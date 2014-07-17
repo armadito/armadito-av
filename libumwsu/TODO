@@ -1,0 +1,10 @@
+
+- créer une struct module dans src/module.c
+- ajouter dans cette struct la fonction de uninstall
+
+- ajouter src/dir.c pour appliquer une fonction sur tous les fichiers d'un directory
+
+- ajouter le chargement de modules pour tous les .so d'un directory (voir libmagic pour filtrer les fichiers autres que .so)
+
+- ajouter modules de scans: module 4, module 5.2, module 5.1/clamav
+- ajouter scan récursif d'un directory (en utilisant src/dir.c)
