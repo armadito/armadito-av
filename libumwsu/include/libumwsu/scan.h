@@ -3,7 +3,7 @@
 
 enum umw_status {
   UMW_CLEAN,
-  UMW_INFECTED,
+  UMW_MALWARE,
   UMW_EINVAL,
   UMW_IERROR,
 };

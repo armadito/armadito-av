@@ -1,3 +1,7 @@
+2014-07-17  François Déchelle  <francois@dechelle.net>
+
+	* added directory traversal function
+
 2014-07-15  François Déchelle  <francois@dechelle.net>
 
 	* initial commit
