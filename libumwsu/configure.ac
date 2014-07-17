@@ -14,6 +14,9 @@ AC_ARG_ENABLE([debug],
 # configuration header
 AM_CONFIG_HEADER(libumwsu-autoconf.h)
 
+# This is needed when the first PKG_CHECK_MODULES call is inside a conditional (not the case here, but who knows)
+PKG_PROG_PKG_CONFIG
+
 # check for needed programs
 AC_PROG_CC([gcc])
 AC_PROG_LIBTOOL
@@ -28,10 +31,18 @@ if test "$enable_debug" = "yes"; then
    CFLAGS="${CFLAGS} -g"
 fi
 
+# check for gmodule
+PKG_CHECK_MODULES(GMODULE2, gmodule-2.0, [HAVE_GMODULE2=yes], [HAVE_GMODULE2=no])
+if test "$HAVE_GMODULE2" = "no"; then
+   AC_MSG_ERROR("cannot find gmodule2 library")
+fi
+
 # Output files
 AC_CONFIG_FILES([
 Makefile
 include/Makefile
 include/libumwsu/Makefile
+src/Makefile
+tests/Makefile
 ])
 AC_OUTPUT
