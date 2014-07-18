@@ -1,3 +1,7 @@
+2014-07-18  François Déchelle  <francois@dechelle.net>
+
+	* adding modules loading from predefined directory
+
 2014-07-17  François Déchelle  <francois@dechelle.net>
 
 	* added directory traversal function

@@ -25,7 +25,7 @@ static void module_name_from_path(const char *path, char *module_name, size_t n)
   module_name[n - 1] = '\0';
 }
 
-int umw_module_install(const char *path)
+int module_install(const char *path)
 {
   GModule *module;
 #define MODULE_NAME_LEN 128
