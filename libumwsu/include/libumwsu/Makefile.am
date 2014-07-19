@@ -1,2 +1,5 @@
 pkginclude_HEADERS= \
-umwsu.h
+status.h \
+scan.h \
+module.h 
+

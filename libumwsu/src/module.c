@@ -1,10 +1,14 @@
-#include <libumwsu/umwsu.h>
+#include <libumwsu/module.h>
+#include "dir.h"
+#include "modulep.h"
 
 #include <alloca.h>
 #include <assert.h>
 #include <gmodule.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <magic.h>
 
 static void module_name_from_path(const char *path, char *module_name, size_t n)
 {
@@ -69,3 +73,35 @@ int module_install(const char *path)
 
   return TRUE;
 }
+
+static void load_entry(const char *full_path, void *data)
+{
+  magic_t *p = (magic_t *)data;
+  const char *t = magic_file(*p, full_path);
+  
+  if (strncmp("ELF 64-bit LSB shared object", t, 28))
+    return;
+
+  printf("loading module: %s\n", full_path);
+
+  module_install(full_path);
+}
+
+int module_load_directory(const char *directory)
+{
+  magic_t *p;
+  int r;
+
+  p = (magic_t *)malloc(sizeof(magic_t));
+
+  *p = magic_open(MAGIC_NONE);
+  magic_load(*p, NULL);
+
+  r = dir_map(directory, 0, load_entry, p);
+
+  magic_close(*p);
+  free(p);
+
+  return r;
+}
+

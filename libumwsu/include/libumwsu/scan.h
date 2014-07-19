@@ -1,12 +1,7 @@
-#ifndef _LIBUMWSU_UMWSU_H_
-#define _LIBUMWSU_UMWSU_H_
+#ifndef _LIBUMWSU_SCAN_H_
+#define _LIBUMWSU_SCAN_H_
 
-enum umw_status {
-  UMW_CLEAN,
-  UMW_MALWARE,
-  UMW_EINVAL,
-  UMW_IERROR,
-};
+#include <libumwsu/status.h>
 
 struct umw;
 
