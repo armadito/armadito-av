@@ -15,4 +15,6 @@ typedef enum umw_mod_status (*umw_mod_init_t)(void **pmod_data);
 typedef enum umw_scan_status (*umw_mod_scan)(const char *path, void *mod_data);
 typedef enum umw_mod_status (*umw_mod_close)(void *mod_data);
 
+void umw_mod_declare_file(const char *magic_desc);
+
 #endif

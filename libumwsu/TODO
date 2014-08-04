@@ -4,15 +4,17 @@
 - ajouter le chargement de modules pour tous les .so d'un directory (voir libmagic pour filtrer les fichiers autres que .so) [OK]
 
 - créer une struct module dans src/module.c
--- ajouter dans cette struct la fonction de uninstall
+-- ajouter dans cette struct les fonctions du module (conf_inif, conf, init, scan, uninstall et les types de fichiers scannés
 -- module_init: ajout des magic textual description associées au module, allocation de la structure spécifique et initialisation
+-- table de hachage: magic_desc -> GPtrArray de module *, trier le GPtrArray par poids du module
 
 - ajouter scan d'un fichier en utilisant libmagic (retrouver la liste des magic_file dans fix-extension.sh)
--- hash table associant magic textual description et (fonction de scan, donnée du module)
 
 - ajouter module de test de scan
 
 - ajouter scan récursif d'un directory (en utilisant src/dir.c)
+-- création du pool de threads
+-- lancement d'un scan de fichier dans un thread
 
 - ajouter modules de scans: module 4, module 5.2, module 5.1/clamav
 

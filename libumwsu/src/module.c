@@ -1,18 +1,17 @@
 #include <libumwsu/module.h>
-#include "dir.h"
 #include "modulep.h"
 
-#include <alloca.h>
 #include <assert.h>
 #include <gmodule.h>
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <magic.h>
 
-static void module_name_from_path(const char *path, char *module_name, size_t n)
+static const char *module_name_from_path(const char *path)
 {
-  char *start, *end;
+  char *start, *end, *module_name;
+  size_t len;
 
   start = strrchr(path, '/');
   assert(start != NULL);
@@ -22,86 +21,74 @@ static void module_name_from_path(const char *path, char *module_name, size_t n)
 
   assert(end > start);
 
-  assert(end - start < n -1);
+  len = end - start;
 
-  n = end - start;
-  strncpy(module_name, start + 1, n);
-  module_name[n - 1] = '\0';
+  module_name = (char *)malloc(len);
+  strncpy(module_name, start + 1, len - 1);
+  module_name[len - 1] = '\0';
+
+  return module_name;
 }
 
-int module_install(const char *path)
+static gpointer get_symbol(GModule *module, const char *module_name, const char *sym_name)
 {
+  char *full_name;
+  gpointer sym;
+
+  if (asprintf(&full_name, "%s_%s", module_name, sym_name) == -1)
+    return NULL;
+
+  if (!g_module_symbol(module, full_name, (gpointer *)&sym))
+    return NULL;
+
+  return sym;
+}
+
+struct umw_module *module_new(const char *path)
+{
+  struct umw_module *mod;
   GModule *module;
-#define MODULE_NAME_LEN 128
-  char module_name[MODULE_NAME_LEN];
-  char *install_fun_name;
-  void (*install_fun)(void);
+
+  mod = (struct umw_module *)malloc(sizeof(struct umw_module));
 
   module = g_module_open(path, G_MODULE_BIND_LAZY);
 
   if (!module) {
-    /* g_set_error(error, FOO_ERROR, FOO_ERROR_BLAH,  "%s", g_module_error()); */
     fprintf(stderr, "unable to open %s\n", path);
-    return FALSE;
+    return NULL;
   }
 
-  module_name_from_path(path, module_name, MODULE_NAME_LEN);
+  mod->name = module_name_from_path(path);
+  mod->data = NULL;
 
-  install_fun_name = (char *)alloca(MODULE_NAME_LEN + 8 + 1);
-  snprintf(install_fun_name, MODULE_NAME_LEN + 8 + 1, "%s_install", module_name);
+  mod->init = get_symbol(module, mod->name, "init");
+  mod->scan = get_symbol(module, mod->name, "scan");
+  mod->close = get_symbol(module, mod->name, "close");
+  mod->files = get_symbol(module, mod->name, "files");
 
-  if (!g_module_symbol(module, install_fun_name, (gpointer *)&install_fun)) {
-    /* g_set_error(error, SAY_ERROR, SAY_ERROR_OPEN, "%s: %s", path, g_module_error()); */
-    fprintf(stderr, "cannot find symbol %s\n", install_fun_name);
-    if (!g_module_close(module))
-      g_warning("%s: %s", path, g_module_error());
-    return FALSE;
-  }
+  if (mod->init != NULL)
+    (*mod->init)(&mod->data);
 
-  if (install_fun == NULL) {
-    /* g_set_error(error, SAY_ERROR, SAY_ERROR_OPEN, "install function is NULL"); */
-    fprintf(stderr, "install function is NULL\n");
-    if(!g_module_close(module))
-      g_warning("%s: %s", path, g_module_error());
-    return FALSE;
-  }
-
-  (*install_fun)();
-
+#if 0
   if(!g_module_close(module))
     g_warning("%s: %s", path, g_module_error());
+#endif
 
-  return TRUE;
+  return mod;
 }
 
-static void load_entry(const char *full_path, void *data)
+void module_print(struct umw_module *mod)
 {
-  magic_t *p = (magic_t *)data;
-  const char *t = magic_file(*p, full_path);
-  
-  if (strncmp("ELF 64-bit LSB shared object", t, 28))
+  const char **p;
+
+  printf("name: %s\n", mod->name);
+  printf("init: %p\n", mod->init);
+  printf("scan: %p\n", mod->scan);
+  printf("close: %p\n", mod->close);
+  if (mod->files == NULL)
     return;
-
-  printf("loading module: %s\n", full_path);
-
-  module_install(full_path);
+  for (p = mod->files; *p != NULL; p++)
+    printf("file: %s\n", *p);
 }
 
-int module_load_directory(const char *directory)
-{
-  magic_t *p;
-  int r;
-
-  p = (magic_t *)malloc(sizeof(magic_t));
-
-  *p = magic_open(MAGIC_NONE);
-  magic_load(*p, NULL);
-
-  r = dir_map(directory, 0, load_entry, p);
-
-  magic_close(*p);
-  free(p);
-
-  return r;
-}
 
