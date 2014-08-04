@@ -90,11 +90,24 @@ static void uwm_module_init_all(struct umw *u)
 
   for (i = 0; i < u->modules->len; i++) {
     struct umw_module *mod = (struct umw_module *)g_ptr_array_index(u->modules, i);
-    const char **pdesc;
 
-    for(pdesc = mod->files; *pdesc != NULL; pdesc++)
-      umw_add_magic_desc(u, *pdesc, mod);
+    if (mod->files != NULL) {
+      const char **pdesc;
+
+      for(pdesc = mod->files; *pdesc != NULL; pdesc++)
+	umw_add_magic_desc(u, *pdesc, mod);
+    }
   }
+}
+
+static void mod_print(gpointer data, gpointer user_data)
+{
+  module_print((struct umw_module *)data);
+}
+
+static void uwm_module_print_all(struct umw *u)
+{
+  g_ptr_array_foreach(u->modules, mod_print, NULL);
 }
 
 struct umw *umw_open(void)
@@ -106,6 +119,8 @@ struct umw *umw_open(void)
   /* module_conf_all(); */
 
   uwm_module_init_all(u);
+
+  uwm_module_print_all(u);
 
   return NULL;
 }

@@ -1,4 +1,4 @@
-#include <libumwsu/umwsu.h>
+#include <libumwsu/scan.h>
 
 int main(int argc, char **argv)
 {
