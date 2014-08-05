@@ -1,10 +1,10 @@
 #include <libumwsu/module.h>
 #include <stdio.h>
 
-const char *module3_files[] = {
-  "ELF 64-bit LSB executable",
-  "ELF 64-bit LSB shared object",
-  "ELF 64-bit LSB relocatable",
+const char *module3_mime_types[] = {
+  "application/x-sharedlib",
+  "application/x-object",
+  "application/x-executable",
   NULL,
 };
 

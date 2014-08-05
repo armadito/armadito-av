@@ -10,7 +10,7 @@
 #include <stdio.h>
 
 struct umw {
-  GHashTable *magic_desc_table;
+  GHashTable *mime_types_table;
   GPtrArray *modules;
   magic_t magic;
 };
@@ -21,10 +21,10 @@ static struct umw *umw_new(void)
 
   assert(u != NULL);
 
-  u->magic = magic_open(MAGIC_NONE);
+  u->magic = magic_open(MAGIC_MIME_TYPE);
   magic_load(u->magic, NULL);
 
-  u->magic_desc_table = g_hash_table_new(g_str_hash, g_str_equal);
+  u->mime_types_table = g_hash_table_new(g_str_hash, g_str_equal);
   u->modules = g_ptr_array_new();
 
   return u;
@@ -41,7 +41,7 @@ static void load_entry(const char *full_path, void *data)
   const char *t = magic_file(u->magic, full_path);
   struct umw_module *mod;
   
-  if (strncmp("ELF 64-bit LSB shared object", t, 28))
+  if (strncmp("application/x-sharedlib", t))
     return;
 
   printf("loading module: %s\n", full_path);
@@ -56,16 +56,16 @@ static int umw_module_load_directory(struct umw *u, const char *directory)
   return dir_map(directory, 0, load_entry, u);
 }
 
-void umw_add_magic_desc(struct umw *u, const char *magic_desc, struct umw_module *mod)
+void umw_add_mime_type(struct umw *u, const char *mime_type, struct umw_module *mod)
 {
   GPtrArray *mod_array;
 
-  mod_array = (GPtrArray *)g_hash_table_lookup(u->magic_desc_table, magic_desc);
+  mod_array = (GPtrArray *)g_hash_table_lookup(u->mime_types_table, mime_type);
 
   if (mod_array == NULL) {
     mod_array = g_ptr_array_new();
 
-    g_hash_table_insert(u->magic_desc_table, (gpointer)magic_desc, mod_array);
+    g_hash_table_insert(u->mime_types_table, (gpointer)mime_type, mod_array);
   }
 
   g_ptr_array_add(mod_array, mod);
@@ -78,11 +78,11 @@ static void uwm_module_init_all(struct umw *u)
   for (i = 0; i < u->modules->len; i++) {
     struct umw_module *mod = (struct umw_module *)g_ptr_array_index(u->modules, i);
 
-    if (mod->files != NULL) {
-      const char **pdesc;
+    if (mod->mime_types != NULL) {
+      const char **p;
 
-      for(pdesc = mod->files; *pdesc != NULL; pdesc++)
-	umw_add_magic_desc(u, *pdesc, mod);
+      for(p = mod->mime_types; *p != NULL; p++)
+	umw_add_mime_type(u, *p, mod);
     }
   }
 }
@@ -117,12 +117,45 @@ void umw_close(struct umw *u)
   magic_close(u->magic);
 }
 
-enum umw_status umw_scan_file(struct umw *umw_handle, const char *path)
+enum umw_status umw_scan_file(struct umw *u, const char *path)
 {
-  return UMW_MALWARE;
+  const char *mime_type = magic_file(u->magic, path);
+  GPtrArray *mod_array;
+  enum umw_status status = UMW_CLEAN;
+  int i;
+
+  mod_array = (GPtrArray *)g_hash_table_lookup(u->mime_types_table, mime_type);
+  
+  if (mod_array == NULL)
+    return UMW_UNKNOWN_FILE_TYPE;
+
+  for (i = 0; i < mod_array->len; i++) {
+    struct umw_module *mod = (struct umw_module *)g_ptr_array_index(mod_array, i);
+
+    status = (*mod->scan)(path, mod->data);
+
+    if (status != UMW_CLEAN)
+      break;
+  }
+
+  return status;
 }
 
 enum umw_status umw_scan_dir(struct umw *umw_handle, const char *path, int recurse)
 {
   return UMW_MALWARE;
+}
+
+const char *umw_status_str(enum umw_status status)
+{
+  switch(status) {
+#define M(S) case S: return #S
+    M(UMW_CLEAN);
+    M(UMW_MALWARE);
+    M(UMW_EINVAL);
+    M(UMW_IERROR);
+    M(UMW_UNKNOWN_FILE_TYPE);
+  }
+
+  return "UNKNOWN STATUS";
 }

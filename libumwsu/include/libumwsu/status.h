@@ -6,6 +6,9 @@ enum umw_status {
   UMW_MALWARE,
   UMW_EINVAL,
   UMW_IERROR,
+  UMW_UNKNOWN_FILE_TYPE,
 };
+
+const char *umw_status_str(enum umw_status status);
 
 #endif

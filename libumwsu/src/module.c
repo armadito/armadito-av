@@ -64,7 +64,7 @@ struct umw_module *module_new(const char *path)
   mod->init = get_symbol(module, mod->name, "init");
   mod->scan = get_symbol(module, mod->name, "scan");
   mod->close = get_symbol(module, mod->name, "close");
-  mod->files = get_symbol(module, mod->name, "files");
+  mod->mime_types = get_symbol(module, mod->name, "mime_types");
 
   if (mod->init != NULL)
     (*mod->init)(&mod->data);
@@ -84,11 +84,11 @@ void module_print(struct umw_module *mod)
   printf("scan: %p\n", mod->scan);
   printf("close: %p\n", mod->close);
 
-  if (mod->files != NULL) {
+  if (mod->mime_types != NULL) {
     const char **p;
 
-    for (p = mod->files; *p != NULL; p++)
-      printf("file: %s\n", *p);
+    for (p = mod->mime_types; *p != NULL; p++)
+      printf("mime type: %s\n", *p);
   }
 }
 

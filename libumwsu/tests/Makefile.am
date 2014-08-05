@@ -1,4 +1,4 @@
-check_PROGRAMS=testfind1 testumwsu1
+check_PROGRAMS=testfind1 testumwsu1 testumwsuscan1
 
 #testmodule1_CFLAGS= -I$(top_srcdir)/include
 #testmodule1_LDADD=$(top_builddir)/src/libumwsu.la @GMODULE2_LIBS@
@@ -26,3 +26,7 @@ testfind1_SOURCES=testfind1.c
 testumwsu1_CFLAGS=-I$(top_srcdir)/include -I$(top_srcdir)/src
 testumwsu1_LDADD=$(top_builddir)/src/libumwsu.la @GMODULE2_LIBS@ -lmagic
 testumwsu1_SOURCES=testumwsu1.c
+
+testumwsuscan1_CFLAGS=-I$(top_srcdir)/include -I$(top_srcdir)/src
+testumwsuscan1_LDADD=$(top_builddir)/src/libumwsu.la @GMODULE2_LIBS@ -lmagic
+testumwsuscan1_SOURCES=testumwsuscan1.c

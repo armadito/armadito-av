@@ -1,3 +1,9 @@
+2014-08-05  François Déchelle  <francois@dechelle.net>
+
+	* added file scan using mime type
+
+	* added modules initialization and mime types hash table creation
+
 2014-07-18  François Déchelle  <francois@dechelle.net>
 
 	* adding modules loading from predefined directory

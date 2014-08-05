@@ -3,10 +3,10 @@
 
 struct umw_module {
   enum umw_mod_status (*init)(void **pmod_data);
-  enum umw_scan_status (*scan)(const char *path, void *mod_data);
+  enum umw_status (*scan)(const char *path, void *mod_data);
   enum umw_mod_status (*close)(void *mod_data);
   const char *name;
-  const char **files;
+  const char **mime_types;
   void *data;
 };
 
