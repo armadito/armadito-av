@@ -79,16 +79,17 @@ struct umw_module *module_new(const char *path)
 
 void module_print(struct umw_module *mod)
 {
-  const char **p;
-
   printf("name: %s\n", mod->name);
   printf("init: %p\n", mod->init);
   printf("scan: %p\n", mod->scan);
   printf("close: %p\n", mod->close);
-  if (mod->files == NULL)
-    return;
-  for (p = mod->files; *p != NULL; p++)
-    printf("file: %s\n", *p);
+
+  if (mod->files != NULL) {
+    const char **p;
+
+    for (p = mod->files; *p != NULL; p++)
+      printf("file: %s\n", *p);
+  }
 }
 
 

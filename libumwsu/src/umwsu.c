@@ -12,6 +12,7 @@
 struct umw {
   GHashTable *magic_desc_table;
   GPtrArray *modules;
+  magic_t magic;
 };
 
 static struct umw *umw_new(void)
@@ -19,6 +20,9 @@ static struct umw *umw_new(void)
   struct umw *u = (struct umw *)malloc(sizeof(struct umw));
 
   assert(u != NULL);
+
+  u->magic = magic_open(MAGIC_NONE);
+  magic_load(u->magic, NULL);
 
   u->magic_desc_table = g_hash_table_new(g_str_hash, g_str_equal);
   u->modules = g_ptr_array_new();
@@ -31,15 +35,10 @@ void umw_add_module(struct umw *u, struct umw_module *mod)
   g_ptr_array_add(u->modules, mod);
 }
 
-struct load_data {
-  magic_t magic;
-  struct umw *u;
-};
-
 static void load_entry(const char *full_path, void *data)
 {
-  struct load_data *l = (struct load_data *)data;
-  const char *t = magic_file(l->magic, full_path);
+  struct umw *u = (struct umw *)data;
+  const char *t = magic_file(u->magic, full_path);
   struct umw_module *mod;
   
   if (strncmp("ELF 64-bit LSB shared object", t, 28))
@@ -49,24 +48,12 @@ static void load_entry(const char *full_path, void *data)
 
   mod = module_new(full_path);
 
-  umw_add_module(l->u, mod);
+  umw_add_module(u, mod);
 }
 
 static int umw_module_load_directory(struct umw *u, const char *directory)
 {
-  struct load_data data;
-  int r;
-
-  data.magic = magic_open(MAGIC_NONE);
-  data.u = u;
-
-  magic_load(data.magic, NULL);
-
-  r = dir_map(directory, 0, load_entry, &data);
-
-  magic_close(data.magic);
-
-  return r;
+  return dir_map(directory, 0, load_entry, u);
 }
 
 void umw_add_magic_desc(struct umw *u, const char *magic_desc, struct umw_module *mod)
@@ -122,7 +109,12 @@ struct umw *umw_open(void)
 
   uwm_module_print_all(u);
 
-  return NULL;
+  return u;
+}
+
+void umw_close(struct umw *u)
+{
+  magic_close(u->magic);
 }
 
 enum umw_status umw_scan_file(struct umw *umw_handle, const char *path)
