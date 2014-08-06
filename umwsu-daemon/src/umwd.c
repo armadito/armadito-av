@@ -129,10 +129,16 @@ static void umwd_loop(struct umwd *d)
   assert(event != NULL);
 
   while(1) {
-    if (read(d->inotify_fd, event, event_size) < 0)
-      error("read");
+    ssize_t r;
 
-    umwd_process_event(d, event);
+    r = read(d->inotify_fd, event, event_size);
+    
+    fprintf(stderr, "read %d\n", r);
+
+    if (r < 0)
+      error("read");
+    else if (r > 0)
+      umwd_process_event(d, event);
   }
 }
 
