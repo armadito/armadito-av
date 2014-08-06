@@ -9,5 +9,5 @@ Name: UMWSU library
 Description: UMWSU library
 Version: ${version} 
 Requires: gmodule-2.0 glib-2.0
-Libs:-L${libdir} -lumwsu
+Libs:-L${libdir} -lumwsu -lmagic
 Cflags: -I${includedir} 

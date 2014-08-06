@@ -1,0 +1,9 @@
+bin_PROGRAMS=umwd
+
+umwd_SOURCES=umwd.c
+umwd_CFLAGS=
+umwd_LDADD=
+umwd_CFLAGS+= @LIBUMWSU_CFLAGS@
+umwd_LDADD+= @LIBUMWSU_LIBS@
+umwd_CFLAGS+= @GLIB2_CFLAGS@
+umwd_LDADD+= @GLIB2_LIBS@
