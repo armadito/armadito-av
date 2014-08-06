@@ -1,4 +1,4 @@
-bin_PROGRAMS=umwd
+sbin_PROGRAMS=umwd
 
 umwd_SOURCES=umwd.c
 umwd_CFLAGS=
