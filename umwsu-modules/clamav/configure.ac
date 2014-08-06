@@ -40,8 +40,8 @@ PKG_CHECK_MODULES(LIBUMWSU, libumwsu, [HAVE_LIBUMWSU=yes], [HAVE_LIBUMWSU=no])
 if test "$HAVE_LIBUMWSU" = "no"; then
    AC_MSG_ERROR("cannot find UMWSU library")
 fi
-LIBUMWSU_LIBDIR=$(pkg-config --variable=libdir libumwsu)
-LIBUMWSU_MODDIR=$LIBUMWSU_LIBDIR/libumwsu/modules
+LIBUMWSU_LIBDIR=
+LIBUMWSU_MODDIR=$(pkg-config --variable=moduledir libumwsu)
 AC_SUBST(LIBUMWSU_MODDIR)
 
 # check for libclamav

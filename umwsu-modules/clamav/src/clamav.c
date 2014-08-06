@@ -7,6 +7,7 @@
 
 const char *clamav_mime_types[] = {
   "application/x-dosexec",
+  "application/pdf",
   NULL,
 };
 
