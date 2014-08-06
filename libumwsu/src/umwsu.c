@@ -1,3 +1,4 @@
+#include <libumwsu/module.h>
 #include <libumwsu/scan.h>
 #include "dir.h"
 #include "modulep.h"
@@ -77,6 +78,9 @@ static void uwm_module_init_all(struct umw *u)
 
   for (i = 0; i < u->modules->len; i++) {
     struct umw_module *mod = (struct umw_module *)g_ptr_array_index(u->modules, i);
+
+    if (mod->init != NULL)
+      (*mod->init)(&mod->data);
 
     if (mod->mime_types != NULL) {
       const char **p;

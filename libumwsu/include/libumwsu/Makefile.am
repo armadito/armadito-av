@@ -2,4 +2,3 @@ pkginclude_HEADERS= \
 status.h \
 scan.h \
 module.h 
-

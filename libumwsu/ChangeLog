@@ -1,3 +1,9 @@
+2014-08-06  François Déchelle  <francois@dechelle.net>
+
+	* moved call to module init function out of module_new
+
+	* changed pkg-config file to add moduledir variable
+
 2014-08-05  François Déchelle  <francois@dechelle.net>
 
 	* added file scan using mime type

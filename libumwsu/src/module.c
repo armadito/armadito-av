@@ -66,9 +66,6 @@ struct umw_module *module_new(const char *path)
   mod->close = get_symbol(module, mod->name, "close");
   mod->mime_types = get_symbol(module, mod->name, "mime_types");
 
-  if (mod->init != NULL)
-    (*mod->init)(&mod->data);
-
 #if 0
   if(!g_module_close(module))
     g_warning("%s: %s", path, g_module_error());

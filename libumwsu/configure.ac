@@ -42,6 +42,7 @@ AC_CONFIG_FILES([
 Makefile
 include/Makefile
 include/libumwsu/Makefile
+pkgconfig/Makefile
 src/Makefile
 tests/Makefile
 ])
