@@ -104,6 +104,9 @@ static void umwd_process_event(struct umwd *d, struct inotify_event *event)
     error("asprintf");
 
   fprintf(stderr, "%s: got inotify event %s\n", full_path, inotify_mask_str(event->mask));
+
+  if (event->mask & IN_CLOSE_WRITE)
+    umw_scan_file(d->umw, full_path);
 }
 
 void print_entry(gpointer key, gpointer value, gpointer user_data)
@@ -116,7 +119,9 @@ static void umwd_loop(struct umwd *d)
   size_t event_size = sizeof(struct inotify_event) + NAME_MAX + 1;
   struct inotify_event *event;
 
+#if 0
   g_hash_table_foreach(d->watch_table, print_entry, NULL);
+#endif
 
   event = (struct inotify_event *)malloc(event_size);
   assert(event != NULL);

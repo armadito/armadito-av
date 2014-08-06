@@ -125,20 +125,22 @@ enum umw_status umw_scan_file(struct umw *u, const char *path)
   const char *mime_type = magic_file(u->magic, path);
   GPtrArray *mod_array;
   enum umw_status status = UMW_CLEAN;
-  int i;
 
   mod_array = (GPtrArray *)g_hash_table_lookup(u->mime_types_table, mime_type);
   
   if (mod_array == NULL)
-    return UMW_UNKNOWN_FILE_TYPE;
+    status = UMW_UNKNOWN_FILE_TYPE;
+  else {
+    int i;
 
-  for (i = 0; i < mod_array->len; i++) {
-    struct umw_module *mod = (struct umw_module *)g_ptr_array_index(mod_array, i);
+    for (i = 0; i < mod_array->len; i++) {
+      struct umw_module *mod = (struct umw_module *)g_ptr_array_index(mod_array, i);
 
-    status = (*mod->scan)(path, mod->data);
+      status = (*mod->scan)(path, mod->data);
 
-    if (status != UMW_CLEAN)
-      break;
+      if (status != UMW_CLEAN)
+	break;
+    }
   }
 
   fprintf(stderr, "%s: %s\n", path, umw_status_str(status));
