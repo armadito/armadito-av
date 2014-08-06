@@ -24,6 +24,7 @@ org/vector.c \
 org/vector.h \
 org/windowsTypes.h 
 
+AM_CPPFLAGS= -DMODULE_52_DBDIR='"$(abs_top_srcdir)/src/org"'
 module5_2_la_LDFLAGS= -module -avoid-version
 module5_2_la_CFLAGS= -I$(srcdir)/org
 module5_2_la_LIBADD=
