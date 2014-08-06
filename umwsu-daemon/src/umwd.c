@@ -1,9 +1,11 @@
 #include <libumwsu/scan.h>
 
-#define _GNU_SOURCE
+#include <assert.h>
 #include <glib.h>
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -62,11 +64,69 @@ static void umwd_watch(struct umwd *d, const char *path, int recurse)
   }
 
   wd = inotify_add_watch(d->inotify_fd, path, IN_CLOSE_WRITE | IN_CREATE);
-  g_hash_table_insert(d->watch_table, GINT_TO_POINTER(wd), (gpointer)path);
+  g_hash_table_insert(d->watch_table, GINT_TO_POINTER(wd), (gpointer)strdup(path));
 }
 
-static void umwd_loop(struct umwd *p)
+static char *inotify_mask_str(uint32_t mask)
 {
+  static char buffer[256];
+
+  buffer[0] = '\0';
+
+#define M(_buff, _mask, _mask_bit) do { if ((_mask) & (_mask_bit)) strcat(_buff, #_mask_bit " "); } while(0)
+
+  M(buffer, mask, IN_ACCESS);
+  M(buffer, mask, IN_ATTRIB);
+  M(buffer, mask, IN_CLOSE_WRITE);
+  M(buffer, mask, IN_CLOSE_NOWRITE);
+  M(buffer, mask, IN_CREATE);
+  M(buffer, mask, IN_DELETE);
+  M(buffer, mask, IN_DELETE_SELF);
+  M(buffer, mask, IN_MODIFY);
+  M(buffer, mask, IN_MOVE_SELF);
+  M(buffer, mask, IN_MOVED_FROM);
+  M(buffer, mask, IN_MOVED_TO);
+  M(buffer, mask, IN_OPEN);
+
+  return buffer;
+}
+
+static void umwd_process_event(struct umwd *d, struct inotify_event *event)
+{
+  char *full_path, *dir;
+
+  dir = (char *)g_hash_table_lookup(d->watch_table, GINT_TO_POINTER(event->wd));
+
+  if (dir == NULL)
+    error("dir lookup");
+
+  if (asprintf(&full_path, "%s/%s", dir, event->name) == -1)
+    error("asprintf");
+
+  fprintf(stderr, "%s: got inotify event %s\n", full_path, inotify_mask_str(event->mask));
+}
+
+void print_entry(gpointer key, gpointer value, gpointer user_data)
+{
+  fprintf(stderr, "hash table entry %d -> %s\n", GPOINTER_TO_INT(key), (char *)value);
+}
+
+static void umwd_loop(struct umwd *d)
+{
+  size_t event_size = sizeof(struct inotify_event) + NAME_MAX + 1;
+  struct inotify_event *event;
+
+  g_hash_table_foreach(d->watch_table, print_entry, NULL);
+
+  event = (struct inotify_event *)malloc(event_size);
+  assert(event != NULL);
+
+  while(1) {
+    if (read(d->inotify_fd, event, event_size) < 0)
+      error("read");
+
+    umwd_process_event(d, event);
+  }
 }
 
 static void usage(int argc, char **argv)
