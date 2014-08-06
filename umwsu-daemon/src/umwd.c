@@ -107,6 +107,8 @@ static void umwd_process_event(struct umwd *d, struct inotify_event *event)
 
   if (event->mask & IN_CLOSE_WRITE)
     umw_scan_file(d->umw, full_path);
+
+  free(full_path);
 }
 
 void print_entry(gpointer key, gpointer value, gpointer user_data)
