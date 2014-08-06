@@ -2,7 +2,6 @@
 #include <libumwsu/scan.h>
 #include "dir.h"
 #include "modulep.h"
-#include "umwsup.h"
 
 #include <assert.h>
 #include <glib.h>
@@ -142,12 +141,23 @@ enum umw_status umw_scan_file(struct umw *u, const char *path)
       break;
   }
 
+  fprintf(stderr, "%s: %s\n", path, umw_status_str(status));
+
   return status;
 }
 
-enum umw_status umw_scan_dir(struct umw *umw_handle, const char *path, int recurse)
+static void scan_entry(const char *full_path, void *data)
 {
-  return UMW_MALWARE;
+  struct umw *u = (struct umw *)data;
+
+  umw_scan_file(u, full_path);
+}
+
+enum umw_status umw_scan_dir(struct umw *u, const char *path, int recurse)
+{
+  dir_map(path, recurse, scan_entry, u);
+
+  return UMW_CLEAN;
 }
 
 const char *umw_status_str(enum umw_status status)

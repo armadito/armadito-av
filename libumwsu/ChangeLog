@@ -1,5 +1,9 @@
 2014-08-06  François Déchelle  <francois@dechelle.net>
 
+	* added directory scanning
+
+	* added command-line scan tool
+
 	* moved call to module init function out of module_new
 
 	* changed pkg-config file to add moduledir variable

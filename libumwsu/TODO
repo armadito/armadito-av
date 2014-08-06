@@ -18,7 +18,7 @@
 - ajouter outil de scan en ligne de commande
 
 - ajouter scan récursif d'un directory (en utilisant src/dir.c)
--- permière version sans multi-thread
+-- première version sans multi-thread
 -- création du pool de threads
 -- lancement d'un scan de fichier dans un thread
 

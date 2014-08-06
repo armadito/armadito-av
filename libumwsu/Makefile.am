@@ -1,3 +1,3 @@
-SUBDIRS=include src tests pkgconfig
+SUBDIRS=include src tests pkgconfig tools
 
 
