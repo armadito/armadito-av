@@ -1,0 +1,13 @@
+doc_DATA= libumwsu.3 umwscan.1
+
+ASCIIDOCFLAGS=-a data-uri -a icons -b html5
+A2XFLAGS=--doctype manpage --format manpage -v -v
+
+%: $(srcdir)/%.txt
+	$(A2X) $(A2XFLAGS) --destination-dir=$(top_builddir)/doc/man/fr $(srcdir)/$*.txt
+
+EXTRA_DIST=libumwsu.3.txt umwscan.1.txt
+
+
+
+

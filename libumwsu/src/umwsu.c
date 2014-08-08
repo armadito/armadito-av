@@ -44,7 +44,7 @@ static void load_entry(const char *full_path, void *data)
   if (strncmp("application/x-sharedlib", t))
     return;
 
-  printf("loading module: %s\n", full_path);
+  printf("UMW: loading module object: %s\n", full_path);
 
   mod = module_new(full_path);
 
@@ -56,7 +56,7 @@ static int umw_module_load_directory(struct umw *u, const char *directory)
   return dir_map(directory, 0, load_entry, u);
 }
 
-void umw_add_mime_type(struct umw *u, const char *mime_type, struct umw_module *mod)
+static void umw_add_mime_type(struct umw *u, const char *mime_type, struct umw_module *mod)
 {
   GPtrArray *mod_array;
 
@@ -110,9 +110,31 @@ struct umw *umw_open(void)
 
   uwm_module_init_all(u);
 
-  uwm_module_print_all(u);
+  /* uwm_module_print_all(u); */
 
   return u;
+}
+
+static void mod_print_name(gpointer data, gpointer user_data)
+{
+  struct umw_module *mod = (struct umw_module *)data;
+  printf("%s ", mod->name);
+}
+
+void print_mime_type_entry(gpointer key, gpointer value, gpointer user_data)
+{
+  printf("UMW: MIME type: %s handled by module: ", (char *)key);
+  g_ptr_array_foreach((GPtrArray *)value, mod_print_name, NULL);
+  printf("\n");
+}
+
+void umw_print(struct umw *u)
+{
+  printf("UMW: modules loaded: ");
+  g_ptr_array_foreach(u->modules, mod_print_name, NULL);
+  printf("\n");
+
+  g_hash_table_foreach(u->mime_types_table, print_mime_type_entry, NULL);
 }
 
 void umw_close(struct umw *u)
@@ -135,6 +157,8 @@ enum umw_status umw_scan_file(struct umw *u, const char *path)
 
     for (i = 0; i < mod_array->len; i++) {
       struct umw_module *mod = (struct umw_module *)g_ptr_array_index(mod_array, i);
+
+      printf("UMW: module %s: scanning %s\n", mod->name, path);
 
       status = (*mod->scan)(path, mod->data);
 

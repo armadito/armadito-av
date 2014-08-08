@@ -37,9 +37,18 @@ if test "$HAVE_GMODULE2" = "no"; then
    AC_MSG_ERROR("cannot find gmodule2 library")
 fi
 
+# documentation
+# check for asciidoc and a2x
+AC_PATH_PROG(ASCIIDOC, asciidoc)
+AC_PATH_PROG(A2X, a2x)
+AM_CONDITIONAL([COND_DOC], [test ! -z "$ASCIIDOC" -a ! -z "$A2X" ])
+
 # Output files
 AC_CONFIG_FILES([
 Makefile
+doc/Makefile
+doc/man/Makefile
+doc/man/fr/Makefile
 include/Makefile
 include/libumwsu/Makefile
 pkgconfig/Makefile

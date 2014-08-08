@@ -28,6 +28,8 @@ int main(int argc, char **argv)
 
   u = umw_open();
 
+  umw_print(u);
+
   while (argp < argc) {
     struct stat sb;
     enum umw_status status;

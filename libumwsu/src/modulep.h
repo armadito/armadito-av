@@ -14,10 +14,4 @@ struct umw_module *module_new(const char *path);
 
 void module_print(struct umw_module *mod);
 
-#if 0
-int module_install(const char *path);
-
-int module_load_directory(const char *directory);
-#endif
-
 #endif

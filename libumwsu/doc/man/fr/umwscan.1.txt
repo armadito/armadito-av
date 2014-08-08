@@ -1,0 +1,49 @@
+UMWSCAN(1)
+==========
+:doctype: manpage
+
+NOM
+---
+umwscan - outil de scan en ligne de commande
+
+
+SYNOPSIS
+--------
+*umwscan* ['OPTIONS'] 'FILE|DIR' ...
+
+
+DESCRIPTION
+-----------
+La commande umwscan(1) lance un scan 
+
+
+OPTIONS
+-------
+*-r*::
+    Récursif
+
+
+
+EXIT STATUS
+-----------
+*0*::
+    Succès
+
+*1*::
+    Erreur
+
+
+AUTHOR
+------
+umwscan a été écrit par François Déchelle.
+
+
+RESOURCES
+---------
+Site web: <http://uhuru-solutions.com/>
+
+
+COPYING
+-------
+Copyright \(C) 2014 qui?. Free use of this software is
+granted under the terms of the GNU General Public License (GPL).
