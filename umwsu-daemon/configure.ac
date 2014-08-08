@@ -1,4 +1,4 @@
-AC_INIT(umwsu-daemon,0.1.1,francois@dechelle.net)
+AC_INIT(umwsu-daemon,1.0.1,francois@dechelle.net)
 AM_INIT_AUTOMAKE
 
 # collect arguments
@@ -46,9 +46,18 @@ if test "$HAVE_GLIB2" = "no"; then
    AC_MSG_ERROR("cannot find glib2 library")
 fi
 
+# documentation
+# check for asciidoc and a2x
+AC_PATH_PROG(ASCIIDOC, asciidoc)
+AC_PATH_PROG(A2X, a2x)
+AM_CONDITIONAL([COND_DOC], [test ! -z "$ASCIIDOC" -a ! -z "$A2X" ])
+
 # Output files
 AC_CONFIG_FILES([
 Makefile
 src/Makefile
+doc/Makefile
+doc/man/Makefile
+doc/man/fr/Makefile
 ])
 AC_OUTPUT
