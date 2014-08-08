@@ -1,0 +1,5 @@
+2014-08-08  François Déchelle  <francois@dechelle.net>
+
+	* finished first working implementation: uses a GHashTable as event queue, in order to avoid scanning loops if the scanning module opens the file read/write (which is yet the case for module 5.2)
+
+
