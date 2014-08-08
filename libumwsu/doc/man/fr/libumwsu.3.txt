@@ -4,7 +4,7 @@ LIBUMWSU(3)
 
 NOM
 ---
-*umw_open*, *umw_print*, *umw_close*, *umw_scan_file*, *umw_scan_dir* - librairie de scan
+libumwsu - librairie de scan
 
 
 SYNOPSIS
