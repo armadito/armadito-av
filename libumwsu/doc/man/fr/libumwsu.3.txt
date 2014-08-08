@@ -1,29 +1,69 @@
-LIBUMWDSU(3)
-============
+LIBUMWSU(3)
+===========
 :doctype: manpage
 
 NOM
 ---
-libumwsu - librairie de scan
+*umw_open*, *umw_print*, *umw_close*, *umw_scan_file*, *umw_scan_dir* - librairie de scan
 
 
 SYNOPSIS
 --------
 *#include <libumwsu/scan.h>*
 
+enum umw_status {
+  UMW_CLEAN,
+  UMW_MALWARE,
+  UMW_EINVAL,
+  UMW_IERROR,
+  UMW_UNKNOWN_FILE_TYPE,
+};
+
+struct umw *
+*umw_open*(void);
+
+void 
+*umw_print*(struct umw *u);
+
+void
+*umw_close*(struct umw *u);
+
+enum umw_status 
+*umw_scan_file*(struct umw *umw_handle, const char *path);
+
+enum umw_status 
+*umw_scan_dir*(struct umw *umw_handle, const char *path, int recurse);
+
 
 DESCRIPTION
 -----------
-La fonction umwsu_open() créée une instance...
+La fonction *umwsu_open*() créée une instance de la structure opaque *struct umw* et la retourne. Les modules de recherche sont chargés dynamiquement et initialisés.
+
+La fonction *umw_print*() affiche le contenu de la structure (liste des modules chargés, liste des types MIME pouvant être analysés).
+
+La fonction *umw_close*() libère la structure allouée après avoir dé-initialisé les modules de recherche.
+
+La fonction *umw_scan_file*() analyse un fichier et retourne un statut indiquant le résultat de l'analyse.
+
+La fonction *umw_scan_dir*() analyse un répertoire, éventuellement récursivement, et retourne un statut indiquant le résultat de l'analyse.
+
+Le statut retourné par les fonctions d'analyse peut prendre les valeurs suivantes:
+
+*UMW_CLEAN*::
+Le fichier ou répertoire est sain
+*UMW_MALWARE*::
+Le fichier ou répertoire contient un malware
+*UMW_EINVAL*::
+Un argument invalide a été passé
+*UMW_IERROR*::
+Le module de recherche a rencontré une erreur interne
+*UMW_UNKNOWN_FILE_TYPE*::
+Le type du fichier n'est pas géré
 
 
-RETURN VALUE
-------------
-*0*::
-    Succès
-
-*1*::
-    Erreur
+MODULES DE RECHERCHE
+--------------------
+La fonction *umw_open*() charge dynamiquement des modules de recherche et délègue la recherche réelle de malware à ces modules.
 
 
 AUTHOR
