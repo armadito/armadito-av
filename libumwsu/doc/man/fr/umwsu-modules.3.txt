@@ -1,0 +1,53 @@
+UMWSU-MODULES(3)
+================
+:doctype: manpage
+
+NOM
+---
+umwsu-modules - modules de recherche de malwares
+
+
+SYNOPSIS
+--------
+
+enum umwsu_mod_status {
+  UMWSUMOD_OK,
+  UMWSUMOD_INIT_ERROR,
+};
+
+enum umwsu_status {
+  UMWSU_CLEAN,
+  UMWSU_MALWARE,
+  UMWSU_EINVAL,
+  UMWSU_IERROR,
+  UMWSU_UNKNOWN_FILE_TYPE,
+};
+
+typedef enum umwsu_mod_status (*umwsu_mod_init_t)(void **pmod_data);
+
+typedef enum umwsu_status (*umwsu_mod_scan)(const char *path, void *mod_data);
+
+typedef enum umwsu_mod_status (*umwsu_mod_close)(void *mod_data);
+
+
+DESCRIPTION
+-----------
+Les modules de recherche...
+
+Les modules de recherche sont chargés dynamiquement à partir des fichiers objets situés dans le répertoire */usr/lib/libumwsu/modules* (ce répertoire peut changer en fonction de l'installation). Chaque module exporte certaines fonctions qui seront utilisées par la librairie *libumwsu*. Pour plus d'informations, se référer à *umwsu-modules*(3).
+
+
+AUTHOR
+------
+libumwsu a été écrit par François Déchelle.
+
+
+RESOURCES
+---------
+Site web: <http://uhuru-solutions.com/>
+
+
+COPYING
+-------
+Copyright \(C) 2014 qui?. Free use of this software is
+granted under the terms of the GNU General Public License (GPL).

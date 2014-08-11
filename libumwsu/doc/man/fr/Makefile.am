@@ -1,4 +1,4 @@
-doc_DATA= libumwsu.3 libumwsu.3.html umwsu_modules.3 umwsu_modules.3.html umwscan.1 umwscan.1.html
+doc_DATA= libumwsu.3 libumwsu.3.html umwsu-modules.3 umwsu-modules.3.html umwsu-scan.1 umwsu-scan.1.html
 
 ASCIIDOCFLAGS=-a data-uri -a icons -b html5
 A2XFLAGS=--doctype manpage --format manpage -v -v 
@@ -9,4 +9,4 @@ A2XFLAGS=--doctype manpage --format manpage -v -v
 %.html: $(srcdir)/%.txt
 	$(ASCIIDOC) $(ASCIIDOCFLAGS) -o $*.html $(srcdir)/$*.txt
 
-EXTRA_DIST=libumwsu.3.txt umwscan.1.txt
+EXTRA_DIST=libumwsu.3.txt umwsu-modules.3.txt umwsu-scan.1.txt
