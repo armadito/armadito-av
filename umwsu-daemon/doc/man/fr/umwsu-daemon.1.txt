@@ -9,18 +9,25 @@ umwsu-daemon - démon de scan utilisant inotify
 
 SYNOPSIS
 --------
-*umwsu-daemon* ['OPTIONS'] 'DIR' ...
+*umwsu-daemon* ['OPTIONS'] 'DIR'...
 
 
 DESCRIPTION
 -----------
-La commande *umwsu-daemon*(1) lance le démon de scan 
+La commande *umwsu-daemon*(1) lance le démon de scan. Ce démon utilise *inotify*(7) pour surveiller les répertoires passés en argument et pour lancer une recherche de malware pour les fichiers créés dans les répertoires surveillés.
+
+*umwsu-daemon*(1) utilise *libumwsu*(3) pour la recherche de malwares. Au lancement du démon, les modules de recherche sont chargés dynamiquement en utilisant *umwsu_open*(3) et restent chargés pendant toute la durée de vie du démon.
+
+Dans sa version actuelle, le démon lance une analyse de fichier à la première fermeture en écriture (événement inotify IN_CLOSE_WRITE) du fichier après sa création (événement inotify IN_CREATE). Ce comportement est susceptible de changer dans une prochaine version.
+
+Les arguments doivent être des répertoires; il n'est pas possible actuellement de surveiller un fichier.
 
 
 OPTIONS
 -------
 *-r*::
     Récursif
+    Pour tous les arguments, lance la recherche dans le répertoire et dans tous ses sous-répertoires.
 
 
 
