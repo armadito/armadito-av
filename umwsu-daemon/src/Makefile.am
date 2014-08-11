@@ -1,9 +1,9 @@
-sbin_PROGRAMS=umwd
+sbin_PROGRAMS=umwsu-daemon
 
-umwd_SOURCES=umwd.c
-umwd_CFLAGS=
-umwd_LDADD=
-umwd_CFLAGS+= @LIBUMWSU_CFLAGS@
-umwd_LDADD+= @LIBUMWSU_LIBS@
-umwd_CFLAGS+= @GLIB2_CFLAGS@
-umwd_LDADD+= @GLIB2_LIBS@
+umwsu_daemon_SOURCES=umwsu-daemon.c
+umwsu_daemon_CFLAGS=
+umwsu_daemon_LDADD=
+umwsu_daemon_CFLAGS+= @LIBUMWSU_CFLAGS@
+umwsu_daemon_LDADD+= @LIBUMWSU_LIBS@
+umwsu_daemon_CFLAGS+= @GLIB2_CFLAGS@
+umwsu_daemon_LDADD+= @GLIB2_LIBS@

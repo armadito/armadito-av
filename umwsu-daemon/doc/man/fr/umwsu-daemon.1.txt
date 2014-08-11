@@ -1,20 +1,20 @@
-UMWD(1)
-=======
+UMWSU-DAEMON(1)
+===============
 :doctype: manpage
 
 NOM
 ---
-umwd - démon de scan utilisant inotify
+umwsu-daemon - démon de scan utilisant inotify
 
 
 SYNOPSIS
 --------
-*umwd* ['OPTIONS'] 'DIR' ...
+*umwsu-daemon* ['OPTIONS'] 'DIR' ...
 
 
 DESCRIPTION
 -----------
-La commande umwd(1) lance le démon de scan 
+La commande *umwsu-daemon*(1) lance le démon de scan 
 
 
 OPTIONS
@@ -35,7 +35,7 @@ EXIT STATUS
 
 AUTHOR
 ------
-umwd a été écrit par François Déchelle.
+umwsu-daemon a été écrit par François Déchelle.
 
 
 RESOURCES

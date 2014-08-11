@@ -12,17 +12,17 @@
 #include <sys/inotify.h>
 #include <dirent.h>
 
-#define UMW
+#define UMWSU
 
 static guint inotify_event_hash(gconstpointer key);
 static gboolean inotify_event_equal(gconstpointer a, gconstpointer b);
 
-struct umwd {
+struct umwsu_daemon {
   int inotify_fd;
   GHashTable *watch_table;
   GHashTable *event_queue;
-#ifdef UMW
-  struct umw *umw;
+#ifdef UMWSU
+  struct umwsu *umwsu;
 #endif
 };
 
@@ -32,7 +32,7 @@ static void error(const char *msg)
   exit(EXIT_FAILURE);
 }
 
-static void umwd_init(struct umwd *d)
+static void umwsu_daemon_init(struct umwsu_daemon *d)
 {
   d->inotify_fd = inotify_init();
   if (d->inotify_fd == -1)
@@ -41,12 +41,12 @@ static void umwd_init(struct umwd *d)
   d->watch_table = g_hash_table_new(g_direct_hash, g_direct_equal);
   d->event_queue = g_hash_table_new(inotify_event_hash, inotify_event_equal);
 
-#ifdef UMW
-  d->umw = umw_open();
+#ifdef UMWSU
+  d->umwsu = umwsu_open();
 #endif
 }
 
-static void umwd_watch(struct umwd *d, const char *path, int recurse)
+static void umwsu_daemon_watch(struct umwsu_daemon *d, const char *path, int recurse)
 {
   int wd;
 
@@ -67,7 +67,7 @@ static void umwd_watch(struct umwd *d, const char *path, int recurse)
       if (asprintf(&entry_path, "%s/%s", path, entry->d_name) == -1)
 	error("asprintf");
 
-      umwd_watch(d, entry_path, 1);
+      umwsu_daemon_watch(d, entry_path, 1);
       
       free(entry_path);
     }
@@ -85,7 +85,7 @@ static void umwd_watch(struct umwd *d, const char *path, int recurse)
 
 static void inotify_event_print(FILE *out, const struct inotify_event *e)
 {
-  fprintf(out, "umwd: inotify event: wd = %2d ", e->wd);
+  fprintf(out, "umwsu_daemon: inotify event: wd = %2d ", e->wd);
 
   if (e->cookie > 0)
     fprintf(out, "cookie = %4d ", e->cookie);
@@ -174,7 +174,7 @@ static gboolean inotify_event_equal(gconstpointer a, gconstpointer b)
   return TRUE;
 }
 
-static char *umwd_event_full_path(struct umwd *d, struct inotify_event *event)
+static char *umwsu_daemon_event_full_path(struct umwsu_daemon *d, struct inotify_event *event)
 {
   char *full_path, *dir;
 
@@ -194,50 +194,50 @@ static void event_queue_print_entry(gpointer key, gpointer value, gpointer user_
   inotify_event_print(stderr, (const struct inotify_event *)key);
 }
 
-static void umwd_print_event_queue(struct umwd *d, const char *msg)
+static void umwsu_daemon_print_event_queue(struct umwsu_daemon *d, const char *msg)
 {
-  fprintf(stderr, "umwd: event queue (%s):\n", msg);
+  fprintf(stderr, "umwsu_daemon: event queue (%s):\n", msg);
   g_hash_table_foreach(d->event_queue, event_queue_print_entry, NULL);
-  fprintf(stderr, "umwd: end of event queue:\n");
+  fprintf(stderr, "umwsu_daemon: end of event queue:\n");
 }
 
-static void umwd_process_dir_create(struct umwd *d, struct inotify_event *event)
+static void umwsu_daemon_process_dir_create(struct umwsu_daemon *d, struct inotify_event *event)
 {
 }
 
-static void umwd_process_file_create(struct umwd *d, struct inotify_event *event)
+static void umwsu_daemon_process_file_create(struct umwsu_daemon *d, struct inotify_event *event)
 {
   struct inotify_event *close_event = inotify_event_clone(event);
 
-  fprintf(stderr, "umwd: processing file create path = %s\n", event->name);
+  fprintf(stderr, "umwsu_daemon: processing file create path = %s\n", event->name);
 
   close_event->mask = IN_CLOSE_WRITE;
 
   g_hash_table_add(d->event_queue, close_event);
 
 #if 0
-  umwd_print_event_queue(d, "create");
+  umwsu_daemon_print_event_queue(d, "create");
 #endif
 }
 
-static void umwd_process_file_close_write(struct umwd *d, struct inotify_event *event)
+static void umwsu_daemon_process_file_close_write(struct umwsu_daemon *d, struct inotify_event *event)
 {
-  char *full_path = umwd_event_full_path(d, event);
+  char *full_path = umwsu_daemon_event_full_path(d, event);
 
-  fprintf(stderr, "umwd: processing file close write full_path = %s\n", full_path);
+  fprintf(stderr, "umwsu_daemon: processing file close write full_path = %s\n", full_path);
 
-#ifdef UMW
+#ifdef UMWSU
   if (g_hash_table_contains(d->event_queue, event)) {
 #if 0
-    fprintf(stderr, "umwd: event is in queue\n");
+    fprintf(stderr, "umwsu_daemon: event is in queue\n");
 #endif
 
-    umw_scan_file(d->umw, full_path);
+    umwsu_scan_file(d->umwsu, full_path);
 
     g_hash_table_remove(d->event_queue, event);
 
 #if 0
-    umwd_print_event_queue(d, "close write");
+    umwsu_daemon_print_event_queue(d, "close write");
 #endif
   }
 #endif
@@ -245,16 +245,16 @@ static void umwd_process_file_close_write(struct umwd *d, struct inotify_event *
   free(full_path);
 }
 
-static void umwd_process_event(struct umwd *d, struct inotify_event *event)
+static void umwsu_daemon_process_event(struct umwsu_daemon *d, struct inotify_event *event)
 {
   inotify_event_print(stderr, event);
 
   if ((event->mask & IN_CLOSE_WRITE) && !(event->mask & IN_ISDIR))
-    umwd_process_file_close_write(d, event);
+    umwsu_daemon_process_file_close_write(d, event);
   else if ((event->mask & IN_CREATE) && !(event->mask & IN_ISDIR))
-    umwd_process_file_create(d, event);
+    umwsu_daemon_process_file_create(d, event);
   else if ((event->mask & IN_CREATE) && (event->mask & IN_ISDIR))
-    umwd_process_dir_create(d, event);
+    umwsu_daemon_process_dir_create(d, event);
 }
 
 void print_entry(gpointer key, gpointer value, gpointer user_data)
@@ -265,7 +265,7 @@ void print_entry(gpointer key, gpointer value, gpointer user_data)
 #define N_EVENTS 10
 #define EVENT_BUFFER_LEN (N_EVENTS * (sizeof(struct inotify_event) + NAME_MAX + 1))
 
-static void umwd_loop(struct umwd *d)
+static void umwsu_daemon_loop(struct umwsu_daemon *d)
 {
   char *event_buffer;
 
@@ -294,7 +294,7 @@ static void umwd_loop(struct umwd *d)
     while (p < event_buffer + nread) {
       struct inotify_event *event = (struct inotify_event *) p;
 
-      umwd_process_event(d, event);
+      umwsu_daemon_process_event(d, event);
 
       p += sizeof(struct inotify_event) + event->len;
     }
@@ -309,7 +309,7 @@ static void usage(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-  struct umwd umwd;
+  struct umwsu_daemon umwsu_daemon;
   int argp = 1;
   int recurse = 0;
   
@@ -321,7 +321,7 @@ int main(int argc, char **argv)
     recurse = 1;
   }
 
-  umwd_init(&umwd);
+  umwsu_daemon_init(&umwsu_daemon);
 
   while (argp < argc) {
     struct stat sb;
@@ -336,10 +336,10 @@ int main(int argc, char **argv)
       exit(EXIT_FAILURE);
     }
 
-    umwd_watch(&umwd, argv[argp], recurse);
+    umwsu_daemon_watch(&umwsu_daemon, argv[argp], recurse);
 
     argp++;
   }
 
-  umwd_loop(&umwd);
+  umwsu_daemon_loop(&umwsu_daemon);
 }
