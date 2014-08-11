@@ -20,28 +20,28 @@ const char *module5_2_mime_types[] = {
   NULL,
 };
 
-enum umw_status module5_2_scan(const char *path, void *mod_data)
+enum umwsu_status module5_2_scan(const char *path, void *mod_data)
 {
   switch(analyseElfFile((char *)path)) {
   case E_MALWARE:
-    return UMW_MALWARE;
+    return UMWSU_MALWARE;
   case E_NOT_MALWARE:
-    return UMW_CLEAN;
+    return UMWSU_CLEAN;
   default:
-    return UMW_IERROR;
+    return UMWSU_IERROR;
   }
 
-  return UMW_CLEAN;
+  return UMWSU_CLEAN;
 }
 
-enum umw_mod_status module5_2_init(void **pmod_data)
+enum umwsu_mod_status module5_2_init(void **pmod_data)
 {
   if (initDB(MODULE_52_DBDIR "/database.elfdata", MODULE_52_DBDIR "/db_malicious.zip", MODULE_52_DBDIR "/db_safe.zip") == 0)
-    return UMW_MOD_INIT_ERROR;
+    return UMWSU_MOD_INIT_ERROR;
 
   fprintf(stderr, "Module 5.2 databases loaded from " MODULE_52_DBDIR "\n");
 
-  return UMW_MOD_OK;
+  return UMWSU_MOD_OK;
 }
 
 void module5_2_install(void)

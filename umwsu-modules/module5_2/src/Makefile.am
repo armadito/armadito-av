@@ -1,8 +1,12 @@
+AUTOMAKE_OPTIONS=subdir-objects
+
 modulesdir=@LIBUMWSU_MODDIR@
 modules_LTLIBRARIES=module5_2.la
 
-module5_2_la_SOURCES= \
-module5_2.c \
+dist_module5_2_la_SOURCES= \
+module5_2.c 
+
+nodist_module5_2_la_SOURCES= \
 org/databases.c \
 org/databases.h \
 org/distances.c \

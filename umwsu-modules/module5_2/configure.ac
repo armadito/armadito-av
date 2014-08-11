@@ -1,4 +1,4 @@
-AC_INIT(umwsu-module5-2,0.1.1,francois@dechelle.net)
+AC_INIT(umwsu-module-mod5-2,0.1.1,francois@dechelle.net)
 AM_INIT_AUTOMAKE
 
 # collect arguments
