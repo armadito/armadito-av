@@ -1,0 +1,51 @@
+UMWSU-SCAN(1)
+=============
+:doctype: manpage
+
+NOM
+---
+umwsu-scan - outil de scan en ligne de commande
+
+
+SYNOPSIS
+--------
+*umwsu-scan* ['OPTIONS'] 'FILE|DIR' ...
+
+
+DESCRIPTION
+-----------
+La commande *umwsu-scan*(1) lance une recherche de malwares dans les fichiers ou les répertoires passés en arguments.
+
+Cette commande utilise la librairie de scan *libumwsu*(3).
+
+
+OPTIONS
+-------
+*-r*::
+    Récursif.
+    Pour les arguments qui sont des répertoires, lance la recherche dans le répertoire et dans tous ses sous-répertoires.
+
+
+EXIT STATUS
+-----------
+*0*::
+    Succès
+
+*1*::
+    Erreur
+
+
+AUTHOR
+------
+umwsu-scan a été écrit par François Déchelle.
+
+
+RESOURCES
+---------
+Site web: <http://uhuru-solutions.com/>
+
+
+COPYING
+-------
+Copyright \(C) 2014 qui?. Free use of this software is
+granted under the terms of the GNU General Public License (GPL).

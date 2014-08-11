@@ -14,7 +14,7 @@ static void usage(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-  struct umw *u;
+  struct umwsu *u;
   int argp = 1;
   int recurse = 0;
   
@@ -26,13 +26,13 @@ int main(int argc, char **argv)
     recurse = 1;
   }
 
-  u = umw_open();
+  u = umwsu_open();
 
-  umw_print(u);
+  umwsu_print(u);
 
   while (argp < argc) {
     struct stat sb;
-    enum umw_status status;
+    enum umwsu_status status;
 
     if (stat(argv[argp], &sb) == -1) {
       perror("stat");
@@ -40,12 +40,12 @@ int main(int argc, char **argv)
     }
 
     if (S_ISDIR(sb.st_mode))
-      umw_scan_dir(u, argv[argp], recurse);
+      umwsu_scan_dir(u, argv[argp], recurse);
     else
-      status = umw_scan_file(u, argv[argp]);
+      status = umwsu_scan_file(u, argv[argp]);
 
     argp++;
   }
 
-  umw_close(u);
+  umwsu_close(u);
 }

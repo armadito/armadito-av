@@ -11,64 +11,66 @@ SYNOPSIS
 --------
 *#include <libumwsu/scan.h>*
 
-enum umw_status {
-  UMW_CLEAN,
-  UMW_MALWARE,
-  UMW_EINVAL,
-  UMW_IERROR,
-  UMW_UNKNOWN_FILE_TYPE,
+enum umwsu_status {
+  UMWSU_CLEAN,
+  UMWSU_MALWARE,
+  UMWSU_EINVAL,
+  UMWSU_IERROR,
+  UMWSU_UNKNOWN_FILE_TYPE,
 };
 
-struct umw *
-*umw_open*(void);
+struct umwsu *
+*umwsu_open*(void);
 
 void 
-*umw_print*(struct umw *u);
+*umwsu_print*(struct umwsu *umwsu_handle);
 
 void
-*umw_close*(struct umw *u);
+*umwsu_close*(struct umwsu *umwsu_handle);
 
-enum umw_status 
-*umw_scan_file*(struct umw *umw_handle, const char *path);
+enum umwsu_status 
+*umwsu_scan_file*(struct umwsu *umwsu_handle, const char *path);
 
-enum umw_status 
-*umw_scan_dir*(struct umw *umw_handle, const char *path, int recurse);
+enum umwsu_status 
+*umwsu_scan_dir*(struct umwsu *umwsu_handle, const char *path, int recurse);
 
 
 DESCRIPTION
 -----------
-La fonction *umwsu_open*() créée une instance de la structure opaque *struct umw* et la retourne. Les modules de recherche sont chargés dynamiquement et initialisés.
+La fonction *umwsu_open*() créée une instance de la structure opaque *struct umwsu* et la retourne. Les modules de recherche sont chargés dynamiquement et initialisés.
 
-La fonction *umw_print*() affiche le contenu de la structure (liste des modules chargés, liste des types MIME pouvant être analysés).
+La fonction *umwsu_print*() affiche le contenu de la structure (liste des modules chargés, liste des types MIME pouvant être analysés).
 
-La fonction *umw_close*() libère la structure allouée après avoir dé-initialisé les modules de recherche.
+La fonction *umwsu_close*() libère la structure allouée après avoir dé-initialisé les modules de recherche.
 
-La fonction *umw_scan_file*() analyse un fichier et retourne un statut indiquant le résultat de l'analyse.
+La fonction *umwsu_scan_file*() analyse un fichier et retourne un statut indiquant le résultat de l'analyse.
 
-La fonction *umw_scan_dir*() analyse un répertoire, éventuellement récursivement, et retourne un statut indiquant le résultat de l'analyse.
+La fonction *umwsu_scan_dir*() analyse un répertoire, éventuellement récursivement, et retourne un statut indiquant le résultat de l'analyse.
 
 Le statut retourné par les fonctions d'analyse peut prendre les valeurs suivantes:
 
-*UMW_CLEAN*::
+*UMWSU_CLEAN*::
 Le fichier ou répertoire est sain
-*UMW_MALWARE*::
+*UMWSU_MALWARE*::
 Le fichier ou répertoire contient un malware
-*UMW_EINVAL*::
+*UMWSU_EINVAL*::
 Un argument invalide a été passé
-*UMW_IERROR*::
+*UMWSU_IERROR*::
 Le module de recherche a rencontré une erreur interne
-*UMW_UNKNOWN_FILE_TYPE*::
+*UMWSU_UNKNOWN_FILE_TYPE*::
 Le type du fichier n'est pas géré
 
 
 MODULES DE RECHERCHE
 --------------------
-La fonction *umw_open*() charge dynamiquement des modules de recherche et délègue la recherche réelle de malware à ces modules.
+La fonction *umwsu_open*() charge dynamiquement des modules de recherche et délègue la recherche réelle de malware à ces modules.
+
+Les modules de recherche sont chargés dynamiquement à partir des fichiers objets situés dans le répertoire */usr/lib/libumwsu/modules* (ce répertoire peut changer en fonction de l'installation). Chaque module exporte certaines fonctions qui seront utilisées par la librairie *libumwsu*. Pour plus d'informations, se référer à *umwsu-modules*(3).
 
 
 AUTHOR
 ------
-umwd a été écrit par François Déchelle.
+libumwsu a été écrit par François Déchelle.
 
 
 RESOURCES

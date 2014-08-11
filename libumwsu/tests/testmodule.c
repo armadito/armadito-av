@@ -8,16 +8,16 @@ const char *testmodule_mime_types[] = {
   NULL,
 };
 
-enum umw_status testmodule_scan(const char *path, void *mod_data)
+enum umwsu_status testmodule_scan(const char *path, void *mod_data)
 {
-  return UMW_CLEAN;
+  return UMWSU_CLEAN;
 }
 
-enum umw_mod_status testmodule_init(void **pmod_data)
+enum umwsu_mod_status testmodule_init(void **pmod_data)
 {
   *pmod_data = NULL;
 
-  return UMW_MOD_OK;
+  return UMWSU_MOD_OK;
 }
 
 void testmodule_install(void)

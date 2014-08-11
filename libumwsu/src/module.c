@@ -44,12 +44,12 @@ static gpointer get_symbol(GModule *module, const char *module_name, const char 
   return sym;
 }
 
-struct umw_module *module_new(const char *path)
+struct umwsu_module *module_new(const char *path)
 {
-  struct umw_module *mod;
+  struct umwsu_module *mod;
   GModule *module;
 
-  mod = (struct umw_module *)malloc(sizeof(struct umw_module));
+  mod = (struct umwsu_module *)malloc(sizeof(struct umwsu_module));
 
   module = g_module_open(path, G_MODULE_BIND_LAZY);
 
@@ -74,7 +74,7 @@ struct umw_module *module_new(const char *path)
   return mod;
 }
 
-void module_print(struct umw_module *mod)
+void module_print(struct umwsu_module *mod)
 {
   printf("name: %s\n", mod->name);
   printf("init: %p\n", mod->init);

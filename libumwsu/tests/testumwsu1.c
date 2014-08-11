@@ -2,5 +2,5 @@
 
 int main(int argc, char **argv)
 {
-  umw_open();
+  umwsu_open();
 }

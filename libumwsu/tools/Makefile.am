@@ -1,5 +1,5 @@
-bin_PROGRAMS=umwscan
+bin_PROGRAMS=umwsu-scan
 
-umwscan_CFLAGS=-I$(top_srcdir)/include
-umwscan_LDADD=$(top_builddir)/src/libumwsu.la @GMODULE2_LIBS@ -lmagic
-umwscan_SOURCES=umwscan.c
+umwsu_scan_CFLAGS=-I$(top_srcdir)/include
+umwsu_scan_LDADD=$(top_builddir)/src/libumwsu.la @GMODULE2_LIBS@ -lmagic
+umwsu_scan_SOURCES=umwsu-scan.c

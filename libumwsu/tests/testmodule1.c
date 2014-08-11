@@ -2,5 +2,5 @@
 
 int main(int argc, char **argv)
 {
-  umw_module_install(argv[1]);
+  umwsu_module_install(argv[1]);
 }

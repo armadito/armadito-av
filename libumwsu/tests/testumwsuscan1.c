@@ -3,15 +3,15 @@
 
 int main(int argc, char **argv)
 {
-  struct umw *u = umw_open();
+  struct umwsu *u = umwsu_open();
   int i;
   
   for (i = 1; i < argc; i++) {
-    enum umw_status status;
+    enum umwsu_status status;
 
-    status = umw_scan_file(u, argv[i]);
-    printf("%s: %s\n", argv[i], umw_status_str(status));
+    status = umwsu_scan_file(u, argv[i]);
+    printf("%s: %s\n", argv[i], umwsu_status_str(status));
   }
 
-  umw_close(u);
+  umwsu_close(u);
 }

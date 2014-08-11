@@ -1,4 +1,4 @@
-doc_DATA= libumwsu.3 umwscan.1 libumwsu.3.html umwscan.1.html
+doc_DATA= libumwsu.3 libumwsu.3.html umwsu_modules.3 umwsu_modules.3.html umwscan.1 umwscan.1.html
 
 ASCIIDOCFLAGS=-a data-uri -a icons -b html5
 A2XFLAGS=--doctype manpage --format manpage -v -v 
