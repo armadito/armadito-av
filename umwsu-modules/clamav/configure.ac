@@ -1,4 +1,4 @@
-AC_INIT(umwsu-clamav,0.1.1,francois@dechelle.net)
+AC_INIT(umwsu-module-clamav,0.1.1,francois@dechelle.net)
 AM_INIT_AUTOMAKE
 
 # collect arguments
@@ -40,7 +40,6 @@ PKG_CHECK_MODULES(LIBUMWSU, libumwsu, [HAVE_LIBUMWSU=yes], [HAVE_LIBUMWSU=no])
 if test "$HAVE_LIBUMWSU" = "no"; then
    AC_MSG_ERROR("cannot find UMWSU library")
 fi
-LIBUMWSU_LIBDIR=
 LIBUMWSU_MODDIR=$(pkg-config --variable=moduledir libumwsu)
 AC_SUBST(LIBUMWSU_MODDIR)
 

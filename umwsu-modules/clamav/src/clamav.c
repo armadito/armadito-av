@@ -15,7 +15,7 @@ struct clamav_data {
   struct cl_engine *clamav_engine;
 };
 
-enum umw_status clamav_scan(const char *path, void *mod_data)
+enum umwsu_status clamav_scan(const char *path, void *mod_data)
 {
   struct clamav_data *cl_data = (struct clamav_data *)mod_data;
   const char *virus_name = NULL;
@@ -26,15 +26,15 @@ enum umw_status clamav_scan(const char *path, void *mod_data)
 
   if (cl_scan_status == CL_VIRUS) {
     fprintf(stderr, "%s is infected by virus %s!\n", path, virus_name);
-    return UMW_MALWARE;
+    return UMWSU_MALWARE;
   } else {
     fprintf(stderr, "%s is not infected by a virus!\n", path);
   }
 
-  return UMW_CLEAN;
+  return UMWSU_CLEAN;
 }
 
-enum umw_mod_status clamav_init(void **pmod_data)
+enum umwsu_mod_status clamav_init(void **pmod_data)
 {
   const char *clamav_db_dir;
   unsigned int signature_count = 0;
@@ -50,16 +50,16 @@ enum umw_mod_status clamav_init(void **pmod_data)
   clamav_db_dir = cl_retdbdir();
 
   if (cl_load(clamav_db_dir, cl_data->clamav_engine, &signature_count, CL_DB_STDOPT) != CL_SUCCESS)
-    return UMW_MOD_INIT_ERROR;
+    return UMWSU_MOD_INIT_ERROR;
 
   fprintf(stderr, "ClamAV database loaded from %s, %d signatures\n", clamav_db_dir, signature_count);
 
   if (cl_engine_compile(cl_data->clamav_engine) != CL_SUCCESS)
-    return UMW_MOD_INIT_ERROR;
+    return UMWSU_MOD_INIT_ERROR;
 
   fprintf(stderr, "ClamAV is initialized\n");
 
-  return UMW_MOD_OK;
+  return UMWSU_MOD_OK;
 }
 
 void clamav_install(void)
