@@ -41,7 +41,7 @@ static void load_entry(const char *full_path, void *data)
   const char *t = magic_file(u->magic, full_path);
   struct umwsu_module *mod;
   
-  if (strncmp("application/x-sharedlib", t))
+  if (strcmp("application/x-sharedlib", t))
     return;
 
   printf("UMWSU: loading module object: %s\n", full_path);
