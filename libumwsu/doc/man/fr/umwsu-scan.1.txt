@@ -14,7 +14,7 @@ SYNOPSIS
 
 DESCRIPTION
 -----------
-La commande *umwsu-scan*(1) lance une recherche de malwares dans les fichiers ou les répertoires passés en arguments.
+La commande *umwsu-scan*(1) lance une recherche de malwares dans les fichiers ou les répertoires passés en arguments et affiche les résultats sur sa sortie standard.
 
 Cette commande utilise la librairie de scan *libumwsu*(3).
 

@@ -10,3 +10,6 @@ A2XFLAGS=--doctype manpage --format manpage -v -v
 	$(ASCIIDOC) $(ASCIIDOCFLAGS) -o $*.html $(srcdir)/$*.txt
 
 EXTRA_DIST=libumwsu.3.txt umwsu-modules.3.txt umwsu-scan.1.txt
+
+CLEANFILES=$(doc_DATA)
+ 

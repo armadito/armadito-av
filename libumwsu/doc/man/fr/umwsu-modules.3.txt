@@ -32,10 +32,20 @@ typedef enum umwsu_mod_status (*umwsu_mod_close)(void *mod_data);
 
 DESCRIPTION
 -----------
-Les modules de recherche...
+Les modules de recherche sont des objets chargés par la fonction *dlopen*(3). Ils implémentent des fonctions qui sont appelées par la librairie *libumwsu*(3) pour réaliser la recherche de malwares dans des fichiers.
 
-Les modules de recherche sont chargés dynamiquement à partir des fichiers objets situés dans le répertoire */usr/lib/libumwsu/modules* (ce répertoire peut changer en fonction de l'installation). Chaque module exporte certaines fonctions qui seront utilisées par la librairie *libumwsu*. Pour plus d'informations, se référer à *umwsu-modules*(3).
+Les modules de recherche sont chargés dynamiquement à partir des fichiers .so situés dans le répertoire */usr/lib/libumwsu/modules* (ce répertoire peut changer en fonction de l'installation). Chaque module exporte certaines fonctions qui seront utilisées par la librairie *libumwsu*. Pour plus d'informations, se référer à *umwsu-modules*(3).
 
+Un module de recherche doit définir les fonctions suivantes (MODULE désigne le nom du module, obtenu à partir du nom du fichier):
+
+*MODULE_init*::
+Fonction d'initialisation. Alloue la structure privée du module, initialise le module, retourne la structure allouée via 'pmod_data'.
+
+*MODULE_scan*::
+Fonction de recherche. Utilise la structure passée via 'pmod_data' (structure allouée par 'MODULE_init'); réalise la recherche et retourne un statut indiquant si le fichier contient ou non un malware.
+
+*MODULE_close*::
+Fonction de dé-initialisation. Libère la structure privée du module, dé-initialise le module.
 
 AUTHOR
 ------
