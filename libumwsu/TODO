@@ -1,5 +1,5 @@
 - scan multi-thread
--- création du pool de threads (dans umwsu_open ou bien au début du scan de directory?)
+-- création du pool de threads au début du scan de paths multiples
 -- lancement d'un scan de fichier dans un thread
 -- attente des résultats? première version: g_thread_pool_free(, FALSE, TRUE) pour attendre la fin du traitement de toutes les tâches de scan
 

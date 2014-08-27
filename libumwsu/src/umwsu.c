@@ -10,6 +10,7 @@
 #include <stdio.h>
 
 struct umwsu {
+  int verbosity;
   GHashTable *mime_types_table;
   GPtrArray *modules;
   magic_t magic;
@@ -21,6 +22,8 @@ static struct umwsu *umwsu_new(void)
 
   assert(u != NULL);
 
+  u->verbosity = 0;
+
   u->magic = magic_open(MAGIC_MIME_TYPE);
   magic_load(u->magic, NULL);
 
@@ -28,6 +31,11 @@ static struct umwsu *umwsu_new(void)
   u->modules = g_ptr_array_new();
 
   return u;
+}
+
+void umwsu_set_verbose(struct umwsu *u, int verbosity)
+{
+  u->verbosity = verbosity;
 }
 
 void umwsu_add_module(struct umwsu *u, struct umwsu_module *mod)
@@ -44,7 +52,8 @@ static void load_entry(const char *full_path, void *data)
   if (strcmp("application/x-sharedlib", t))
     return;
 
-  printf("UMWSU: loading module object: %s\n", full_path);
+  if (u->verbosity >= 1)
+    printf("UMWSU: loading module object: %s\n", full_path);
 
   mod = module_new(full_path);
 
@@ -92,7 +101,7 @@ static void uwm_module_init_all(struct umwsu *u)
 
 static void mod_print(gpointer data, gpointer user_data)
 {
-  module_print((struct umwsu_module *)data);
+  module_print((struct umwsu_module *)data, stderr);
 }
 
 static void uwm_module_print_all(struct umwsu *u)
@@ -158,6 +167,27 @@ static enum umwsu_status umwsu_status_max(enum umwsu_status s1, enum umwsu_statu
   return UMWSU_CLEAN;
 }
 
+static int umwsu_status_cmp(enum umwsu_status s1, enum umwsu_status s2)
+{
+  if (s1 == s2)
+    return 0;
+
+  switch(s1) {
+  case UMWSU_CLEAN:
+    return -1;
+  case UMWSU_IERROR:
+    return (s2 == UMWSU_CLEAN) ? 1 : -1;
+  case UMWSU_SUSPICIOUS:
+    return (s2 == UMWSU_CLEAN || s2 == UMWSU_IERROR) ? 1 : -1;
+  case UMWSU_MALWARE:
+    return 1;
+  }
+
+  assert(1 == 0);
+
+  return 0;
+}
+
 
 enum umwsu_status umwsu_scan_file(struct umwsu *u, const char *path, struct umwsu_report *report)
 {
@@ -176,7 +206,8 @@ enum umwsu_status umwsu_scan_file(struct umwsu *u, const char *path, struct umws
       struct umwsu_module *mod = (struct umwsu_module *)g_ptr_array_index(mod_array, i);
       enum umwsu_status mod_status;
 
-      printf("UMWSU: module %s: scanning %s\n", mod->name, path);
+      if (u->verbosity >= 2)
+	printf("UMWSU: module %s: scanning %s\n", mod->name, path);
 
       mod_status = (*mod->scan)(path, mod->data);
 
@@ -187,7 +218,8 @@ enum umwsu_status umwsu_scan_file(struct umwsu *u, const char *path, struct umws
     }
   }
 
-  fprintf(stderr, "%s: %s\n", path, umwsu_status_str(current_status));
+  if (u->verbosity >= 1)
+    printf("%s: %s\n", path, umwsu_status_str(current_status));
 
   return current_status;
 }

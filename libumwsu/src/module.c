@@ -74,18 +74,18 @@ struct umwsu_module *module_new(const char *path)
   return mod;
 }
 
-void module_print(struct umwsu_module *mod)
+void module_print(struct umwsu_module *mod, FILE *out)
 {
-  printf("name: %s\n", mod->name);
-  printf("init: %p\n", mod->init);
-  printf("scan: %p\n", mod->scan);
-  printf("close: %p\n", mod->close);
+  fprintf(out, "name: %s\n", mod->name);
+  fprintf(out, "init: %p\n", mod->init);
+  fprintf(out, "scan: %p\n", mod->scan);
+  fprintf(out, "close: %p\n", mod->close);
 
   if (mod->mime_types != NULL) {
     const char **p;
 
     for (p = mod->mime_types; *p != NULL; p++)
-      printf("mime type: %s\n", *p);
+      fprintf(out, "mime type: %s\n", *p);
   }
 }
 

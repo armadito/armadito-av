@@ -28,6 +28,8 @@ int main(int argc, char **argv)
 
   u = umwsu_open();
 
+  umwsu_set_verbose(u, 1);
+
   umwsu_print(u);
 
   while (argp < argc) {
