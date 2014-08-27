@@ -1,5 +1,7 @@
 2014-08-27  François Déchelle  <francois@dechelle.net>
 
+	* adding report structure, added better status evaluation in case of multiple modules scanning a file
+
 	* added UMWSU_SUSPICIOUS to enum umwsu_status, changed scan function and modules
 
 	* added extern "C" for C++ compilation

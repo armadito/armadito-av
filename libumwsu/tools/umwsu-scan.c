@@ -42,7 +42,7 @@ int main(int argc, char **argv)
     if (S_ISDIR(sb.st_mode))
       umwsu_scan_dir(u, argv[argp], recurse);
     else
-      status = umwsu_scan_file(u, argv[argp]);
+      status = umwsu_scan_file(u, argv[argp], NULL);
 
     argp++;
   }

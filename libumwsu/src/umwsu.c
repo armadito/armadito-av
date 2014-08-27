@@ -40,7 +40,7 @@ static void load_entry(const char *full_path, void *data)
   struct umwsu *u = (struct umwsu *)data;
   const char *t = magic_file(u->magic, full_path);
   struct umwsu_module *mod;
-  
+
   if (strcmp("application/x-sharedlib", t))
     return;
 
@@ -142,16 +142,33 @@ void umwsu_close(struct umwsu *u)
   magic_close(u->magic);
 }
 
-enum umwsu_status umwsu_scan_file(struct umwsu *u, const char *path)
+static enum umwsu_status umwsu_status_max(enum umwsu_status s1, enum umwsu_status s2)
+{
+  if (s1 == UMWSU_MALWARE || s2 == UMWSU_MALWARE)
+    return UMWSU_MALWARE;
+
+  if (s1 == UMWSU_SUSPICIOUS || s2 == UMWSU_SUSPICIOUS)
+    return UMWSU_SUSPICIOUS;
+
+  if (s1 == UMWSU_IERROR || s2 == UMWSU_IERROR)
+    return UMWSU_IERROR;
+
+  assert(s1 == UMWSU_CLEAN && s2 == UMWSU_CLEAN);
+
+  return UMWSU_CLEAN;
+}
+
+
+enum umwsu_status umwsu_scan_file(struct umwsu *u, const char *path, struct umwsu_report *report)
 {
   const char *mime_type = magic_file(u->magic, path);
   GPtrArray *mod_array;
-  enum umwsu_status status = UMWSU_CLEAN;
+  enum umwsu_status current_status = UMWSU_CLEAN;
 
   mod_array = (GPtrArray *)g_hash_table_lookup(u->mime_types_table, mime_type);
-  
+
   if (mod_array == NULL)
-    status = UMWSU_UNKNOWN_FILE_TYPE;
+    current_status = UMWSU_UNKNOWN_FILE_TYPE;
   else {
     int i;
 
@@ -163,25 +180,23 @@ enum umwsu_status umwsu_scan_file(struct umwsu *u, const char *path)
 
       mod_status = (*mod->scan)(path, mod->data);
 
-      /* transition table should be more complex */
-      if (status == UMWSU_CLEAN && mod_status != UMWSU_CLEAN)
-	status = mod_status;
+      current_status = umwsu_status_max(current_status, mod_status);
 
-      if (mod_status == UMWSU_MALWARE)
+      if (current_status == UMWSU_MALWARE)
 	break;
     }
   }
 
-  fprintf(stderr, "%s: %s\n", path, umwsu_status_str(status));
+  fprintf(stderr, "%s: %s\n", path, umwsu_status_str(current_status));
 
-  return status;
+  return current_status;
 }
 
 static void scan_entry(const char *full_path, void *data)
 {
   struct umwsu *u = (struct umwsu *)data;
 
-  umwsu_scan_file(u, full_path);
+  umwsu_scan_file(u, full_path, NULL);
 }
 
 enum umwsu_status umwsu_scan_dir(struct umwsu *u, const char *path, int recurse)
