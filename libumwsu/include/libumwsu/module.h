@@ -3,6 +3,10 @@
 
 #include <libumwsu/status.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum umwsu_mod_status {
   UMWSU_MOD_OK,
   UMWSU_MOD_INIT_ERROR,
@@ -14,5 +18,9 @@ typedef enum umwsu_mod_status (*umwsu_mod_conf_t)(const char *key, const char *v
 typedef enum umwsu_mod_status (*umwsu_mod_init_t)(void **pmod_data);
 typedef enum umwsu_scan_status (*umwsu_mod_scan)(const char *path, void *mod_data);
 typedef enum umwsu_mod_status (*umwsu_mod_close)(void *mod_data);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

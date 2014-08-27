@@ -1,3 +1,15 @@
+- scan multi-thread
+-- création du pool de threads (dans umwsu_open ou bien au début du scan de directory?)
+-- lancement d'un scan de fichier dans un thread
+-- attente des résultats? première version: g_thread_pool_free(, FALSE, TRUE) pour attendre la fin du traitement de toutes les tâches de scan
+
+
+- ajouter structure rapport
+-- champs: path, état, rapport du module
+-- création du document XML à partir structure rapport
+-- envoi du document XML à l'agent de reporting
+
+- implémenter module 5.1 avec infos [NOT YET]
 
 - ajouter src/dir.c pour appliquer une fonction sur tous les fichiers d'un directory [OK]
 
@@ -6,7 +18,8 @@
 - créer une struct module dans src/module.c
 -- ajouter dans cette struct les fonctions du module (conf_inif, conf, init, scan, uninstall et les types de fichiers scannés [OK]
 -- module_init: ajout des magic textual description associées au module, allocation de la structure spécifique et initialisation [OK]
--- table de hachage: magic_desc -> GPtrArray de module *, trier le GPtrArray par poids du module [OK]
+-- table de hachage: magic_desc -> GPtrArray de module * [OK]
+-- trier le GPtrArray par poids du module
 
 - ajouter scan d'un fichier en utilisant libmagic (retrouver la liste des magic_file dans fix-extension.sh) [OK]
 
@@ -19,7 +32,4 @@
 
 - ajouter scan récursif d'un directory (en utilisant src/dir.c)
 -- première version sans multi-thread [OK]
--- création du pool de threads
--- lancement d'un scan de fichier dans un thread
 
-- ajouter structure rapport

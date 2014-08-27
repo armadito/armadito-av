@@ -1,3 +1,9 @@
+2014-08-27  François Déchelle  <francois@dechelle.net>
+
+	* added UMWSU_SUSPICIOUS to enum umwsu_status, changed scan function and modules
+
+	* added extern "C" for C++ compilation
+
 2014-08-11  François Déchelle  <francois@dechelle.net>
 
 	* fixed inconsistent naming

@@ -157,12 +157,17 @@ enum umwsu_status umwsu_scan_file(struct umwsu *u, const char *path)
 
     for (i = 0; i < mod_array->len; i++) {
       struct umwsu_module *mod = (struct umwsu_module *)g_ptr_array_index(mod_array, i);
+      enum umwsu_status mod_status;
 
       printf("UMWSU: module %s: scanning %s\n", mod->name, path);
 
-      status = (*mod->scan)(path, mod->data);
+      mod_status = (*mod->scan)(path, mod->data);
 
-      if (status != UMWSU_CLEAN)
+      /* transition table should be more complex */
+      if (status == UMWSU_CLEAN && mod_status != UMWSU_CLEAN)
+	status = mod_status;
+
+      if (mod_status == UMWSU_MALWARE)
 	break;
     }
   }
@@ -191,6 +196,7 @@ const char *umwsu_status_str(enum umwsu_status status)
   switch(status) {
 #define M(S) case S: return #S
     M(UMWSU_CLEAN);
+    M(UMWSU_SUSPICIOUS);
     M(UMWSU_MALWARE);
     M(UMWSU_EINVAL);
     M(UMWSU_IERROR);
