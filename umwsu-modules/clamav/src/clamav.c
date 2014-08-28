@@ -2,7 +2,8 @@
 
 #include <assert.h>
 #include <clamav.h>
-#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 #include <stdio.h>
 
 const char *clamav_mime_types[] = {
@@ -15,7 +16,7 @@ struct clamav_data {
   struct cl_engine *clamav_engine;
 };
 
-enum umwsu_status clamav_scan(const char *path, void *mod_data)
+enum umwsu_status clamav_scan(const char *path, void *mod_data, char **pmod_report)
 {
   struct clamav_data *cl_data = (struct clamav_data *)mod_data;
   const char *virus_name = NULL;
@@ -26,9 +27,9 @@ enum umwsu_status clamav_scan(const char *path, void *mod_data)
 
   if (cl_scan_status == CL_VIRUS) {
     fprintf(stderr, "%s is infected by virus %s!\n", path, virus_name);
+    *pmod_report = strdup(virus_name);
+
     return UMWSU_MALWARE;
-  } else {
-    fprintf(stderr, "%s is not infected by a virus!\n", path);
   }
 
   return UMWSU_CLEAN;
