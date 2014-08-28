@@ -1,6 +1,8 @@
 #ifndef _LIBUMWSU_STATUS_H_
 #define _LIBUMWSU_STATUS_H_
 
+#include <stdio.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -15,17 +17,16 @@ enum umwsu_status {
 };
 
 const char *umwsu_status_str(enum umwsu_status status);
+const char *umwsu_status_pretty_str(enum umwsu_status status);
 
 struct umwsu_report {
   enum umwsu_status status;
   char *path;
-  char *module_name;
-  char *module_report;
+  char *mod_name;
+  char *mod_report;
 };
 
-struct umwsu_report umwsu_report_new(enum umwsu_status status, char *path, char *module_name, char *module_report);
-
-void umwsu_report_free(struct umwsu_report *report);
+void umwsu_report_print(struct umwsu_report *report, FILE *out);
 
 #ifdef __cplusplus
 }

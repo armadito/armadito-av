@@ -1,3 +1,7 @@
+2014-08-28  François Déchelle  <francois@dechelle.net>
+
+	* added struct umwsu_report and detailled reporting from modules
+
 2014-08-27  François Déchelle  <francois@dechelle.net>
 
 	* added verbosity level in struct umwsu

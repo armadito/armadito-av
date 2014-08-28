@@ -3,9 +3,11 @@
 
 #include <stdio.h>
 
+#include <libumwsu/module.h>
+
 struct umwsu_module {
   enum umwsu_mod_status (*init)(void **pmod_data);
-  enum umwsu_status (*scan)(const char *path, void *mod_data);
+  enum umwsu_status (*scan)(const char *path, void *mod_data, char **pmod_report);
   enum umwsu_mod_status (*close)(void *mod_data);
   const char *name;
   const char **mime_types;

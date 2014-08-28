@@ -7,6 +7,7 @@
 #include <glib.h>
 #include <magic.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 
 struct umwsu {
@@ -38,7 +39,7 @@ void umwsu_set_verbose(struct umwsu *u, int verbosity)
   u->verbosity = verbosity;
 }
 
-void umwsu_add_module(struct umwsu *u, struct umwsu_module *mod)
+static void umwsu_add_module(struct umwsu *u, struct umwsu_module *mod)
 {
   g_ptr_array_add(u->modules, mod);
 }
@@ -151,22 +152,6 @@ void umwsu_close(struct umwsu *u)
   magic_close(u->magic);
 }
 
-static enum umwsu_status umwsu_status_max(enum umwsu_status s1, enum umwsu_status s2)
-{
-  if (s1 == UMWSU_MALWARE || s2 == UMWSU_MALWARE)
-    return UMWSU_MALWARE;
-
-  if (s1 == UMWSU_SUSPICIOUS || s2 == UMWSU_SUSPICIOUS)
-    return UMWSU_SUSPICIOUS;
-
-  if (s1 == UMWSU_IERROR || s2 == UMWSU_IERROR)
-    return UMWSU_IERROR;
-
-  assert(s1 == UMWSU_CLEAN && s2 == UMWSU_CLEAN);
-
-  return UMWSU_CLEAN;
-}
-
 static int umwsu_status_cmp(enum umwsu_status s1, enum umwsu_status s2)
 {
   if (s1 == s2)
@@ -195,30 +180,47 @@ enum umwsu_status umwsu_scan_file(struct umwsu *u, const char *path, struct umws
   GPtrArray *mod_array;
   enum umwsu_status current_status = UMWSU_CLEAN;
 
+  report->status = UMWSU_CLEAN;
+  report->path = strdup(path);
+  report->mod_name = NULL;
+  report->mod_report = NULL;
+
   mod_array = (GPtrArray *)g_hash_table_lookup(u->mime_types_table, mime_type);
 
-  if (mod_array == NULL)
+  if (mod_array == NULL) {
     current_status = UMWSU_UNKNOWN_FILE_TYPE;
-  else {
+
+    report->status = current_status;
+  } else {
     int i;
 
     for (i = 0; i < mod_array->len; i++) {
       struct umwsu_module *mod = (struct umwsu_module *)g_ptr_array_index(mod_array, i);
       enum umwsu_status mod_status;
+      char *mod_report = NULL;
 
       if (u->verbosity >= 2)
 	printf("UMWSU: module %s: scanning %s\n", mod->name, path);
 
-      mod_status = (*mod->scan)(path, mod->data);
+      mod_status = (*mod->scan)(path, mod->data, &mod_report);
 
-      current_status = umwsu_status_max(current_status, mod_status);
+      if (umwsu_status_cmp(current_status, mod_status) < 0) {
+	current_status = mod_status;
+
+	report->status = mod_status;
+	report->mod_name = (char *)mod->name;
+	if (report->mod_report != NULL)
+	  free(report->mod_report);
+	report->mod_report = mod_report;
+      } else if (mod_report != NULL)
+	free(mod_report);
 
       if (current_status == UMWSU_MALWARE)
 	break;
     }
   }
 
-  if (u->verbosity >= 1)
+  if (u->verbosity >= 3)
     printf("%s: %s\n", path, umwsu_status_str(current_status));
 
   return current_status;
@@ -227,8 +229,10 @@ enum umwsu_status umwsu_scan_file(struct umwsu *u, const char *path, struct umws
 static void scan_entry(const char *full_path, void *data)
 {
   struct umwsu *u = (struct umwsu *)data;
+  struct umwsu_report report;
 
-  umwsu_scan_file(u, full_path, NULL);
+  umwsu_scan_file(u, full_path, &report);
+  umwsu_report_print(&report, stdout);
 }
 
 enum umwsu_status umwsu_scan_dir(struct umwsu *u, const char *path, int recurse)
@@ -251,4 +255,32 @@ const char *umwsu_status_str(enum umwsu_status status)
   }
 
   return "UNKNOWN STATUS";
+}
+
+const char *umwsu_status_pretty_str(enum umwsu_status status)
+{
+  switch(status) {
+  case UMWSU_CLEAN:
+    return "clean";
+  case UMWSU_SUSPICIOUS:
+    return "suspicious";
+  case UMWSU_MALWARE:
+    return "malware";
+  case UMWSU_EINVAL:
+    return "invalid argument";
+  case UMWSU_IERROR:
+    return "internal error";
+  case UMWSU_UNKNOWN_FILE_TYPE:
+    return "ignored";
+  }
+
+  return "inconnu";
+}
+
+void umwsu_report_print(struct umwsu_report *report, FILE *out)
+{
+  fprintf(out, "%s: %s", report->path, umwsu_status_pretty_str(report->status));
+  if (report->status != UMWSU_CLEAN && report->status != UMWSU_UNKNOWN_FILE_TYPE)
+    fprintf(out, " [%s - %s]", report->mod_name, report->mod_report);
+  fprintf(out, "\n");
 }
