@@ -8,7 +8,7 @@
 #include <errno.h>
 #include <string.h>
 
-int dir_map(const char *path, int recurse, void (*dirent_fun)(const char *full_path, void *data), void *data)
+int dir_map(const char *path, int recurse, void (*dirent_fun)(const char *fpath, const struct dirent *dir_entry, void *data), void *data)
 {
   DIR *d;
   struct dirent entry, *result;
@@ -52,7 +52,7 @@ int dir_map(const char *path, int recurse, void (*dirent_fun)(const char *full_p
       }
     }
 
-    (*dirent_fun)(entry_path, data);
+    (*dirent_fun)(entry_path, &entry, data);
 
     free(entry_path);
   }

@@ -17,6 +17,7 @@ int main(int argc, char **argv)
   struct umwsu *u;
   int argp = 1;
   int recurse = 0;
+  int threaded = 0;
   
   if (argc < 2)
     usage(argc, argv);
@@ -24,6 +25,11 @@ int main(int argc, char **argv)
   if (!strcmp(argv[argp], "-r")) {
     argp++;
     recurse = 1;
+  }
+
+  if (!strcmp(argv[argp], "-t")) {
+    argp++;
+    threaded = 1;
   }
 
   u = umwsu_open();
@@ -43,9 +49,9 @@ int main(int argc, char **argv)
     }
 
     if (S_ISDIR(sb.st_mode))
-      umwsu_scan_dir(u, argv[argp], recurse);
+      umwsu_scan_dir(u, argv[argp], recurse, threaded);
     else {
-      status = umwsu_scan_file(u, argv[argp], &report);
+      status = umwsu_scan_file(u, NULL, argv[argp], &report);
       umwsu_report_print(&report, stdout);
     }
 

@@ -44,7 +44,7 @@ static void umwsu_add_module(struct umwsu *u, struct umwsu_module *mod)
   g_ptr_array_add(u->modules, mod);
 }
 
-static void load_entry(const char *full_path, void *data)
+static void load_entry(const char *full_path, const struct dirent *dir_entry, void *data)
 {
   struct umwsu *u = (struct umwsu *)data;
   const char *t = magic_file(u->magic, full_path);
@@ -174,11 +174,16 @@ static int umwsu_status_cmp(enum umwsu_status s1, enum umwsu_status s2)
 }
 
 
-enum umwsu_status umwsu_scan_file(struct umwsu *u, const char *path, struct umwsu_report *report)
+enum umwsu_status umwsu_scan_file(struct umwsu *u, magic_t magic, const char *path, struct umwsu_report *report)
 {
-  const char *mime_type = magic_file(u->magic, path);
+  const char *mime_type;
   GPtrArray *mod_array;
   enum umwsu_status current_status = UMWSU_CLEAN;
+
+  if (magic == NULL)
+    magic = u->magic;
+
+  mime_type = magic_file(magic, path);
 
   report->status = UMWSU_CLEAN;
   report->path = strdup(path);
@@ -226,18 +231,88 @@ enum umwsu_status umwsu_scan_file(struct umwsu *u, const char *path, struct umws
   return current_status;
 }
 
-static void scan_entry(const char *full_path, void *data)
+struct scan_data {
+  struct umwsu *u;
+  GThreadPool *thread_pool;  
+};
+
+static void magic_destroy_notify(gpointer data)
 {
-  struct umwsu *u = (struct umwsu *)data;
+  magic_close((magic_t)data);
+}
+
+static GPrivate private_magic = G_PRIVATE_INIT(magic_destroy_notify);
+
+static magic_t get_private_magic(void)
+{
+  magic_t m;
+
+  m = (magic_t)g_private_get(&private_magic);
+
+  if (m == NULL) {
+    m = magic_open(MAGIC_MIME_TYPE);
+    magic_load(m, NULL);
+
+    g_private_set(&private_magic, (gpointer)m);
+  }
+
+  return m;
+}
+
+void scan_entry_thread(gpointer data, gpointer user_data)
+{
+  struct umwsu *u = (struct umwsu *)user_data;
+  char *path = (char *)data;
   struct umwsu_report report;
 
-  umwsu_scan_file(u, full_path, &report);
+  umwsu_scan_file(u, get_private_magic(), path, &report);
+  umwsu_report_print(&report, stdout);
+
+  free(path);
+}
+
+static void scan_entry_threaded(const char *full_path, const struct dirent *dir_entry, void *data)
+{
+  struct scan_data *sd = (struct scan_data *)data;
+
+  if (dir_entry->d_type == DT_DIR)
+    return;
+
+  g_thread_pool_push(sd->thread_pool, (gpointer)strdup(full_path), NULL);
+}
+
+static int get_max_threads(void)
+{
+  return 8;
+}
+
+static void scan_entry(const char *full_path, const struct dirent *dir_entry, void *data)
+{
+  struct scan_data *sd = (struct scan_data *)data;
+  struct umwsu_report report;
+
+  if (dir_entry->d_type == DT_DIR)
+    return;
+
+  umwsu_scan_file(sd->u, NULL, full_path, &report);
   umwsu_report_print(&report, stdout);
 }
 
-enum umwsu_status umwsu_scan_dir(struct umwsu *u, const char *path, int recurse)
+enum umwsu_status umwsu_scan_dir(struct umwsu *u, const char *path, int recurse, int threaded)
 {
-  dir_map(path, recurse, scan_entry, u);
+  struct scan_data sd;
+
+  sd.u = u;
+
+  if (threaded) {
+    sd.thread_pool = g_thread_pool_new(scan_entry_thread, u, get_max_threads(), FALSE, NULL);
+
+    dir_map(path, recurse, scan_entry_threaded, &sd);
+
+    g_thread_pool_free(sd.thread_pool, FALSE, TRUE);
+  }
+  else
+    dir_map(path, recurse, scan_entry, &sd);
 
   return UMWSU_CLEAN;
 }

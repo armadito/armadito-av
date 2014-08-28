@@ -1,11 +1,14 @@
-- scan multi-thread
--- création du pool de threads au début du scan de paths multiples
--- lancement d'un scan de fichier dans un thread
--- attente des résultats? première version: g_thread_pool_free(, FALSE, TRUE) pour attendre la fin du traitement de toutes les tâches de scan
 
+- scan multi-thread
+-- création du pool de threads au début du scan de paths multiples [OK]
+-- lancement d'un scan de fichier dans un thread [OK]
+-- attente des résultats? première version: g_thread_pool_free(, FALSE, TRUE) pour attendre la fin du traitement de toutes les tâches de scan [OK]
+
+- ajouter modules de scans: 
+-- module 1
 
 - ajouter structure rapport
--- champs: path, état, rapport du module
+-- champs: path, état, rapport du module [OK]
 -- création du document XML à partir structure rapport
 -- envoi du document XML à l'agent de reporting
 
