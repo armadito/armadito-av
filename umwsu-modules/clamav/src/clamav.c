@@ -26,7 +26,7 @@ enum umwsu_status clamav_scan(const char *path, void *mod_data, char **pmod_repo
   cl_scan_status = cl_scanfile(path, &virus_name, &scanned, cl_data->clamav_engine, CL_SCAN_STDOPT);
 
   if (cl_scan_status == CL_VIRUS) {
-    fprintf(stderr, "%s is infected by virus %s!\n", path, virus_name);
+    /* fprintf(stderr, "%s is infected by virus %s!\n", path, virus_name); */
     *pmod_report = strdup(virus_name);
 
     return UMWSU_MALWARE;
