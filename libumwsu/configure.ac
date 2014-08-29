@@ -37,6 +37,12 @@ if test "$HAVE_GMODULE2" = "no"; then
    AC_MSG_ERROR("cannot find gmodule2 library")
 fi
 
+# check for libxml2
+PKG_CHECK_MODULES(LIBXML2, libxml-2.0, [HAVE_LIBXML2=yes], [HAVE_LIBXML2=no])
+if test "$HAVE_LIBXML2" = "no"; then
+   AC_MSG_ERROR("cannot find libxml2 library")
+fi
+
 # documentation
 # check for asciidoc and a2x
 AC_PATH_PROG(ASCIIDOC, asciidoc)

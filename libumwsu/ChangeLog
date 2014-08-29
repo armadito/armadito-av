@@ -1,3 +1,7 @@
+2014-08-29  François Déchelle  <francois@dechelle.net>
+
+	* moved status and report functions to own file
+
 2014-08-28  François Déchelle  <francois@dechelle.net>
 
 	* implemented and tested multi-threaded version of directory scan

@@ -2,6 +2,7 @@
 #include <libumwsu/scan.h>
 #include "dir.h"
 #include "modulep.h"
+#include "statusp.h"
 
 #include <assert.h>
 #include <glib.h>
@@ -152,49 +153,27 @@ void umwsu_close(struct umwsu *u)
   magic_close(u->magic);
 }
 
-static int umwsu_status_cmp(enum umwsu_status s1, enum umwsu_status s2)
-{
-  if (s1 == s2)
-    return 0;
-
-  switch(s1) {
-  case UMWSU_CLEAN:
-    return -1;
-  case UMWSU_IERROR:
-    return (s2 == UMWSU_CLEAN) ? 1 : -1;
-  case UMWSU_SUSPICIOUS:
-    return (s2 == UMWSU_CLEAN || s2 == UMWSU_IERROR) ? 1 : -1;
-  case UMWSU_MALWARE:
-    return 1;
-  }
-
-  assert(1 == 0);
-
-  return 0;
-}
-
-
-enum umwsu_status umwsu_scan_file(struct umwsu *u, magic_t magic, const char *path, struct umwsu_report *report)
+static GPtrArray *get_applicable_modules(struct umwsu *u, magic_t magic, const char *path)
 {
   const char *mime_type;
-  GPtrArray *mod_array;
-  enum umwsu_status current_status = UMWSU_CLEAN;
 
   if (magic == NULL)
     magic = u->magic;
 
   mime_type = magic_file(magic, path);
 
-  report->status = UMWSU_CLEAN;
-  report->path = strdup(path);
-  report->mod_name = NULL;
-  report->mod_report = NULL;
+  return (GPtrArray *)g_hash_table_lookup(u->mime_types_table, mime_type);
+}
 
-  mod_array = (GPtrArray *)g_hash_table_lookup(u->mime_types_table, mime_type);
+enum umwsu_status umwsu_scan_file(struct umwsu *u, magic_t magic, const char *path, struct umwsu_report *report)
+{
+  GPtrArray *mod_array = get_applicable_modules(u, magic, path);
+  enum umwsu_status current_status = UMWSU_CLEAN;
+
+  umwsu_report_init(report, path);
 
   if (mod_array == NULL) {
     current_status = UMWSU_UNKNOWN_FILE_TYPE;
-
     report->status = current_status;
   } else {
     int i;
@@ -211,12 +190,7 @@ enum umwsu_status umwsu_scan_file(struct umwsu *u, magic_t magic, const char *pa
 
       if (umwsu_status_cmp(current_status, mod_status) < 0) {
 	current_status = mod_status;
-
-	report->status = mod_status;
-	report->mod_name = (char *)mod->name;
-	if (report->mod_report != NULL)
-	  free(report->mod_report);
-	report->mod_report = mod_report;
+	umwsu_report_change(report, mod_status, (char *)mod->name, mod_report);
       } else if (mod_report != NULL)
 	free(mod_report);
 
@@ -241,6 +215,11 @@ static void magic_destroy_notify(gpointer data)
   magic_close((magic_t)data);
 }
 
+/*
+  Unfortunately, libmagic is not thread-safe.
+  So we create a new magic_t for each thread, and keep it 
+  in thread's private data, so that it is created only once.
+ */
 static GPrivate private_magic = G_PRIVATE_INIT(magic_destroy_notify);
 
 static magic_t get_private_magic(void)
@@ -286,7 +265,7 @@ static int get_max_threads(void)
   return 8;
 }
 
-static void scan_entry(const char *full_path, const struct dirent *dir_entry, void *data)
+static void scan_entry_non_threaded(const char *full_path, const struct dirent *dir_entry, void *data)
 {
   struct scan_data *sd = (struct scan_data *)data;
   struct umwsu_report report;
@@ -312,50 +291,8 @@ enum umwsu_status umwsu_scan_dir(struct umwsu *u, const char *path, int recurse,
     g_thread_pool_free(sd.thread_pool, FALSE, TRUE);
   }
   else
-    dir_map(path, recurse, scan_entry, &sd);
+    dir_map(path, recurse, scan_entry_non_threaded, &sd);
 
   return UMWSU_CLEAN;
 }
 
-const char *umwsu_status_str(enum umwsu_status status)
-{
-  switch(status) {
-#define M(S) case S: return #S
-    M(UMWSU_CLEAN);
-    M(UMWSU_SUSPICIOUS);
-    M(UMWSU_MALWARE);
-    M(UMWSU_EINVAL);
-    M(UMWSU_IERROR);
-    M(UMWSU_UNKNOWN_FILE_TYPE);
-  }
-
-  return "UNKNOWN STATUS";
-}
-
-const char *umwsu_status_pretty_str(enum umwsu_status status)
-{
-  switch(status) {
-  case UMWSU_CLEAN:
-    return "clean";
-  case UMWSU_SUSPICIOUS:
-    return "suspicious";
-  case UMWSU_MALWARE:
-    return "malware";
-  case UMWSU_EINVAL:
-    return "invalid argument";
-  case UMWSU_IERROR:
-    return "internal error";
-  case UMWSU_UNKNOWN_FILE_TYPE:
-    return "ignored";
-  }
-
-  return "inconnu";
-}
-
-void umwsu_report_print(struct umwsu_report *report, FILE *out)
-{
-  fprintf(out, "%s: %s", report->path, umwsu_status_pretty_str(report->status));
-  if (report->status != UMWSU_CLEAN && report->status != UMWSU_UNKNOWN_FILE_TYPE)
-    fprintf(out, " [%s - %s]", report->mod_name, report->mod_report);
-  fprintf(out, "\n");
-}
