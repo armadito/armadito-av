@@ -15,6 +15,7 @@ struct umwsu {
   int verbosity;
   GHashTable *mime_types_table;
   GPtrArray *modules;
+  GSList *scan_callbacks;
   magic_t magic;
 };
 
@@ -31,6 +32,7 @@ static struct umwsu *umwsu_new(void)
 
   u->mime_types_table = g_hash_table_new(g_str_hash, g_str_equal);
   u->modules = g_ptr_array_new();
+  u->scan_callbacks = NULL;
 
   return u;
 }
@@ -205,21 +207,17 @@ enum umwsu_status umwsu_scan_file(struct umwsu *u, magic_t magic, const char *pa
   return current_status;
 }
 
-struct scan_data {
-  struct umwsu *u;
-  GThreadPool *thread_pool;  
-};
+/*
+  Unfortunately, libmagic is not thread-safe.
+  We create a new magic_t for each thread, and keep it 
+  in thread's private data, so that it is created only once.
+ */
 
 static void magic_destroy_notify(gpointer data)
 {
   magic_close((magic_t)data);
 }
 
-/*
-  Unfortunately, libmagic is not thread-safe.
-  So we create a new magic_t for each thread, and keep it 
-  in thread's private data, so that it is created only once.
- */
 static GPrivate private_magic = G_PRIVATE_INIT(magic_destroy_notify);
 
 static magic_t get_private_magic(void)
@@ -246,9 +244,15 @@ void scan_entry_thread(gpointer data, gpointer user_data)
 
   umwsu_scan_file(u, get_private_magic(), path, &report);
   umwsu_report_print(&report, stdout);
+  umwsu_report_destroy(&report);
 
   free(path);
 }
+
+struct scan_data {
+  struct umwsu *u;
+  GThreadPool *thread_pool;  
+};
 
 static void scan_entry_threaded(const char *full_path, const struct dirent *dir_entry, void *data)
 {
@@ -258,11 +262,6 @@ static void scan_entry_threaded(const char *full_path, const struct dirent *dir_
     return;
 
   g_thread_pool_push(sd->thread_pool, (gpointer)strdup(full_path), NULL);
-}
-
-static int get_max_threads(void)
-{
-  return 8;
 }
 
 static void scan_entry_non_threaded(const char *full_path, const struct dirent *dir_entry, void *data)
@@ -275,6 +274,12 @@ static void scan_entry_non_threaded(const char *full_path, const struct dirent *
 
   umwsu_scan_file(sd->u, NULL, full_path, &report);
   umwsu_report_print(&report, stdout);
+  umwsu_report_destroy(&report);
+}
+
+static int get_max_threads(void)
+{
+  return 8;
 }
 
 enum umwsu_status umwsu_scan_dir(struct umwsu *u, const char *path, int recurse, int threaded)

@@ -1,5 +1,7 @@
 2014-08-29  François Déchelle  <francois@dechelle.net>
 
+	* adding XML report generation; in progress
+
 	* moved status and report functions to own file
 
 2014-08-28  François Déchelle  <francois@dechelle.net>

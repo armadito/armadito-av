@@ -22,6 +22,10 @@ enum umwsu_status umwsu_scan_file(struct umwsu *umwsu_handle, magic_t magic, con
 
 enum umwsu_status umwsu_scan_dir(struct umwsu *umwsu_handle, const char *path, int recurse, int threaded);
 
+typedef void (*umwsu_scan_callback_t)(struct umwsu_report *report, void *user_data);
+
+void umwsu_add_scan_callback(struct umwsu *umwsu_handle, umwsu_scan_callback_t callback, void *user_data);
+
 #ifdef __cplusplus
 }
 #endif
