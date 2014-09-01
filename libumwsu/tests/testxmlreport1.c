@@ -4,6 +4,12 @@
 #include <libxml/tree.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <ifaddrs.h>
+#include <time.h>
 
 static xmlDocPtr document_new(void)
 {
@@ -20,17 +26,90 @@ static xmlDocPtr document_new(void)
   return doc;
 }
 
+static void get_ip_addr(char *ip_addr)
+{
+  struct ifaddrs *ifaddr, *ifa;
+
+  if (getifaddrs(&ifaddr) == -1) {
+    perror("getifaddrs");
+    exit(EXIT_FAILURE);
+  }
+
+  for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+    if (ifa->ifa_addr == NULL)
+      continue;
+
+    if (ifa->ifa_addr->sa_family == AF_INET || ifa->ifa_addr->sa_family == AF_INET6) {
+      int s;
+      char mask[NI_MAXHOST];
+
+      s = getnameinfo(ifa->ifa_netmask,
+		      (ifa->ifa_addr->sa_family == AF_INET) ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
+		      mask, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+      if (s != 0) {
+	printf("getnameinfo() failed: %s\n", gai_strerror(s));
+	exit(EXIT_FAILURE);
+      }
+
+      if (strcmp(mask, "255.0.0.0") == 0)
+	continue;
+
+      /* printf("\tmask: <%s>\n", mask); */
+
+      s = getnameinfo(ifa->ifa_addr,
+		      (ifa->ifa_addr->sa_family == AF_INET) ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
+		      ip_addr, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+      if (s != 0) {
+	printf("getnameinfo() failed: %s\n", gai_strerror(s));
+	exit(EXIT_FAILURE);
+      }
+
+      /* printf("\taddress: <%s>\n", ip_addr); */
+
+      return;
+    }
+  }
+
+  freeifaddrs(ifaddr);
+}
+
 static xmlNodePtr document_identification_node(void)
 {
   xmlNodePtr node;
+  char hostname[HOST_NAME_MAX + 1];
+  char ip_addr[NI_MAXHOST];
 
   node = xmlNewNode(NULL, "identification");
 
   xmlNewChild(node, NULL, "user", getenv("USER"));
+  gethostname(hostname, HOST_NAME_MAX + 1);
+  xmlNewChild(node, NULL, "hostname", hostname);
+  get_ip_addr(ip_addr);
+  xmlNewChild(node, NULL, "ip", ip_addr);
   xmlNewChild(node, NULL, "os", "Linux");
 
   return node;
 }
+
+static xmlNodePtr document_gdh_node(void)
+{
+  xmlNodePtr node;
+  time_t t;
+  struct tm l_tm;
+  char buff[32];
+
+  node = xmlNewNode(NULL, "gdh");
+
+  time(&t);
+  localtime_r(&t, &l_tm);
+
+  snprintf(buff, sizeof(buff) - 1, "%04d-%02d-%02dT%02d:%02d:%02d", 1900 + l_tm.tm_year, l_tm.tm_mon, l_tm.tm_mday, l_tm.tm_hour, l_tm.tm_min, l_tm.tm_sec);
+  /* xmlAddChild(node, xmlNewText("2001-12-31T12:00:00")); */
+  xmlAddChild(node, xmlNewText(buff));
+
+  return node;
+}
+
 
 static void document_add_alert(xmlDocPtr doc, struct umwsu_report *report)
 {
@@ -41,7 +120,7 @@ static void document_add_alert(xmlDocPtr doc, struct umwsu_report *report)
   xmlNewChild(alert_node, NULL, "level", "2");
   node = xmlNewChild(alert_node, NULL, "uri", report->path);
   xmlNewProp(node, "type", "path");
-  xmlNewChild(alert_node, NULL, "gdh", "2001-12-31T12:00:00");
+  xmlAddChild(alert_node, document_gdh_node());
   xmlAddChild(alert_node, document_identification_node());
   xmlNewChild(alert_node, NULL, "module", report->mod_name);
   xmlNewChild(alert_node, NULL, "module_specific", report->mod_report);
