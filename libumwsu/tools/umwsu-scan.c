@@ -39,9 +39,9 @@ int main(int argc, char **argv)
   umwsu_print(u);
 
   while (argp < argc) {
+#if 0
     struct stat sb;
     enum umwsu_status status;
-    struct umwsu_report report;
 
     if (stat(argv[argp], &sb) == -1) {
       perror("stat");
@@ -49,11 +49,13 @@ int main(int argc, char **argv)
     }
 
     if (S_ISDIR(sb.st_mode))
-      umwsu_scan_dir(u, argv[argp], recurse, threaded);
+#endif
+      umwsu_scan_dir(u, argv[argp], recurse, threaded, NULL, NULL);
+#if 0
     else {
-      status = umwsu_scan_file(u, NULL, argv[argp], &report);
-      umwsu_report_print(&report, stdout);
+      status = umwsu_scan_file(u, NULL, argv[argp], NULL, NULL);
     }
+#endif
 
     argp++;
   }

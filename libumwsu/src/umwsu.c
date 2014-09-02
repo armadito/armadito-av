@@ -15,9 +15,81 @@ struct umwsu {
   int verbosity;
   GHashTable *mime_types_table;
   GPtrArray *modules;
-  GSList *scan_callbacks;
   magic_t magic;
+  GSList *scan_callbacks;
 };
+
+#define MAX_CALLBACKS 4
+
+struct umwsu_scan {
+  struct umwsu *u;
+  GThreadPool *thread_pool;  
+  int callback_count;
+  struct {
+    umwsu_scan_callback_t callback;
+    void *callback_data;
+  } callbacks[MAX_CALLBACKS];
+};
+
+void scan_entry_thread(gpointer data, gpointer user_data);
+
+static void umwsu_scan_add_callback(struct umwsu_scan *sd, umwsu_scan_callback_t callback, void **callback_data)
+{
+  assert(sd->callback_count < MAX_CALLBACKS);
+
+  sd->callbacks[sd->callback_count].callback = callback;
+  sd->callbacks[sd->callback_count].callback_data = callback_data;
+
+  sd->callback_count++;
+}
+
+static int get_max_threads(void)
+{
+  return 8;
+}
+
+static struct umwsu_scan *umwsu_scan_new(struct umwsu *u, int threaded, umwsu_scan_callback_t callback, void *callback_data)
+{
+  struct umwsu_scan *sd;
+
+  sd = (struct umwsu_scan *)malloc(sizeof(struct umwsu_scan));
+
+  sd->u = u;
+  if (threaded)
+    sd->thread_pool = g_thread_pool_new(scan_entry_thread, u, get_max_threads(), FALSE, NULL);
+  else
+    sd->thread_pool = NULL;
+
+  sd->callback_count = 0;
+  
+#if 0
+  umwsu_scan_add_callback(sd, scan_print_callback, NULL);
+  umwsu_scan_add_callback(sd, xml_report_callback, umwsu_report_xml_new());
+#endif
+  umwsu_scan_add_callback(sd, callback, callback_data);
+
+  return sd;
+}
+
+static void umwsu_scan_call_callbacks(struct umwsu_scan *sd, struct umwsu_report *report)
+{
+  int i;
+
+  for(i = 0; i < sd->callback_count; i++) {
+    umwsu_scan_callback_t callback = sd->callbacks[i].callback;
+
+    (*callback)(sd->u, report, sd->callbacks[i].callback_data);
+  }
+}
+
+static void umwsu_scan_free(struct umwsu_scan *sd)
+{
+  if (sd->thread_pool != NULL)
+    g_thread_pool_free(sd->thread_pool, FALSE, TRUE);
+
+  free(sd);
+}
+
 
 static struct umwsu *umwsu_new(void)
 {
@@ -167,16 +239,17 @@ static GPtrArray *get_applicable_modules(struct umwsu *u, magic_t magic, const c
   return (GPtrArray *)g_hash_table_lookup(u->mime_types_table, mime_type);
 }
 
-enum umwsu_status umwsu_scan_file(struct umwsu *u, magic_t magic, const char *path, struct umwsu_report *report)
+enum umwsu_status umwsu_scan_file(struct umwsu *u, magic_t magic, const char *path)
 {
   GPtrArray *mod_array = get_applicable_modules(u, magic, path);
   enum umwsu_status current_status = UMWSU_CLEAN;
+  struct umwsu_report report;
 
-  umwsu_report_init(report, path);
+  umwsu_report_init(&report, path);
 
   if (mod_array == NULL) {
     current_status = UMWSU_UNKNOWN_FILE_TYPE;
-    report->status = current_status;
+    report.status = current_status;
   } else {
     int i;
 
@@ -192,7 +265,7 @@ enum umwsu_status umwsu_scan_file(struct umwsu *u, magic_t magic, const char *pa
 
       if (umwsu_status_cmp(current_status, mod_status) < 0) {
 	current_status = mod_status;
-	umwsu_report_change(report, mod_status, (char *)mod->name, mod_report);
+	umwsu_report_change(&report, mod_status, (char *)mod->name, mod_report);
       } else if (mod_report != NULL)
 	free(mod_report);
 
@@ -203,6 +276,13 @@ enum umwsu_status umwsu_scan_file(struct umwsu *u, magic_t magic, const char *pa
 
   if (u->verbosity >= 3)
     printf("%s: %s\n", path, umwsu_status_str(current_status));
+
+  umwsu_report_print(&report, stdout);
+
+  /* call the callbacks here */
+  /* ... */
+
+  umwsu_report_destroy(&report);
 
   return current_status;
 }
@@ -240,23 +320,15 @@ void scan_entry_thread(gpointer data, gpointer user_data)
 {
   struct umwsu *u = (struct umwsu *)user_data;
   char *path = (char *)data;
-  struct umwsu_report report;
 
-  umwsu_scan_file(u, get_private_magic(), path, &report);
-  umwsu_report_print(&report, stdout);
-  umwsu_report_destroy(&report);
+  umwsu_scan_file(u, get_private_magic(), path);
 
   free(path);
 }
 
-struct scan_data {
-  struct umwsu *u;
-  GThreadPool *thread_pool;  
-};
-
 static void scan_entry_threaded(const char *full_path, const struct dirent *dir_entry, void *data)
 {
-  struct scan_data *sd = (struct scan_data *)data;
+  struct umwsu_scan *sd = (struct umwsu_scan *)data;
 
   if (dir_entry->d_type == DT_DIR)
     return;
@@ -266,37 +338,23 @@ static void scan_entry_threaded(const char *full_path, const struct dirent *dir_
 
 static void scan_entry_non_threaded(const char *full_path, const struct dirent *dir_entry, void *data)
 {
-  struct scan_data *sd = (struct scan_data *)data;
-  struct umwsu_report report;
+  struct umwsu_scan *sd = (struct umwsu_scan *)data;
 
   if (dir_entry->d_type == DT_DIR)
     return;
 
-  umwsu_scan_file(sd->u, NULL, full_path, &report);
-  umwsu_report_print(&report, stdout);
-  umwsu_report_destroy(&report);
+  umwsu_scan_file(sd->u, NULL, full_path);
 }
 
-static int get_max_threads(void)
+enum umwsu_status umwsu_scan_dir(struct umwsu *u, const char *path, int recurse, int threaded, umwsu_scan_callback_t callback, void **callback_data )
 {
-  return 8;
-}
+  struct umwsu_scan *sd;
 
-enum umwsu_status umwsu_scan_dir(struct umwsu *u, const char *path, int recurse, int threaded)
-{
-  struct scan_data sd;
+  sd = umwsu_scan_new(u, threaded, callback, callback_data);
 
-  sd.u = u;
+  dir_map(path, recurse, (threaded) ? scan_entry_threaded : scan_entry_non_threaded, &sd);
 
-  if (threaded) {
-    sd.thread_pool = g_thread_pool_new(scan_entry_thread, u, get_max_threads(), FALSE, NULL);
-
-    dir_map(path, recurse, scan_entry_threaded, &sd);
-
-    g_thread_pool_free(sd.thread_pool, FALSE, TRUE);
-  }
-  else
-    dir_map(path, recurse, scan_entry_non_threaded, &sd);
+  umwsu_scan_free(sd);
 
   return UMWSU_CLEAN;
 }

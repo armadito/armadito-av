@@ -1,15 +1,25 @@
-#include <libumwsu/status.h>
+#include <libumwsu/scan.h>
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+#include <libxml/xmlsave.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/un.h>
 #include <netdb.h>
 #include <ifaddrs.h>
 #include <time.h>
+#include <glib.h>
+#include <assert.h>
+
+struct alert_data {
+  xmlDocPtr xml_doc;
+  GMutex doc_lock;
+};
 
 static void get_ip_addr(char *ip_addr)
 {
@@ -39,8 +49,6 @@ static void get_ip_addr(char *ip_addr)
       if (strcmp(mask, "255.0.0.0") == 0)
 	continue;
 
-      /* printf("\tmask: <%s>\n", mask); */
-
       s = getnameinfo(ifa->ifa_addr,
 		      (ifa->ifa_addr->sa_family == AF_INET) ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
 		      ip_addr, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
@@ -49,8 +57,6 @@ static void get_ip_addr(char *ip_addr)
 	exit(EXIT_FAILURE);
       }
 
-      /* printf("\taddress: <%s>\n", ip_addr); */
-
       return;
     }
   }
@@ -58,7 +64,7 @@ static void get_ip_addr(char *ip_addr)
   freeifaddrs(ifaddr);
 }
 
-static xmlNodePtr document_identification_node(void)
+static xmlNodePtr alert_doc_identification_node(void)
 {
   xmlNodePtr node;
   char hostname[HOST_NAME_MAX + 1];
@@ -76,7 +82,7 @@ static xmlNodePtr document_identification_node(void)
   return node;
 }
 
-static xmlNodePtr document_gdh_node(void)
+static xmlNodePtr alert_doc_gdh_node(void)
 {
   xmlNodePtr node;
   time_t t;
@@ -96,10 +102,12 @@ static xmlNodePtr document_gdh_node(void)
   return node;
 }
 
-xmlDocPtr document_new(void)
+static xmlDocPtr alert_doc_new(void)
 {
   xmlDocPtr doc;
   xmlNodePtr root_node;
+
+  LIBXML_TEST_VERSION;
 
   doc = xmlNewDoc("1.0");
   root_node = xmlNewNode(NULL, "alert_set");
@@ -108,13 +116,13 @@ xmlDocPtr document_new(void)
   xmlNewProp(root_node, "xsi:schemaLocation", "http://www.davfi-project.org/AlertSchema AlertSchema.xsd ");
   xmlDocSetRootElement(doc, root_node);
 
-  xmlAddChild(root_node, document_identification_node());
-  xmlAddChild(root_node, document_gdh_node());
+  xmlAddChild(root_node, alert_doc_identification_node());
+  xmlAddChild(root_node, alert_doc_gdh_node());
 
   return doc;
 }
 
-void document_add_alert(xmlDocPtr doc, struct umwsu_report *report)
+static void alert_doc_add_alert(xmlDocPtr doc, struct umwsu_report *report)
 {
   xmlNodePtr alert_node, node;
 
@@ -127,43 +135,109 @@ void document_add_alert(xmlDocPtr doc, struct umwsu_report *report)
   xmlNewChild(alert_node, NULL, "module_specific", report->mod_report);
 }
 
-void document_save(xmlDocPtr doc, const char *filename)
+static void alert_doc_save(xmlDocPtr doc, const char *filename)
 {
   xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
 }
 
-void document_free(xmlDocPtr doc)
+static void alert_doc_free(xmlDocPtr doc)
 {
   xmlFreeDoc(doc);
 }
  
-static void report_fill(struct umwsu_report *report, enum umwsu_status status, const char *path, const char *mod_name, const char *mod_report)
+static struct alert_data *alert_data_new(void)
 {
-  report->status = status;
-  report->path = (char *)path;
-  report->mod_name = (char *)mod_name;
-  report->mod_report = (char *)mod_report;
+  struct alert_data *ad;
+
+  ad = (struct alert_data *)malloc(sizeof(struct alert_data));
+  assert(ad != NULL);
+
+  ad->xml_doc = NULL;
+
+  g_mutex_init(&ad->doc_lock);
 }
 
-int main(int argc, char **argv)
+static void alert_data_add(struct alert_data *ad, struct umwsu_report *report)
 {
-  xmlDocPtr doc;
-  struct umwsu_report report;
+  if (report->status == UMWSU_CLEAN || report->status == UMWSU_UNKNOWN_FILE_TYPE)
+    return;
 
-  LIBXML_TEST_VERSION;
+  g_mutex_lock(&ad->doc_lock);
 
-  doc = document_new();
+  if (ad->xml_doc == NULL)
+    ad->xml_doc = alert_doc_new();
 
-  report_fill(&report, UMWSU_MALWARE, "/home/francois/zob", "module_pi", "virus de la grippe");
-  document_add_alert(doc, &report);
-  report_fill(&report, UMWSU_SUSPICIOUS, "/home/francois/zobi", "module_e", "virus de la chtouille");
-  document_add_alert(doc, &report);
+  alert_doc_add_alert(ad->xml_doc, report);
 
-  document_save(doc, argc > 1 ? argv[1] : "-");
-
-  document_free(doc);
-
-  xmlCleanupParser();
-
-  return 0;
+  g_mutex_unlock(&ad->doc_lock);
 }
+
+static int connect_socket(const char *path)
+{
+  int fd;
+  struct sockaddr_un server_addr;
+
+  fd = socket( AF_UNIX, SOCK_STREAM, 0);
+  if (fd < 0) {
+    perror("socket() failed");
+    return -1;
+  }
+
+  server_addr.sun_family = AF_UNIX;
+  strcpy(server_addr.sun_path, path);
+
+  if (connect(fd, (struct sockaddr *)&server_addr, sizeof(struct sockaddr_un)) < 0) {
+    close(fd);
+    perror("connecting stream socket");
+    return -1;
+  }
+
+  return fd;
+}
+
+#define ALERT_SOCKET_PATH "/var/tmp/davfi_alert.s"
+
+static void alert_data_send_and_free(struct alert_data *ad)
+{
+  int fd;
+				
+  fd = connect_socket(ALERT_SOCKET_PATH);
+  if (fd != -1) {
+    xmlSaveCtxtPtr xmlCtxt = xmlSaveToFd(fd, "UTF-8", XML_SAVE_FORMAT);
+
+    if (xmlCtxt != NULL) {
+      xmlSaveDoc(xmlCtxt, ad->xml_doc);
+      xmlSaveClose(xmlCtxt);
+    }
+
+    close(fd);
+  }
+
+  xmlFreeDoc(ad->xml_doc);
+
+  g_mutex_clear(&ad->doc_lock);
+
+  free(ad);
+}
+
+void umwsu_alert_callback(struct umwsu *u, /* enum umwsu_event_type event_type, */ struct umwsu_report *report, void **callback_data)
+{
+  struct alert_data **ad = (struct alert_data **)callback_data;
+
+#if 0
+  switch(event_type) {
+  case UMWSU_SCAN_START:
+    *ad = alert_data_new();
+    break;
+  case UMWSU_SCAN_START:
+    alert_data_add(*ad, report);
+    break;
+  case UMWSU_SCAN_END:
+    alert_data_send_and_free(*ad);
+    *ad = NULL;
+    break;
+  }
+#endif
+
+}
+

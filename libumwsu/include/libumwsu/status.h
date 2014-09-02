@@ -19,15 +19,6 @@ enum umwsu_status {
 const char *umwsu_status_str(enum umwsu_status status);
 const char *umwsu_status_pretty_str(enum umwsu_status status);
 
-struct umwsu_report {
-  enum umwsu_status status;
-  char *path;
-  char *mod_name;
-  char *mod_report;
-};
-
-void umwsu_report_print(struct umwsu_report *report, FILE *out);
-
 #ifdef __cplusplus
 }
 #endif

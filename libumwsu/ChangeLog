@@ -1,3 +1,7 @@
+2014-09-02  François Déchelle  <francois@dechelle.net>
+
+	* adding XML report sending to socket; in progress
+
 2014-08-29  François Déchelle  <francois@dechelle.net>
 
 	* adding XML report generation; in progress
