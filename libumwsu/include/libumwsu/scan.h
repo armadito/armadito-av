@@ -15,6 +15,8 @@ struct umwsu *umwsu_open(void);
 
 void umwsu_set_verbose(struct umwsu *u, int verbosity);
 
+int umwsu_get_verbose(struct umwsu *u);
+
 void umwsu_print(struct umwsu *u);
 
 void umwsu_close(struct umwsu *u);
@@ -24,7 +26,7 @@ enum umwsu_scan_flags {
   UMWSU_SCAN_RECURSE = 2,
 };
 
-struct umwsu_scan umwsu_scan_new(struct umwsu *umwsu_handle, const char *path, enum umwsu_scan_flags flags);
+struct umwsu_scan *umwsu_scan_new(struct umwsu *umwsu_handle, const char *path, enum umwsu_scan_flags flags);
 
 typedef void (*umwsu_scan_callback_t)(struct umwsu_report *report, void *callback_data);
 

@@ -31,14 +31,8 @@ static struct umwsu *umwsu_new(void)
 
   u->mime_types_table = g_hash_table_new(g_str_hash, g_str_equal);
   u->modules = g_ptr_array_new();
-  u->scan_callbacks = NULL;
 
   return u;
-}
-
-void umwsu_set_verbose(struct umwsu *u, int verbosity)
-{
-  u->verbosity = verbosity;
 }
 
 static void umwsu_add_module(struct umwsu *u, struct umwsu_module *mod)
@@ -127,13 +121,23 @@ struct umwsu *umwsu_open(void)
   return u;
 }
 
+void umwsu_set_verbose(struct umwsu *u, int verbosity)
+{
+  u->verbosity = verbosity;
+}
+
+int umwsu_get_verbose(struct umwsu *u)
+{
+  return u->verbosity;
+}
+
 static void mod_print_name(gpointer data, gpointer user_data)
 {
   struct umwsu_module *mod = (struct umwsu_module *)data;
   printf("%s ", mod->name);
 }
 
-void print_mime_type_entry(gpointer key, gpointer value, gpointer user_data)
+static void print_mime_type_entry(gpointer key, gpointer value, gpointer user_data)
 {
   printf("UMWSU: MIME type: %s handled by module: ", (char *)key);
   g_ptr_array_foreach((GPtrArray *)value, mod_print_name, NULL);
@@ -149,12 +153,7 @@ void umwsu_print(struct umwsu *u)
   g_hash_table_foreach(u->mime_types_table, print_mime_type_entry, NULL);
 }
 
-void umwsu_close(struct umwsu *u)
-{
-  magic_close(u->magic);
-}
-
-static GPtrArray *get_applicable_modules(struct umwsu *u, magic_t magic, const char *path)
+GPtrArray *umwsu_get_applicable_modules(struct umwsu *u, magic_t magic, const char *path)
 {
   const char *mime_type;
 
@@ -164,5 +163,10 @@ static GPtrArray *get_applicable_modules(struct umwsu *u, magic_t magic, const c
   mime_type = magic_file(magic, path);
 
   return (GPtrArray *)g_hash_table_lookup(u->mime_types_table, mime_type);
+}
+
+void umwsu_close(struct umwsu *u)
+{
+  magic_close(u->magic);
 }
 

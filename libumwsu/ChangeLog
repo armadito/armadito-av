@@ -1,3 +1,7 @@
+2014-09-03  François Déchelle  <francois@dechelle.net>
+
+	* finished implementation of callbacks; compiles ok
+
 2014-09-02  François Déchelle  <francois@dechelle.net>
 
 	* adding XML report sending to socket; in progress
