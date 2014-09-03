@@ -22,8 +22,8 @@ void umwsu_print(struct umwsu *u);
 void umwsu_close(struct umwsu *u);
 
 enum umwsu_scan_flags {
-  UMWSU_SCAN_THREADED = 1,
-  UMWSU_SCAN_RECURSE = 2,
+  UMWSU_SCAN_THREADED   = 1 << 0,
+  UMWSU_SCAN_RECURSE    = 1 << 1,
 };
 
 struct umwsu_scan *umwsu_scan_new(struct umwsu *umwsu_handle, const char *path, enum umwsu_scan_flags flags);

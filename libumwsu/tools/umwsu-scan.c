@@ -2,9 +2,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
 static void usage(int argc, char **argv)
 {
@@ -15,22 +12,25 @@ static void usage(int argc, char **argv)
 int main(int argc, char **argv)
 {
   struct umwsu *u;
+  struct umwsu_scan *scan;
   int argp = 1;
-  int recurse = 0;
-  int threaded = 0;
+  enum umwsu_scan_flags flags = 0;
   
   if (argc < 2)
     usage(argc, argv);
 
   if (!strcmp(argv[argp], "-r")) {
     argp++;
-    recurse = 1;
+    flags |= UMWSU_SCAN_RECURSE;
   }
 
   if (!strcmp(argv[argp], "-t")) {
     argp++;
-    threaded = 1;
+    flags |= UMWSU_SCAN_THREADED;
   }
+
+  if (argp >= argc)
+    usage(argc, argv);
 
   u = umwsu_open();
 
@@ -38,25 +38,13 @@ int main(int argc, char **argv)
 
   umwsu_print(u);
 
-  while (argp < argc) {
-#if 0
-    struct stat sb;
-    enum umwsu_status status;
+  scan = umwsu_scan_new(u, argv[argp], flags);
 
-    if (stat(argv[argp], &sb) == -1) {
-      perror("stat");
-      exit(EXIT_FAILURE);
-    }
+  umwsu_scan_run(scan);
 
-    if (S_ISDIR(sb.st_mode))
-      umwsu_scan_dir(u, argv[argp], recurse, threaded, NULL, NULL);
-    else {
-      status = umwsu_scan_file(u, NULL, argv[argp], NULL, NULL);
-    }
-#endif
-
-    argp++;
-  }
+  umwsu_scan_free(scan);
 
   umwsu_close(u);
+
+  return 0;
 }
