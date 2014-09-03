@@ -16,8 +16,9 @@
 #include <glib.h>
 #include <assert.h>
 
-struct alert_data {
+struct alert {
   xmlDocPtr xml_doc;
+  int must_lock;
   GMutex doc_lock;
 };
 
@@ -140,36 +141,55 @@ static void alert_doc_save(xmlDocPtr doc, const char *filename)
   xmlSaveFormatFileEnc(filename, doc, "UTF-8", 1);
 }
 
+static void alert_doc_save_to_fd(xmlDocPtr doc, int fd)
+{
+  xmlSaveCtxtPtr xmlCtxt = xmlSaveToFd(fd, "UTF-8", XML_SAVE_FORMAT);
+
+  if (xmlCtxt != NULL) {
+    xmlSaveDoc(xmlCtxt, doc);
+    xmlSaveClose(xmlCtxt);
+  }
+}
+
 static void alert_doc_free(xmlDocPtr doc)
 {
   xmlFreeDoc(doc);
 }
  
-static struct alert_data *alert_data_new(void)
+struct alert *alert_new(int must_lock)
 {
-  struct alert_data *ad;
+  struct alert *a;
 
-  ad = (struct alert_data *)malloc(sizeof(struct alert_data));
-  assert(ad != NULL);
+  a = (struct alert *)malloc(sizeof(struct alert));
+  assert(a != NULL);
 
-  ad->xml_doc = NULL;
+  a->xml_doc = NULL;
+  a->must_lock = must_lock;
 
-  g_mutex_init(&ad->doc_lock);
+  if (a->must_lock)
+    g_mutex_init(&a->doc_lock);
 }
 
-static void alert_data_add(struct alert_data *ad, struct umwsu_report *report)
+static void alert_add(struct alert *a, struct umwsu_report *report)
 {
   if (report->status == UMWSU_CLEAN || report->status == UMWSU_UNKNOWN_FILE_TYPE)
     return;
 
-  g_mutex_lock(&ad->doc_lock);
+  if (a->must_lock)
+    g_mutex_lock(&a->doc_lock);
 
-  if (ad->xml_doc == NULL)
-    ad->xml_doc = alert_doc_new();
+  if (a->xml_doc == NULL)
+    a->xml_doc = alert_doc_new();
 
-  alert_doc_add_alert(ad->xml_doc, report);
+  alert_doc_add_alert(a->xml_doc, report);
 
-  g_mutex_unlock(&ad->doc_lock);
+  if (a->must_lock)
+    g_mutex_unlock(&a->doc_lock);
+}
+
+void alert_callback(struct umwsu_report *report, void *callback_data)
+{
+  alert_add((struct alert *)callback_data, report);
 }
 
 static int connect_socket(const char *path)
@@ -197,47 +217,23 @@ static int connect_socket(const char *path)
 
 #define ALERT_SOCKET_PATH "/var/tmp/davfi_alert.s"
 
-static void alert_data_send_and_free(struct alert_data *ad)
+void alert_send(struct alert *a)
 {
   int fd;
 				
   fd = connect_socket(ALERT_SOCKET_PATH);
   if (fd != -1) {
-    xmlSaveCtxtPtr xmlCtxt = xmlSaveToFd(fd, "UTF-8", XML_SAVE_FORMAT);
-
-    if (xmlCtxt != NULL) {
-      xmlSaveDoc(xmlCtxt, ad->xml_doc);
-      xmlSaveClose(xmlCtxt);
-    }
-
+    alert_doc_save_to_fd(a->xml_doc, fd);
     close(fd);
   }
-
-  xmlFreeDoc(ad->xml_doc);
-
-  g_mutex_clear(&ad->doc_lock);
-
-  free(ad);
 }
 
-void umwsu_alert_callback(struct umwsu *u, /* enum umwsu_event_type event_type, */ struct umwsu_report *report, void **callback_data)
+void alert_free(struct alert *a)
 {
-  struct alert_data **ad = (struct alert_data **)callback_data;
+  alert_doc_free(a->xml_doc);
 
-#if 0
-  switch(event_type) {
-  case UMWSU_SCAN_START:
-    *ad = alert_data_new();
-    break;
-  case UMWSU_SCAN_START:
-    alert_data_add(*ad, report);
-    break;
-  case UMWSU_SCAN_END:
-    alert_data_send_and_free(*ad);
-    *ad = NULL;
-    break;
-  }
-#endif
+  if (a->must_lock)
+    g_mutex_clear(&a->doc_lock);
 
+  free(a);
 }
-
