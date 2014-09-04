@@ -106,7 +106,7 @@ static enum umwsu_status umwsu_scan_apply_modules(const char *path, GPtrArray *m
 
       if (umwsu_status_cmp(current_status, mod_status) < 0) {
 	current_status = mod_status;
-	umwsu_report_change(&report, mod_status, (char *)mod->name, mod_report);
+	umwsu_report_change(report, mod_status, (char *)mod->name, mod_report);
       } else if (mod_report != NULL)
 	free(mod_report);
 

@@ -1,3 +1,7 @@
+2014-09-04  François Déchelle  <francois@dechelle.net>
+
+	* tested new implementation with callbacks (no callbacks yet); runs ok
+
 2014-09-03  François Déchelle  <francois@dechelle.net>
 
 	* finished implementation of callbacks; compiles ok
