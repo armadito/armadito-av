@@ -1,3 +1,4 @@
+- compléter les infos mime-type dans les modules
 
 - scan multi-thread
 -- création du pool de threads au début du scan de paths multiples [OK]
@@ -9,8 +10,8 @@
 
 - ajouter structure rapport
 -- champs: path, état, rapport du module [OK]
--- création du document XML à partir structure rapport
--- envoi du document XML à l'agent de reporting
+-- création du document XML à partir structure rapport [OK]
+-- envoi du document XML à l'agent de reporting [OK]
 
 - implémenter module 5.1 avec infos [NOT YET]
 
