@@ -1,5 +1,7 @@
 2014-09-04  François Déchelle  <francois@dechelle.net>
 
+	* added first callback (report_print in umwsu-scan.c); runs ok
+
 	* tested new implementation with callbacks (no callbacks yet); runs ok
 
 2014-09-03  François Déchelle  <francois@dechelle.net>

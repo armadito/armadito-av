@@ -221,6 +221,9 @@ void alert_send(struct alert *a)
 {
   int fd;
 				
+  if (a->xml_doc == NULL)
+    return;
+
   fd = connect_socket(ALERT_SOCKET_PATH);
   if (fd != -1) {
     alert_doc_save_to_fd(a->xml_doc, fd);

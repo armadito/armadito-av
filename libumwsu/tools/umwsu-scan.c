@@ -3,6 +3,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+void report_print_callback(struct umwsu_report *report, void *callback_data)
+{
+  FILE *out = (FILE *)callback_data;
+
+  umwsu_report_print(report, out);
+}
+
 static void usage(int argc, char **argv)
 {
   fprintf(stderr, "usage: %s [-r] FILE|DIR ...\n", argv[0]);
@@ -39,6 +46,8 @@ int main(int argc, char **argv)
   umwsu_print(u);
 
   scan = umwsu_scan_new(u, argv[argp], flags);
+
+  umwsu_scan_add_callback(scan, report_print_callback, stdout);
 
   umwsu_scan_run(scan);
 

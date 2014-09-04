@@ -53,7 +53,6 @@ struct umwsu_scan *umwsu_scan_new(struct umwsu *umwsu_handle, const char *path, 
   scan->callbacks = g_array_new(FALSE, FALSE, sizeof(struct callback_entry));
 
 #if 0
-  umwsu_scan_add_callback(s, scan_print_callback, NULL);
   umwsu_scan_add_callback(s, xml_report_callback, umwsu_report_xml_new());
 #endif
 
@@ -129,8 +128,6 @@ static enum umwsu_status umwsu_scan_file(struct umwsu_scan *scan, magic_t magic,
 
   if (umwsu_get_verbose(scan->u) >= 3)
     printf("%s: %s\n", path, umwsu_status_str(status));
-
-  umwsu_report_print(&report, stdout);
 
   umwsu_scan_call_callbacks(scan, &report);
 
