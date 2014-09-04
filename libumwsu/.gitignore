@@ -2,6 +2,7 @@ Makefile
 Makefile.in
 autom4te.cache/*
 BUILD/
+compile
 config.log
 config.status
 configure
