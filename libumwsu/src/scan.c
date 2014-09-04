@@ -1,5 +1,6 @@
 #include <libumwsu/module.h>
 #include <libumwsu/scan.h>
+#include "alert.h"
 #include "dir.h"
 #include "modulep.h"
 #include "umwsup.h"
@@ -25,6 +26,7 @@ struct umwsu_scan {
   enum umwsu_scan_flags flags;
   GThreadPool *thread_pool;  
   GArray *callbacks;
+  struct alert *alert;
 };
 
 static void scan_entry_thread(gpointer data, gpointer user_data);
@@ -52,9 +54,8 @@ struct umwsu_scan *umwsu_scan_new(struct umwsu *umwsu_handle, const char *path, 
 
   scan->callbacks = g_array_new(FALSE, FALSE, sizeof(struct callback_entry));
 
-#if 0
-  umwsu_scan_add_callback(s, xml_report_callback, umwsu_report_xml_new());
-#endif
+  scan->alert = alert_new(scan->flags & UMWSU_SCAN_THREADED);
+  umwsu_scan_add_callback(scan, alert_callback, scan->alert);
 
   return scan;
 }
@@ -222,6 +223,9 @@ void umwsu_scan_free(struct umwsu_scan *scan)
     g_thread_pool_free(scan->thread_pool, FALSE, TRUE);
 
   g_array_free(scan->callbacks, TRUE);
+
+  alert_send(scan->alert);
+  alert_free(scan->alert);
 
   free(scan);
 }

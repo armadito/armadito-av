@@ -5,7 +5,7 @@ struct alert;
 
 struct alert *alert_new(int must_lock);
 
-void umwsu_alert_callback(struct umwsu_report *report, void *callback_data);
+void alert_callback(struct umwsu_report *report, void *callback_data);
 
 void alert_send(struct alert *a);
 

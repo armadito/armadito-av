@@ -1,5 +1,7 @@
 2014-09-04  François Déchelle  <francois@dechelle.net>
 
+	* added small test server in python
+
 	* added first callback (report_print in umwsu-scan.c); runs ok
 
 	* tested new implementation with callbacks (no callbacks yet); runs ok

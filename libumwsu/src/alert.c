@@ -168,6 +168,8 @@ struct alert *alert_new(int must_lock)
 
   if (a->must_lock)
     g_mutex_init(&a->doc_lock);
+
+  return a;
 }
 
 static void alert_add(struct alert *a, struct umwsu_report *report)
@@ -223,6 +225,8 @@ void alert_send(struct alert *a)
 				
   if (a->xml_doc == NULL)
     return;
+
+  alert_doc_save(a->xml_doc, "-");
 
   fd = connect_socket(ALERT_SOCKET_PATH);
   if (fd != -1) {
