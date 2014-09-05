@@ -32,7 +32,9 @@ typedef void (*umwsu_scan_callback_t)(struct umwsu_report *report, void *callbac
 
 void umwsu_scan_add_callback(struct umwsu_scan *scan, umwsu_scan_callback_t callback, void *callback_data);
 
-enum umwsu_status umwsu_scan_run(struct umwsu_scan *scan);
+enum umwsu_status umwsu_scan_start(struct umwsu_scan *scan);
+
+void umwsu_scan_finish(struct umwsu_scan *scan);
 
 void umwsu_scan_free(struct umwsu_scan *scan);
 

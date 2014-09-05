@@ -1,3 +1,7 @@
+2014-09-05  François Déchelle  <francois@dechelle.net>
+
+	* changed reporting to send alert immediately instead of waiting for end of scan
+
 2014-09-04  François Déchelle  <francois@dechelle.net>
 
 	* added small test server in python

@@ -18,9 +18,27 @@
 
 struct alert {
   xmlDocPtr xml_doc;
-  int must_lock;
-  GMutex doc_lock;
 };
+
+static xmlNodePtr alert_doc_gdh_node(void)
+{
+  xmlNodePtr node;
+  time_t t;
+  struct tm l_tm;
+  char buff[32];
+
+  node = xmlNewNode(NULL, "gdh");
+
+  time(&t);
+  localtime_r(&t, &l_tm);
+
+  /* format: "2001-12-31T12:00:00" */
+  snprintf(buff, sizeof(buff) - 1, "%04d-%02d-%02dT%02d:%02d:%02d", 1900 + l_tm.tm_year, l_tm.tm_mon, l_tm.tm_mday, l_tm.tm_hour, l_tm.tm_min, l_tm.tm_sec);
+  buff[sizeof(buff) - 1] = '\0';
+  xmlAddChild(node, xmlNewText(buff));
+
+  return node;
+}
 
 static void get_ip_addr(char *ip_addr)
 {
@@ -83,26 +101,6 @@ static xmlNodePtr alert_doc_identification_node(void)
   return node;
 }
 
-static xmlNodePtr alert_doc_gdh_node(void)
-{
-  xmlNodePtr node;
-  time_t t;
-  struct tm l_tm;
-  char buff[32];
-
-  node = xmlNewNode(NULL, "gdh");
-
-  time(&t);
-  localtime_r(&t, &l_tm);
-
-  /* format: "2001-12-31T12:00:00" */
-  snprintf(buff, sizeof(buff) - 1, "%04d-%02d-%02dT%02d:%02d:%02d", 1900 + l_tm.tm_year, l_tm.tm_mon, l_tm.tm_mday, l_tm.tm_hour, l_tm.tm_min, l_tm.tm_sec);
-  buff[sizeof(buff) - 1] = '\0';
-  xmlAddChild(node, xmlNewText(buff));
-
-  return node;
-}
-
 static xmlDocPtr alert_doc_new(void)
 {
   xmlDocPtr doc;
@@ -111,29 +109,32 @@ static xmlDocPtr alert_doc_new(void)
   LIBXML_TEST_VERSION;
 
   doc = xmlNewDoc("1.0");
-  root_node = xmlNewNode(NULL, "alert_set");
+  root_node = xmlNewNode(NULL, "alert");
   xmlNewProp(root_node, "xmlns", "http://www.davfi-project.org/AlertSchema");
   xmlNewProp(root_node, "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
   xmlNewProp(root_node, "xsi:schemaLocation", "http://www.davfi-project.org/AlertSchema AlertSchema.xsd ");
   xmlDocSetRootElement(doc, root_node);
-
-  xmlAddChild(root_node, alert_doc_identification_node());
-  xmlAddChild(root_node, alert_doc_gdh_node());
 
   return doc;
 }
 
 static void alert_doc_add_alert(xmlDocPtr doc, struct umwsu_report *report)
 {
-  xmlNodePtr alert_node, node;
+  xmlNodePtr root_node, node;
 
-  alert_node = xmlNewChild(xmlDocGetRootElement(doc), NULL, "alert", NULL);
-  xmlNewChild(alert_node, NULL, "code", "a");
-  xmlNewChild(alert_node, NULL, "level", "2");
-  node = xmlNewChild(alert_node, NULL, "uri", report->path);
+  root_node = xmlDocGetRootElement(doc);
+  xmlNewChild(root_node, NULL, "code", "a");
+  xmlNewChild(root_node, NULL, "level", "2");
+
+  node = xmlNewChild(root_node, NULL, "uri", report->path);
   xmlNewProp(node, "type", "path");
-  xmlNewChild(alert_node, NULL, "module", report->mod_name);
-  xmlNewChild(alert_node, NULL, "module_specific", report->mod_report);
+
+  xmlAddChild(root_node, alert_doc_gdh_node());
+
+  xmlAddChild(root_node, alert_doc_identification_node());
+
+  xmlNewChild(root_node, NULL, "module", report->mod_name);
+  xmlNewChild(root_node, NULL, "module_specific", report->mod_report);
 }
 
 static void alert_doc_save(xmlDocPtr doc, const char *filename)
@@ -156,42 +157,21 @@ static void alert_doc_free(xmlDocPtr doc)
   xmlFreeDoc(doc);
 }
  
-struct alert *alert_new(int must_lock)
+static struct alert *alert_new()
 {
   struct alert *a;
 
   a = (struct alert *)malloc(sizeof(struct alert));
   assert(a != NULL);
 
-  a->xml_doc = NULL;
-  a->must_lock = must_lock;
-
-  if (a->must_lock)
-    g_mutex_init(&a->doc_lock);
+  a->xml_doc = alert_doc_new();
 
   return a;
 }
 
 static void alert_add(struct alert *a, struct umwsu_report *report)
 {
-  if (report->status == UMWSU_CLEAN || report->status == UMWSU_UNKNOWN_FILE_TYPE)
-    return;
-
-  if (a->must_lock)
-    g_mutex_lock(&a->doc_lock);
-
-  if (a->xml_doc == NULL)
-    a->xml_doc = alert_doc_new();
-
   alert_doc_add_alert(a->xml_doc, report);
-
-  if (a->must_lock)
-    g_mutex_unlock(&a->doc_lock);
-}
-
-void alert_callback(struct umwsu_report *report, void *callback_data)
-{
-  alert_add((struct alert *)callback_data, report);
 }
 
 static int connect_socket(const char *path)
@@ -219,7 +199,7 @@ static int connect_socket(const char *path)
 
 #define ALERT_SOCKET_PATH "/var/tmp/davfi_alert.s"
 
-void alert_send(struct alert *a)
+static void alert_send(struct alert *a)
 {
   int fd;
 				
@@ -235,12 +215,23 @@ void alert_send(struct alert *a)
   }
 }
 
-void alert_free(struct alert *a)
+static void alert_free(struct alert *a)
 {
   alert_doc_free(a->xml_doc);
 
-  if (a->must_lock)
-    g_mutex_clear(&a->doc_lock);
-
   free(a);
 }
+
+void alert_callback(struct umwsu_report *report, void *callback_data)
+{
+  struct alert *a;
+
+  if (report->status == UMWSU_CLEAN || report->status == UMWSU_UNKNOWN_FILE_TYPE)
+    return;
+
+  a = alert_new();
+  alert_add(a, report);
+  alert_send(a);
+  alert_free(a);
+}
+
