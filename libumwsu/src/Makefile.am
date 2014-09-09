@@ -1,6 +1,6 @@
 lib_LTLIBRARIES=libumwsu.la
 
-libumwsu_la_SOURCES=alert.c alert.h dir.c dir.h module.c modulep.h report.c reportp.h status.c statusp.h scan.c umwsu.c
+libumwsu_la_SOURCES=alert.c alert.h dir.c dir.h module.c modulep.h report.c reportp.h status.c statusp.h scan.c umwsu.c umwsup.h
 
 AM_CPPFLAGS= -DLIBUMWSU_MODULES_PATH='"$(pkglibdir)/modules"'
 libumwsu_la_CFLAGS= -I$(top_srcdir)/include

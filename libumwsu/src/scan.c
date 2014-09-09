@@ -189,7 +189,7 @@ static void scan_entry_non_threaded(const char *full_path, const struct dirent *
   umwsu_scan_file(scan, NULL, full_path);
 }
 
-enum umwsu_status umwsu_scan_run(struct umwsu_scan *scan)
+enum umwsu_status umwsu_scan_start(struct umwsu_scan *scan)
 {
   struct stat sb;
 

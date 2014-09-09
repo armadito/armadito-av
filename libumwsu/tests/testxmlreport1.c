@@ -1,4 +1,4 @@
-#include <libumwsu/status.h>
+#include <libumwsu/scan.h>
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
