@@ -3,10 +3,7 @@ AUTOMAKE_OPTIONS=subdir-objects
 modulesdir=@LIBUMWSU_MODDIR@
 modules_LTLIBRARIES=module5_2.la
 
-dist_module5_2_la_SOURCES= \
-module5_2.c 
-
-nodist_module5_2_la_SOURCES= \
+ORG_SOURCES= \
 org/databases.c \
 org/databases.h \
 org/distances.c \
@@ -28,10 +25,18 @@ org/vector.c \
 org/vector.h \
 org/windowsTypes.h 
 
-AM_CPPFLAGS= -DMODULE_52_DBDIR='"$(abs_top_srcdir)/src/org"'
+dist_module5_2_la_SOURCES= module5_2.c $(ORG_SOURCES)
+#nodist_module5_2_la_SOURCES= $(ORG_SOURCES)
+
+AM_CPPFLAGS= -DMODULE5_2_DBDIR='"@MODULE5_2_DBDIR@"'
 module5_2_la_LDFLAGS= -module -avoid-version
 module5_2_la_CFLAGS= -I$(srcdir)/org
 module5_2_la_LIBADD=
 module5_2_la_CFLAGS+= @LIBUMWSU_CFLAGS@
 module5_2_la_LIBADD+= @LIBUMWSU_LIBS@
 
+install-exec-hook:
+	-rm -f "$(DESTDIR)$(modulesdir)"/module5_2.la "$(DESTDIR)$(modulesdir)"/module5_2.a
+
+install-data-hook:
+	-rm -f "$(DESTDIR)$(modulesdir)"/module5_2.la "$(DESTDIR)$(modulesdir)"/module5_2.a

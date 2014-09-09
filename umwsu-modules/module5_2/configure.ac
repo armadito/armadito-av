@@ -1,4 +1,4 @@
-AC_INIT(umwsu-module-mod5-2,0.1.1,francois@dechelle.net)
+AC_INIT(umwsu-module5-2,1.0.0,francois@dechelle.net)
 AM_INIT_AUTOMAKE
 
 # collect arguments
@@ -10,8 +10,13 @@ AC_ARG_ENABLE([debug],
 # libumwsu
 AC_ARG_WITH([libumwsu],
 	AS_HELP_STRING([--with-libumwsu=DIR],[specify libumwsu install dir @<:@default is /usr@:>@]),
-	,
-	with_libumwsu="$withval")
+	with_libumwsu="$withval",
+	)
+# database directory
+AC_ARG_WITH([dbdir],
+	AS_HELP_STRING([--with-dbdir=DIR],[specify path to databases @<:@default is /var/lib/uhuru/module5-2/db@:>@]),
+	with_dbdir="$withval",
+	with_dbdir="no")
 
 # check for needed programs
 AC_PROG_CC([gcc])
@@ -35,13 +40,24 @@ if test x"$with_libumwsu" != x ; then
 fi
 PKG_PROG_PKG_CONFIG
 
-# check for libumwsu
 PKG_CHECK_MODULES(LIBUMWSU, libumwsu, [HAVE_LIBUMWSU=yes], [HAVE_LIBUMWSU=no])
 if test "$HAVE_LIBUMWSU" = "no"; then
    AC_MSG_ERROR("cannot find UMWSU library")
 fi
 LIBUMWSU_MODDIR=$(pkg-config --variable=moduledir libumwsu)
 AC_SUBST(LIBUMWSU_MODDIR)
+
+# database directory
+AC_MSG_CHECKING(for databases directory)
+if test "$with_dbdir" = "no" ; then
+   AC_MSG_ERROR("must specify database directory")
+fi
+MODULE5_2_DBDIR="$with_dbdir"
+if test ! -f "$MODULE5_2_DBDIR/database.elfdata" ; then
+   AC_MSG_ERROR("cannot find $MODULE5_2_DBDIR/database.elfdata")
+fi
+AC_MSG_RESULT($MODULE5_2_DBDIR)
+AC_SUBST(MODULE5_2_DBDIR)
 
 # Output files
 AC_CONFIG_FILES([
