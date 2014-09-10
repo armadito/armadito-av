@@ -1,4 +1,4 @@
-AC_INIT(umwsu-module5-2,1.0.0,francois@dechelle.net)
+AC_INIT(umwsu-module52,1.0.0,francois@dechelle.net)
 AM_INIT_AUTOMAKE
 
 # collect arguments
@@ -50,13 +50,14 @@ AC_SUBST(LIBUMWSU_MODDIR)
 # database directory
 AC_MSG_CHECKING(for databases directory)
 if test "$with_dbdir" = "no" ; then
-   AC_MSG_ERROR("must specify database directory")
-fi
-MODULE5_2_DBDIR="$with_dbdir"
-if test ! -f "$MODULE5_2_DBDIR/database.elfdata" ; then
-   AC_MSG_ERROR("cannot find $MODULE5_2_DBDIR/database.elfdata")
+   MODULE5_2_DBDIR="$localstatedir/lib/umwsu/module52/db"
+else
+   MODULE5_2_DBDIR="$with_dbdir"
 fi
 AC_MSG_RESULT($MODULE5_2_DBDIR)
+if test ! -f "$MODULE5_2_DBDIR/database.elfdata" ; then
+   AC_MSG_WARN("cannot find $MODULE5_2_DBDIR/database.elfdata, continuing anyway")
+fi
 AC_SUBST(MODULE5_2_DBDIR)
 
 # Output files
