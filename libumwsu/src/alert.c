@@ -226,7 +226,7 @@ void alert_callback(struct umwsu_report *report, void *callback_data)
 {
   struct alert *a;
 
-  if (report->status == UMWSU_CLEAN || report->status == UMWSU_UNKNOWN_FILE_TYPE)
+  if (report->status == UMWSU_CLEAN || report->status == UMWSU_UNKNOWN_FILE_TYPE || report->status == UMWSU_WHITE_LISTED)
     return;
 
   a = alert_new();

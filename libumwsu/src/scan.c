@@ -108,7 +108,7 @@ static enum umwsu_status umwsu_scan_apply_modules(const char *path, GPtrArray *m
       } else if (mod_report != NULL)
 	free(mod_report);
 
-      if (current_status == UMWSU_MALWARE)
+      if (current_status == UMWSU_WHITE_LISTED || current_status == UMWSU_MALWARE)
 	break;
     }
   }

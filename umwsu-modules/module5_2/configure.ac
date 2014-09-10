@@ -14,7 +14,7 @@ AC_ARG_WITH([libumwsu],
 	)
 # database directory
 AC_ARG_WITH([dbdir],
-	AS_HELP_STRING([--with-dbdir=DIR],[specify path to databases @<:@default is /var/lib/uhuru/module5-2/db@:>@]),
+	AS_HELP_STRING([--with-dbdir=DIR],[specify path to databases @<:@default is /var/lib/umwsu/module52/db@:>@]),
 	with_dbdir="$withval",
 	with_dbdir="no")
 

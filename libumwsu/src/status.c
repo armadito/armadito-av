@@ -17,6 +17,8 @@ int umwsu_status_cmp(enum umwsu_status s1, enum umwsu_status s2)
     return (s2 == UMWSU_CLEAN) ? 1 : -1;
   case UMWSU_SUSPICIOUS:
     return (s2 == UMWSU_CLEAN || s2 == UMWSU_IERROR) ? 1 : -1;
+  case UMWSU_WHITE_LISTED:
+    return (s2 == UMWSU_CLEAN || s2 == UMWSU_IERROR || s2 == UMWSU_SUSPICIOUS) ? 1 : -1;
   case UMWSU_MALWARE:
     return 1;
   }
@@ -33,6 +35,7 @@ const char *umwsu_status_str(enum umwsu_status status)
     M(UMWSU_CLEAN);
     M(UMWSU_SUSPICIOUS);
     M(UMWSU_MALWARE);
+    M(UMWSU_WHITE_LISTED);
     M(UMWSU_EINVAL);
     M(UMWSU_IERROR);
     M(UMWSU_UNKNOWN_FILE_TYPE);
@@ -50,6 +53,8 @@ const char *umwsu_status_pretty_str(enum umwsu_status status)
     return "suspicious";
   case UMWSU_MALWARE:
     return "malware";
+  case UMWSU_WHITE_LISTED:
+    return "white listed";
   case UMWSU_EINVAL:
     return "invalid argument";
   case UMWSU_IERROR:

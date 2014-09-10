@@ -1,3 +1,7 @@
+2014-09-10  François Déchelle  <francois@dechelle.net>
+
+	* added white listed status for module 1
+
 2014-09-05  François Déchelle  <francois@dechelle.net>
 
 	* changed reporting to send alert immediately instead of waiting for end of scan
