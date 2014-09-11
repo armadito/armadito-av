@@ -15,10 +15,12 @@ int umwsu_status_cmp(enum umwsu_status s1, enum umwsu_status s2)
     return -1;
   case UMWSU_IERROR:
     return (s2 == UMWSU_CLEAN) ? 1 : -1;
-  case UMWSU_SUSPICIOUS:
+  case UMWSU_UNDECIDED:
     return (s2 == UMWSU_CLEAN || s2 == UMWSU_IERROR) ? 1 : -1;
+  case UMWSU_SUSPICIOUS:
+    return (s2 == UMWSU_CLEAN || s2 == UMWSU_IERROR || s2 == UMWSU_UNDECIDED) ? 1 : -1;
   case UMWSU_WHITE_LISTED:
-    return (s2 == UMWSU_CLEAN || s2 == UMWSU_IERROR || s2 == UMWSU_SUSPICIOUS) ? 1 : -1;
+    return (s2 == UMWSU_CLEAN || s2 == UMWSU_IERROR || s2 == UMWSU_UNDECIDED || s2 == UMWSU_SUSPICIOUS) ? 1 : -1;
   case UMWSU_MALWARE:
     return 1;
   }

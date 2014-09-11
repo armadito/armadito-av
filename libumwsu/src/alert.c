@@ -226,8 +226,15 @@ void alert_callback(struct umwsu_report *report, void *callback_data)
 {
   struct alert *a;
 
-  if (report->status == UMWSU_CLEAN || report->status == UMWSU_UNKNOWN_FILE_TYPE || report->status == UMWSU_WHITE_LISTED)
+  switch(report->status) {
+  case UMWSU_CLEAN:
+  case UMWSU_UNKNOWN_FILE_TYPE:
+  case UMWSU_EINVAL:
+  case UMWSU_IERROR:
+  case UMWSU_UNDECIDED:
+  case UMWSU_WHITE_LISTED:
     return;
+  }
 
   a = alert_new();
   alert_add(a, report);
