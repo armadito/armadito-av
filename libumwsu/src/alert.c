@@ -206,7 +206,9 @@ static void alert_send(struct alert *a)
   if (a->xml_doc == NULL)
     return;
 
+#if 0
   alert_doc_save(a->xml_doc, "-");
+#endif
 
   fd = connect_socket(ALERT_SOCKET_PATH);
   if (fd != -1) {

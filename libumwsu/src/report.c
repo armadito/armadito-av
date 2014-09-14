@@ -8,14 +8,14 @@
 void umwsu_report_print(struct umwsu_report *report, FILE *out)
 {
   fprintf(out, "%s: %s", report->path, umwsu_status_pretty_str(report->status));
-  if (report->status != UMWSU_CLEAN && report->status != UMWSU_UNKNOWN_FILE_TYPE)
+  if (report->status != UMWSU_UNDECIDED && report->status != UMWSU_CLEAN && report->status != UMWSU_UNKNOWN_FILE_TYPE)
     fprintf(out, " [%s - %s]", report->mod_name, report->mod_report);
   fprintf(out, "\n");
 }
 
 void umwsu_report_init(struct umwsu_report *report, const char *path)
 {
-  report->status = UMWSU_CLEAN;
+  report->status = UMWSU_UNDECIDED;
   report->path = strdup(path);
   report->mod_name = NULL;
   report->mod_report = NULL;

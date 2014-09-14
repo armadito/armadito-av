@@ -1,3 +1,7 @@
+2014-09-14  François Déchelle  <francois@dechelle.net>
+
+	* fixed status % undecided
+
 2014-09-11  François Déchelle  <francois@dechelle.net>
 
 	* fixed status related bugs after introducing white listed status; tested

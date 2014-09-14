@@ -82,7 +82,7 @@ static void umwsu_scan_call_callbacks(struct umwsu_scan *scan, struct umwsu_repo
 
 static enum umwsu_status umwsu_scan_apply_modules(const char *path, GPtrArray *mod_array,  struct umwsu_report *report)
 {
-  enum umwsu_status current_status = UMWSU_CLEAN;
+  enum umwsu_status current_status = UMWSU_UNDECIDED;
 
   if (mod_array == NULL) {
     current_status = UMWSU_UNKNOWN_FILE_TYPE;
@@ -102,11 +102,19 @@ static enum umwsu_status umwsu_scan_apply_modules(const char *path, GPtrArray *m
 
       mod_status = (*mod->scan)(path, mod->data, &mod_report);
 
+#if 0
+      printf("UMWSU: module %s: scanning %s -> %s\n", mod->name, path, umwsu_status_str(mod_status));
+#endif
+
       if (umwsu_status_cmp(current_status, mod_status) < 0) {
 	current_status = mod_status;
 	umwsu_report_change(report, mod_status, (char *)mod->name, mod_report);
       } else if (mod_report != NULL)
 	free(mod_report);
+
+#if 0
+      printf("UMWSU: current status %s\n", umwsu_status_str(current_status));
+#endif
 
       if (current_status == UMWSU_WHITE_LISTED || current_status == UMWSU_MALWARE)
 	break;
