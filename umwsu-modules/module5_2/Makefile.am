@@ -1,6 +1,6 @@
 SUBDIRS=src 
 
-DISTDBS=database.elfdata db_malicious.zip db_safe.zip
+DISTDBS=database.elfdata db_malicious.zip db_safe.zip tfidf_m.dat tfidf_s.dat
 
 dbdistdir=$(PACKAGE)-db-$(VERSION)
 

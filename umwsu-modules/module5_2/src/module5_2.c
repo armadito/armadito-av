@@ -9,7 +9,11 @@
 
 #define LEARN_TO_PROTOTYPE_EXPORTED_FUNCTIONS
 #ifdef LEARN_TO_PROTOTYPE_EXPORTED_FUNCTIONS
-int initDB(char* dbName, char* malicousDbName, char* notMalicousDbName);
+int initDB( char* dbName, 
+	    char* malicousDbName, 
+	    char* notMalicousDbName, 
+	    char* ElfdatabaseTFIDFInf, 
+	    char* ElfdatabaseTFIDFSain );
 void freeDB(void);
 ERROR_CODE analyseElfFile(char* fileName);
 #endif
@@ -76,21 +80,31 @@ enum umwsu_status module5_2_scan(const char *path, void *mod_data, char **pmod_r
 
   *pmod_report = strdup(error_code_str(e));
   
+#if 0
+  fprintf(stderr, "module 5.2: %s %s\n", path, error_code_str(e));
+#endif
+
   switch(e) {
   case E_MALWARE:
     return UMWSU_MALWARE;
   case E_NOT_MALWARE:
     return UMWSU_CLEAN;
-  default:
-    return UMWSU_IERROR;
+  case E_NOT_DECIDED:
+  case E_DOUBTFUL:
+    return UMWSU_UNDECIDED;
   }
 
-  return UMWSU_CLEAN;
+  return UMWSU_IERROR;
+
 }
 
 enum umwsu_mod_status module5_2_init(void **pmod_data)
 {
-  if (initDB(MODULE5_2_DBDIR "/database.elfdata", MODULE5_2_DBDIR "/db_malicious.zip", MODULE5_2_DBDIR "/db_safe.zip") == 0)
+  if (initDB(MODULE5_2_DBDIR "/database.elfdata", 
+	     MODULE5_2_DBDIR "/db_malicious.zip", 
+	     MODULE5_2_DBDIR "/db_safe.zip",
+	     MODULE5_2_DBDIR "/tfidf_m.dat",
+	     MODULE5_2_DBDIR "/tfidf_s.dat") != 0)
     return UMWSU_MOD_INIT_ERROR;
 
   fprintf(stderr, "Module 5.2 databases loaded from " MODULE5_2_DBDIR "\n");
@@ -100,5 +114,5 @@ enum umwsu_mod_status module5_2_init(void **pmod_data)
 
 void module5_2_install(void)
 {
-  fprintf(stderr, "Module5_2 module installed\n");
+  fprintf(stderr, "Module 5.2 installed\n");
 }

@@ -20,6 +20,8 @@ org/model.c \
 org/model.h \
 org/table.c \
 org/table.h \
+org/tfidfDetection.c \
+org/tfidfDetection.h \
 org/utils.h \
 org/vector.c \
 org/vector.h \

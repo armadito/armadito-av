@@ -1,3 +1,7 @@
+2014-09-14  François Déchelle  <francois@dechelle.net>
+
+	* moved to new version; tested
+
 2014-08-28  François Déchelle  <francois@dechelle.net>
 
 	* changed scan function to set module report
