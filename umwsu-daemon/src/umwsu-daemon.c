@@ -12,8 +12,6 @@
 #include <sys/inotify.h>
 #include <dirent.h>
 
-#define UMWSU
-
 static guint inotify_event_hash(gconstpointer key);
 static gboolean inotify_event_equal(gconstpointer a, gconstpointer b);
 
@@ -21,9 +19,7 @@ struct umwsu_daemon {
   int inotify_fd;
   GHashTable *watch_table;
   GHashTable *event_queue;
-#ifdef UMWSU
   struct umwsu *umwsu;
-#endif
 };
 
 static void error(const char *msg)
@@ -41,9 +37,7 @@ static void umwsu_daemon_init(struct umwsu_daemon *d)
   d->watch_table = g_hash_table_new(g_direct_hash, g_direct_equal);
   d->event_queue = g_hash_table_new(inotify_event_hash, inotify_event_equal);
 
-#ifdef UMWSU
   d->umwsu = umwsu_open();
-#endif
 }
 
 static void umwsu_daemon_watch(struct umwsu_daemon *d, const char *path, int recurse)
@@ -220,27 +214,35 @@ static void umwsu_daemon_process_file_create(struct umwsu_daemon *d, struct inot
 #endif
 }
 
+void report_print_callback(struct umwsu_report *report, void *callback_data)
+{
+  FILE *out = (FILE *)callback_data;
+
+  umwsu_report_print(report, out);
+}
+
 static void umwsu_daemon_process_file_close_write(struct umwsu_daemon *d, struct inotify_event *event)
 {
   char *full_path = umwsu_daemon_event_full_path(d, event);
 
   fprintf(stderr, "umwsu_daemon: processing file close write full_path = %s\n", full_path);
 
-#ifdef UMWSU
   if (g_hash_table_contains(d->event_queue, event)) {
-#if 0
-    fprintf(stderr, "umwsu_daemon: event is in queue\n");
-#endif
+    struct umwsu_scan *scan;
+    enum umwsu_scan_flags flags = 0;
 
-    umwsu_scan_file(d->umwsu, full_path);
+    scan = umwsu_scan_new(d->umwsu, full_path, flags);
+
+    umwsu_scan_add_callback(scan, report_print_callback, stdout);
+
+    umwsu_scan_start(scan);
+
+    umwsu_scan_finish(scan);
+
+    umwsu_scan_free(scan);
 
     g_hash_table_remove(d->event_queue, event);
-
-#if 0
-    umwsu_daemon_print_event_queue(d, "close write");
-#endif
   }
-#endif
 
   free(full_path);
 }
