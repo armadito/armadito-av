@@ -43,6 +43,12 @@ if test "$HAVE_LIBXML2" = "no"; then
    AC_MSG_ERROR("cannot find libxml2 library")
 fi
 
+# check for libcurl
+PKG_CHECK_MODULES(LIBCURL, libcurl, [HAVE_LIBCURL=yes], [HAVE_LIBCURL=no])
+if test "$HAVE_LIBCURL" = "no"; then
+   AC_MSG_ERROR("cannot find libcurl library")
+fi
+
 # documentation
 # check for asciidoc and a2x
 AC_PATH_PROG(ASCIIDOC, asciidoc)

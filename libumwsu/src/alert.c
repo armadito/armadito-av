@@ -3,6 +3,7 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xmlsave.h>
+#include <curl/curl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -152,6 +153,19 @@ static void alert_doc_save_to_fd(xmlDocPtr doc, int fd)
   }
 }
 
+static void alert_doc_save_to_buffer(xmlDocPtr doc, xmlBufferPtr *pxml_buf)
+{
+  xmlSaveCtxtPtr xmlCtxt;
+
+  *pxml_buf = xmlBufferCreate();
+  xmlCtxt = xmlSaveToBuffer(*pxml_buf, "UTF-8", XML_SAVE_FORMAT);
+
+  if (xmlCtxt != NULL) {
+    xmlSaveDoc(xmlCtxt, doc);
+    xmlSaveClose(xmlCtxt);
+  }
+}
+
 static void alert_doc_free(xmlDocPtr doc)
 {
   xmlFreeDoc(doc);
@@ -197,6 +211,7 @@ static int connect_socket(const char *path)
   return fd;
 }
 
+#if 0
 #define ALERT_SOCKET_PATH "/var/tmp/davfi_alert.s"
 
 static void alert_send(struct alert *a)
@@ -215,6 +230,50 @@ static void alert_send(struct alert *a)
     alert_doc_save_to_fd(a->xml_doc, fd);
     close(fd);
   }
+}
+#endif
+
+static size_t discard_data(void *buffer, size_t size, size_t nmemb, void *userp)
+{
+   return size * nmemb;
+}
+
+static void alert_send(struct alert *a)
+{
+  xmlBufferPtr xml_buf;
+  struct curl_httppost *formpost=NULL;
+  struct curl_httppost *lastptr=NULL;
+  CURL *curl;
+  CURLcode res;
+
+  if (a->xml_doc == NULL)
+    return;
+
+  alert_doc_save_to_buffer(a->xml_doc, &xml_buf);
+
+  curl_global_init(CURL_GLOBAL_ALL);
+
+  curl_formadd(&formpost, &lastptr, CURLFORM_PTRNAME, "xml", CURLFORM_PTRCONTENTS, xmlBufferContent(xml_buf), CURLFORM_END);
+
+  curl = curl_easy_init();
+
+  if (curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "http://127.0.0.1:10083/");
+    curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, "libumwsu/1.0");
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, discard_data);
+
+    res = curl_easy_perform(curl);
+
+    if(res != CURLE_OK)
+      fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+
+    curl_easy_cleanup(curl);
+
+    curl_formfree(formpost);
+  }
+
+  xmlBufferFree(xml_buf);
 }
 
 static void alert_free(struct alert *a)

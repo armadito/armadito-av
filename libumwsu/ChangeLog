@@ -1,3 +1,7 @@
+2014-09-26  François  <francois@dechelle.net>
+
+	* changed alert reporting code to use local Perl agent via HTTP/Post request; tested
+
 2014-09-14  François Déchelle  <francois@dechelle.net>
 
 	* fixed status % undecided
