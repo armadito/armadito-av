@@ -4,5 +4,5 @@ umwsu_scan_CFLAGS=-I$(top_srcdir)/include
 umwsu_scan_LDADD=$(top_builddir)/src/libumwsu.la @GMODULE2_LIBS@ -lmagic
 umwsu_scan_SOURCES=umwsu-scan.c
 
-dist_bin_SCRIPTS=umwsu-fake-server.py
+#dist_bin_SCRIPTS=umwsu-fake-server.py
 

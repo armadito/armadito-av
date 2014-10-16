@@ -241,8 +241,8 @@ static size_t discard_data(void *buffer, size_t size, size_t nmemb, void *userp)
 static void alert_send(struct alert *a)
 {
   xmlBufferPtr xml_buf;
-  struct curl_httppost *formpost=NULL;
-  struct curl_httppost *lastptr=NULL;
+  struct curl_httppost *formpost = NULL;
+  struct curl_httppost *lastptr = NULL;
   CURL *curl;
   CURLcode res;
 
