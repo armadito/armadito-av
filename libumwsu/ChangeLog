@@ -1,3 +1,7 @@
+2014-10-28  François  <francois@dechelle.net>
+
+	* changed alert reporting URL for HTTPS, added necessary libcurl options
+
 2014-10-16  François  <francois@dechelle.net>
 
 	* fixed compilation problem when building package on ubuntu 12.04

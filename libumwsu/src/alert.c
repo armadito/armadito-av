@@ -17,6 +17,14 @@
 #include <glib.h>
 #include <assert.h>
 
+#define ALERT_REPORT_SSL
+
+#ifdef ALERT_REPORT_SSL
+#define UMWSU_ALERT_URL "https://127.0.0.1:10083/"
+#else
+#define UMWSU_ALERT_URL "http://127.0.0.1:10083/"
+#endif
+
 struct alert {
   xmlDocPtr xml_doc;
 };
@@ -249,29 +257,31 @@ static void alert_send(struct alert *a)
   if (a->xml_doc == NULL)
     return;
 
-  alert_doc_save_to_buffer(a->xml_doc, &xml_buf);
-
   curl_global_init(CURL_GLOBAL_ALL);
 
-  curl_formadd(&formpost, &lastptr, CURLFORM_PTRNAME, "xml", CURLFORM_PTRCONTENTS, xmlBufferContent(xml_buf), CURLFORM_END);
-
   curl = curl_easy_init();
+  if (!curl)
+    return;
 
-  if (curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "http://127.0.0.1:10083/");
-    curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "libumwsu/1.0");
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, discard_data);
+  curl_easy_setopt(curl, CURLOPT_URL, UMWSU_ALERT_URL);
+  curl_easy_setopt(curl, CURLOPT_USERAGENT, "libumwsu/1.0");
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, discard_data);
+#ifdef ALERT_REPORT_SSL
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+#endif
 
-    res = curl_easy_perform(curl);
+  alert_doc_save_to_buffer(a->xml_doc, &xml_buf);
+  curl_formadd(&formpost, &lastptr, CURLFORM_PTRNAME, "xml", CURLFORM_PTRCONTENTS, xmlBufferContent(xml_buf), CURLFORM_END);
+  curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
 
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+  res = curl_easy_perform(curl);
 
-    curl_easy_cleanup(curl);
+  if(res != CURLE_OK)
+    fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
 
-    curl_formfree(formpost);
-  }
+  curl_easy_cleanup(curl);
+  curl_formfree(formpost);
 
   xmlBufferFree(xml_buf);
 }

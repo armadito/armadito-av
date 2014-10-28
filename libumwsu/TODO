@@ -1,3 +1,7 @@
+- ajouter service d'analyse idem windows [+TARD]
+- utiliser HTTPS au lieu HTTP pr remontée alerte
+- configuration
+
 - compléter les infos mime-type dans les modules
 
 - scan multi-thread
