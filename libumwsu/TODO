@@ -1,6 +1,6 @@
-- ajouter service d'analyse idem windows [+TARD]
-- utiliser HTTPS au lieu HTTP pr remontée alerte
-- configuration
+- ajouter service d'analyse idem windows avec analyse dans un process séparé [+TARD]
+- utiliser HTTPS au lieu HTTP pr remontée alerte [EN COURS]
+- configuration [+TARD]
 
 - compléter les infos mime-type dans les modules
 
