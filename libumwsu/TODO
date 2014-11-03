@@ -1,3 +1,4 @@
+- ajouter mise en quarantaine (voir IHM legacy)
 - ajouter service d'analyse idem windows avec analyse dans un process séparé [+TARD]
 - utiliser HTTPS au lieu HTTP pr remontée alerte [EN COURS]
 - configuration [+TARD]
