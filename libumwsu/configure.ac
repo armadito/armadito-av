@@ -61,7 +61,6 @@ Makefile
 doc/Makefile
 doc/man/Makefile
 doc/man/fr/Makefile
-doc/talk/Makefile
 include/Makefile
 include/libumwsu/Makefile
 pkgconfig/Makefile

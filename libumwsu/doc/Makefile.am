@@ -1,1 +1,1 @@
-SUBDIRS=man talk
+SUBDIRS=man
