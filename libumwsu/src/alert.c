@@ -248,6 +248,7 @@ static size_t discard_data(void *buffer, size_t size, size_t nmemb, void *userp)
 
 static void alert_send(struct alert *a)
 {
+  static int error_count;
   xmlBufferPtr xml_buf;
   struct curl_httppost *formpost = NULL;
   struct curl_httppost *lastptr = NULL;
@@ -277,7 +278,8 @@ static void alert_send(struct alert *a)
 
   res = curl_easy_perform(curl);
 
-  if(res != CURLE_OK)
+#define MAX_CURL_ERROR_PRINT 3
+  if(res != CURLE_OK && error_count++ < MAX_CURL_ERROR_PRINT)
     fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
 
   curl_easy_cleanup(curl);

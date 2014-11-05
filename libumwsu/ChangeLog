@@ -1,3 +1,7 @@
+2014-11-05  François  <francois@dechelle.net>
+
+	* added maximum count of error messages in alert.c
+
 2014-10-28  François  <francois@dechelle.net>
 
 	* changed alert reporting URL for HTTPS, added necessary libcurl options
