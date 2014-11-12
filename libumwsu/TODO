@@ -1,7 +1,18 @@
+- ajouter watch(directory)
+- configuration
 - ajouter mise en quarantaine (voir IHM legacy)
-- ajouter service d'analyse idem windows avec analyse dans un process séparé [+TARD]
-- utiliser HTTPS au lieu HTTP pr remontée alerte [EN COURS]
-- configuration [+TARD]
+
+- ajouter service d'analyse idem windows avec analyse dans un process séparé 
+-- protocole: idem clamd, socket Unix; problème du protocole clamd % caractère :
+
+- protection de l'antivirus: comment l'AV se protège lui-même (kill, suppression fichiers/répertoires)?
+-> comment relancer automatiquement un process, même si on tue le watchdog
+cf http://stackoverflow.com/questions/6538587/how-to-protect-my-process-from-being-killed
+
+- clamav: mettre la liste des bases à charger dans le fichier de config (pour bases OIV)
+
+
+- utiliser HTTPS au lieu HTTP pr remontée alerte [OK]
 
 - compléter les infos mime-type dans les modules
 
