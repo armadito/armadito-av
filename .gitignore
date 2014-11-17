@@ -1,1 +1,14 @@
 build-uhuru-*-Debug/
+build-uhuru-*-Dist/
+*~
+autom4te.cache/
+aclocal.m4
+configure
+depcomp
+install-sh
+missing
+legacy/CompilUhuru/
+Makefile
+Makefile.in
+*.o
+moc_*.cpp
