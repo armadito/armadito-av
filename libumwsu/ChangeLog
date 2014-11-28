@@ -1,3 +1,7 @@
+2014-11-28  François  <francois@dechelle.net>
+
+	* started implementing the scan daemon
+
 2014-11-05  François  <francois@dechelle.net>
 
 	* added maximum count of error messages in alert.c
