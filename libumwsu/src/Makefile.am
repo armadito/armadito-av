@@ -1,6 +1,23 @@
 lib_LTLIBRARIES=libumwsu.la
 
-libumwsu_la_SOURCES=alert.c alert.h dir.c dir.h module.c modulep.h report.c reportp.h status.c statusp.h scan.c umwsu.c umwsup.h unixsock.h unixsock.c
+libumwsu_la_SOURCES= \
+alert.c \
+alert.h \
+dir.c \
+dir.h \
+module.c \
+modulep.h \
+protocol.c \
+protocol.h \
+report.c \
+reportp.h \
+scan.c \
+status.c \
+statusp.h \
+umwsu.c \
+umwsup.h \
+unixsock.c \
+unixsock.h 
 
 AM_CPPFLAGS= -DLIBUMWSU_MODULES_PATH='"$(pkglibdir)/modules"'
 libumwsu_la_CFLAGS= -I$(top_srcdir)/include
