@@ -37,6 +37,7 @@ enum umwsu_status clamav_scan(const char *path, void *mod_data, char **pmod_repo
 
 enum umwsu_mod_status clamav_init(void **pmod_data)
 {
+  int ret;
   const char *clamav_db_dir;
   unsigned int signature_count = 0;
   struct clamav_data *cl_data;
@@ -46,17 +47,31 @@ enum umwsu_mod_status clamav_init(void **pmod_data)
 
   *pmod_data = cl_data;
 
-  cl_data->clamav_engine = cl_engine_new();
+  if ((ret = cl_init(CL_INIT_DEFAULT)) != CL_SUCCESS) {
+    fprintf(stderr, "ClamAV initialization failed: %s\n", cl_strerror(ret));
+    return UMWSU_MOD_INIT_ERROR;
+  }
+
+  if(!(cl_data->clamav_engine = cl_engine_new())) {
+    fprintf(stderr, "ClamAV: can't create new engine\n");
+    return UMWSU_MOD_INIT_ERROR;
+  }
 
   clamav_db_dir = cl_retdbdir();
 
-  if (cl_load(clamav_db_dir, cl_data->clamav_engine, &signature_count, CL_DB_STDOPT) != CL_SUCCESS)
+  if ((ret = cl_load(clamav_db_dir, cl_data->clamav_engine, &signature_count, CL_DB_STDOPT)) != CL_SUCCESS) {
+    fprintf(stderr, "ClamAV: error loading databases: \n", cl_strerror(ret));
+    cl_engine_free(cl_data->clamav_engine);
     return UMWSU_MOD_INIT_ERROR;
+  }
 
   fprintf(stderr, "ClamAV database loaded from %s, %d signatures\n", clamav_db_dir, signature_count);
 
-  if (cl_engine_compile(cl_data->clamav_engine) != CL_SUCCESS)
+  if ((ret = cl_engine_compile(cl_data->clamav_engine)) != CL_SUCCESS) {
+    fprintf(stderr, "ClamAV: engine compilation error: %s\n", cl_strerror(ret));;
+    cl_engine_free(cl_data->clamav_engine);
     return UMWSU_MOD_INIT_ERROR;
+  }
 
   fprintf(stderr, "ClamAV is initialized\n");
 
@@ -65,10 +80,5 @@ enum umwsu_mod_status clamav_init(void **pmod_data)
 
 void clamav_install(void)
 {
-  if (cl_init(CL_INIT_DEFAULT) != CL_SUCCESS) {
-    fprintf(stderr, "ClamAV initialization failed\n");
-    return;
-  }
-
   fprintf(stderr, "ClamAV module installed\n");
 }
