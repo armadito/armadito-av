@@ -7,8 +7,6 @@ dir.c \
 dir.h \
 module.c \
 modulep.h \
-protocol.c \
-protocol.h \
 report.c \
 reportp.h \
 scan.c \
@@ -18,6 +16,9 @@ umwsu.c \
 umwsup.h \
 unixsock.c \
 unixsock.h 
+
+#protocol.c 
+#protocol.h 
 
 AM_CPPFLAGS= -DLIBUMWSU_MODULES_PATH='"$(pkglibdir)/modules"'
 libumwsu_la_CFLAGS= -I$(top_srcdir)/include
