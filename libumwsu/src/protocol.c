@@ -2,73 +2,62 @@
 
 #include <stdlib.h>
 
-struct vector {
-  int element_size;
-  int alloc;
+#define PROTOCOL_BUFFER_INITIAL_SIZE 32
+
+struct buffer {
   char *head;
   char *tail;
+  int alloc;
 };
 
-#define DEFAULT_RESERVED_SIZE 256
-
-void vector_init(struct vector *v, int element_size, int reserved_size)
+void buffer_init(struct protocol_buffer *b)
 {
-  v->element_size = element_size;
-  if (reserved_size == 0)
-    reserved_size = DEFAULT_RESERVED_SIZE;
-  v->alloc = reserved_size * v->element_size;
-  v->head = (char *)malloc(v->alloc);
-  v->tail = v->head;
+  b->alloc = PROTOCOL_BUFFER_INITIAL_SIZE;
+  b->head = (char *)malloc(b->alloc);
+  b->tail = b->head;
 }
 
-void vector_grow(struct vector *v, int needed)
+void protocol_buffer_destroy(struct protocol_buffer *b)
 {
-  int current_size = v->tail - v->head;
-  int needed_size = needed * v->element_size;
+  free(b->buff);
+}
 
-  if (current_size + needed_size >= v->alloc) {
-    while (current_size + needed_size >= v->alloc)
-      v->alloc *= 2;
-    v->head = (char *)realloc(v->head, v->alloc);
-    v->tail = v->head + current_size;
+void protocol_buffer_grow(struct protocol_buffer *b, int needed)
+{
+  if (b->head + needed >= b->alloc) {
+    while(b->head + needed >= b->alloc)
+      b->alloc *= 2;
+    b->buff = (char *)realloc(b->buff, b->alloc);
   }
 }
 
-void *vector_append(struct vector *v, int n)
+void protocol_buffer_append_v(struct protocol_buffer *b, char *p)
 {
-  void *tail;
+  while(*p) {
+    switch(*p) {
+    case '\n':
+      protocol_buffer_grow(b, 2);
+      b->buff[b->head++] = '\\';
+      b->buff[b->head++] = 'n';
+      break;
+    default:
+      protocol_buffer_grow(b, 1);
+      b->buff[b->head++] = *p;
+      break;
+    }
 
-  vector_grow(v, n);
-
-  tail = v->tail;
-  v->tail += n * v->element_size;
-
-  return tail;
+    p++;
+  }
 }
 
-void vector_clear(struct vector *v)
+void protocol_buffer_append_s(struct protocol_buffer *b, char *p, int size)
 {
-  v->tail = v->head;
-}
+  int i;
 
-int vector_size(struct vector *v)
-{
-  return (v->tail - v->head) / v->element_size;
-}
-
-void *vector_head(struct vector *v)
-{
-  return v->head;
-}
-
-void *vector_tail(struct vector *v)
-{
-  return v->tail;
-}
-
-void *vector_index(struct vector *v, int i)
-{
-  return v->head + i * v->element_size;
+  protocol_buffer_grow(b, size);
+  
+  for(i = 0; i < size; i++)
+    b->buff[b->head++] = *p++;
 }
 
 struct header {
@@ -119,7 +108,6 @@ void protocol_decode(struct protocol_hander *h)
       append_to_command(c);
     else if (c == '\n') {
       append_to_command('\0');
-      reset_headers();
       state = IN_HEADER_NAME;
     } else
       protocol_error(c);
@@ -131,7 +119,7 @@ void protocol_decode(struct protocol_hander *h)
       append_to_header_name('\0');
       state = IN_HEADER_VALUE_SKIP_SPACE;
     } else if (c == '\n') {
-      end_of_command();
+      end_of_command();   /* includes reset_headers(); */
       state = IN_COMMAND;
     } else
       protocol_error(c);
