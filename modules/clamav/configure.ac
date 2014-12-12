@@ -1,4 +1,4 @@
-AC_INIT(umwsu-clamav,1.0.0,francois@dechelle.net)
+AC_INIT(uhuru-mod-clamav,1.0.0,francois@dechelle.net)
 AM_INIT_AUTOMAKE
 
 # collect arguments
