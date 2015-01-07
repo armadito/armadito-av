@@ -49,6 +49,16 @@ if test "$HAVE_LIBCURL" = "no"; then
    AC_MSG_ERROR("cannot find libcurl library")
 fi
 
+# check for libmagic, that has no pkg-config
+AC_CHECK_LIB(magic, magic_open, [HAVE_LIBMAGIC=yes], [HAVE_LIBMAGIC=no])
+if test "$HAVE_LIBMAGIC" = "no"; then
+   AC_MSG_ERROR("cannot find -lmagic")
+fi
+AC_CHECK_HEADER(magic.h, [HAVE_MAGIC_H=yes], [HAVE_MAGIC_H=no])
+if test "$HAVE_MAGIC_H" = "no"; then
+   AC_MSG_ERROR("cannot find magic.h")
+fi
+
 # documentation
 # check for asciidoc and a2x
 AC_PATH_PROG(ASCIIDOC, asciidoc)

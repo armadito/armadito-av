@@ -25,6 +25,7 @@ struct umwsu_scan {
   const char *path;
   enum umwsu_scan_flags flags;
   GThreadPool *thread_pool;  
+  GPrivate *private_magic_key;
   GArray *callbacks;
 };
 
@@ -33,6 +34,14 @@ static void scan_entry_thread(gpointer data, gpointer user_data);
 static int get_max_threads(void)
 {
   return 8;
+}
+
+/* Unfortunately, libmagic is not thread-safe. */
+/* We create a new magic_t for each thread, and keep it  */
+/* in thread's private data, so that it is created only once. */
+static void magic_destroy_notify(gpointer data)
+{
+  magic_close((magic_t)data);
 }
 
 struct umwsu_scan *umwsu_scan_new(struct umwsu *umwsu_handle, const char *path, enum umwsu_scan_flags flags)
@@ -46,10 +55,13 @@ struct umwsu_scan *umwsu_scan_new(struct umwsu *umwsu_handle, const char *path, 
 
   scan->flags = flags;
 
-  if (scan->flags & UMWSU_SCAN_THREADED)
+  if (scan->flags & UMWSU_SCAN_THREADED) {
     scan->thread_pool = g_thread_pool_new(scan_entry_thread, scan, get_max_threads(), FALSE, NULL);
-  else
+    scan->private_magic_key = g_private_new(magic_destroy_notify);
+  } else {
     scan->thread_pool = NULL;
+    scan->private_magic_key = NULL;
+  }
 
   scan->callbacks = g_array_new(FALSE, FALSE, sizeof(struct callback_entry));
 
@@ -143,25 +155,15 @@ static enum umwsu_status umwsu_scan_file(struct umwsu_scan *scan, magic_t magic,
   return status;
 }
 
-/* Unfortunately, libmagic is not thread-safe. */
-/* We create a new magic_t for each thread, and keep it  */
-/* in thread's private data, so that it is created only once. */
-static void magic_destroy_notify(gpointer data)
+static magic_t get_private_magic(struct umwsu_scan *scan)
 {
-  magic_close((magic_t)data);
-}
-
-static GPrivate private_magic = G_PRIVATE_INIT(magic_destroy_notify);
-
-static magic_t get_private_magic(void)
-{
-  magic_t m = (magic_t)g_private_get(&private_magic);
+  magic_t m = (magic_t)g_private_get(scan->private_magic_key);
 
   if (m == NULL) {
     m = magic_open(MAGIC_MIME_TYPE);
     magic_load(m, NULL);
 
-    g_private_set(&private_magic, (gpointer)m);
+    g_private_set(scan->private_magic_key, (gpointer)m);
   }
 
   return m;
@@ -172,7 +174,7 @@ static void scan_entry_thread(gpointer data, gpointer user_data)
   struct umwsu_scan *scan = (struct umwsu_scan *)user_data;
   char *path = (char *)data;
 
-  umwsu_scan_file(scan, get_private_magic(), path);
+  umwsu_scan_file(scan, get_private_magic(scan), path);
 
   free(path);
 }

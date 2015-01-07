@@ -1,3 +1,9 @@
+2015-01-07  François  <francois@dechelle.net>
+
+	* renamed umwsu-scan to uhuru-scan
+
+	* fixed compilation problem w.r.t. CentOS and glib2 version. TODO: check use of g_private_new for glib2 recent versions
+
 2014-11-28  François  <francois@dechelle.net>
 
 	* started implementing the scan daemon

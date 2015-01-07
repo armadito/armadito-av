@@ -1,8 +1,8 @@
-bin_PROGRAMS=umwsu-scan
+bin_PROGRAMS=uhuru-scan
 
-umwsu_scan_CFLAGS=-I$(top_srcdir)/include
-umwsu_scan_LDADD=$(top_builddir)/src/libumwsu.la @GMODULE2_LIBS@ -lmagic
-umwsu_scan_SOURCES=umwsu-scan.c
+uhuru_scan_CFLAGS=-I$(top_srcdir)/include
+uhuru_scan_LDADD=$(top_builddir)/src/libumwsu.la @GMODULE2_LIBS@ -lmagic
+uhuru_scan_SOURCES=uhuru-scan.c
 
 #dist_bin_SCRIPTS=umwsu-fake-server.py
 
