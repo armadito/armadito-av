@@ -1,3 +1,7 @@
+2015-01-08  François  <francois@dechelle.net>
+
+	* fixed installation directory for modules w.r.t. CentOS packaging
+
 2015-01-07  François  <francois@dechelle.net>
 
 	* renamed umwsu-scan to uhuru-scan

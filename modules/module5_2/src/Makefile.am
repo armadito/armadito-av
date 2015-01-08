@@ -1,6 +1,7 @@
 AUTOMAKE_OPTIONS=subdir-objects
 
-modulesdir=@LIBUMWSU_MODDIR@
+#modulesdir=@LIBUMWSU_MODDIR@
+modulesdir=$(libdir)/libumwsu/modules
 modules_LTLIBRARIES=module5_2.la
 
 ORG_SOURCES= \

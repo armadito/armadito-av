@@ -44,8 +44,8 @@ PKG_CHECK_MODULES(LIBUMWSU, libumwsu, [HAVE_LIBUMWSU=yes], [HAVE_LIBUMWSU=no])
 if test "$HAVE_LIBUMWSU" = "no"; then
    AC_MSG_ERROR("cannot find UMWSU library")
 fi
-LIBUMWSU_MODDIR=$(pkg-config --variable=moduledir libumwsu)
-AC_SUBST(LIBUMWSU_MODDIR)
+#LIBUMWSU_MODDIR=$(pkg-config --variable=moduledir libumwsu)
+#AC_SUBST(LIBUMWSU_MODDIR)
 
 # database directory
 AC_MSG_CHECKING(for databases directory)

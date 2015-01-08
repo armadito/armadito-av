@@ -1,4 +1,5 @@
-modulesdir=@LIBUMWSU_MODDIR@
+#modulesdir=@LIBUMWSU_MODDIR@
+modulesdir=$(libdir)/libumwsu/modules
 modules_LTLIBRARIES=clamav.la
 
 clamav_la_SOURCES=clamav.c
