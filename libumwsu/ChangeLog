@@ -1,3 +1,7 @@
+2015-01-23  François  <francois@dechelle.net>
+
+	* added summary print and better option parsing to uhuru-scan CLI
+
 2015-01-08  François  <francois@dechelle.net>
 
 	* fixed installation directory for modules w.r.t. CentOS packaging

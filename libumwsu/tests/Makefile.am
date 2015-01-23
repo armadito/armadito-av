@@ -1,3 +1,5 @@
+SUBDIRS=conf
+
 check_PROGRAMS=testfind1 testumwsu1 testumwsuscan1 testxmlreport1
 
 testfind1_CFLAGS=-I$(top_srcdir)/include -I$(top_srcdir)/src

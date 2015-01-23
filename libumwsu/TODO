@@ -1,3 +1,29 @@
+- configuration
+
+par module:
+- général: mime-types
+doit être fait au niveau général pour donner l'ordre des modules
+exemple:
+
+umwsu.conf:
+scan-archive=1
+alert-dir=/var/tmp/uhuru/alert
+mime-type=application/x-dosexec; clamav; module5.2
+mime-type=application/pdf;module4;clamav
+conf-dir=/etc/uhuru/conf.d
+conf-file=/etc/uhuru/zzz.conf
+
+clamav.conf:
+db=/var/lib/uhuru/db/clamav/unsupported # directory
+db=/var/lib/uhuru/db/clamav/oiv.db  # db
+
+module5_2.conf:
+dbdir=/var/lib/uhuru/db/module5.2/
+
+analysable par un analyseur lexical seul, pas besoin d'analyseur syntaxique
+flex vs. hand made scanner?
+
+
 - test commit DEV
 - ajouter watch(directory)
 - configuration
