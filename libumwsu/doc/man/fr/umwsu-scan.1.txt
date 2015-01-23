@@ -1,29 +1,41 @@
-UMWSU-SCAN(1)
+UHURU-SCAN(1)
 =============
 :doctype: manpage
 
 NOM
 ---
-umwsu-scan - outil de scan en ligne de commande
+uhuru-scan - outil de scan en ligne de commande
 
 
 SYNOPSIS
 --------
-*umwsu-scan* ['OPTIONS'] 'FILE|DIR' ...
+*uhuru-scan* ['OPTIONS'] 'FILE|DIR'
 
 
 DESCRIPTION
 -----------
-La commande *umwsu-scan*(1) lance une recherche de malwares dans les fichiers ou les répertoires passés en arguments et affiche les résultats sur sa sortie standard.
+La commande *uhuru-scan*(1) lance une recherche de malwares dans le fichier ou répertoire passé en argument et affiche les résultats sur sa sortie standard.
 
 Cette commande utilise la librairie de scan *libumwsu*(3).
 
 
 OPTIONS
 -------
-*-r*::
+*-r, --recursive*::
     Récursif.
-    Pour les arguments qui sont des répertoires, lance la recherche dans le répertoire et dans tous ses sous-répertoires.
+    Analyse récursive des répertoires. Lance la recherche dans le répertoire et dans tous ses sous-répertoires.
+
+*-t, --threaded*::
+    Threadé.
+    Utilise un ensemble de threads pour accélérer l'analyse.
+
+*-n, --no-summary*::
+    Pas de résumé.
+    N'affiche pas le résumé de l'analyse à la fin de l'exécution.
+
+*-h, --help*::
+    Aide
+    Affiche l'aide et termine l'exécution.
 
 
 EXIT STATUS
@@ -37,7 +49,7 @@ EXIT STATUS
 
 AUTHOR
 ------
-umwsu-scan a été écrit par François Déchelle.
+uhuru-scan a été écrit par François Déchelle.
 
 
 RESOURCES
