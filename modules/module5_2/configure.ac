@@ -14,7 +14,7 @@ AC_ARG_WITH([libumwsu],
 	)
 # database directory
 AC_ARG_WITH([dbdir],
-	AS_HELP_STRING([--with-dbdir=DIR],[specify path to databases @<:@default is /var/lib/umwsu/module52/db@:>@]),
+	AS_HELP_STRING([--with-dbdir=DIR],[specify path to databases @<:@default is /var/lib/umwsu/module5-2/db@:>@]),
 	with_dbdir="$withval",
 	with_dbdir="no")
 
@@ -50,7 +50,7 @@ fi
 # database directory
 AC_MSG_CHECKING(for databases directory)
 if test "$with_dbdir" = "no" ; then
-   MODULE5_2_DBDIR="$localstatedir/lib/umwsu/module52/db"
+   MODULE5_2_DBDIR="$localstatedir/lib/umwsu/module5-2/db"
 else
    MODULE5_2_DBDIR="$with_dbdir"
 fi

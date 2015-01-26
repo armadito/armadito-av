@@ -75,6 +75,7 @@ include/Makefile
 include/libumwsu/Makefile
 pkgconfig/Makefile
 src/Makefile
+tests/Makefile
 tools/Makefile
 ])
 AC_OUTPUT

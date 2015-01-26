@@ -1,4 +1,4 @@
-SUBDIRS=conf
+#SUBDIRS=conf
 
 check_PROGRAMS=testfind1 testumwsu1 testumwsuscan1 testxmlreport1
 
