@@ -1,11 +1,17 @@
 #include <libumwsu/scan.h>
 
+#undef ALERT_VIA_SSL
+#define ALERT_VIA_FILE
+
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xmlsave.h>
+#ifdef ALERT_VIA_SSL
 #include <curl/curl.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -16,13 +22,13 @@
 #include <time.h>
 #include <glib.h>
 #include <assert.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
-#define ALERT_REPORT_SSL
-
-#ifdef ALERT_REPORT_SSL
+#ifdef ALERT_VIA_SSL
 #define UMWSU_ALERT_URL "https://127.0.0.1:10083/"
-#else
-#define UMWSU_ALERT_URL "http://127.0.0.1:10083/"
+/* #define UMWSU_ALERT_URL "http://127.0.0.1:10083/" */
 #endif
 
 struct alert {
@@ -196,6 +202,7 @@ static void alert_add(struct alert *a, struct umwsu_report *report)
   alert_doc_add_alert(a->xml_doc, report);
 }
 
+#ifdef ALERT_VIA_UNIX_SOCKET
 static int connect_socket(const char *path)
 {
   int fd;
@@ -219,10 +226,9 @@ static int connect_socket(const char *path)
   return fd;
 }
 
-#if 0
 #define ALERT_SOCKET_PATH "/var/tmp/davfi_alert.s"
 
-static void alert_send(struct alert *a)
+static void alert_send_via_unix_sock(struct alert *a)
 {
   int fd;
 				
@@ -241,12 +247,13 @@ static void alert_send(struct alert *a)
 }
 #endif
 
+#ifdef ALERT_VIA_SSL
 static size_t discard_data(void *buffer, size_t size, size_t nmemb, void *userp)
 {
    return size * nmemb;
 }
 
-static void alert_send(struct alert *a)
+static void alert_send_via_https(struct alert *a)
 {
   static int error_count;
   xmlBufferPtr xml_buf;
@@ -287,6 +294,29 @@ static void alert_send(struct alert *a)
 
   xmlBufferFree(xml_buf);
 }
+#endif
+
+#ifdef ALERT_VIA_FILE
+/* must be configurable */
+#define ALERT_DIR "/var/tmp"
+#define ALERT_PFX "uhuru"
+
+static void alert_send_via_file(struct alert *a)
+{
+  int fd;
+  char *tmp_file_name;
+  
+  tmp_file_name = tempnam(ALERT_DIR, ALERT_PFX);
+
+  fd = open(tmp_file_name, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+  if (fd != -1) {
+    alert_doc_save_to_fd(a->xml_doc, fd);
+    close(fd);
+  }
+
+  free(tmp_file_name);
+}
+#endif
 
 static void alert_free(struct alert *a)
 {
@@ -311,7 +341,14 @@ void alert_callback(struct umwsu_report *report, void *callback_data)
 
   a = alert_new();
   alert_add(a, report);
-  alert_send(a);
+
+#ifdef ALERT_VIA_SSL
+  alert_send_via_https(a);
+#endif
+#ifdef ALERT_VIA_FILE
+  alert_send_via_file(a);
+#endif
+
   alert_free(a);
 }
 

@@ -30,5 +30,5 @@ libumwsu_la_LIBADD+= @GMODULE2_LIBS@
 libumwsu_la_CFLAGS+= @LIBXML2_CFLAGS@
 libumwsu_la_LIBADD+= @LIBXML2_LIBS@
 
-libumwsu_la_CFLAGS+= @LIBCURL_CFLAGS@
-libumwsu_la_LIBADD+= @LIBCURL_LIBS@
+#libumwsu_la_CFLAGS+= @LIBCURL_CFLAGS@
+#libumwsu_la_LIBADD+= @LIBCURL_LIBS@

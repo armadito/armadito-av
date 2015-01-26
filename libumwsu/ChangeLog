@@ -1,3 +1,7 @@
+2015-01-26  François  <francois@dechelle.net>
+
+	* removed alert sending via HTTPS, replaced by writing a file (changes in agent)
+
 2015-01-23  François  <francois@dechelle.net>
 
 	* added summary print and better option parsing to uhuru-scan CLI
