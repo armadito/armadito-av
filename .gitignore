@@ -1,0 +1,17 @@
+﻿################################################################################
+# Ce fichier .gitignore a été créé automatiquement par Microsoft(R) Visual Studio.
+################################################################################
+
+/DllUhuru/Debug
+/DllUhuru/Release
+/DllUhuru/x64/Debug
+/DllUhuru/x64/Release
+/x64/Debug
+/x64/Release
+/UhuruStatic/bin
+*.sdf
+*.opensdf
+*.suo
+*.user
+/BlueWhaleWalker/Release
+/BlueWhaleWalker/x64/Release
