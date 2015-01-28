@@ -7,7 +7,6 @@ reprendre umwsu-daemon.c
 -> callback(u, event type, char *path)
 dans la GUI: créer un scan *, ouvrir une fenêtre de scan, lancer le scan
 
-
 - configuration
 
 par module:

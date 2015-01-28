@@ -9,6 +9,7 @@
 const char *clamav_mime_types[] = {
   "application/x-dosexec",
   "application/pdf",
+  "*", /* clamav scans every file if no other module applies */
   NULL,
 };
 

@@ -95,42 +95,36 @@ static void umwsu_scan_call_callbacks(struct umwsu_scan *scan, struct umwsu_repo
 static enum umwsu_status umwsu_scan_apply_modules(const char *path, GPtrArray *mod_array,  struct umwsu_report *report)
 {
   enum umwsu_status current_status = UMWSU_UNDECIDED;
+  int i;
 
-  if (mod_array == NULL) {
-    current_status = UMWSU_UNKNOWN_FILE_TYPE;
-    report->status = current_status;
-  } else {
-    int i;
-
-    for (i = 0; i < mod_array->len; i++) {
-      struct umwsu_module *mod = (struct umwsu_module *)g_ptr_array_index(mod_array, i);
-      enum umwsu_status mod_status;
-      char *mod_report = NULL;
+  for (i = 0; i < mod_array->len; i++) {
+    struct umwsu_module *mod = (struct umwsu_module *)g_ptr_array_index(mod_array, i);
+    enum umwsu_status mod_status;
+    char *mod_report = NULL;
 
 #if 0
-      if (umwsu_get_verbose(u) >= 2)
-	printf("UMWSU: module %s: scanning %s\n", mod->name, path);
+    if (umwsu_get_verbose(u) >= 2)
+      printf("UMWSU: module %s: scanning %s\n", mod->name, path);
 #endif
 
-      mod_status = (*mod->scan)(path, mod->data, &mod_report);
+    mod_status = (*mod->scan)(path, mod->data, &mod_report);
 
 #if 0
-      printf("UMWSU: module %s: scanning %s -> %s\n", mod->name, path, umwsu_status_str(mod_status));
+    printf("UMWSU: module %s: scanning %s -> %s\n", mod->name, path, umwsu_status_str(mod_status));
 #endif
 
-      if (umwsu_status_cmp(current_status, mod_status) < 0) {
-	current_status = mod_status;
-	umwsu_report_change(report, mod_status, (char *)mod->name, mod_report);
-      } else if (mod_report != NULL)
-	free(mod_report);
+    if (umwsu_status_cmp(current_status, mod_status) < 0) {
+      current_status = mod_status;
+      umwsu_report_change(report, mod_status, (char *)mod->name, mod_report);
+    } else if (mod_report != NULL)
+      free(mod_report);
 
 #if 0
-      printf("UMWSU: current status %s\n", umwsu_status_str(current_status));
+    printf("UMWSU: current status %s\n", umwsu_status_str(current_status));
 #endif
 
-      if (current_status == UMWSU_WHITE_LISTED || current_status == UMWSU_MALWARE)
-	break;
-    }
+    if (current_status == UMWSU_WHITE_LISTED || current_status == UMWSU_MALWARE)
+      break;
   }
 
   return current_status;
@@ -140,10 +134,16 @@ static enum umwsu_status umwsu_scan_file(struct umwsu_scan *scan, magic_t magic,
 {
   enum umwsu_status status;
   struct umwsu_report report;
+  GPtrArray *modules;
 
   umwsu_report_init(&report, path);
 
-  status = umwsu_scan_apply_modules(path, umwsu_get_applicable_modules(scan->u, magic, path), &report);
+  modules = umwsu_get_applicable_modules(scan->u, magic, path);
+
+  if (modules == NULL)
+    report.status = UMWSU_UNKNOWN_FILE_TYPE;
+  else
+    status = umwsu_scan_apply_modules(path, modules, &report);
 
   if (umwsu_get_verbose(scan->u) >= 3)
     printf("%s: %s\n", path, umwsu_status_str(status));

@@ -82,6 +82,8 @@ int main(int argc, char **argv)
 
   umwsu_set_verbose(u, 1);
 
+  umwsu_print(u);
+
   umwsu_watch(u, opts.file_or_dir);
 
   watch_event.full_path = NULL;
