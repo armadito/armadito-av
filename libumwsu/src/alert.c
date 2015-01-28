@@ -301,7 +301,7 @@ static void alert_send_via_https(struct alert *a)
 
 #ifdef ALERT_VIA_FILE
 /* must be configurable */
-#define DEFAULT_ALERT_DIR "/var/spool/uhuru"
+#define DEFAULT_ALERT_DIR LIBUMWSU_ALERT_DIR
 #define ALERT_PFX "alert"
 
 static char *alert_dir = DEFAULT_ALERT_DIR;

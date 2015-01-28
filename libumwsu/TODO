@@ -1,3 +1,13 @@
+- ajouter watch(directory)
+
+reprendre umwsu-daemon.c
+ umwsu_watch(u, char *path)
+-> créer le inotify_fd si nécessaire
+ umwsu_watch_loop(u, callback)
+-> callback(u, event type, char *path)
+dans la GUI: créer un scan *, ouvrir une fenêtre de scan, lancer le scan
+
+
 - configuration
 
 par module:
@@ -65,8 +75,7 @@ g_key_file_free (GKeyFile *key_file);
 
 
 - test commit DEV
-- ajouter watch(directory)
-- configuration
+
 - ajouter mise en quarantaine (voir IHM legacy)
 
 - ajouter service d'analyse idem windows avec analyse dans un process séparé 

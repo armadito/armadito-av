@@ -73,7 +73,6 @@ static void umwsu_daemon_watch(struct umwsu_daemon *d, const char *path, int rec
     error("inotify_add_watch");
 
   fprintf(stderr, "adding watch %d on %s\n", wd, path);
-
   g_hash_table_insert(d->watch_table, GINT_TO_POINTER(wd), (gpointer)strdup(path));
 }
 

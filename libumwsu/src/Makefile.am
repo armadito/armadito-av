@@ -17,12 +17,15 @@ statusp.h \
 umwsu.c \
 umwsup.h \
 unixsock.c \
-unixsock.h 
+unixsock.h \
+watch.c \
+watch.h
+
 
 #protocol.c 
 #protocol.h 
 
-AM_CPPFLAGS= -DLIBUMWSU_MODULES_PATH='"$(pkglibdir)/modules"' -DLIBUMWSU_CONF_DIR='"$(sysconfdir)/umwsu"'
+AM_CPPFLAGS= -DLIBUMWSU_MODULES_PATH='"$(pkglibdir)/modules"' -DLIBUMWSU_CONF_DIR='"$(sysconfdir)/umwsu"' -DLIBUMWSU_ALERT_DIR='"$(localstatedir)/spool/uhuru"' 
 libumwsu_la_CFLAGS= -I$(top_srcdir)/include
 libumwsu_la_LIBADD= 
 
@@ -34,3 +37,8 @@ libumwsu_la_LIBADD+= @LIBXML2_LIBS@
 
 #libumwsu_la_CFLAGS+= @LIBCURL_CFLAGS@
 #libumwsu_la_LIBADD+= @LIBCURL_LIBS@
+
+install-exec-hook:
+	-mkdir -p $(DESTDIR)$(localstatedir)/spool/uhuru
+	-chmod 0777 $(DESTDIR)$(localstatedir)/spool/uhuru
+

@@ -4,6 +4,7 @@
 #include "dir.h"
 #include "modulep.h"
 #include "statusp.h"
+#include "watchp.h"
 
 #include <assert.h>
 #include <glib.h>
@@ -17,6 +18,8 @@ struct umwsu {
   GHashTable *mime_types_table;
   GPtrArray *modules;
   magic_t magic;
+  /* for now... */
+  struct umwsu_watch *watch;
 };
 
 static struct umwsu *umwsu_new(void)
@@ -32,6 +35,8 @@ static struct umwsu *umwsu_new(void)
 
   u->mime_types_table = g_hash_table_new(g_str_hash, g_str_equal);
   u->modules = g_ptr_array_new();
+
+  u->watch = NULL;
 
   return u;
 }
@@ -188,5 +193,18 @@ void umwsu_close(struct umwsu *u)
   magic_close(u->magic);
 
   /* must close all modules */
+}
+
+void umwsu_watch(struct umwsu *u, const char *dir)
+{
+  if (u->watch == NULL)
+    u->watch = umwsu_watch_new();
+
+  umwsu_watch_add(u->watch, dir);
+}
+
+int umwsu_watch_next_event(struct umwsu *u, struct umwsu_watch_event *event)
+{
+  return umwsu_watch_wait(u->watch, event);
 }
 

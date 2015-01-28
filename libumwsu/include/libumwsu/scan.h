@@ -47,6 +47,30 @@ struct umwsu_report {
 
 void umwsu_report_print(struct umwsu_report *report, FILE *out);
 
+enum umwsu_watch_event_type {
+  UMWSU_WATCH_NONE,
+  UMWSU_WATCH_DIRECTORY_CREATE,
+  UMWSU_WATCH_DIRECTORY_OPEN,
+  UMWSU_WATCH_DIRECTORY_CLOSE_NO_WRITE,
+  UMWSU_WATCH_DIRECTORY_CLOSE_WRITE,
+  UMWSU_WATCH_DIRECTORY_DELETE,
+  UMWSU_WATCH_FILE_CREATE,
+  UMWSU_WATCH_FILE_OPEN,
+  UMWSU_WATCH_FILE_CLOSE_NO_WRITE,
+  UMWSU_WATCH_FILE_CLOSE_WRITE,
+  UMWSU_WATCH_FILE_DELETE,
+  /* etc */
+};
+
+struct umwsu_watch_event {
+  enum umwsu_watch_event_type event_type;
+  char *full_path;
+};
+
+void umwsu_watch(struct umwsu *u, const char *dir);
+
+int umwsu_watch_next_event(struct umwsu *u, struct umwsu_watch_event *event);
+
 #ifdef __cplusplus
 }
 #endif

@@ -205,7 +205,7 @@ enum umwsu_status umwsu_scan_start(struct umwsu_scan *scan)
 
   if (stat(scan->path, &sb) == -1) {
     perror("stat");
-    exit(EXIT_FAILURE);
+    /* exit(EXIT_FAILURE); */
   }
 
   if (S_ISREG(sb.st_mode))
