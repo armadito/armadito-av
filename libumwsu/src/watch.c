@@ -60,8 +60,10 @@ static void umwsu_watch_add_aux(struct umwsu_watch *w, const char *path, int rec
     struct dirent *entry;
 
     dir = opendir(path);
-    if (dir == NULL)
+    if (dir == NULL) {
       error("opendir");
+      return;
+    }
 
     while((entry = readdir(dir)) != NULL) {
       char *entry_path;

@@ -19,8 +19,7 @@ umwsup.h \
 unixsock.c \
 unixsock.h \
 watch.c \
-watch.h
-
+watchp.h
 
 #protocol.c 
 #protocol.h 
