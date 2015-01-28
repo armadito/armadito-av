@@ -61,6 +61,7 @@ struct umwsu_module *module_new(const char *path)
   mod->name = module_name_from_path(path);
   mod->data = NULL;
 
+  mod->conf = get_symbol(module, mod->name, "conf");
   mod->init = get_symbol(module, mod->name, "init");
   mod->scan = get_symbol(module, mod->name, "scan");
   mod->close = get_symbol(module, mod->name, "close");

@@ -1,5 +1,6 @@
 #include <libumwsu/module.h>
 #include <libumwsu/scan.h>
+#include "alert.h"
 #include "dir.h"
 #include "modulep.h"
 #include "statusp.h"
@@ -62,6 +63,11 @@ static int umwsu_module_load_directory(struct umwsu *u, const char *directory)
   return dir_map(directory, 0, load_entry, u);
 }
 
+static void umwsu_module_add_local(struct umwsu *u)
+{
+  umwsu_add_module(u, &umwsu_mod_alert);
+}
+
 static void umwsu_add_mime_type(struct umwsu *u, const char *mime_type, struct umwsu_module *mod)
 {
   GPtrArray *mod_array;
@@ -77,7 +83,7 @@ static void umwsu_add_mime_type(struct umwsu *u, const char *mime_type, struct u
   g_ptr_array_add(mod_array, mod);
 }
 
-static void uwm_module_init_all(struct umwsu *u)
+static void uwmsu_module_init_all(struct umwsu *u)
 {
   int i;
 
@@ -96,6 +102,17 @@ static void uwm_module_init_all(struct umwsu *u)
   }
 }
 
+static void umwsu_module_conf_all(struct umwsu *u)
+{
+  int i;
+
+  for (i = 0; i < u->modules->len; i++) {
+    struct umwsu_module *mod = (struct umwsu_module *)g_ptr_array_index(u->modules, i);
+
+    conf_load(mod);
+  }
+}
+
 static void mod_print(gpointer data, gpointer user_data)
 {
   module_print((struct umwsu_module *)data, stderr);
@@ -111,10 +128,11 @@ struct umwsu *umwsu_open(void)
   struct umwsu *u = umwsu_new();
 
   umwsu_module_load_directory(u, LIBUMWSU_MODULES_PATH);
+  umwsu_module_add_local(u);
 
-  /* module_conf_all(); */
+  umwsu_module_conf_all(u);
 
-  uwm_module_init_all(u);
+  uwmsu_module_init_all(u);
 
   /* uwm_module_print_all(u); */
 
@@ -168,5 +186,7 @@ GPtrArray *umwsu_get_applicable_modules(struct umwsu *u, magic_t magic, const ch
 void umwsu_close(struct umwsu *u)
 {
   magic_close(u->magic);
+
+  /* must close all modules */
 }
 

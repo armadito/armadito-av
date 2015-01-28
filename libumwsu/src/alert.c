@@ -1,4 +1,7 @@
 #include <libumwsu/scan.h>
+#include <libumwsu/module.h>
+#include "dir.h"
+#include "modulep.h"
 
 #undef ALERT_VIA_SSL
 #define ALERT_VIA_FILE
@@ -298,15 +301,17 @@ static void alert_send_via_https(struct alert *a)
 
 #ifdef ALERT_VIA_FILE
 /* must be configurable */
-#define ALERT_DIR "/var/tmp"
-#define ALERT_PFX "uhuru"
+#define DEFAULT_ALERT_DIR "/var/spool/uhuru"
+#define ALERT_PFX "alert"
+
+static char *alert_dir = DEFAULT_ALERT_DIR;
 
 static void alert_send_via_file(struct alert *a)
 {
   int fd;
   char *tmp_file_name;
   
-  tmp_file_name = tempnam(ALERT_DIR, ALERT_PFX);
+  tmp_file_name = tempnam(alert_dir, ALERT_PFX);
 
   fd = open(tmp_file_name, O_WRONLY | O_CREAT | O_TRUNC, 0666);
   if (fd != -1) {
@@ -352,3 +357,21 @@ void alert_callback(struct umwsu_report *report, void *callback_data)
   alert_free(a);
 }
 
+static enum umwsu_mod_status mod_alert_conf(void *mod_data, const char *key, const char *value)
+{
+  if (!strcmp(key, "alert-dir")) {
+    fprintf(stderr, "alert: got config %s -> %s\n", key, value);
+    alert_dir = strdup(value);
+    mkdir_p(alert_dir);
+  }
+}
+
+struct umwsu_module umwsu_mod_alert = {
+  .init = NULL,
+  .conf = &mod_alert_conf,
+  .scan = NULL,
+  .close = NULL,
+  .name = "alert",
+  .mime_types = NULL,
+  .data = NULL,
+};

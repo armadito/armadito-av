@@ -7,6 +7,10 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 int dir_map(const char *path, int recurse, void (*dirent_fun)(const char *fpath, const struct dirent *dir_entry, void *data), void *data)
 {
@@ -63,3 +67,44 @@ int dir_map(const char *path, int recurse, void (*dirent_fun)(const char *fpath,
   return ret;
 }
 
+/*
+ * Returns:
+ * 1 if path exists
+ * 0 it path does not exist and must be created
+ * -1 if error (path exists and is not a directory, or other error)
+ */
+static int stat_dir(const char *path)
+{
+  struct stat st;
+
+  if (!stat(path, &st) && S_ISDIR(st.st_mode))
+    return 1;
+
+  return (errno == ENOENT) ? 0 : -1;
+}
+
+int mkdir_p(const char *path)
+{
+  char *token, *full, *end;
+  int ret = 0;
+     
+  token = full = strdup(path);
+  do {
+    end = strchr(token, '/');
+
+    if (token != end) {
+      if (end != NULL)
+	*end = '\0';
+
+      if (!(ret = stat_dir(full))) {
+	ret = mkdir(full, 0777);
+      }
+
+      if (end != NULL)
+	*end = '/';
+    }
+    token = end + 1;
+  } while (end != NULL && ret >= 0);
+
+  return ret;
+}

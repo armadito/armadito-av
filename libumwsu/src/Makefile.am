@@ -3,6 +3,8 @@ lib_LTLIBRARIES=libumwsu.la
 libumwsu_la_SOURCES= \
 alert.c \
 alert.h \
+conf.c \
+conf.h \
 dir.c \
 dir.h \
 module.c \
@@ -20,7 +22,7 @@ unixsock.h
 #protocol.c 
 #protocol.h 
 
-AM_CPPFLAGS= -DLIBUMWSU_MODULES_PATH='"$(pkglibdir)/modules"'
+AM_CPPFLAGS= -DLIBUMWSU_MODULES_PATH='"$(pkglibdir)/modules"' -DLIBUMWSU_CONF_DIR='"$(sysconfdir)/umwsu"'
 libumwsu_la_CFLAGS= -I$(top_srcdir)/include
 libumwsu_la_LIBADD= 
 
