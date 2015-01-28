@@ -82,10 +82,6 @@ int main(int argc, char **argv)
 
   umwsu_set_verbose(u, 1);
 
-#if 0
-  umwsu_print(u);
-#endif
-
   umwsu_watch(u, opts.file_or_dir);
 
   watch_event.full_path = NULL;
@@ -93,8 +89,6 @@ int main(int argc, char **argv)
   while (!umwsu_watch_next_event(u, &watch_event)) {
     struct umwsu_scan *scan;
     enum umwsu_scan_flags flags = UMWSU_SCAN_RECURSE | UMWSU_SCAN_THREADED;
-
-    /* fprintf(stderr, "got watch on %s\n", watch_event.full_path); */
 
     switch(watch_event.event_type) {
     case UMWSU_WATCH_DIRECTORY_CREATE:
@@ -108,16 +102,6 @@ int main(int argc, char **argv)
       break;
     }
   }
-
-#if 0
-  umwsu_watch_add_callback(watch, report_print_callback, stdout);
-
-  umwsu_watch_start(watch);
-
-  umwsu_watch_finish(watch);
-
-  umwsu_watch_free(watch);
-#endif
 
   umwsu_close(u);
 
