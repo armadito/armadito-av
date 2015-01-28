@@ -1,5 +1,6 @@
 AUTOMAKE_OPTIONS=subdir-objects
 
+# this does not work w.r.t. rpm packaging
 #modulesdir=@LIBUMWSU_MODDIR@
 modulesdir=$(libdir)/libumwsu/modules
 modules_LTLIBRARIES=module5_2.la

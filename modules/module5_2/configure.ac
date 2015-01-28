@@ -1,4 +1,4 @@
-AC_INIT(uhuru-mod-module5-2,1.0.0,francois@dechelle.net)
+AC_INIT(uhuru-mod-module5-2,1.1.0,francois@dechelle.net)
 AM_INIT_AUTOMAKE
 
 # collect arguments
@@ -64,5 +64,6 @@ AC_SUBST(MODULE5_2_DBDIR)
 AC_CONFIG_FILES([
 Makefile
 src/Makefile
+conf/Makefile
 ])
 AC_OUTPUT

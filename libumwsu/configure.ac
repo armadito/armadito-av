@@ -68,6 +68,7 @@ AM_CONDITIONAL([COND_DOC], [test ! -z "$ASCIIDOC" -a ! -z "$A2X" ])
 # Output files
 AC_CONFIG_FILES([
 Makefile
+conf/Makefile
 doc/Makefile
 doc/man/Makefile
 doc/man/fr/Makefile

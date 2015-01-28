@@ -1,4 +1,4 @@
-AC_INIT(uhuru-mod-clamav,1.0.0,francois@dechelle.net)
+AC_INIT(uhuru-mod-clamav,1.1.0,francois@dechelle.net)
 AM_INIT_AUTOMAKE
 
 # collect arguments
@@ -52,5 +52,6 @@ fi
 AC_CONFIG_FILES([
 Makefile
 src/Makefile
+conf/Makefile
 ])
 AC_OUTPUT

@@ -60,7 +60,7 @@ enum umwsu_mod_status clamav_init(void **pmod_data)
   clamav_db_dir = cl_retdbdir();
 
   if ((ret = cl_load(clamav_db_dir, cl_data->clamav_engine, &signature_count, CL_DB_STDOPT)) != CL_SUCCESS) {
-    fprintf(stderr, "ClamAV: error loading databases: \n", cl_strerror(ret));
+    fprintf(stderr, "ClamAV: error loading databases: %s\n", cl_strerror(ret));
     cl_engine_free(cl_data->clamav_engine);
     return UMWSU_MOD_INIT_ERROR;
   }
