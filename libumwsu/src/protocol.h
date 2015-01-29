@@ -14,12 +14,12 @@
   Response: SCANNED
   Response headers:
     Path: <scanned_path> (is a file)
-    Status: UNDECIDED | UNKNOWN | EINVAL | IERROR | SUSPICIOUS | MALWARE
+    Status: OK | UNDECIDED | UNKNOWN | EINVAL | IERROR | SUSPICIOUS | MALWARE
     X-Status: <specific to scan module> (for instance virus name) (optional)
-    Action: CLEAN | QUARANTINE | REMOVED | NONE
+    Action: CLEAN | QUARANTINE | REMOVED | NONE | ...
   Repeat response: yes
   Connexion: not closed
-  Response: END
+  Response: SCAN_END
   Response headers: none
   Connexion: close
 
