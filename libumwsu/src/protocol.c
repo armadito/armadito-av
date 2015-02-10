@@ -4,38 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct protocol_command {
-  GString *command;
-  GHashTable *headers;
-};
-
-static void str_free(gpointer p)
-{
-  g_free(p);
-}
-
-static struct protocol_command *protocol_command_new(void)
-{
-  struct protocol_command *cmd;
-
-  cmd = (struct protocol_command *)malloc(sizeof(struct protocol_command));
-  cmd->command = g_string_new("");
-  cmd->headers = g_hash_table_new_full(g_str_hash, g_str_equal, str_free, str_free);
-
-  return cmd;
-}
-
-char *protocol_command_cmd(struct protocol_command *cmd)
-{
-  return cmd->command->str;
-}
-
-char *protocol_command_header(struct protocol_command *cmd, const char *key)
-{
-  return (char *)g_hash_table_lookup(cmd->headers, key);
-}
-
-
 enum protocol_handler_state {
   EXPECTING_COMMAND,
   IN_COMMAND,
@@ -47,9 +15,15 @@ enum protocol_handler_state {
 
 struct protocol_handler {
   enum protocol_handler_state state;
+  GString *current_command;
   GString *current_header_key, *current_header_value;
-  struct protocol_command *cmd;
+  GHashTable *headers;
 };
+
+static void str_free(gpointer p)
+{
+  g_free(p);
+}
 
 struct protocol_handler *protocol_handler_new(void)
 {
@@ -58,9 +32,10 @@ struct protocol_handler *protocol_handler_new(void)
   h = (struct protocol_handler *)malloc(sizeof(struct protocol_handler));
 
   h->state = EXPECTING_COMMAND;
+  h->current_command = g_string_new("");
   h->current_header_key = g_string_new("");
   h->current_header_value = g_string_new("");
-  h->cmd = protocol_command_new();
+  h->headers = g_hash_table_new_full(g_str_hash, g_str_equal, str_free, str_free);
 
   return h;
 }
@@ -72,7 +47,7 @@ static void protocol_error(struct protocol_handler *h, char c)
 
 static void protocol_handler_end_of_header(struct protocol_handler *h)
 {
-  g_hash_table_insert(h->cmd->headers, g_strdup(h->current_header_key->str), g_strdup(h->current_header_value->str));
+  g_hash_table_insert(h->headers, g_strdup(h->current_header_key->str), g_strdup(h->current_header_value->str));
   g_string_truncate(h->current_header_key, 0);
   g_string_truncate(h->current_header_value, 0);
 }
@@ -84,12 +59,12 @@ static void GH_print_func(gpointer key, gpointer value, gpointer user_data)
 
 static void protocol_handler_end_of_command(struct protocol_handler *h)
 {
-  fprintf(stderr, "Command: %s\n", h->cmd->command->str);
-  g_hash_table_foreach (h->cmd->headers, GH_print_func, NULL);
+  fprintf(stderr, "Command: %s\n", h->current_command->str);
+  g_hash_table_foreach (h->headers, GH_print_func, NULL);
   fprintf(stderr, "\n");
 
-  g_string_truncate(h->cmd->command, 0);
-  g_hash_table_remove_all(h->cmd->headers);
+  g_string_truncate(h->current_command, 0);
+  g_hash_table_remove_all(h->headers);
   g_string_truncate(h->current_header_key, 0);
   g_string_truncate(h->current_header_value, 0);
 }
@@ -102,7 +77,7 @@ int protocol_handler_input_char(struct protocol_handler *h, char c)
   switch(h->state) {
   case EXPECTING_COMMAND:
     if (isupper(c) || c == '_')
-      g_string_append_c(h->cmd->command, c);
+      g_string_append_c(h->current_command, c);
     else if (c == '\n')
       h->state = EXPECTING_HEADER;
     else
@@ -136,4 +111,15 @@ int protocol_handler_input_char(struct protocol_handler *h, char c)
 
   return 0;
 }
+
+char *protocol_handler_cmd(struct protocol_handler *handler)
+{
+  return handler->current_command->str;
+}
+
+char *protocol_handler_header(struct protocol_handler *handler, const char *key)
+{
+  return (char *)g_hash_table_lookup(handler->headers, key);
+}
+
 
