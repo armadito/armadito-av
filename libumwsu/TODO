@@ -1,4 +1,10 @@
-- ajouter watch(directory)
+- ajouter service d'analyse idem windows avec analyse dans un process séparé 
+-- protocole: idem clamd, socket Unix; problème du protocole clamd % caractère :
+-- structure: GArray? de GString ou GByteArray ou structure ad-hoc des mêmes
+-- parser: crée une structure du même type
+
+
+- ajouter watch(directory) [OK, revoir l'implémentation]
 
 reprendre umwsu-daemon.c
  umwsu_watch(u, char *path)
@@ -7,7 +13,7 @@ reprendre umwsu-daemon.c
 -> callback(u, event type, char *path)
 dans la GUI: créer un scan *, ouvrir une fenêtre de scan, lancer le scan
 
-- configuration
+- configuration [OK, revoir l'implémentation]
 
 par module:
 - général: mime-types
@@ -30,101 +36,13 @@ module5_2.conf:
 dbdir=/var/lib/uhuru/db/module5.2/
 
 analysable par un analyseur lexical seul, pas besoin d'analyseur syntaxique
-flex vs. hand made scanner?
-
-glib:
-g_key_file_new ()
-
-gboolean
-g_key_file_load_from_file (GKeyFile *key_file,
-                           const gchar *file,
-                           GKeyFileFlags flags,
-                           GError **error);
-
-gboolean
-g_key_file_load_from_dirs (GKeyFile *key_file,
-                           const gchar *file,
-                           const gchar **search_dirs,
-                           gchar **full_path,
-                           GKeyFileFlags flags,
-                           GError **error);
-
-tester si le groupe existe?
-gboolean
-g_key_file_has_group (GKeyFile *key_file,
-                      const gchar *group_name);
-
-pour chaque module, avec group_name = nom du module
-gchar **
-g_key_file_get_keys (GKeyFile *key_file,
-                     const gchar *group_name,
-                     gsize *length,
-                     GError **error);
-
-pour chaque clé, appeler la fonction conf du module
-gchar *
-g_key_file_get_value (GKeyFile *key_file,
-                      const gchar *group_name,
-                      const gchar *key,
-                      GError **error);
-void
-g_strfreev (gchar **str_array); pour les clés
-void
-g_key_file_free (GKeyFile *key_file);
-
-
-- test commit DEV
+flex vs. hand made scanner? => analyseur lexical de la glib
 
 - ajouter mise en quarantaine (voir IHM legacy)
-
-- ajouter service d'analyse idem windows avec analyse dans un process séparé 
--- protocole: idem clamd, socket Unix; problème du protocole clamd % caractère :
 
 - protection de l'antivirus: comment l'AV se protège lui-même (kill, suppression fichiers/répertoires)?
 -> comment relancer automatiquement un process, même si on tue le watchdog
 cf http://stackoverflow.com/questions/6538587/how-to-protect-my-process-from-being-killed
 
 - clamav: mettre la liste des bases à charger dans le fichier de config (pour bases OIV)
-
-
-- utiliser HTTPS au lieu HTTP pr remontée alerte [OK]
-
-- compléter les infos mime-type dans les modules
-
-- scan multi-thread
--- création du pool de threads au début du scan de paths multiples [OK]
--- lancement d'un scan de fichier dans un thread [OK]
--- attente des résultats? première version: g_thread_pool_free(, FALSE, TRUE) pour attendre la fin du traitement de toutes les tâches de scan [OK]
-
-- ajouter modules de scans: 
--- module 1
-
-- ajouter structure rapport
--- champs: path, état, rapport du module [OK]
--- création du document XML à partir structure rapport [OK]
--- envoi du document XML à l'agent de reporting [OK]
-
-- implémenter module 5.1 avec infos [NOT YET]
-
-- ajouter src/dir.c pour appliquer une fonction sur tous les fichiers d'un directory [OK]
-
-- ajouter le chargement de modules pour tous les .so d'un directory (voir libmagic pour filtrer les fichiers autres que .so) [OK]
-
-- créer une struct module dans src/module.c
--- ajouter dans cette struct les fonctions du module (conf_inif, conf, init, scan, uninstall et les types de fichiers scannés [OK]
--- module_init: ajout des magic textual description associées au module, allocation de la structure spécifique et initialisation [OK]
--- table de hachage: magic_desc -> GPtrArray de module * [OK]
--- trier le GPtrArray par poids du module
-
-- ajouter scan d'un fichier en utilisant libmagic (retrouver la liste des magic_file dans fix-extension.sh) [OK]
-
-- ajouter modules de scans: 
--- module 4 [OK]
--- module 5.2 [OK]
--- module 5.1/clamav [OK]
-
-- ajouter outil de scan en ligne de commande [OK]
-
-- ajouter scan récursif d'un directory (en utilisant src/dir.c)
--- première version sans multi-thread [OK]
 

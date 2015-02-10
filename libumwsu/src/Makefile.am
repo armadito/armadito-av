@@ -9,6 +9,8 @@ dir.c \
 dir.h \
 module.c \
 modulep.h \
+protocol.c \
+protocol.h \
 report.c \
 reportp.h \
 scan.c \
@@ -21,8 +23,6 @@ unixsock.h \
 watch.c \
 watchp.h
 
-#protocol.c 
-#protocol.h 
 
 AM_CPPFLAGS= -DLIBUMWSU_MODULES_PATH='"$(pkglibdir)/modules"' -DLIBUMWSU_CONF_DIR='"$(sysconfdir)/umwsu"' -DLIBUMWSU_ALERT_DIR='"$(localstatedir)/spool/uhuru"' 
 libumwsu_la_CFLAGS= -I$(top_srcdir)/include

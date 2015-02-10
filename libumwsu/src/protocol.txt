@@ -1,0 +1,60 @@
+Protocol grammar:
+
+message: command_list
+
+command_list: command command_list | EMPTY
+
+command: ID '\n' header_list '\n'
+
+header_list: header header_list | EMPTY
+
+header: ID ':' STRING '\n'
+
+
+
+Command: PING
+Headers: none
+Response: PONG
+Response headers: none
+Connexion: close
+
+Command: SCAN
+Headers:
+Path: <path_to_scan>
+Response: SCAN_START
+Response headers:
+Path: <scanned_path> (is a file)
+Count: <file count>
+Connexion: not closed
+Response: SCAN_FILE
+Response headers:
+Path: <scanned_path> (is a file)
+Status: OK | UNDECIDED | UNKNOWN | EINVAL | IERROR | SUSPICIOUS | MALWARE
+X-Status: <specific to scan module> (for instance virus name) (optional)
+Action: CLEAN | QUARANTINE | REMOVED | NONE | ...
+Repeat response: yes
+Connexion: not closed
+Response: SCAN_END
+Response headers: none
+Connexion: close
+
+Command: STATS
+Headers: none
+Response: STATS
+Response headers:
+Stat: line
+Repeat header: yes
+Connexion: close
+
+later:
+Command: WATCH
+Headers:
+Path: <path_to_watch>
+Response: idem SCAN, but no END response
+
+1
+Clamd examples:
+$ echo "nVERSION" | netcat -U /var/run/clamav/clamd.ctl
+ClamAV 0.98.1/19684/Wed Nov 26 15:29:58 2014
+$ echo "nVERSIONCOMMANDS" | netcat -U /var/run/clamav/clamd.ctl
+ClamAV 0.98.1/19684/Wed Nov 26 15:29:58 2014| COMMANDS: SCAN QUIT RELOAD PING CONTSCAN VERSIONCOMMANDS VERSION STREAM END SHUTDOWN MULTISCAN FILDES STATS IDSESSION INSTREAM DETSTATSCLEAR DETSTATS ALLMATCHSCAN
