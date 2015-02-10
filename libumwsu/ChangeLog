@@ -1,5 +1,7 @@
 2015-02-10  François  <francois@dechelle.net>
 
+	* implemented first working version of protocol handler
+
 	* adding scan process protocol implementation
 
 2015-01-26  François  <francois@dechelle.net>

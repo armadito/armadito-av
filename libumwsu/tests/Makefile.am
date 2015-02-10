@@ -1,22 +1,15 @@
 #SUBDIRS=conf
 
-check_PROGRAMS=testfind1 testumwsu1 testumwsuscan1 testxmlreport1
+check_PROGRAMS=testfind1 testumwsu1 testumwsuscan1 testxmlreport1 testprotocol1
 
-testfind1_CFLAGS=-I$(top_srcdir)/include -I$(top_srcdir)/src
-testfind1_LDADD=$(top_builddir)/src/libumwsu.la @GMODULE2_LIBS@ -lmagic
+AM_CFLAGS=-I$(top_srcdir)/include -I$(top_srcdir)/src @LIBXML2_CFLAGS@
+LDADD=$(top_builddir)/src/libumwsu.la @GMODULE2_LIBS@ @LIBXML2_LIBS@ -lmagic
+
 testfind1_SOURCES=testfind1.c
-
-testumwsu1_CFLAGS=-I$(top_srcdir)/include -I$(top_srcdir)/src
-testumwsu1_LDADD=$(top_builddir)/src/libumwsu.la @GMODULE2_LIBS@ -lmagic
 testumwsu1_SOURCES=testumwsu1.c
-
-testumwsuscan1_CFLAGS=-I$(top_srcdir)/include -I$(top_srcdir)/src
-testumwsuscan1_LDADD=$(top_builddir)/src/libumwsu.la @GMODULE2_LIBS@ -lmagic
 testumwsuscan1_SOURCES=testumwsuscan1.c
-
-testxmlreport1_CFLAGS=-I$(top_srcdir)/include -I$(top_srcdir)/src @LIBXML2_CFLAGS@
-testxmlreport1_LDADD=$(top_builddir)/src/libumwsu.la @GMODULE2_LIBS@ @LIBXML2_LIBS@ -lmagic
 testxmlreport1_SOURCES=testxmlreport1.c
+testprotocol1_SOURCES=testprotocol1.c
 
 #modulesdir=$(pkglibdir)/modules
 #modules_LTLIBRARIES=testmodule.la
