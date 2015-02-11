@@ -34,19 +34,14 @@ static char *data3 = "zob";
 int main(int argc, char **argv)
 {
   struct protocol_handler *h;
-  FILE *in = fopen(argv[1], "r");
-  char c;
 
-  assert(in != NULL);
-
-  h = protocol_handler_new();
+  h = protocol_handler_new(0, 1);
 
   protocol_handler_add_callback(h, "SCAN_START", cb_scan_start, &data1);
   protocol_handler_add_callback(h, "SCAN_FILE", cb_scan_file, data2);
   protocol_handler_add_callback(h, "SCAN_END", cb_scan_end, data3);
 
-  while((c = fgetc(in)) != EOF)
-    protocol_handler_input_char(h, c);
+  protocol_handler_input(h);
 
   return 0;
 }

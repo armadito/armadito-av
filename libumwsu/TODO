@@ -1,6 +1,6 @@
 - ajouter service d'analyse idem windows avec analyse dans un process séparé 
 -- protocole: idem clamd, socket Unix; problème du protocole clamd % caractère :
--- parser du protocole: ajouter callbacks sur les commandes
+-- parser du protocole: ajouter callbacks sur les commandes [OK]
 -- implémenter service de scan utilisant le protocole
 -- faire version de UMWSU utilisant le protocole au lieu de l'appel direct des modules
 

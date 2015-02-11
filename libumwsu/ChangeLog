@@ -1,5 +1,7 @@
 2015-02-11  François  <francois@dechelle.net>
 
+	* added output in protocol handler
+
 	* added callbacks in protocol handler
 
 2015-02-10  François  <francois@dechelle.net>
