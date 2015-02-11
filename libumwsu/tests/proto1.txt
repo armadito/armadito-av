@@ -7,7 +7,7 @@ Path: /var/tmp/foo
 
 SCAN_START
 Path: /var/tmp/foo
-Count: 42
+File-count: 42
 
 SCAN_FILE
 Path: /var/tmp/foo/bar/zob1

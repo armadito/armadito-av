@@ -1,4 +1,5 @@
 #include "protocol.h"
+#include "libumwsu-config.h"
 
 #include <glib.h>
 #include <stdio.h>
@@ -17,7 +18,8 @@ struct protocol_handler {
   enum protocol_handler_state state;
   GString *current_command;
   GString *current_header_key, *current_header_value;
-  GHashTable *headers;
+  GHashTable *current_headers;
+  GHashTable *callbacks;
 };
 
 static void str_free(gpointer p)
@@ -35,9 +37,37 @@ struct protocol_handler *protocol_handler_new(void)
   h->current_command = g_string_new("");
   h->current_header_key = g_string_new("");
   h->current_header_value = g_string_new("");
-  h->headers = g_hash_table_new_full(g_str_hash, g_str_equal, str_free, str_free);
+  h->current_headers = g_hash_table_new_full(g_str_hash, g_str_equal, str_free, str_free);
+
+  h->callbacks = g_hash_table_new(g_str_hash, g_str_equal);
 
   return h;
+}
+
+struct callback_entry {
+  protocol_handler_cb_t cb;
+  void *data;
+};
+
+int protocol_handler_add_callback(struct protocol_handler *handler, const char *cmd, protocol_handler_cb_t cb, void *data)
+{
+  struct callback_entry *entry;
+
+  entry = (struct callback_entry *)malloc(sizeof(struct callback_entry));
+  entry->cb = cb;
+  entry->data = data;
+  
+  g_hash_table_insert(handler->callbacks, (gpointer)cmd, entry);
+
+  return 0;
+}
+
+static void protocol_handler_call_callback(struct protocol_handler *h)
+{
+  struct callback_entry *entry = (struct callback_entry *)g_hash_table_lookup(h->callbacks, h->current_command->str);
+
+  if (entry != NULL)
+    (*entry->cb)(h, entry->data);
 }
 
 static void protocol_error(struct protocol_handler *h, char c)
@@ -47,7 +77,7 @@ static void protocol_error(struct protocol_handler *h, char c)
 
 static void protocol_handler_end_of_header(struct protocol_handler *h)
 {
-  g_hash_table_insert(h->headers, g_strdup(h->current_header_key->str), g_strdup(h->current_header_value->str));
+  g_hash_table_insert(h->current_headers, g_strdup(h->current_header_key->str), g_strdup(h->current_header_value->str));
   g_string_truncate(h->current_header_key, 0);
   g_string_truncate(h->current_header_value, 0);
 }
@@ -59,18 +89,19 @@ static void GH_print_func(gpointer key, gpointer value, gpointer user_data)
 
 static void protocol_handler_end_of_command(struct protocol_handler *h)
 {
+#ifdef DEBUG
   fprintf(stderr, "Command: %s\n", h->current_command->str);
-  g_hash_table_foreach (h->headers, GH_print_func, NULL);
+  g_hash_table_foreach (h->current_headers, GH_print_func, NULL);
   fprintf(stderr, "\n");
+#endif
+
+  protocol_handler_call_callback(h);
 
   g_string_truncate(h->current_command, 0);
-  g_hash_table_remove_all(h->headers);
+  g_hash_table_remove_all(h->current_headers);
   g_string_truncate(h->current_header_key, 0);
   g_string_truncate(h->current_header_value, 0);
 }
-
-#define STAY(A) (A)
-#define MOVE(A,S) do { A; state = S; } while (0)
 
 int protocol_handler_input_char(struct protocol_handler *h, char c)
 {
@@ -117,9 +148,9 @@ char *protocol_handler_cmd(struct protocol_handler *handler)
   return handler->current_command->str;
 }
 
-char *protocol_handler_header(struct protocol_handler *handler, const char *key)
+char *protocol_handler_header_value(struct protocol_handler *handler, const char *header_key)
 {
-  return (char *)g_hash_table_lookup(handler->headers, key);
+  return (char *)g_hash_table_lookup(handler->current_headers, header_key);
 }
 
 

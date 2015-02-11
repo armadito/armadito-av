@@ -12,7 +12,7 @@ AC_ARG_ENABLE([debug],
 	enable_debug="yes")
 
 # configuration header
-AM_CONFIG_HEADER(libumwsu-autoconf.h)
+AM_CONFIG_HEADER(libumwsu-config.h)
 
 # This is needed when the first PKG_CHECK_MODULES call is inside a conditional (not the case here, but who knows)
 PKG_PROG_PKG_CONFIG
