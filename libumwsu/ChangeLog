@@ -1,3 +1,9 @@
+2015-02-19  François  <francois@dechelle.net>
+
+	* changed modules scan function in order to pass file mime type, so that modules can make scan decisions based on mime-type
+
+	* adding quarantine as module
+
 2015-02-11  François  <francois@dechelle.net>
 
 	* added output in protocol handler

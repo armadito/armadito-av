@@ -92,7 +92,7 @@ static void umwsu_scan_call_callbacks(struct umwsu_scan *scan, struct umwsu_repo
   }
 }
 
-static enum umwsu_status umwsu_scan_apply_modules(const char *path, GPtrArray *mod_array,  struct umwsu_report *report)
+static enum umwsu_status umwsu_scan_apply_modules(const char *path, const char *mime_type, GPtrArray *mod_array,  struct umwsu_report *report)
 {
   enum umwsu_status current_status = UMWSU_UNDECIDED;
   int i;
@@ -107,7 +107,7 @@ static enum umwsu_status umwsu_scan_apply_modules(const char *path, GPtrArray *m
       printf("UMWSU: module %s: scanning %s\n", mod->name, path);
 #endif
 
-    mod_status = (*mod->scan)(path, mod->data, &mod_report);
+    mod_status = (*mod->scan)(path, mime_type, mod->data, &mod_report);
 
 #if 0
     printf("UMWSU: module %s: scanning %s -> %s\n", mod->name, path, umwsu_status_str(mod_status));
@@ -135,15 +135,16 @@ static enum umwsu_status umwsu_scan_file(struct umwsu_scan *scan, magic_t magic,
   enum umwsu_status status;
   struct umwsu_report report;
   GPtrArray *modules;
+  char *mime_type;
 
   umwsu_report_init(&report, path);
 
-  modules = umwsu_get_applicable_modules(scan->u, magic, path);
+  modules = umwsu_get_applicable_modules(scan->u, magic, path, &mime_type);
 
   if (modules == NULL)
     report.status = UMWSU_UNKNOWN_FILE_TYPE;
   else
-    status = umwsu_scan_apply_modules(path, modules, &report);
+    status = umwsu_scan_apply_modules(path, mime_type, modules, &report);
 
   if (umwsu_get_verbose(scan->u) >= 3)
     printf("%s: %s\n", path, umwsu_status_str(status));
@@ -151,6 +152,8 @@ static enum umwsu_status umwsu_scan_file(struct umwsu_scan *scan, magic_t magic,
   umwsu_scan_call_callbacks(scan, &report);
 
   umwsu_report_destroy(&report);
+
+  free(mime_type);
 
   return status;
 }

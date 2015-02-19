@@ -38,9 +38,17 @@ void umwsu_scan_finish(struct umwsu_scan *scan);
 
 void umwsu_scan_free(struct umwsu_scan *scan);
 
+enum umwsu_action {
+  UMWSU_ACTION_NONE         = 0,
+  UMWSU_ACTION_ALERT        = 1 << 1,
+  UMWSU_ACTION_QUARANTINE   = 1 << 2,
+  UMWSU_ACTION_REMOVE,
+};
+
 struct umwsu_report {
-  enum umwsu_status status;
   char *path;
+  enum umwsu_status status;
+  enum umwsu_action action;
   char *mod_name;
   char *mod_report;
 };

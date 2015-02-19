@@ -1,3 +1,6 @@
+- ajouter mise en quarantaine (voir IHM legacy)
+
+
 - ajouter service d'analyse idem windows avec analyse dans un process séparé 
 -- protocole: idem clamd, socket Unix; problème du protocole clamd % caractère :
 -- parser du protocole: ajouter callbacks sur les commandes [OK]
@@ -39,11 +42,8 @@ dbdir=/var/lib/uhuru/db/module5.2/
 analysable par un analyseur lexical seul, pas besoin d'analyseur syntaxique
 flex vs. hand made scanner? => analyseur lexical de la glib
 
-- ajouter mise en quarantaine (voir IHM legacy)
-
 - protection de l'antivirus: comment l'AV se protège lui-même (kill, suppression fichiers/répertoires)?
 -> comment relancer automatiquement un process, même si on tue le watchdog
 cf http://stackoverflow.com/questions/6538587/how-to-protect-my-process-from-being-killed
 
-- clamav: mettre la liste des bases à charger dans le fichier de config (pour bases OIV)
 

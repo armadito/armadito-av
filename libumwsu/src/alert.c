@@ -2,6 +2,7 @@
 #include <libumwsu/module.h>
 #include "dir.h"
 #include "modulep.h"
+#include "alert.h"
 
 #undef ALERT_VIA_SSL
 #define ALERT_VIA_FILE
@@ -364,6 +365,8 @@ static enum umwsu_mod_status mod_alert_conf(void *mod_data, const char *key, con
     alert_dir = strdup(value);
     mkdir_p(alert_dir);
   }
+
+  return UMWSU_MOD_OK;
 }
 
 struct umwsu_module umwsu_mod_alert = {

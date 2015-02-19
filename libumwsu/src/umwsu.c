@@ -176,17 +176,16 @@ void umwsu_print(struct umwsu *u)
   g_hash_table_foreach(u->mime_types_table, print_mime_type_entry, NULL);
 }
 
-GPtrArray *umwsu_get_applicable_modules(struct umwsu *u, magic_t magic, const char *path)
+GPtrArray *umwsu_get_applicable_modules(struct umwsu *u, magic_t magic, const char *path, char **p_mime_type)
 {
-  const char *mime_type;
   GPtrArray *modules;
 
   if (magic == NULL)
     magic = u->magic;
 
-  mime_type = magic_file(magic, path);
+  *p_mime_type = strdup(magic_file(magic, path));
 
-  modules = (GPtrArray *)g_hash_table_lookup(u->mime_types_table, mime_type);
+  modules = (GPtrArray *)g_hash_table_lookup(u->mime_types_table, *p_mime_type);
 
   if (modules != NULL)
     return modules;

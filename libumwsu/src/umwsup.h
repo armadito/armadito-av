@@ -6,6 +6,6 @@
 #include <glib.h>
 #include <magic.h>
 
-GPtrArray *umwsu_get_applicable_modules(struct umwsu *u, magic_t magic, const char *path);
+GPtrArray *umwsu_get_applicable_modules(struct umwsu *u, magic_t magic, const char *path, char **p_mime_type);
 
 #endif

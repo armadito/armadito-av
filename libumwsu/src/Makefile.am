@@ -11,6 +11,8 @@ module.c \
 modulep.h \
 protocol.c \
 protocol.h \
+quarantine.c \
+quarantine.h \
 report.c \
 reportp.h \
 scan.c \
