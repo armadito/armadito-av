@@ -1,0 +1,6 @@
+
+- configuration:
+* mettre la liste des bases à charger dans le fichier de config (pour bases OIV)
+
+- faire module de scan utilisant clamd:
+* problème asynchronisme si utilisation du scan récursif de clamd (MULTISCAN ou SCAN file/directory)

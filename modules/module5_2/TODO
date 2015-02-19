@@ -1,0 +1,11 @@
+
+- m.à.j. code git
+* intégration du scan fichiers PE
+* chargement des bases PE
+* problème de sélection de la fonction % type mime: 
+soit ajouter type mime dans les arguments de la fonction de scan (le plus simple et le plus efficace)
+soit faire 2 modules (mais duplication du code et problème de configuration)x
+
+
+- configuration
+* répertoire des bases

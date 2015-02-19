@@ -5,23 +5,15 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "errors.h"
-
-#define LEARN_TO_PROTOTYPE_EXPORTED_FUNCTIONS
-#ifdef LEARN_TO_PROTOTYPE_EXPORTED_FUNCTIONS
-int initDB( char* dbName, 
-	    char* malicousDbName, 
-	    char* notMalicousDbName, 
-	    char* ElfdatabaseTFIDFInf, 
-	    char* ElfdatabaseTFIDFSain );
-void freeDB(void);
-ERROR_CODE analyseElfFile(char* fileName);
-#endif
+#include "uh_errors.h"
+#include "UhuruStatic.h"
 
 const char *module5_2_mime_types[] = {
   "application/x-sharedlib",
   "application/x-object",
   "application/x-executable",
+  "application/x-msdos-program",
+  "application/x-dosexec",
   NULL,
 };
 
@@ -29,15 +21,15 @@ static const char *error_code_str(ERROR_CODE e)
 {
   switch(e) {
 #define M(E) case E: return #E
-    M(E_NULL);
-    M(E_SUCCESS);
-    M(E_MALWARE);
-    M(E_NOT_MALWARE);
-    M(E_EAT_UNKNOWN);
-    M(E_TFIDF_UNKNOWN);
-    M(E_NOT_DECIDED);
-    M(E_DOUBTFUL);
-    M(E_ERROR);
+    M(UH_NULL);
+    M(UH_SUCCESS);
+    M(UH_MALWARE);
+    M(UH_NOT_MALWARE);
+    M(UH_EAT_UNKNOWN);
+    M(UH_TFIDF_UNKNOWN);
+    M(UH_NOT_DECIDED);
+    M(UH_DOUBTFUL);
+    M(UH_UNSUPPORTED_FILE);
     M(E_READING_ERROR);
     M(E_TEST_ERROR);
     M(E_DISTANCE_ERROR);
@@ -48,35 +40,53 @@ static const char *error_code_str(ERROR_CODE e)
     M(E_NOT_MZ);
     M(E_NOT_PE);
     M(E_BAD_ARCHITECTURE);
+    M(UH_NO_SECTIONS);
     M(E_NO_ENTRY_POINT);
     M(E_EAT_EMPTY);
     M(E_IAT_EMPTY);
     M(E_SECTION_ERROR);
     M(E_DLL_NAME_ERROR);
-    M(E_FUNCTION_NAME_ERROR);
     M(E_NAME_ERROR);
     M(E_CHECKSUM_ERROR);
     M(E_IAT_NOT_GOOD);
     M(E_EAT_NOT_GOOD);
-    M(E_SECTION_EMPTY_NAME);
+    M(E_FUNCTION_NAME_ERROR);
     M(E_NO_ENTRY);
+    M(UH_INVALID_SECTION_NAME);
     M(E_INVALID_ENTRY_POINT);
+    M(E_INVALID_STUB);
+    M(E_INVALID_TIMESTAMP);
+    M(E_FIELDS_WITH_INVALID_VALUE);
+    M(E_INVALID_SIZE_OPT_HEADER);
+    M(E_EAT_INVALID_TIMESTAMP);
+    M(E_IAT_INVALID_TIMESTAMP);
+    M(E_EMPTY_VECTOR);
+    M(E_INVALID_STRUCTURE);
+    M(E_INVALID_NUMBER_RVA_SIZES);
+    M(E_INVALID_FILE_SIZE);
+    M(E_HEADER_NOT_GOOD);
+    M(E_INVALID_S_F_ALIGNMENT);
+    M(UH_INVALID_SECTION);
     M(E_NOT_ELF);
     M(E_SYMBOL_TABLE_EMPTY);
     M(E_BAD_FORMAT);
-    M(E_PE_INIT);
-    M(E_IAT);
-    M(E_EAT);
+    M(E_NO_KNOWN_SYMBOLS);
   }
 
   return "UNKNOWN ERROR";
 }
 
-enum umwsu_status module5_2_scan(const char *path, void *mod_data, char **pmod_report)
+enum umwsu_status module5_2_scan(const char *path, const char *mime_type, void *mod_data, char **pmod_report)
 {
   ERROR_CODE e;
 
-  e = analyseElfFile((char *)path);
+  if (!strcmp(mime_type, "application/x-sharedlib")
+      || !strcmp(mime_type, "application/x-object")
+      || !strcmp(mime_type, "application/x-executable")) {
+    e = analyseElfFile((char *)path);
+  } else if (!strcmp(mime_type, "application/x-dosexec") ) {
+    e = fileAnalysis((char *)path);
+  }
 
   *pmod_report = strdup(error_code_str(e));
   
@@ -85,12 +95,12 @@ enum umwsu_status module5_2_scan(const char *path, void *mod_data, char **pmod_r
 #endif
 
   switch(e) {
-  case E_MALWARE:
+  case UH_MALWARE:
     return UMWSU_MALWARE;
-  case E_NOT_MALWARE:
+  case UH_NOT_MALWARE:
     return UMWSU_CLEAN;
-  case E_NOT_DECIDED:
-  case E_DOUBTFUL:
+  case UH_NOT_DECIDED:
+  case UH_DOUBTFUL:
     return UMWSU_UNDECIDED;
   }
 
@@ -100,14 +110,26 @@ enum umwsu_status module5_2_scan(const char *path, void *mod_data, char **pmod_r
 
 enum umwsu_mod_status module5_2_init(void **pmod_data)
 {
-  if (initDB(MODULE5_2_DBDIR "/database.elfdata", 
-	     MODULE5_2_DBDIR "/db_malicious.zip", 
-	     MODULE5_2_DBDIR "/db_safe.zip",
-	     MODULE5_2_DBDIR "/tfidf_m.dat",
-	     MODULE5_2_DBDIR "/tfidf_s.dat") != 0)
+  if (initDB(MODULE5_2_DBDIR "/elf/database.elfdata", 
+	     MODULE5_2_DBDIR "/elf/db_malicious.zip", 
+	     MODULE5_2_DBDIR "/elf/db_safe.zip",
+	     MODULE5_2_DBDIR "/elf/tfidf_m.dat",
+	     MODULE5_2_DBDIR "/elf/tfidf_s.dat") != 0)
     return UMWSU_MOD_INIT_ERROR;
 
-  fprintf(stderr, "Module 5.2 databases loaded from " MODULE5_2_DBDIR "\n");
+  fprintf(stderr, "Module 5.2 ELF databases loaded from " MODULE5_2_DBDIR "/elf\n");
+
+  if (initDatabases(MODULE5_2_DBDIR "/pe/Database_malsain_2.zip",
+		    MODULE5_2_DBDIR "/pe/wip/Database_malsain_1.zip",
+		    MODULE5_2_DBDIR "/pe/Database_sain_2.zip",
+		    MODULE5_2_DBDIR "/pe/wip/Database_sain_1.zip",
+		    MODULE5_2_DBDIR "/pe/database_2.dat",
+		    MODULE5_2_DBDIR "/pe/wip/database_1.dat",
+		    MODULE5_2_DBDIR "/pe/DBI_inf.dat",
+		    MODULE5_2_DBDIR "/pe/DBI_sain.dat") != 0)
+    return UMWSU_MOD_INIT_ERROR;
+
+  fprintf(stderr, "Module 5.2 Windows PE databases loaded from " MODULE5_2_DBDIR "/pe\n");
 
   return UMWSU_MOD_OK;
 }
