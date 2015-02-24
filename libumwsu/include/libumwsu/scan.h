@@ -42,7 +42,7 @@ enum umwsu_action {
   UMWSU_ACTION_NONE         = 0,
   UMWSU_ACTION_ALERT        = 1 << 1,
   UMWSU_ACTION_QUARANTINE   = 1 << 2,
-  UMWSU_ACTION_REMOVE,
+  UMWSU_ACTION_REMOVE       = 1 << 3,
 };
 
 struct umwsu_report {
@@ -52,6 +52,11 @@ struct umwsu_report {
   char *mod_name;
   char *mod_report;
 };
+
+const char *umwsu_status_str(enum umwsu_status status);
+const char *umwsu_status_pretty_str(enum umwsu_status status);
+
+const char *umwsu_action_pretty_str(enum umwsu_action action);
 
 void umwsu_report_print(struct umwsu_report *report, FILE *out);
 

@@ -3,6 +3,7 @@
 #include "alert.h"
 #include "dir.h"
 #include "modulep.h"
+#include "quarantine.h"
 #include "statusp.h"
 #include "watchp.h"
 
@@ -71,6 +72,7 @@ static int umwsu_module_load_directory(struct umwsu *u, const char *directory)
 static void umwsu_module_add_local(struct umwsu *u)
 {
   umwsu_add_module(u, &umwsu_mod_alert);
+  umwsu_add_module(u, &umwsu_mod_quarantine);
 }
 
 static void umwsu_add_mime_type(struct umwsu *u, const char *mime_type, struct umwsu_module *mod)

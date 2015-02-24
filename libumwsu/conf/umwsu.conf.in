@@ -1,7 +1,7 @@
 [umwsu]
 
 #scan-archive=1
-conf-dir=/etc/uhuru/conf.d
+conf-dir=@sysconfdir@/uhuru/conf.d
 
 [mime-type]
 

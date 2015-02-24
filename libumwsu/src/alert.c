@@ -356,6 +356,8 @@ void alert_callback(struct umwsu_report *report, void *callback_data)
 #endif
 
   alert_free(a);
+
+  report->action |= UMWSU_ACTION_ALERT;
 }
 
 static enum umwsu_mod_status mod_alert_conf(void *mod_data, const char *key, const char *value)

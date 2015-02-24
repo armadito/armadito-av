@@ -116,19 +116,19 @@ enum umwsu_mod_status module5_2_init(void **pmod_data)
 	     MODULE5_2_DBDIR "/Linux/tfidf_s.dat") != 0)
     return UMWSU_MOD_INIT_ERROR;
 
-  fprintf(stderr, "Module 5.2 ELF databases loaded from " MODULE5_2_DBDIR "/elf\n");
+  fprintf(stderr, "Module 5.2 ELF databases loaded from " MODULE5_2_DBDIR "/Linux\n");
 
   if (initDatabases(MODULE5_2_DBDIR "/Windows/Database_malsain_2.zip",
-		    MODULE5_2_DBDIR "/Windows/wip/Database_malsain_1.zip",
+		    MODULE5_2_DBDIR "/Windows/Database_malsain_1.zip",
 		    MODULE5_2_DBDIR "/Windows/Database_sain_2.zip",
-		    MODULE5_2_DBDIR "/Windows/wip/Database_sain_1.zip",
+		    MODULE5_2_DBDIR "/Windows/Database_sain_1.zip",
 		    MODULE5_2_DBDIR "/Windows/database_2.dat",
-		    MODULE5_2_DBDIR "/Windows/wip/database_1.dat",
+		    MODULE5_2_DBDIR "/Windows/database_1.dat",
 		    MODULE5_2_DBDIR "/Windows/DBI_inf.dat",
 		    MODULE5_2_DBDIR "/Windows/DBI_sain.dat") != 0)
     return UMWSU_MOD_INIT_ERROR;
 
-  fprintf(stderr, "Module 5.2 Windows PE databases loaded from " MODULE5_2_DBDIR "/pe\n");
+  fprintf(stderr, "Module 5.2 PE databases loaded from " MODULE5_2_DBDIR "/Windows\n");
 
   return UMWSU_MOD_OK;
 }

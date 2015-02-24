@@ -18,9 +18,6 @@ enum umwsu_status {
   UMWSU_MALWARE,
 };
 
-const char *umwsu_status_str(enum umwsu_status status);
-const char *umwsu_status_pretty_str(enum umwsu_status status);
-
 #ifdef __cplusplus
 }
 #endif

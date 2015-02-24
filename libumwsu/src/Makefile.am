@@ -1,6 +1,7 @@
 lib_LTLIBRARIES=libumwsu.la
 
 libumwsu_la_SOURCES= \
+action.c \
 alert.c \
 alert.h \
 conf.c \

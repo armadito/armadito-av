@@ -1,4 +1,7 @@
 - ajouter mise en quarantaine (voir IHM legacy)
+* utiliser un répertoire en 0333 appartenant à root (ajouter dans le script postinst du package)
+* déplacer le fichier dans le directory de quarantaine avec un nouveau nom aléatoire [OK]
+* changer le mode du nouveau fichier à 00 [OK]
 
 
 - ajouter service d'analyse idem windows avec analyse dans un process séparé 

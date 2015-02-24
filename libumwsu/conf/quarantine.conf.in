@@ -1,0 +1,3 @@
+[quarantine]
+enabled=1
+quarantine-dir=@localstatedir@/lib/uhuru/quarantine

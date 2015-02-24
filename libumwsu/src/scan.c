@@ -3,6 +3,7 @@
 #include "alert.h"
 #include "dir.h"
 #include "modulep.h"
+#include "quarantine.h"
 #include "umwsup.h"
 #include "statusp.h"
 
@@ -66,6 +67,7 @@ struct umwsu_scan *umwsu_scan_new(struct umwsu *umwsu_handle, const char *path, 
   scan->callbacks = g_array_new(FALSE, FALSE, sizeof(struct callback_entry));
 
   umwsu_scan_add_callback(scan, alert_callback, NULL);
+  umwsu_scan_add_callback(scan, quarantine_callback, NULL);
 
   return scan;
 }
