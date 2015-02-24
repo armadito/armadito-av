@@ -55,8 +55,8 @@ else
    MODULE5_2_DBDIR="$with_dbdir"
 fi
 AC_MSG_RESULT($MODULE5_2_DBDIR)
-if test ! -f "$MODULE5_2_DBDIR/elf/database.elfdata" ; then
-   AC_MSG_WARN("cannot find $MODULE5_2_DBDIR/elf/database.elfdata, continuing anyway")
+if test ! -f "$MODULE5_2_DBDIR/Linux/database.elfdata" ; then
+   AC_MSG_WARN("cannot find $MODULE5_2_DBDIR/Linux/database.elfdata, continuing anyway")
 fi
 AC_SUBST(MODULE5_2_DBDIR)
 
