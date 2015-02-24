@@ -8,10 +8,14 @@ AC_ARG_WITH([dbdir],
 	with_dbdir="$withval",
 	with_dbdir="no")
 
-# database directory
-AC_MSG_CHECKING(for databases directory)
+# databases
+AC_MSG_CHECKING(for databases)
 if test "$with_dbdir" = "no" ; then
-   MODULE5_2_DBDIR="$localstatedir/lib/umwsu/module5-2/db"
+   if test -f "$srcdir/db/Linux/database.elfdata" ; then
+      MODULE5_2_DBDIR="$srcdir/db"
+   else
+      MODULE5_2_DBDIR="$localstatedir/lib/umwsu/module5-2/db"
+   fi
 else
    MODULE5_2_DBDIR="$with_dbdir"
 fi

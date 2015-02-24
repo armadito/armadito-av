@@ -22,6 +22,6 @@ pedbdir=$(localstatedir)/lib/umwsu/module5-2/db/Windows
 pedb_DATA=$(PE_DBS)
 
 dist-hook:
-	mkdir -p "$(distdir)"/Linux "$(distdir)"/Windows
-	for db in $(ELF_DBS) ; do cp -fp $$db "$(distdir)"/Linux ; done
-	for db in $(PE_DBS) ; do cp -fp $$db "$(distdir)"/Windows ; done
+	mkdir -p "$(distdir)"/db/Linux "$(distdir)"/db/Windows
+	for db in $(ELF_DBS) ; do cp -fp $$db "$(distdir)"/db/Linux ; done
+	for db in $(PE_DBS) ; do cp -fp $$db "$(distdir)"/db/Windows ; done
