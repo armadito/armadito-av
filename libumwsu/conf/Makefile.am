@@ -10,4 +10,4 @@ EDIT = sed \
 	$(EDIT) $(srcdir)/$*.conf.in >$*.conf.tmp
 	mv $*.conf.tmp $*.conf
 
-EXTRA_DIST=umwsu.conf alert.conf quarantine.conf
+EXTRA_DIST=umwsu.conf.in alert.conf.in quarantine.conf.in
