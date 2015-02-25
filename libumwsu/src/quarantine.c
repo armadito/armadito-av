@@ -6,6 +6,9 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 static char *quarantine_dir;
 static int quarantine_enabled = 0;
@@ -14,28 +17,60 @@ static int quarantine_do(const char *path)
 {
   char *newpath;
   int fd;
+  struct stat stat_buf;
+  mode_t mode = -1;
+  uid_t uid = -1;
+  gid_t gid = -1;
+  FILE *info;
+  int ret = 0;
 
-  newpath = (char *)malloc(strlen(quarantine_dir) + 1 + 6 + 1); /* "QUARANTINE_DIR/XXXXXX" */
+  newpath = (char *)malloc(strlen(quarantine_dir) + 1 + 6 + 5 + 1); /* "QUARANTINE_DIR/XXXXXX[.info]" */
   strcpy(newpath, quarantine_dir);
   strcat(newpath, "/XXXXXX");
   if ((fd = mkstemp(newpath)) < 0) {
     perror("mkstemp");
-    return -1;
+    ret = -1;
+    goto get_out;
   }
 
   close(fd);
 
+  if(!stat(path, &stat_buf)) {
+    mode = stat_buf.st_mode;
+    uid = stat_buf.st_uid;
+    gid = stat_buf.st_gid;
+  } else {
+    ret = -2;
+  }
+
   if (rename(path, newpath) != 0) {
     perror("rename");
-    return -1;
+    ret = -1;
+    goto get_out;
   }
 
   if (chmod(newpath, 0) != 0) {
     perror("chmod");
-    return -1;
+    ret = -2;
+    /* continue either */
   }
 
-  return 0;
+  strcat(newpath, ".info");
+  info = fopen(newpath, "w");
+  if (info == NULL) {
+    ret = -2;
+    goto get_out;
+  }
+
+  fprintf(info, "path: %s\n", path);
+  fprintf(info, "mode: 0%o\n", mode);
+  fprintf(info, "uid: %d\n", uid);
+  fprintf(info, "gid: %d\n", gid);
+
+  fclose(info);
+
+ get_out:
+  return ret;
 }
 
 
@@ -52,7 +87,7 @@ void quarantine_callback(struct umwsu_report *report, void *callback_data)
     return;
   }
 
-  if (!quarantine_do(report->path))
+  if (quarantine_do(report->path) != -1)
     report->action |= UMWSU_ACTION_QUARANTINE;
 }
 
