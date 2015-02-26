@@ -2,7 +2,7 @@
 
 check_PROGRAMS=testfind1 testumwsu1 testumwsuscan1 testxmlreport1 testprotocol1 testprotocol2
 
-AM_CFLAGS=-I$(top_srcdir)/include -I$(top_srcdir)/src @LIBXML2_CFLAGS@
+AM_CFLAGS=-I$(top_srcdir)/include -I$(top_srcdir)/src/lib @LIBXML2_CFLAGS@
 LDADD=$(top_builddir)/src/libumwsu.la @GMODULE2_LIBS@ @LIBXML2_LIBS@ -lmagic
 
 testfind1_SOURCES=testfind1.c
