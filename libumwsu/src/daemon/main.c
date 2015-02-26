@@ -103,7 +103,11 @@ static int daemonize(void)
   close(STDERR_FILENO);
 }
 
-/* from http://stackoverflow.com/questions/17954432/creating-a-daemon-in-linux */
+/* refs:
+   http://stackoverflow.com/questions/17954432/creating-a-daemon-in-linux 
+   http://www.netzmafia.de/skripten/unix/linux-daemon-howto.html
+   http://shahmirj.com/blog/beginners-guide-to-creating-a-daemon-in-linux
+*/
 static int other_daemonize(char* name, char* path, char* outfile, char* errfile, char* infile )
 {
   if(!path) { path="/"; }
