@@ -1,4 +1,5 @@
 #include <libumwsu/scan.h>
+#include "poll.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,6 +16,7 @@
 struct umwsu_daemon_options {
   int no_daemon;
   /* more options later */
+  char *sock_path;
 };
 
 static struct option long_options[] = {
@@ -25,7 +27,7 @@ static struct option long_options[] = {
 
 static void usage(void)
 {
-  fprintf(stderr, "usage: uhuru-daemon [options]\n");
+  fprintf(stderr, "usage: uhuru-daemon [options] UNIX_SOCKET_PATH\n");
   fprintf(stderr, "\n");
   fprintf(stderr, "Uhuru antivirus scanner daemon\n");
   fprintf(stderr, "\n");
@@ -42,6 +44,7 @@ static void parse_options(int argc, char *argv[], struct umwsu_daemon_options *o
   int c;
 
   opts->no_daemon = 0;
+  opts->sock_path = NULL;
 
   while (1) {
     int option_index = 0;
@@ -63,13 +66,11 @@ static void parse_options(int argc, char *argv[], struct umwsu_daemon_options *o
     }
   }
 
-#if 0
   if (optind < argc)
-    opts->path = argv[optind];
+    opts->sock_path = argv[optind];
 
-  if (opts->path == NULL)
+  if (opts->sock_path == NULL)
     usage();
-#endif
 }
 
 static int daemonize(void)
@@ -166,23 +167,44 @@ static int other_daemonize(char* name, char* path, char* outfile, char* errfile,
   return(0);
 }
 
+static int foo(int sock, void *data)
+{
+  char buff[100];
+
+  memset(buff, 0, 100);
+  read(sock, buff, 100);
+  fprintf(stderr, "foo %d %s\n", sock, buff);
+}
+
+static void daemon_loop(const char *sock_path)
+{
+  int listen_sock;
+  struct poll_set *ps;
+
+  listen_sock = server_socket_create(sock_path);
+  ps = poll_set_new(listen_sock, foo);
+
+  poll_set_loop(ps, NULL);
+}
+
 int main(int argc, char **argv)
 {
-  struct umwsu *u;
   struct umwsu_daemon_options opts;
-  
+  int listen_sock;
+
   parse_options(argc, argv, &opts);
 
   if (!opts.no_daemon)
     daemonize();
 
-  while(1) {
-    sleep(30);
-  }
+  daemon_loop(opts.sock_path);
 
-#if 1
   return 0;
-#endif
+}
+
+
+#if 0
+  struct umwsu *u;
 
   u = umwsu_open();
 
@@ -193,6 +215,4 @@ int main(int argc, char **argv)
 #endif
 
   umwsu_close(u);
-
-  return 0;
-}
+#endif
