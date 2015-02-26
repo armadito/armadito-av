@@ -1,7 +1,4 @@
-m4_include([version.m4])
-m4_define([LIBUMWSU_VERSION],VERSION_MAJOR[.]VERSION_MINOR[.]VERSION_PATCH)
-
-AC_INIT(libumwsu,LIBUMWSU_VERSION,francois@dechelle.net)
+AC_INIT(libumwsu,1.2.0,francois@dechelle.net)
 AM_INIT_AUTOMAKE
 
 # collect arguments
@@ -76,6 +73,8 @@ include/Makefile
 include/libumwsu/Makefile
 pkgconfig/Makefile
 src/Makefile
+src/lib/Makefile
+src/daemon/Makefile
 tests/Makefile
 tools/Makefile
 ])
