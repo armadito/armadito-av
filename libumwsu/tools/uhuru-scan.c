@@ -17,7 +17,7 @@ struct umwsu_scan_options {
   int threaded;
   int no_summary;
   /* more options later */
-  char *file_or_dir;
+  char *path;
 };
 
 static struct option long_options[] = {
@@ -51,7 +51,7 @@ static void parse_options(int argc, char *argv[], struct umwsu_scan_options *opt
   opts->recursive = 0;
   opts->threaded = 1;
   opts->no_summary = 0;
-  opts->file_or_dir = NULL;
+  opts->path = NULL;
 
   while (1) {
     int option_index = 0;
@@ -80,9 +80,9 @@ static void parse_options(int argc, char *argv[], struct umwsu_scan_options *opt
   }
 
   if (optind < argc)
-    opts->file_or_dir = argv[optind];
+    opts->path = argv[optind];
 
-  if (opts->file_or_dir == NULL)
+  if (opts->path == NULL)
     usage();
 }
 
@@ -143,7 +143,7 @@ int main(int argc, char **argv)
   umwsu_print(u);
 #endif
 
-  scan = umwsu_scan_new(u, opts.file_or_dir, flags);
+  scan = umwsu_scan_new(u, opts.path, flags);
 
   umwsu_scan_add_callback(scan, report_print_callback, stdout);
 

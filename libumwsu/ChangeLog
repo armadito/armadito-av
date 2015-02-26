@@ -1,5 +1,7 @@
 2015-02-26  François  <francois@dechelle.net>
 
+	* added skeleton of scan daemon
+
 	* reorganisation of directories for daemon implementation
 
 2015-02-24  François  <francois@dechelle.net>
