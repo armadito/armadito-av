@@ -1,5 +1,6 @@
 #include "poll.h"
-#include "unixsock.h"
+#include "client.h"
+#include "lib/unixsock.h"
 
 #include <assert.h>
 #include <stdlib.h>
@@ -80,28 +81,20 @@ int poll_set_loop(struct poll_set *s)
       exit(EXIT_FAILURE);
     }
 
-    fprintf(stderr, "#event %d\n", n_ev);
     for (n = 0; n < n_ev; n++) {
       struct poll_data *p = (struct poll_data *)events[n].data.ptr;
-
-      fprintf(stderr, "event %d\n", n);
 
       if (p->fd == s->listen_sock) {
 	int conn_sock = server_socket_accept(s->listen_sock);
 
-	poll_set_add_fd(s, conn_sock, NULL);
 	fprintf(stderr, "accepted connection socket=%d\n", conn_sock);
-      } else {
-	char buff[100];
-	int n_read;
 
-	memset(buff, 0, 100);
-	n_read = read(p->fd, buff, 100);
-	if (n_read > 0)
-	  fprintf(stderr, "foo %d %d %s\n", p->fd, n_read, buff);
-	else {
+	poll_set_add_fd(s, conn_sock, client_new(conn_sock));
+      } else {
+	struct client *cl = (struct client *)p->data;
+
+	if (client_process(cl) < 0)
 	  poll_set_remove_fd(s, p);
-	}
       }
     }
   }

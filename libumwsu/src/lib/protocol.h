@@ -17,6 +17,8 @@ int protocol_handler_add_callback(struct protocol_handler *handler, const char *
 
 int protocol_handler_input(struct protocol_handler *handler);
 
+int protocol_handler_input_buffer(struct protocol_handler *handler, char *buff, int len);
+
 int protocol_handler_output_message(struct protocol_handler *handler, const char *cmd, ...);
 
 #endif

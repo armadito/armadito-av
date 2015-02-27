@@ -181,6 +181,16 @@ int protocol_handler_input(struct protocol_handler *handler)
 
   while((c = fgetc(handler->input)) != EOF)
     protocol_handler_input_char(handler, c);
+
+  return 0;
+}
+
+int protocol_handler_input_buffer(struct protocol_handler *handler, char *buff, int len)
+{
+  int i;
+
+  for(i = 0; i < len; i++)
+    protocol_handler_input_char(handler, buff[i]);
 }
 
 int protocol_handler_output_message(struct protocol_handler *handler, const char *cmd, ...)
