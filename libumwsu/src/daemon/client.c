@@ -13,16 +13,24 @@ static void cb_ping(struct protocol_handler *h, void *data)
 {
   struct client *cl = (struct client *)data;
 
-  printf("callback cb_ping\n");
+  fprintf(stderr, "callback cb_ping\n");
 
   protocol_handler_output_message(cl->handler, "PONG", NULL);
+}
+
+static void cb_scan(struct protocol_handler *h, void *data)
+{
+  struct client *cl = (struct client *)data;
+
+  fprintf(stderr, "callback cb_scan\n");
+  fprintf(stderr, "Path: %s\n", protocol_handler_header_value(h, "Path"));
 }
 
 static void cb_stat(struct protocol_handler *h, void *data)
 {
   struct client *cl = (struct client *)data;
 
-  printf("callback cb_stat\n");
+  fprintf(stderr, "callback cb_stat\n");
 }
 
 struct client *client_new(int client_sock)
@@ -33,6 +41,7 @@ struct client *client_new(int client_sock)
   cl->handler = protocol_handler_new(cl->sock, cl->sock);
 
   protocol_handler_add_callback(cl->handler, "PING", cb_ping, cl);
+  protocol_handler_add_callback(cl->handler, "SCAN", cb_scan, cl);
   protocol_handler_add_callback(cl->handler, "STATS", cb_stat, cl);
 
   return cl;
@@ -46,8 +55,6 @@ int client_process(struct client *cl)
   n_read = read(cl->sock, buff, 100);
   if (n_read == 0)
     return -1;
-
-  fprintf(stderr, "foo %d %s\n", n_read, buff);
 
   protocol_handler_input_buffer(cl->handler, buff, n_read);
 
