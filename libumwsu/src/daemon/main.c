@@ -182,9 +182,9 @@ static void daemon_loop(const char *sock_path)
   struct poll_set *ps;
 
   listen_sock = server_socket_create(sock_path);
-  ps = poll_set_new(listen_sock, foo);
+  ps = poll_set_new(listen_sock);
 
-  poll_set_loop(ps, NULL);
+  poll_set_loop(ps);
 }
 
 int main(int argc, char **argv)

@@ -3,11 +3,9 @@
 
 struct poll_set;
 
-typedef int (*poll_cb_t)(int sock, void *data);
+struct poll_set *poll_set_new(int listen_sock);
 
-struct poll_set *poll_set_new(int listen_sock, poll_cb_t cb);
-
-int poll_set_loop(struct poll_set *s, void *data);
+int poll_set_loop(struct poll_set *s);
 
 void poll_set_close(struct poll_set *s);
 
