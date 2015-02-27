@@ -24,6 +24,18 @@ static void cb_scan(struct protocol_handler *h, void *data)
 
   fprintf(stderr, "callback cb_scan\n");
   fprintf(stderr, "Path: %s\n", protocol_handler_header_value(h, "Path"));
+
+  protocol_handler_output_message(cl->handler, "SCAN_FILE", 
+				  "Path", "/var/tmp/foo/bar/zob1", 
+				  "Status", "OK", 
+				  NULL);
+  protocol_handler_output_message(cl->handler, "SCAN_FILE", 
+				  "Path", "/var/tmp/foo/bar/zob2", 
+				  "Status", "MALWARE",
+				  "X-Status", "GrosTrojan",
+				  "Action", "QUARANTINE",
+				  NULL);
+  protocol_handler_output_message(cl->handler, "SCAN_END", NULL);
 }
 
 static void cb_stat(struct protocol_handler *h, void *data)
