@@ -14,6 +14,8 @@ protocol.c \
 protocol.h \
 quarantine.c \
 quarantine.h \
+remote.c \
+remote.h \
 report.c \
 reportp.h \
 scan.c \

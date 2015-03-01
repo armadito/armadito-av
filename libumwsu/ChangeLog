@@ -1,3 +1,7 @@
+2015-03-01  François  <francois@dechelle.net>
+
+	* added 'remote' module for configuration; cleaned server code
+
 2015-02-26  François  <francois@dechelle.net>
 
 	* adding use of epoll()

@@ -1,0 +1,3 @@
+[remote]
+socket-path=@localstatedir@/run/uhuru.sock
+

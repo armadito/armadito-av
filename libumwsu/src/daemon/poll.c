@@ -67,7 +67,7 @@ struct poll_set *poll_set_new(int listen_sock)
   return s;
 }
 
-int poll_set_loop(struct poll_set *s)
+int poll_set_loop(struct poll_set *s, struct umwsu *u)
 {
 #define MAX_EVENTS 10
   struct epoll_event events[MAX_EVENTS];
@@ -89,7 +89,7 @@ int poll_set_loop(struct poll_set *s)
 
 	fprintf(stderr, "accepted connection socket=%d\n", conn_sock);
 
-	poll_set_add_fd(s, conn_sock, client_new(conn_sock));
+	poll_set_add_fd(s, conn_sock, client_new(conn_sock, u));
       } else {
 	struct client *cl = (struct client *)p->data;
 

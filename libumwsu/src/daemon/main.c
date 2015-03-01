@@ -1,5 +1,5 @@
 #include <libumwsu/scan.h>
-#include "poll.h"
+#include "server.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -167,52 +167,16 @@ static int other_daemonize(char* name, char* path, char* outfile, char* errfile,
   return(0);
 }
 
-static int foo(int sock, void *data)
-{
-  char buff[100];
-
-  memset(buff, 0, 100);
-  read(sock, buff, 100);
-  fprintf(stderr, "foo %d %s\n", sock, buff);
-}
-
-static void daemon_loop(const char *sock_path)
-{
-  int listen_sock;
-  struct poll_set *ps;
-
-  listen_sock = server_socket_create(sock_path);
-  ps = poll_set_new(listen_sock);
-
-  poll_set_loop(ps);
-}
-
 int main(int argc, char **argv)
 {
   struct umwsu_daemon_options opts;
-  int listen_sock;
 
   parse_options(argc, argv, &opts);
 
   if (!opts.no_daemon)
     daemonize();
 
-  daemon_loop(opts.sock_path);
+  server_loop(server_new());
 
   return 0;
 }
-
-
-#if 0
-  struct umwsu *u;
-
-  u = umwsu_open();
-
-  umwsu_set_verbose(u, 1);
-
-#if 0
-  umwsu_print(u);
-#endif
-
-  umwsu_close(u);
-#endif
