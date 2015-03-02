@@ -65,6 +65,8 @@ static gpointer scan_thread_fun(gpointer data)
 
   protocol_handler_output_message(cl->handler, "SCAN_END", NULL);
 
+  close(cl->sock);
+
   free(args);
   free(path);
 
