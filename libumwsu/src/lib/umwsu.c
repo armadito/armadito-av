@@ -19,6 +19,7 @@ struct umwsu {
   int verbosity;
   int is_remote;
   GPtrArray *modules;
+
   GHashTable *mime_types_table;
   magic_t magic;
   /* for now... */

@@ -23,11 +23,12 @@ struct callback_entry {
 
 struct umwsu_scan {
   struct umwsu *u;
+  GArray *callbacks;
   const char *path;
+
   enum umwsu_scan_flags flags;
   GThreadPool *thread_pool;  
   GPrivate *private_magic_key;
-  GArray *callbacks;
 };
 
 static void scan_entry_thread(gpointer data, gpointer user_data);
