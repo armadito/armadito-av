@@ -56,14 +56,6 @@ struct umwsu_scan *umwsu_scan_new(struct umwsu *umwsu_handle, const char *path, 
 
   scan->flags = flags;
 
-  if (scan->flags & UMWSU_SCAN_THREADED) {
-    scan->thread_pool = g_thread_pool_new(scan_entry_thread, scan, get_max_threads(), FALSE, NULL);
-    scan->private_magic_key = g_private_new(magic_destroy_notify);
-  } else {
-    scan->thread_pool = NULL;
-    scan->private_magic_key = NULL;
-  }
-
   scan->callbacks = g_array_new(FALSE, FALSE, sizeof(struct callback_entry));
 
   umwsu_scan_add_callback(scan, alert_callback, NULL);
@@ -207,6 +199,14 @@ static void scan_entry_non_threaded(const char *full_path, const struct dirent *
 enum umwsu_status umwsu_scan_start(struct umwsu_scan *scan)
 {
   struct stat sb;
+
+  if (scan->flags & UMWSU_SCAN_THREADED) {
+    scan->thread_pool = g_thread_pool_new(scan_entry_thread, scan, get_max_threads(), FALSE, NULL);
+    scan->private_magic_key = g_private_new(magic_destroy_notify);
+  } else {
+    scan->thread_pool = NULL;
+    scan->private_magic_key = NULL;
+  }
 
   if (stat(scan->path, &sb) == -1) {
     perror("stat");

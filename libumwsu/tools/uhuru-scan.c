@@ -135,7 +135,7 @@ int main(int argc, char **argv)
   if (opts.threaded)
     flags |= UMWSU_SCAN_THREADED;
 
-  u = umwsu_open();
+  u = umwsu_open(0);
 
   umwsu_set_verbose(u, 1);
 

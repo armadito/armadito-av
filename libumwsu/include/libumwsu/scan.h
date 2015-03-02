@@ -11,7 +11,7 @@ struct umwsu;
 struct umwsu_report;
 struct umwsu_scan;
 
-struct umwsu *umwsu_open(void);
+struct umwsu *umwsu_open(int is_remote);
 
 void umwsu_set_verbose(struct umwsu *u, int verbosity);
 

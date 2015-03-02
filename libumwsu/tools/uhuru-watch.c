@@ -78,7 +78,7 @@ int main(int argc, char **argv)
   
   parse_options(argc, argv, &opts);
 
-  u = umwsu_open();
+  u = umwsu_open(0);
 
   umwsu_set_verbose(u, 1);
 

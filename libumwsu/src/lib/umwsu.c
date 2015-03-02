@@ -17,26 +17,29 @@
 
 struct umwsu {
   int verbosity;
-  GHashTable *mime_types_table;
+  int is_remote;
   GPtrArray *modules;
+  GHashTable *mime_types_table;
   magic_t magic;
   /* for now... */
   struct umwsu_watch *watch;
 };
 
-static struct umwsu *umwsu_new(void)
+static struct umwsu *umwsu_new(int is_remote)
 {
   struct umwsu *u = (struct umwsu *)malloc(sizeof(struct umwsu));
 
   assert(u != NULL);
 
   u->verbosity = 0;
+  u->is_remote = is_remote;
+
+  u->modules = g_ptr_array_new();
 
   u->magic = magic_open(MAGIC_MIME_TYPE);
   magic_load(u->magic, NULL);
 
   u->mime_types_table = g_hash_table_new(g_str_hash, g_str_equal);
-  u->modules = g_ptr_array_new();
 
   u->watch = NULL;
 
@@ -70,11 +73,25 @@ static int umwsu_module_load_directory(struct umwsu *u, const char *directory)
   return dir_map(directory, 0, load_entry, u);
 }
 
-static void umwsu_module_add_local(struct umwsu *u)
-{ 
+static void umwsu_module_load_all(struct umwsu *u)
+{
+  if (!u->is_remote)
+    umwsu_module_load_directory(u, LIBUMWSU_MODULES_PATH);
+
   umwsu_add_module(u, &umwsu_mod_alert);
   umwsu_add_module(u, &umwsu_mod_quarantine);
   umwsu_add_module(u, &umwsu_mod_remote);
+}
+
+static void umwsu_module_conf_all(struct umwsu *u)
+{
+  int i;
+
+  for (i = 0; i < u->modules->len; i++) {
+    struct umwsu_module *mod = (struct umwsu_module *)g_ptr_array_index(u->modules, i);
+
+    conf_load(mod);
+  }
 }
 
 static void umwsu_add_mime_type(struct umwsu *u, const char *mime_type, struct umwsu_module *mod)
@@ -111,17 +128,6 @@ static void uwmsu_module_init_all(struct umwsu *u)
   }
 }
 
-static void umwsu_module_conf_all(struct umwsu *u)
-{
-  int i;
-
-  for (i = 0; i < u->modules->len; i++) {
-    struct umwsu_module *mod = (struct umwsu_module *)g_ptr_array_index(u->modules, i);
-
-    conf_load(mod);
-  }
-}
-
 static void mod_print(gpointer data, gpointer user_data)
 {
   module_print((struct umwsu_module *)data, stderr);
@@ -132,12 +138,11 @@ static void uwm_module_print_all(struct umwsu *u)
   g_ptr_array_foreach(u->modules, mod_print, NULL);
 }
 
-struct umwsu *umwsu_open(void)
+struct umwsu *umwsu_open(int is_remote)
 {
-  struct umwsu *u = umwsu_new();
+  struct umwsu *u = umwsu_new(is_remote);
 
-  umwsu_module_load_directory(u, LIBUMWSU_MODULES_PATH);
-  umwsu_module_add_local(u);
+  umwsu_module_load_all(u);
 
   umwsu_module_conf_all(u);
 

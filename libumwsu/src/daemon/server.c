@@ -33,7 +33,7 @@ struct server *server_new(void)
   server = (struct server *)malloc(sizeof(struct server));
   assert(server != NULL);
 
-  server->umwsu = umwsu_open();
+  server->umwsu = umwsu_open(0);
   assert(server->umwsu != NULL);
 
   umwsu_set_verbose(server->umwsu, 1);
