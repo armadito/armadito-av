@@ -91,7 +91,7 @@ void quarantine_callback(struct umwsu_report *report, void *callback_data)
     report->action |= UMWSU_ACTION_QUARANTINE;
 }
 
-static enum umwsu_mod_status mod_quarantine_conf(void *mod_data, const char *key, const char *value)
+static enum umwsu_mod_status mod_quarantine_conf_set(void *mod_data, const char *key, const char *value)
 {
   if (!strcmp(key, "quarantine-dir")) {
     fprintf(stderr, "quarantine: got config %s -> %s\n", key, value);
@@ -107,9 +107,21 @@ static enum umwsu_mod_status mod_quarantine_conf(void *mod_data, const char *key
   return UMWSU_MOD_OK;
 }
 
+static char *mod_quarantine_conf_get(void *mod_data, const char *key)
+{
+  if (!strcmp(key, "quarantine-dir")) {
+    return quarantine_dir;
+  } else if (!strcmp(key, "enabled")) {
+    return (quarantine_enabled) ? "1" : "0";
+  } 
+
+  return NULL;
+}
+
 struct umwsu_module umwsu_mod_quarantine = {
   .init = NULL,
-  .conf = &mod_quarantine_conf,
+  .conf_set = &mod_quarantine_conf_set,
+  .conf_get = &mod_quarantine_conf_get,
   .scan = NULL,
   .close = NULL,
   .name = "quarantine",

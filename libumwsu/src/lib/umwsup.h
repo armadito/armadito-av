@@ -8,4 +8,6 @@
 
 GPtrArray *umwsu_get_applicable_modules(struct umwsu *u, magic_t magic, const char *path, char **p_mime_type);
 
+struct umwsu_module *umwsu_get_module_by_name(struct umwsu *u, const char *name);
+
 #endif

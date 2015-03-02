@@ -4,6 +4,7 @@
 #include "dir.h"
 #include "modulep.h"
 #include "quarantine.h"
+#include "remote.h"
 #include "statusp.h"
 #include "watchp.h"
 
@@ -70,9 +71,10 @@ static int umwsu_module_load_directory(struct umwsu *u, const char *directory)
 }
 
 static void umwsu_module_add_local(struct umwsu *u)
-{
+{ 
   umwsu_add_module(u, &umwsu_mod_alert);
   umwsu_add_module(u, &umwsu_mod_quarantine);
+  umwsu_add_module(u, &umwsu_mod_remote);
 }
 
 static void umwsu_add_mime_type(struct umwsu *u, const char *mime_type, struct umwsu_module *mod)
@@ -176,6 +178,20 @@ void umwsu_print(struct umwsu *u)
   printf("\n");
 
   g_hash_table_foreach(u->mime_types_table, print_mime_type_entry, NULL);
+}
+
+struct umwsu_module *umwsu_get_module_by_name(struct umwsu *u, const char *name)
+{
+  int i;
+
+  for (i = 0; i < u->modules->len; i++) {
+    struct umwsu_module *mod = (struct umwsu_module *)g_ptr_array_index(u->modules, i);
+
+    if (!strcmp(mod->name, name))
+      return mod;
+  }
+
+  return NULL;
 }
 
 GPtrArray *umwsu_get_applicable_modules(struct umwsu *u, magic_t magic, const char *path, char **p_mime_type)

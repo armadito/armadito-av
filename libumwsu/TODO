@@ -9,6 +9,7 @@
 -- parser du protocole: ajouter callbacks sur les commandes [OK]
 -- implémenter service de scan utilisant le protocole:
 --- listen socket unix (/var/run/uhuru/uhuru.socket) [OK, VOIR CONFIG]
+--- compléter config & umwsu_open(REMOTE)
 --- poll vs. thread pool vs. prefork (non, possible duplication des bases chargées?): poll pour commencer
 --- version mono thread pour l'instant
 -- faire version de UMWSU utilisant le protocole au lieu de l'appel direct des modules

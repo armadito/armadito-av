@@ -1,4 +1,5 @@
 #include "server.h"
+#include "lib/conf.h"
 #include "lib/unixsock.h"
 
 #include <libumwsu/scan.h>
@@ -26,15 +27,18 @@ static void server_remove_polled_fd(struct server *server, struct poll_data *p);
 struct server *server_new(void)
 {
   struct server *server;
+  char *sock_path;
 
   server = (struct server *)malloc(sizeof(struct server));
   assert(server != NULL);
 
-#if 0
-  listen_sock = server_socket_create(sock_path);
-  s->listen_sock = listen_sock;
-  server_add_polled_fd(server, listen_sock, NULL);
-#endif
+  server->umwsu = umwsu_open();
+  assert(server->umwsu != NULL);
+
+  umwsu_set_verbose(server->umwsu, 1);
+
+  sock_path = conf_get(server->umwsu, "remote", "socket-path");
+  assert(sock_path != NULL);
 
   server->epoll_fd = epoll_create(42);
   if (server->epoll_fd < 0) {
@@ -42,9 +46,8 @@ struct server *server_new(void)
     exit(EXIT_FAILURE);
   }
 
-  server->umwsu = umwsu_open();
-  umwsu_set_verbose(server->umwsu, 1);
-
+  server->listen_sock = server_socket_create(sock_path);
+  server_add_polled_fd(server, server->listen_sock, NULL);
 
   return server;
 }

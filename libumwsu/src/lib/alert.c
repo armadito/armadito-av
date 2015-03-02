@@ -360,20 +360,30 @@ void alert_callback(struct umwsu_report *report, void *callback_data)
   report->action |= UMWSU_ACTION_ALERT;
 }
 
-static enum umwsu_mod_status mod_alert_conf(void *mod_data, const char *key, const char *value)
+static enum umwsu_mod_status mod_alert_conf_set(void *mod_data, const char *key, const char *value)
 {
   if (!strcmp(key, "alert-dir")) {
     fprintf(stderr, "alert: got config %s -> %s\n", key, value);
     alert_dir = strdup(value);
     mkdir_p(alert_dir);
+    return UMWSU_MOD_OK;
   }
 
-  return UMWSU_MOD_OK;
+  return UMWSU_MOD_CONF_ERROR;
+}
+
+static char *mod_alert_conf_get(void *mod_data, const char *key)
+{
+  if (!strcmp(key, "alert-dir"))
+    return alert_dir;
+
+  return NULL;
 }
 
 struct umwsu_module umwsu_mod_alert = {
   .init = NULL,
-  .conf = &mod_alert_conf,
+  .conf_set = &mod_alert_conf_set,
+  .conf_get = &mod_alert_conf_get,
   .scan = NULL,
   .close = NULL,
   .name = "alert",

@@ -1,4 +1,5 @@
 #include "conf.h"
+#include "umwsup.h"
 
 #include <glib.h>
 #include <stdlib.h>
@@ -14,7 +15,7 @@ void conf_load(struct umwsu_module *mod)
   static char *dirs[] = { LIBUMWSU_CONF_DIR, LIBUMWSU_CONF_DIR "/conf.d", NULL};
   char **keys, **pkey;
 
-  if (mod->conf == NULL)
+  if (mod->conf_set == NULL)
     return;
 
   key_file = g_key_file_new();
@@ -36,7 +37,7 @@ void conf_load(struct umwsu_module *mod)
     char *value = g_key_file_get_value(key_file, mod->name, *pkey, NULL);
 
     assert(value != NULL);
-    (*mod->conf)(mod->data, *pkey, value);
+    (*mod->conf_set)(mod->data, *pkey, value);
   }
 
   g_strfreev(keys);
@@ -45,3 +46,22 @@ void conf_load(struct umwsu_module *mod)
   free(filename);
 }
 
+void conf_set(struct umwsu *umwsu, const char *mod_name, const char *key, const char *value)
+{
+  struct umwsu_module *mod = umwsu_get_module_by_name(umwsu, mod_name);
+
+  if (mod != NULL)
+    (*mod->conf_set)(mod->data, key, value);
+  else
+    fprintf(stderr, "No such module: %s\n", mod_name);
+}
+
+char *conf_get(struct umwsu *umwsu, const char *mod_name, const char *key)
+{
+  struct umwsu_module *mod = umwsu_get_module_by_name(umwsu, mod_name);
+
+  if (mod != NULL)
+    return (*mod->conf_get)(mod->data, key);
+
+  return NULL;
+}

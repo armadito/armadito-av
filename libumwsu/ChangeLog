@@ -1,3 +1,7 @@
+2015-03-02  François  <francois@dechelle.net>
+
+	* changed configuration to add set/get functions; changed server code to use configuration
+
 2015-03-01  François  <francois@dechelle.net>
 
 	* added 'remote' module for configuration; cleaned server code

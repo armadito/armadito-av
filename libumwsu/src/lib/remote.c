@@ -8,19 +8,29 @@
 
 static char *remote_sock_path;
 
-static enum umwsu_mod_status mod_remote_conf(void *mod_data, const char *key, const char *value)
+static enum umwsu_mod_status mod_remote_conf_set(void *mod_data, const char *key, const char *value)
 {
   if (!strcmp(key, "socket-path")) {
     fprintf(stderr, "remote: got config %s -> %s\n", key, value);
     remote_sock_path = strdup(value);
+    return UMWSU_MOD_OK;
   } 
 
-  return UMWSU_MOD_OK;
+  return UMWSU_MOD_CONF_ERROR;
+}
+
+static char *mod_remote_conf_get(void *mod_data, const char *key)
+{
+  if (!strcmp(key, "socket-path"))
+    return remote_sock_path;
+
+  return NULL;
 }
 
 struct umwsu_module umwsu_mod_remote = {
   .init = NULL,
-  .conf = &mod_remote_conf,
+  .conf_set = &mod_remote_conf_set,
+  .conf_get = &mod_remote_conf_get,
   .scan = NULL,
   .close = NULL,
   .name = "remote",

@@ -16,7 +16,6 @@
 struct umwsu_daemon_options {
   int no_daemon;
   /* more options later */
-  char *sock_path;
 };
 
 static struct option long_options[] = {
@@ -27,7 +26,7 @@ static struct option long_options[] = {
 
 static void usage(void)
 {
-  fprintf(stderr, "usage: uhuru-daemon [options] UNIX_SOCKET_PATH\n");
+  fprintf(stderr, "usage: uhuru-daemon [options]\n");
   fprintf(stderr, "\n");
   fprintf(stderr, "Uhuru antivirus scanner daemon\n");
   fprintf(stderr, "\n");
@@ -44,7 +43,6 @@ static void parse_options(int argc, char *argv[], struct umwsu_daemon_options *o
   int c;
 
   opts->no_daemon = 0;
-  opts->sock_path = NULL;
 
   while (1) {
     int option_index = 0;
@@ -65,12 +63,6 @@ static void parse_options(int argc, char *argv[], struct umwsu_daemon_options *o
       usage();
     }
   }
-
-  if (optind < argc)
-    opts->sock_path = argv[optind];
-
-  if (opts->sock_path == NULL)
-    usage();
 }
 
 static int daemonize(void)

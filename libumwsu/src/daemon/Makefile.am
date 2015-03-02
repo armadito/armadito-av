@@ -7,3 +7,5 @@ main.c \
 server.c \
 server.h
 
+install-exec-hook:
+	-mkdir -p $(DESTDIR)$(localstatedir)/run/
