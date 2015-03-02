@@ -1,5 +1,7 @@
 2015-03-02  François  <francois@dechelle.net>
 
+	* tested remote scanning using netcat; works but termination must be fixed
+
 	* changed configuration to add set/get functions; changed server code to use configuration
 
 2015-03-01  François  <francois@dechelle.net>

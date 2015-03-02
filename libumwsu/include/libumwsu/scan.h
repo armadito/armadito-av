@@ -56,6 +56,7 @@ struct umwsu_report {
 const char *umwsu_status_str(enum umwsu_status status);
 const char *umwsu_status_pretty_str(enum umwsu_status status);
 
+/* const char *umwsu_action_str(enum umwsu_action action); */
 const char *umwsu_action_pretty_str(enum umwsu_action action);
 
 void umwsu_report_print(struct umwsu_report *report, FILE *out);

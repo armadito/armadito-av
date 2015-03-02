@@ -5,7 +5,7 @@
 
 struct client;
 
-struct client *client_new(int client_sock, struct umwsu *u);
+struct client *client_new(int client_sock, struct umwsu *umwsu);
 
 int client_process(struct client *cl);
 

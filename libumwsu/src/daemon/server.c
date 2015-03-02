@@ -1,4 +1,5 @@
 #include "server.h"
+#include "client.h"
 #include "lib/conf.h"
 #include "lib/unixsock.h"
 
@@ -74,17 +75,13 @@ void server_loop(struct server *server)
 
 	fprintf(stderr, "accepted connection socket=%d\n", conn_sock);
 
-#if 0
-	poll_set_add_fd(server, conn_sock, client_new(conn_sock, u));
-#endif
+	server_add_polled_fd(server, conn_sock, client_new(conn_sock, server->umwsu));
 
       } else {
-#if 0
 	struct client *cl = (struct client *)p->data;
 
 	if (client_process(cl) < 0)
-	  poll_set_remove_fd(server, p);
-#endif
+	  server_remove_polled_fd(server, p);
       }
     }
   }

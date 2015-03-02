@@ -1,5 +1,5 @@
-#ifndef _PROTOCOL_H_
-#define _PROTOCOL_H_
+#ifndef _LIBUMWSU_PROTOCOL_H_
+#define _LIBUMWSU_PROTOCOL_H_
 
 struct protocol_handler;
 
@@ -14,8 +14,6 @@ char *protocol_handler_header_value(struct protocol_handler *handler, const char
 typedef void (*protocol_handler_cb_t)(struct protocol_handler *handler, void *data);
 
 int protocol_handler_add_callback(struct protocol_handler *handler, const char *cmd, protocol_handler_cb_t cb, void *data);
-
-int protocol_handler_input(struct protocol_handler *handler);
 
 int protocol_handler_input_buffer(struct protocol_handler *handler, char *buff, int len);
 

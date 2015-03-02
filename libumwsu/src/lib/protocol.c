@@ -175,16 +175,6 @@ static int protocol_handler_input_char(struct protocol_handler *h, char c)
   return 0;
 }
 
-int protocol_handler_input(struct protocol_handler *handler)
-{
-  char c;
-
-  while((c = fgetc(handler->input)) != EOF)
-    protocol_handler_input_char(handler, c);
-
-  return 0;
-}
-
 int protocol_handler_input_buffer(struct protocol_handler *handler, char *buff, int len)
 {
   int i;
@@ -205,7 +195,8 @@ int protocol_handler_output_message(struct protocol_handler *handler, const char
     header_key = va_arg(ap, char *);
     if (header_key != NULL) {
       header_value = va_arg(ap, char *);
-      fprintf(handler->output, "%s: %s\n", header_key, header_value);
+      if (header_value != NULL)
+	fprintf(handler->output, "%s: %s\n", header_key, header_value);
     }
   } while(header_key != NULL);
   va_end(ap);

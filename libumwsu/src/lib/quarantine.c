@@ -76,6 +76,9 @@ static int quarantine_do(const char *path)
 
 void quarantine_callback(struct umwsu_report *report, void *callback_data)
 {
+  if (!quarantine_enabled)
+    return;
+
   switch(report->status) {
   case UMWSU_UNDECIDED:
   case UMWSU_CLEAN:
