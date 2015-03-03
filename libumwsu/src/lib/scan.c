@@ -22,7 +22,7 @@ struct callback_entry {
 };
 
 struct umwsu_scan {
-  struct umwsu *u;
+  struct umwsu *umwsu;
   GArray *callbacks;
   const char *path;
 
@@ -46,13 +46,13 @@ static void magic_destroy_notify(gpointer data)
   magic_close((magic_t)data);
 }
 
-struct umwsu_scan *umwsu_scan_new(struct umwsu *umwsu_handle, const char *path, enum umwsu_scan_flags flags)
+struct umwsu_scan *umwsu_scan_new(struct umwsu *umwsu, const char *path, enum umwsu_scan_flags flags)
 {
   struct umwsu_scan *scan;
 
   scan = (struct umwsu_scan *)malloc(sizeof(struct umwsu_scan));
 
-  scan->u = umwsu_handle;
+  scan->umwsu = umwsu;
   scan->path = (const char *)strdup(path);
 
   scan->flags = flags;
@@ -134,14 +134,14 @@ static enum umwsu_status umwsu_scan_file(struct umwsu_scan *scan, magic_t magic,
 
   umwsu_report_init(&report, path);
 
-  modules = umwsu_get_applicable_modules(scan->u, magic, path, &mime_type);
+  modules = umwsu_get_applicable_modules(scan->umwsu, magic, path, &mime_type);
 
   if (modules == NULL)
     report.status = UMWSU_UNKNOWN_FILE_TYPE;
   else
     status = umwsu_scan_apply_modules(path, mime_type, modules, &report);
 
-  if (umwsu_get_verbose(scan->u) >= 3)
+  if (umwsu_get_verbose(scan->umwsu) >= 3)
     printf("%s: %s\n", path, umwsu_status_str(status));
 
   umwsu_scan_call_callbacks(scan, &report);

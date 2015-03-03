@@ -26,7 +26,7 @@ enum umwsu_scan_flags {
   UMWSU_SCAN_RECURSE    = 1 << 1,
 };
 
-struct umwsu_scan *umwsu_scan_new(struct umwsu *umwsu_handle, const char *path, enum umwsu_scan_flags flags);
+struct umwsu_scan *umwsu_scan_new(struct umwsu *umwsu, const char *path, enum umwsu_scan_flags flags);
 
 typedef void (*umwsu_scan_callback_t)(struct umwsu_report *report, void *callback_data);
 

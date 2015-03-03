@@ -24,7 +24,7 @@ static void cb_ping(struct protocol_handler *h, void *data)
 static void scan_callback(struct umwsu_report *report, void *callback_data)
 {
   struct client *cl = (struct client *)callback_data;
-  char action[32];
+  char status[32], action[32];
 
   switch(report->status) {
   case UMWSU_WHITE_LISTED:
@@ -32,10 +32,11 @@ static void scan_callback(struct umwsu_report *report, void *callback_data)
     return;
   }
 
+  sprintf(status, "%d", report->status);
   sprintf(action, "%d", report->action);
   protocol_handler_output_message(cl->handler, "SCAN_FILE", 
 				  "Path", report->path, 
-				  "Status", umwsu_status_str(report->status),
+				  "Status", status,
 				  "X-Status", report->mod_report,
 				  "Action", action,
 				  NULL);

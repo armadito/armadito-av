@@ -33,6 +33,7 @@ int umwsu_status_cmp(enum umwsu_status s1, enum umwsu_status s2)
 const char *umwsu_status_str(enum umwsu_status status)
 {
   switch(status) {
+#undef M
 #define M(S) case S: return #S
     M(UMWSU_UNDECIDED);
     M(UMWSU_CLEAN);

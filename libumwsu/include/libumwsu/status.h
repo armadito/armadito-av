@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 enum umwsu_status {
-  UMWSU_UNDECIDED,
+  UMWSU_UNDECIDED = 1,
   UMWSU_CLEAN,
   UMWSU_UNKNOWN_FILE_TYPE,
   UMWSU_EINVAL,

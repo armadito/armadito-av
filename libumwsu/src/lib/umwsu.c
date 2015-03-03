@@ -79,8 +79,11 @@ static void umwsu_module_load_all(struct umwsu *u)
   if (!u->is_remote)
     umwsu_module_load_directory(u, LIBUMWSU_MODULES_PATH);
 
-  umwsu_add_module(u, &umwsu_mod_alert);
-  umwsu_add_module(u, &umwsu_mod_quarantine);
+  if (!u->is_remote) {
+    umwsu_add_module(u, &umwsu_mod_alert);
+    umwsu_add_module(u, &umwsu_mod_quarantine);
+  }
+
   umwsu_add_module(u, &umwsu_mod_remote);
 }
 

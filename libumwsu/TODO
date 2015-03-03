@@ -13,6 +13,8 @@
 --- poll vs. thread pool vs. prefork (non, possible duplication des bases chargées?): poll pour commencer [OK]
 --- version mono thread pour l'instant
 -- faire version de UMWSU utilisant le protocole au lieu de l'appel direct des modules
+--- umwsu.c [OK]
+--- scan.c: dans le start, ouvrir la connexion, envoyer la commande, attendre les réponses SCAN_FILE et SCAN_END, sur SCAN_FILE créer un report et appeler les callbacks
 
 
 - ajouter watch(directory) [OK, revoir l'implémentation]
