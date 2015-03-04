@@ -17,7 +17,7 @@ struct clamav_data {
   struct cl_engine *clamav_engine;
 };
 
-enum umwsu_status clamav_scan(const char *path, const char *mime_type, void *mod_data, char **pmod_report)
+enum umwsu_file_status clamav_scan(const char *path, const char *mime_type, void *mod_data, char **pmod_report)
 {
   struct clamav_data *cl_data = (struct clamav_data *)mod_data;
   const char *virus_name = NULL;

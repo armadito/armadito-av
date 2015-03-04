@@ -76,7 +76,7 @@ static const char *error_code_str(ERROR_CODE e)
   return "UNKNOWN ERROR";
 }
 
-enum umwsu_status module5_2_scan(const char *path, const char *mime_type, void *mod_data, char **pmod_report)
+enum umwsu_file_status module5_2_scan(const char *path, const char *mime_type, void *mod_data, char **pmod_report)
 {
   ERROR_CODE e;
 
