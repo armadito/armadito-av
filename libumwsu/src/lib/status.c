@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-int umwsu_status_cmp(enum umwsu_status s1, enum umwsu_status s2)
+int umwsu_file_status_cmp(enum umwsu_file_status s1, enum umwsu_file_status s2)
 {
   if (s1 == s2)
     return 0;
@@ -30,7 +30,7 @@ int umwsu_status_cmp(enum umwsu_status s1, enum umwsu_status s2)
   return 0;
 }
 
-const char *umwsu_status_str(enum umwsu_status status)
+const char *umwsu_file_status_str(enum umwsu_file_status status)
 {
   switch(status) {
 #undef M
@@ -48,7 +48,7 @@ const char *umwsu_status_str(enum umwsu_status status)
   return "UNKNOWN STATUS";
 }
 
-const char *umwsu_status_pretty_str(enum umwsu_status status)
+const char *umwsu_file_status_pretty_str(enum umwsu_file_status status)
 {
   switch(status) {
   case UMWSU_UNDECIDED:

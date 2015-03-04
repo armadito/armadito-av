@@ -7,7 +7,7 @@
 
 void umwsu_report_print(struct umwsu_report *report, FILE *out)
 {
-  fprintf(out, "%s: %s", report->path, umwsu_status_pretty_str(report->status));
+  fprintf(out, "%s: %s", report->path, umwsu_file_status_pretty_str(report->status));
   if (report->status != UMWSU_UNDECIDED && report->status != UMWSU_CLEAN && report->status != UMWSU_UNKNOWN_FILE_TYPE)
     fprintf(out, " [%s - %s]", report->mod_name, report->mod_report);
   if (report->action != UMWSU_ACTION_NONE)
@@ -31,7 +31,7 @@ void umwsu_report_destroy(struct umwsu_report *report)
     free(report->mod_report);
 }
 
-void umwsu_report_change(struct umwsu_report *report, enum umwsu_status status, const char *mod_name, const char *mod_report)
+void umwsu_report_change(struct umwsu_report *report, enum umwsu_file_status status, const char *mod_name, const char *mod_report)
 {
   report->status = status;
 

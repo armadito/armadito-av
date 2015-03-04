@@ -7,7 +7,7 @@ int main(int argc, char **argv)
   int i;
   
   for (i = 1; i < argc; i++) {
-    enum umwsu_status status;
+    enum umwsu_file_status status;
 
     /* status = umwsu_scan_file(u, argv[i]); */
     printf("%s: %s\n", argv[i], umwsu_status_str(status));

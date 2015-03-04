@@ -141,7 +141,7 @@ void document_free(xmlDocPtr doc)
   xmlFreeDoc(doc);
 }
  
-static void report_fill(struct umwsu_report *report, enum umwsu_status status, const char *path, const char *mod_name, const char *mod_report)
+static void report_fill(struct umwsu_report *report, enum umwsu_file_status status, const char *path, const char *mod_name, const char *mod_report)
 {
   report->status = status;
   report->path = (char *)path;

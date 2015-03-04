@@ -97,7 +97,8 @@ int main(int argc, char **argv)
       scan = umwsu_scan_new(u, watch_event.full_path, flags);
       umwsu_scan_add_callback(scan, report_print_callback, stdout);
       umwsu_scan_start(scan);
-      umwsu_scan_finish(scan);
+      umwsu_scan_run(scan);
+      umwsu_scan_wait_for_completion(scan);
       umwsu_scan_free(scan);
       break;
     default:

@@ -26,15 +26,24 @@ enum umwsu_scan_flags {
   UMWSU_SCAN_RECURSE    = 1 << 1,
 };
 
+enum umwsu_scan_status {
+  UMWSU_SCAN_OK = 1,
+  UMWSU_SCAN_CANNOT_CONNECT,
+  UMWSU_SCAN_COMPLETED,
+};
+
 struct umwsu_scan *umwsu_scan_new(struct umwsu *umwsu, const char *path, enum umwsu_scan_flags flags);
 
 typedef void (*umwsu_scan_callback_t)(struct umwsu_report *report, void *callback_data);
 
 void umwsu_scan_add_callback(struct umwsu_scan *scan, umwsu_scan_callback_t callback, void *callback_data);
 
-enum umwsu_status umwsu_scan_start(struct umwsu_scan *scan);
+enum umwsu_scan_status umwsu_scan_start(struct umwsu_scan *scan);
 
-void umwsu_scan_finish(struct umwsu_scan *scan);
+int umwsu_scan_get_poll_fd(struct umwsu_scan *scan);
+enum umwsu_scan_status umwsu_scan_run(struct umwsu_scan *scan);
+
+enum umwsu_scan_status umwsu_scan_wait_for_completion(struct umwsu_scan *scan);
 
 void umwsu_scan_free(struct umwsu_scan *scan);
 
@@ -47,15 +56,14 @@ enum umwsu_action {
 
 struct umwsu_report {
   char *path;
-  enum umwsu_status status;
+  enum umwsu_file_status status;
   enum umwsu_action action;
   char *mod_name;
   char *mod_report;
 };
 
-const char *umwsu_status_str(enum umwsu_status status);
-const char *umwsu_status_pretty_str(enum umwsu_status status);
-
+const char *umwsu_file_status_str(enum umwsu_file_status status);
+const char *umwsu_file_status_pretty_str(enum umwsu_file_status status);
 /* const char *umwsu_action_str(enum umwsu_action action); */
 const char *umwsu_action_pretty_str(enum umwsu_action action);
 

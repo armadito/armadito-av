@@ -9,7 +9,7 @@ struct umwsu_module {
   enum umwsu_mod_status (*init)(void **pmod_data);
   enum umwsu_mod_status (*conf_set)(void *mod_data, const char *key, const char *value);
   char *(*conf_get)(void *mod_data, const char *key);
-  enum umwsu_status (*scan)(const char *path, const char *mime_type, void *mod_data, char **pmod_report);
+  enum umwsu_file_status (*scan)(const char *path, const char *mime_type, void *mod_data, char **pmod_report);
   enum umwsu_mod_status (*close)(void *mod_data);
   const char *name;
   const char **mime_types;

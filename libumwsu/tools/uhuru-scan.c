@@ -155,7 +155,7 @@ int main(int argc, char **argv)
 
   umwsu_scan_start(scan);
 
-  umwsu_scan_finish(scan);
+  umwsu_scan_run(scan);
 
   umwsu_scan_free(scan);
 

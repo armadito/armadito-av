@@ -18,7 +18,7 @@ static void cb_ping(struct protocol_handler *h, void *data)
 
   fprintf(stderr, "callback cb_ping\n");
 
-  protocol_handler_output_message(cl->handler, "PONG", NULL);
+  protocol_handler_send_msg(cl->handler, "PONG", NULL);
 }
 
 static void scan_callback(struct umwsu_report *report, void *callback_data)
@@ -34,12 +34,12 @@ static void scan_callback(struct umwsu_report *report, void *callback_data)
 
   sprintf(status, "%d", report->status);
   sprintf(action, "%d", report->action);
-  protocol_handler_output_message(cl->handler, "SCAN_FILE", 
-				  "Path", report->path, 
-				  "Status", status,
-				  "X-Status", report->mod_report,
-				  "Action", action,
-				  NULL);
+  protocol_handler_send_msg(cl->handler, "SCAN_FILE", 
+			    "Path", report->path, 
+			    "Status", status,
+			    "X-Status", report->mod_report,
+			    "Action", action,
+			    NULL);
 }
 
 struct scan_thread_args {
@@ -60,11 +60,13 @@ static gpointer scan_thread_fun(gpointer data)
 
   umwsu_scan_start(scan);
 
-  umwsu_scan_finish(scan);
+  umwsu_scan_run(scan);
+
+  umwsu_scan_wait_for_completion(scan);
 
   umwsu_scan_free(scan);
 
-  protocol_handler_output_message(cl->handler, "SCAN_END", NULL);
+  protocol_handler_send_msg(cl->handler, "SCAN_END", NULL);
 
   close(cl->sock);
 
@@ -77,7 +79,7 @@ static gpointer scan_thread_fun(gpointer data)
 static void cb_scan(struct protocol_handler *h, void *data)
 {
   struct client *cl = (struct client *)data;
-  char *path = protocol_handler_header_value(h, "Path");
+  char *path = protocol_handler_get_header(h, "Path");
   struct scan_thread_args *args;
   GThread *scan_thread;
 
@@ -115,14 +117,5 @@ struct client *client_new(int client_sock, struct umwsu *umwsu)
 
 int client_process(struct client *cl)
 {
-  char buff[100];
-  int n_read;
-
-  n_read = read(cl->sock, buff, 100);
-  if (n_read == 0)
-    return -1;
-
-  protocol_handler_input_buffer(cl->handler, buff, n_read);
-
-  return 0;
+  return protocol_handler_receive(cl->handler);
 }
