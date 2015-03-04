@@ -128,10 +128,12 @@ static void GH_print_func(gpointer key, gpointer value, gpointer user_data)
 
 static void protocol_handler_end_of_msg(struct protocol_handler *h)
 {
+#if 0
 #ifdef DEBUG
   fprintf(stderr, "Msg: %s\n", h->current_msg->str);
   g_hash_table_foreach (h->current_headers, GH_print_func, NULL);
   fprintf(stderr, "\n");
+#endif
 #endif
 
   protocol_handler_call_callback(h);

@@ -31,6 +31,7 @@ static void scan_callback(struct umwsu_report *report, void *callback_data)
   protocol_handler_send_msg(cl->handler, "SCAN_FILE", 
 			    "Path", report->path, 
 			    "Status", status,
+			    "Module-Name", report->mod_name,
 			    "X-Status", report->mod_report,
 			    "Action", action,
 			    NULL);

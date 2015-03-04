@@ -243,6 +243,7 @@ static void remote_scan_cb_scan_file(struct protocol_handler *h, void *data)
   struct umwsu_scan *scan = (struct umwsu_scan *)data;
   char *path = protocol_handler_get_header(h, "Path");
   char *status = protocol_handler_get_header(h, "Status");
+  char *mod_name = protocol_handler_get_header(h, "Module-Name");
   char *x_status = protocol_handler_get_header(h, "X-Status");
   char *action = protocol_handler_get_header(h, "Action");
   struct umwsu_report report;
@@ -251,7 +252,7 @@ static void remote_scan_cb_scan_file(struct protocol_handler *h, void *data)
 
   report.status = (enum umwsu_file_status)atoi(status);
   report.action = (enum umwsu_action)atoi(action);
-  report.mod_name = "unknown";
+  report.mod_name = mod_name;
   if (x_status != NULL)
     report.mod_report = strdup(x_status);
 
