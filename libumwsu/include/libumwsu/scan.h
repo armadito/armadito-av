@@ -29,6 +29,7 @@ enum umwsu_scan_flags {
 enum umwsu_scan_status {
   UMWSU_SCAN_OK = 1,
   UMWSU_SCAN_CANNOT_CONNECT,
+  UMWSU_SCAN_CONTINUE,
   UMWSU_SCAN_COMPLETED,
 };
 
@@ -43,7 +44,7 @@ enum umwsu_scan_status umwsu_scan_start(struct umwsu_scan *scan);
 int umwsu_scan_get_poll_fd(struct umwsu_scan *scan);
 enum umwsu_scan_status umwsu_scan_run(struct umwsu_scan *scan);
 
-enum umwsu_scan_status umwsu_scan_wait_for_completion(struct umwsu_scan *scan);
+/* enum umwsu_scan_status umwsu_scan_wait_for_completion(struct umwsu_scan *scan); */
 
 void umwsu_scan_free(struct umwsu_scan *scan);
 

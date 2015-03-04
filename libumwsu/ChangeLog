@@ -1,5 +1,7 @@
 2015-03-04  François  <francois@dechelle.net>
 
+	* tested remote scanning using uhuru-scan command line
+
 	* finished implementation of remote scanning in libumwsu
 
 2015-03-02  François  <francois@dechelle.net>

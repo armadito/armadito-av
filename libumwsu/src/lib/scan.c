@@ -13,6 +13,7 @@
 #include <assert.h>
 #include <glib.h>
 #include <magic.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -219,17 +220,11 @@ static enum umwsu_scan_status local_scan_run(struct umwsu_scan *scan)
       dir_map(scan->path, recurse, local_scan_entry_non_threaded, scan);
   }
 
-  return UMWSU_SCAN_OK;
-}
-
-static enum umwsu_scan_status local_scan_wait_for_completion(struct umwsu_scan *scan)
-{
   if (scan->flags & UMWSU_SCAN_THREADED)
     g_thread_pool_free(scan->local.thread_pool, FALSE, TRUE);
 
-  return UMWSU_SCAN_OK;
+  return UMWSU_SCAN_COMPLETED;
 }
-
 
 /* 
  * **************************************************
@@ -257,7 +252,8 @@ static void remote_scan_cb_scan_file(struct protocol_handler *h, void *data)
   report.status = (enum umwsu_file_status)atoi(status);
   report.action = (enum umwsu_action)atoi(action);
   report.mod_name = "unknown";
-  report.mod_report = x_status;
+  if (x_status != NULL)
+    report.mod_report = strdup(x_status);
 
   umwsu_scan_call_callbacks(scan, &report);
 
@@ -285,14 +281,10 @@ static enum umwsu_file_status remote_scan_start(struct umwsu_scan *scan)
 
 static enum umwsu_scan_status remote_scan_run(struct umwsu_scan *scan)
 {
-  protocol_handler_receive(scan->remote.handler);
+  if (protocol_handler_receive(scan->remote.handler) < 0)
+    return UMWSU_SCAN_COMPLETED;
 
-  return UMWSU_SCAN_OK;
-}
-
-static enum umwsu_scan_status remote_scan_wait_for_completion(struct umwsu_scan *scan)
-{
-  return UMWSU_SCAN_OK;
+  return UMWSU_SCAN_CONTINUE;
 }
 
 /* 
@@ -306,7 +298,13 @@ struct umwsu_scan *umwsu_scan_new(struct umwsu *umwsu, const char *path, enum um
   struct umwsu_scan *scan = (struct umwsu_scan *)malloc(sizeof(struct umwsu_scan));
 
   scan->umwsu = umwsu;
-  scan->path = (const char *)strdup(path);
+  scan->path = (const char *)realpath(path, NULL);
+  if (scan->path == NULL) {
+    perror("realpath");
+    free(scan);
+    return NULL;
+  }
+
   scan->flags = flags;
   scan->callbacks = g_array_new(FALSE, FALSE, sizeof(struct callback_entry));
   scan->is_remote = umwsu_is_remote(umwsu);
@@ -359,11 +357,6 @@ enum umwsu_scan_status umwsu_scan_start(struct umwsu_scan *scan)
 enum umwsu_scan_status umwsu_scan_run(struct umwsu_scan *scan)
 {
   return (scan->is_remote) ? remote_scan_run(scan) : local_scan_run(scan);
-}
-
-enum umwsu_scan_status umwsu_scan_wait_for_completion(struct umwsu_scan *scan)
-{
-  return (scan->is_remote) ? remote_scan_wait_for_completion(scan) : local_scan_wait_for_completion(scan);
 }
 
 void umwsu_scan_free(struct umwsu_scan *scan)

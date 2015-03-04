@@ -26,12 +26,6 @@ static void scan_callback(struct umwsu_report *report, void *callback_data)
   struct client *cl = (struct client *)callback_data;
   char status[32], action[32];
 
-  switch(report->status) {
-  case UMWSU_WHITE_LISTED:
-  case UMWSU_CLEAN:
-    return;
-  }
-
   sprintf(status, "%d", report->status);
   sprintf(action, "%d", report->action);
   protocol_handler_send_msg(cl->handler, "SCAN_FILE", 
@@ -60,9 +54,8 @@ static gpointer scan_thread_fun(gpointer data)
 
   umwsu_scan_start(scan);
 
-  umwsu_scan_run(scan);
-
-  umwsu_scan_wait_for_completion(scan);
+  while (umwsu_scan_run(scan) == UMWSU_SCAN_CONTINUE)
+    ;
 
   umwsu_scan_free(scan);
 

@@ -13,6 +13,7 @@ struct umwsu_scan_summary {
 };
 
 struct umwsu_scan_options {
+  int use_daemon;
   int recursive;
   int threaded;
   int no_summary;
@@ -22,6 +23,7 @@ struct umwsu_scan_options {
 
 static struct option long_options[] = {
   {"help",         no_argument,       0, 'h'},
+  {"local",        no_argument,       0, 'l'},
   {"recursive",    no_argument,       0, 'r'},
   {"threaded",     no_argument,       0, 't'},
   {"no-summary",   no_argument,       0, 'n'},
@@ -36,6 +38,7 @@ static void usage(void)
   fprintf(stderr, "\n");
   fprintf(stderr, "Options:\n");
   fprintf(stderr, "  --help  -h               print help and quit\n");
+  fprintf(stderr, "  --local  -l              do not use the scan daemon\n");
   fprintf(stderr, "  --recursive  -r          scan directories recursively\n");
   fprintf(stderr, "  --threaded -t            scan using multiple threads\n");
   fprintf(stderr, "  --no-summary -n          disable summary at end of scanning\n");
@@ -48,6 +51,7 @@ static void parse_options(int argc, char *argv[], struct umwsu_scan_options *opt
 {
   int c;
 
+  opts->use_daemon = 1;
   opts->recursive = 0;
   opts->threaded = 1;
   opts->no_summary = 0;
@@ -56,7 +60,7 @@ static void parse_options(int argc, char *argv[], struct umwsu_scan_options *opt
   while (1) {
     int option_index = 0;
 
-    c = getopt_long(argc, argv, "hrtn", long_options, &option_index);
+    c = getopt_long(argc, argv, "hlrtn", long_options, &option_index);
 
     if (c == -1)
       break;
@@ -64,6 +68,9 @@ static void parse_options(int argc, char *argv[], struct umwsu_scan_options *opt
     switch (c) {
     case 'h':
       usage();
+      break;
+    case 'l':
+      opts->use_daemon = 0;
       break;
     case 'r':
       opts->recursive = 1;
@@ -135,7 +142,7 @@ int main(int argc, char **argv)
   if (opts.threaded)
     flags |= UMWSU_SCAN_THREADED;
 
-  u = umwsu_open(0);
+  u = umwsu_open(opts.use_daemon);
 
   umwsu_set_verbose(u, 1);
 
@@ -155,7 +162,8 @@ int main(int argc, char **argv)
 
   umwsu_scan_start(scan);
 
-  umwsu_scan_run(scan);
+  while(umwsu_scan_run(scan) == UMWSU_SCAN_CONTINUE)
+    ;
 
   umwsu_scan_free(scan);
 
