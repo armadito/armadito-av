@@ -10,4 +10,6 @@ GPtrArray *umwsu_get_applicable_modules(struct umwsu *u, magic_t magic, const ch
 
 struct umwsu_module *umwsu_get_module_by_name(struct umwsu *u, const char *name);
 
+int umwsu_is_remote(struct umwsu *u);
+
 #endif

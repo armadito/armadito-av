@@ -1,11 +1,14 @@
 #include <libumwsu/module.h>
 #include <libumwsu/scan.h>
 #include "alert.h"
+#include "conf.h"
 #include "dir.h"
 #include "modulep.h"
+#include "protocol.h"
 #include "quarantine.h"
-#include "umwsup.h"
 #include "statusp.h"
+#include "umwsup.h"
+#include "unixsock.h"
 
 #include <assert.h>
 #include <glib.h>
@@ -21,46 +24,44 @@ struct callback_entry {
   void *callback_data;
 };
 
-struct umwsu_scan {
-  struct umwsu *umwsu;
-  GArray *callbacks;
-  const char *path;
-
-  enum umwsu_scan_flags flags;
+struct local_scan {
   GThreadPool *thread_pool;  
   GPrivate *private_magic_key;
 };
 
-static void scan_entry_thread(gpointer data, gpointer user_data);
+struct remote_scan {
+  int sock;
+  struct protocol_handler *handler;
+};
 
-static int get_max_threads(void)
-{
-  return 8;
-}
+struct umwsu_scan {
+  struct umwsu *umwsu;
+  const char *path;
+  enum umwsu_scan_flags flags;
+  GArray *callbacks;
+  int is_remote;
 
-/* Unfortunately, libmagic is not thread-safe. */
-/* We create a new magic_t for each thread, and keep it  */
-/* in thread's private data, so that it is created only once. */
-static void magic_destroy_notify(gpointer data)
-{
-  magic_close((magic_t)data);
-}
+  union {
+    struct local_scan local;
+    struct remote_scan remote;
+  };
+
+  GThreadPool *thread_pool;  
+  GPrivate *private_magic_key;
+};
+
+static enum umwsu_status local_scan_start(struct umwsu_scan *scan);
+static enum umwsu_status remote_scan_start(struct umwsu_scan *scan);
 
 struct umwsu_scan *umwsu_scan_new(struct umwsu *umwsu, const char *path, enum umwsu_scan_flags flags)
 {
-  struct umwsu_scan *scan;
-
-  scan = (struct umwsu_scan *)malloc(sizeof(struct umwsu_scan));
+  struct umwsu_scan *scan = (struct umwsu_scan *)malloc(sizeof(struct umwsu_scan));
 
   scan->umwsu = umwsu;
   scan->path = (const char *)strdup(path);
-
   scan->flags = flags;
-
   scan->callbacks = g_array_new(FALSE, FALSE, sizeof(struct callback_entry));
-
-  umwsu_scan_add_callback(scan, alert_callback, NULL);
-  umwsu_scan_add_callback(scan, quarantine_callback, NULL);
+  scan->is_remote = umwsu_is_remote(umwsu);
 
   return scan;
 }
@@ -87,7 +88,32 @@ static void umwsu_scan_call_callbacks(struct umwsu_scan *scan, struct umwsu_repo
   }
 }
 
-static enum umwsu_status umwsu_scan_apply_modules(const char *path, const char *mime_type, GPtrArray *mod_array,  struct umwsu_report *report)
+enum umwsu_status umwsu_scan_start(struct umwsu_scan *scan)
+{
+  if (scan->is_remote)
+    return remote_scan_start(scan);
+
+  return local_scan_start(scan);
+}
+
+void umwsu_scan_finish(struct umwsu_scan *scan)
+{
+  if (scan->local.thread_pool != NULL)
+    g_thread_pool_free(scan->local.thread_pool, FALSE, TRUE);
+}
+
+void umwsu_scan_free(struct umwsu_scan *scan)
+{
+  free((char *)scan->path);
+
+  g_array_free(scan->callbacks, TRUE);
+
+  free(scan);
+}
+
+
+
+static enum umwsu_status local_scan_apply_modules(const char *path, const char *mime_type, GPtrArray *mod_array,  struct umwsu_report *report)
 {
   enum umwsu_status current_status = UMWSU_UNDECIDED;
   int i;
@@ -125,7 +151,7 @@ static enum umwsu_status umwsu_scan_apply_modules(const char *path, const char *
   return current_status;
 }
 
-static enum umwsu_status umwsu_scan_file(struct umwsu_scan *scan, magic_t magic, const char *path)
+static enum umwsu_status local_scan_file(struct umwsu_scan *scan, magic_t magic, const char *path)
 {
   enum umwsu_status status;
   struct umwsu_report report;
@@ -139,7 +165,7 @@ static enum umwsu_status umwsu_scan_file(struct umwsu_scan *scan, magic_t magic,
   if (modules == NULL)
     report.status = UMWSU_UNKNOWN_FILE_TYPE;
   else
-    status = umwsu_scan_apply_modules(path, mime_type, modules, &report);
+    status = local_scan_apply_modules(path, mime_type, modules, &report);
 
   if (umwsu_get_verbose(scan->umwsu) >= 3)
     printf("%s: %s\n", path, umwsu_status_str(status));
@@ -153,60 +179,76 @@ static enum umwsu_status umwsu_scan_file(struct umwsu_scan *scan, magic_t magic,
   return status;
 }
 
+/* Unfortunately, libmagic is not thread-safe. */
+/* We create a new magic_t for each thread, and keep it  */
+/* in thread's private data, so that it is created only once. */
+static void magic_destroy_notify(gpointer data)
+{
+  magic_close((magic_t)data);
+}
+
 static magic_t get_private_magic(struct umwsu_scan *scan)
 {
-  magic_t m = (magic_t)g_private_get(scan->private_magic_key);
+  magic_t m = (magic_t)g_private_get(scan->local.private_magic_key);
 
   if (m == NULL) {
     m = magic_open(MAGIC_MIME_TYPE);
     magic_load(m, NULL);
 
-    g_private_set(scan->private_magic_key, (gpointer)m);
+    g_private_set(scan->local.private_magic_key, (gpointer)m);
   }
 
   return m;
 }
 
-static void scan_entry_thread(gpointer data, gpointer user_data)
+static void local_scan_entry_thread(gpointer data, gpointer user_data)
 {
   struct umwsu_scan *scan = (struct umwsu_scan *)user_data;
   char *path = (char *)data;
 
-  umwsu_scan_file(scan, get_private_magic(scan), path);
+  local_scan_file(scan, get_private_magic(scan), path);
 
   free(path);
 }
 
-static void scan_entry_threaded(const char *full_path, const struct dirent *dir_entry, void *data)
+static void local_scan_entry_threaded(const char *full_path, const struct dirent *dir_entry, void *data)
 {
   struct umwsu_scan *scan = (struct umwsu_scan *)data;
 
   if (dir_entry->d_type == DT_DIR)
     return;
 
-  g_thread_pool_push(scan->thread_pool, (gpointer)strdup(full_path), NULL);
+  g_thread_pool_push(scan->local.thread_pool, (gpointer)strdup(full_path), NULL);
 }
 
-static void scan_entry_non_threaded(const char *full_path, const struct dirent *dir_entry, void *data)
+static void local_scan_entry_non_threaded(const char *full_path, const struct dirent *dir_entry, void *data)
 {
   struct umwsu_scan *scan = (struct umwsu_scan *)data;
 
   if (dir_entry->d_type == DT_DIR)
     return;
 
-  umwsu_scan_file(scan, NULL, full_path);
+  local_scan_file(scan, NULL, full_path);
 }
 
-enum umwsu_status umwsu_scan_start(struct umwsu_scan *scan)
+static int get_max_threads(void)
+{
+  return 8;
+}
+
+enum umwsu_status local_scan_start(struct umwsu_scan *scan)
 {
   struct stat sb;
 
+  umwsu_scan_add_callback(scan, alert_callback, NULL);
+  umwsu_scan_add_callback(scan, quarantine_callback, NULL);
+
   if (scan->flags & UMWSU_SCAN_THREADED) {
-    scan->thread_pool = g_thread_pool_new(scan_entry_thread, scan, get_max_threads(), FALSE, NULL);
-    scan->private_magic_key = g_private_new(magic_destroy_notify);
+    scan->local.thread_pool = g_thread_pool_new(local_scan_entry_thread, scan, get_max_threads(), FALSE, NULL);
+    scan->local.private_magic_key = g_private_new(magic_destroy_notify);
   } else {
-    scan->thread_pool = NULL;
-    scan->private_magic_key = NULL;
+    scan->local.thread_pool = NULL;
+    scan->local.private_magic_key = NULL;
   }
 
   if (stat(scan->path, &sb) == -1) {
@@ -215,13 +257,13 @@ enum umwsu_status umwsu_scan_start(struct umwsu_scan *scan)
   }
 
   if (S_ISREG(sb.st_mode))
-    return umwsu_scan_file(scan, NULL, scan->path);
+    return local_scan_file(scan, NULL, scan->path);
 
   if (S_ISDIR(sb.st_mode)) {
     int threaded = scan->flags  & UMWSU_SCAN_THREADED;
     int recurse = scan->flags  & UMWSU_SCAN_RECURSE;
 
-    dir_map(scan->path, recurse, (threaded) ? scan_entry_threaded : scan_entry_non_threaded, scan);
+    dir_map(scan->path, recurse, (threaded) ? local_scan_entry_threaded : local_scan_entry_non_threaded, scan);
 
     return UMWSU_CLEAN;
   }
@@ -229,17 +271,50 @@ enum umwsu_status umwsu_scan_start(struct umwsu_scan *scan)
   return UMWSU_EINVAL;
 }
 
-void umwsu_scan_finish(struct umwsu_scan *scan)
+static void remote_scan_cb_scan_start(struct protocol_handler *h, void *data)
 {
-  if (scan->thread_pool != NULL)
-    g_thread_pool_free(scan->thread_pool, FALSE, TRUE);
 }
 
-void umwsu_scan_free(struct umwsu_scan *scan)
+static void remote_scan_cb_scan_file(struct protocol_handler *h, void *data)
 {
-  free((char *)scan->path);
+  struct umwsu_scan *scan = (struct umwsu_scan *)data;
+  char *path = protocol_handler_header_value(h, "Path");
+  char *status = protocol_handler_header_value(h, "Status");
+  char *x_status = protocol_handler_header_value(h, "X-Status");
+  char *action = protocol_handler_header_value(h, "Action");
+  struct umwsu_report report;
 
-  g_array_free(scan->callbacks, TRUE);
+  umwsu_report_init(&report, path);
 
-  free(scan);
+  report.status = (enum umwsu_status)atoi(status);
+  report.action = (enum umwsu_action)atoi(action);
+  report.mod_name = "unknown";
+  report.mod_report = x_status;
+
+  umwsu_scan_call_callbacks(scan, &report);
+
+  umwsu_report_destroy(&report);
+}
+
+static void remote_scan_cb_scan_end(struct protocol_handler *h, void *data)
+{
+}
+
+static enum umwsu_status remote_scan_start(struct umwsu_scan *scan)
+{
+  char *sock_path;
+  
+  sock_path = conf_get(scan->umwsu, "remote", "socket-path");
+  assert(sock_path != NULL);
+
+  scan->remote.sock = client_socket_create(sock_path, 10);
+  scan->remote.handler = protocol_handler_new(scan->remote.sock, scan->remote.sock);
+
+  protocol_handler_add_callback(scan->remote.handler, "SCAN_START", remote_scan_cb_scan_start, scan);
+  protocol_handler_add_callback(scan->remote.handler, "SCAN_FILE", remote_scan_cb_scan_file, scan);
+  protocol_handler_add_callback(scan->remote.handler, "SCAN_END", remote_scan_cb_scan_end, scan);
+
+  protocol_handler_output_message(scan->remote.handler, "SCAN",
+				  "Path", scan->path,
+				  NULL);
 }

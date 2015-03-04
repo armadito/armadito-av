@@ -157,6 +157,11 @@ struct umwsu *umwsu_open(int is_remote)
   return u;
 }
 
+int umwsu_is_remote(struct umwsu *u)
+{
+  return u->is_remote;
+}
+
 void umwsu_set_verbose(struct umwsu *u, int verbosity)
 {
   u->verbosity = verbosity;
