@@ -1,3 +1,7 @@
+2015-03-05  François  <francois@dechelle.net>
+
+	* added option to suppress printing clean files in uhuru-scan; added use of epoll()
+
 2015-03-04  François  <francois@dechelle.net>
 
 	* tested local vs. remote: output is exactly the same
