@@ -1,4 +1,4 @@
-AC_INIT(uhuru-mod-module5-2-db,1.1.1,francois@dechelle.net)
+AC_INIT(uhuru-mod-module5-2-db,1.2.0,francois@dechelle.net)
 AM_INIT_AUTOMAKE(dist-bzip2 no-dist-gzip)
 
 # collect arguments
