@@ -6,13 +6,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-static char *remote_sock_path;
+static char *remote_sock_dir;
 
 static enum umwsu_mod_status mod_remote_conf_set(void *mod_data, const char *key, const char *value)
 {
-  if (!strcmp(key, "socket-path")) {
+  if (!strcmp(key, "socket-dir")) {
     fprintf(stderr, "remote: got config %s -> %s\n", key, value);
-    remote_sock_path = strdup(value);
+    remote_sock_dir = strdup(value);
     return UMWSU_MOD_OK;
   } 
 
@@ -21,8 +21,8 @@ static enum umwsu_mod_status mod_remote_conf_set(void *mod_data, const char *key
 
 static char *mod_remote_conf_get(void *mod_data, const char *key)
 {
-  if (!strcmp(key, "socket-path"))
-    return remote_sock_path;
+  if (!strcmp(key, "socket-dir"))
+    return remote_sock_dir;
 
   return NULL;
 }

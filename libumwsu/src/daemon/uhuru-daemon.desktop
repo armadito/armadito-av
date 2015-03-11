@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Uhuru scan daemon
+Exec=/usr/bin/uhuru-daemon
+NoDisplay=true
+Terminal=false
+

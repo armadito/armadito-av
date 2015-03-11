@@ -6,12 +6,16 @@
 #include <libumwsu/scan.h>
 
 #include <assert.h>
+#include <errno.h>
+#include <glib.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/epoll.h>
+#include <unistd.h>
 
 struct server {
+  char *sock_path;
   int listen_sock;
   int epoll_fd;
   struct umwsu *umwsu;
@@ -28,7 +32,8 @@ static void server_remove_polled_fd(struct server *server, struct poll_data *p);
 struct server *server_new(void)
 {
   struct server *server;
-  char *sock_path;
+  char *sock_dir;
+  GString *sock_path;
 
   server = (struct server *)malloc(sizeof(struct server));
   assert(server != NULL);
@@ -38,8 +43,19 @@ struct server *server_new(void)
 
   umwsu_set_verbose(server->umwsu, 1);
 
-  sock_path = conf_get(server->umwsu, "remote", "socket-path");
-  assert(sock_path != NULL);
+  sock_dir = conf_get(server->umwsu, "remote", "socket-dir");
+  assert(sock_dir != NULL);
+
+  sock_path = g_string_new(sock_dir);
+
+  g_string_append_printf(sock_path, "/uhuru-%s", getenv("USER"));
+  server->sock_path = sock_path->str;
+  g_string_free(sock_path, FALSE);
+
+  if (unlink(server->sock_path) && errno != ENOENT) {
+    perror("unlink");
+    exit(EXIT_FAILURE);
+  }
 
   server->epoll_fd = epoll_create(42);
   if (server->epoll_fd < 0) {
@@ -47,7 +63,7 @@ struct server *server_new(void)
     exit(EXIT_FAILURE);
   }
 
-  server->listen_sock = server_socket_create(sock_path);
+  server->listen_sock = server_socket_create(server->sock_path);
   server_add_polled_fd(server, server->listen_sock, NULL);
 
   return server;
@@ -117,12 +133,4 @@ static void server_remove_polled_fd(struct server *server, struct poll_data *p)
   free(p);
 }
 
-static int foo(int sock, void *data)
-{
-  char buff[100];
-
-  memset(buff, 0, 100);
-  read(sock, buff, 100);
-  fprintf(stderr, "foo %d %s\n", sock, buff);
-}
 

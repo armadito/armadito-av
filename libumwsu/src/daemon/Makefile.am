@@ -9,5 +9,4 @@ client.h \
 server.c \
 server.h
 
-install-exec-hook:
-	-mkdir -p $(DESTDIR)$(localstatedir)/run/
+EXTRA_DIST=uhuru-daemon.desktop

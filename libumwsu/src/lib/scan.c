@@ -234,8 +234,16 @@ static enum umwsu_scan_status local_scan_run(struct umwsu_scan *scan)
 
 static void remote_scan_init(struct umwsu_scan *scan)
 {
-  scan->remote.sock_path = strdup(conf_get(scan->umwsu, "remote", "socket-path"));
-  assert(scan->remote.sock_path != NULL);
+  char *sock_dir;
+  GString *sock_path;
+
+  sock_dir = conf_get(scan->umwsu, "remote", "socket-dir");
+  assert(sock_path != NULL);
+
+  sock_path = g_string_new(sock_dir);
+  g_string_append_printf(sock_path, "/uhuru-%s", getenv("USER"));
+  scan->remote.sock_path = sock_path->str;
+  g_string_free(sock_path, FALSE);
 }
 
 static void remote_scan_cb_scan_file(struct protocol_handler *h, void *data)
