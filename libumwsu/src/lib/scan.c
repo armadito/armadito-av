@@ -238,9 +238,10 @@ static void remote_scan_init(struct umwsu_scan *scan)
   GString *sock_path;
 
   sock_dir = conf_get(scan->umwsu, "remote", "socket-dir");
-  assert(sock_path != NULL);
+  assert(sock_dir != NULL);
 
   sock_path = g_string_new(sock_dir);
+
   g_string_append_printf(sock_path, "/uhuru-%s", getenv("USER"));
   scan->remote.sock_path = sock_path->str;
   g_string_free(sock_path, FALSE);
