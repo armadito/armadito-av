@@ -33,6 +33,20 @@ PKG_CHECK_MODULES(GMODULE2, gmodule-2.0, [HAVE_GMODULE2=yes], [HAVE_GMODULE2=no]
 if test "$HAVE_GMODULE2" = "no"; then
    AC_MSG_ERROR("cannot find gmodule2 library")
 fi
+# check for g_thread_new/g_thread_create
+SAVE_CFLAGS=${CFLAGS}
+CFLAGS="${GMODULE2_CFLAGS} ${CFLAGS}"
+SAVE_LDFLAGS=${LDFLAGS}
+LDFLAGS="${GMODULE2_LIBS} ${LDFLAGS}"
+AC_CHECK_LIB([glib-2.0], [g_thread_new],
+		      [AC_DEFINE([HAVE_GTHREAD_NEW], [], [Define this if glib has the 'g_thread_new' function])])
+AC_CHECK_LIB([glib-2.0], [g_thread_create],
+		      [AC_DEFINE([HAVE_GTHREAD_CREATE], [], [Define this if glib has the 'g_thread_create' function])])
+CFLAGS=${SAVE_CFLAGS}
+unset SAVE_CFLAGS
+LDFLAGS=${SAVE_LDFLAGS}
+unset SAVE_LDFLAGS
+
 
 # check for libxml2
 PKG_CHECK_MODULES(LIBXML2, libxml-2.0, [HAVE_LIBXML2=yes], [HAVE_LIBXML2=no])

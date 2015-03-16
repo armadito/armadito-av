@@ -1,5 +1,6 @@
 #include "client.h"
 #include "lib/protocol.h"
+#include "libumwsu-config.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -67,7 +68,9 @@ static gpointer scan_thread_fun(gpointer data)
   free(args);
   free(path);
 
+#if 0
   g_thread_unref(g_thread_self());
+#endif
 }
 
 static void cb_scan(struct protocol_handler *h, void *data)
@@ -77,14 +80,19 @@ static void cb_scan(struct protocol_handler *h, void *data)
   struct scan_thread_args *args;
   GThread *scan_thread;
 
-  fprintf(stderr, "callback cb_scan\n");
-  fprintf(stderr, "Path: %s\n", path);
+  fprintf(stderr, "callback cb_scan path: %s\n", path);
 
   args = (struct scan_thread_args *)malloc(sizeof(struct scan_thread_args));
   args->path = strdup(path);
   args->cl = cl;
 
+#ifdef HAVE_GTHREAD_NEW
   scan_thread = g_thread_new("scan_thread", scan_thread_fun, args);
+#else
+#ifdef g_thread_create
+  scan_thread = g_thread_create(scan_thread_fun, args, TRUE, NULL);
+#endif
+#endif
 }
 
 static void cb_stat(struct protocol_handler *h, void *data)
