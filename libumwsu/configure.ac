@@ -29,7 +29,7 @@ if test "$enable_debug" = "yes"; then
 fi
 
 # check for gmodule
-PKG_CHECK_MODULES(GMODULE2, gmodule-2.0, [HAVE_GMODULE2=yes], [HAVE_GMODULE2=no])
+PKG_CHECK_MODULES(GMODULE2, gmodule-2.0 gthread-2.0, [HAVE_GMODULE2=yes], [HAVE_GMODULE2=no])
 if test "$HAVE_GMODULE2" = "no"; then
    AC_MSG_ERROR("cannot find gmodule2 library")
 fi

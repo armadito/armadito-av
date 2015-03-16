@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <getopt.h>
+#include <glib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -162,6 +163,8 @@ static int other_daemonize(char* name, char* path, char* outfile, char* errfile,
 int main(int argc, char **argv)
 {
   struct umwsu_daemon_options opts;
+
+  g_thread_init(NULL);
 
   parse_options(argc, argv, &opts);
 
