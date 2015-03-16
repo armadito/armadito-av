@@ -1,3 +1,7 @@
+2015-03-16  François  <francois@dechelle.net>
+
+	* fixed g_thread_init() (must add to configure)
+
 2015-03-05  François  <francois@dechelle.net>
 
 	* added option to suppress printing clean files in uhuru-scan; added use of epoll()
