@@ -162,24 +162,29 @@ static void local_scan_entry_thread_fun(gpointer data, gpointer user_data)
   free(path);
 }
 
-static void local_scan_entry_threaded(const char *full_path, const struct dirent *dir_entry, void *data)
+static void local_scan_entry(const char *full_path, enum dir_entry_flag flags, int errno, void *data)
 {
   struct umwsu_scan *scan = (struct umwsu_scan *)data;
 
-  if (dir_entry->d_type == DT_DIR)
+  if (flags & DIR_ENTRY_IS_ERROR) {
+    struct umwsu_report report;
+
+    umwsu_report_init(&report, full_path);
+
+    report.status = UMWSU_IERROR;
+    report.mod_report = strdup(strerror(errno));
+    umwsu_scan_call_callbacks(scan, &report);
+
+    umwsu_report_destroy(&report);
+  }
+
+  if (!(flags & DIR_ENTRY_IS_REG))
     return;
 
-  g_thread_pool_push(scan->local.thread_pool, (gpointer)strdup(full_path), NULL);
-}
-
-static void local_scan_entry_non_threaded(const char *full_path, const struct dirent *dir_entry, void *data)
-{
-  struct umwsu_scan *scan = (struct umwsu_scan *)data;
-
-  if (dir_entry->d_type == DT_DIR)
-    return;
-
-  local_scan_file(scan, NULL, full_path);
+  if (scan->flags & UMWSU_SCAN_THREADED)
+    g_thread_pool_push(scan->local.thread_pool, (gpointer)strdup(full_path), NULL);
+  else
+    local_scan_file(scan, NULL, full_path);
 }
 
 static int get_max_threads(void)
@@ -214,10 +219,7 @@ static enum umwsu_scan_status local_scan_run(struct umwsu_scan *scan)
   } else if (S_ISDIR(sb.st_mode)) {
     int recurse = scan->flags & UMWSU_SCAN_RECURSE;
 
-    if (scan->flags & UMWSU_SCAN_THREADED) {
-      dir_map(scan->path, recurse, local_scan_entry_threaded, scan);
-    } else
-      dir_map(scan->path, recurse, local_scan_entry_non_threaded, scan);
+    dir_map(scan->path, recurse, local_scan_entry, scan);
   }
 
   if (scan->flags & UMWSU_SCAN_THREADED)

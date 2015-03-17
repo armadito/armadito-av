@@ -52,7 +52,7 @@ static void umwsu_add_module(struct umwsu *u, struct umwsu_module *mod)
   g_ptr_array_add(u->modules, mod);
 }
 
-static void load_entry(const char *full_path, const struct dirent *dir_entry, void *data)
+static void load_entry(const char *full_path, enum dir_entry_flag flags, int errno, void *data)
 {
   struct umwsu *u = (struct umwsu *)data;
   const char *t = magic_file(u->magic, full_path);

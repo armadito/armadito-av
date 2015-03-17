@@ -11,17 +11,47 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <errno.h>
 
-int dir_map(const char *path, int recurse, void (*dirent_fun)(const char *fpath, const struct dirent *dir_entry, void *data), void *data)
+static enum dir_entry_flag dirent_flags(struct dirent *entry)
+{
+  switch(entry->d_type) {
+  case DT_DIR:
+    return DIR_ENTRY_IS_DIR;
+  case DT_BLK:
+  case DT_CHR:
+    return DIR_ENTRY_IS_DEV;
+  case DT_SOCK:
+  case DT_FIFO:
+    return DIR_ENTRY_IS_IPC;
+  case DT_LNK:
+    return DIR_ENTRY_IS_LINK;
+  case DT_REG:
+    return DIR_ENTRY_IS_REG;
+  default:
+    return DIR_ENTRY_IS_UNKNOWN;
+  }
+
+  return DIR_ENTRY_IS_UNKNOWN;
+}
+
+int dir_map(const char *path, int recurse, dirent_fun_t dirent_fun, void *data)
 {
   DIR *d;
   struct dirent entry, *result;
   int ret = 0;
-
+  enum dir_entry_flag flags = 0;
+    
   d = opendir(path);
   if (d == NULL) {
     fprintf(stderr, "error opening directory %s (%s)\n", path, strerror(errno));
-    ret = 1;
+
+    flags |= DIR_ENTRY_IS_ERROR;
+    (*dirent_fun)(path, flags, errno, data);
+    
+    if (errno != EACCES && errno != ENOENT && errno != ENOTDIR)
+      ret = 1;
+
     goto cleanup;
   }
 
@@ -56,7 +86,8 @@ int dir_map(const char *path, int recurse, void (*dirent_fun)(const char *fpath,
       }
     }
 
-    (*dirent_fun)(entry_path, &entry, data);
+    flags = dirent_flags(&entry);
+    (*dirent_fun)(entry_path, flags, 0, data);
 
     free(entry_path);
   }
