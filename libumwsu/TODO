@@ -1,20 +1,10 @@
 
-- ajouter mise en quarantaine (voir IHM legacy)
-* utiliser un répertoire en 0333 appartenant à root (ajouter dans le script postinst du package) [OK, CHECK]
-* déplacer le fichier dans le directory de quarantaine avec un nouveau nom aléatoire [OK]
-* changer le mode du nouveau fichier à 00 [OK]
+- scan
+* déplacer le comptage des fichiers dans scan.c
+* ajouter un argument dans les callbacks (file_count, file_report, scan_end)
 
-- ajouter service d'analyse idem windows avec analyse dans un process séparé 
--- protocole: idem clamd, socket Unix; problème du protocole clamd % caractère :
--- parser du protocole: ajouter callbacks sur les commandes [OK]
--- implémenter service de scan utilisant le protocole:
---- listen socket unix (/var/run/uhuru/uhuru.socket) [OK]
---- compléter config [OK]
---- poll vs. thread pool vs. prefork (non, possible duplication des bases chargées?): poll pour commencer [OK]
---- version mono thread pour l'instant
--- faire version de UMWSU utilisant le protocole au lieu de l'appel direct des modules
---- umwsu.c [OK]
---- scan.c: dans le start, ouvrir la connexion, envoyer la commande, attendre les réponses SCAN_FILE et SCAN_END, sur SCAN_FILE créer un report et appeler les callbacks
+- démon de scan
+* ajouter les messages pour le compte de fichiers
 
 
 - ajouter watch(directory) [OK, revoir l'implémentation]
@@ -55,4 +45,9 @@ flex vs. hand made scanner? => analyseur lexical de la glib
 -> comment relancer automatiquement un process, même si on tue le watchdog
 cf http://stackoverflow.com/questions/6538587/how-to-protect-my-process-from-being-killed
 
+
+- ajouter mise en quarantaine (voir IHM legacy) [OK]
+* utiliser un répertoire en 0333 appartenant à root (ajouter dans le script postinst du package) [OK]
+* déplacer le fichier dans le directory de quarantaine avec un nouveau nom aléatoire [OK]
+* changer le mode du nouveau fichier à 00 [OK]
 

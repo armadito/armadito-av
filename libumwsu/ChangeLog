@@ -1,3 +1,7 @@
+2015-04-17  François  <francois@dechelle.net>
+
+	* reimplemented daemon server part using GIO, in order to support dbus signals
+
 2015-03-17  François  <francois@dechelle.net>
 
 	* fixed directory traversal bug in case of access denied

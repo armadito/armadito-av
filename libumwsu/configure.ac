@@ -28,10 +28,14 @@ if test "$enable_debug" = "yes"; then
    CFLAGS="${CFLAGS} -g"
 fi
 
-# check for gmodule
+# check for glib stuff
 PKG_CHECK_MODULES(GMODULE2, gmodule-2.0 gthread-2.0, [HAVE_GMODULE2=yes], [HAVE_GMODULE2=no])
 if test "$HAVE_GMODULE2" = "no"; then
    AC_MSG_ERROR("cannot find gmodule2 library")
+fi
+PKG_CHECK_MODULES(GIO2, gio-2.0 gio-unix-2.0, [HAVE_GIO2=yes], [HAVE_GIO2=no])
+if test "$HAVE_GIO2" = "no"; then
+   AC_MSG_ERROR("cannot find glib gio library")
 fi
 # check for g_thread_new/g_thread_create
 SAVE_CFLAGS=${CFLAGS}
