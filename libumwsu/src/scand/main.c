@@ -1,3 +1,4 @@
+#include "libumwsu-config.h"
 #include <libumwsu/scan.h>
 #include "server.h"
 
@@ -165,6 +166,7 @@ int main(int argc, char **argv)
   struct umwsu_daemon_options opts;
 
   g_thread_init(NULL);
+  g_type_init();
 
   parse_options(argc, argv, &opts);
 

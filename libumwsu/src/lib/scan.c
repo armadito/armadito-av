@@ -1,3 +1,4 @@
+#include "libumwsu-config.h"
 #include <libumwsu/module.h>
 #include <libumwsu/scan.h>
 #include "alert.h"

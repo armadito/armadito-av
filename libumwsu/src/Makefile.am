@@ -1,1 +1,1 @@
-SUBDIRS=lib daemon
+SUBDIRS=lib scand

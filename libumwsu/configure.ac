@@ -1,4 +1,4 @@
-AC_INIT(libumwsu,1.2.0,francois@dechelle.net)
+AC_INIT(libumwsu,1.2.1,francois@dechelle.net)
 AM_INIT_AUTOMAKE
 
 # collect arguments
@@ -50,7 +50,8 @@ CFLAGS=${SAVE_CFLAGS}
 unset SAVE_CFLAGS
 LDFLAGS=${SAVE_LDFLAGS}
 unset SAVE_LDFLAGS
-
+# for now, disable deprecations, will need more tests in configure.ac
+AC_DEFINE([GLIB_DISABLE_DEPRECATION_WARNINGS], [1], [Disable glib deprecation warnings])
 
 # check for libxml2
 PKG_CHECK_MODULES(LIBXML2, libxml-2.0, [HAVE_LIBXML2=yes], [HAVE_LIBXML2=no])
@@ -92,7 +93,7 @@ include/libumwsu/Makefile
 pkgconfig/Makefile
 src/Makefile
 src/lib/Makefile
-src/daemon/Makefile
+src/scand/Makefile
 tests/Makefile
 tools/Makefile
 ])
