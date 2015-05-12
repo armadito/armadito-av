@@ -94,6 +94,7 @@ pkgconfig/Makefile
 src/Makefile
 src/lib/Makefile
 src/scand/Makefile
+src/watchd/Makefile
 tests/Makefile
 tools/Makefile
 ])

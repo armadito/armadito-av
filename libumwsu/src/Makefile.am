@@ -1,1 +1,1 @@
-SUBDIRS=lib scand
+SUBDIRS=lib scand watchd
