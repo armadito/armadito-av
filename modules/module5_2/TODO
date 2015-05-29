@@ -1,12 +1,6 @@
 
 - m.à.j. code git
 * maj % derniers changements
-* intégration du scan fichiers PE [OK]
-* chargement des bases PE [OK]
-* problème de sélection de la fonction % type mime: [OK]
-soit ajouter type mime dans les arguments de la fonction de scan (le plus simple et le plus efficace) [OK]
-soit faire 2 modules (mais duplication du code et problème de configuration) [NON]
-
 
 - configuration
 * répertoire des bases
