@@ -46,8 +46,4 @@ flex vs. hand made scanner? => analyseur lexical de la glib
 cf http://stackoverflow.com/questions/6538587/how-to-protect-my-process-from-being-killed
 
 
-- ajouter mise en quarantaine (voir IHM legacy) [OK]
-* utiliser un répertoire en 0333 appartenant à root (ajouter dans le script postinst du package) [OK]
-* déplacer le fichier dans le directory de quarantaine avec un nouveau nom aléatoire [OK]
-* changer le mode du nouveau fichier à 00 [OK]
 

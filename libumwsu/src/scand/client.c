@@ -38,17 +38,13 @@ static void scan_callback(struct umwsu_report *report, void *callback_data)
 			    NULL);
 }
 
-struct scan_thread_args {
-  char *path;
-  struct client *cl;
-};
-
-static gpointer scan_thread_fun(gpointer data)
+static void cb_scan(struct protocol_handler *h, void *data)
 {
-  struct scan_thread_args *args = (struct scan_thread_args *)data;
-  char *path = args->path;
-  struct client *cl = args->cl;
+  struct client *cl = (struct client *)data;
+  char *path = protocol_handler_get_header(h, "Path");
   struct umwsu_scan *scan;
+
+  fprintf(stderr, "callback cb_scan path: %s\n", path);
 
   scan = umwsu_scan_new(cl->umwsu, path, UMWSU_SCAN_RECURSE);
 
@@ -63,36 +59,10 @@ static gpointer scan_thread_fun(gpointer data)
 
   protocol_handler_send_msg(cl->handler, "SCAN_END", NULL);
 
+  /* should not be there: the UI must close the connexion when processing SCAN_END message, then the server will close */
   close(cl->sock);
 
-  free(args);
-  free(path);
-
-#if 0
-  g_thread_unref(g_thread_self());
-#endif
-}
-
-static void cb_scan(struct protocol_handler *h, void *data)
-{
-  struct client *cl = (struct client *)data;
-  char *path = protocol_handler_get_header(h, "Path");
-  struct scan_thread_args *args;
-  GThread *scan_thread;
-
-  fprintf(stderr, "callback cb_scan path: %s\n", path);
-
-  args = (struct scan_thread_args *)malloc(sizeof(struct scan_thread_args));
-  args->path = strdup(path);
-  args->cl = cl;
-
-#ifdef HAVE_GTHREAD_NEW
-  scan_thread = g_thread_new("scan_thread", scan_thread_fun, args);
-#else
-#ifdef g_thread_create
-  scan_thread = g_thread_create(scan_thread_fun, args, TRUE, NULL);
-#endif
-#endif
+  fprintf(stderr, "callback cb_scan end\n");
 }
 
 static void cb_stat(struct protocol_handler *h, void *data)

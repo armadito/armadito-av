@@ -1,54 +1,28 @@
 #include "server.h"
 #include "client.h"
 #include "lib/conf.h"
+#include "lib/unixsock.h"
+
 #include <libumwsu/scan.h>
 
 #include <assert.h>
 #include <errno.h>
 #include <glib.h>
-#include <gio/gio.h>
-#include <gio/gunixsocketaddress.h>
-#include <glib-object.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 
 struct server {
-  char *sock_path;
+  int listen_sock;
+  GIOChannel *channel;
+  GThreadPool *thread_pool;  
   struct umwsu *umwsu;
-  GSocketService *service;
 };
 
-static gboolean server_incoming_cb(GSocketService *service, GSocketConnection *connection, GObject *source_object, gpointer user_data)
+static char *server_get_sock_path(struct server *server)
 {
-  GSocket *sock;
-  GValue fd_value = G_VALUE_INIT;
-  int fd;
-  struct client *cl;
-  struct server *server = (struct server *)user_data;
-
-  sock = g_socket_connection_get_socket(connection);
-  if (sock == NULL) {
-    fprintf(stderr, "socket is NULL???\n");
-    return TRUE;
-  }
-
-  g_value_init(&fd_value, G_TYPE_INT);
-  g_object_get_property(G_OBJECT(sock), "fd", &fd_value);
-  fd = g_value_get_int(&fd_value);
-
-  cl = client_new(fd, server->umwsu);
-
-  while (client_process(cl) >= 0)
-    ;
-
-  return FALSE;
-}
-
-static void server_get_sock_path(struct server *server)
-{
-  char *sock_dir;
+  char *sock_dir, *ret;
   GString *sock_path;
 
   sock_dir = conf_get(server->umwsu, "remote", "socket-dir");
@@ -56,41 +30,63 @@ static void server_get_sock_path(struct server *server)
 
   sock_path = g_string_new(sock_dir);
   g_string_append_printf(sock_path, "/uhuru-%s", getenv("USER"));
-  server->sock_path = sock_path->str;
+  ret = sock_path->str;
   g_string_free(sock_path, FALSE);
+
+  return ret;
+}
+
+static void client_thread(gpointer data, gpointer user_data)
+{
+  struct client *client = (struct client *)data;
+
+  while (client_process(client) >= 0)
+    ;
+
+  fprintf(stderr, "finished connection\n");
+}
+
+static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpointer data)
+{
+  struct server *server = (struct server *)data;
+  struct client *client;
+  int client_sock;
+
+  client_sock = server_socket_accept(server->listen_sock);
+
+  client = client_new(client_sock, server->umwsu);
+
+  g_thread_pool_push(server->thread_pool, (gpointer)client, NULL);
+
+  return TRUE;
 }
 
 struct server *server_new(void)
 {
   struct server *server;
-  GError *error = NULL;
-  GSocketAddress *sock_addr;
+  char *sock_path;
 
   server = (struct server *)malloc(sizeof(struct server));
   assert(server != NULL);
 
   server->umwsu = umwsu_open(0);
   assert(server->umwsu != NULL);
+
   umwsu_set_verbose(server->umwsu, 1);
 
-  server_get_sock_path(server);
+  sock_path = server_get_sock_path(server);
 
-  if (unlink(server->sock_path) && errno != ENOENT) {
+  if (unlink(sock_path) && errno != ENOENT) {
     perror("unlink");
     exit(EXIT_FAILURE);
   }
 
-  sock_addr = g_unix_socket_address_new(server->sock_path);
+  server->listen_sock = server_socket_create(sock_path);
 
-  server->service = g_threaded_socket_service_new(-1);
+  server->channel = g_io_channel_unix_new(server->listen_sock);
+  g_io_add_watch(server->channel, G_IO_IN, server_listen_cb, server);
 
-  if (!g_socket_listener_add_address(G_SOCKET_LISTENER(server->service), sock_addr, G_SOCKET_TYPE_STREAM, G_SOCKET_PROTOCOL_DEFAULT, NULL, NULL, &error)) {
-    g_error("%s", error->message);
-    exit(EXIT_FAILURE);
-  }
-
-  g_signal_connect(server->service, "incoming", G_CALLBACK(server_incoming_cb), server);
-  g_socket_service_start(server->service);
+  server->thread_pool = g_thread_pool_new(client_thread, server, -1, FALSE, NULL);
 
   return server;
 }

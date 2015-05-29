@@ -1,4 +1,5 @@
 #include "libumwsu-config.h"
+#include "watch.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -172,7 +173,7 @@ int main(int argc, char **argv)
   if (!opts.no_daemon)
     daemonize();
 
-  /* server_loop(server_new()); */
+  watch_loop();
 
   return 0;
 }

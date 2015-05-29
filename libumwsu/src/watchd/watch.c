@@ -1,5 +1,6 @@
 #include <gio/gio.h>
 #include <stdio.h>
+#include <string.h>
 
 #define UHURU_BUS_NAME          "com.uhuru.ScanService"
 #define UHURU_INTERFACE_NAME    "com.uhuru.Scan"
@@ -46,16 +47,16 @@ static void scan_done_cb(GObject *source_object, GAsyncResult *res, gpointer use
   fprintf(stderr, "scan done\n");
 }
 
-static void call_scan(GDBusConnection *conn, const char *scan_path, int show_dialog)
+static void call_scan(GDBusConnection *conn, const char *scan_path, int show_what)
 {
-  printf("calling scan(\"%s\", %d)\n", scan_path, show_dialog);
+  printf("calling scan(\"%s\", %d)\n", scan_path, show_what);
 
   g_dbus_connection_call(conn,
                          UHURU_BUS_NAME,
                          UHURU_OBJECT_PATH,
                          UHURU_INTERFACE_NAME,
                          "Scan",
-                         g_variant_new("(sb)", scan_path, show_dialog),
+                         g_variant_new("(su)", scan_path, show_what),
                          NULL,
                          G_DBUS_CALL_FLAGS_NONE,
                          -1,
@@ -119,7 +120,9 @@ static void mount_cb(GDBusConnection *conn,
 
   mount_dir = g_variant_get_string(sub_argv, NULL);
 
-  call_scan(conn, mount_dir, 0);
+  if (!strncmp(mount_dir, "file://", 7)) {
+    call_scan(conn, mount_dir + 7, 1);
+  }
 
   g_variant_unref(sub_argv);
   g_variant_unref(argv);

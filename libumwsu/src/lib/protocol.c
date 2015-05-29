@@ -2,9 +2,11 @@
 #include "libumwsu-config.h"
 
 #include <glib.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <string.h>
 
 enum protocol_handler_state {
   EXPECTING_MSG,
@@ -188,8 +190,17 @@ int protocol_handler_receive(struct protocol_handler *handler)
 {
   int n_read, i;
 
+  fprintf(stderr, "about to read %d\n", RECEIVE_BUFFER_LEN);
+  
   n_read = read(handler->input_fd, handler->receive_buffer, RECEIVE_BUFFER_LEN);
-  if (n_read == 0)
+
+  fprintf(stderr, "read %d\n", n_read);
+
+  if (n_read == -1) {
+    fprintf(stderr, "error in protocol_handler_receive: %s\n", strerror(errno));
+  }
+
+  if (n_read <= 0)
     return -1;
 
   for(i = 0; i < n_read; i++)
