@@ -1,0 +1,13 @@
+bindir=@bindir@
+sbindir=@sbindir@
+includedir=@includedir@
+libdir=@libdir@
+moduledir=@moduledir@
+version=@PACKAGE_VERSION@
+
+Name: UMWSU library
+Description: UMWSU library
+Version: ${version} 
+Requires: gmodule-2.0 glib-2.0 libxml-2.0
+Libs:-L${libdir} -lumwsu -lmagic
+Cflags: -I${includedir} 

@@ -1,0 +1,49 @@
+
+- scan
+* déplacer le comptage des fichiers dans scan.c, parcourir une seule fois l'arborescence pour le compte de fichiers, mémoriser les chemins dans un tableau (mémoire?), ne pas reparcourir l'arborescence pour le scan
+* ajouter un argument dans les callbacks (file_count, file_report, scan_end)
+
+- démon de scan
+* ajouter les messages pour le compte de fichiers
+
+
+- ajouter watch(directory) [OK, revoir l'implémentation]
+
+reprendre umwsu-daemon.c
+ umwsu_watch(u, char *path)
+-> créer le inotify_fd si nécessaire
+ umwsu_watch_loop(u, callback)
+-> callback(u, event type, char *path)
+dans la GUI: créer un scan *, ouvrir une fenêtre de scan, lancer le scan
+
+- configuration [OK, revoir l'implémentation]
+
+par module:
+- général: mime-types
+doit être fait au niveau général pour donner l'ordre des modules
+exemple:
+
+umwsu.conf:
+scan-archive=1
+alert-dir=/var/tmp/uhuru/alert
+mime-type=application/x-dosexec; clamav; module5.2
+mime-type=application/pdf;module4;clamav
+conf-dir=/etc/uhuru/conf.d
+conf-file=/etc/uhuru/zzz.conf
+
+clamav.conf:
+db=/var/lib/uhuru/db/clamav/unsupported # directory
+db=/var/lib/uhuru/db/clamav/oiv.db  # db
+
+module5_2.conf:
+dbdir=/var/lib/uhuru/db/module5.2/
+
+analysable par un analyseur lexical seul, pas besoin d'analyseur syntaxique
+flex vs. hand made scanner? => analyseur lexical de la glib
+
+- protection de l'antivirus: comment l'AV se protège lui-même (kill, suppression fichiers/répertoires)?
+-> comment relancer automatiquement un process, même si on tue le watchdog
+cf http://stackoverflow.com/questions/6538587/how-to-protect-my-process-from-being-killed
+
+
+

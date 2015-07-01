@@ -1,0 +1,5 @@
+if COND_DOC
+OPT_DOC_DIR=doc
+endif
+
+SUBDIRS=src $(OPT_DOC_DIR)

@@ -1,0 +1,17 @@
+Makefile
+Makefile.in
+autom4te.cache/*
+BUILD/
+compile
+config.log
+config.status
+configure
+aclocal.m4
+config.guess
+libumwsu-config.h.in
+config.sub
+depcomp
+install-sh
+ltmain.sh
+missing
+*~

@@ -1,0 +1,17 @@
+#include <libumwsu/scan.h>
+#include <stdio.h>
+
+int main(int argc, char **argv)
+{
+  struct umwsu *u = umwsu_open(0);
+  int i;
+  
+  for (i = 1; i < argc; i++) {
+    enum umwsu_file_status status;
+
+    /* status = umwsu_scan_file(u, argv[i]); */
+    printf("%s: %s\n", argv[i], umwsu_file_status_str(status));
+  }
+
+  umwsu_close(u);
+}
