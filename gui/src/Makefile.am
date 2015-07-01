@@ -1,0 +1,8 @@
+if COND_GTK_GUI
+GTK_SRC_DIR= gtk
+else
+GTK_SRC_DIR= 
+endif
+
+SUBDIRS= $(GTK_SRC_DIR) 
+DIST_SUBDIRS=gtk qt

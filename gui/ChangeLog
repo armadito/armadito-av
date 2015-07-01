@@ -1,0 +1,161 @@
+2015-05-29  François  <francois@dechelle.net>
+
+	* implementation of recent scans in progress; almost works
+
+2015-05-28  François  <francois@dechelle.net>
+
+	* adding recent scan menu
+
+2015-05-27  François  <francois@dechelle.net>
+
+	* internationalization completed
+
+2015-05-12  François  <francois@dechelle.net>
+
+	* dbus debug in progress
+
+2015-04-02  François  <francois@dechelle.net>
+
+	* added scan duration in scan dialog
+
+	* finished i18n; replaced systray menu creation with manual menu, no more XML or glade
+
+2015-03-27  François  <francois@dechelle.net>
+
+	* added i18n using intltool; only language added yet is fr
+
+2015-03-16  François  <francois@dechelle.net>
+
+	* added systray implementation with old gtk_status_icon()
+
+	* added non-scalable PNG icons
+
+2015-03-12  François  <francois@dechelle.net>
+
+	* fixed icon path
+
+2015-03-11  François  <francois@dechelle.net>
+
+	* moved interface to GTK; Qt is phased out
+
+2015-03-10  François  <francois@dechelle.net>
+
+	* added about dialog
+
+2015-03-06  François  <francois@dechelle.net>
+
+	* added systray icon and menu; works almost like Qt version (maybe better...)
+
+	* adding file selection dialog
+
+	* fixed state, action & path display
+
+	* fixed some sorting and resizing problems
+
+2015-03-05  François  <francois@dechelle.net>
+
+	* fixed close button
+
+	* added unhandled file count
+
+	* added current scanning path displayed in progress bar
+
+	* fixed progress bar and to scan file count
+
+	* changed implementation of GTK model to use polled I/O instead of threads; works!
+
+2015-02-04  François  <francois@dechelle.net>
+
+	* added implementation of model counters using glib/gobject
+
+2015-02-03  François  <francois@dechelle.net>
+
+	* starting implementation of GTK gui
+
+2015-01-29  François  <francois@dechelle.net>
+
+	* moving Qt gui to its own directory; preparing move to gtk ;-)
+
+2015-01-13  François  <francois@dechelle.net>
+
+	* trying to fix report table column resizing; added new counters
+
+2015-01-08  François  <francois@dechelle.net>
+
+	* fixed configure.ac and systray.cc w.r.t. CentOS packaging
+
+2014-12-26  François  <francois@dechelle.net>
+
+	* removed -rpath option in src/Makefile.am, which made lintian fail
+
+2014-12-10  François  <francois@dechelle.net>
+
+	* fixed make dist
+
+	* added a 'About' menu entry, with associated dialog
+
+2014-12-05  François  <francois@dechelle.net>
+
+	* added a 'Recent scans' menu entry, and fixed initialization of ScanWidget when displaying a passed scan
+
+2014-12-04  François  <francois@dechelle.net>
+
+	* changed scan window size and position
+
+2014-12-03  François  <francois@dechelle.net>
+
+	* added a close button to the scan window, enabled when scan is completed
+
+ 	* tested umwsu.cpp w.r.t. load thread
+
+	* changing umwsu.cpp in order to call umwsu_open at startup in a separate thread, in order not to block interface startup
+
+2014-12-01  François  <francois@dechelle.net>
+
+	* added .desktop file; added make install rules for .desktop file and icons
+
+2014-11-25  François  <francois@dechelle.net>
+
+	* improved model to display analysis file names and select them (copy/paste works)
+
+	* temporarily giving up with icon animation; will see later
+
+2014-11-24  François  <francois@dechelle.net>
+
+	* changed scan model to call umwsu_*() inside a QThread; now tables updates continuously
+
+	* implemented correctly the model derived from QAbstractTableModel; now the table updates ok
+
+2014-11-19  François  <francois@dechelle.net>
+
+	* adding QAbstractTableModel derived model for scan report
+
+2014-11-18  François  <francois@dechelle.net>
+
+	* switched to uhuru-linux-gui git repo
+
+	* fixed some compilation and installation problems with automake/autoconf; now runs ok with icon
+
+2014-11-17  François  <francois@dechelle.net>
+
+	* compile and run with automake/autoconf; will make packaging much easier
+
+	* added automake/autoconf stuff
+
+2014-11-05  François  <francois@dechelle.net>
+
+	* changed scan widget components, changed constructors signatures
+
+	* first working version with systray; scans ok
+
+	* added file selection dialog to systray action
+
+	* added systray to IHM
+
+	* reorganized sources; moved origin UI to legacy/
+
+2014-09-24  François Déchelle  <francois@dechelle.net>
+
+	* ported Uhuru/ to QT4: works ok, except strange compile error in scanondemand.cpp
+
+

@@ -1,0 +1,40 @@
+GTK
+===
+
+- mettre le numéro de version dans le 'about'
+
+- ajouter analyses récentes
+- ajouter surveillance (via dbus)
+-- ajouter notification
+- animer et changer les couleurs de l'icône
+- dialogue d'analyse: 
+-- afficher les détails de scan si double click (ou autre) sur la ligne du fichier
+-- afficher un tooltip avec les détails
+-- afficher le nom du virus dans un champ texte
+-- ajouter un bouton "annuler"
+-- afficher une console ???
+
+- alertes (scan de surveillance)
+
+- menu: 
+analyse
+analyses récentes >
+  analyses avec la date et l'heure
+Etat protection >
+  analyse sur accès (// protection temps réel)
+  analyse des médias amovibles
+  agent d'alerte
+à propos
+
+- internationaliser [OK]
+
+
+Intégration Linux
+=================
+
+- intégration nautilus: clic droit -> analyser, état du fichier
+(/usr/lib/nautilus/extensions-3.0/ présent sur ubuntu 12.04)
+
+
+BUGS
+====

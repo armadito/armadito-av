@@ -1,0 +1,168 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-05-28 14:45+0200\n"
+"PO-Revision-Date: 2015-05-28 14:46+0100\n"
+"Last-Translator: François Déchelle <francois@dechelle.net>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.4\n"
+
+#: ../src/gtk/ui/aboutdialog.glade.h:1
+msgid "Copyright NOV'IT 2014, 2015"
+msgstr "Copyright NOV'IT 2014, 2015"
+
+#: ../src/gtk/ui/aboutdialog.glade.h:2
+msgid "Antivirus solution for Linux"
+msgstr "Solution antivirus pour Linux"
+
+#: ../src/gtk/ui/scandialog.glade.h:1
+msgid "Cancel"
+msgstr "Annuler"
+
+#: ../src/gtk/ui/scandialog.glade.h:2
+msgid "Close"
+msgstr "Fermer"
+
+#: ../src/gtk/ui/scandialog.glade.h:3
+msgid "Directory"
+msgstr "Répertoire"
+
+#: ../src/gtk/ui/scandialog.glade.h:4
+msgid "/media/francois/88C9-4C32"
+msgstr "/media/francois/88C9-4C32"
+
+#: ../src/gtk/ui/scandialog.glade.h:5
+msgid "Files to scan"
+msgstr "Fichiers à analyser"
+
+#: ../src/gtk/ui/scandialog.glade.h:6
+msgid "Scanned files"
+msgstr "Fichiers analysés"
+
+#: ../src/gtk/ui/scandialog.glade.h:7
+msgid "Malware"
+msgstr "Malicieux"
+
+#: ../src/gtk/ui/scandialog.glade.h:8
+msgid "Suspicious"
+msgstr "Suspects"
+
+#: ../src/gtk/ui/scandialog.glade.h:9
+msgid "Unhandled"
+msgstr "Non traités"
+
+#: ../src/gtk/ui/scandialog.glade.h:10
+msgid "Clean"
+msgstr "Sain"
+
+#: ../src/gtk/ui/scandialog.glade.h:11
+msgid "Scan duration"
+msgstr "Durée d'analyse"
+
+#: ../src/gtk/ui/scandialog.glade.h:12
+msgid "State"
+msgstr "Etat"
+
+#: ../src/gtk/ui/scandialog.glade.h:13
+msgid "Action"
+msgstr "Action"
+
+#: ../src/gtk/ui/scandialog.glade.h:14
+msgid "File"
+msgstr "Fichier"
+
+#: ../src/gtk/ui/systraymenu.c:18 ../src/gtk/ui/systraymenu.c:64
+msgid "Scan"
+msgstr "Analyser"
+
+#: ../src/gtk/ui/systraymenu.c:68
+msgid "Recent scans"
+msgstr "Analyses récentes"
+
+#: ../src/gtk/ui/systraymenu.c:79
+msgid "Foo"
+msgstr ""
+
+#: ../src/gtk/ui/systraymenu.c:83
+msgid "Bar"
+msgstr ""
+
+#: ../src/gtk/ui/systraymenu.c:89
+msgid "About"
+msgstr "A propos"
+
+#: ../src/gtk/ui/scandialog.c:112
+msgid "status undecided"
+msgstr "non décidé"
+
+#: ../src/gtk/ui/scandialog.c:114
+msgid "status clean"
+msgstr "sain"
+
+#: ../src/gtk/ui/scandialog.c:116
+msgid "status ignored"
+msgstr "ignoré"
+
+#: ../src/gtk/ui/scandialog.c:118
+msgid "status invalid argument"
+msgstr "argument invalide"
+
+#: ../src/gtk/ui/scandialog.c:120
+msgid "status internal error"
+msgstr "erreur interne"
+
+#: ../src/gtk/ui/scandialog.c:122
+msgid "status suspicious"
+msgstr "suspect"
+
+#: ../src/gtk/ui/scandialog.c:124
+msgid "status white listed"
+msgstr "liste blanche"
+
+#: ../src/gtk/ui/scandialog.c:126
+msgid "status malware"
+msgstr "malicieux"
+
+#: ../src/gtk/ui/scandialog.c:129
+msgid "status unknown"
+msgstr "inconnu"
+
+#: ../src/gtk/ui/scandialog.c:135
+msgid "action alert"
+msgstr "alerte"
+
+#: ../src/gtk/ui/scandialog.c:136
+msgid "action alert+quarantine"
+msgstr "quarantaine"
+
+#: ../src/gtk/ui/scandialog.c:137
+msgid "action alert+removed"
+msgstr "supprimé"
+
+#: ../src/gtk/ui/scandialog.c:140
+msgid "alert none"
+msgstr "aucune"
+
+#: ../src/gtk/utils/dbus.c:74
+#, c-format
+msgid "Scanning: %s"
+msgstr "Analyse de: %s"
+
+#~ msgid "Scan.."
+#~ msgstr "Analyser..."
+
+#, fuzzy
+#~ msgid "clean"
+#~ msgstr "Sain"
+
+#~ msgid "unknown status"
+#~ msgstr "inconnu"
