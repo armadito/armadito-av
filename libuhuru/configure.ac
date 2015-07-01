@@ -1,4 +1,4 @@
-AC_INIT(libumwsu,1.2.1,francois@dechelle.net)
+AC_INIT(libuhuru,1.2.1,francois@dechelle.net)
 AM_INIT_AUTOMAKE
 
 # collect arguments
@@ -9,7 +9,7 @@ AC_ARG_ENABLE([debug],
 	enable_debug="yes")
 
 # configuration header
-AM_CONFIG_HEADER(libumwsu-config.h)
+AM_CONFIG_HEADER(libuhuru-config.h)
 
 # This is needed when the first PKG_CHECK_MODULES call is inside a conditional (not the case here, but who knows)
 PKG_PROG_PKG_CONFIG
@@ -89,7 +89,7 @@ doc/Makefile
 doc/man/Makefile
 doc/man/fr/Makefile
 include/Makefile
-include/libumwsu/Makefile
+include/libuhuru/Makefile
 pkgconfig/Makefile
 src/Makefile
 src/lib/Makefile
