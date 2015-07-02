@@ -79,7 +79,6 @@ void ScanModel::callback(enum uhuru_file_status status, const char *path, const 
   case UHURU_WHITE_LISTED:
   case UHURU_CLEAN:
     _cleanCount.increment();
-    _reportModel.append(QString("sain"), QString("aucune"), QString(path), "");
     break;
   }
 }
