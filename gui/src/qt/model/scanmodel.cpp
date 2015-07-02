@@ -21,9 +21,8 @@ void ScanModelThread::run()
 
   uhuru_scan_start(scan);
 
-#if 0
-  uhuru_scan_finish(scan);
-#endif
+  while(uhuru_scan_run(scan) == UHURU_SCAN_CONTINUE)
+    ;
 
   uhuru_scan_free(scan);
 }
