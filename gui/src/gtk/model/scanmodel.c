@@ -1,8 +1,8 @@
 #include "model/scanmodel.h"
 #include "model/scanmodel-marshall.h"
-#include "utils/umwsu.h"
+#include "utils/uhuru.h"
 
-#include <libumwsu/scan.h>
+#include <libuhuru/scan.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,7 +41,7 @@ struct _scan_model_private {
 
   GTimer *duration_timer;
 
-  struct umwsu_scan *scan;
+  struct uhuru_scan *scan;
 
   GPtrArray *saved_reports;
 };
@@ -220,9 +220,9 @@ static int count_files(const char *path)
   return count;
 }
 
-static void scan_model_save_report(scan_model *self, struct umwsu_report *report)
+static void scan_model_save_report(scan_model *self, struct uhuru_report *report)
 {
-  struct umwsu_report *clone = (struct umwsu_report *)malloc(sizeof(struct umwsu_report));
+  struct uhuru_report *clone = (struct uhuru_report *)malloc(sizeof(struct uhuru_report));
 
   clone->path = strdup(report->path);
   clone->status = report->status;
@@ -239,7 +239,7 @@ static void scan_model_save_report(scan_model *self, struct umwsu_report *report
   g_ptr_array_add(self->private->saved_reports, clone);
 }
 
-static void scan_model_callback(struct umwsu_report *report, void *callback_data)
+static void scan_model_callback(struct uhuru_report *report, void *callback_data)
 {
   scan_model *self = (scan_model *)callback_data;
   enum scan_counter_type which_counter = NONE_COUNTER;
@@ -248,27 +248,27 @@ static void scan_model_callback(struct umwsu_report *report, void *callback_data
   gdouble scan_duration;
 
   switch(report->status) {
-  case UMWSU_MALWARE:
+  case UHURU_MALWARE:
     which_counter = MALWARE_COUNTER;
     counter = ++self->private->malware_counter;
     self->private->scanned_counter++;
     break;
-  case UMWSU_SUSPICIOUS:
+  case UHURU_SUSPICIOUS:
     which_counter = SUSPICIOUS_COUNTER;
     counter = ++self->private->suspicious_counter;
     self->private->scanned_counter++;
     break;
-  case UMWSU_EINVAL:
-  case UMWSU_IERROR:
+  case UHURU_EINVAL:
+  case UHURU_IERROR:
     break;
-  case UMWSU_UNKNOWN_FILE_TYPE:
-  case UMWSU_UNDECIDED:
+  case UHURU_UNKNOWN_FILE_TYPE:
+  case UHURU_UNDECIDED:
     which_counter = UNHANDLED_COUNTER;
     counter = ++self->private->unhandled_counter;
     self->private->scanned_counter++;
     break;
-  case UMWSU_WHITE_LISTED:
-  case UMWSU_CLEAN:
+  case UHURU_WHITE_LISTED:
+  case UHURU_CLEAN:
     which_counter = CLEAN_COUNTER;
     counter = ++self->private->clean_counter;
     self->private->scanned_counter++;
@@ -283,7 +283,7 @@ static void scan_model_callback(struct umwsu_report *report, void *callback_data
   scan_duration = g_timer_elapsed(self->private->duration_timer, NULL);
   g_signal_emit(self, SCAN_MODEL_GET_CLASS(self)->scanning_signal_id, 0, report->status, report->action, report->path, scan_duration);
 
-  if (report->status != UMWSU_WHITE_LISTED && report->status != UMWSU_CLEAN)
+  if (report->status != UHURU_WHITE_LISTED && report->status != UHURU_CLEAN)
     scan_model_save_report(self, report);
 }
 
@@ -291,7 +291,7 @@ gboolean scan_channel_io_func(GIOChannel *source, GIOCondition condition, gpoint
 {
   scan_model *self = (scan_model *)data;
 
-  if (umwsu_scan_run(self->private->scan) != UMWSU_SCAN_CONTINUE) {
+  if (uhuru_scan_run(self->private->scan) != UHURU_SCAN_CONTINUE) {
     fprintf(stderr, "finished!\n");
 
     g_signal_emit(self, SCAN_MODEL_GET_CLASS(self)->completed_signal_id, 0);
@@ -307,16 +307,16 @@ gboolean scan_channel_io_func(GIOChannel *source, GIOCondition condition, gpoint
 
 void scan_model_scan(scan_model *self)
 {
-  enum umwsu_scan_flags flags = UMWSU_SCAN_RECURSE;
+  enum uhuru_scan_flags flags = UHURU_SCAN_RECURSE;
   GIOChannel *channel;
 
   self->private->duration_timer = g_timer_new();
 
-  self->private->scan = umwsu_scan_new(umwsu_handle(), self->private->scan_path, flags);
+  self->private->scan = uhuru_scan_new(uhuru_handle(), self->private->scan_path, flags);
 
-  umwsu_scan_add_callback(self->private->scan, scan_model_callback, self);
+  uhuru_scan_add_callback(self->private->scan, scan_model_callback, self);
 
-  umwsu_scan_start(self->private->scan);
+  uhuru_scan_start(self->private->scan);
 
   g_timer_start(self->private->duration_timer);
 
@@ -324,10 +324,10 @@ void scan_model_scan(scan_model *self)
 
   g_signal_emit(self, SCAN_MODEL_GET_CLASS(self)->count_changed_signal_id, 0, TO_SCAN_COUNTER, self->private->to_scan_counter);
 
-  channel = g_io_channel_unix_new(umwsu_scan_get_poll_fd(self->private->scan));
+  channel = g_io_channel_unix_new(uhuru_scan_get_poll_fd(self->private->scan));
   g_io_add_watch(channel, G_IO_IN, scan_channel_io_func, self);
 
-  /* umwsu_scan_free(scan); */
+  /* uhuru_scan_free(scan); */
 }
 
 void scan_model_reemit(scan_model *self)

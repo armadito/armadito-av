@@ -2,7 +2,7 @@
 #define _SCANMODEL_H_
 
 #include "counter.h"
-#include "utils/umwsu.h"
+#include "utils/uhuru.h"
 #include "scanreportmodel.h"
 
 #include <QObject>
@@ -33,7 +33,7 @@ public:
 
   void countFiles();
 
-  void callback(enum umwsu_file_status status, const char *path, const char *report);
+  void callback(enum uhuru_file_status status, const char *path, const char *report);
 
 signals:
   void scanning(const QString &path);

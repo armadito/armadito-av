@@ -2,7 +2,7 @@ SUBDIRS=icons
 
 AUTOMAKE_OPTIONS=subdir-objects
 
-check_PROGRAMS= uhuru-qt
+bin_PROGRAMS= uhuru-qt
 
 uhuru_qt_SOURCES= \
 main.cpp \
@@ -21,8 +21,8 @@ ui/scanwindow.h \
 ui/systray.cpp \
 ui/systray.h \
 utils/stdpaths.h \
-utils/umwsu.cpp \
-utils/umwsu.h
+utils/uhuru.cpp \
+utils/uhuru.h
 
 nodist_uhuru_qt_SOURCES= \
 model/moc_counter.cpp  \
@@ -34,7 +34,7 @@ ui/moc_scanwidget.cpp \
 ui/moc_systray.cpp \
 ui/ui_aboutdialog.h \
 ui/ui_scanwidget.h \
-utils/moc_umwsu.cpp \
+utils/moc_uhuru.cpp \
 qrc_uhuru.cpp
 
 BUILT_SOURCES= \
@@ -47,13 +47,13 @@ ui/moc_scanwidget.cpp \
 ui/moc_systray.cpp \
 ui/ui_aboutdialog.h \
 ui/ui_scanwidget.h \
-utils/moc_umwsu.cpp \
+utils/moc_uhuru.cpp \
 qrc_uhuru.cpp
 
 uhuru_qt_LDADD= @QT_LIBS@ #@DEFS@
 uhuru_qt_CXXFLAGS= @QT_CFLAGS@ -I$(builddir)/ui -fPIC
-uhuru_qt_LDADD+= @LIBUMWSU_LIBS@
-uhuru_qt_CXXFLAGS+= @LIBUMWSU_CFLAGS@
+uhuru_qt_LDADD+= @LIBUHURU_LIBS@
+uhuru_qt_CXXFLAGS+= @LIBUHURU_CFLAGS@
 #uhuru_LDFLAGS= -Wl,-rpath=$(libdir)
 
 moc_%.cpp: %.h

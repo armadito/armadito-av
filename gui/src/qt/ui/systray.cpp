@@ -164,13 +164,13 @@ void WatchThread::run()
 {
   QByteArray ba = _path.toLocal8Bit();
   const char *c_path = ba.data();
-  struct umwsu_watch_event watch_event;
+  struct uhuru_watch_event watch_event;
 
-  umwsu_watch(UMWSU::instance(), c_path);
+  uhuru_watch(UHURU::instance(), c_path);
 
-  while (!umwsu_watch_next_event(UMWSU::instance(), &watch_event)) {
+  while (!uhuru_watch_next_event(UHURU::instance(), &watch_event)) {
     switch(watch_event.event_type) {
-    case UMWSU_WATCH_DIRECTORY_CREATE:
+    case UHURU_WATCH_DIRECTORY_CREATE:
       std::cerr << "watch: must scan " << watch_event.full_path << "\n";
 
       emit watched(QString(watch_event.full_path));

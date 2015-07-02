@@ -4,5 +4,11 @@ else
 GTK_SRC_DIR= 
 endif
 
-SUBDIRS= $(GTK_SRC_DIR) 
+if COND_QT_GUI
+QT_SRC_DIR= qt
+else
+QT_SRC_DIR= 
+endif
+
+SUBDIRS= $(GTK_SRC_DIR) $(QT_SRC_DIR) 
 DIST_SUBDIRS=gtk qt

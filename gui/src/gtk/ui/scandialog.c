@@ -55,36 +55,36 @@ static void count_changed_cb(GObject *obj, guint counter_type, guint counter_val
   free(tmp);
 }
 
-static const char *file_status_pretty_str_i18n(enum umwsu_file_status status)
+static const char *file_status_pretty_str_i18n(enum uhuru_file_status status)
 {
   switch(status) {
-  case UMWSU_UNDECIDED:
+  case UHURU_UNDECIDED:
     return _("status undecided");
-  case UMWSU_CLEAN:
+  case UHURU_CLEAN:
     return _("status clean");
-  case UMWSU_UNKNOWN_FILE_TYPE:
+  case UHURU_UNKNOWN_FILE_TYPE:
     return _("status ignored");
-  case UMWSU_EINVAL:
+  case UHURU_EINVAL:
     return _("status invalid argument");
-  case UMWSU_IERROR:
+  case UHURU_IERROR:
     return _("status internal error");
-  case UMWSU_SUSPICIOUS:
+  case UHURU_SUSPICIOUS:
     return _("status suspicious");
-  case UMWSU_WHITE_LISTED:
+  case UHURU_WHITE_LISTED:
     return _("status white listed");
-  case UMWSU_MALWARE:
+  case UHURU_MALWARE:
     return _("status malware");
   }
 
   return _("status unknown");
 }
 
-static const char *action_pretty_str_i18n(enum umwsu_action action)
+static const char *action_pretty_str_i18n(enum uhuru_action action)
 {
-  switch(action & (UMWSU_ACTION_ALERT | UMWSU_ACTION_QUARANTINE | UMWSU_ACTION_REMOVE)) {
-  case UMWSU_ACTION_ALERT: return _("action alert");
-  case UMWSU_ACTION_ALERT | UMWSU_ACTION_QUARANTINE: return _("action alert+quarantine");
-  case UMWSU_ACTION_ALERT | UMWSU_ACTION_REMOVE: return _("action alert+removed");
+  switch(action & (UHURU_ACTION_ALERT | UHURU_ACTION_QUARANTINE | UHURU_ACTION_REMOVE)) {
+  case UHURU_ACTION_ALERT: return _("action alert");
+  case UHURU_ACTION_ALERT | UHURU_ACTION_QUARANTINE: return _("action alert+quarantine");
+  case UHURU_ACTION_ALERT | UHURU_ACTION_REMOVE: return _("action alert+removed");
   }
 
   return _("alert none");
@@ -93,8 +93,8 @@ static const char *action_pretty_str_i18n(enum umwsu_action action)
 static void scanning_cb(GObject *obj, guint u_status, guint u_action, const gchar *path, gdouble scan_duration, gpointer user_data)
 {
   struct scan_dialog *sd = (struct scan_dialog *)user_data;
-  enum umwsu_file_status status = (enum umwsu_file_status)u_status;
-  enum umwsu_action action = (enum umwsu_action)u_action;
+  enum uhuru_file_status status = (enum uhuru_file_status)u_status;
+  enum uhuru_action action = (enum uhuru_action)u_action;
   char *tmp;
 
   gtk_progress_bar_set_text(sd->scanProgress, path);
@@ -104,7 +104,7 @@ static void scanning_cb(GObject *obj, guint u_status, guint u_action, const gcha
   gtk_entry_set_text(sd->scan_duration, tmp);
   free(tmp);
 
-  if (status != UMWSU_WHITE_LISTED && status != UMWSU_CLEAN) {
+  if (status != UHURU_WHITE_LISTED && status != UHURU_CLEAN) {
     GtkTreeIter iter;
 
     gtk_tree_store_append(sd->reportStore, &iter, NULL);

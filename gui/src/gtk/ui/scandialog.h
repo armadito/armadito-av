@@ -3,7 +3,7 @@
 
 #include <glib.h>
 #include <gtk/gtk.h>
-#include <libumwsu/scan.h>
+#include <libuhuru/scan.h>
 
 struct scan_dialog {
   GtkDialog *dialog_widget;

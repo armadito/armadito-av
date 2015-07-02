@@ -29,10 +29,10 @@ if test "$enable_debug" = "yes"; then
    CFLAGS="${CFLAGS} -g"
 fi
 
-# check for libumwsu
-PKG_CHECK_MODULES(LIBUMWSU, libumwsu, [HAVE_LIBUMWSU=yes], [HAVE_LIBUMWSU=no])
-if test "$HAVE_LIBUMWSU" = "no"; then
-   AC_MSG_ERROR("cannot find UMWSU library")
+# check for libuhuru
+PKG_CHECK_MODULES(LIBUHURU, libuhuru, [HAVE_LIBUHURU=yes], [HAVE_LIBUHURU=no])
+if test "$HAVE_LIBUHURU" = "no"; then
+   AC_MSG_ERROR("cannot find UHURU library")
 fi
 
 # Checks for programs.

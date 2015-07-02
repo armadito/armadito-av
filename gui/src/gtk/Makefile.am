@@ -19,8 +19,8 @@ model/scanmodel.c \
 model/scanmodel.h \
 utils/dbus.c \
 utils/dbus.h \
-utils/umwsu.c \
-utils/umwsu.h
+utils/uhuru.c \
+utils/uhuru.h
 
 #ui/scanchooser.c 
 #ui/scanchooser.h 
@@ -47,8 +47,8 @@ model/scanmodel-marshall.h
 #ui/glade_scanchooser.c 
 #ui/glade_scanchooser.h 
 
-uhuru_CFLAGS= -fPIC @GTK_CFLAGS@ @APPINDICATOR_CFLAGS@ @LIBUMWSU_CFLAGS@ @GIO_CFLAGS@ @LIBNOTIFY_CFLAGS@ -I$(builddir) -DSVG_ICON_PATH=\"$(datarootdir)/icons/hicolor/scalable/apps\" -DPNG_ICON_PATH=\"$(datarootdir)/icons/hicolor/48x48/apps\" -DGETTEXT_PACKAGE=\"@GETTEXT_PACKAGE@\" -DPROGRAMNAME_LOCALEDIR=\"${datarootdir}/locale\"
-uhuru_LDADD= @GTK_LIBS@ @GIO_LIBS@ @APPINDICATOR_LIBS@ @LIBUMWSU_LIBS@ @LIBNOTIFY_LIBS@ 
+uhuru_CFLAGS= -fPIC @GTK_CFLAGS@ @APPINDICATOR_CFLAGS@ @LIBUHURU_CFLAGS@ @GIO_CFLAGS@ @LIBNOTIFY_CFLAGS@ -I$(builddir) -DSVG_ICON_PATH=\"$(datarootdir)/icons/hicolor/scalable/apps\" -DPNG_ICON_PATH=\"$(datarootdir)/icons/hicolor/48x48/apps\" -DGETTEXT_PACKAGE=\"@GETTEXT_PACKAGE@\" -DPROGRAMNAME_LOCALEDIR=\"${datarootdir}/locale\"
+uhuru_LDADD= @GTK_LIBS@ @GIO_LIBS@ @APPINDICATOR_LIBS@ @LIBUHURU_LIBS@ @LIBNOTIFY_LIBS@ 
 
 ui/glade_%.h ui/glade_%.c: ui/%.glade
 	export F=`basename $*` ; \
