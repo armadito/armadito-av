@@ -33,7 +33,6 @@ private:
 
   QAction *scanAction;
   QAction *aboutAction;
-  QAction *quitAction;
   QSystemTrayIcon *trayIcon;
   QMenu *recentScanMenu;
   WatchThread *_watchThread;

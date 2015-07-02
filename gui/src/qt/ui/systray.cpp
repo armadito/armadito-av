@@ -36,9 +36,6 @@ void Systray::createActions()
 
   aboutAction = new QAction(tr("&A propos"), this);
   connect(aboutAction, SIGNAL(triggered()), this, SLOT(about()));
-
-  quitAction = new QAction(tr("&Quitter"), this);
-  connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
 }
 
 QIcon *Systray::getIcon()
@@ -75,7 +72,6 @@ void Systray::createTrayIcon()
   recentScanMenu = trayIconMenu->addMenu(tr("&Analyses recentes"));
   trayIconMenu->addSeparator();
   trayIconMenu->addAction(aboutAction);
-  trayIconMenu->addAction(quitAction);
 
   trayIcon = new QSystemTrayIcon(this);
 
