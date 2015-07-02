@@ -1,5 +1,5 @@
-#modulesdir=@LIBUMWSU_MODDIR@
-modulesdir=$(libdir)/libumwsu/modules
+#modulesdir=@LIBUHURU_MODDIR@
+modulesdir=$(libdir)/libuhuru/modules
 modules_LTLIBRARIES=clamav.la
 
 clamav_la_SOURCES=clamav.c
@@ -7,8 +7,8 @@ clamav_la_SOURCES=clamav.c
 clamav_la_LDFLAGS= -module -avoid-version
 clamav_la_CFLAGS=
 clamav_la_LIBADD=
-clamav_la_CFLAGS+= @LIBUMWSU_CFLAGS@
-clamav_la_LIBADD+= @LIBUMWSU_LIBS@
+clamav_la_CFLAGS+= @LIBUHURU_CFLAGS@
+clamav_la_LIBADD+= @LIBUHURU_LIBS@
 clamav_la_CFLAGS+= @LIBCLAMAV_CFLAGS@
 clamav_la_LIBADD+= @LIBCLAMAV_LIBS@
 

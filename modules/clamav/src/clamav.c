@@ -1,4 +1,4 @@
-#include <libumwsu/module.h>
+#include <libuhuru/module.h>
 
 #include <assert.h>
 #include <clamav.h>
@@ -17,7 +17,7 @@ struct clamav_data {
   struct cl_engine *clamav_engine;
 };
 
-enum umwsu_file_status clamav_scan(const char *path, const char *mime_type, void *mod_data, char **pmod_report)
+enum uhuru_file_status clamav_scan(const char *path, const char *mime_type, void *mod_data, char **pmod_report)
 {
   struct clamav_data *cl_data = (struct clamav_data *)mod_data;
   const char *virus_name = NULL;
@@ -25,7 +25,7 @@ enum umwsu_file_status clamav_scan(const char *path, const char *mime_type, void
   int cl_scan_status;
 
   if (cl_data ->clamav_engine == NULL)
-    return UMWSU_IERROR;
+    return UHURU_IERROR;
 
   cl_scan_status = cl_scanfile(path, &virus_name, &scanned, cl_data->clamav_engine, CL_SCAN_STDOPT);
 
@@ -33,13 +33,13 @@ enum umwsu_file_status clamav_scan(const char *path, const char *mime_type, void
     /* fprintf(stderr, "%s is infected by virus %s!\n", path, virus_name); */
     *pmod_report = strdup(virus_name);
 
-    return UMWSU_MALWARE;
+    return UHURU_MALWARE;
   }
 
-  return UMWSU_CLEAN;
+  return UHURU_CLEAN;
 }
 
-enum umwsu_mod_status clamav_init(void **pmod_data)
+enum uhuru_mod_status clamav_init(void **pmod_data)
 {
   int ret;
   const char *clamav_db_dir;
@@ -55,12 +55,12 @@ enum umwsu_mod_status clamav_init(void **pmod_data)
 
   if ((ret = cl_init(CL_INIT_DEFAULT)) != CL_SUCCESS) {
     fprintf(stderr, "ClamAV initialization failed: %s\n", cl_strerror(ret));
-    return UMWSU_MOD_INIT_ERROR;
+    return UHURU_MOD_INIT_ERROR;
   }
 
   if(!(cl_data->clamav_engine = cl_engine_new())) {
     fprintf(stderr, "ClamAV: can't create new engine\n");
-    return UMWSU_MOD_INIT_ERROR;
+    return UHURU_MOD_INIT_ERROR;
   }
 
   clamav_db_dir = cl_retdbdir();
@@ -69,7 +69,7 @@ enum umwsu_mod_status clamav_init(void **pmod_data)
     fprintf(stderr, "ClamAV: error loading databases: %s\n", cl_strerror(ret));
     cl_engine_free(cl_data->clamav_engine);
     cl_data->clamav_engine = NULL;
-    return UMWSU_MOD_INIT_ERROR;
+    return UHURU_MOD_INIT_ERROR;
   }
 
   fprintf(stderr, "ClamAV database loaded from %s, %d signatures\n", clamav_db_dir, signature_count);
@@ -78,12 +78,12 @@ enum umwsu_mod_status clamav_init(void **pmod_data)
     fprintf(stderr, "ClamAV: engine compilation error: %s\n", cl_strerror(ret));;
     cl_engine_free(cl_data->clamav_engine);
     cl_data->clamav_engine = NULL;
-    return UMWSU_MOD_INIT_ERROR;
+    return UHURU_MOD_INIT_ERROR;
   }
 
   fprintf(stderr, "ClamAV is initialized\n");
 
-  return UMWSU_MOD_OK;
+  return UHURU_MOD_OK;
 }
 
 void clamav_install(void)

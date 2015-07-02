@@ -7,11 +7,11 @@ AC_ARG_ENABLE([debug],
 	AS_HELP_STRING([--enable-debug],[enable debugging @<:@default is yes@:>@]),
 	,
 	enable_debug="yes")
-# libumwsu
-AC_ARG_WITH([libumwsu],
-	AS_HELP_STRING([--with-libumwsu=DIR],[specify libumwsu install dir @<:@default is /usr@:>@]),
+# libuhuru
+AC_ARG_WITH([libuhuru],
+	AS_HELP_STRING([--with-libuhuru=DIR],[specify libuhuru install dir @<:@default is /usr@:>@]),
 	,
-	with_libumwsu="$withval")
+	with_libuhuru="$withval")
 
 # check for needed programs
 AC_PROG_CC([gcc])
@@ -29,18 +29,18 @@ if test "$enable_debug" = "yes"; then
    CFLAGS="${CFLAGS} -g"
 fi
 
-# check for libumwsu
-if test x"$with_libumwsu" != x ; then
-   export PKG_CONFIG_PATH="$with_libumwsu/lib/pkgconfig"
+# check for libuhuru
+if test x"$with_libuhuru" != x ; then
+   export PKG_CONFIG_PATH="$with_libuhuru/lib/pkgconfig"
 fi
 PKG_PROG_PKG_CONFIG
 
-PKG_CHECK_MODULES(LIBUMWSU, libumwsu, [HAVE_LIBUMWSU=yes], [HAVE_LIBUMWSU=no])
-if test "$HAVE_LIBUMWSU" = "no"; then
-   AC_MSG_ERROR("cannot find UMWSU library")
+PKG_CHECK_MODULES(LIBUHURU, libuhuru, [HAVE_LIBUHURU=yes], [HAVE_LIBUHURU=no])
+if test "$HAVE_LIBUHURU" = "no"; then
+   AC_MSG_ERROR("cannot find UHURU library")
 fi
-#LIBUMWSU_MODDIR=$(pkg-config --variable=moduledir libumwsu)
-#AC_SUBST(LIBUMWSU_MODDIR)
+#LIBUHURU_MODDIR=$(pkg-config --variable=moduledir libuhuru)
+#AC_SUBST(LIBUHURU_MODDIR)
 
 # check for libclamav
 PKG_CHECK_MODULES(LIBCLAMAV, libclamav, [HAVE_LIBCLAMAV=yes], [HAVE_LIBCLAMAV=no])
