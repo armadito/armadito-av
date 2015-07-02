@@ -69,7 +69,7 @@ if test "$HAVE_QT" = "yes" ; then
    AC_PATH_PROGS(UIC, uic-qt4 uic uic-qt5, no, [$PATH:$QTDIR/bin])
    AC_PATH_PROGS(RCC, rcc rcc-qt5, no, [$PATH:$QTDIR/bin])
    if test "x$MOC" = "xno" -o "x$UIC" = "xno" -o "x$RCC" = "xno" ; then
-      AC_MSG_WARN([cannot find 'moc' 'uic' or 'rcc', please install the Qt4 development tools package.])
+      AC_MSG_WARN([cannot find 'moc' 'uic' or 'rcc', please install the Qt development tools package.])
       HAVE_QT="no"
    fi
 fi
@@ -81,15 +81,14 @@ PKG_CHECK_MODULES(LIBNOTIFY, libnotify)
 # output files
 AC_CONFIG_FILES([
 Makefile
+qt/Makefile
+qt/icons/Makefile
+gtk/Makefile
+gtk/icons/Makefile
+gtk/icons/22x22/Makefile
+gtk/icons/48x48/Makefile
+gtk/icons/scalable/Makefile
+gtk/tests/Makefile
 po/Makefile.in
-src/Makefile
-src/gtk/Makefile
-src/gtk/icons/Makefile
-src/gtk/icons/22x22/Makefile
-src/gtk/icons/48x48/Makefile
-src/gtk/icons/scalable/Makefile
-src/gtk/tests/Makefile
-src/qt/Makefile
-src/qt/icons/Makefile
 ])
 AC_OUTPUT

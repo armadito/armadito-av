@@ -67,8 +67,4 @@ qrc_%.cpp: %.qrc
 
 CLEANFILES= $(nodist_uhuru_qt_SOURCES)
 
-desktopdir=$(datarootdir)/applications
-
-desktop_DATA=uhuru.desktop
-
-EXTRA_DIST= uhuru.pro uhuru.desktop ui/aboutdialog.ui ui/scanwidget.ui uhuru.qrc
+EXTRA_DIST= uhuru.pro ui/aboutdialog.ui ui/scanwidget.ui uhuru.qrc

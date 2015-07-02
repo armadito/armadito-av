@@ -68,8 +68,4 @@ ui/glade_scandialog.h \
 model/scanmodel-marshall.c \
 model/scanmodel-marshall.h
 
-desktopdir=$(datarootdir)/applications
-
-desktop_DATA=uhuru.desktop
-
-EXTRA_DIST=uhuru.desktop ui/aboutdialog.glade ui/scandialog.glade ui/scanchooser.glade model/scanmodel-marshall.list
+EXTRA_DIST= ui/aboutdialog.glade ui/scandialog.glade ui/scanchooser.glade model/scanmodel-marshall.list
