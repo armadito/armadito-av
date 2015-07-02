@@ -190,11 +190,7 @@ int protocol_handler_receive(struct protocol_handler *handler)
 {
   int n_read, i;
 
-  fprintf(stderr, "about to read %d\n", RECEIVE_BUFFER_LEN);
-  
   n_read = read(handler->input_fd, handler->receive_buffer, RECEIVE_BUFFER_LEN);
-
-  fprintf(stderr, "read %d\n", n_read);
 
   if (n_read == -1) {
     fprintf(stderr, "error in protocol_handler_receive: %s\n", strerror(errno));
