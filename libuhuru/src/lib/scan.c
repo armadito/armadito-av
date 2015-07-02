@@ -1,6 +1,6 @@
-#include "libumwsu-config.h"
-#include <libumwsu/module.h>
-#include <libumwsu/scan.h>
+#include "libuhuru-config.h"
+#include <libuhuru/module.h>
+#include <libuhuru/scan.h>
 #include "alert.h"
 #include "conf.h"
 #include "dir.h"
@@ -8,7 +8,7 @@
 #include "protocol.h"
 #include "quarantine.h"
 #include "statusp.h"
-#include "umwsup.h"
+#include "uhurup.h"
 #include "unixsock.h"
 
 #include <assert.h>
@@ -22,7 +22,7 @@
 #include <sys/stat.h>
 
 struct callback_entry {
-  umwsu_scan_callback_t callback;
+  uhuru_scan_callback_t callback;
   void *callback_data;
 };
 
@@ -37,10 +37,10 @@ struct remote_scan {
   struct protocol_handler *handler;
 };
 
-struct umwsu_scan {
-  struct umwsu *umwsu;
+struct uhuru_scan {
+  struct uhuru *uhuru;
   const char *path;
-  enum umwsu_scan_flags flags;
+  enum uhuru_scan_flags flags;
   GArray *callbacks;
   int is_remote;
 
@@ -50,7 +50,7 @@ struct umwsu_scan {
   };
 };
 
-static void umwsu_scan_call_callbacks(struct umwsu_scan *scan, struct umwsu_report *report);
+static void uhuru_scan_call_callbacks(struct uhuru_scan *scan, struct uhuru_report *report);
 
 /* 
  * **************************************************
@@ -58,75 +58,75 @@ static void umwsu_scan_call_callbacks(struct umwsu_scan *scan, struct umwsu_repo
  * *************************************************
  */
 
-static void local_scan_init(struct umwsu_scan *scan)
+static void local_scan_init(struct uhuru_scan *scan)
 {
   scan->local.thread_pool = NULL;
   scan->local.private_magic_key = NULL;
 
-  umwsu_scan_add_callback(scan, alert_callback, NULL);
-  umwsu_scan_add_callback(scan, quarantine_callback, NULL);
+  uhuru_scan_add_callback(scan, alert_callback, NULL);
+  uhuru_scan_add_callback(scan, quarantine_callback, NULL);
 }
 
-static enum umwsu_file_status local_scan_apply_modules(const char *path, const char *mime_type, GPtrArray *mod_array,  struct umwsu_report *report)
+static enum uhuru_file_status local_scan_apply_modules(const char *path, const char *mime_type, GPtrArray *mod_array,  struct uhuru_report *report)
 {
-  enum umwsu_file_status current_status = UMWSU_UNDECIDED;
+  enum uhuru_file_status current_status = UHURU_UNDECIDED;
   int i;
 
   for (i = 0; i < mod_array->len; i++) {
-    struct umwsu_module *mod = (struct umwsu_module *)g_ptr_array_index(mod_array, i);
-    enum umwsu_file_status mod_status;
+    struct uhuru_module *mod = (struct uhuru_module *)g_ptr_array_index(mod_array, i);
+    enum uhuru_file_status mod_status;
     char *mod_report = NULL;
 
 #if 0
-    if (umwsu_get_verbose(u) >= 2)
-      printf("UMWSU: module %s: scanning %s\n", mod->name, path);
+    if (uhuru_get_verbose(u) >= 2)
+      printf("UHURU: module %s: scanning %s\n", mod->name, path);
 #endif
 
     mod_status = (*mod->scan)(path, mime_type, mod->data, &mod_report);
 
 #if 0
-    printf("UMWSU: module %s: scanning %s -> %s\n", mod->name, path, umwsu_status_str(mod_status));
+    printf("UHURU: module %s: scanning %s -> %s\n", mod->name, path, uhuru_status_str(mod_status));
 #endif
 
-    if (umwsu_file_status_cmp(current_status, mod_status) < 0) {
+    if (uhuru_file_status_cmp(current_status, mod_status) < 0) {
       current_status = mod_status;
-      umwsu_report_change(report, mod_status, (char *)mod->name, mod_report);
+      uhuru_report_change(report, mod_status, (char *)mod->name, mod_report);
     } else if (mod_report != NULL)
       free(mod_report);
 
 #if 0
-    printf("UMWSU: current status %s\n", umwsu_file_status_str(current_status));
+    printf("UHURU: current status %s\n", uhuru_file_status_str(current_status));
 #endif
 
-    if (current_status == UMWSU_WHITE_LISTED || current_status == UMWSU_MALWARE)
+    if (current_status == UHURU_WHITE_LISTED || current_status == UHURU_MALWARE)
       break;
   }
 
   return current_status;
 }
 
-static void local_scan_file(struct umwsu_scan *scan, magic_t magic, const char *path)
+static void local_scan_file(struct uhuru_scan *scan, magic_t magic, const char *path)
 {
-  enum umwsu_file_status status;
-  struct umwsu_report report;
+  enum uhuru_file_status status;
+  struct uhuru_report report;
   GPtrArray *modules;
   char *mime_type;
 
-  umwsu_report_init(&report, path);
+  uhuru_report_init(&report, path);
 
-  modules = umwsu_get_applicable_modules(scan->umwsu, magic, path, &mime_type);
+  modules = uhuru_get_applicable_modules(scan->uhuru, magic, path, &mime_type);
 
   if (modules == NULL)
-    report.status = UMWSU_UNKNOWN_FILE_TYPE;
+    report.status = UHURU_UNKNOWN_FILE_TYPE;
   else
     status = local_scan_apply_modules(path, mime_type, modules, &report);
 
-  if (umwsu_get_verbose(scan->umwsu) >= 3)
-    printf("%s: %s\n", path, umwsu_file_status_str(status));
+  if (uhuru_get_verbose(scan->uhuru) >= 3)
+    printf("%s: %s\n", path, uhuru_file_status_str(status));
 
-  umwsu_scan_call_callbacks(scan, &report);
+  uhuru_scan_call_callbacks(scan, &report);
 
-  umwsu_report_destroy(&report);
+  uhuru_report_destroy(&report);
 
   free(mime_type);
 }
@@ -139,7 +139,7 @@ static void magic_destroy_notify(gpointer data)
   magic_close((magic_t)data);
 }
 
-static magic_t get_private_magic(struct umwsu_scan *scan)
+static magic_t get_private_magic(struct uhuru_scan *scan)
 {
   magic_t m = (magic_t)g_private_get(scan->local.private_magic_key);
 
@@ -155,7 +155,7 @@ static magic_t get_private_magic(struct umwsu_scan *scan)
 
 static void local_scan_entry_thread_fun(gpointer data, gpointer user_data)
 {
-  struct umwsu_scan *scan = (struct umwsu_scan *)user_data;
+  struct uhuru_scan *scan = (struct uhuru_scan *)user_data;
   char *path = (char *)data;
 
   local_scan_file(scan, get_private_magic(scan), path);
@@ -165,24 +165,24 @@ static void local_scan_entry_thread_fun(gpointer data, gpointer user_data)
 
 static void local_scan_entry(const char *full_path, enum dir_entry_flag flags, int errno, void *data)
 {
-  struct umwsu_scan *scan = (struct umwsu_scan *)data;
+  struct uhuru_scan *scan = (struct uhuru_scan *)data;
 
   if (flags & DIR_ENTRY_IS_ERROR) {
-    struct umwsu_report report;
+    struct uhuru_report report;
 
-    umwsu_report_init(&report, full_path);
+    uhuru_report_init(&report, full_path);
 
-    report.status = UMWSU_IERROR;
+    report.status = UHURU_IERROR;
     report.mod_report = strdup(strerror(errno));
-    umwsu_scan_call_callbacks(scan, &report);
+    uhuru_scan_call_callbacks(scan, &report);
 
-    umwsu_report_destroy(&report);
+    uhuru_report_destroy(&report);
   }
 
   if (!(flags & DIR_ENTRY_IS_REG))
     return;
 
-  if (scan->flags & UMWSU_SCAN_THREADED)
+  if (scan->flags & UHURU_SCAN_THREADED)
     g_thread_pool_push(scan->local.thread_pool, (gpointer)strdup(full_path), NULL);
   else
     local_scan_file(scan, NULL, full_path);
@@ -193,17 +193,17 @@ static int get_max_threads(void)
   return 8;
 }
 
-static enum umwsu_scan_status local_scan_start(struct umwsu_scan *scan)
+static enum uhuru_scan_status local_scan_start(struct uhuru_scan *scan)
 {
-  if (scan->flags & UMWSU_SCAN_THREADED) {
+  if (scan->flags & UHURU_SCAN_THREADED) {
     scan->local.thread_pool = g_thread_pool_new(local_scan_entry_thread_fun, scan, get_max_threads(), FALSE, NULL);
     scan->local.private_magic_key = g_private_new(magic_destroy_notify);
   }
 
-  return UMWSU_SCAN_OK;
+  return UHURU_SCAN_OK;
 }
 
-static enum umwsu_scan_status local_scan_run(struct umwsu_scan *scan)
+static enum uhuru_scan_status local_scan_run(struct uhuru_scan *scan)
 {
   struct stat sb;
 
@@ -213,20 +213,20 @@ static enum umwsu_scan_status local_scan_run(struct umwsu_scan *scan)
   }
 
   if (S_ISREG(sb.st_mode)) {
-    if (scan->flags & UMWSU_SCAN_THREADED)
+    if (scan->flags & UHURU_SCAN_THREADED)
       g_thread_pool_push(scan->local.thread_pool, (gpointer)strdup(scan->path), NULL);
     else
       local_scan_file(scan, NULL, scan->path);
   } else if (S_ISDIR(sb.st_mode)) {
-    int recurse = scan->flags & UMWSU_SCAN_RECURSE;
+    int recurse = scan->flags & UHURU_SCAN_RECURSE;
 
     dir_map(scan->path, recurse, local_scan_entry, scan);
   }
 
-  if (scan->flags & UMWSU_SCAN_THREADED)
+  if (scan->flags & UHURU_SCAN_THREADED)
     g_thread_pool_free(scan->local.thread_pool, FALSE, TRUE);
 
-  return UMWSU_SCAN_COMPLETED;
+  return UHURU_SCAN_COMPLETED;
 }
 
 /* 
@@ -235,12 +235,12 @@ static enum umwsu_scan_status local_scan_run(struct umwsu_scan *scan)
  * *************************************************
  */
 
-static void remote_scan_init(struct umwsu_scan *scan)
+static void remote_scan_init(struct uhuru_scan *scan)
 {
   char *sock_dir;
   GString *sock_path;
 
-  sock_dir = conf_get(scan->umwsu, "remote", "socket-dir");
+  sock_dir = conf_get(scan->uhuru, "remote", "socket-dir");
   assert(sock_dir != NULL);
 
   sock_path = g_string_new(sock_dir);
@@ -252,36 +252,36 @@ static void remote_scan_init(struct umwsu_scan *scan)
 
 static void remote_scan_cb_scan_file(struct protocol_handler *h, void *data)
 {
-  struct umwsu_scan *scan = (struct umwsu_scan *)data;
+  struct uhuru_scan *scan = (struct uhuru_scan *)data;
   char *path = protocol_handler_get_header(h, "Path");
   char *status = protocol_handler_get_header(h, "Status");
   char *mod_name = protocol_handler_get_header(h, "Module-Name");
   char *x_status = protocol_handler_get_header(h, "X-Status");
   char *action = protocol_handler_get_header(h, "Action");
-  struct umwsu_report report;
+  struct uhuru_report report;
 
-  umwsu_report_init(&report, path);
+  uhuru_report_init(&report, path);
 
-  report.status = (enum umwsu_file_status)atoi(status);
-  report.action = (enum umwsu_action)atoi(action);
+  report.status = (enum uhuru_file_status)atoi(status);
+  report.action = (enum uhuru_action)atoi(action);
   report.mod_name = mod_name;
   if (x_status != NULL)
     report.mod_report = strdup(x_status);
 
-  umwsu_scan_call_callbacks(scan, &report);
+  uhuru_scan_call_callbacks(scan, &report);
 
-  umwsu_report_destroy(&report);
+  uhuru_report_destroy(&report);
 }
 
 static void remote_scan_cb_scan_end(struct protocol_handler *h, void *data)
 {
 }
 
-static enum umwsu_file_status remote_scan_start(struct umwsu_scan *scan)
+static enum uhuru_file_status remote_scan_start(struct uhuru_scan *scan)
 {
   scan->remote.sock = client_socket_create(scan->remote.sock_path, 10);
   if (scan->remote.sock < 0)
-    return UMWSU_IERROR;
+    return UHURU_IERROR;
   scan->remote.handler = protocol_handler_new(scan->remote.sock, scan->remote.sock);
 
   protocol_handler_add_callback(scan->remote.handler, "SCAN_FILE", remote_scan_cb_scan_file, scan);
@@ -292,12 +292,12 @@ static enum umwsu_file_status remote_scan_start(struct umwsu_scan *scan)
 			    NULL);
 }
 
-static enum umwsu_scan_status remote_scan_run(struct umwsu_scan *scan)
+static enum uhuru_scan_status remote_scan_run(struct uhuru_scan *scan)
 {
   if (protocol_handler_receive(scan->remote.handler) < 0)
-    return UMWSU_SCAN_COMPLETED;
+    return UHURU_SCAN_COMPLETED;
 
-  return UMWSU_SCAN_CONTINUE;
+  return UHURU_SCAN_CONTINUE;
 }
 
 /* 
@@ -306,11 +306,11 @@ static enum umwsu_scan_status remote_scan_run(struct umwsu_scan *scan)
  * *************************************************
  */
 
-struct umwsu_scan *umwsu_scan_new(struct umwsu *umwsu, const char *path, enum umwsu_scan_flags flags)
+struct uhuru_scan *uhuru_scan_new(struct uhuru *uhuru, const char *path, enum uhuru_scan_flags flags)
 {
-  struct umwsu_scan *scan = (struct umwsu_scan *)malloc(sizeof(struct umwsu_scan));
+  struct uhuru_scan *scan = (struct uhuru_scan *)malloc(sizeof(struct uhuru_scan));
 
-  scan->umwsu = umwsu;
+  scan->uhuru = uhuru;
   scan->path = (const char *)realpath(path, NULL);
   if (scan->path == NULL) {
     perror("realpath");
@@ -320,7 +320,7 @@ struct umwsu_scan *umwsu_scan_new(struct umwsu *umwsu, const char *path, enum um
 
   scan->flags = flags;
   scan->callbacks = g_array_new(FALSE, FALSE, sizeof(struct callback_entry));
-  scan->is_remote = umwsu_is_remote(umwsu);
+  scan->is_remote = uhuru_is_remote(uhuru);
 
   if (scan->is_remote)
     remote_scan_init(scan);
@@ -330,7 +330,7 @@ struct umwsu_scan *umwsu_scan_new(struct umwsu *umwsu, const char *path, enum um
   return scan;
 }
 
-void umwsu_scan_add_callback(struct umwsu_scan *scan, umwsu_scan_callback_t callback, void *callback_data)
+void uhuru_scan_add_callback(struct uhuru_scan *scan, uhuru_scan_callback_t callback, void *callback_data)
 {
   struct callback_entry entry;
 
@@ -340,39 +340,39 @@ void umwsu_scan_add_callback(struct umwsu_scan *scan, umwsu_scan_callback_t call
   g_array_append_val(scan->callbacks, entry);
 }
 
-static void umwsu_scan_call_callbacks(struct umwsu_scan *scan, struct umwsu_report *report)
+static void uhuru_scan_call_callbacks(struct uhuru_scan *scan, struct uhuru_report *report)
 {
   int i;
 
   for(i = 0; i < scan->callbacks->len; i++) {
     struct callback_entry *entry = &g_array_index(scan->callbacks, struct callback_entry, i);
-    umwsu_scan_callback_t callback = entry->callback;
+    uhuru_scan_callback_t callback = entry->callback;
 
     (*callback)(report, entry->callback_data);
   }
 }
 
-int umwsu_scan_get_poll_fd(struct umwsu_scan *scan)
+int uhuru_scan_get_poll_fd(struct uhuru_scan *scan)
 {
   if (scan->is_remote)
     return scan->remote.sock;
 
-  fprintf(stderr, "cannot call umwsu_scan_get_poll_fd() for a local scan\n");
+  fprintf(stderr, "cannot call uhuru_scan_get_poll_fd() for a local scan\n");
 
   return -1;
 }
 
-enum umwsu_scan_status umwsu_scan_start(struct umwsu_scan *scan)
+enum uhuru_scan_status uhuru_scan_start(struct uhuru_scan *scan)
 {
   return (scan->is_remote) ? remote_scan_start(scan) : local_scan_start(scan);
 }
 
-enum umwsu_scan_status umwsu_scan_run(struct umwsu_scan *scan)
+enum uhuru_scan_status uhuru_scan_run(struct uhuru_scan *scan)
 {
   return (scan->is_remote) ? remote_scan_run(scan) : local_scan_run(scan);
 }
 
-void umwsu_scan_free(struct umwsu_scan *scan)
+void uhuru_scan_free(struct uhuru_scan *scan)
 {
   free((char *)scan->path);
 

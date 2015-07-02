@@ -3,7 +3,7 @@
 #include "lib/conf.h"
 #include "lib/unixsock.h"
 
-#include <libumwsu/scan.h>
+#include <libuhuru/scan.h>
 
 #include <assert.h>
 #include <errno.h>
@@ -17,7 +17,7 @@ struct server {
   int listen_sock;
   GIOChannel *channel;
   GThreadPool *thread_pool;  
-  struct umwsu *umwsu;
+  struct uhuru *uhuru;
 };
 
 static char *server_get_sock_path(struct server *server)
@@ -25,7 +25,7 @@ static char *server_get_sock_path(struct server *server)
   char *sock_dir, *ret;
   GString *sock_path;
 
-  sock_dir = conf_get(server->umwsu, "remote", "socket-dir");
+  sock_dir = conf_get(server->uhuru, "remote", "socket-dir");
   assert(sock_dir != NULL);
 
   sock_path = g_string_new(sock_dir);
@@ -54,7 +54,7 @@ static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpo
 
   client_sock = server_socket_accept(server->listen_sock);
 
-  client = client_new(client_sock, server->umwsu);
+  client = client_new(client_sock, server->uhuru);
 
   g_thread_pool_push(server->thread_pool, (gpointer)client, NULL);
 
@@ -69,10 +69,10 @@ struct server *server_new(void)
   server = (struct server *)malloc(sizeof(struct server));
   assert(server != NULL);
 
-  server->umwsu = umwsu_open(0);
-  assert(server->umwsu != NULL);
+  server->uhuru = uhuru_open(0);
+  assert(server->uhuru != NULL);
 
-  umwsu_set_verbose(server->umwsu, 1);
+  uhuru_set_verbose(server->uhuru, 1);
 
   sock_path = server_get_sock_path(server);
 

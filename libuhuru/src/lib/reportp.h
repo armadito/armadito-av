@@ -1,12 +1,12 @@
-#ifndef _LIBUMWSU_REPORTP_H_
-#define _LIBUMWSU_REPORTP_H_
+#ifndef _LIBUHURU_REPORTP_H_
+#define _LIBUHURU_REPORTP_H_
 
-#include <libumwsu/scan.h>
+#include <libuhuru/scan.h>
 
-void umwsu_report_init(struct umwsu_report *report, const char *path);
+void uhuru_report_init(struct uhuru_report *report, const char *path);
 
-void umwsu_report_destroy(struct umwsu_report *report);
+void uhuru_report_destroy(struct uhuru_report *report);
 
-void umwsu_report_change(struct umwsu_report *report, enum umwsu_file_status status, const char *mod_name, const char *mod_report);
+void uhuru_report_change(struct uhuru_report *report, enum uhuru_file_status status, const char *mod_name, const char *mod_report);
 
 #endif

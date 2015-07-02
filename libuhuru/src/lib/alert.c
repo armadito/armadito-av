@@ -1,5 +1,5 @@
-#include <libumwsu/scan.h>
-#include <libumwsu/module.h>
+#include <libuhuru/scan.h>
+#include <libuhuru/module.h>
 #include "dir.h"
 #include "modulep.h"
 #include "alert.h"
@@ -31,8 +31,8 @@
 #include <fcntl.h>
 
 #ifdef ALERT_VIA_SSL
-#define UMWSU_ALERT_URL "https://127.0.0.1:10083/"
-/* #define UMWSU_ALERT_URL "http://127.0.0.1:10083/" */
+#define UHURU_ALERT_URL "https://127.0.0.1:10083/"
+/* #define UHURU_ALERT_URL "http://127.0.0.1:10083/" */
 #endif
 
 struct alert {
@@ -137,7 +137,7 @@ static xmlDocPtr alert_doc_new(void)
   return doc;
 }
 
-static void alert_doc_add_alert(xmlDocPtr doc, struct umwsu_report *report)
+static void alert_doc_add_alert(xmlDocPtr doc, struct uhuru_report *report)
 {
   xmlNodePtr root_node, node;
 
@@ -201,7 +201,7 @@ static struct alert *alert_new()
   return a;
 }
 
-static void alert_add(struct alert *a, struct umwsu_report *report)
+static void alert_add(struct alert *a, struct uhuru_report *report)
 {
   alert_doc_add_alert(a->xml_doc, report);
 }
@@ -275,8 +275,8 @@ static void alert_send_via_https(struct alert *a)
   if (!curl)
     return;
 
-  curl_easy_setopt(curl, CURLOPT_URL, UMWSU_ALERT_URL);
-  curl_easy_setopt(curl, CURLOPT_USERAGENT, "libumwsu/1.0");
+  curl_easy_setopt(curl, CURLOPT_URL, UHURU_ALERT_URL);
+  curl_easy_setopt(curl, CURLOPT_USERAGENT, "libuhuru/1.0");
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, discard_data);
 #ifdef ALERT_REPORT_SSL
   curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
@@ -302,7 +302,7 @@ static void alert_send_via_https(struct alert *a)
 
 #ifdef ALERT_VIA_FILE
 /* must be configurable */
-#define DEFAULT_ALERT_DIR LIBUMWSU_ALERT_DIR
+#define DEFAULT_ALERT_DIR LIBUHURU_ALERT_DIR
 #define ALERT_PFX "alert"
 
 static char *alert_dir = DEFAULT_ALERT_DIR;
@@ -331,17 +331,17 @@ static void alert_free(struct alert *a)
   free(a);
 }
 
-void alert_callback(struct umwsu_report *report, void *callback_data)
+void alert_callback(struct uhuru_report *report, void *callback_data)
 {
   struct alert *a;
 
   switch(report->status) {
-  case UMWSU_CLEAN:
-  case UMWSU_UNKNOWN_FILE_TYPE:
-  case UMWSU_EINVAL:
-  case UMWSU_IERROR:
-  case UMWSU_UNDECIDED:
-  case UMWSU_WHITE_LISTED:
+  case UHURU_CLEAN:
+  case UHURU_UNKNOWN_FILE_TYPE:
+  case UHURU_EINVAL:
+  case UHURU_IERROR:
+  case UHURU_UNDECIDED:
+  case UHURU_WHITE_LISTED:
     return;
   }
 
@@ -357,19 +357,19 @@ void alert_callback(struct umwsu_report *report, void *callback_data)
 
   alert_free(a);
 
-  report->action |= UMWSU_ACTION_ALERT;
+  report->action |= UHURU_ACTION_ALERT;
 }
 
-static enum umwsu_mod_status mod_alert_conf_set(void *mod_data, const char *key, const char *value)
+static enum uhuru_mod_status mod_alert_conf_set(void *mod_data, const char *key, const char *value)
 {
   if (!strcmp(key, "alert-dir")) {
     fprintf(stderr, "alert: got config %s -> %s\n", key, value);
     alert_dir = strdup(value);
     mkdir_p(alert_dir);
-    return UMWSU_MOD_OK;
+    return UHURU_MOD_OK;
   }
 
-  return UMWSU_MOD_CONF_ERROR;
+  return UHURU_MOD_CONF_ERROR;
 }
 
 static char *mod_alert_conf_get(void *mod_data, const char *key)
@@ -380,7 +380,7 @@ static char *mod_alert_conf_get(void *mod_data, const char *key)
   return NULL;
 }
 
-struct umwsu_module umwsu_mod_alert = {
+struct uhuru_module uhuru_mod_alert = {
   .init = NULL,
   .conf_set = &mod_alert_conf_set,
   .conf_get = &mod_alert_conf_get,

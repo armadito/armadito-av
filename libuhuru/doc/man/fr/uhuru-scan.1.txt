@@ -16,7 +16,7 @@ DESCRIPTION
 -----------
 La commande *uhuru-scan*(1) lance une recherche de malwares dans le fichier ou répertoire passé en argument et affiche les résultats sur sa sortie standard.
 
-Cette commande utilise la librairie de scan *libumwsu*(3).
+Cette commande utilise la librairie de scan *libuhuru*(3).
 
 
 OPTIONS

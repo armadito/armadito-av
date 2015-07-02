@@ -1,11 +1,11 @@
-#ifndef _LIBUMWSU_ALERT_H_
-#define _LIBUMWSU_ALERT_H_
+#ifndef _LIBUHURU_ALERT_H_
+#define _LIBUHURU_ALERT_H_
 
-#include <libumwsu/scan.h>
+#include <libuhuru/scan.h>
 #include "modulep.h"
 
-void alert_callback(struct umwsu_report *report, void *callback_data);
+void alert_callback(struct uhuru_report *report, void *callback_data);
 
-extern struct umwsu_module umwsu_mod_alert;
+extern struct uhuru_module uhuru_mod_alert;
 
 #endif

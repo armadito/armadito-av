@@ -1,5 +1,5 @@
-#ifndef _LIBUMWSU_DIR_H_
-#define _LIBUMWSU_DIR_H_
+#ifndef _LIBUHURU_DIR_H_
+#define _LIBUHURU_DIR_H_
 
 #include <dirent.h>
 

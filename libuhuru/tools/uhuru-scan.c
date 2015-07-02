@@ -1,4 +1,4 @@
-#include <libumwsu/scan.h>
+#include <libuhuru/scan.h>
 
 #include <getopt.h>
 #include <stdio.h>
@@ -102,37 +102,37 @@ static void parse_options(int argc, char *argv[], struct scan_options *opts)
     usage();
 }
 
-static void report_print_callback(struct umwsu_report *report, void *callback_data)
+static void report_print_callback(struct uhuru_report *report, void *callback_data)
 {
   int *print_clean = (int *)callback_data;
 
-  if (!*print_clean && (report->status == UMWSU_WHITE_LISTED || report->status == UMWSU_CLEAN))
+  if (!*print_clean && (report->status == UHURU_WHITE_LISTED || report->status == UHURU_CLEAN))
     return;
 
-  umwsu_report_print(report, stdout);
+  uhuru_report_print(report, stdout);
 }
 
-static void summary_callback(struct umwsu_report *report, void *callback_data)
+static void summary_callback(struct uhuru_report *report, void *callback_data)
 {
   struct scan_summary *s = (struct scan_summary *)callback_data;
 
   s->scanned++;
 
   switch(report->status) {
-  case UMWSU_MALWARE:
+  case UHURU_MALWARE:
     s->malware++;
     break;
-  case UMWSU_SUSPICIOUS:
+  case UHURU_SUSPICIOUS:
     s->suspicious++;
     break;
-  case UMWSU_EINVAL:
-  case UMWSU_IERROR:
-  case UMWSU_UNKNOWN_FILE_TYPE:
-  case UMWSU_UNDECIDED:
+  case UHURU_EINVAL:
+  case UHURU_IERROR:
+  case UHURU_UNKNOWN_FILE_TYPE:
+  case UHURU_UNDECIDED:
     s->unhandled++;
     break;
-  case UMWSU_WHITE_LISTED:
-  case UMWSU_CLEAN:
+  case UHURU_WHITE_LISTED:
+  case UHURU_CLEAN:
     s->clean++;
     break;
   }
@@ -150,7 +150,7 @@ static void poll_add_fd(int epoll_fd, int fd)
   }
 }
 
-static void scan_loop_poll(struct umwsu_scan *scan)
+static void scan_loop_poll(struct uhuru_scan *scan)
 {
 #define MAX_EVENTS 10
   struct epoll_event events[MAX_EVENTS];
@@ -163,7 +163,7 @@ static void scan_loop_poll(struct umwsu_scan *scan)
   }
 
   poll_add_fd(epoll_fd, STDIN_FILENO);
-  poll_add_fd(epoll_fd, umwsu_scan_get_poll_fd(scan));
+  poll_add_fd(epoll_fd, uhuru_scan_get_poll_fd(scan));
 
   while (1) {
     int n_ev, n;
@@ -178,59 +178,59 @@ static void scan_loop_poll(struct umwsu_scan *scan)
       if (events[n].data.fd == STDIN_FILENO) {
 	;
       } else {
-	if (umwsu_scan_run(scan) != UMWSU_SCAN_CONTINUE)
+	if (uhuru_scan_run(scan) != UHURU_SCAN_CONTINUE)
 	  return;
       }
     }
   }
 }
 
-static void scan_loop_no_poll(struct umwsu_scan *scan)
+static void scan_loop_no_poll(struct uhuru_scan *scan)
 {
-  while(umwsu_scan_run(scan) == UMWSU_SCAN_CONTINUE)
+  while(uhuru_scan_run(scan) == UHURU_SCAN_CONTINUE)
     ;
 }
 
 static void do_scan(struct scan_options *opts, struct scan_summary *summary)
 {
-  enum umwsu_scan_flags flags = 0;
-  struct umwsu *u;
-  struct umwsu_scan *scan;
+  enum uhuru_scan_flags flags = 0;
+  struct uhuru *u;
+  struct uhuru_scan *scan;
 
   if (opts->recursive)
-    flags |= UMWSU_SCAN_RECURSE;
+    flags |= UHURU_SCAN_RECURSE;
 
   if (opts->threaded)
-    flags |= UMWSU_SCAN_THREADED;
+    flags |= UHURU_SCAN_THREADED;
 
-  u = umwsu_open(opts->use_daemon);
+  u = uhuru_open(opts->use_daemon);
 
-  umwsu_set_verbose(u, 1);
+  uhuru_set_verbose(u, 1);
 
 #if 0
-  umwsu_print(u);
+  uhuru_print(u);
 #endif
 
-  scan = umwsu_scan_new(u, opts->path, flags);
+  scan = uhuru_scan_new(u, opts->path, flags);
 
-  umwsu_scan_add_callback(scan, report_print_callback, &opts->print_clean);
+  uhuru_scan_add_callback(scan, report_print_callback, &opts->print_clean);
 
   if (!opts->no_summary) {
     summary->scanned = summary->malware = summary->suspicious = summary->unhandled = summary->clean = 0;
 
-    umwsu_scan_add_callback(scan, summary_callback, summary);
+    uhuru_scan_add_callback(scan, summary_callback, summary);
   }
 
-  umwsu_scan_start(scan);
+  uhuru_scan_start(scan);
 
   if (opts->use_daemon)
     scan_loop_poll(scan);
   else
     scan_loop_no_poll(scan);
 
-  umwsu_scan_free(scan);
+  uhuru_scan_free(scan);
 
-  umwsu_close(u);
+  uhuru_close(u);
 }
 
 static void print_summary(struct scan_summary *summary)

@@ -1,5 +1,5 @@
 #include "conf.h"
-#include "umwsup.h"
+#include "uhurup.h"
 
 #include <glib.h>
 #include <stdlib.h>
@@ -7,12 +7,12 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 
-void conf_load(struct umwsu_module *mod)
+void conf_load(struct uhuru_module *mod)
 {
   GKeyFile *key_file;
   char *filename;
   /* GError *error; */
-  static char *dirs[] = { LIBUMWSU_CONF_DIR, LIBUMWSU_CONF_DIR "/conf.d", NULL};
+  static char *dirs[] = { LIBUHURU_CONF_DIR, LIBUHURU_CONF_DIR "/conf.d", NULL};
   char **keys, **pkey;
 
   if (mod->conf_set == NULL)
@@ -46,9 +46,9 @@ void conf_load(struct umwsu_module *mod)
   free(filename);
 }
 
-void conf_set(struct umwsu *umwsu, const char *mod_name, const char *key, const char *value)
+void conf_set(struct uhuru *uhuru, const char *mod_name, const char *key, const char *value)
 {
-  struct umwsu_module *mod = umwsu_get_module_by_name(umwsu, mod_name);
+  struct uhuru_module *mod = uhuru_get_module_by_name(uhuru, mod_name);
 
   if (mod != NULL)
     (*mod->conf_set)(mod->data, key, value);
@@ -56,9 +56,9 @@ void conf_set(struct umwsu *umwsu, const char *mod_name, const char *key, const 
     fprintf(stderr, "No such module: %s\n", mod_name);
 }
 
-char *conf_get(struct umwsu *umwsu, const char *mod_name, const char *key)
+char *conf_get(struct uhuru *uhuru, const char *mod_name, const char *key)
 {
-  struct umwsu_module *mod = umwsu_get_module_by_name(umwsu, mod_name);
+  struct uhuru_module *mod = uhuru_get_module_by_name(uhuru, mod_name);
 
   if (mod != NULL)
     return (*mod->conf_get)(mod->data, key);

@@ -1,4 +1,4 @@
-#include <libumwsu/scan.h>
+#include <libuhuru/scan.h>
 
 #include <assert.h>
 #include <glib.h>
@@ -15,11 +15,11 @@
 static guint inotify_event_hash(gconstpointer key);
 static gboolean inotify_event_equal(gconstpointer a, gconstpointer b);
 
-struct umwsu_daemon {
+struct uhuru_daemon {
   int inotify_fd;
   GHashTable *watch_table;
   GHashTable *event_queue;
-  struct umwsu *umwsu;
+  struct uhuru *uhuru;
 };
 
 static void error(const char *msg)
@@ -28,7 +28,7 @@ static void error(const char *msg)
   exit(EXIT_FAILURE);
 }
 
-static void umwsu_daemon_init(struct umwsu_daemon *d)
+static void uhuru_daemon_init(struct uhuru_daemon *d)
 {
   d->inotify_fd = inotify_init();
   if (d->inotify_fd == -1)
@@ -37,10 +37,10 @@ static void umwsu_daemon_init(struct umwsu_daemon *d)
   d->watch_table = g_hash_table_new(g_direct_hash, g_direct_equal);
   d->event_queue = g_hash_table_new(inotify_event_hash, inotify_event_equal);
 
-  d->umwsu = umwsu_open();
+  d->uhuru = uhuru_open();
 }
 
-static void umwsu_daemon_watch(struct umwsu_daemon *d, const char *path, int recurse)
+static void uhuru_daemon_watch(struct uhuru_daemon *d, const char *path, int recurse)
 {
   int wd;
 
@@ -61,7 +61,7 @@ static void umwsu_daemon_watch(struct umwsu_daemon *d, const char *path, int rec
       if (asprintf(&entry_path, "%s/%s", path, entry->d_name) == -1)
 	error("asprintf");
 
-      umwsu_daemon_watch(d, entry_path, 1);
+      uhuru_daemon_watch(d, entry_path, 1);
       
       free(entry_path);
     }
@@ -78,7 +78,7 @@ static void umwsu_daemon_watch(struct umwsu_daemon *d, const char *path, int rec
 
 static void inotify_event_print(FILE *out, const struct inotify_event *e)
 {
-  fprintf(out, "umwsu_daemon: inotify event: wd = %2d ", e->wd);
+  fprintf(out, "uhuru_daemon: inotify event: wd = %2d ", e->wd);
 
   if (e->cookie > 0)
     fprintf(out, "cookie = %4d ", e->cookie);
@@ -167,7 +167,7 @@ static gboolean inotify_event_equal(gconstpointer a, gconstpointer b)
   return TRUE;
 }
 
-static char *umwsu_daemon_event_full_path(struct umwsu_daemon *d, struct inotify_event *event)
+static char *uhuru_daemon_event_full_path(struct uhuru_daemon *d, struct inotify_event *event)
 {
   char *full_path, *dir;
 
@@ -187,58 +187,58 @@ static void event_queue_print_entry(gpointer key, gpointer value, gpointer user_
   inotify_event_print(stderr, (const struct inotify_event *)key);
 }
 
-static void umwsu_daemon_print_event_queue(struct umwsu_daemon *d, const char *msg)
+static void uhuru_daemon_print_event_queue(struct uhuru_daemon *d, const char *msg)
 {
-  fprintf(stderr, "umwsu_daemon: event queue (%s):\n", msg);
+  fprintf(stderr, "uhuru_daemon: event queue (%s):\n", msg);
   g_hash_table_foreach(d->event_queue, event_queue_print_entry, NULL);
-  fprintf(stderr, "umwsu_daemon: end of event queue:\n");
+  fprintf(stderr, "uhuru_daemon: end of event queue:\n");
 }
 
-static void umwsu_daemon_process_dir_create(struct umwsu_daemon *d, struct inotify_event *event)
+static void uhuru_daemon_process_dir_create(struct uhuru_daemon *d, struct inotify_event *event)
 {
 }
 
-static void umwsu_daemon_process_file_create(struct umwsu_daemon *d, struct inotify_event *event)
+static void uhuru_daemon_process_file_create(struct uhuru_daemon *d, struct inotify_event *event)
 {
   struct inotify_event *close_event = inotify_event_clone(event);
 
-  fprintf(stderr, "umwsu_daemon: processing file create path = %s\n", event->name);
+  fprintf(stderr, "uhuru_daemon: processing file create path = %s\n", event->name);
 
   close_event->mask = IN_CLOSE_WRITE;
 
   g_hash_table_add(d->event_queue, close_event);
 
 #if 0
-  umwsu_daemon_print_event_queue(d, "create");
+  uhuru_daemon_print_event_queue(d, "create");
 #endif
 }
 
-void report_print_callback(struct umwsu_report *report, void *callback_data)
+void report_print_callback(struct uhuru_report *report, void *callback_data)
 {
   FILE *out = (FILE *)callback_data;
 
-  umwsu_report_print(report, out);
+  uhuru_report_print(report, out);
 }
 
-static void umwsu_daemon_process_file_close_write(struct umwsu_daemon *d, struct inotify_event *event)
+static void uhuru_daemon_process_file_close_write(struct uhuru_daemon *d, struct inotify_event *event)
 {
-  char *full_path = umwsu_daemon_event_full_path(d, event);
+  char *full_path = uhuru_daemon_event_full_path(d, event);
 
-  fprintf(stderr, "umwsu_daemon: processing file close write full_path = %s\n", full_path);
+  fprintf(stderr, "uhuru_daemon: processing file close write full_path = %s\n", full_path);
 
   if (g_hash_table_contains(d->event_queue, event)) {
-    struct umwsu_scan *scan;
-    enum umwsu_scan_flags flags = 0;
+    struct uhuru_scan *scan;
+    enum uhuru_scan_flags flags = 0;
 
-    scan = umwsu_scan_new(d->umwsu, full_path, flags);
+    scan = uhuru_scan_new(d->uhuru, full_path, flags);
 
-    umwsu_scan_add_callback(scan, report_print_callback, stdout);
+    uhuru_scan_add_callback(scan, report_print_callback, stdout);
 
-    umwsu_scan_start(scan);
+    uhuru_scan_start(scan);
 
-    umwsu_scan_finish(scan);
+    uhuru_scan_finish(scan);
 
-    umwsu_scan_free(scan);
+    uhuru_scan_free(scan);
 
     g_hash_table_remove(d->event_queue, event);
   }
@@ -246,16 +246,16 @@ static void umwsu_daemon_process_file_close_write(struct umwsu_daemon *d, struct
   free(full_path);
 }
 
-static void umwsu_daemon_process_event(struct umwsu_daemon *d, struct inotify_event *event)
+static void uhuru_daemon_process_event(struct uhuru_daemon *d, struct inotify_event *event)
 {
   inotify_event_print(stderr, event);
 
   if ((event->mask & IN_CLOSE_WRITE) && !(event->mask & IN_ISDIR))
-    umwsu_daemon_process_file_close_write(d, event);
+    uhuru_daemon_process_file_close_write(d, event);
   else if ((event->mask & IN_CREATE) && !(event->mask & IN_ISDIR))
-    umwsu_daemon_process_file_create(d, event);
+    uhuru_daemon_process_file_create(d, event);
   else if ((event->mask & IN_CREATE) && (event->mask & IN_ISDIR))
-    umwsu_daemon_process_dir_create(d, event);
+    uhuru_daemon_process_dir_create(d, event);
 }
 
 void print_entry(gpointer key, gpointer value, gpointer user_data)
@@ -266,7 +266,7 @@ void print_entry(gpointer key, gpointer value, gpointer user_data)
 #define N_EVENTS 10
 #define EVENT_BUFFER_LEN (N_EVENTS * (sizeof(struct inotify_event) + NAME_MAX + 1))
 
-static void umwsu_daemon_loop(struct umwsu_daemon *d)
+static void uhuru_daemon_loop(struct uhuru_daemon *d)
 {
   char *event_buffer;
 
@@ -295,7 +295,7 @@ static void umwsu_daemon_loop(struct umwsu_daemon *d)
     while (p < event_buffer + nread) {
       struct inotify_event *event = (struct inotify_event *) p;
 
-      umwsu_daemon_process_event(d, event);
+      uhuru_daemon_process_event(d, event);
 
       p += sizeof(struct inotify_event) + event->len;
     }
@@ -310,7 +310,7 @@ static void usage(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-  struct umwsu_daemon umwsu_daemon;
+  struct uhuru_daemon uhuru_daemon;
   int argp = 1;
   int recurse = 0;
   
@@ -322,7 +322,7 @@ int main(int argc, char **argv)
     recurse = 1;
   }
 
-  umwsu_daemon_init(&umwsu_daemon);
+  uhuru_daemon_init(&uhuru_daemon);
 
   while (argp < argc) {
     struct stat sb;
@@ -337,10 +337,10 @@ int main(int argc, char **argv)
       exit(EXIT_FAILURE);
     }
 
-    umwsu_daemon_watch(&umwsu_daemon, argv[argp], recurse);
+    uhuru_daemon_watch(&uhuru_daemon, argv[argp], recurse);
 
     argp++;
   }
 
-  umwsu_daemon_loop(&umwsu_daemon);
+  uhuru_daemon_loop(&uhuru_daemon);
 }

@@ -1,5 +1,5 @@
 #include "protocol.h"
-#include "libumwsu-config.h"
+#include "libuhuru-config.h"
 
 #include <glib.h>
 #include <errno.h>

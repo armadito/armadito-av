@@ -1,14 +1,14 @@
 #SUBDIRS=conf
 
-#check_PROGRAMS=testfind1 testumwsu1 testumwsuscan1 testxmlreport1 testprotocol1 testprotocol2
-check_PROGRAMS=testumwsu1 testumwsuscan1 testxmlreport1 
+#check_PROGRAMS=testfind1 testuhuru1 testuhuruscan1 testxmlreport1 testprotocol1 testprotocol2
+check_PROGRAMS=testuhuru1 testuhuruscan1 testxmlreport1 
 
 AM_CFLAGS=-I$(top_srcdir)/include -I$(top_srcdir)/src/lib @LIBXML2_CFLAGS@
-LDADD=$(top_builddir)/src/lib/libumwsu.la @GMODULE2_LIBS@ @LIBXML2_LIBS@ -lmagic
+LDADD=$(top_builddir)/src/lib/libuhuru.la @GMODULE2_LIBS@ @LIBXML2_LIBS@ -lmagic
 
 #testfind1_SOURCES=testfind1.c
-testumwsu1_SOURCES=testumwsu1.c
-testumwsuscan1_SOURCES=testumwsuscan1.c
+testuhuru1_SOURCES=testuhuru1.c
+testuhuruscan1_SOURCES=testuhuruscan1.c
 testxmlreport1_SOURCES=testxmlreport1.c
 #testprotocol1_SOURCES=testprotocol1.c
 #testprotocol2_SOURCES=testprotocol2.c

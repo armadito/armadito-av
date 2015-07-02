@@ -1,4 +1,4 @@
-#include <libumwsu/module.h>
+#include <libuhuru/module.h>
 #include "modulep.h"
 
 #include <assert.h>
@@ -44,12 +44,12 @@ static gpointer get_symbol(GModule *module, const char *module_name, const char 
   return sym;
 }
 
-struct umwsu_module *module_new(const char *path)
+struct uhuru_module *module_new(const char *path)
 {
-  struct umwsu_module *mod;
+  struct uhuru_module *mod;
   GModule *module;
 
-  mod = (struct umwsu_module *)malloc(sizeof(struct umwsu_module));
+  mod = (struct uhuru_module *)malloc(sizeof(struct uhuru_module));
 
   module = g_module_open(path, G_MODULE_BIND_LAZY);
 
@@ -76,7 +76,7 @@ struct umwsu_module *module_new(const char *path)
   return mod;
 }
 
-void module_print(struct umwsu_module *mod, FILE *out)
+void module_print(struct uhuru_module *mod, FILE *out)
 {
   fprintf(out, "name: %s\n", mod->name);
   fprintf(out, "init: %p\n", mod->init);

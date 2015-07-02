@@ -1,4 +1,4 @@
-#include "libumwsu-config.h"
+#include "libuhuru-config.h"
 #include "watch.h"
 
 #include <stdio.h>

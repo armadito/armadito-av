@@ -1,8 +1,8 @@
-#ifndef _LIBUMWSU_QUARANTINE_H_
-#define _LIBUMWSU_QUARANTINE_H_
+#ifndef _LIBUHURU_QUARANTINE_H_
+#define _LIBUHURU_QUARANTINE_H_
 
-void quarantine_callback(struct umwsu_report *report, void *callback_data);
+void quarantine_callback(struct uhuru_report *report, void *callback_data);
 
-extern struct umwsu_module umwsu_mod_quarantine;
+extern struct uhuru_module uhuru_mod_quarantine;
 
 #endif

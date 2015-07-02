@@ -1,8 +1,8 @@
-#ifndef _LIBUMWSU_STATUSP_H_
-#define _LIBUMWSU_STATUSP_H_
+#ifndef _LIBUHURU_STATUSP_H_
+#define _LIBUHURU_STATUSP_H_
 
-#include <libumwsu/status.h>
+#include <libuhuru/status.h>
 
-int umwsu_file_status_cmp(enum umwsu_file_status s1, enum umwsu_file_status s2);
+int uhuru_file_status_cmp(enum uhuru_file_status s1, enum uhuru_file_status s2);
 
 #endif

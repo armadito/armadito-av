@@ -8,7 +8,7 @@ config.status
 configure
 aclocal.m4
 config.guess
-libumwsu-config.h.in
+libuhuru-config.h.in
 config.sub
 depcomp
 install-sh

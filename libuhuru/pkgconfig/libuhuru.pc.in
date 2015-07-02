@@ -5,9 +5,9 @@ libdir=@libdir@
 moduledir=@moduledir@
 version=@PACKAGE_VERSION@
 
-Name: UMWSU library
-Description: UMWSU library
+Name: UHURU library
+Description: UHURU library
 Version: ${version} 
 Requires: gmodule-2.0 glib-2.0 libxml-2.0
-Libs:-L${libdir} -lumwsu -lmagic
+Libs:-L${libdir} -luhuru -lmagic
 Cflags: -I${includedir} 

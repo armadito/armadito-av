@@ -1,4 +1,4 @@
-#include <libumwsu/module.h>
+#include <libuhuru/module.h>
 #include <stdio.h>
 
 const char *testmodule_mime_types[] = {
@@ -8,16 +8,16 @@ const char *testmodule_mime_types[] = {
   NULL,
 };
 
-enum umwsu_status testmodule_scan(const char *path, void *mod_data)
+enum uhuru_status testmodule_scan(const char *path, void *mod_data)
 {
-  return UMWSU_CLEAN;
+  return UHURU_CLEAN;
 }
 
-enum umwsu_mod_status testmodule_init(void **pmod_data)
+enum uhuru_mod_status testmodule_init(void **pmod_data)
 {
   *pmod_data = NULL;
 
-  return UMWSU_MOD_OK;
+  return UHURU_MOD_OK;
 }
 
 void testmodule_install(void)

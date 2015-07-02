@@ -1,4 +1,4 @@
-#include <libumwsu/scan.h>
+#include <libuhuru/scan.h>
 
 #include <assert.h>
 #include <glib.h>
@@ -12,7 +12,7 @@
 #include <sys/inotify.h>
 #include <dirent.h>
 
-struct umwsu_watch {
+struct uhuru_watch {
   int inotify_fd;
   GHashTable *watch_table;
   char *event_buffer;
@@ -29,11 +29,11 @@ static void error(const char *msg)
 #define N_EVENTS 10
 #define EVENT_BUFFER_LEN (N_EVENTS * (sizeof(struct inotify_event) + NAME_MAX + 1))
 
-struct umwsu_watch *umwsu_watch_new(void)
+struct uhuru_watch *uhuru_watch_new(void)
 {
-  struct umwsu_watch *w;
+  struct uhuru_watch *w;
 
-  w = (struct umwsu_watch *)malloc(sizeof(struct umwsu_watch));
+  w = (struct uhuru_watch *)malloc(sizeof(struct uhuru_watch));
   assert(w != 0);
 
   w->inotify_fd = inotify_init();
@@ -51,7 +51,7 @@ struct umwsu_watch *umwsu_watch_new(void)
   return w;
 }
 
-static void umwsu_watch_add_aux(struct umwsu_watch *w, const char *path, int recurse)
+static void uhuru_watch_add_aux(struct uhuru_watch *w, const char *path, int recurse)
 {
   int wd;
 
@@ -74,7 +74,7 @@ static void umwsu_watch_add_aux(struct umwsu_watch *w, const char *path, int rec
       if (asprintf(&entry_path, "%s/%s", path, entry->d_name) == -1)
 	error("asprintf");
 
-      umwsu_watch_add_aux(w, entry_path, 1);
+      uhuru_watch_add_aux(w, entry_path, 1);
       
       free(entry_path);
     }
@@ -94,7 +94,7 @@ static void umwsu_watch_add_aux(struct umwsu_watch *w, const char *path, int rec
 
 static void inotify_event_print(FILE *out, const struct inotify_event *e, char *full_path)
 {
-  fprintf(out, "umwsu_daemon: inotify event: wd = %2d ", e->wd);
+  fprintf(out, "uhuru_daemon: inotify event: wd = %2d ", e->wd);
 
   if (e->cookie > 0)
     fprintf(out, "cookie = %4d ", e->cookie);
@@ -126,7 +126,7 @@ static void inotify_event_print(FILE *out, const struct inotify_event *e, char *
   fprintf(out, " full_path = %s\n", full_path);
 }
 
-static char *umwsu_watch_event_full_path(struct umwsu_watch *w, struct inotify_event *event)
+static char *uhuru_watch_event_full_path(struct uhuru_watch *w, struct inotify_event *event)
 {
   char *full_path, *dir;
 
@@ -141,41 +141,41 @@ static char *umwsu_watch_event_full_path(struct umwsu_watch *w, struct inotify_e
   return full_path;
 }
 
-static enum umwsu_watch_event_type umwsu_watch_event_type(struct inotify_event *iev)
+static enum uhuru_watch_event_type uhuru_watch_event_type(struct inotify_event *iev)
 {
   if (iev->mask & IN_ISDIR) {
     if (iev->mask & IN_CREATE)
-      return UMWSU_WATCH_DIRECTORY_CREATE;
+      return UHURU_WATCH_DIRECTORY_CREATE;
     else if (iev->mask & IN_OPEN)
-      return UMWSU_WATCH_DIRECTORY_OPEN;
+      return UHURU_WATCH_DIRECTORY_OPEN;
     else if (iev->mask & IN_CLOSE_NOWRITE)
-      return UMWSU_WATCH_DIRECTORY_CLOSE_NO_WRITE;
+      return UHURU_WATCH_DIRECTORY_CLOSE_NO_WRITE;
     else if (iev->mask & IN_CLOSE_WRITE)
-      return UMWSU_WATCH_DIRECTORY_CLOSE_WRITE;
+      return UHURU_WATCH_DIRECTORY_CLOSE_WRITE;
     else if (iev->mask & IN_DELETE)
-      return UMWSU_WATCH_DIRECTORY_DELETE;
+      return UHURU_WATCH_DIRECTORY_DELETE;
   } else {
     if (iev->mask & IN_CREATE)
-      return UMWSU_WATCH_FILE_CREATE;
+      return UHURU_WATCH_FILE_CREATE;
     else if (iev->mask & IN_OPEN)
-      return UMWSU_WATCH_FILE_OPEN;
+      return UHURU_WATCH_FILE_OPEN;
     else if (iev->mask & IN_CLOSE_NOWRITE)
-      return UMWSU_WATCH_FILE_CLOSE_NO_WRITE;
+      return UHURU_WATCH_FILE_CLOSE_NO_WRITE;
     else if (iev->mask & IN_CLOSE_WRITE)
-      return UMWSU_WATCH_FILE_CLOSE_WRITE;
+      return UHURU_WATCH_FILE_CLOSE_WRITE;
     else if (iev->mask & IN_DELETE)
-      return UMWSU_WATCH_FILE_DELETE;
+      return UHURU_WATCH_FILE_DELETE;
   }
 
-  return UMWSU_WATCH_NONE;
+  return UHURU_WATCH_NONE;
 }
 
-void umwsu_watch_add(struct umwsu_watch *w, const char *dir)
+void uhuru_watch_add(struct uhuru_watch *w, const char *dir)
 {
-  umwsu_watch_add_aux(w, dir, 1);
+  uhuru_watch_add_aux(w, dir, 1);
 }
 
-static void umwsu_watch_process_event(struct umwsu_watch *w, struct inotify_event *iev, char *full_path)
+static void uhuru_watch_process_event(struct uhuru_watch *w, struct inotify_event *iev, char *full_path)
 {
   unsigned int delay = 200000;
 
@@ -186,11 +186,11 @@ static void umwsu_watch_process_event(struct umwsu_watch *w, struct inotify_even
 
 #if 0
   if (iev->mask & IN_CREATE)
-    umwsu_watch_add_aux(w, full_path, 0);
+    uhuru_watch_add_aux(w, full_path, 0);
 #endif
 }
 
-int umwsu_watch_wait(struct umwsu_watch *w, struct umwsu_watch_event *event)
+int uhuru_watch_wait(struct uhuru_watch *w, struct uhuru_watch_event *event)
 {
   struct inotify_event *iev;
 
@@ -215,12 +215,12 @@ int umwsu_watch_wait(struct umwsu_watch *w, struct umwsu_watch_event *event)
   if (event->full_path != NULL)
     free(event->full_path);
 
-  event->full_path = umwsu_watch_event_full_path(w, iev);
-  event->event_type = umwsu_watch_event_type(iev);
+  event->full_path = uhuru_watch_event_full_path(w, iev);
+  event->event_type = uhuru_watch_event_type(iev);
 
   inotify_event_print(stderr, iev, event->full_path);
 
-  umwsu_watch_process_event(w, iev, event->full_path);
+  uhuru_watch_process_event(w, iev, event->full_path);
 
   w->current_event += sizeof(struct inotify_event) + iev->len;
 

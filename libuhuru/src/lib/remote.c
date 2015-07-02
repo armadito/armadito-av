@@ -1,5 +1,5 @@
-#include <libumwsu/scan.h>
-#include <libumwsu/module.h>
+#include <libuhuru/scan.h>
+#include <libuhuru/module.h>
 #include "modulep.h"
 #include "remote.h"
 
@@ -8,15 +8,15 @@
 
 static char *remote_sock_dir;
 
-static enum umwsu_mod_status mod_remote_conf_set(void *mod_data, const char *key, const char *value)
+static enum uhuru_mod_status mod_remote_conf_set(void *mod_data, const char *key, const char *value)
 {
   if (!strcmp(key, "socket-dir")) {
     fprintf(stderr, "remote: got config %s -> %s\n", key, value);
     remote_sock_dir = strdup(value);
-    return UMWSU_MOD_OK;
+    return UHURU_MOD_OK;
   } 
 
-  return UMWSU_MOD_CONF_ERROR;
+  return UHURU_MOD_CONF_ERROR;
 }
 
 static char *mod_remote_conf_get(void *mod_data, const char *key)
@@ -27,7 +27,7 @@ static char *mod_remote_conf_get(void *mod_data, const char *key)
   return NULL;
 }
 
-struct umwsu_module umwsu_mod_remote = {
+struct uhuru_module uhuru_mod_remote = {
   .init = NULL,
   .conf_set = &mod_remote_conf_set,
   .conf_get = &mod_remote_conf_get,

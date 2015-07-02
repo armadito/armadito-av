@@ -1,13 +1,13 @@
-#ifndef _LIBUMWSU_WATCHP_H_
-#define _LIBUMWSU_WATCHP_H_
+#ifndef _LIBUHURU_WATCHP_H_
+#define _LIBUHURU_WATCHP_H_
 
-struct umwsu_watch;
+struct uhuru_watch;
 
-struct umwsu_watch *umwsu_watch_new(void);
+struct uhuru_watch *uhuru_watch_new(void);
 
-void umwsu_watch_add(struct umwsu_watch *w, const char *dir);
+void uhuru_watch_add(struct uhuru_watch *w, const char *dir);
 
-int umwsu_watch_wait(struct umwsu_watch *w, struct umwsu_watch_event *event);
+int uhuru_watch_wait(struct uhuru_watch *w, struct uhuru_watch_event *event);
 
 #endif
 

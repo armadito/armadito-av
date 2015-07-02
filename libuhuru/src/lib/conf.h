@@ -1,13 +1,13 @@
-#ifndef _LIBUMWSU_CONF_H_
-#define _LIBUMWSU_CONF_H_
+#ifndef _LIBUHURU_CONF_H_
+#define _LIBUHURU_CONF_H_
 
 #include "modulep.h"
-#include "umwsup.h"
+#include "uhurup.h"
 
-void conf_load(struct umwsu_module *mod);
+void conf_load(struct uhuru_module *mod);
 
-void conf_set(struct umwsu *umwsu, const char *mod_name, const char *key, const char *value);
+void conf_set(struct uhuru *uhuru, const char *mod_name, const char *key, const char *value);
 
-char *conf_get(struct umwsu *umwsu, const char *mod_name, const char *key);
+char *conf_get(struct uhuru *uhuru, const char *mod_name, const char *key);
 
 #endif

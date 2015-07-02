@@ -1,4 +1,4 @@
-doc_DATA=umwsu-daemon.1 umwsu-daemon.1.html
+doc_DATA=uhuru-daemon.1 uhuru-daemon.1.html
 
 ASCIIDOCFLAGS=-a data-uri -a icons -b html5
 A2XFLAGS=--doctype manpage --format manpage -v -v
@@ -9,7 +9,7 @@ A2XFLAGS=--doctype manpage --format manpage -v -v
 %.html: $(srcdir)/%.txt
 	$(ASCIIDOC) $(ASCIIDOCFLAGS) -o $*.html $(srcdir)/$*.txt
 
-EXTRA_DIST=umwsu-daemon.1.txt
+EXTRA_DIST=uhuru-daemon.1.txt
 
 
 

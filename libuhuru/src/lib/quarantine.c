@@ -1,5 +1,5 @@
-#include <libumwsu/scan.h>
-#include <libumwsu/module.h>
+#include <libuhuru/scan.h>
+#include <libuhuru/module.h>
 #include "dir.h"
 #include "modulep.h"
 #include "quarantine.h"
@@ -74,27 +74,27 @@ static int quarantine_do(const char *path)
 }
 
 
-void quarantine_callback(struct umwsu_report *report, void *callback_data)
+void quarantine_callback(struct uhuru_report *report, void *callback_data)
 {
   if (!quarantine_enabled)
     return;
 
   switch(report->status) {
-  case UMWSU_UNDECIDED:
-  case UMWSU_CLEAN:
-  case UMWSU_UNKNOWN_FILE_TYPE:
-  case UMWSU_EINVAL:
-  case UMWSU_IERROR:
-  case UMWSU_SUSPICIOUS:
-  case UMWSU_WHITE_LISTED:
+  case UHURU_UNDECIDED:
+  case UHURU_CLEAN:
+  case UHURU_UNKNOWN_FILE_TYPE:
+  case UHURU_EINVAL:
+  case UHURU_IERROR:
+  case UHURU_SUSPICIOUS:
+  case UHURU_WHITE_LISTED:
     return;
   }
 
   if (quarantine_do(report->path) != -1)
-    report->action |= UMWSU_ACTION_QUARANTINE;
+    report->action |= UHURU_ACTION_QUARANTINE;
 }
 
-static enum umwsu_mod_status mod_quarantine_conf_set(void *mod_data, const char *key, const char *value)
+static enum uhuru_mod_status mod_quarantine_conf_set(void *mod_data, const char *key, const char *value)
 {
   if (!strcmp(key, "quarantine-dir")) {
     fprintf(stderr, "quarantine: got config %s -> %s\n", key, value);
@@ -107,7 +107,7 @@ static enum umwsu_mod_status mod_quarantine_conf_set(void *mod_data, const char 
     quarantine_enabled = !strcmp(value, "yes") || !strcmp(value, "1") ;
   } 
 
-  return UMWSU_MOD_OK;
+  return UHURU_MOD_OK;
 }
 
 static char *mod_quarantine_conf_get(void *mod_data, const char *key)
@@ -121,7 +121,7 @@ static char *mod_quarantine_conf_get(void *mod_data, const char *key)
   return NULL;
 }
 
-struct umwsu_module umwsu_mod_quarantine = {
+struct uhuru_module uhuru_mod_quarantine = {
   .init = NULL,
   .conf_set = &mod_quarantine_conf_set,
   .conf_get = &mod_quarantine_conf_get,

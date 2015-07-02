@@ -1,0 +1,84 @@
+LIBUHURU(3)
+===========
+:doctype: manpage
+
+NOM
+---
+libuhuru - librairie de scan
+
+
+SYNOPSIS
+--------
+*#include <libuhuru/scan.h>*
+
+enum uhuru_status {
+  UHURU_CLEAN,
+  UHURU_MALWARE,
+  UHURU_EINVAL,
+  UHURU_IERROR,
+  UHURU_UNKNOWN_FILE_TYPE,
+};
+
+struct uhuru *
+*uhuru_open*(void);
+
+void 
+*uhuru_print*(struct uhuru *uhuru_handle);
+
+void
+*uhuru_close*(struct uhuru *uhuru_handle);
+
+enum uhuru_status 
+*uhuru_scan_file*(struct uhuru *uhuru_handle, const char *path);
+
+enum uhuru_status 
+*uhuru_scan_dir*(struct uhuru *uhuru_handle, const char *path, int recurse);
+
+
+DESCRIPTION
+-----------
+La fonction *uhuru_open*() créée une instance de la structure opaque *struct uhuru* et la retourne. Les modules de recherche sont chargés dynamiquement et initialisés.
+
+La fonction *uhuru_print*() affiche le contenu de la structure (liste des modules chargés, liste des types MIME pouvant être analysés).
+
+La fonction *uhuru_close*() libère la structure allouée après avoir dé-initialisé les modules de recherche.
+
+La fonction *uhuru_scan_file*() analyse un fichier et retourne un statut indiquant le résultat de l'analyse.
+
+La fonction *uhuru_scan_dir*() analyse un répertoire, éventuellement récursivement, et retourne un statut indiquant le résultat de l'analyse.
+
+Le statut retourné par les fonctions d'analyse peut prendre les valeurs suivantes:
+
+*UHURU_CLEAN*::
+Le fichier ou répertoire est sain
+*UHURU_MALWARE*::
+Le fichier ou répertoire contient un malware
+*UHURU_EINVAL*::
+Un argument invalide a été passé
+*UHURU_IERROR*::
+Le module de recherche a rencontré une erreur interne
+*UHURU_UNKNOWN_FILE_TYPE*::
+Le type du fichier n'est pas géré
+
+
+MODULES DE RECHERCHE
+--------------------
+La fonction *uhuru_open*() charge dynamiquement des modules de recherche et délègue la recherche réelle de malware à ces modules.
+
+Les modules de recherche sont chargés dynamiquement à partir des fichiers objets situés dans le répertoire */usr/lib/libuhuru/modules* (ce répertoire peut changer en fonction de l'installation). Chaque module exporte certaines fonctions qui seront utilisées par la librairie *libuhuru*. Pour plus d'informations, se référer à *uhuru-modules*(3).
+
+
+AUTHOR
+------
+libuhuru a été écrit par François Déchelle.
+
+
+RESOURCES
+---------
+Site web: <http://uhuru-solutions.com/>
+
+
+COPYING
+-------
+Copyright \(C) 2014 qui?. Free use of this software is
+granted under the terms of the GNU General Public License (GPL).

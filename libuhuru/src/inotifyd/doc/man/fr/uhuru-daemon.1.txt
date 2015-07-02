@@ -1,22 +1,22 @@
-UMWSU-DAEMON(1)
+UHURU-DAEMON(1)
 ===============
 :doctype: manpage
 
 NOM
 ---
-umwsu-daemon - démon de scan utilisant inotify
+uhuru-daemon - démon de scan utilisant inotify
 
 
 SYNOPSIS
 --------
-*umwsu-daemon* ['OPTIONS'] 'DIR'...
+*uhuru-daemon* ['OPTIONS'] 'DIR'...
 
 
 DESCRIPTION
 -----------
-La commande *umwsu-daemon*(1) lance le démon de scan. Ce démon utilise *inotify*(7) pour surveiller les répertoires passés en argument et pour lancer une recherche de malware pour les fichiers créés dans les répertoires surveillés.
+La commande *uhuru-daemon*(1) lance le démon de scan. Ce démon utilise *inotify*(7) pour surveiller les répertoires passés en argument et pour lancer une recherche de malware pour les fichiers créés dans les répertoires surveillés.
 
-*umwsu-daemon*(1) utilise *libumwsu*(3) pour la recherche de malwares. Au lancement du démon, les modules de recherche sont chargés dynamiquement en utilisant *umwsu_open*(3) et restent chargés pendant toute la durée de vie du démon.
+*uhuru-daemon*(1) utilise *libuhuru*(3) pour la recherche de malwares. Au lancement du démon, les modules de recherche sont chargés dynamiquement en utilisant *uhuru_open*(3) et restent chargés pendant toute la durée de vie du démon.
 
 Dans sa version actuelle, le démon lance une analyse de fichier à la première fermeture en écriture (événement inotify IN_CLOSE_WRITE) du fichier après sa création (événement inotify IN_CREATE). Ce comportement est susceptible de changer dans une prochaine version.
 
@@ -42,7 +42,7 @@ EXIT STATUS
 
 AUTHOR
 ------
-umwsu-daemon a été écrit par François Déchelle.
+uhuru-daemon a été écrit par François Déchelle.
 
 
 RESOURCES

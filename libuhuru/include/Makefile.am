@@ -1,1 +1,1 @@
-SUBDIRS=libumwsu
+SUBDIRS=libuhuru

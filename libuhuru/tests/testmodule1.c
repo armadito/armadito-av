@@ -1,6 +1,6 @@
-#include <libumwsu/umwsu.h>
+#include <libuhuru/uhuru.h>
 
 int main(int argc, char **argv)
 {
-  umwsu_module_install(argv[1]);
+  uhuru_module_install(argv[1]);
 }

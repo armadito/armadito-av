@@ -1,5 +1,5 @@
-#ifndef _LIBUMWSU_PROTOCOL_H_
-#define _LIBUMWSU_PROTOCOL_H_
+#ifndef _LIBUHURU_PROTOCOL_H_
+#define _LIBUHURU_PROTOCOL_H_
 
 struct protocol_handler;
 

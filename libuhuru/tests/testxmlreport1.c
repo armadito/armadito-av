@@ -1,4 +1,4 @@
-#include <libumwsu/scan.h>
+#include <libuhuru/scan.h>
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -118,7 +118,7 @@ xmlDocPtr document_new(void)
   return doc;
 }
 
-void document_add_alert(xmlDocPtr doc, struct umwsu_report *report)
+void document_add_alert(xmlDocPtr doc, struct uhuru_report *report)
 {
   xmlNodePtr alert_node, node;
 
@@ -141,7 +141,7 @@ void document_free(xmlDocPtr doc)
   xmlFreeDoc(doc);
 }
  
-static void report_fill(struct umwsu_report *report, enum umwsu_file_status status, const char *path, const char *mod_name, const char *mod_report)
+static void report_fill(struct uhuru_report *report, enum uhuru_file_status status, const char *path, const char *mod_name, const char *mod_report)
 {
   report->status = status;
   report->path = (char *)path;
@@ -152,15 +152,15 @@ static void report_fill(struct umwsu_report *report, enum umwsu_file_status stat
 int main(int argc, char **argv)
 {
   xmlDocPtr doc;
-  struct umwsu_report report;
+  struct uhuru_report report;
 
   LIBXML_TEST_VERSION;
 
   doc = document_new();
 
-  report_fill(&report, UMWSU_MALWARE, "/home/francois/zob", "module_pi", "virus de la grippe");
+  report_fill(&report, UHURU_MALWARE, "/home/francois/zob", "module_pi", "virus de la grippe");
   document_add_alert(doc, &report);
-  report_fill(&report, UMWSU_SUSPICIOUS, "/home/francois/zobi", "module_e", "virus de la chtouille");
+  report_fill(&report, UHURU_SUSPICIOUS, "/home/francois/zobi", "module_e", "virus de la chtouille");
   document_add_alert(doc, &report);
 
   document_save(doc, argc > 1 ? argv[1] : "-");

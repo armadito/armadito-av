@@ -1,6 +1,6 @@
 #include "client.h"
 #include "lib/protocol.h"
-#include "libumwsu-config.h"
+#include "libuhuru-config.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,7 +10,7 @@
 struct client {
   int sock;
   struct protocol_handler *handler;
-  struct umwsu *umwsu;
+  struct uhuru *uhuru;
 };
 
 static void cb_ping(struct protocol_handler *h, void *data)
@@ -22,7 +22,7 @@ static void cb_ping(struct protocol_handler *h, void *data)
   protocol_handler_send_msg(cl->handler, "PONG", NULL);
 }
 
-static void scan_callback(struct umwsu_report *report, void *callback_data)
+static void scan_callback(struct uhuru_report *report, void *callback_data)
 {
   struct client *cl = (struct client *)callback_data;
   char status[32], action[32];
@@ -42,20 +42,20 @@ static void cb_scan(struct protocol_handler *h, void *data)
 {
   struct client *cl = (struct client *)data;
   char *path = protocol_handler_get_header(h, "Path");
-  struct umwsu_scan *scan;
+  struct uhuru_scan *scan;
 
   fprintf(stderr, "callback cb_scan path: %s\n", path);
 
-  scan = umwsu_scan_new(cl->umwsu, path, UMWSU_SCAN_RECURSE);
+  scan = uhuru_scan_new(cl->uhuru, path, UHURU_SCAN_RECURSE);
 
-  umwsu_scan_add_callback(scan, scan_callback, cl);
+  uhuru_scan_add_callback(scan, scan_callback, cl);
 
-  umwsu_scan_start(scan);
+  uhuru_scan_start(scan);
 
-  while (umwsu_scan_run(scan) == UMWSU_SCAN_CONTINUE)
+  while (uhuru_scan_run(scan) == UHURU_SCAN_CONTINUE)
     ;
 
-  umwsu_scan_free(scan);
+  uhuru_scan_free(scan);
 
   protocol_handler_send_msg(cl->handler, "SCAN_END", NULL);
 
@@ -72,13 +72,13 @@ static void cb_stat(struct protocol_handler *h, void *data)
   fprintf(stderr, "callback cb_stat\n");
 }
 
-struct client *client_new(int client_sock, struct umwsu *umwsu)
+struct client *client_new(int client_sock, struct uhuru *uhuru)
 {
   struct client *cl = (struct client *)malloc(sizeof(struct client));
 
   cl->sock = client_sock;
   cl->handler = protocol_handler_new(cl->sock, cl->sock);
-  cl->umwsu = umwsu;
+  cl->uhuru = uhuru;
 
   protocol_handler_add_callback(cl->handler, "PING", cb_ping, cl);
   protocol_handler_add_callback(cl->handler, "SCAN", cb_scan, cl);

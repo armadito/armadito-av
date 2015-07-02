@@ -5,23 +5,23 @@
 #include <stdlib.h>
 #include <string.h>
 
-int umwsu_file_status_cmp(enum umwsu_file_status s1, enum umwsu_file_status s2)
+int uhuru_file_status_cmp(enum uhuru_file_status s1, enum uhuru_file_status s2)
 {
   if (s1 == s2)
     return 0;
 
   switch(s1) {
-  case UMWSU_UNDECIDED:
+  case UHURU_UNDECIDED:
     return -1;
-  case UMWSU_CLEAN:
-    return (s2 == UMWSU_UNDECIDED) ? 1 : -1;
-  case UMWSU_IERROR:
-    return (s2 == UMWSU_UNDECIDED || s2 == UMWSU_CLEAN) ? 1 : -1;
-  case UMWSU_SUSPICIOUS:
-    return (s2 == UMWSU_UNDECIDED || s2 == UMWSU_CLEAN || s2 == UMWSU_IERROR) ? 1 : -1;
-  case UMWSU_WHITE_LISTED:
-    return (s2 == UMWSU_UNDECIDED || s2 == UMWSU_CLEAN || s2 == UMWSU_IERROR || s2 == UMWSU_SUSPICIOUS) ? 1 : -1;
-  case UMWSU_MALWARE:
+  case UHURU_CLEAN:
+    return (s2 == UHURU_UNDECIDED) ? 1 : -1;
+  case UHURU_IERROR:
+    return (s2 == UHURU_UNDECIDED || s2 == UHURU_CLEAN) ? 1 : -1;
+  case UHURU_SUSPICIOUS:
+    return (s2 == UHURU_UNDECIDED || s2 == UHURU_CLEAN || s2 == UHURU_IERROR) ? 1 : -1;
+  case UHURU_WHITE_LISTED:
+    return (s2 == UHURU_UNDECIDED || s2 == UHURU_CLEAN || s2 == UHURU_IERROR || s2 == UHURU_SUSPICIOUS) ? 1 : -1;
+  case UHURU_MALWARE:
     return 1;
   }
 
@@ -30,42 +30,42 @@ int umwsu_file_status_cmp(enum umwsu_file_status s1, enum umwsu_file_status s2)
   return 0;
 }
 
-const char *umwsu_file_status_str(enum umwsu_file_status status)
+const char *uhuru_file_status_str(enum uhuru_file_status status)
 {
   switch(status) {
 #undef M
 #define M(S) case S: return #S
-    M(UMWSU_UNDECIDED);
-    M(UMWSU_CLEAN);
-    M(UMWSU_UNKNOWN_FILE_TYPE);
-    M(UMWSU_EINVAL);
-    M(UMWSU_IERROR);
-    M(UMWSU_SUSPICIOUS);
-    M(UMWSU_WHITE_LISTED);
-    M(UMWSU_MALWARE);
+    M(UHURU_UNDECIDED);
+    M(UHURU_CLEAN);
+    M(UHURU_UNKNOWN_FILE_TYPE);
+    M(UHURU_EINVAL);
+    M(UHURU_IERROR);
+    M(UHURU_SUSPICIOUS);
+    M(UHURU_WHITE_LISTED);
+    M(UHURU_MALWARE);
   }
 
   return "UNKNOWN STATUS";
 }
 
-const char *umwsu_file_status_pretty_str(enum umwsu_file_status status)
+const char *uhuru_file_status_pretty_str(enum uhuru_file_status status)
 {
   switch(status) {
-  case UMWSU_UNDECIDED:
+  case UHURU_UNDECIDED:
     return "undecided";
-  case UMWSU_CLEAN:
+  case UHURU_CLEAN:
     return "clean";
-  case UMWSU_UNKNOWN_FILE_TYPE:
+  case UHURU_UNKNOWN_FILE_TYPE:
     return "ignored";
-  case UMWSU_EINVAL:
+  case UHURU_EINVAL:
     return "invalid argument";
-  case UMWSU_IERROR:
+  case UHURU_IERROR:
     return "internal error";
-  case UMWSU_SUSPICIOUS:
+  case UHURU_SUSPICIOUS:
     return "suspicious";
-  case UMWSU_WHITE_LISTED:
+  case UHURU_WHITE_LISTED:
     return "white listed";
-  case UMWSU_MALWARE:
+  case UHURU_MALWARE:
     return "malware";
   }
 

@@ -1,5 +1,5 @@
 pkgconfigdir=$(libdir)/pkgconfig
-pkgconfig_DATA=libumwsu.pc
+pkgconfig_DATA=libuhuru.pc
 
 moduledir=$(pkglibdir)/modules
 
@@ -16,5 +16,5 @@ EDIT = sed \
 	$(EDIT) $(srcdir)/$*.pc.in >$*.pc.tmp
 	mv $*.pc.tmp $*.pc
 
-EXTRA_DIST=libumwsu.pc.in
+EXTRA_DIST=libuhuru.pc.in
 

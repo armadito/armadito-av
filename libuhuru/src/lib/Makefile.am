@@ -1,6 +1,6 @@
-lib_LTLIBRARIES=libumwsu.la
+lib_LTLIBRARIES=libuhuru.la
 
-libumwsu_la_SOURCES= \
+libuhuru_la_SOURCES= \
 action.c \
 alert.c \
 alert.h \
@@ -21,26 +21,26 @@ reportp.h \
 scan.c \
 status.c \
 statusp.h \
-umwsu.c \
-umwsup.h \
+uhuru.c \
+uhurup.h \
 unixsock.c \
 unixsock.h \
 watch.c \
 watchp.h
 
 
-AM_CPPFLAGS= -DLIBUMWSU_MODULES_PATH='"$(pkglibdir)/modules"' -DLIBUMWSU_CONF_DIR='"$(sysconfdir)/umwsu"' -DLIBUMWSU_ALERT_DIR='"$(localstatedir)/spool/uhuru"' 
-libumwsu_la_CFLAGS= -I$(top_srcdir)/include
-libumwsu_la_LIBADD= 
+AM_CPPFLAGS= -DLIBUHURU_MODULES_PATH='"$(pkglibdir)/modules"' -DLIBUHURU_CONF_DIR='"$(sysconfdir)/uhuru"' -DLIBUHURU_ALERT_DIR='"$(localstatedir)/spool/uhuru"' 
+libuhuru_la_CFLAGS= -I$(top_srcdir)/include
+libuhuru_la_LIBADD= 
 
-libumwsu_la_CFLAGS+= @GMODULE2_CFLAGS@
-libumwsu_la_LIBADD+= @GMODULE2_LIBS@
+libuhuru_la_CFLAGS+= @GMODULE2_CFLAGS@
+libuhuru_la_LIBADD+= @GMODULE2_LIBS@
 
-libumwsu_la_CFLAGS+= @LIBXML2_CFLAGS@
-libumwsu_la_LIBADD+= @LIBXML2_LIBS@
+libuhuru_la_CFLAGS+= @LIBXML2_CFLAGS@
+libuhuru_la_LIBADD+= @LIBXML2_LIBS@
 
-#libumwsu_la_CFLAGS+= @LIBCURL_CFLAGS@
-#libumwsu_la_LIBADD+= @LIBCURL_LIBS@
+#libuhuru_la_CFLAGS+= @LIBCURL_CFLAGS@
+#libuhuru_la_LIBADD+= @LIBCURL_LIBS@
 
 install-exec-hook:
 	-mkdir -p $(DESTDIR)$(localstatedir)/spool/uhuru

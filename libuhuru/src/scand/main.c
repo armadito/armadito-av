@@ -1,5 +1,5 @@
-#include "libumwsu-config.h"
-#include <libumwsu/scan.h>
+#include "libuhuru-config.h"
+#include <libuhuru/scan.h>
 #include "server.h"
 
 #include <stdio.h>
@@ -15,7 +15,7 @@
 #include <string.h>
 #include <signal.h>
 
-struct umwsu_daemon_options {
+struct uhuru_daemon_options {
   int no_daemon;
   /* more options later */
 };
@@ -40,7 +40,7 @@ static void usage(void)
   exit(1);
 }
 
-static void parse_options(int argc, char *argv[], struct umwsu_daemon_options *opts)
+static void parse_options(int argc, char *argv[], struct uhuru_daemon_options *opts)
 {
   int c;
 
@@ -163,7 +163,7 @@ static int other_daemonize(char* name, char* path, char* outfile, char* errfile,
 
 int main(int argc, char **argv)
 {
-  struct umwsu_daemon_options opts;
+  struct uhuru_daemon_options opts;
 
   g_thread_init(NULL);
   g_type_init();
