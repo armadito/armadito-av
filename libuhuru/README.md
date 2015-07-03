@@ -2,6 +2,7 @@ libuhuru
 ========
 
 Copyright (c) NOV'IT/Teclib, 2014, 2015
+
 Project home: http://www.somewhere.org
 
 
@@ -36,6 +37,7 @@ In order to compile libuhuru, you need the following tools:
 To install the needed headers:
 
 - Ubuntu: `apt-get install libglib2.0-dev libmagic-dev libxml2-dev`
+- CentOS: ...
 
 If you want to build documentation, you will need the following additional tools:
 
@@ -48,31 +50,34 @@ Configuration
 Once git repo cloned, you need to initialize the build using automake, autoconf and tools.
 A shell script `autogen.sh` is provided to ease this step:
 
-  $ ./autogen.sh 
-  + aclocal --force
-  + libtoolize --force --automake --copy
-  + autoheader --force
-  + automake --foreign --add-missing --force-missing --copy
-  + autoconf --force
+    $ ./autogen.sh 
+    + aclocal --force
+    + libtoolize --force --automake --copy
+    + autoheader --force
+    + automake --foreign --add-missing --force-missing --copy
+    + autoconf --force
 
 This will generate the `Makefile.in` files and the `configure` script.
 
 `configure` script takes the following useful options:
 
-  --prefix=PREFIX         install architecture-independent files in PREFIX
-                          [/usr/local]
-  --enable-debug          enable debugging [default is yes]
+    --prefix=PREFIX         install architecture-independent files in PREFIX
+                            [/usr/local]
+    --enable-debug          enable debugging [default is yes]
 
-The `PREFIX` direcotry will be used by `make install`. Its use is mandatory, unless 
-building a package and installing in system directories.
+The `PREFIX` directory will be used by `make install`. Its use is mandatory, unless 
+building a package and installing in system directories, since compiling the
+scannning modules and the graphical user interface will need a libuhuru properly
+installed.
 
-Building in a separate directory is highly recommended.
+Building in a separate directory is highly recommended, unless you really want
+to clobber the source tree with objects, libraries, binaries and other stuff.
 
-  $ mkdir /home/joebar/BUILD/libuhuru
+    $ mkdir /home/joebar/BUILD/libuhuru
 
 Typical invocation of the configure script is:
 
-  $ /home/joebar/uhuru-av/libuhuru/configure --prefix=/home/joebar/install --enable-debug 
+    $ /home/joebar/uhuru-av/libuhuru/configure --prefix=/home/joebar/install --enable-debug 
 
 
 Compiling
@@ -80,10 +85,10 @@ Compiling
 
 Once configured, compilation is easy:
 
-  $ make
-  make  all-recursive
-  make[1]: entrant dans le répertoire " /home/joebar/BUILD/libuhuru "
-  ...
+    $ make
+    make  all-recursive
+    make[1]: entrant dans le répertoire " /home/joebar/BUILD/libuhuru "
+    ...
 
 
 Installing
@@ -91,8 +96,8 @@ Installing
 
 After compiling, installation is done by:
 
-  $ make install
-  ...
+    $ make install
+    ...
 
 This will install libraries, tools, header files... in the subdirectories of the PREFIX
 directory defined at configure time.
