@@ -73,7 +73,7 @@ installed.
 Building in a separate directory is highly recommended, unless you really want
 to clobber the source tree with objects, libraries, binaries and other stuff.
 
-    $ mkdir /home/joebar/BUILD/libuhuru
+    $ mkdir /home/joebar/build/libuhuru
 
 Typical invocation of the configure script is:
 
@@ -87,7 +87,7 @@ Once configured, compilation is easy:
 
     $ make
     make  all-recursive
-    make[1]: entrant dans le répertoire " /home/joebar/BUILD/libuhuru "
+    make[1]: entrant dans le répertoire " /home/joebar/build/libuhuru "
     ...
 
 

@@ -12,13 +12,6 @@ AM_CONFIG_HEADER(uhuru-linux-gui-config.h)
 
 CFLAGS=-g
 
-# i18n
-IT_PROG_INTLTOOL([0.35.0])
-GETTEXT_PACKAGE=uhuru-linux-gui
-AC_SUBST(GETTEXT_PACKAGE)
-AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Gettext package])
-AM_GLIB_GNU_GETTEXT
-
 # check for debug
 AC_MSG_CHECKING(for debug)
 AC_MSG_RESULT($enable_debug)
@@ -29,20 +22,20 @@ if test "$enable_debug" = "yes"; then
    CFLAGS="${CFLAGS} -g"
 fi
 
+# Checks for programs.
+AC_PROG_INSTALL
+AC_PROG_CC
+
 # check for libuhuru
 PKG_CHECK_MODULES(LIBUHURU, libuhuru, [HAVE_LIBUHURU=yes], [HAVE_LIBUHURU=no])
 if test "$HAVE_LIBUHURU" = "no"; then
    AC_MSG_ERROR("cannot find UHURU library")
 fi
 
-# Checks for programs.
-AC_PROG_INSTALL
-
-# check for GTK
-PKG_CHECK_MODULES(GTK, gtk+-2.0, HAVE_GTK2="yes", HAVE_GTK2="no")
+# phasing out GTK
+#PKG_CHECK_MODULES(GTK, gtk+-2.0, HAVE_GTK2="yes", HAVE_GTK2="no")
+HAVE_GTK2="no"
 if test "$HAVE_GTK2" = "yes" ; then
-   AC_PROG_CC
-
 #   PKG_CHECK_MODULES(INDICATOR, indicator-0.4)
    PKG_CHECK_MODULES(APPINDICATOR, appindicator-0.1, HAVE_APPINDICATOR="yes", HAVE_APPINDICATOR="no")
    if test "$HAVE_APPINDICATOR" = "yes"; then
@@ -51,6 +44,16 @@ if test "$HAVE_GTK2" = "yes" ; then
 
    PKG_CHECK_MODULES(GOBJECT, glib-2.0 gobject-2.0)
    PKG_CHECK_MODULES(GIO, gio-2.0 gio-unix-2.0)
+
+   # check for libnotify
+   PKG_CHECK_MODULES(LIBNOTIFY, libnotify)
+
+   # i18n
+   #IT_PROG_INTLTOOL([0.35.0])
+   #GETTEXT_PACKAGE=uhuru-linux-gui
+   #AC_SUBST(GETTEXT_PACKAGE)
+   #AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Gettext package])
+   #AM_GLIB_GNU_GETTEXT
 fi
 AM_CONDITIONAL(COND_GTK_GUI, test x"$HAVE_GTK2" = "xyes" -o x"$HAVE_GTK3" = "xyes")
 
@@ -75,9 +78,6 @@ if test "$HAVE_QT" = "yes" ; then
 fi
 AM_CONDITIONAL(COND_QT_GUI, test x"$HAVE_QT" = "xyes")
 
-# check for libnotify
-PKG_CHECK_MODULES(LIBNOTIFY, libnotify)
-
 # output files
 AC_CONFIG_FILES([
 Makefile
@@ -89,6 +89,5 @@ gtk/icons/22x22/Makefile
 gtk/icons/48x48/Makefile
 gtk/icons/scalable/Makefile
 gtk/tests/Makefile
-po/Makefile.in
 ])
 AC_OUTPUT
