@@ -1,4 +1,4 @@
-AC_INIT(uhuru-mod-module5-2,1.2.0,francois@dechelle.net)
+AC_INIT(uhuru-mod-module5-2,1.3.0,francois@dechelle.net)
 AM_INIT_AUTOMAKE
 
 # collect arguments
@@ -7,14 +7,10 @@ AC_ARG_ENABLE([debug],
 	AS_HELP_STRING([--enable-debug],[enable debugging @<:@default is yes@:>@]),
 	,
 	enable_debug="yes")
-# libumwsu
-AC_ARG_WITH([libumwsu],
-	AS_HELP_STRING([--with-libumwsu=DIR],[specify libumwsu install dir @<:@default is /usr@:>@]),
-	with_libumwsu="$withval",
-	)
+
 # database directory
 AC_ARG_WITH([dbdir],
-	AS_HELP_STRING([--with-dbdir=DIR],[specify path to databases @<:@default is /var/lib/umwsu/module5-2/db@:>@]),
+	AS_HELP_STRING([--with-dbdir=DIR],[specify path to databases @<:@default is /var/lib/uhuru/module5-2/db@:>@]),
 	with_dbdir="$withval",
 	with_dbdir="no")
 
@@ -39,23 +35,18 @@ if test "$enable_debug" = "yes"; then
    CFLAGS="${CFLAGS} -g"
 fi
 
-# check for libumwsu
-if test x"$with_libumwsu" != x ; then
-   export PKG_CONFIG_PATH="$with_libumwsu/lib/pkgconfig"
-fi
 PKG_PROG_PKG_CONFIG
 
-PKG_CHECK_MODULES(LIBUMWSU, libumwsu, [HAVE_LIBUMWSU=yes], [HAVE_LIBUMWSU=no])
-if test "$HAVE_LIBUMWSU" = "no"; then
-   AC_MSG_ERROR("cannot find UMWSU library")
+# check for libuhuru
+PKG_CHECK_MODULES(LIBUHURU, libuhuru, [HAVE_LIBUHURU=yes], [HAVE_LIBUHURU=no])
+if test "$HAVE_LIBUHURU" = "no"; then
+   AC_MSG_ERROR("cannot find UHURU library")
 fi
-#LIBUMWSU_MODDIR=$(pkg-config --variable=moduledir libumwsu)
-#AC_SUBST(LIBUMWSU_MODDIR)
 
 # database directory
 AC_MSG_CHECKING(for databases directory)
 if test "$with_dbdir" = "no" ; then
-   MODULE5_2_DBDIR="$localstatedir/lib/umwsu/module5-2/db"
+   MODULE5_2_DBDIR="$localstatedir/lib/uhuru/module5-2/db"
 else
    MODULE5_2_DBDIR="$with_dbdir"
 fi

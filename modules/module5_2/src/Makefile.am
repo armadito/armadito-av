@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS=subdir-objects
 
-modulesdir=$(libdir)/libumwsu/modules
+modulesdir=$(libdir)/libuhuru/modules
 modules_LTLIBRARIES=module5_2.la
 
 module5_2_la_SOURCES= \
@@ -38,8 +38,8 @@ AM_CPPFLAGS= -DMODULE5_2_DBDIR='"@MODULE5_2_DBDIR@"'
 module5_2_la_LDFLAGS= -module -avoid-version
 module5_2_la_CFLAGS= -I$(srcdir)/module5_2_sources/UhuruStatic/include -I$(srcdir)/module5_2_sources/UhuruStatic/resources
 module5_2_la_LIBADD=
-module5_2_la_CFLAGS+= @LIBUMWSU_CFLAGS@
-module5_2_la_LIBADD+= @LIBUMWSU_LIBS@
+module5_2_la_CFLAGS+= @LIBUHURU_CFLAGS@
+module5_2_la_LIBADD+= @LIBUHURU_LIBS@
 
 install-exec-hook:
 	-rm -f "$(DESTDIR)$(modulesdir)"/module5_2.la "$(DESTDIR)$(modulesdir)"/module5_2.a
