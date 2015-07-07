@@ -1,4 +1,4 @@
-#include <libumwsu/module.h>
+#include <libuhuru/module.h>
 
 #include <assert.h>
 #include <stdlib.h>
@@ -76,7 +76,7 @@ static const char *error_code_str(ERROR_CODE e)
   return "UNKNOWN ERROR";
 }
 
-enum umwsu_file_status module5_2_scan(const char *path, const char *mime_type, void *mod_data, char **pmod_report)
+enum uhuru_file_status module5_2_scan(const char *path, const char *mime_type, void *mod_data, char **pmod_report)
 {
   ERROR_CODE e;
 
@@ -96,41 +96,41 @@ enum umwsu_file_status module5_2_scan(const char *path, const char *mime_type, v
 
   switch(e) {
   case UH_MALWARE:
-    return UMWSU_MALWARE;
+    return UHURU_MALWARE;
   case UH_NOT_MALWARE:
-    return UMWSU_CLEAN;
+    return UHURU_CLEAN;
   case UH_NOT_DECIDED:
   case UH_DOUBTFUL:
-    return UMWSU_UNDECIDED;
+    return UHURU_UNDECIDED;
   }
 
-  return UMWSU_IERROR;
+  return UHURU_IERROR;
 }
 
-enum umwsu_mod_status module5_2_init(void **pmod_data)
+enum uhuru_mod_status module5_2_init(void **pmod_data)
 {
-  if (initDB(MODULE5_2_DBDIR "/Linux/database.elfdata", 
-	     MODULE5_2_DBDIR "/Linux/db_malicious.zip", 
-	     MODULE5_2_DBDIR "/Linux/db_safe.zip",
-	     MODULE5_2_DBDIR "/Linux/tfidf_m.dat",
-	     MODULE5_2_DBDIR "/Linux/tfidf_s.dat") != 0)
-    return UMWSU_MOD_INIT_ERROR;
+  if (initDB(MODULE5_2_DBDIR "/linux/database.elfdata", 
+	     MODULE5_2_DBDIR "/linux/db_malicious.zip", 
+	     MODULE5_2_DBDIR "/linux/db_safe.zip",
+	     MODULE5_2_DBDIR "/linux/tfidf_m.dat",
+	     MODULE5_2_DBDIR "/linux/tfidf_s.dat") != 0)
+    return UHURU_MOD_INIT_ERROR;
 
-  fprintf(stderr, "Module 5.2 ELF databases loaded from " MODULE5_2_DBDIR "/Linux\n");
+  fprintf(stderr, "Module 5.2 ELF databases loaded from " MODULE5_2_DBDIR "/linux\n");
 
-  if (initDatabases(MODULE5_2_DBDIR "/Windows/Database_malsain_2.zip",
-		    MODULE5_2_DBDIR "/Windows/Database_malsain_1.zip",
-		    MODULE5_2_DBDIR "/Windows/Database_sain_2.zip",
-		    MODULE5_2_DBDIR "/Windows/Database_sain_1.zip",
-		    MODULE5_2_DBDIR "/Windows/database_2.dat",
-		    MODULE5_2_DBDIR "/Windows/database_1.dat",
-		    MODULE5_2_DBDIR "/Windows/DBI_inf.dat",
-		    MODULE5_2_DBDIR "/Windows/DBI_sain.dat") != 0)
-    return UMWSU_MOD_INIT_ERROR;
+  if (initDatabases(MODULE5_2_DBDIR "/windows/Database_malsain_2.zip",
+		    MODULE5_2_DBDIR "/windows/Database_malsain_1.zip",
+		    MODULE5_2_DBDIR "/windows/Database_sain_2.zip",
+		    MODULE5_2_DBDIR "/windows/Database_sain_1.zip",
+		    MODULE5_2_DBDIR "/windows/database_2.dat",
+		    MODULE5_2_DBDIR "/windows/database_1.dat",
+		    MODULE5_2_DBDIR "/windows/DBI_inf.dat",
+		    MODULE5_2_DBDIR "/windows/DBI_sain.dat") != 0)
+    return UHURU_MOD_INIT_ERROR;
 
-  fprintf(stderr, "Module 5.2 PE databases loaded from " MODULE5_2_DBDIR "/Windows\n");
+  fprintf(stderr, "Module 5.2 PE databases loaded from " MODULE5_2_DBDIR "/windows\n");
 
-  return UMWSU_MOD_OK;
+  return UHURU_MOD_OK;
 }
 
 void module5_2_install(void)
