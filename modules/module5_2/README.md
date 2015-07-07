@@ -1,5 +1,5 @@
-Uhuru ClamAV module
-===================
+Uhuru 5.2 module
+================
 
 Copyright (c) NOV'IT/Teclib, 2014, 2015
 
@@ -9,8 +9,8 @@ Project home: http://www.somewhere.org
 What is it?
 -----------
 
-Uhuru ClamAV module is the scan module based on ClamAV engine. It is based on the libuhuru
-library.
+Uhuru 5.2 module is a scan module dedicated to binaries analysis (PE and ELF).
+It is based on the libuhuru library.
 
 
 Licensing
@@ -22,24 +22,38 @@ TBW
 Prerequisites
 -------------
 
-In order to compile Uhuru ClamAV module, you need the following tools:
+In order to compile Uhuru 5.2 module, you need the following tools:
 
 - automake/autoconf
 - GNU make
 - C compiler
-- ClamAV library and headers
-
-To install the needed headers:
-
-- Ubuntu: `apt-get install libclamav-dev`
-- CentOS: ...
+- 5.2 original sources
 
 
 Configuration
 -------------
 
-Once git repo cloned, you need to initialize the build using automake, autoconf and tools.
-A shell script `autogen.sh` is provided to ease this step:
+The sources of the module 5.2 are divided into:
+
+- the analysis code, maintained in a separate git repo
+- this code, which acts as 'glue' between the analysis code and libuhuru
+
+The analysis code repository must be cloned before running the configure 
+script. Once this clone done, a symbolic link must be created in the src/
+subdirectory of this directory, named `module5_2_sources` (this name is
+mandatory).
+
+    $ cd src/
+    $ ln -s /home/joebar/module5.2 ./module5_2_sources
+
+If `configure` script fails with a message like:
+
+    configure: error: cannot find sources (src/module5_2_sources/UhuruStatic/resources/UhuruStatic.h) in /home/joebar/uhuru-av/modules/module5_2 or ..
+
+it means that the symbolic link was not properly created.
+
+To initialize the build using automake, autoconf and tools, a shell script 
+`autogen.sh` is provided to ease this step:
 
     $ ./autogen.sh
     + aclocal --force
@@ -66,11 +80,11 @@ must use the PKG_CONFIG_PATH environment variable.
 Building in a separate directory is highly recommended, unless you really want
 to clobber the source tree with objects, libraries, binaries and other stuff.
 
-    $ mkdir -p /home/joebar/build/modules/clamav
+    $ mkdir -p /home/joebar/build/modules/module5_2
 
 Typical invocation of the configure script is:
 
-    $ /home/joebar/uhuru-av/modules/clamav/configure --prefix=/home/joebar/install --enable-debug PKG_CONFIG_PATH=/home/joebar/install/lib/pkgconfig
+    $ /home/joebar/uhuru-av/modules/module5_2/configure --prefix=/home/joebar/install --enable-debug PKG_CONFIG_PATH=/home/joebar/install/lib/pkgconfig
 
 Note that the path specified in the value of PKG_CONFIG_PATH must be coherent
 with the PREFIX used in libuhuru installation (see `libuhuru` README).
@@ -83,7 +97,7 @@ Once configured, compilation is easy:
 
     $ make
     make  all-recursive
-    make[1]: entrant dans le répertoire " /home/joebar/build/modules/clamav "
+    make[1]: entrant dans le répertoire " /home/joebar/build/modules/module5_2 "
     ...
 
 

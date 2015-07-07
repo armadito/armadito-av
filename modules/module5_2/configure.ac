@@ -18,6 +18,11 @@ AC_ARG_WITH([dbdir],
 	with_dbdir="$withval",
 	with_dbdir="no")
 
+# check for analysis module sources
+AC_MSG_CHECKING(for analysis module sources)
+AC_CONFIG_SRCDIR(src/module5_2_sources/UhuruStatic/resources/UhuruStatic.h)
+AC_MSG_RESULT(yes)
+
 # check for needed programs
 AC_PROG_CC([gcc])
 AC_PROG_LIBTOOL
