@@ -110,17 +110,17 @@ p, li { white-space: pre-wrap; }
     <name>Systray</name>
     <message>
         <location filename="../ui/systray.cpp" line="34"/>
-        <source>&amp;Analyser</source>
+        <source>&amp;Scan</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/systray.cpp" line="37"/>
-        <source>&amp;A propos</source>
+        <source>&amp;About</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/systray.cpp" line="72"/>
-        <source>&amp;Analyses recentes</source>
+        <source>&amp;Recent analysis</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

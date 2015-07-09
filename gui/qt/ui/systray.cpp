@@ -31,10 +31,10 @@ Systray::Systray()
 
 void Systray::createActions()
 {
-  scanAction = new QAction(tr("&Analyser"), this);
+  scanAction = new QAction(tr("&Scan"), this);
   connect(scanAction, SIGNAL(triggered()), this, SLOT(scan()));
 
-  aboutAction = new QAction(tr("&A propos"), this);
+  aboutAction = new QAction(tr("&About"), this);
   connect(aboutAction, SIGNAL(triggered()), this, SLOT(about()));
 }
 
@@ -69,7 +69,7 @@ void Systray::createTrayIcon()
 
   trayIconMenu->addAction(scanAction);
   trayIconMenu->addSeparator();
-  recentScanMenu = trayIconMenu->addMenu(tr("&Analyses recentes"));
+  recentScanMenu = trayIconMenu->addMenu(tr("&Recent analysis"));
   trayIconMenu->addSeparator();
   trayIconMenu->addAction(aboutAction);
 

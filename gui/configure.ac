@@ -1,4 +1,4 @@
-AC_INIT([uhuru-linux-gui], [1.2.1], [f.dechelle@uhuru-solutions.com])
+AC_INIT([uhuru-qt], [1.2.1], [f.dechelle@uhuru-solutions.com])
 AM_INIT_AUTOMAKE
 
 # debug
@@ -8,7 +8,7 @@ AC_ARG_ENABLE([debug],
 	enable_debug="yes")
 
 # configuration header
-AM_CONFIG_HEADER(uhuru-linux-gui-config.h)
+AM_CONFIG_HEADER(uhuru-qt-config.h)
 
 CFLAGS=-g
 
@@ -71,8 +71,10 @@ if test "$HAVE_QT" = "yes" ; then
    AC_PATH_PROGS(MOC, moc-qt4 moc moc-qt5, no, [$PATH:$QTDIR/bin])
    AC_PATH_PROGS(UIC, uic-qt4 uic uic-qt5, no, [$PATH:$QTDIR/bin])
    AC_PATH_PROGS(RCC, rcc rcc-qt5, no, [$PATH:$QTDIR/bin])
-   if test "x$MOC" = "xno" -o "x$UIC" = "xno" -o "x$RCC" = "xno" ; then
-      AC_MSG_WARN([cannot find 'moc' 'uic' or 'rcc', please install the Qt development tools package.])
+   AC_PATH_PROGS(LUPDATE, lupdate-qt4 lupdate, no, [$PATH:$QTDIR/bin])
+   AC_PATH_PROGS(LRELEASE, lrelease-qt4 lrelease, no, [$PATH:$QTDIR/bin])
+   if test "x$MOC" = "xno" -o "x$UIC" = "xno" -o "x$RCC" = "xno"  -o "x$LUPDATE" = "xno"  -o "x$LRELEASE" = "xno" ; then
+      AC_MSG_WARN([cannot find 'moc', 'uic', 'rcc', 'lupdate' or 'lrelease', please install the Qt development tools package.])
       HAVE_QT="no"
    fi
 fi
@@ -83,6 +85,7 @@ AC_CONFIG_FILES([
 Makefile
 qt/Makefile
 qt/icons/Makefile
+qt/translations/Makefile
 gtk/Makefile
 gtk/icons/Makefile
 gtk/icons/22x22/Makefile

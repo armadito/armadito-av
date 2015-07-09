@@ -48,7 +48,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui/scanwidget.ui" line="23"/>
         <source>Form</source>
-        <translation></translation>
+        <translation>Analyse</translation>
     </message>
     <message>
         <location filename="../ui/scanwidget.ui" line="36"/>
@@ -110,18 +110,18 @@ p, li { white-space: pre-wrap; }
     <name>Systray</name>
     <message>
         <location filename="../ui/systray.cpp" line="34"/>
-        <source>&amp;Analyser</source>
-        <translation type="unfinished"></translation>
+        <source>&amp;Scan</source>
+        <translation>&amp;Analyser</translation>
     </message>
     <message>
         <location filename="../ui/systray.cpp" line="37"/>
-        <source>&amp;A propos</source>
-        <translation type="unfinished"></translation>
+        <source>&amp;About</source>
+        <translation>&amp;A propos</translation>
     </message>
     <message>
         <location filename="../ui/systray.cpp" line="72"/>
-        <source>&amp;Analyses recentes</source>
-        <translation type="unfinished"></translation>
+        <source>&amp;Recent analysis</source>
+        <translation>&amp;Analyses récentes</translation>
     </message>
 </context>
 </TS>
