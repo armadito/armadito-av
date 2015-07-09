@@ -44,15 +44,15 @@ QVariant ScanReportModel::headerData(int section, Qt::Orientation orientation, i
     if (orientation == Qt::Horizontal) {
       switch (section) {
       case 0:
-	return QString("Etat");
+	return QString(tr("State"));
 #if 0
       case 1:
-	return QString("Action");
+	return QString(tr("Action"));
 #endif
       case 1:
-	return QString("Detail");
+	return QString(tr("Detail"));
       case 2:
-	return QString("Fichier");
+	return QString(tr("file"));
       }
     }
   } 

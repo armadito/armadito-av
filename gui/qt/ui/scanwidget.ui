@@ -78,8 +78,11 @@
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="label_6">
+           <property name="locale">
+            <locale language="English" country="UnitedStates"/>
+           </property>
            <property name="text">
-            <string>Fichiers analysés</string>
+            <string>Scanned files</string>
            </property>
           </widget>
          </item>
@@ -98,8 +101,11 @@
          </item>
          <item row="0" column="0">
           <widget class="QLabel" name="label_2">
+           <property name="locale">
+            <locale language="English" country="UnitedStates"/>
+           </property>
            <property name="text">
-            <string>Fichiers à analyser</string>
+            <string>Files to scan</string>
            </property>
           </widget>
          </item>
@@ -107,10 +113,16 @@
        </item>
        <item>
         <layout class="QFormLayout" name="formLayout_2">
+         <property name="fieldGrowthPolicy">
+          <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+         </property>
          <item row="0" column="0">
           <widget class="QLabel" name="label_3">
+           <property name="locale">
+            <locale language="English" country="UnitedStates"/>
+           </property>
            <property name="text">
-            <string>Malicieux</string>
+            <string>Malicious</string>
            </property>
           </widget>
          </item>
@@ -129,8 +141,11 @@
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="label_7">
+           <property name="locale">
+            <locale language="English" country="UnitedStates"/>
+           </property>
            <property name="text">
-            <string>Suspects</string>
+            <string>Suspicious</string>
            </property>
           </widget>
          </item>
@@ -149,8 +164,11 @@
          </item>
          <item row="2" column="0">
           <widget class="QLabel" name="label_8">
+           <property name="locale">
+            <locale language="English" country="UnitedStates"/>
+           </property>
            <property name="text">
-            <string>Non traités</string>
+            <string>Unhandled</string>
            </property>
           </widget>
          </item>
@@ -169,8 +187,11 @@
          </item>
          <item row="3" column="0">
           <widget class="QLabel" name="label_9">
+           <property name="locale">
+            <locale language="English" country="UnitedStates"/>
+           </property>
            <property name="text">
-            <string>Sains</string>
+            <string>Clean</string>
            </property>
           </widget>
          </item>
@@ -193,6 +214,9 @@
      </item>
      <item>
       <widget class="QTableView" name="reportView">
+       <property name="locale">
+        <locale language="English" country="UnitedStates"/>
+       </property>
        <property name="horizontalScrollBarPolicy">
         <enum>Qt::ScrollBarAlwaysOn</enum>
        </property>
@@ -251,8 +275,11 @@
          <property name="enabled">
           <bool>false</bool>
          </property>
+         <property name="locale">
+          <locale language="English" country="UnitedStates"/>
+         </property>
          <property name="text">
-          <string>Fermer</string>
+          <string>Close</string>
          </property>
         </widget>
        </item>

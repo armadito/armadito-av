@@ -13,24 +13,25 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-    ui/mainwindow.cpp \
     model/scanmodel.cpp \
     ui/scanwidget.cpp \
     ui/systray.cpp \
     model/counter.cpp \
     model/scanreportmodel.cpp \
-    utils/umwsu.cpp \
-    ui/aboutdialog.cpp
+    ui/aboutdialog.cpp \
+    utils/uhuru.cpp \
+    ui/scanwindow.cpp
 
-HEADERS  += ui/mainwindow.h \
+HEADERS  +=  \
     model/scanmodel.h \ 
     ui/scanwidget.h \
     ui/systray.h \
     model/counter.h \
-    utils/umwsu.h \
     utils/stdpaths.h \
     model/scanreportmodel.h \
-    ui/aboutdialog.h
+    ui/aboutdialog.h \
+    utils/uhuru.h \
+    ui/scanwindow.h
 
 FORMS    += \  
     ui/scanwidget.ui \
@@ -38,8 +39,12 @@ FORMS    += \
 
 RESOURCES = uhuru.qrc
 
+TRANSLATIONS = \
+ translations/$${TARGET}_fr.ts \
+ translations/$${TARGET}_en.ts
+
 unix: CONFIG += link_pkgconfig
-unix: PKGCONFIG += libumwsu
+unix: PKGCONFIG += libuhuru
 
 target.path =    $$PREFIX/bin
 INSTALLS += target

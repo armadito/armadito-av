@@ -12,3 +12,4 @@ Makefile.in
 *.o
 moc_*.cpp
 compile
+qt/translations/*.qm
