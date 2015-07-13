@@ -1,5 +1,6 @@
-#include "ui/systray.h"
 #include "uhuru-qt-config.h"
+#include "ui/systray.h"
+#include "utils/dbus.h"
 #include <QApplication>
 #include <QTranslator>
 #include <QLocale>
@@ -7,33 +8,61 @@
 #include <QDebug>
 #include <QtDBus/QtDBus>
 
-int main(int argc, char *argv[])
-{
-  QApplication a(argc, argv);
+#define SERVICE_NAME "org.uhuru.ScanService"
 
+static int initDBus()
+{
   if (!QDBusConnection::sessionBus().isConnected()) {
     fprintf(stderr, "Cannot connect to the D-Bus session bus.\n");
     return 1;
   }
 
+  if (!QDBusConnection::sessionBus().registerService(SERVICE_NAME)) {
+    fprintf(stderr, "%s\n", qPrintable(QDBusConnection::sessionBus().lastError().message()));        
+    return 1;
+  }
+
+  UhuruDBusService *service = new UhuruDBusService();
+  QDBusConnection::sessionBus().registerObject("/", service, QDBusConnection::ExportAllSlots);
+
+  return 0;
+}
+
+static int initI18n(QApplication &app)
+{
   QLocale loc = QLocale::system();
 
   QTranslator qtTr;
 
   if (qtTr.load(QString("qt_") + loc.name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
-    a.installTranslator(&qtTr);
+    app.installTranslator(&qtTr);
 
   QTranslator uhuruTr;
-
+  
   if (uhuruTr.load(QString(PACKAGE "_") + loc.name(), TRANSLATIONSDIR)) {
-    a.installTranslator(&uhuruTr);
+    app.installTranslator(&uhuruTr);
     qDebug() << "loaded translator for " << QString(PACKAGE "_") + loc.name() << " in " TRANSLATIONSDIR;
-  } else
+  } else {
     qDebug() << "cannot load translator for " << QString(PACKAGE "_") + loc.name() << " in " TRANSLATIONSDIR;
+    return 1;
+  }
+
+  return 0;
+}
+
+int main(int argc, char *argv[])
+{
+  QApplication app(argc, argv);
+
+  if (initDBus())
+    return 1;
+
+  if (initI18n(app))
+    return 1;
 
   QApplication::setQuitOnLastWindowClosed(false);
 
   Systray *st = new Systray();
 
-  return a.exec();
+  return app.exec();
 }

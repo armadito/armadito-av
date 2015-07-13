@@ -21,6 +21,8 @@ uhuru_qt_SOURCES= \
 	ui/systray.cpp \
 	ui/systray.h \
 	utils/stdpaths.h \
+	utils/dbus.cpp \
+	utils/dbus.h \
 	utils/uhuru.cpp \
 	utils/uhuru.h
 
@@ -35,6 +37,7 @@ nodist_uhuru_qt_SOURCES= \
 	ui/ui_aboutdialog.h \
 	ui/ui_scanwidget.h \
 	utils/moc_uhuru.cpp \
+	utils/moc_dbus.cpp \
 	qrc_uhuru.cpp
 
 BUILT_SOURCES= \
@@ -48,6 +51,7 @@ BUILT_SOURCES= \
 	ui/ui_aboutdialog.h \
 	ui/ui_scanwidget.h \
 	utils/moc_uhuru.cpp \
+	utils/moc_dbus.cpp \
 	qrc_uhuru.cpp
 
 uhuru_qt_LDADD= @QT_LIBS@ #@DEFS@
