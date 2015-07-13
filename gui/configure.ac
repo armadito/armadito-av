@@ -58,9 +58,9 @@ fi
 AM_CONDITIONAL(COND_GTK_GUI, test x"$HAVE_GTK2" = "xyes" -o x"$HAVE_GTK3" = "xyes")
 
 # check for Qt >= 4
-PKG_CHECK_MODULES(QT, QtCore QtGui >= 4.2.0 QtSvg, HAVE_QT="yes", HAVE_QT="no")
+PKG_CHECK_MODULES(QT, QtCore QtGui >= 4.2.0 QtSvg QtDBus, HAVE_QT="yes", HAVE_QT="no")
 if test "$HAVE_QT" = "no" ; then
-   PKG_CHECK_MODULES(QT, Qt5Core Qt5Gui Qt5Svg, HAVE_QT5="yes", HAVE_QT5="no")
+   PKG_CHECK_MODULES(QT, Qt5Core Qt5Gui Qt5Svg Qt5DBus, HAVE_QT5="yes", HAVE_QT5="no")
    if test "$HAVE_QT5" = "yes" ; then HAVE_QT="yes" ; else HAVE_QT="no" ; fi
 fi
 	

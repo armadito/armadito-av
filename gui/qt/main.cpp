@@ -5,10 +5,16 @@
 #include <QLocale>
 #include <QLibraryInfo>
 #include <QDebug>
+#include <QtDBus/QtDBus>
 
 int main(int argc, char *argv[])
 {
   QApplication a(argc, argv);
+
+  if (!QDBusConnection::sessionBus().isConnected()) {
+    fprintf(stderr, "Cannot connect to the D-Bus session bus.\n");
+    return 1;
+  }
 
   QLocale loc = QLocale::system();
 
