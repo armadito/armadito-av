@@ -10,6 +10,8 @@
 
 #define SERVICE_NAME "org.uhuru.ScanService"
 
+// to debug DBus launch with QDBUS_DEBUG=1 
+
 static int initDBus()
 {
   if (!QDBusConnection::sessionBus().isConnected()) {
