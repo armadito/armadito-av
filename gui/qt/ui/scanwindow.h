@@ -16,10 +16,11 @@ class ScanWindow : public QMainWindow
 
 public:
     explicit ScanWindow(ScanModel *model, QWidget *parent = 0);
+    explicit ScanWindow(const QString &path, QWidget *parent = 0);
     ~ScanWindow() {}
 
 private:
-
+    ScanModel *_model;
 };
 
 #endif

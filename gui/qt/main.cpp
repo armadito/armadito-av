@@ -23,7 +23,10 @@ static int initDBus()
   }
 
   UhuruDBusService *service = new UhuruDBusService();
-  QDBusConnection::sessionBus().registerObject("/", service, QDBusConnection::ExportAllSlots);
+  if (!QDBusConnection::sessionBus().registerObject("/", service, QDBusConnection::ExportAllSlots)) {
+    fprintf(stderr, "%s\n", qPrintable(QDBusConnection::sessionBus().lastError().message()));        
+    return 1;
+  }
 
   return 0;
 }
