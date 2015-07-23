@@ -1,3 +1,7 @@
+2015-07-23  François  <francois@dechelle.net>
+
+	* fixed missing check of module status in scan loop; this made scan crash if module's init function failed and module's status was then UHURU_MOD_INIT_ERROR
+
 2015-05-29  François  <francois@dechelle.net>
 
 	* fixed bug/crash in scan daemon

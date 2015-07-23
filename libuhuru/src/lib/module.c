@@ -60,6 +60,7 @@ struct uhuru_module *module_new(const char *path)
 
   mod->name = module_name_from_path(path);
   mod->data = NULL;
+  mod->mod_status = UHURU_MOD_OK;
 
   mod->conf_set = get_symbol(module, mod->name, "conf_set");
   mod->conf_get = get_symbol(module, mod->name, "conf_get");

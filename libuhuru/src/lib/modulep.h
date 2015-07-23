@@ -11,6 +11,7 @@ struct uhuru_module {
   char *(*conf_get)(void *mod_data, const char *key);
   enum uhuru_file_status (*scan)(const char *path, const char *mime_type, void *mod_data, char **pmod_report);
   enum uhuru_mod_status (*close)(void *mod_data);
+  enum uhuru_mod_status mod_status;
   const char *name;
   const char **mime_types;
   void *data;

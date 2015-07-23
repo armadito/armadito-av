@@ -77,6 +77,9 @@ static enum uhuru_file_status local_scan_apply_modules(const char *path, const c
     enum uhuru_file_status mod_status;
     char *mod_report = NULL;
 
+    if (mod->mod_status != UHURU_MOD_OK)
+      continue;
+
 #if 0
     if (uhuru_get_verbose(u) >= 2)
       printf("UHURU: module %s: scanning %s\n", mod->name, path);

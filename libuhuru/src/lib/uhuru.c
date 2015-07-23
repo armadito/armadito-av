@@ -66,7 +66,8 @@ static void load_entry(const char *full_path, enum dir_entry_flag flags, int err
 
   mod = module_new(full_path);
 
-  uhuru_add_module(u, mod);
+  if (mod != NULL)
+    uhuru_add_module(u, mod);
 }
 
 static int uhuru_module_load_directory(struct uhuru *u, const char *directory)
@@ -119,10 +120,12 @@ static void uwmsu_module_init_all(struct uhuru *u)
 
   for (i = 0; i < u->modules->len; i++) {
     struct uhuru_module *mod = (struct uhuru_module *)g_ptr_array_index(u->modules, i);
+    enum uhuru_mod_status mod_status;    
 
     if (mod->init != NULL)
-      (*mod->init)(&mod->data);
+      mod->mod_status = (*mod->init)(&mod->data);
 
+    /* FIXME: must go in configuration */
     if (mod->mime_types != NULL) {
       const char **p;
 
