@@ -1,4 +1,4 @@
-AC_INIT([uhuru-qt], [1.2.1], [f.dechelle@uhuru-solutions.com])
+AC_INIT([uhuru-qt], [1.3.0], [f.dechelle@uhuru-solutions.com])
 AM_INIT_AUTOMAKE
 
 # debug
@@ -86,11 +86,5 @@ Makefile
 qt/Makefile
 qt/icons/Makefile
 qt/translations/Makefile
-gtk/Makefile
-gtk/icons/Makefile
-gtk/icons/22x22/Makefile
-gtk/icons/48x48/Makefile
-gtk/icons/scalable/Makefile
-gtk/tests/Makefile
 ])
 AC_OUTPUT

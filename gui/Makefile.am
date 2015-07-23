@@ -12,13 +12,9 @@ QT_SRC_DIR=
 endif
 
 SUBDIRS= $(GTK_SRC_DIR) $(QT_SRC_DIR) 
-DIST_SUBDIRS=gtk qt
+DIST_SUBDIRS=qt
 
 desktopdir=$(datarootdir)/applications
 desktop_DATA=uhuru.desktop
 
-INTLTOOL_FILES=intltool-extract.in intltool-merge.in intltool-update.in
-
-EXTRA_DIST=$(INTLTOOL_FILES) uhuru.desktop
-
-DISTCLEANFILES=intltool-extract intltool-merge intltool-update po/.intltool-merge-cache
+EXTRA_DIST= uhuru.desktop
