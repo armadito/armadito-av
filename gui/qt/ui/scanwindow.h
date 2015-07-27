@@ -20,6 +20,7 @@ public:
     ~ScanWindow() {}
 
 private:
+    void construct(ScanModel *model);
     ScanModel *_model;
 };
 

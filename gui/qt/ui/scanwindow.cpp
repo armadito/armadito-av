@@ -5,8 +5,7 @@
 #include <QApplication>
 #include <QDesktopWidget>
 
-ScanWindow::ScanWindow(ScanModel *model, QWidget *parent) :
-    QMainWindow(parent)
+void ScanWindow::construct(ScanModel *model)
 {
   _model = model;
 
@@ -21,8 +20,15 @@ ScanWindow::ScanWindow(ScanModel *model, QWidget *parent) :
   _model->scan();
 }
 
-ScanWindow::ScanWindow(const QString &path, QWidget *parent) :
-  ScanWindow(new ScanModel(path), parent)
+ScanWindow::ScanWindow(ScanModel *model, QWidget *parent) :
+    QMainWindow(parent)
 {
+  construct(model);
+}
+
+ScanWindow::ScanWindow(const QString &path, QWidget *parent) :
+    QMainWindow(parent)
+{
+  construct(new ScanModel(path));
 }
 
