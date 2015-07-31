@@ -42,10 +42,10 @@ static int initI18n(QApplication &app)
   if (qtTr.load(QString("qt_") + loc.name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
     app.installTranslator(&qtTr);
 
-  QTranslator uhuruTr;
+  QTranslator *uhuruTr = new QTranslator();
   
-  if (uhuruTr.load(QString(PACKAGE "_") + loc.name(), TRANSLATIONSDIR)) {
-    app.installTranslator(&uhuruTr);
+  if (uhuruTr->load(QString(PACKAGE "_") + loc.name(), TRANSLATIONSDIR)) {
+    app.installTranslator(uhuruTr);
     qDebug() << "loaded translator for " << QString(PACKAGE "_") + loc.name() << " in " TRANSLATIONSDIR;
   } else {
     qDebug() << "cannot load translator for " << QString(PACKAGE "_") + loc.name() << " in " TRANSLATIONSDIR;

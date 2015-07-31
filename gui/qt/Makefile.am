@@ -70,6 +70,6 @@ ui_%.h: %.ui
 qrc_%.cpp: %.qrc
 	$(RCC) -name uhuru $< -o $@
 
-CLEANFILES= $(nodist_uhuru_qt_SOURCES) $(translations_DATA)
+CLEANFILES= $(nodist_uhuru_qt_SOURCES)
 
-EXTRA_DIST= uhuru.pro ui/aboutdialog.ui ui/scanwidget.ui uhuru.qrc $(translations)
+EXTRA_DIST= uhuru.pro ui/aboutdialog.ui ui/scanwidget.ui uhuru.qrc
