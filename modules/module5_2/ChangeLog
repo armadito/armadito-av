@@ -1,3 +1,7 @@
+2015-08-04  François  <francois@dechelle.net>
+
+	* changed bases default directory; now /var/lib/uhuru/bases/module5_2
+
 2014-09-14  François Déchelle  <francois@dechelle.net>
 
 	* moved to new version; tested

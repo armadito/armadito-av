@@ -1,4 +1,4 @@
-AC_INIT(uhuru-mod-clamav,1.3.0,francois@dechelle.net)
+AC_INIT(uhuru-mod-clamav,1.3.1,francois@dechelle.net)
 AM_INIT_AUTOMAKE
 
 # collect arguments
@@ -7,6 +7,12 @@ AC_ARG_ENABLE([debug],
 	AS_HELP_STRING([--enable-debug],[enable debugging @<:@default is yes@:>@]),
 	,
 	enable_debug="yes")
+
+# database directory
+AC_ARG_WITH([dbdir],
+	AS_HELP_STRING([--with-dbdir=DIR],[specify path to databases @<:@default is /var/lib/uhuru/bases/clamav@:>@]),
+	with_dbdir="$withval",
+	with_dbdir="no")
 
 # check for needed programs
 AC_PROG_CC([gcc])
@@ -37,6 +43,19 @@ PKG_CHECK_MODULES(LIBCLAMAV, libclamav, [HAVE_LIBCLAMAV=yes], [HAVE_LIBCLAMAV=no
 if test "$HAVE_LIBCLAMAV" = "no"; then
    AC_MSG_ERROR("cannot find ClamAV library")
 fi
+
+# database directory
+AC_MSG_CHECKING(for databases directory)
+if test "$with_dbdir" = "no" ; then
+   MODULE_CLAMAV_DBDIR="$localstatedir/lib/uhuru/bases/clamav"
+else
+   MODULE_CLAMAV_DBDIR="$with_dbdir"
+fi
+AC_MSG_RESULT($MODULE_CLAMAV_DBDIR)
+if test ! -f "$MODULE_CLAMAV_DBDIR/daily.cld" ; then
+   AC_MSG_WARN("cannot find $MODULE_CLAMAV_DBDIR/daily.cld, continuing anyway")
+fi
+AC_SUBST(MODULE_CLAMAV_DBDIR)
 
 # Output files
 AC_CONFIG_FILES([

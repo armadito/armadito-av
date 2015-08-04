@@ -1,4 +1,4 @@
-AC_INIT(uhuru-mod-module5-2,1.3.0,francois@dechelle.net)
+AC_INIT(uhuru-mod-module5-2,1.3.1,francois@dechelle.net)
 AM_INIT_AUTOMAKE
 
 # collect arguments
@@ -10,7 +10,8 @@ AC_ARG_ENABLE([debug],
 
 # database directory
 AC_ARG_WITH([dbdir],
-	AS_HELP_STRING([--with-dbdir=DIR],[specify path to databases @<:@default is /var/lib/uhuru/module5-2/db@:>@]),
+	AS_HELP_STRING([--with-dbdir=DIR],[specify path to databases @<:@default is /var/lib/uhuru/bases/module5_2@:>@]),
+
 	with_dbdir="$withval",
 	with_dbdir="no")
 
@@ -46,13 +47,13 @@ fi
 # database directory
 AC_MSG_CHECKING(for databases directory)
 if test "$with_dbdir" = "no" ; then
-   MODULE5_2_DBDIR="$localstatedir/lib/uhuru/module5-2/db"
+   MODULE5_2_DBDIR="$localstatedir/lib/uhuru/bases/module5_2"
 else
    MODULE5_2_DBDIR="$with_dbdir"
 fi
 AC_MSG_RESULT($MODULE5_2_DBDIR)
-if test ! -f "$MODULE5_2_DBDIR/Linux/database.elfdata" ; then
-   AC_MSG_WARN("cannot find $MODULE5_2_DBDIR/Linux/database.elfdata, continuing anyway")
+if test ! -f "$MODULE5_2_DBDIR/linux/database.elfdata" ; then
+   AC_MSG_WARN("cannot find $MODULE5_2_DBDIR/linux/database.elfdata, continuing anyway")
 fi
 AC_SUBST(MODULE5_2_DBDIR)
 

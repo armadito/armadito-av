@@ -42,7 +42,11 @@ enum uhuru_file_status clamav_scan(const char *path, const char *mime_type, void
 enum uhuru_mod_status clamav_init(void **pmod_data)
 {
   int ret;
-  const char *clamav_db_dir;
+  const char *clamav_db_dir = MODULE_CLAMAV_DBDIR;
+#if 0
+  /* this if you want to use clamav bases from clamav standard directory */
+  const char *clamav_db_dir = cl_retdbdir();
+#endif
   unsigned int signature_count = 0;
   struct clamav_data *cl_data;
 
@@ -62,8 +66,6 @@ enum uhuru_mod_status clamav_init(void **pmod_data)
     fprintf(stderr, "ClamAV: can't create new engine\n");
     return UHURU_MOD_INIT_ERROR;
   }
-
-  clamav_db_dir = cl_retdbdir();
 
   if ((ret = cl_load(clamav_db_dir, cl_data->clamav_engine, &signature_count, CL_DB_STDOPT)) != CL_SUCCESS) {
     fprintf(stderr, "ClamAV: error loading databases: %s\n", cl_strerror(ret));
