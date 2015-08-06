@@ -357,12 +357,13 @@ static void uhuru_scan_call_callbacks(struct uhuru_scan *scan, struct uhuru_repo
 
 int uhuru_scan_get_poll_fd(struct uhuru_scan *scan)
 {
-  if (scan->is_remote)
-    return scan->remote.sock;
+  if (!scan->is_remote) {
+    g_log(NULL, G_LOG_LEVEL_ERROR, "cannot call uhuru_scan_get_poll_fd() for a local scan");
+    
+    return -1;
+  }
 
-  fprintf(stderr, "cannot call uhuru_scan_get_poll_fd() for a local scan\n");
-
-  return -1;
+  return scan->remote.sock;
 }
 
 enum uhuru_scan_status uhuru_scan_start(struct uhuru_scan *scan)

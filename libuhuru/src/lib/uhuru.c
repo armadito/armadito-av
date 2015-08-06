@@ -6,7 +6,6 @@
 #include "quarantine.h"
 #include "remote.h"
 #include "statusp.h"
-#include "watchp.h"
 
 #include <assert.h>
 #include <glib.h>
@@ -22,8 +21,6 @@ struct uhuru {
 
   GHashTable *mime_types_table;
   magic_t magic;
-  /* for now... */
-  struct uhuru_watch *watch;
 };
 
 static struct uhuru *uhuru_new(int is_remote)
@@ -42,8 +39,6 @@ static struct uhuru *uhuru_new(int is_remote)
 
   u->mime_types_table = g_hash_table_new(g_str_hash, g_str_equal);
 
-  u->watch = NULL;
-
   return u;
 }
 
@@ -61,13 +56,15 @@ static void load_entry(const char *full_path, enum dir_entry_flag flags, int err
   if (strcmp("application/x-sharedlib", t))
     return;
 
-  if (u->verbosity >= 1)
-    printf("UHURU: loading module object: %s\n", full_path);
-
   mod = module_new(full_path);
 
-  if (mod != NULL)
-    uhuru_add_module(u, mod);
+  if (mod == NULL) {
+    g_log(NULL, G_LOG_LEVEL_WARNING, "cannot load module %s", full_path);
+  }
+
+  g_log(NULL, G_LOG_LEVEL_INFO, "UHURU: loaded module object: %s", full_path);
+
+  uhuru_add_module(u, mod);
 }
 
 static int uhuru_module_load_directory(struct uhuru *u, const char *directory)
@@ -135,14 +132,14 @@ static void uwmsu_module_init_all(struct uhuru *u)
   }
 }
 
-static void mod_print(gpointer data, gpointer user_data)
+static void mod_debug(gpointer data, gpointer user_data)
 {
-  module_print((struct uhuru_module *)data, stderr);
+  module_debug((struct uhuru_module *)data);
 }
 
 static void uwm_module_print_all(struct uhuru *u)
 {
-  g_ptr_array_foreach(u->modules, mod_print, NULL);
+  g_ptr_array_foreach(u->modules, mod_debug, NULL);
 }
 
 struct uhuru *uhuru_open(int is_remote)
@@ -154,8 +151,6 @@ struct uhuru *uhuru_open(int is_remote)
   uhuru_module_conf_all(u);
 
   uwmsu_module_init_all(u);
-
-  /* uwm_module_print_all(u); */
 
   return u;
 }
@@ -178,6 +173,7 @@ int uhuru_get_verbose(struct uhuru *u)
 static void mod_print_name(gpointer data, gpointer user_data)
 {
   struct uhuru_module *mod = (struct uhuru_module *)data;
+
   printf("%s ", mod->name);
 }
 
@@ -236,17 +232,3 @@ void uhuru_close(struct uhuru *u)
 
   /* must close all modules */
 }
-
-void uhuru_watch(struct uhuru *u, const char *dir)
-{
-  if (u->watch == NULL)
-    u->watch = uhuru_watch_new();
-
-  uhuru_watch_add(u->watch, dir);
-}
-
-int uhuru_watch_next_event(struct uhuru *u, struct uhuru_watch_event *event)
-{
-  return uhuru_watch_wait(u->watch, event);
-}
-

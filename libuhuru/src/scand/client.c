@@ -59,7 +59,7 @@ static void cb_scan(struct protocol_handler *h, void *data)
 
   protocol_handler_send_msg(cl->handler, "SCAN_END", NULL);
 
-  /* should not be there: the UI must close the connexion when processing SCAN_END message, then the server will close */
+  /* FIXME: should not be there: the UI must close the connexion when processing SCAN_END message, then the server will close */
   close(cl->sock);
 
   fprintf(stderr, "callback cb_scan end\n");

@@ -70,30 +70,6 @@ const char *uhuru_action_pretty_str(enum uhuru_action action);
 
 void uhuru_report_print(struct uhuru_report *report, FILE *out);
 
-enum uhuru_watch_event_type {
-  UHURU_WATCH_NONE,
-  UHURU_WATCH_DIRECTORY_CREATE,
-  UHURU_WATCH_DIRECTORY_OPEN,
-  UHURU_WATCH_DIRECTORY_CLOSE_NO_WRITE,
-  UHURU_WATCH_DIRECTORY_CLOSE_WRITE,
-  UHURU_WATCH_DIRECTORY_DELETE,
-  UHURU_WATCH_FILE_CREATE,
-  UHURU_WATCH_FILE_OPEN,
-  UHURU_WATCH_FILE_CLOSE_NO_WRITE,
-  UHURU_WATCH_FILE_CLOSE_WRITE,
-  UHURU_WATCH_FILE_DELETE,
-  /* etc */
-};
-
-struct uhuru_watch_event {
-  enum uhuru_watch_event_type event_type;
-  char *full_path;
-};
-
-void uhuru_watch(struct uhuru *u, const char *dir);
-
-int uhuru_watch_next_event(struct uhuru *u, struct uhuru_watch_event *event);
-
 #ifdef __cplusplus
 }
 #endif

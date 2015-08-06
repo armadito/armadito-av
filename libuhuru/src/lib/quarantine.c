@@ -97,13 +97,11 @@ void quarantine_callback(struct uhuru_report *report, void *callback_data)
 static enum uhuru_mod_status mod_quarantine_conf_set(void *mod_data, const char *key, const char *value)
 {
   if (!strcmp(key, "quarantine-dir")) {
-    fprintf(stderr, "quarantine: got config %s -> %s\n", key, value);
     quarantine_dir = strdup(value);
 #if 0
     mkdir_p(quarantine_dir);
 #endif
   } else if (!strcmp(key, "enabled")) {
-    fprintf(stderr, "quarantine: got config %s -> %s\n", key, value);
     quarantine_enabled = !strcmp(value, "yes") || !strcmp(value, "1") ;
   } 
 

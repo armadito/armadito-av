@@ -113,7 +113,7 @@ static void protocol_handler_call_callback(struct protocol_handler *h)
 
 static void protocol_error(struct protocol_handler *h, char c)
 {
-  fprintf(stderr, "Error in protocol: state %d char %c\n", h->state, c);
+  g_log(NULL, G_LOG_LEVEL_ERROR, "Error in protocol: state %d char %c", h->state, c);
 }
 
 static void protocol_handler_end_of_header(struct protocol_handler *h)
@@ -125,16 +125,15 @@ static void protocol_handler_end_of_header(struct protocol_handler *h)
 
 static void GH_print_func(gpointer key, gpointer value, gpointer user_data)
 {
-  fprintf(stderr, "Header: key=%s value=\"%s\"\n", (char *)key, (char *)value);
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "Header: key=%s value=\"%s\"", (char *)key, (char *)value);
 }
 
 static void protocol_handler_end_of_msg(struct protocol_handler *h)
 {
 #if 0
 #ifdef DEBUG
-  fprintf(stderr, "Msg: %s\n", h->current_msg->str);
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "Msg: %s\n", h->current_msg->str);
   g_hash_table_foreach (h->current_headers, GH_print_func, NULL);
-  fprintf(stderr, "\n");
 #endif
 #endif
 
@@ -193,7 +192,7 @@ int protocol_handler_receive(struct protocol_handler *handler)
   n_read = read(handler->input_fd, handler->receive_buffer, RECEIVE_BUFFER_LEN);
 
   if (n_read == -1) {
-    fprintf(stderr, "error in protocol_handler_receive: %s\n", strerror(errno));
+    g_log(NULL, G_LOG_LEVEL_ERROR, "error in protocol_handler_receive: %s", strerror(errno));
   }
 
   if (n_read <= 0)

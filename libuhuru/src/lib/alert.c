@@ -52,6 +52,7 @@ static xmlNodePtr alert_doc_gdh_node(void)
   localtime_r(&t, &l_tm);
 
   /* format: "2001-12-31T12:00:00" */
+  /* FIXME: use g_string_printf */
   snprintf(buff, sizeof(buff) - 1, "%04d-%02d-%02dT%02d:%02d:%02d", 1900 + l_tm.tm_year, l_tm.tm_mon, l_tm.tm_mday, l_tm.tm_hour, l_tm.tm_min, l_tm.tm_sec);
   buff[sizeof(buff) - 1] = '\0';
   xmlAddChild(node, xmlNewText(buff));
@@ -63,6 +64,7 @@ static void get_ip_addr(char *ip_addr)
 {
   struct ifaddrs *ifaddr, *ifa;
 
+  /* FIXME: do not exit on failure, but report error */
   if (getifaddrs(&ifaddr) == -1) {
     perror("getifaddrs");
     exit(EXIT_FAILURE);
@@ -76,22 +78,24 @@ static void get_ip_addr(char *ip_addr)
       int s;
       char mask[NI_MAXHOST];
 
+      /* FIXME: do not exit on failure, but report error */
       s = getnameinfo(ifa->ifa_netmask,
 		      (ifa->ifa_addr->sa_family == AF_INET) ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
 		      mask, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
       if (s != 0) {
-	printf("getnameinfo() failed: %s\n", gai_strerror(s));
+	g_log(NULL, G_LOG_LEVEL_ERROR, "getnameinfo() failed: %s", gai_strerror(s));
 	exit(EXIT_FAILURE);
       }
 
       if (strcmp(mask, "255.0.0.0") == 0)
 	continue;
 
+      /* FIXME: do not exit on failure, but report error */
       s = getnameinfo(ifa->ifa_addr,
 		      (ifa->ifa_addr->sa_family == AF_INET) ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
 		      ip_addr, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
       if (s != 0) {
-	printf("getnameinfo() failed: %s\n", gai_strerror(s));
+	g_log(NULL, G_LOG_LEVEL_ERROR, "getnameinfo() failed: %s\n", gai_strerror(s));
 	exit(EXIT_FAILURE);
       }
 
@@ -290,8 +294,9 @@ static void alert_send_via_https(struct alert *a)
   res = curl_easy_perform(curl);
 
 #define MAX_CURL_ERROR_PRINT 3
-  if(res != CURLE_OK && error_count++ < MAX_CURL_ERROR_PRINT)
-    fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+  if(res != CURLE_OK && error_count++ < MAX_CURL_ERROR_PRINT) {
+    /* this mode of reporting alert is no longer available, so give up fixing error reporting */
+  }
 
   curl_easy_cleanup(curl);
   curl_formfree(formpost);
@@ -301,26 +306,25 @@ static void alert_send_via_https(struct alert *a)
 #endif
 
 #ifdef ALERT_VIA_FILE
-/* must be configurable */
-#define DEFAULT_ALERT_DIR LIBUHURU_ALERT_DIR
+
 #define ALERT_PFX "alert"
 
+/* FIXME: must be configurable */
+#define DEFAULT_ALERT_DIR LIBUHURU_ALERT_DIR
 static char *alert_dir = DEFAULT_ALERT_DIR;
 
 static void alert_send_via_file(struct alert *a)
 {
   int fd;
-  char *tmp_file_name;
-  
-  tmp_file_name = tempnam(alert_dir, ALERT_PFX);
 
-  fd = open(tmp_file_name, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+  /* FIXME: signal error if cannot open file */
+  fd = mkostemp(DEFAULT_ALERT_DIR "/" ALERT_PFX "XXXXXX", O_WRONLY | O_CREAT | O_TRUNC);
+  fchmod(fd, 0666);
+
   if (fd != -1) {
     alert_doc_save_to_fd(a->xml_doc, fd);
     close(fd);
   }
-
-  free(tmp_file_name);
 }
 #endif
 
@@ -363,7 +367,6 @@ void alert_callback(struct uhuru_report *report, void *callback_data)
 static enum uhuru_mod_status mod_alert_conf_set(void *mod_data, const char *key, const char *value)
 {
   if (!strcmp(key, "alert-dir")) {
-    fprintf(stderr, "alert: got config %s -> %s\n", key, value);
     alert_dir = strdup(value);
     mkdir_p(alert_dir);
     return UHURU_MOD_OK;

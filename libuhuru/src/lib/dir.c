@@ -1,5 +1,6 @@
 #include "dir.h"
 
+#include <glib.h>
 #include <dirent.h>
 #include <sys/types.h>
 #define _GNU_SOURCE
@@ -44,7 +45,7 @@ int dir_map(const char *path, int recurse, dirent_fun_t dirent_fun, void *data)
     
   d = opendir(path);
   if (d == NULL) {
-    fprintf(stderr, "error opening directory %s (%s)\n", path, strerror(errno));
+    g_log(NULL, G_LOG_LEVEL_WARNING, "error opening directory %s (%s)", path, strerror(errno));
 
     flags |= DIR_ENTRY_IS_ERROR;
     (*dirent_fun)(path, flags, errno, data);
@@ -60,7 +61,7 @@ int dir_map(const char *path, int recurse, dirent_fun_t dirent_fun, void *data)
     int r = readdir_r(d, &entry, &result);
 
     if (r != 0) {
-      fprintf(stderr, "error reading directory entry (%s)\n", strerror(errno));
+      g_log(NULL, G_LOG_LEVEL_WARNING, "error reading directory entry (%s)", strerror(errno));
       ret = 1;
       goto cleanup;
     }

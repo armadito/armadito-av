@@ -19,6 +19,6 @@ struct uhuru_module {
 
 struct uhuru_module *module_new(const char *path);
 
-void module_print(struct uhuru_module *mod, FILE *out);
+void module_debug(struct uhuru_module *mod);
 
 #endif

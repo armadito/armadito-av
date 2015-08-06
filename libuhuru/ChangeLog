@@ -1,3 +1,7 @@
+2015-08-06  François  <francois@dechelle.net>
+
+	* fixing calls to fprintf to signal error or print debug messages; now using g_log() with appropriate level
+
 2015-07-23  François  <francois@dechelle.net>
 
 	* fixed missing check of module status in scan loop; this made scan crash if module's init function failed and module's status was then UHURU_MOD_INIT_ERROR

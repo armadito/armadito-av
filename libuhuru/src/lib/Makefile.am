@@ -24,12 +24,10 @@ statusp.h \
 uhuru.c \
 uhurup.h \
 unixsock.c \
-unixsock.h \
-watch.c \
-watchp.h
+unixsock.h 
 
 
-AM_CPPFLAGS= -DLIBUHURU_MODULES_PATH='"$(pkglibdir)/modules"' -DLIBUHURU_CONF_DIR='"$(sysconfdir)/uhuru"' -DLIBUHURU_ALERT_DIR='"$(localstatedir)/spool/uhuru"' 
+AM_CPPFLAGS= -DLIBUHURU_MODULES_PATH='"$(pkglibdir)/modules"' -DLIBUHURU_CONF_DIR='"$(sysconfdir)/uhuru"' -DLIBUHURU_ALERT_DIR='"$(localstatedir)/spool/uhuru"' -DG_LOG_DOMAIN='"libuhuru"'
 libuhuru_la_CFLAGS= -I$(top_srcdir)/include
 libuhuru_la_LIBADD= 
 

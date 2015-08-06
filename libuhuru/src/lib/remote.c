@@ -11,7 +11,6 @@ static char *remote_sock_dir;
 static enum uhuru_mod_status mod_remote_conf_set(void *mod_data, const char *key, const char *value)
 {
   if (!strcmp(key, "socket-dir")) {
-    fprintf(stderr, "remote: got config %s -> %s\n", key, value);
     remote_sock_dir = strdup(value);
     return UHURU_MOD_OK;
   } 
