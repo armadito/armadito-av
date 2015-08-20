@@ -80,11 +80,6 @@ static enum uhuru_file_status local_scan_apply_modules(const char *path, const c
     if (mod->mod_status != UHURU_MOD_OK)
       continue;
 
-#if 0
-    if (uhuru_get_verbose(u) >= 2)
-      printf("UHURU: module %s: scanning %s\n", mod->name, path);
-#endif
-
     mod_status = (*mod->scan_fun)(path, mime_type, mod->data, &mod_report);
 
 #if 0
@@ -123,9 +118,6 @@ static void local_scan_file(struct uhuru_scan *scan, magic_t magic, const char *
     report.status = UHURU_UNKNOWN_FILE_TYPE;
   else
     status = local_scan_apply_modules(path, mime_type, modules, &report);
-
-  if (uhuru_get_verbose(scan->uhuru) >= 3)
-    printf("%s: %s\n", path, uhuru_file_status_str(status));
 
   uhuru_scan_call_callbacks(scan, &report);
 

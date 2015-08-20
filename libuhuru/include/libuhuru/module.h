@@ -23,7 +23,7 @@ struct uhuru_module {
   /* FIXME: must export a configuration table as in c_icap */
   char *(*conf_get)(void *mod_data, const char *key);
 
-  enum uhuru_mod_status (*post_init_fun)(void *pmod_data);
+  enum uhuru_mod_status (*post_init_fun)(void *mod_data);
 
   enum uhuru_file_status (*scan_fun)(const char *path, const char *mime_type, void *mod_data, char **pmod_report);
 
@@ -32,9 +32,6 @@ struct uhuru_module {
   const char *name;
 
   enum uhuru_mod_status mod_status;
-
-  /* FIXME: must move to configuration */
-  const char **mime_types;
 
   void *data;
 };

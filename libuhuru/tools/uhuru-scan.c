@@ -216,8 +216,6 @@ static void do_scan(struct scan_options *opts, struct scan_summary *summary)
 
   u = uhuru_open(opts->use_daemon);
 
-  uhuru_set_verbose(u, 1);
-
 #if 0
   uhuru_print(u);
 #endif

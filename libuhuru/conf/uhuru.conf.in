@@ -1,12 +1,14 @@
-[umwsu]
+[uhuru]
 
 #scan-archive=1
 conf-dir=@sysconfdir@/uhuru/conf.d
 
-[mime-type]
+[mime-types]
 
 mime-type=application/x-dosexec; clamav; module5.2
-mime-type=application/pdf; module4; clamav
+mime-type=application/pdf; clamav
 mime-type=application/x-sharedlib; module5.2
 mime-type=application/x-object; module5.2
 mime-type=application/x-executable; module5.2
+# clamav scans every file if no other module applies
+mime-type=*; clamav

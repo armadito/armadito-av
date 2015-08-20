@@ -15,11 +15,11 @@
 #include <stdio.h>
 
 struct uhuru {
-  int verbosity;
   int is_remote;
-  GPtrArray *modules;
-
+  struct uhuru_module_manager module_manager;
   GHashTable *mime_types_table;
+
+  /* FIXME: to be removed */
   magic_t magic;
 };
 
@@ -29,71 +29,38 @@ static struct uhuru *uhuru_new(int is_remote)
 
   assert(u != NULL);
 
-  u->verbosity = 0;
   u->is_remote = is_remote;
 
-  u->modules = g_ptr_array_new();
+  uhuru_module_manager_init(&u->module_manager);
+
+  u->mime_types_table = g_hash_table_new(g_str_hash, g_str_equal);
 
   u->magic = magic_open(MAGIC_MIME_TYPE);
   magic_load(u->magic, NULL);
 
-  u->mime_types_table = g_hash_table_new(g_str_hash, g_str_equal);
+  return u;
+}
+
+struct uhuru *uhuru_open(int is_remote)
+{
+  struct uhuru *u = uhuru_new(is_remote);
+
+  if (!u->is_remote) {
+    uhuru_module_manager_add(&u->module_manager, &uhuru_mod_alert);
+    uhuru_module_manager_add(&u->module_manager, &uhuru_mod_quarantine);
+  }
+
+  uhuru_module_manager_add(&u->module_manager, &uhuru_mod_remote);
+
+  if (!u->is_remote)
+    uhuru_module_manager_load_path(&u->module_manager, LIBUHURU_MODULES_PATH);
 
   return u;
 }
 
-static void uhuru_add_module(struct uhuru *u, struct uhuru_module *mod)
+int uhuru_is_remote(struct uhuru *u)
 {
-  g_ptr_array_add(u->modules, mod);
-}
-
-static void load_entry(const char *full_path, enum dir_entry_flag flags, int errno, void *data)
-{
-  struct uhuru *u = (struct uhuru *)data;
-  const char *t = magic_file(u->magic, full_path);
-  struct uhuru_module *mod;
-
-  if (strcmp("application/x-sharedlib", t))
-    return;
-
-  mod = module_new(full_path);
-
-  if (mod == NULL) {
-    g_log(NULL, G_LOG_LEVEL_WARNING, "cannot load module %s", full_path);
-  }
-
-  g_log(NULL, G_LOG_LEVEL_INFO, "UHURU: loaded module object: %s", full_path);
-
-  uhuru_add_module(u, mod);
-}
-
-static int uhuru_module_load_directory(struct uhuru *u, const char *directory)
-{
-  return dir_map(directory, 0, load_entry, u);
-}
-
-static void uhuru_module_load_all(struct uhuru *u)
-{
-  if (!u->is_remote)
-    uhuru_module_load_directory(u, LIBUHURU_MODULES_PATH);
-
-  if (!u->is_remote) {
-    uhuru_add_module(u, &uhuru_mod_alert);
-    uhuru_add_module(u, &uhuru_mod_quarantine);
-  }
-
-  uhuru_add_module(u, &uhuru_mod_remote);
-}
-
-static void uhuru_module_conf_all(struct uhuru *u)
-{
-  int i;
-
-  for (i = 0; i < u->modules->len; i++) {
-    struct uhuru_module *mod = (struct uhuru_module *)g_ptr_array_index(u->modules, i);
-
-    conf_load(mod);
-  }
+  return u->is_remote;
 }
 
 static void uhuru_add_mime_type(struct uhuru *u, const char *mime_type, struct uhuru_module *mod)
@@ -109,65 +76,6 @@ static void uhuru_add_mime_type(struct uhuru *u, const char *mime_type, struct u
   }
 
   g_ptr_array_add(mod_array, mod);
-}
-
-static void uwmsu_module_init_all(struct uhuru *u)
-{
-  int i;
-
-  for (i = 0; i < u->modules->len; i++) {
-    struct uhuru_module *mod = (struct uhuru_module *)g_ptr_array_index(u->modules, i);
-    enum uhuru_mod_status mod_status;    
-
-    if (mod->init_fun != NULL)
-      mod->mod_status = (*mod->init_fun)(&mod->data);
-
-    /* FIXME: must go in configuration */
-    if (mod->mime_types != NULL) {
-      const char **p;
-
-      for(p = mod->mime_types; *p != NULL; p++)
-	uhuru_add_mime_type(u, *p, mod);
-    }
-  }
-}
-
-static void mod_debug(gpointer data, gpointer user_data)
-{
-  module_debug((struct uhuru_module *)data);
-}
-
-static void uwm_module_print_all(struct uhuru *u)
-{
-  g_ptr_array_foreach(u->modules, mod_debug, NULL);
-}
-
-struct uhuru *uhuru_open(int is_remote)
-{
-  struct uhuru *u = uhuru_new(is_remote);
-
-  uhuru_module_load_all(u);
-
-  uhuru_module_conf_all(u);
-
-  uwmsu_module_init_all(u);
-
-  return u;
-}
-
-int uhuru_is_remote(struct uhuru *u)
-{
-  return u->is_remote;
-}
-
-void uhuru_set_verbose(struct uhuru *u, int verbosity)
-{
-  u->verbosity = verbosity;
-}
-
-int uhuru_get_verbose(struct uhuru *u)
-{
-  return u->verbosity;
 }
 
 static void mod_print_name(gpointer data, gpointer user_data)
@@ -187,7 +95,7 @@ static void print_mime_type_entry(gpointer key, gpointer value, gpointer user_da
 void uhuru_print(struct uhuru *u)
 {
   printf("UHURU: modules loaded: ");
-  g_ptr_array_foreach(u->modules, mod_print_name, NULL);
+  /* g_ptr_array_foreach(u->modules, mod_print_name, NULL); */
   printf("\n");
 
   g_hash_table_foreach(u->mime_types_table, print_mime_type_entry, NULL);
@@ -197,12 +105,14 @@ struct uhuru_module *uhuru_get_module_by_name(struct uhuru *u, const char *name)
 {
   int i;
 
+#if 0
   for (i = 0; i < u->modules->len; i++) {
     struct uhuru_module *mod = (struct uhuru_module *)g_ptr_array_index(u->modules, i);
 
     if (!strcmp(mod->name, name))
       return mod;
   }
+#endif
 
   return NULL;
 }

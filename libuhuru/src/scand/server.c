@@ -72,8 +72,6 @@ struct server *server_new(void)
   server->uhuru = uhuru_open(0);
   assert(server->uhuru != NULL);
 
-  uhuru_set_verbose(server->uhuru, 1);
-
   sock_path = server_get_sock_path(server);
 
   if (unlink(sock_path) && errno != ENOENT) {

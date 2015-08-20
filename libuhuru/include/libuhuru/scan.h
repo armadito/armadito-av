@@ -13,10 +13,6 @@ struct uhuru_scan;
 
 struct uhuru *uhuru_open(int is_remote);
 
-void uhuru_set_verbose(struct uhuru *u, int verbosity);
-
-int uhuru_get_verbose(struct uhuru *u);
-
 void uhuru_print(struct uhuru *u);
 
 void uhuru_close(struct uhuru *u);
