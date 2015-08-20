@@ -120,12 +120,11 @@ static char *mod_quarantine_conf_get(void *mod_data, const char *key)
 }
 
 struct uhuru_module uhuru_mod_quarantine = {
-  .init = NULL,
+  .init_fun = NULL,
   .conf_set = &mod_quarantine_conf_set,
   .conf_get = &mod_quarantine_conf_get,
-  .scan = NULL,
-  .close = NULL,
+  .post_init_fun = NULL,
+  .scan_fun = NULL,
+  .close_fun = NULL,
   .name = "quarantine",
-  .mime_types = NULL,
-  .data = NULL,
 };

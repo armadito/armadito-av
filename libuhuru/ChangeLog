@@ -1,3 +1,9 @@
+2015-08-20  François  <francois@dechelle.net>
+
+	* structure for modules in progress
+
+	* moved builtin modules to separate directory
+
 2015-08-19  François  <francois@dechelle.net>
 
 	* removing some exported print functions

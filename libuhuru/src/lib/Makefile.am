@@ -1,9 +1,9 @@
+AUTOMAKE_OPTIONS=subdir-objects
+
 lib_LTLIBRARIES=libuhuru.la
 
 libuhuru_la_SOURCES= \
 action.c \
-alert.c \
-alert.h \
 conf.c \
 conf.h \
 dir.c \
@@ -12,10 +12,6 @@ module.c \
 modulep.h \
 protocol.c \
 protocol.h \
-quarantine.c \
-quarantine.h \
-remote.c \
-remote.h \
 report.c \
 reportp.h \
 scan.c \
@@ -24,8 +20,13 @@ statusp.h \
 uhuru.c \
 uhurup.h \
 unixsock.c \
-unixsock.h 
-
+unixsock.h \
+builtin-modules/alert.c \
+builtin-modules/alert.h \
+builtin-modules/quarantine.c \
+builtin-modules/quarantine.h \
+builtin-modules/remote.c \
+builtin-modules/remote.h 
 
 AM_CPPFLAGS= -DLIBUHURU_MODULES_PATH='"$(pkglibdir)/modules"' -DLIBUHURU_CONF_DIR='"$(sysconfdir)/uhuru"' -DLIBUHURU_ALERT_DIR='"$(localstatedir)/spool/uhuru"' -DG_LOG_DOMAIN='"libuhuru"'
 libuhuru_la_CFLAGS= -I$(top_srcdir)/include

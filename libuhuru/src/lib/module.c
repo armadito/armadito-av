@@ -57,21 +57,17 @@ struct uhuru_module *module_new(const char *path)
     return NULL;
 
   mod->name = module_name_from_path(path);
-  mod->data = NULL;
   mod->mod_status = UHURU_MOD_OK;
+  mod->data = NULL;
 
   /* FIXME: must check if module contains essential symbols */
+  mod->init_fun = get_symbol(module, mod->name, "init");
   mod->conf_set = get_symbol(module, mod->name, "conf_set");
   mod->conf_get = get_symbol(module, mod->name, "conf_get");
-  mod->init = get_symbol(module, mod->name, "init");
-  mod->scan = get_symbol(module, mod->name, "scan");
-  mod->close = get_symbol(module, mod->name, "close");
+  mod->post_init_fun = get_symbol(module, mod->name, "post_init");
+  mod->scan_fun = get_symbol(module, mod->name, "scan");
+  mod->close_fun = get_symbol(module, mod->name, "close");
   mod->mime_types = get_symbol(module, mod->name, "mime_types");
-
-#if 0
-  if(!g_module_close(module))
-    g_warning("%s: %s", path, g_module_error());
-#endif
 
   return mod;
 }
@@ -79,9 +75,9 @@ struct uhuru_module *module_new(const char *path)
 void module_debug(struct uhuru_module *mod)
 {
   g_log(NULL, G_LOG_LEVEL_DEBUG, "name: %s", mod->name);
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "init: %p", mod->init);
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "scan: %p", mod->scan);
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "close: %p", mod->close);
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "init: %p", mod->init_fun);
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "scan: %p", mod->scan_fun);
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "close: %p", mod->close_fun);
 
   if (mod->mime_types != NULL) {
     const char **p;

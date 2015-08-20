@@ -1,11 +1,11 @@
 #include <libuhuru/module.h>
 #include <libuhuru/scan.h>
-#include "alert.h"
 #include "dir.h"
 #include "modulep.h"
-#include "quarantine.h"
-#include "remote.h"
 #include "statusp.h"
+#include "builtin-modules/alert.h"
+#include "builtin-modules/quarantine.h"
+#include "builtin-modules/remote.h"
 
 #include <assert.h>
 #include <glib.h>
@@ -119,8 +119,8 @@ static void uwmsu_module_init_all(struct uhuru *u)
     struct uhuru_module *mod = (struct uhuru_module *)g_ptr_array_index(u->modules, i);
     enum uhuru_mod_status mod_status;    
 
-    if (mod->init != NULL)
-      mod->mod_status = (*mod->init)(&mod->data);
+    if (mod->init_fun != NULL)
+      mod->mod_status = (*mod->init_fun)(&mod->data);
 
     /* FIXME: must go in configuration */
     if (mod->mime_types != NULL) {

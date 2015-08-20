@@ -1,15 +1,15 @@
 #include "libuhuru-config.h"
 #include <libuhuru/module.h>
 #include <libuhuru/scan.h>
-#include "alert.h"
 #include "conf.h"
 #include "dir.h"
 #include "modulep.h"
 #include "protocol.h"
-#include "quarantine.h"
 #include "statusp.h"
 #include "uhurup.h"
 #include "unixsock.h"
+#include "builtin-modules/alert.h"
+#include "builtin-modules/quarantine.h"
 
 #include <assert.h>
 #include <glib.h>
@@ -85,7 +85,7 @@ static enum uhuru_file_status local_scan_apply_modules(const char *path, const c
       printf("UHURU: module %s: scanning %s\n", mod->name, path);
 #endif
 
-    mod_status = (*mod->scan)(path, mime_type, mod->data, &mod_report);
+    mod_status = (*mod->scan_fun)(path, mime_type, mod->data, &mod_report);
 
 #if 0
     printf("UHURU: module %s: scanning %s -> %s\n", mod->name, path, uhuru_status_str(mod_status));
