@@ -2,7 +2,6 @@
 
 scan-archive=1
 conf-dir="@sysconfdir@/uhuru/conf.d"
-foo= bar 
 
 [mime-types]
 

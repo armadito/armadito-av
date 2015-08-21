@@ -14,6 +14,11 @@ enum uhuru_mod_status {
   UHURU_MOD_CLOSE_ERROR,
 };
 
+struct uhuru_conf_entry {
+  const char *key;
+  int (*conf_set)(void *mod_data, const char *key, int argc, const char **argv);
+};
+
 struct uhuru_module {
   enum uhuru_mod_status (*init_fun)(void **pmod_data);
 
