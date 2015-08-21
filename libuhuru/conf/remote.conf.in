@@ -1,3 +1,4 @@
 [remote]
-socket-dir=/tmp
+socket-dir="/tmp"
+
 

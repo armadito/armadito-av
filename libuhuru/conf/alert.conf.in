@@ -1,2 +1,3 @@
 [alert]
-alert-dir=@localstatedir@/spool/uhuru
+
+alert-dir="@localstatedir@/spool/uhuru"

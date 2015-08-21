@@ -1,14 +1,24 @@
 [uhuru]
 
-#scan-archive=1
-conf-dir=@sysconfdir@/uhuru/conf.d
+scan-archive=1
+conf-dir="@sysconfdir@/uhuru/conf.d"
+foo= bar 
 
 [mime-types]
 
-mime-type=application/x-dosexec; clamav; module5.2
-mime-type=application/pdf; clamav
-mime-type=application/x-sharedlib; module5.2
-mime-type=application/x-object; module5.2
-mime-type=application/x-executable; module5.2
+mime-type="application/x-dosexec"; clamav; "module5.2"
+mime-type="application/pdf"; clamav
+mime-type="application/x-sharedlib"; "module5.2"
+mime-type="application/x-object"; "module5.2"
+mime-type="application/x-executable"; "module5.2"
 # clamav scans every file if no other module applies
-mime-type=*; clamav
+mime-type="*"; clamav
+
+#const char *module5_2_mime_types[] = {
+#  "application/x-sharedlib",
+#  "application/x-object",
+#  "application/x-executable",
+#  "application/x-msdos-program",
+#  "application/x-dosexec",
+#  NULL,
+#};

@@ -11,4 +11,5 @@ enabled=0
 # non-readable
 # quarantine directory must be mode 333 octal. This is normaly managed by 
 # package installation scripts
-quarantine-dir=@localstatedir@/lib/uhuru/quarantine
+quarantine-dir="@localstatedir@/lib/uhuru/quarantine"
+

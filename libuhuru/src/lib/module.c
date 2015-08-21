@@ -6,9 +6,38 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct uhuru_module *module_load(const char *filename)
+/*
+  is module copy really needed?
+  module management modifies the uhuru_module structure, namely the fields
+  'status' and 'data'
+  but this is safe even if the structure is in a dynamically loaded object 
+  (this has been checked in a small program).
+  problem may arise if there are 2 instances of struct uhuru, but this 
+  should not happen
+  so for now, we don't copy, but keep the code around in case of
+ */
+static struct uhuru_module *module_new(struct uhuru_module *src)
 {
-  struct uhuru_module *mod, *mod_loaded;
+  struct uhuru_module *mod;
+
+  mod = (struct uhuru_module *)malloc(sizeof(struct uhuru_module));
+  assert(mod != NULL);
+
+  mod->name = strdup(src->name);
+
+  mod->init_fun = src->init_fun;
+  mod->conf_set = src->conf_set;
+  mod->conf_get = src->conf_get;
+  mod->post_init_fun = src->post_init_fun;
+  mod->scan_fun = src->scan_fun;
+  mod->close_fun = src->close_fun;
+
+  return mod;
+}
+
+static struct uhuru_module *module_load(const char *filename)
+{
+  struct uhuru_module *mod_loaded;
   GModule *g_mod;
 
   g_mod = g_module_open(filename, G_MODULE_BIND_LAZY);
@@ -22,21 +51,9 @@ struct uhuru_module *module_load(const char *filename)
     return NULL;
   }
 
-  mod = (struct uhuru_module *)malloc(sizeof(struct uhuru_module));
-  assert(mod != NULL);
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "module %s loaded from file %s\n", mod_loaded->name, filename);
 
-  mod->name = strdup(mod_loaded->name);
-
-  mod->init_fun = mod_loaded->init_fun;
-  mod->conf_set = mod_loaded->conf_set;
-  mod->conf_get = mod_loaded->conf_get;
-  mod->post_init_fun = mod_loaded->post_init_fun;
-  mod->scan_fun = mod_loaded->scan_fun;
-  mod->close_fun = mod_loaded->close_fun;
-
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "module %s loaded from file %s\n", mod->name, filename);
-
-  return mod;
+  return mod_loaded;
 }
 
 void uhuru_module_manager_init(struct uhuru_module_manager *mm)
@@ -58,10 +75,10 @@ void uhuru_module_manager_load_path(struct uhuru_module_manager *mm, const char 
   dir = g_dir_open(path, 0, &err);
 
   while((filename = g_dir_read_name(dir)) != NULL) {
-    struct uhuru_module *mod = module_load(filename);
+    struct uhuru_module *mod_loaded = module_load(filename);
 
-    if (mod != NULL)
-      uhuru_module_manager_add(mm, mod);
+    if (mod_loaded != NULL)
+      uhuru_module_manager_add(mm, mod_loaded);
   }
 
   g_dir_close(dir);
