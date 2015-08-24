@@ -13,6 +13,7 @@
 #ifdef ALERT_VIA_SSL
 #include <curl/curl.h>
 #endif
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,11 +30,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
-#ifdef ALERT_VIA_SSL
-#define UHURU_ALERT_URL "https://127.0.0.1:10083/"
-/* #define UHURU_ALERT_URL "http://127.0.0.1:10083/" */
-#endif
 
 struct alert {
   xmlDocPtr xml_doc;
@@ -256,6 +252,11 @@ static void alert_send_via_unix_sock(struct alert *a)
 #endif
 
 #ifdef ALERT_VIA_SSL
+#ifdef ALERT_VIA_SSL
+#define UHURU_ALERT_URL "https://127.0.0.1:10083/"
+/* #define UHURU_ALERT_URL "http://127.0.0.1:10083/" */
+#endif
+
 static size_t discard_data(void *buffer, size_t size, size_t nmemb, void *userp)
 {
    return size * nmemb;
@@ -305,20 +306,19 @@ static void alert_send_via_https(struct alert *a)
 }
 #endif
 
+
 #ifdef ALERT_VIA_FILE
 
-#define ALERT_PFX "alert"
-
-/* FIXME: must be configurable */
-#define DEFAULT_ALERT_DIR LIBUHURU_ALERT_DIR
-static char *alert_dir = DEFAULT_ALERT_DIR;
-
-static void alert_send_via_file(struct alert *a)
+static void alert_send_via_file(struct alert *a, const char *alert_dir)
 {
   int fd;
+  char *alert_path;
+
+  asprintf(&alert_path, "%s/alertXXXXXX", alert_dir) ;
+  assert(alert_path != NULL);
 
   /* FIXME: signal error if cannot open file */
-  fd = mkostemp(DEFAULT_ALERT_DIR "/" ALERT_PFX "XXXXXX", O_WRONLY | O_CREAT | O_TRUNC);
+  fd = mkostemp(alert_path, O_WRONLY | O_CREAT | O_TRUNC);
   fchmod(fd, 0666);
 
   if (fd != -1) {
@@ -326,6 +326,7 @@ static void alert_send_via_file(struct alert *a)
     close(fd);
   }
 }
+
 #endif
 
 static void alert_free(struct alert *a)
@@ -335,8 +336,45 @@ static void alert_free(struct alert *a)
   free(a);
 }
 
+/*
+ * module specific functions
+ */
+
+struct alert_data {
+  char *alert_dir;
+};
+
+#define DEFAULT_ALERT_DIR LIBUHURU_ALERT_DIR
+
+static enum uhuru_mod_status alert_init(void **pmod_data)
+{
+  struct alert_data *al_data;
+
+  al_data = (struct alert_data *)malloc(sizeof(struct alert_data));
+  assert(al_data != NULL);
+
+  al_data->alert_dir = NULL;
+
+  *pmod_data = al_data;
+
+  return UHURU_MOD_OK;
+}
+
+static enum uhuru_mod_status alert_conf_set_alert_dir(void *mod_data, const char *key, int argc, const char **argv)
+{
+  struct alert_data *al_data = (struct alert_data *)mod_data;
+
+  al_data->alert_dir = strdup(argv[0]);
+
+  /* really necessary??? */
+  mkdir_p(al_data->alert_dir);
+
+  return UHURU_MOD_OK;
+}
+
 void alert_callback(struct uhuru_report *report, void *callback_data)
 {
+  struct alert_data *al_data = (struct alert_data *)callback_data;
   struct alert *a;
 
   switch(report->status) {
@@ -356,7 +394,7 @@ void alert_callback(struct uhuru_report *report, void *callback_data)
   alert_send_via_https(a);
 #endif
 #ifdef ALERT_VIA_FILE
-  alert_send_via_file(a);
+  alert_send_via_file(a, al_data->alert_dir);
 #endif
 
   alert_free(a);
@@ -364,29 +402,22 @@ void alert_callback(struct uhuru_report *report, void *callback_data)
   report->action |= UHURU_ACTION_ALERT;
 }
 
-static enum uhuru_mod_status mod_alert_conf_set(void *mod_data, const char *key, const char *value)
-{
-  if (!strcmp(key, "alert-dir")) {
-    alert_dir = strdup(value);
-    mkdir_p(alert_dir);
-    return UHURU_MOD_OK;
-  }
+static struct uhuru_conf_entry alert_conf_table[] = {
+  { 
+    .key = "alert-dir", 
+    .conf_set_fun = alert_conf_set_alert_dir, 
+    .conf_get_fun = NULL,
+  },
+  { 
+    .key = NULL,
+    .conf_set_fun = NULL, 
+    .conf_get_fun = NULL,
+  },
+};
 
-  return UHURU_MOD_CONF_ERROR;
-}
-
-static char *mod_alert_conf_get(void *mod_data, const char *key)
-{
-  if (!strcmp(key, "alert-dir"))
-    return alert_dir;
-
-  return NULL;
-}
-
-struct uhuru_module uhuru_mod_alert = {
-  .init_fun = NULL,
-  .conf_set = &mod_alert_conf_set,
-  .conf_get = &mod_alert_conf_get,
+struct uhuru_module alert_module = {
+  .init_fun = alert_init,
+  .conf_table = alert_conf_table,
   .post_init_fun = NULL,
   .scan_fun = NULL,
   .close_fun = NULL,

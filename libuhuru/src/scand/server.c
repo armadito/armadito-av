@@ -25,10 +25,12 @@ static char *server_get_sock_path(struct server *server)
   char *sock_dir, *ret;
   GString *sock_path;
 
-  sock_dir = conf_get(server->uhuru, "remote", "socket-dir");
+  sock_dir = conf_get_single_value(server->uhuru, "remote", "socket-dir");
   assert(sock_dir != NULL);
 
   sock_path = g_string_new(sock_dir);
+  free(sock_dir);
+
   g_string_append_printf(sock_path, "/uhuru-%s", getenv("USER"));
   ret = sock_path->str;
   g_string_free(sock_path, FALSE);

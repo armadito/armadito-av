@@ -1,5 +1,7 @@
 2015-08-24  François  <francois@dechelle.net>
 
+	* implementing new config system: changed internal modules and clamav module to use configuration table; in progress
+
 	* changed configuration file parser to use its own scanner; using glib scanner was painfull because of distinction integer/strings; now all integers are returned as strings; tests ok
 
 2015-08-21  François  <francois@dechelle.net>

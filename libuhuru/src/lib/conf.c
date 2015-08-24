@@ -6,6 +6,7 @@
 #include <assert.h>
 #define _GNU_SOURCE
 #include <stdio.h>
+#include <string.h>
 #include <setjmp.h>
 #include <ctype.h>
 
@@ -29,10 +30,7 @@ enum token_type {
 
 static struct scanner *scanner_new(FILE *input)
 {
-  struct scanner *s;
-
-  s = (struct scanner *)malloc(sizeof(struct scanner));
-  assert(s != NULL);
+  struct scanner *s = g_new(struct scanner, 1);
 
   s->input = input;
   s->cur_line = 1;
@@ -164,20 +162,18 @@ static void scanner_free(struct scanner *s)
 }
 
 struct uhuru_conf_parser {
-  struct scanner *scanner;
   FILE *input;
+  struct scanner *scanner;
   enum token_type lookahead_token;
   jmp_buf env;
-  struct uhuru_module *current_module;
+  char *current_group;
   char *current_key;
   GPtrArray *current_args;
 };
 
 struct uhuru_conf_parser *uhuru_conf_parser_new(const char *filename)
 {
-  struct uhuru_conf_parser *cp;
-
-  cp = (struct uhuru_conf_parser *)malloc(sizeof(struct uhuru_conf_parser));
+  struct uhuru_conf_parser *cp = g_new(struct uhuru_conf_parser, 1);
   assert(cp != NULL);
 
   cp->input = fopen(filename, "r");
@@ -265,9 +261,11 @@ static void accept(struct uhuru_conf_parser *cp, guint token)
 
   configuration : group_list
   group_list : group group_list | EMPTY
-  group : '[' STRING ']' definition_list
+  group : '[' groupname ']' definition_list
+  groupname : STRING
   definition_list: definition definition_list | EMPTY
-  definition : STRING '=' value opt_value_list 
+  definition : key '=' value opt_value_list
+  key : STRING
   opt_value_list : list_sep value opt_value_list | EMPTY
   value : STRING
   list_sep : ',' | ';' 
@@ -276,11 +274,21 @@ static void accept(struct uhuru_conf_parser *cp, guint token)
 static void r_configuration(struct uhuru_conf_parser *cp);
 static void r_group_list(struct uhuru_conf_parser *cp);
 static void r_group(struct uhuru_conf_parser *cp);
+static void r_groupname(struct uhuru_conf_parser *cp);
 static void r_definition_list(struct uhuru_conf_parser *cp);
 static void r_definition(struct uhuru_conf_parser *cp);
+static void r_key(struct uhuru_conf_parser *cp);
 static void r_opt_value_list(struct uhuru_conf_parser *cp);
 static void r_value(struct uhuru_conf_parser *cp);
 static void r_list_sep(struct uhuru_conf_parser *cp);
+
+static void free_and_set(char **old, char *new)
+{
+  if (*old != NULL)
+    free(*old);
+
+  *old = strdup(new);
+}
 
 /* configuration : group_list */
 static void r_configuration(struct uhuru_conf_parser *cp)
@@ -301,9 +309,18 @@ static void r_group_list(struct uhuru_conf_parser *cp)
 static void r_group(struct uhuru_conf_parser *cp)
 {
   accept(cp, TOKEN_LEFT_BRACE);
-  accept(cp, TOKEN_STRING);
+  r_groupname(cp);
   accept(cp, TOKEN_RIGHT_BRACE);
   r_definition_list(cp);
+}
+
+/* groupname : STRING */
+static void r_groupname(struct uhuru_conf_parser *cp)
+{
+  /* store current group */
+  free_and_set(&cp->current_group, scanner_token_text(cp->scanner));
+
+  accept(cp, TOKEN_STRING);
 }
 
 /* definition_list: definition definition_list | EMPTY */
@@ -315,13 +332,34 @@ static void r_definition_list(struct uhuru_conf_parser *cp)
   }
 }
 
-/* definition : STRING '=' value opt_value_list  */
+/* definition : key '=' value opt_value_list  */
 static void r_definition(struct uhuru_conf_parser *cp)
 {
-  accept(cp, TOKEN_STRING);
+  r_key(cp);
   accept(cp, TOKEN_EQUAL_SIGN);
   r_value(cp);
   r_opt_value_list(cp);
+
+  /* process stored values */
+  {
+    int i;
+    
+    fprintf(stderr, "=> group %s key %s args", cp->current_group, cp->current_key);
+    for(i = 0; i < cp->current_args->len; i++)
+      fprintf(stderr, " [%d] %s", i, (const char *)g_ptr_array_index(cp->current_args, i));
+    fprintf(stderr, "\n");
+  }
+
+  g_ptr_array_set_size(cp->current_args, 0);
+}
+
+/* key : STRING */
+static void r_key(struct uhuru_conf_parser *cp)
+{
+  /* store current key */
+  free_and_set(&cp->current_key, scanner_token_text(cp->scanner));
+
+  accept(cp, TOKEN_STRING);
 }
 
 /* opt_value_list : list_sep value opt_value_list | EMPTY */
@@ -337,6 +375,9 @@ static void r_opt_value_list(struct uhuru_conf_parser *cp)
 /* value : STRING */
 static void r_value(struct uhuru_conf_parser *cp)
 {
+  /* store current value */
+  g_ptr_array_add(cp->current_args, strdup(scanner_token_text(cp->scanner)));
+
   accept(cp, TOKEN_STRING);
 }
 
@@ -349,6 +390,10 @@ static void r_list_sep(struct uhuru_conf_parser *cp)
     accept(cp, TOKEN_SEMI_COLON);
 }
 
+void arg_destroy_notify(gpointer data)
+{
+  free(data);
+}
 
 int uhuru_conf_parser_parse(struct uhuru_conf_parser *cp)
 {
@@ -358,6 +403,10 @@ int uhuru_conf_parser_parse(struct uhuru_conf_parser *cp)
 #if 1
   print_token(cp->scanner, cp->lookahead_token);
 #endif
+
+  cp->current_group = NULL;
+  cp->current_key = NULL;
+  cp->current_args = g_ptr_array_new_with_free_func(arg_destroy_notify);
 
   if (!setjmp(cp->env)) {
     r_configuration(cp);
@@ -376,9 +425,56 @@ void uhuru_conf_parser_free(struct uhuru_conf_parser *cp)
 
   fclose(cp->input);
 
+  g_ptr_array_free(cp->current_args, TRUE);
+
   free(cp);
 }
 
+static struct uhuru_conf_entry *conf_entry_get(struct uhuru_module *mod, const char *key)
+{
+  struct uhuru_conf_entry *p;
+
+  if (mod->conf_table == NULL)
+    return NULL;
+
+  for(p = mod->conf_table; p->key != NULL; p++)
+    if (!strcmp(key, p->key))
+      return p;
+
+  return NULL;
+}
+
+const char *conf_get_single_value(struct uhuru *uhuru, const char *mod_name, const char *key)
+{
+  struct uhuru_module *mod;
+  struct uhuru_conf_entry *conf_entry;
+  int argc;
+  const char **argv;
+  const char *ret;
+
+  mod = uhuru_get_module_by_name(uhuru, mod_name);
+  if (mod == NULL) {
+    g_log(NULL, G_LOG_LEVEL_WARNING, "conf_get: no module '%s'", mod_name);
+    return NULL;
+  }
+
+  conf_entry = conf_entry_get(mod, key);
+  if (conf_entry == NULL || conf_entry->conf_get_fun == NULL) {
+    g_log(NULL, G_LOG_LEVEL_WARNING, "conf_get: no key '%s' for module '%s'", key, mod_name);
+    return NULL;
+  }
+
+  if ((*conf_entry->conf_get_fun)(mod->mod_data, key, &argc, &argv) != UHURU_MOD_OK || argc != 1) {
+    g_log(NULL, G_LOG_LEVEL_WARNING, "conf_get: cannot get key '%s' value for module '%s'", key, mod_name);
+    return NULL;
+  }
+
+  ret = argv[0];
+
+  free(argv);
+
+  return ret;
+}
 
 /* ==================== old code ==================== */
 
@@ -390,8 +486,8 @@ void conf_load(struct uhuru_module *mod)
   static char *dirs[] = { LIBUHURU_CONF_DIR, LIBUHURU_CONF_DIR "/conf.d", NULL};
   char **keys, **pkey;
 
-  if (mod->conf_set == NULL)
-    return;
+  /* if (mod->conf_set == NULL) */
+  /*   return; */
 
   key_file = g_key_file_new();
 
@@ -412,7 +508,7 @@ void conf_load(struct uhuru_module *mod)
     char *value = g_key_file_get_value(key_file, mod->name, *pkey, NULL);
 
     assert(value != NULL);
-    (*mod->conf_set)(mod->data, *pkey, value);
+    /* (*mod->conf_set)(mod->data, *pkey, value); */
   }
 
   g_strfreev(keys);
@@ -421,26 +517,3 @@ void conf_load(struct uhuru_module *mod)
   free(filename);
 }
 
-void conf_set(struct uhuru *uhuru, const char *mod_name, const char *key, const char *value)
-{
-  struct uhuru_module *mod = uhuru_get_module_by_name(uhuru, mod_name);
-
-  if (mod == NULL) {
-    g_log(NULL, G_LOG_LEVEL_WARNING, "No such module: %s", mod_name);
-    return;
-  }
-
-  (*mod->conf_set)(mod->data, key, value);
-}
-
-char *conf_get(struct uhuru *uhuru, const char *mod_name, const char *key)
-{
-  struct uhuru_module *mod = uhuru_get_module_by_name(uhuru, mod_name);
-
-  if (mod == NULL) {
-    g_log(NULL, G_LOG_LEVEL_WARNING, "No such module: %s", mod_name);
-    return;
-  }
-
-  return (*mod->conf_get)(mod->data, key);
-}

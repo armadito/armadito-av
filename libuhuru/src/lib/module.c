@@ -23,14 +23,16 @@ static struct uhuru_module *module_new(struct uhuru_module *src)
   mod = (struct uhuru_module *)malloc(sizeof(struct uhuru_module));
   assert(mod != NULL);
 
-  mod->name = strdup(src->name);
-
   mod->init_fun = src->init_fun;
-  mod->conf_set = src->conf_set;
-  mod->conf_get = src->conf_get;
+  mod->conf_table = src->conf_table;
   mod->post_init_fun = src->post_init_fun;
   mod->scan_fun = src->scan_fun;
   mod->close_fun = src->close_fun;
+
+  mod->name = strdup(src->name);
+
+  mod->mod_status = UHURU_MOD_OK;
+  mod->mod_data = NULL;
 
   return mod;
 }
@@ -92,11 +94,8 @@ void uhuru_module_manager_init_all(struct uhuru_module_manager *mm)
   for (i = 0; i < mm->modules->len; i++) {
     mod = (struct uhuru_module *)g_ptr_array_index(mm->modules, i);
 
-    mod->mod_status = UHURU_MOD_OK;
-    mod->data = NULL;
-
     if (mod->init_fun != NULL)
-      mod->mod_status = (*mod->init_fun)(&mod->data);
+      mod->mod_status = (*mod->init_fun)(&mod->mod_data);
   }
 
   for (i = 0; i < mm->modules->len; i++) {
@@ -110,7 +109,7 @@ void uhuru_module_manager_init_all(struct uhuru_module_manager *mm)
     mod = (struct uhuru_module *)g_ptr_array_index(mm->modules, i);
 
     if (mod->post_init_fun != NULL && mod->mod_status == UHURU_MOD_OK)
-      mod->mod_status = (*mod->post_init_fun)(mod->data);
+      mod->mod_status = (*mod->post_init_fun)(mod->mod_data);
   }
 }
 
@@ -136,7 +135,7 @@ void uhuru_module_manager_close_all(struct uhuru_module_manager *mm)
     struct uhuru_module *mod = (struct uhuru_module *)g_ptr_array_index(mm->modules, i);
 
     if (mod->close_fun != NULL && mod->mod_status == UHURU_MOD_OK)
-      mod->mod_status = (*mod->close_fun)(mod->data);
+      mod->mod_status = (*mod->close_fun)(mod->mod_data);
   }
 }
 

@@ -16,17 +16,15 @@ enum uhuru_mod_status {
 
 struct uhuru_conf_entry {
   const char *key;
-  int (*conf_set)(void *mod_data, const char *key, int argc, const char **argv);
+  enum uhuru_mod_status (*conf_set_fun)(void *mod_data, const char *key, int argc, const char **argv);
+  /* the 'get' function can be set to NULL if module is too lazy to return its configuration */
+  enum uhuru_mod_status (*conf_get_fun)(void *mod_data, const char *key, int *pargc, const char ***pargv);
 };
 
 struct uhuru_module {
   enum uhuru_mod_status (*init_fun)(void **pmod_data);
 
-  /* FIXME: must export a configuration table as in c_icap */
-  enum uhuru_mod_status (*conf_set)(void *mod_data, const char *key, const char *value);
-
-  /* FIXME: must export a configuration table as in c_icap */
-  char *(*conf_get)(void *mod_data, const char *key);
+  struct uhuru_conf_entry *conf_table;
 
   enum uhuru_mod_status (*post_init_fun)(void *mod_data);
 
@@ -38,7 +36,7 @@ struct uhuru_module {
 
   enum uhuru_mod_status mod_status;
 
-  void *data;
+  void *mod_data;
 };
 
 #ifdef __cplusplus

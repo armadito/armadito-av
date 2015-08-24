@@ -63,8 +63,9 @@ static void local_scan_init(struct uhuru_scan *scan)
   scan->local.thread_pool = NULL;
   scan->local.private_magic_key = NULL;
 
-  uhuru_scan_add_callback(scan, alert_callback, NULL);
-  uhuru_scan_add_callback(scan, quarantine_callback, NULL);
+  /* FIXME: should search module by name in scan->uhuru */
+  uhuru_scan_add_callback(scan, alert_callback, alert_module.mod_data);
+  uhuru_scan_add_callback(scan, quarantine_callback, quarantine_module.mod_data);
 }
 
 static enum uhuru_file_status local_scan_apply_modules(const char *path, const char *mime_type, GPtrArray *mod_array,  struct uhuru_report *report)
@@ -80,7 +81,7 @@ static enum uhuru_file_status local_scan_apply_modules(const char *path, const c
     if (mod->mod_status != UHURU_MOD_OK)
       continue;
 
-    mod_status = (*mod->scan_fun)(path, mime_type, mod->data, &mod_report);
+    mod_status = (*mod->scan_fun)(path, mime_type, mod->mod_data, &mod_report);
 
 #if 0
     printf("UHURU: module %s: scanning %s -> %s\n", mod->name, path, uhuru_status_str(mod_status));
@@ -235,10 +236,11 @@ static void remote_scan_init(struct uhuru_scan *scan)
   char *sock_dir;
   GString *sock_path;
 
-  sock_dir = conf_get(scan->uhuru, "remote", "socket-dir");
+  sock_dir = conf_get_single_value(scan->uhuru, "remote", "socket-dir");
   assert(sock_dir != NULL);
 
   sock_path = g_string_new(sock_dir);
+  free(sock_dir);
 
   g_string_append_printf(sock_path, "/uhuru-%s", getenv("USER"));
   scan->remote.sock_path = sock_path->str;

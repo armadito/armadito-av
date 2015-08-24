@@ -46,11 +46,11 @@ struct uhuru *uhuru_open(int is_remote)
   struct uhuru *u = uhuru_new(is_remote);
 
   if (!u->is_remote) {
-    uhuru_module_manager_add(&u->module_manager, &uhuru_mod_alert);
-    uhuru_module_manager_add(&u->module_manager, &uhuru_mod_quarantine);
+    uhuru_module_manager_add(&u->module_manager, &alert_module);
+    uhuru_module_manager_add(&u->module_manager, &quarantine_module);
   }
 
-  uhuru_module_manager_add(&u->module_manager, &uhuru_mod_remote);
+  uhuru_module_manager_add(&u->module_manager, &remote_module);
 
   if (!u->is_remote)
     uhuru_module_manager_load_path(&u->module_manager, LIBUHURU_MODULES_PATH);
@@ -103,18 +103,7 @@ void uhuru_print(struct uhuru *u)
 
 struct uhuru_module *uhuru_get_module_by_name(struct uhuru *u, const char *name)
 {
-  int i;
-
-#if 0
-  for (i = 0; i < u->modules->len; i++) {
-    struct uhuru_module *mod = (struct uhuru_module *)g_ptr_array_index(u->modules, i);
-
-    if (!strcmp(mod->name, name))
-      return mod;
-  }
-#endif
-
-  return NULL;
+  return uhuru_module_manager_get_by_name(&u->module_manager, name);
 }
 
 GPtrArray *uhuru_get_applicable_modules(struct uhuru *u, magic_t magic, const char *path, char **p_mime_type)
