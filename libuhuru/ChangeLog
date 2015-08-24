@@ -1,3 +1,7 @@
+2015-08-24  François  <francois@dechelle.net>
+
+	* changed configuration file parser to use its own scanner; using glib scanner was painfull because of distinction integer/strings; now all integers are returned as strings; tests ok
+
 2015-08-21  François  <francois@dechelle.net>
 
 	* added new configuration file parser using Glib scanner; tests ok
