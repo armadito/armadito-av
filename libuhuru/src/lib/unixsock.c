@@ -5,7 +5,7 @@
 #include <sys/un.h>
 #include <stdlib.h>
 
-int client_socket_create(char *socket_path, int max_retry)
+int client_socket_create(const char *socket_path, int max_retry)
 {
   int fd, r, retry_count = 0;
   struct sockaddr_un server_addr;
@@ -35,7 +35,7 @@ int client_socket_create(char *socket_path, int max_retry)
   return fd;
 }
 
-int server_socket_create(char *socket_path)
+int server_socket_create(const char *socket_path)
 {
   int fd, r;
   struct sockaddr_un listening_addr;

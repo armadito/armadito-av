@@ -16,9 +16,11 @@ enum uhuru_mod_status {
 
 struct uhuru_conf_entry {
   const char *key;
-  enum uhuru_mod_status (*conf_set_fun)(void *mod_data, const char *key, int argc, const char **argv);
+
+  enum uhuru_mod_status (*conf_set_fun)(void *mod_data, const char *key, const char **argv);
+
   /* the 'get' function can be set to NULL if module is too lazy to return its configuration */
-  enum uhuru_mod_status (*conf_get_fun)(void *mod_data, const char *key, int *pargc, const char ***pargv);
+  const char **(*conf_get_fun)(void *mod_data, const char *key, enum uhuru_mod_status *pstatus);
 };
 
 struct uhuru_module {

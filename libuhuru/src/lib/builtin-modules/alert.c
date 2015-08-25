@@ -344,8 +344,6 @@ struct alert_data {
   char *alert_dir;
 };
 
-#define DEFAULT_ALERT_DIR LIBUHURU_ALERT_DIR
-
 static enum uhuru_mod_status alert_init(void **pmod_data)
 {
   struct alert_data *al_data;
@@ -360,7 +358,7 @@ static enum uhuru_mod_status alert_init(void **pmod_data)
   return UHURU_MOD_OK;
 }
 
-static enum uhuru_mod_status alert_conf_set_alert_dir(void *mod_data, const char *key, int argc, const char **argv)
+static enum uhuru_mod_status alert_conf_set_alert_dir(void *mod_data, const char *key, const char **argv)
 {
   struct alert_data *al_data = (struct alert_data *)mod_data;
 

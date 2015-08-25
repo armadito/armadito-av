@@ -4,6 +4,7 @@
 #include "modulep.h"
 #include "statusp.h"
 #include "builtin-modules/alert.h"
+#include "builtin-modules/mimetype.h"
 #include "builtin-modules/quarantine.h"
 #include "builtin-modules/remote.h"
 
@@ -47,6 +48,7 @@ struct uhuru *uhuru_open(int is_remote)
 
   if (!u->is_remote) {
     uhuru_module_manager_add(&u->module_manager, &alert_module);
+    uhuru_module_manager_add(&u->module_manager, &mimetype_module);
     uhuru_module_manager_add(&u->module_manager, &quarantine_module);
   }
 
@@ -63,7 +65,7 @@ int uhuru_is_remote(struct uhuru *u)
   return u->is_remote;
 }
 
-static void uhuru_add_mime_type(struct uhuru *u, const char *mime_type, struct uhuru_module *mod)
+void uhuru_add_mime_type(struct uhuru *u, const char *mime_type, struct uhuru_module *mod)
 {
   GPtrArray *mod_array;
 
@@ -129,5 +131,5 @@ void uhuru_close(struct uhuru *u)
 {
   magic_close(u->magic);
 
-  /* must close all modules */
+  uhuru_module_manager_close_all(&u->module_manager);
 }

@@ -23,7 +23,7 @@ static enum uhuru_mod_status remote_init(void **pmod_data)
   return UHURU_MOD_OK;
 }
 
-static enum uhuru_mod_status remote_conf_set_socket_dir(void *mod_data, const char *key, int argc, const char **argv)
+static enum uhuru_mod_status remote_conf_set_socket_dir(void *mod_data, const char *key, const char **argv)
 {
   struct remote_data *re_data = (struct remote_data *)mod_data;
 
@@ -32,17 +32,17 @@ static enum uhuru_mod_status remote_conf_set_socket_dir(void *mod_data, const ch
   return UHURU_MOD_OK;
 }
 
-static enum uhuru_mod_status remote_conf_get_socket_dir(void *mod_data, const char *key, int *pargc, const char ***pargv)
+static const char **remote_conf_get_socket_dir(void *mod_data, const char *key, enum uhuru_mod_status *pstatus)
 {
   struct remote_data *re_data = (struct remote_data *)mod_data;
-  const char **argv = (const char **)malloc(1 * sizeof(const char *));
+  const char **argv = (const char **)malloc(2 * sizeof(const char *));
 
   argv[0] = strdup(re_data->remote_sock_dir);
+  argv[1] = NULL;
 
-  *pargc = 1;
-  *pargv = argv;
+  *pstatus = UHURU_MOD_OK;
 
-  return UHURU_MOD_OK;
+  return argv;
 }
 
 struct uhuru_conf_entry remote_conf_table[] = {

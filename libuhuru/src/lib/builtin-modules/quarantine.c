@@ -111,7 +111,7 @@ void quarantine_callback(struct uhuru_report *report, void *callback_data)
     report->action |= UHURU_ACTION_QUARANTINE;
 }
 
-static enum uhuru_mod_status quarantine_conf_set_quarantine_dir(void *mod_data, const char *key, int argc, const char **argv)
+static enum uhuru_mod_status quarantine_conf_set_quarantine_dir(void *mod_data, const char *key, const char **argv)
 {
   struct quarantine_data *qu_data = (struct quarantine_data *)mod_data;
 
@@ -120,7 +120,7 @@ static enum uhuru_mod_status quarantine_conf_set_quarantine_dir(void *mod_data, 
   return UHURU_MOD_OK;
 }
 
-static enum uhuru_mod_status quarantine_conf_set_enable(void *mod_data, const char *key, int argc, const char **argv)
+static enum uhuru_mod_status quarantine_conf_set_enable(void *mod_data, const char *key, const char **argv)
 {
   struct quarantine_data *qu_data = (struct quarantine_data *)mod_data;
 
