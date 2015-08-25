@@ -1,5 +1,6 @@
 #include "conf.h"
 #include "uhurup.h"
+#include "confparser.h"
 
 #include <glib.h>
 #include <stdlib.h>
@@ -7,8 +8,6 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <string.h>
-
-  /* conf_set_value(cp->uhuru, cp->current_group, cp->current_key, (const char **)cp->current_args->pdata); */
 
 static struct uhuru_conf_entry *conf_entry_get(struct uhuru_module *mod, const char *key)
 {
@@ -78,45 +77,34 @@ const char **conf_get_value(struct uhuru *uhuru, const char *mod_name, const cha
   return argv;
 }
 
-
-/* ==================== old code ==================== */
-
-void conf_load(struct uhuru_module *mod)
+static void conf_parser_set_cb(const char *group, const char *key, const char **argv, void *user_data)
 {
-  GKeyFile *key_file;
-  char *filename;
-  /* GError *error; */
-  static char *dirs[] = { LIBUHURU_CONF_DIR, LIBUHURU_CONF_DIR "/conf.d", NULL};
-  char **keys, **pkey;
-
-  /* if (mod->conf_set == NULL) */
-  /*   return; */
-
-  key_file = g_key_file_new();
-
-  asprintf(&filename, "%s.conf", mod->name);
-
-  if (!g_key_file_load_from_dirs(key_file, filename, (const gchar **)dirs, NULL, G_KEY_FILE_NONE, NULL)) {
-    g_log(NULL, G_LOG_LEVEL_WARNING, "cannot load conf file %s", mod->name);
-    return;
-  }
-
-  keys = g_key_file_get_keys(key_file, mod->name, NULL, NULL);
-  if (keys == NULL) {
-    g_log(NULL, G_LOG_LEVEL_WARNING, "cannot find group %s", mod->name);
-    return;
-  }
-
-  for(pkey = keys; *pkey != NULL; pkey++) {
-    char *value = g_key_file_get_value(key_file, mod->name, *pkey, NULL);
-
-    assert(value != NULL);
-    /* (*mod->conf_set)(mod->data, *pkey, value); */
-  }
-
-  g_strfreev(keys);
-
-  g_key_file_free(key_file);
-  free(filename);
+  conf_set_value((struct uhuru *)user_data, group, key, argv);
 }
+
+void conf_load_file(struct uhuru *uhuru, const char *filename)
+{
+  struct uhuru_conf_parser *cp = uhuru_conf_parser_new(filename, conf_parser_set_cb, uhuru);
+
+  uhuru_conf_parser_parse(cp);
+
+  uhuru_conf_parser_free(cp);
+}
+
+void conf_load_path(struct uhuru *uhuru, const char *path)
+{
+  GDir *dir;
+  const char *filename;
+  GError *err = NULL;
+
+  dir = g_dir_open(path, 0, &err);
+
+  while((filename = g_dir_read_name(dir)) != NULL) {
+    if (g_str_has_suffix(filename, ".conf"))
+      conf_load_file(uhuru, filename);
+  }
+
+  g_dir_close(dir);
+}
+
 

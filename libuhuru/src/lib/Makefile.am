@@ -25,8 +25,8 @@ unixsock.c \
 unixsock.h \
 builtin-modules/alert.c \
 builtin-modules/alert.h \
-builtin-modules/mimetype.c \
-builtin-modules/mimetype.h \
+builtin-modules/uhurumod.c \
+builtin-modules/uhurumod.h \
 builtin-modules/quarantine.c \
 builtin-modules/quarantine.h \
 builtin-modules/remote.c \

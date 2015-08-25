@@ -6,6 +6,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+struct module_manager {
+  /* a GArray and not a GPtrArray because GArray can be automatically NULL terminated */
+  GArray *modules;
+};
+
 /*
   is module copy really needed?
   module management modifies the uhuru_module structure, namely the fields
@@ -18,10 +23,7 @@
  */
 static struct uhuru_module *module_new(struct uhuru_module *src)
 {
-  struct uhuru_module *mod;
-
-  mod = (struct uhuru_module *)malloc(sizeof(struct uhuru_module));
-  assert(mod != NULL);
+  struct uhuru_module *mod = g_new(struct uhuru_module, 1);
 
   mod->init_fun = src->init_fun;
   mod->conf_table = src->conf_table;
@@ -58,17 +60,21 @@ static struct uhuru_module *module_load(const char *filename)
   return mod_loaded;
 }
 
-void uhuru_module_manager_init(struct uhuru_module_manager *mm)
+struct module_manager *module_manager_new(void)
 {
-  mm->modules = g_ptr_array_new();
+  struct module_manager *mm = g_new(struct module_manager, 1);
+
+  mm->modules = g_array_new(TRUE, TRUE, sizeof(struct uhuru_module *));
+
+  return mm;
 }
 
-void uhuru_module_manager_add(struct uhuru_module_manager *mm, struct uhuru_module *module)
+void module_manager_add(struct module_manager *mm, struct uhuru_module *module)
 {
-  g_ptr_array_add(mm->modules, module);
+  g_array_append_val(mm->modules, module);
 }
 
-void uhuru_module_manager_load_path(struct uhuru_module_manager *mm, const char *path)
+void module_manager_load_path(struct module_manager *mm, const char *path)
 {
   GDir *dir;
   const char *filename;
@@ -80,90 +86,13 @@ void uhuru_module_manager_load_path(struct uhuru_module_manager *mm, const char 
     struct uhuru_module *mod_loaded = module_load(filename);
 
     if (mod_loaded != NULL)
-      uhuru_module_manager_add(mm, mod_loaded);
+      module_manager_add(mm, mod_loaded);
   }
 
   g_dir_close(dir);
 }
 
-void uhuru_module_manager_init_all(struct uhuru_module_manager *mm)
+struct uhuru_module **module_manager_get_modules(struct module_manager *mm)
 {
-  int i;
-  struct uhuru_module *mod;
-
-  for (i = 0; i < mm->modules->len; i++) {
-    mod = (struct uhuru_module *)g_ptr_array_index(mm->modules, i);
-
-    if (mod->init_fun != NULL)
-      mod->mod_status = (*mod->init_fun)(&mod->mod_data);
-  }
-
-  for (i = 0; i < mm->modules->len; i++) {
-    mod = (struct uhuru_module *)g_ptr_array_index(mm->modules, i);
-
-    if (mod->mod_status == UHURU_MOD_OK)
-      conf_load(mod);
-  }
-
-  for (i = 0; i < mm->modules->len; i++) {
-    mod = (struct uhuru_module *)g_ptr_array_index(mm->modules, i);
-
-    if (mod->post_init_fun != NULL && mod->mod_status == UHURU_MOD_OK)
-      mod->mod_status = (*mod->post_init_fun)(mod->mod_data);
-  }
+  return (struct uhuru_module **)mm->modules->data;
 }
-
-struct uhuru_module *uhuru_module_manager_get_by_name(struct uhuru_module_manager *mm, const char *module_name)
-{
-  int i;
-
-  for (i = 0; i < mm->modules->len; i++) {
-    struct uhuru_module *mod = (struct uhuru_module *)g_ptr_array_index(mm->modules, i);
-
-    if (!strcmp(mod->name, module_name))
-      return mod;
-  }
-
-  return NULL;
-}
-
-void uhuru_module_manager_close_all(struct uhuru_module_manager *mm)
-{
-  int i;
-
-  for (i = 0; i < mm->modules->len; i++) {
-    struct uhuru_module *mod = (struct uhuru_module *)g_ptr_array_index(mm->modules, i);
-
-    if (mod->close_fun != NULL && mod->mod_status == UHURU_MOD_OK)
-      mod->mod_status = (*mod->close_fun)(mod->mod_data);
-  }
-}
-
-
-#if 0
-
-struct uhuru_module *module_load(const char *path);
-
-void module_init(struct uhuru_module *mod);
-
-void module_debug(struct uhuru_module *mod);
-
-void module_debug(struct uhuru_module *mod)
-{
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "name: %s", mod->name);
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "init: %p", mod->init_fun);
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "scan: %p", mod->scan_fun);
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "close: %p", mod->close_fun);
-}
-
-static void mod_debug(gpointer data, gpointer user_data)
-{
-  module_debug((struct uhuru_module *)data);
-}
-
-static void uwm_module_print_all(struct uhuru *u)
-{
-  g_ptr_array_foreach(u->modules, mod_debug, NULL);
-}
-
-#endif

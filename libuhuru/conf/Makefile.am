@@ -1,5 +1,5 @@
-uhuruconfdir=$(sysconfdir)/uhuru/conf.d
-uhuruconf_DATA=uhuru.conf alert.conf quarantine.conf remote.conf
+uhuruconfdir=$(sysconfdir)/uhuru
+uhuruconf_DATA=uhuru.conf
 
 EDIT = sed \
         -e 's,@sysconfdir\@,$(sysconfdir),g' \
@@ -10,4 +10,4 @@ EDIT = sed \
 	$(EDIT) $(srcdir)/$*.conf.in >$*.conf.tmp
 	mv $*.conf.tmp $*.conf
 
-EXTRA_DIST=uhuru.conf.in alert.conf.in quarantine.conf.in remote.conf.in
+EXTRA_DIST=uhuru.conf.in

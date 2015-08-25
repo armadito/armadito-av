@@ -6,20 +6,14 @@
 #include <stdio.h>
 #include <glib.h>
 
-struct uhuru_module_manager {
-  GPtrArray *modules;
-};
+struct module_manager;
 
-void uhuru_module_manager_init(struct uhuru_module_manager *mm);
+struct module_manager *module_manager_new(void);
 
-void uhuru_module_manager_add(struct uhuru_module_manager *mm, struct uhuru_module *module);
+void module_manager_add(struct module_manager *mm, struct uhuru_module *module);
 
-void uhuru_module_manager_load_path(struct uhuru_module_manager *mm, const char *path);
+void module_manager_load_path(struct module_manager *mm, const char *path);
 
-void uhuru_module_manager_init_all(struct uhuru_module_manager *mm);
-
-struct uhuru_module *uhuru_module_manager_get_by_name(struct uhuru_module_manager *mm, const char *module_name);
-
-void uhuru_module_manager_close_all(struct uhuru_module_manager *mm);
+struct uhuru_module **module_manager_get_modules(struct module_manager *mm);
 
 #endif

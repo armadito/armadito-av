@@ -1,5 +1,7 @@
 2015-08-25  François  <francois@dechelle.net>
 
+	* completed implementation of new configuration; not tested yet
+
 	* pushed the configuration parser code to its own file
 
 	* changed signature of set/get configuration functions; now argv is NULL terminated, remove argc argument
