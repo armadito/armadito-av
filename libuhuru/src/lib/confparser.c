@@ -258,7 +258,7 @@ static void accept(struct uhuru_conf_parser *cp, guint token)
   if (cp->lookahead_token == token) {
     if (cp->lookahead_token != TOKEN_EOF) {
       cp->lookahead_token = scanner_get_next_token(cp->scanner);
-#if 1
+#if 0
       print_token(cp->scanner, cp->lookahead_token);
 #endif
     }
@@ -403,7 +403,7 @@ int uhuru_conf_parser_parse(struct uhuru_conf_parser *cp)
   int ret = 1;
 
   cp->lookahead_token = scanner_get_next_token(cp->scanner);
-#if 1
+#if 0
   print_token(cp->scanner, cp->lookahead_token);
 #endif
 

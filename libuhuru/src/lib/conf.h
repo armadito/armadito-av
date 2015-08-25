@@ -4,14 +4,6 @@
 #include <libuhuru/module.h>
 #include <libuhuru/scan.h>
 
-struct uhuru_conf_parser;
-
-struct uhuru_conf_parser *uhuru_conf_parser_new(struct uhuru *u, const char *filename);
-
-int uhuru_conf_parser_parse(struct uhuru_conf_parser *cp);
-
-void uhuru_conf_parser_free(struct uhuru_conf_parser *cp);
-
 void conf_load_dir(struct uhuru *uhuru, const char *path);
 
 int conf_set_value(struct uhuru *uhuru, const char *mod_name, const char *key, const char **argv);
