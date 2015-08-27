@@ -5,16 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-void uhuru_report_print(struct uhuru_report *report, FILE *out)
-{
-  fprintf(out, "%s: %s", report->path, uhuru_file_status_pretty_str(report->status));
-  if (report->status != UHURU_UNDECIDED && report->status != UHURU_CLEAN && report->status != UHURU_UNKNOWN_FILE_TYPE)
-    fprintf(out, " [%s - %s]", report->mod_name, report->mod_report);
-  if (report->action != UHURU_ACTION_NONE)
-    fprintf(out, " (action %s)", uhuru_action_pretty_str(report->action));
-  fprintf(out, "\n");
-}
-
 void uhuru_report_init(struct uhuru_report *report, const char *path)
 {
   report->path = strdup(path);

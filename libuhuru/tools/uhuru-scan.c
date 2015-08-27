@@ -1,4 +1,5 @@
 #include <libuhuru/scan.h>
+#include "lib/statusp.h"
 
 #include <getopt.h>
 #include <stdio.h>
@@ -102,6 +103,16 @@ static void parse_options(int argc, char *argv[], struct scan_options *opts)
     usage();
 }
 
+static void report_print(struct uhuru_report *report, FILE *out)
+{
+  fprintf(out, "%s: %s", report->path, uhuru_file_status_pretty_str(report->status));
+  if (report->status != UHURU_UNDECIDED && report->status != UHURU_CLEAN && report->status != UHURU_UNKNOWN_FILE_TYPE)
+    fprintf(out, " [%s - %s]", report->mod_name, report->mod_report);
+  if (report->action != UHURU_ACTION_NONE)
+    fprintf(out, " (action %s)", uhuru_action_pretty_str(report->action));
+  fprintf(out, "\n");
+}
+
 static void report_print_callback(struct uhuru_report *report, void *callback_data)
 {
   int *print_clean = (int *)callback_data;
@@ -109,7 +120,7 @@ static void report_print_callback(struct uhuru_report *report, void *callback_da
   if (!*print_clean && (report->status == UHURU_WHITE_LISTED || report->status == UHURU_CLEAN))
     return;
 
-  uhuru_report_print(report, stdout);
+  report_print(report, stdout);
 }
 
 static void summary_callback(struct uhuru_report *report, void *callback_data)
@@ -204,8 +215,6 @@ static void do_scan(struct scan_options *opts, struct scan_summary *summary)
     flags |= UHURU_SCAN_THREADED;
 
   u = uhuru_open(opts->use_daemon);
-
-  uhuru_set_verbose(u, 1);
 
 #if 0
   uhuru_print(u);

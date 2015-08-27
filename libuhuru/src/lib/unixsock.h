@@ -3,9 +3,9 @@
 
 #include <unistd.h>
 
-int client_socket_create(char *socket_path, int max_retry);
+int client_socket_create(const char *socket_path, int max_retry);
 
-int server_socket_create(char *socket_path);
+int server_socket_create(const char *socket_path);
 
 int server_socket_accept(int server_sock);
 

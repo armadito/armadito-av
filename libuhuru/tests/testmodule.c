@@ -8,14 +8,14 @@ const char *testmodule_mime_types[] = {
   NULL,
 };
 
-enum uhuru_status testmodule_scan(const char *path, void *mod_data)
+enum uhuru_status testmodule_scan(const char *path, void *data)
 {
   return UHURU_CLEAN;
 }
 
-enum uhuru_mod_status testmodule_init(void **pmod_data)
+enum uhuru_mod_status testmodule_init(struct uhuru_module *module)
 {
-  *pmod_data = NULL;
+  *pdata = NULL;
 
   return UHURU_MOD_OK;
 }

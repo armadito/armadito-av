@@ -1,15 +1,16 @@
 #include "libuhuru-config.h"
 #include <libuhuru/module.h>
 #include <libuhuru/scan.h>
-#include "alert.h"
 #include "conf.h"
 #include "dir.h"
 #include "modulep.h"
 #include "protocol.h"
-#include "quarantine.h"
 #include "statusp.h"
 #include "uhurup.h"
 #include "unixsock.h"
+#include "builtin-modules/alert.h"
+#include "builtin-modules/quarantine.h"
+#include "builtin-modules/remote.h"
 
 #include <assert.h>
 #include <glib.h>
@@ -60,35 +61,34 @@ static void uhuru_scan_call_callbacks(struct uhuru_scan *scan, struct uhuru_repo
 
 static void local_scan_init(struct uhuru_scan *scan)
 {
+  struct uhuru_module *alert_module, *quarantine_module;
+
   scan->local.thread_pool = NULL;
   scan->local.private_magic_key = NULL;
 
-  uhuru_scan_add_callback(scan, alert_callback, NULL);
-  uhuru_scan_add_callback(scan, quarantine_callback, NULL);
+  alert_module = uhuru_get_module_by_name(scan->uhuru, "alert");
+  uhuru_scan_add_callback(scan, alert_callback, alert_module->data);
+
+  quarantine_module = uhuru_get_module_by_name(scan->uhuru, "quarantine");
+  uhuru_scan_add_callback(scan, quarantine_callback, quarantine_module->data);
 }
 
-static enum uhuru_file_status local_scan_apply_modules(const char *path, const char *mime_type, GPtrArray *mod_array,  struct uhuru_report *report)
+static enum uhuru_file_status local_scan_apply_modules(const char *path, const char *mime_type, struct uhuru_module **modules,  struct uhuru_report *report)
 {
   enum uhuru_file_status current_status = UHURU_UNDECIDED;
-  int i;
 
-  for (i = 0; i < mod_array->len; i++) {
-    struct uhuru_module *mod = (struct uhuru_module *)g_ptr_array_index(mod_array, i);
+  for (; *modules != NULL; modules++) {
+    struct uhuru_module *mod = *modules;
     enum uhuru_file_status mod_status;
     char *mod_report = NULL;
 
-    if (mod->mod_status != UHURU_MOD_OK)
+    if (mod->status != UHURU_MOD_OK)
       continue;
 
-#if 0
-    if (uhuru_get_verbose(u) >= 2)
-      printf("UHURU: module %s: scanning %s\n", mod->name, path);
-#endif
+    mod_status = (*mod->scan_fun)(mod, path, mime_type, &mod_report);
 
-    mod_status = (*mod->scan)(path, mime_type, mod->data, &mod_report);
-
-#if 0
-    printf("UHURU: module %s: scanning %s -> %s\n", mod->name, path, uhuru_status_str(mod_status));
+#ifdef DEBUG
+    g_log(NULL, G_LOG_LEVEL_DEBUG, "module %s: scanning %s -> %s\n", mod->name, path, uhuru_file_status_str(mod_status));
 #endif
 
     if (uhuru_file_status_cmp(current_status, mod_status) < 0) {
@@ -96,10 +96,6 @@ static enum uhuru_file_status local_scan_apply_modules(const char *path, const c
       uhuru_report_change(report, mod_status, (char *)mod->name, mod_report);
     } else if (mod_report != NULL)
       free(mod_report);
-
-#if 0
-    printf("UHURU: current status %s\n", uhuru_file_status_str(current_status));
-#endif
 
     if (current_status == UHURU_WHITE_LISTED || current_status == UHURU_MALWARE)
       break;
@@ -112,8 +108,8 @@ static void local_scan_file(struct uhuru_scan *scan, magic_t magic, const char *
 {
   enum uhuru_file_status status;
   struct uhuru_report report;
-  GPtrArray *modules;
-  char *mime_type;
+  struct uhuru_module **modules;
+  const char *mime_type;
 
   uhuru_report_init(&report, path);
 
@@ -124,14 +120,11 @@ static void local_scan_file(struct uhuru_scan *scan, magic_t magic, const char *
   else
     status = local_scan_apply_modules(path, mime_type, modules, &report);
 
-  if (uhuru_get_verbose(scan->uhuru) >= 3)
-    printf("%s: %s\n", path, uhuru_file_status_str(status));
-
   uhuru_scan_call_callbacks(scan, &report);
 
   uhuru_report_destroy(&report);
 
-  free(mime_type);
+  free((void *)mime_type);
 }
 
 /* Unfortunately, libmagic is not thread-safe. */
@@ -240,10 +233,10 @@ static enum uhuru_scan_status local_scan_run(struct uhuru_scan *scan)
 
 static void remote_scan_init(struct uhuru_scan *scan)
 {
-  char *sock_dir;
+  const char *sock_dir;
   GString *sock_path;
 
-  sock_dir = conf_get(scan->uhuru, "remote", "socket-dir");
+  sock_dir = remote_module_get_sock_dir(&remote_module);
   assert(sock_dir != NULL);
 
   sock_path = g_string_new(sock_dir);
@@ -251,6 +244,8 @@ static void remote_scan_init(struct uhuru_scan *scan)
   g_string_append_printf(sock_path, "/uhuru-%s", getenv("USER"));
   scan->remote.sock_path = sock_path->str;
   g_string_free(sock_path, FALSE);
+
+  free((void *)sock_dir);
 }
 
 static void remote_scan_cb_scan_file(struct protocol_handler *h, void *data)

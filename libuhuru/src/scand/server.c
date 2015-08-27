@@ -20,18 +20,26 @@ struct server {
   struct uhuru *uhuru;
 };
 
-static char *server_get_sock_path(struct server *server)
+static const char *server_get_sock_path(struct server *server)
 {
-  char *sock_dir, *ret;
+  const char **argv;
+  const char *sock_dir, *ret;
   GString *sock_path;
 
-  sock_dir = conf_get(server->uhuru, "remote", "socket-dir");
-  assert(sock_dir != NULL);
+  /* FIXME */
+  /* argv = conf_get_value(server->uhuru, "remote", "socket-dir"); */
+  assert(argv != NULL);
+
+  sock_dir = argv[0];
 
   sock_path = g_string_new(sock_dir);
+
   g_string_append_printf(sock_path, "/uhuru-%s", getenv("USER"));
   ret = sock_path->str;
   g_string_free(sock_path, FALSE);
+
+  free((void *)sock_dir);
+  free(argv);
 
   return ret;
 }
@@ -64,15 +72,13 @@ static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpo
 struct server *server_new(void)
 {
   struct server *server;
-  char *sock_path;
+  const char *sock_path;
 
   server = (struct server *)malloc(sizeof(struct server));
   assert(server != NULL);
 
   server->uhuru = uhuru_open(0);
   assert(server->uhuru != NULL);
-
-  uhuru_set_verbose(server->uhuru, 1);
 
   sock_path = server_get_sock_path(server);
 

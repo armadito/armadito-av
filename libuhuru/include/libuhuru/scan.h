@@ -13,10 +13,6 @@ struct uhuru_scan;
 
 struct uhuru *uhuru_open(int is_remote);
 
-void uhuru_set_verbose(struct uhuru *u, int verbosity);
-
-int uhuru_get_verbose(struct uhuru *u);
-
 void uhuru_print(struct uhuru *u);
 
 void uhuru_close(struct uhuru *u);
@@ -55,6 +51,9 @@ enum uhuru_action {
   UHURU_ACTION_REMOVE       = 1 << 3,
 };
 
+/* const char *uhuru_action_str(enum uhuru_action action); */
+const char *uhuru_action_pretty_str(enum uhuru_action action);
+
 struct uhuru_report {
   char *path;
   enum uhuru_file_status status;
@@ -62,11 +61,6 @@ struct uhuru_report {
   char *mod_name;
   char *mod_report;
 };
-
-const char *uhuru_file_status_str(enum uhuru_file_status status);
-const char *uhuru_file_status_pretty_str(enum uhuru_file_status status);
-/* const char *uhuru_action_str(enum uhuru_action action); */
-const char *uhuru_action_pretty_str(enum uhuru_action action);
 
 void uhuru_report_print(struct uhuru_report *report, FILE *out);
 

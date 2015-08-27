@@ -1,12 +1,41 @@
-[umwsu]
-
-#scan-archive=1
-conf-dir=@sysconfdir@/uhuru/conf.d
-
 [mime-type]
 
-mime-type=application/x-dosexec; clamav; module5.2
-mime-type=application/pdf; module4; clamav
-mime-type=application/x-sharedlib; module5.2
-mime-type=application/x-object; module5.2
-mime-type=application/x-executable; module5.2
+mime-type="application/pdf"; clamav
+mime-type="application/x-dosexec"; clamav; "module5_2"
+mime-type="application/x-executable"; "module5.2"; clamav
+mime-type="application/x-msdos-program"; "module5_2"; clamav
+mime-type="application/x-object"; "module5_2"; clamav
+mime-type="application/x-sharedlib"; "module5.2"; clamav
+# clamav scans every file if no other module applies
+mime-type="*"; clamav    
+
+
+[alert]
+
+alert-dir="@localstatedir@/spool/uhuru"
+
+
+[quarantine]
+
+# is quarantine enabled?
+enable=0
+
+# quarantine directory
+# files containing malware will be moved to this directory, renamed and made 
+# non-readable
+# quarantine directory must be mode 333 octal. This is normaly managed by 
+# package installation scripts
+quarantine-dir="@localstatedir@/lib/uhuru/quarantine"
+
+
+[remote]
+
+socket-dir="/tmp"
+
+
+# [uhuru]
+# REMOVED, path loading directly from uhuru.c
+# this directive trigs loading of the configuration files of the dynamically 
+# loaded modules
+# conf-dir="@sysconfdir@/uhuru/conf.d"
+

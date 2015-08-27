@@ -1,24 +1,27 @@
 #ifndef _LIBUHURU_MODULEP_H_
 #define _LIBUHURU_MODULEP_H_
 
-#include <stdio.h>
-
 #include <libuhuru/module.h>
+#include "libuhuru-config.h"
 
-struct uhuru_module {
-  enum uhuru_mod_status (*init)(void **pmod_data);
-  enum uhuru_mod_status (*conf_set)(void *mod_data, const char *key, const char *value);
-  char *(*conf_get)(void *mod_data, const char *key);
-  enum uhuru_file_status (*scan)(const char *path, const char *mime_type, void *mod_data, char **pmod_report);
-  enum uhuru_mod_status (*close)(void *mod_data);
-  enum uhuru_mod_status mod_status;
-  const char *name;
-  const char **mime_types;
-  void *data;
-};
+#include <stdio.h>
+#include <glib.h>
 
-struct uhuru_module *module_new(const char *path);
+struct module_manager;
 
-void module_debug(struct uhuru_module *mod);
+struct module_manager *module_manager_new(struct uhuru *uhuru);
+
+void module_manager_add(struct module_manager *mm, struct uhuru_module *module);
+
+void module_manager_load_path(struct module_manager *mm, const char *path);
+
+/* NULL terminated array of struct uhuru_module */
+struct uhuru_module **module_manager_get_modules(struct module_manager *mm);
+
+void module_manager_close_all(struct module_manager *mm);
+
+#ifdef DEBUG
+const char *module_debug(struct uhuru_module *module);
+#endif
 
 #endif

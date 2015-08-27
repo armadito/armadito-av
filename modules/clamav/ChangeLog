@@ -1,6 +1,10 @@
+2015-08-27  François  <francois@dechelle.net>
+
+	* changed module API and configuration
+
 2015-08-04  François  <francois@dechelle.net>
 
-	* * changed bases default directory; now /var/lib/uhuru/bases/clamav
+	* changed bases default directory; now /var/lib/uhuru/bases/clamav
 
 2014-12-03  François  <francois@dechelle.net>
 

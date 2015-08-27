@@ -1,13 +1,15 @@
 #ifndef _LIBUHURU_CONF_H_
 #define _LIBUHURU_CONF_H_
 
-#include "modulep.h"
-#include "uhurup.h"
+#include <libuhuru/module.h>
+#include <libuhuru/scan.h>
 
-void conf_load(struct uhuru_module *mod);
+int conf_set_value(struct uhuru *uhuru, const char *mod_name, const char *key, const char **argv);
 
-void conf_set(struct uhuru *uhuru, const char *mod_name, const char *key, const char *value);
+const char **conf_get_value(struct uhuru *uhuru, const char *mod_name, const char *key);
 
-char *conf_get(struct uhuru *uhuru, const char *mod_name, const char *key);
+void conf_load_file(struct uhuru *uhuru, const char *filename);
+
+void conf_load_path(struct uhuru *uhuru, const char *path);
 
 #endif
