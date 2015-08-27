@@ -14,31 +14,35 @@ enum uhuru_mod_status {
   UHURU_MOD_CLOSE_ERROR,
 };
 
+struct uhuru;
+struct uhuru_module;
+
 struct uhuru_conf_entry {
-  const char *key;
-
-  enum uhuru_mod_status (*conf_set_fun)(void *mod_data, const char *key, const char **argv);
-
-  /* the 'get' function can be set to NULL if module is too lazy to return its configuration */
-  const char **(*conf_get_fun)(void *mod_data, const char *key, enum uhuru_mod_status *pstatus);
+  const char *directive;
+  enum uhuru_mod_status (*conf_fun)(struct uhuru_module *module, const char *directive, const char **argv);
 };
 
 struct uhuru_module {
-  enum uhuru_mod_status (*init_fun)(void **pmod_data);
+  enum uhuru_mod_status (*init_fun)(struct uhuru_module *module);
 
   struct uhuru_conf_entry *conf_table;
 
-  enum uhuru_mod_status (*post_init_fun)(void *mod_data);
+  enum uhuru_mod_status (*post_init_fun)(struct uhuru_module *module);
 
-  enum uhuru_file_status (*scan_fun)(const char *path, const char *mime_type, void *mod_data, char **pmod_report);
+  enum uhuru_file_status (*scan_fun)(struct uhuru_module *module, const char *path, const char *mime_type, char **pmod_report);
 
-  enum uhuru_mod_status (*close_fun)(void *mod_data);
+  enum uhuru_mod_status (*close_fun)(struct uhuru_module *module);
 
   const char *name;
 
-  enum uhuru_mod_status mod_status;
+  size_t size;
 
-  void *mod_data;
+  /* following fields will be initialized by the library */
+  enum uhuru_mod_status status;
+
+  void *data;
+
+  struct uhuru *uhuru;
 };
 
 #ifdef __cplusplus

@@ -3,4 +3,6 @@
 
 extern struct uhuru_module remote_module;
 
+const char *remote_module_get_sock_dir(struct uhuru_module *remote_module);
+
 #endif

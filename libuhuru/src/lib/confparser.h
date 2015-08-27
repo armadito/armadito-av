@@ -3,7 +3,7 @@
 
 struct uhuru_conf_parser;
 
-typedef void (*conf_parser_callback_t)(const char *group, const char *key, const char **argv, void *user_data);
+typedef void (*conf_parser_callback_t)(const char *group, const char *directive, const char **argv, void *user_data);
 
 struct uhuru_conf_parser *uhuru_conf_parser_new(const char *filename, conf_parser_callback_t callback, void *user_data);
 

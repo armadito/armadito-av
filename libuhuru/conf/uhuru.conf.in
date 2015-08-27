@@ -1,4 +1,4 @@
-[uhuru]
+[mime-type]
 
 mime-type="application/pdf"; clamav
 mime-type="application/x-dosexec"; clamav; "module5_2"

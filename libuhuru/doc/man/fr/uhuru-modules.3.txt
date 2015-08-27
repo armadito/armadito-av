@@ -23,11 +23,11 @@ enum uhuru_status {
   UHURU_UNKNOWN_FILE_TYPE,
 };
 
-typedef enum uhuru_mod_status (*uhuru_mod_init_t)(void **pmod_data);
+typedef enum uhuru_mod_status (*uhuru_mod_init_t)(struct uhuru_module *mod);
 
-typedef enum uhuru_status (*uhuru_mod_scan)(const char *path, void *mod_data);
+typedef enum uhuru_status (*uhuru_mod_scan)(const char *path, void *data);
 
-typedef enum uhuru_mod_status (*uhuru_mod_close)(void *mod_data);
+typedef enum uhuru_mod_status (*uhuru_mod_close)(struct uhuru_module *module);
 
 
 DESCRIPTION
@@ -39,10 +39,10 @@ Les modules de recherche sont chargés dynamiquement à partir des fichiers .so 
 Un module de recherche doit définir les fonctions suivantes (MODULE désigne le nom du module, obtenu à partir du nom du fichier):
 
 *MODULE_init*::
-Fonction d'initialisation. Alloue la structure privée du module, initialise le module, retourne la structure allouée via 'pmod_data'.
+Fonction d'initialisation. Alloue la structure privée du module, initialise le module, retourne la structure allouée via 'pdata'.
 
 *MODULE_scan*::
-Fonction de recherche. Utilise la structure passée via 'pmod_data' (structure allouée par 'MODULE_init'); réalise la recherche et retourne un statut indiquant si le fichier contient ou non un malware.
+Fonction de recherche. Utilise la structure passée via 'pdata' (structure allouée par 'MODULE_init'); réalise la recherche et retourne un statut indiquant si le fichier contient ou non un malware.
 
 *MODULE_close*::
 Fonction de dé-initialisation. Libère la structure privée du module, dé-initialise le module.

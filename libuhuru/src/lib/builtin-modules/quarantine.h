@@ -4,8 +4,8 @@
 #include <libuhuru/module.h>
 #include <libuhuru/scan.h>
 
-void quarantine_callback(struct uhuru_report *report, void *callback_data);
-
 extern struct uhuru_module quarantine_module;
+
+void quarantine_callback(struct uhuru_report *report, void *callback_data);
 
 #endif

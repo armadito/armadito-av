@@ -26,7 +26,8 @@ static const char *server_get_sock_path(struct server *server)
   const char *sock_dir, *ret;
   GString *sock_path;
 
-  argv = conf_get_value(server->uhuru, "remote", "socket-dir");
+  /* FIXME */
+  /* argv = conf_get_value(server->uhuru, "remote", "socket-dir"); */
   assert(argv != NULL);
 
   sock_dir = argv[0];

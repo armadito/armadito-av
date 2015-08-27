@@ -344,23 +344,20 @@ struct alert_data {
   char *alert_dir;
 };
 
-static enum uhuru_mod_status alert_init(void **pmod_data)
+static enum uhuru_mod_status alert_init(struct uhuru_module *module)
 {
-  struct alert_data *al_data;
-
-  al_data = (struct alert_data *)malloc(sizeof(struct alert_data));
-  assert(al_data != NULL);
+  struct alert_data *al_data = g_new(struct alert_data, 1);
 
   al_data->alert_dir = NULL;
 
-  *pmod_data = al_data;
+  module->data = al_data;
 
   return UHURU_MOD_OK;
 }
 
-static enum uhuru_mod_status alert_conf_set_alert_dir(void *mod_data, const char *key, const char **argv)
+static enum uhuru_mod_status alert_conf_alert_dir(struct uhuru_module *module, const char *directive, const char **argv)
 {
-  struct alert_data *al_data = (struct alert_data *)mod_data;
+  struct alert_data *al_data = (struct alert_data *)module->data;
 
   al_data->alert_dir = strdup(argv[0]);
 
@@ -402,14 +399,12 @@ void alert_callback(struct uhuru_report *report, void *callback_data)
 
 static struct uhuru_conf_entry alert_conf_table[] = {
   { 
-    .key = "alert-dir", 
-    .conf_set_fun = alert_conf_set_alert_dir, 
-    .conf_get_fun = NULL,
+    .directive = "alert-dir", 
+    .conf_fun = alert_conf_alert_dir, 
   },
   { 
-    .key = NULL,
-    .conf_set_fun = NULL, 
-    .conf_get_fun = NULL,
+    .directive = NULL,
+    .conf_fun = NULL, 
   },
 };
 
@@ -420,4 +415,5 @@ struct uhuru_module alert_module = {
   .scan_fun = NULL,
   .close_fun = NULL,
   .name = "alert",
+  .size = sizeof(struct alert_data),
 };

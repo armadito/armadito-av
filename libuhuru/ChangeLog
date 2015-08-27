@@ -1,3 +1,7 @@
+2015-08-27  François  <francois@dechelle.net>
+
+	* tested implementation of new configuration and new modules API; works with clamav
+
 2015-08-25  François  <francois@dechelle.net>
 
 	* completed implementation of new configuration; not tested yet
