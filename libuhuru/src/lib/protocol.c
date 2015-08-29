@@ -1,5 +1,5 @@
-#include "protocol.h"
 #include "libuhuru-config.h"
+#include "protocol.h"
 
 #include <glib.h>
 #include <errno.h>

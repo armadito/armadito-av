@@ -1,3 +1,7 @@
+2015-08-29  François  <francois@dechelle.net>
+
+	* tested new implementation of ipc; unit tests works; handler calling not yet implemented
+
 2015-08-27  François  <francois@dechelle.net>
 
 	* tested implementation of new configuration and new modules API; works with clamav
