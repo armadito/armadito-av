@@ -2,6 +2,8 @@
 #include "client.h"
 #include "lib/conf.h"
 #include "lib/unixsock.h"
+#include "lib/uhurup.h"
+#include "lib/builtin-modules/remote.h"
 
 #include <libuhuru/scan.h>
 
@@ -22,24 +24,22 @@ struct server {
 
 static const char *server_get_sock_path(struct server *server)
 {
-  const char **argv;
+  struct uhuru_module *remote_module;
   const char *sock_dir, *ret;
   GString *sock_path;
 
-  /* FIXME */
-  /* argv = conf_get_value(server->uhuru, "remote", "socket-dir"); */
-  assert(argv != NULL);
+  remote_module = uhuru_get_module_by_name(server->uhuru, "remote");
+  assert(remote_module != NULL);
 
-  sock_dir = argv[0];
+  sock_dir = remote_module_get_sock_dir(remote_module);
+  assert(sock_dir != NULL);
+  /* was: argv = conf_get_value(server->uhuru, "remote", "socket-dir"); */
 
   sock_path = g_string_new(sock_dir);
 
   g_string_append_printf(sock_path, "/uhuru-%s", getenv("USER"));
   ret = sock_path->str;
   g_string_free(sock_path, FALSE);
-
-  free((void *)sock_dir);
-  free(argv);
 
   return ret;
 }

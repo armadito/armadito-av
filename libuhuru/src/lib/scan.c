@@ -233,10 +233,14 @@ static enum uhuru_scan_status local_scan_run(struct uhuru_scan *scan)
 
 static void remote_scan_init(struct uhuru_scan *scan)
 {
+  struct uhuru_module *remote_module;
   const char *sock_dir;
   GString *sock_path;
 
-  sock_dir = remote_module_get_sock_dir(&remote_module);
+  remote_module = uhuru_get_module_by_name(scan->uhuru, "remote");
+  assert(remote_module != NULL);
+
+  sock_dir = remote_module_get_sock_dir(remote_module);
   assert(sock_dir != NULL);
 
   sock_path = g_string_new(sock_dir);
@@ -244,8 +248,6 @@ static void remote_scan_init(struct uhuru_scan *scan)
   g_string_append_printf(sock_path, "/uhuru-%s", getenv("USER"));
   scan->remote.sock_path = sock_path->str;
   g_string_free(sock_path, FALSE);
-
-  free((void *)sock_dir);
 }
 
 static void remote_scan_handler_scan_file(struct ipc_manager *m, void *data)
