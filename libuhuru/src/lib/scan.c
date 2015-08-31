@@ -4,7 +4,7 @@
 #include "conf.h"
 #include "dir.h"
 #include "modulep.h"
-#include "protocol.h"
+#include "ipc.h"
 #include "statusp.h"
 #include "uhurup.h"
 #include "unixsock.h"
@@ -35,7 +35,7 @@ struct local_scan {
 struct remote_scan {
   char *sock_path;
   int sock;
-  struct protocol_handler *handler;
+  struct ipc_manager *manager;
 };
 
 struct uhuru_scan {
@@ -248,15 +248,21 @@ static void remote_scan_init(struct uhuru_scan *scan)
   free((void *)sock_dir);
 }
 
-static void remote_scan_cb_scan_file(struct protocol_handler *h, void *data)
+static void remote_scan_handler_scan_file(struct ipc_manager *m, void *data)
 {
   struct uhuru_scan *scan = (struct uhuru_scan *)data;
-  char *path = protocol_handler_get_header(h, "Path");
-  char *status = protocol_handler_get_header(h, "Status");
-  char *mod_name = protocol_handler_get_header(h, "Module-Name");
-  char *x_status = protocol_handler_get_header(h, "X-Status");
-  char *action = protocol_handler_get_header(h, "Action");
+  char *path;
+  char *status;
+  char *mod_name;
+  char *x_status;
+  char *action;
   struct uhuru_report report;
+
+  ipc_manager_get_arg_at(m, 0, IPC_STRING, &path);
+  ipc_manager_get_arg_at(m, 1, IPC_STRING, &status);
+  ipc_manager_get_arg_at(m, 2, IPC_STRING, &mod_name);
+  ipc_manager_get_arg_at(m, 3, IPC_STRING, &x_status);
+  ipc_manager_get_arg_at(m, 4, IPC_STRING, &action);
 
   uhuru_report_init(&report, path);
 
@@ -271,7 +277,7 @@ static void remote_scan_cb_scan_file(struct protocol_handler *h, void *data)
   uhuru_report_destroy(&report);
 }
 
-static void remote_scan_cb_scan_end(struct protocol_handler *h, void *data)
+static void remote_scan_handler_scan_end(struct ipc_manager *m, void *data)
 {
 }
 
@@ -280,19 +286,18 @@ static enum uhuru_file_status remote_scan_start(struct uhuru_scan *scan)
   scan->remote.sock = client_socket_create(scan->remote.sock_path, 10);
   if (scan->remote.sock < 0)
     return UHURU_IERROR;
-  scan->remote.handler = protocol_handler_new(scan->remote.sock, scan->remote.sock);
 
-  protocol_handler_add_callback(scan->remote.handler, "SCAN_FILE", remote_scan_cb_scan_file, scan);
-  protocol_handler_add_callback(scan->remote.handler, "SCAN_END", remote_scan_cb_scan_end, scan);
+  scan->remote.manager = ipc_manager_new(scan->remote.sock, scan->remote.sock);
 
-  protocol_handler_send_msg(scan->remote.handler, "SCAN",
-			    "Path", scan->path,
-			    NULL);
+  ipc_manager_add_handler(scan->remote.manager, IPC_MSG_ID_SCAN_FILE, remote_scan_handler_scan_file, scan);
+  ipc_manager_add_handler(scan->remote.manager, IPC_MSG_ID_SCAN_FILE, remote_scan_handler_scan_end, scan);
+
+  ipc_manager_send_msg(scan->remote.manager, IPC_MSG_ID_SCAN, IPC_STRING, scan->path, IPC_NONE);
 }
 
 static enum uhuru_scan_status remote_scan_run(struct uhuru_scan *scan)
 {
-  if (protocol_handler_receive(scan->remote.handler) < 0)
+  if (ipc_manager_receive(scan->remote.manager) < 0)
     return UHURU_SCAN_COMPLETED;
 
   return UHURU_SCAN_CONTINUE;

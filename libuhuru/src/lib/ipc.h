@@ -20,10 +20,12 @@ struct ipc_value {
 typedef guchar ipc_msg_id_t;
 
 #define IPC_MSG_ID_FIRST             ((ipc_msg_id_t)0)
-#define IPC_MSG_ID_SCAN              ((ipc_msg_id_t)0)
-#define IPC_MSG_ID_SCAN_FILE         ((ipc_msg_id_t)1)
-#define IPC_MSG_ID_SCAN_END          ((ipc_msg_id_t)2)
-#define IPC_MSG_ID_LAST              ((ipc_msg_id_t)2)
+#define IPC_MSG_ID_PING              ((ipc_msg_id_t)0)
+#define IPC_MSG_ID_PONG              ((ipc_msg_id_t)1)
+#define IPC_MSG_ID_SCAN              ((ipc_msg_id_t)2)
+#define IPC_MSG_ID_SCAN_FILE         ((ipc_msg_id_t)3)
+#define IPC_MSG_ID_SCAN_END          ((ipc_msg_id_t)4)
+#define IPC_MSG_ID_LAST              ((ipc_msg_id_t)4)
 
 struct ipc_manager;
 
@@ -36,6 +38,8 @@ ipc_msg_id_t ipc_manager_get_msg_id(struct ipc_manager *manager);
 int ipc_manager_get_argc(struct ipc_manager *manager);
 
 struct ipc_value *ipc_manager_get_argv(struct ipc_manager *manager);
+
+int ipc_manager_get_arg_at(struct ipc_manager *manager, int index, ipc_type_t type, void *pvalue);
 
 typedef void (*ipc_handler_t)(struct ipc_manager *manager, void *data);
 

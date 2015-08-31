@@ -88,6 +88,33 @@ struct ipc_value *ipc_manager_get_argv(struct ipc_manager *manager)
   return (struct ipc_value *)manager->argv->data;
 }
 
+int ipc_manager_get_arg_at(struct ipc_manager *manager, int index, ipc_type_t type, void *pvalue)
+{
+  struct ipc_value *argv;
+
+  if (index >= ipc_manager_get_argc(manager)) {
+    g_log(NULL, G_LOG_LEVEL_ERROR, "IPC: argument index out of range %d >= %d ", index, ipc_manager_get_argc(manager));
+    return -1;
+  }
+
+  argv = ipc_manager_get_argv(manager);
+  if (argv[index].type != type) {
+    g_log(NULL, G_LOG_LEVEL_ERROR, "IPC: invalid argument type %d != %d ", type, argv[index].type);
+    return -1;
+  }
+
+  switch(type) {
+  case IPC_INT32:
+    *((gint32 *)pvalue) = argv[index].value.v_int32;
+    break;
+  case IPC_STRING:
+    *((char **)pvalue) = argv[index].value.v_str;
+    break;
+  }
+
+  return 0;
+}
+
 int ipc_manager_add_handler(struct ipc_manager *manager, ipc_msg_id_t msg_id, ipc_handler_t handler, void *data)
 {
   if (msg_id < IPC_MSG_ID_FIRST || msg_id > IPC_MSG_ID_LAST)

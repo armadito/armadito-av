@@ -28,9 +28,16 @@ static void debug_args(struct ipc_manager *m)
 
 static void handler1(struct ipc_manager *manager, void *data)
 {
+  char *ps;
+  gint32 i;
+
   fprintf(stderr, "handler 1: ");
   debug_args(manager);
   fprintf(stderr, "\n");
+  ipc_manager_get_arg_at(manager, 0, IPC_STRING, &ps);
+  fprintf(stderr, "arg 0 %s\n", ps);
+  ipc_manager_get_arg_at(manager, 1, IPC_INT32, &i);
+  fprintf(stderr, "arg 1 %d\n", i);
 }
 
 static void handler2(struct ipc_manager *manager, void *data)
