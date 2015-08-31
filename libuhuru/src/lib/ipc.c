@@ -9,7 +9,7 @@
 #include <string.h>
 
 enum ipc_manager_state {
-  EXPECTING_TAG = 1,
+  EXPECTING_MSG_ID = 1,
   EXPECTING_ARG,
   IN_ARG_INT32,
   IN_ARG_STRING,
@@ -17,13 +17,18 @@ enum ipc_manager_state {
 
 #define DEFAULT_INPUT_BUFFER_SIZE 1024
 
+struct ipc_handler_entry {
+  ipc_handler_t handler;
+  void *data;
+};
+
 struct ipc_manager {
   int input_fd;
   FILE *output;
   size_t input_buffer_size;
   char *input_buffer;
   enum ipc_manager_state state;
-  guchar tag;
+  guchar msg_id;
   int received_count;
   union {
     gint32 i;
@@ -31,6 +36,7 @@ struct ipc_manager {
   } int32_arg;
   GString *str_arg;
   GArray *argv;
+  struct ipc_handler_entry *handlers;
 };
 
 struct ipc_manager *ipc_manager_new(int input_fd, int output_fd)
@@ -48,12 +54,14 @@ struct ipc_manager *ipc_manager_new(int input_fd, int output_fd)
   m->input_buffer_size = DEFAULT_INPUT_BUFFER_SIZE;
   m->input_buffer = (char *)malloc(m->input_buffer_size);
 
-  m->state = EXPECTING_TAG;
+  m->state = EXPECTING_MSG_ID;
 
   m->int32_arg.i = 0;
   m->str_arg = g_string_new("");
 
   m->argv = g_array_new(FALSE, FALSE, sizeof(struct ipc_value));
+
+  m->handlers = g_new0(struct ipc_handler_entry, IPC_MSG_ID_LAST - IPC_MSG_ID_FIRST);
 
   return m;
 }
@@ -63,6 +71,11 @@ void ipc_manager_free(struct ipc_manager *manager)
   free(manager->input_buffer);
   g_string_free(manager->str_arg, TRUE);
   /* FIXME: to be completed */
+}
+
+ipc_msg_id_t ipc_manager_get_msg_id(struct ipc_manager *manager)
+{
+  return manager->msg_id;
 }
 
 int ipc_manager_get_argc(struct ipc_manager *manager)
@@ -75,8 +88,14 @@ struct ipc_value *ipc_manager_get_argv(struct ipc_manager *manager)
   return (struct ipc_value *)manager->argv->data;
 }
 
-int ipc_manager_add_callback(struct ipc_manager *manager, ipc_tag_t tag, ipc_handler_t cb, void *data)
+int ipc_manager_add_handler(struct ipc_manager *manager, ipc_msg_id_t msg_id, ipc_handler_t handler, void *data)
 {
+  if (msg_id < IPC_MSG_ID_FIRST || msg_id > IPC_MSG_ID_LAST)
+    g_log(NULL, G_LOG_LEVEL_ERROR, "IPC: cannot add handler for msg_id %d out of range %d - %d ", msg_id, IPC_MSG_ID_FIRST, IPC_MSG_ID_LAST);
+
+  manager->handlers[msg_id].handler = handler;
+  manager->handlers[msg_id].data = data;
+
   return 0;
 }
 
@@ -106,7 +125,7 @@ static void ipc_manager_debug(struct ipc_manager *m)
   int i;
   struct ipc_value *argv;
 
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "IPC: tag %d argc %d", m->tag, ipc_manager_get_argc(m));
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "IPC: msg_id %d argc %d", m->msg_id, ipc_manager_get_argc(m));
 
   argv = ipc_manager_get_argv(m);
   for (i = 0; i < ipc_manager_get_argc(m); i++) {
@@ -125,25 +144,52 @@ static void ipc_manager_debug(struct ipc_manager *m)
 }
 #endif  
 
+static void  ipc_manager_call_handler(struct ipc_manager *m)
+{
+  ipc_handler_t handler;
+  void *data;
+
+  if (m->msg_id < IPC_MSG_ID_FIRST || m->msg_id > IPC_MSG_ID_LAST) {
+    g_log(NULL, G_LOG_LEVEL_WARNING, "IPC: received msg_id %d out of range %d - %d ", m->msg_id, IPC_MSG_ID_FIRST, IPC_MSG_ID_LAST);
+    return;
+  }
+
+  handler = m->handlers[m->msg_id].handler;
+  if (handler == NULL)
+    return;
+
+  data = m->handlers[m->msg_id].data;
+  (*handler)(m, data);
+}
+
+
 static void ipc_manager_end_of_msg(struct ipc_manager *m)
 {
+  int i;
+  struct ipc_value *argv;
+
 #ifdef DEBUG
   ipc_manager_debug(m);
 #endif
 
-  /* FIXME: must free strings */
+  ipc_manager_call_handler(m);
+
+  argv = ipc_manager_get_argv(m);
+  for (i = 0; i < ipc_manager_get_argc(m); i++) {
+    if (argv[i].type == IPC_STRING) {
+      free(argv[i].value.v_str);
+      argv[i].value.v_str = NULL;
+    }
+  }
+
   g_array_set_size(m->argv, 0);
 }
 
 static void ipc_manager_input_char(struct ipc_manager *m, guchar c)
 {
-#if 0
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "IPC: processing char %0d %hhd %c state %d", c, c, (c != '\0') ? c : NULL, m->state);
-#endif
-
   switch(m->state) {
-  case EXPECTING_TAG:
-    m->tag = c;
+  case EXPECTING_MSG_ID:
+    m->msg_id = c;
     m->state = EXPECTING_ARG;
     break;
   case EXPECTING_ARG:
@@ -156,17 +202,16 @@ static void ipc_manager_input_char(struct ipc_manager *m, guchar c)
       m->state = IN_ARG_STRING;
       break;
     case IPC_NONE:
-      m->state = EXPECTING_TAG;
+      m->state = EXPECTING_MSG_ID;
       ipc_manager_end_of_msg(m);
       break;
     default:
-      g_log(NULL, G_LOG_LEVEL_ERROR, "error in ipc_manager_receive: invalid type tag %c %d", c, c);
+      g_log(NULL, G_LOG_LEVEL_ERROR, "error in ipc_manager_receive: invalid type msg_id %c %d", c, c);
       break;
     }
     break;
   case IN_ARG_INT32:
     m->int32_arg.t[m->received_count++] = c;
-    /* g_log(NULL, G_LOG_LEVEL_DEBUG, "received %d bytes of %d", m->received_count, sizeof(gint32)); */
     if (m->received_count == sizeof(gint32)) {
       ipc_manager_add_int32_arg(m);
       m->received_count = 0;
@@ -206,7 +251,7 @@ int ipc_manager_receive(struct ipc_manager *manager)
   return 1;
 }
 
-int ipc_manager_send_msg(struct ipc_manager *manager, guchar tag, ...)
+int ipc_manager_send_msg(struct ipc_manager *manager, guchar msg_id, ...)
 {
   va_list ap;
   int i_type;
@@ -214,9 +259,9 @@ int ipc_manager_send_msg(struct ipc_manager *manager, guchar tag, ...)
   gint32 v_int32;
   char *v_str;
 
-  fwrite(&tag, sizeof(guchar), 1, manager->output);
+  fwrite(&msg_id, sizeof(guchar), 1, manager->output);
 
-  va_start(ap, tag);
+  va_start(ap, msg_id);
 
   do {
     i_type = va_arg(ap, int);
