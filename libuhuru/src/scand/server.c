@@ -48,10 +48,18 @@ static void client_thread(gpointer data, gpointer user_data)
 {
   struct client *client = (struct client *)data;
 
-  while (client_process(client) >= 0)
+#ifdef DEBUG
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "client thread started");
+#endif
+
+  while (client_process(client) > 0)
     ;
 
-  fprintf(stderr, "finished connection\n");
+  client_free(client);
+
+#ifdef DEBUG
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "client thread terminated");
+#endif
 }
 
 static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpointer data)

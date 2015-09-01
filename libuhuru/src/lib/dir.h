@@ -13,7 +13,7 @@ enum dir_entry_flag {
   DIR_ENTRY_IS_UNKNOWN   = 1 << 6,
 };
 
-typedef void (*dirent_fun_t)(const char *full_path, enum dir_entry_flag flags, int errno, void *data);
+typedef void (*dirent_fun_t)(const char *full_path, enum dir_entry_flag flags, int entry_errno, void *data);
 
 int dir_map(const char *path, int recurse, dirent_fun_t dirent_fun, void *data);
 

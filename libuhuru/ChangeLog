@@ -1,3 +1,7 @@
+2015-09-01  François  <francois@dechelle.net>
+
+	* tested and debugged new binary IPC; uhuru-scan works ok
+
 2015-08-31  François  <francois@dechelle.net>
 
 	* finished replacing old IPC protocol with new binary implementation; not tested yet with scan daemon

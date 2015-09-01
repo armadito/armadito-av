@@ -61,7 +61,7 @@ struct ipc_manager *ipc_manager_new(int input_fd, int output_fd)
 
   m->argv = g_array_new(FALSE, FALSE, sizeof(struct ipc_value));
 
-  m->handlers = g_new0(struct ipc_handler_entry, IPC_MSG_ID_LAST - IPC_MSG_ID_FIRST);
+  m->handlers = g_new0(struct ipc_handler_entry, IPC_MSG_ID_LAST - IPC_MSG_ID_FIRST + 1);
 
   return m;
 }
@@ -117,8 +117,15 @@ int ipc_manager_get_arg_at(struct ipc_manager *manager, int index, ipc_type_t ty
 
 int ipc_manager_add_handler(struct ipc_manager *manager, ipc_msg_id_t msg_id, ipc_handler_t handler, void *data)
 {
-  if (msg_id < IPC_MSG_ID_FIRST || msg_id > IPC_MSG_ID_LAST)
-    g_log(NULL, G_LOG_LEVEL_ERROR, "IPC: cannot add handler for msg_id %d out of range %d - %d ", msg_id, IPC_MSG_ID_FIRST, IPC_MSG_ID_LAST);
+  if (msg_id < IPC_MSG_ID_FIRST || msg_id > IPC_MSG_ID_LAST) {
+    g_log(NULL, G_LOG_LEVEL_ERROR, "IPC: cannot add handler for msg_id %d: out of range %d - %d ", msg_id, IPC_MSG_ID_FIRST, IPC_MSG_ID_LAST);
+    return -1;
+  }
+
+  if (manager->handlers[msg_id].handler != NULL) {
+    g_log(NULL, G_LOG_LEVEL_ERROR, "IPC: cannot add handler for msg_id %d: handler already set", msg_id);
+    return -1;
+  }
 
   manager->handlers[msg_id].handler = handler;
   manager->handlers[msg_id].data = data;
@@ -303,7 +310,10 @@ int ipc_manager_send_msg(struct ipc_manager *manager, guchar msg_id, ...)
       break;
     case IPC_STRING:
       v_str = va_arg(ap, char *);
-      fwrite(v_str, strlen(v_str) + 1, 1, manager->output);
+      if (v_str != NULL)
+	fwrite(v_str, strlen(v_str) + 1, 1, manager->output);
+      else
+	fwrite("", 1, 1, manager->output);
       break;
     case IPC_NONE:
       break;

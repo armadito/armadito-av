@@ -12,7 +12,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <errno.h>
 
 static enum dir_entry_flag dirent_flags(struct dirent *entry)
 {

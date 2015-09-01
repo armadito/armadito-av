@@ -13,6 +13,7 @@
 #include "builtin-modules/remote.h"
 
 #include <assert.h>
+#include <errno.h>
 #include <glib.h>
 #include <magic.h>
 #include <limits.h>
@@ -21,6 +22,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 struct callback_entry {
   uhuru_scan_callback_t callback;
@@ -87,8 +89,10 @@ static enum uhuru_file_status local_scan_apply_modules(const char *path, const c
 
     mod_status = (*mod->scan_fun)(mod, path, mime_type, &mod_report);
 
+#if 0
 #ifdef DEBUG
-    g_log(NULL, G_LOG_LEVEL_DEBUG, "module %s: scanning %s -> %s\n", mod->name, path, uhuru_file_status_str(mod_status));
+    g_log(NULL, G_LOG_LEVEL_DEBUG, "module %s: scanning %s -> %s", mod->name, path, uhuru_file_status_str(mod_status));
+#endif
 #endif
 
     if (uhuru_file_status_cmp(current_status, mod_status) < 0) {
@@ -159,7 +163,7 @@ static void local_scan_entry_thread_fun(gpointer data, gpointer user_data)
   free(path);
 }
 
-static void local_scan_entry(const char *full_path, enum dir_entry_flag flags, int errno, void *data)
+static void local_scan_entry(const char *full_path, enum dir_entry_flag flags, int entry_errno, void *data)
 {
   struct uhuru_scan *scan = (struct uhuru_scan *)data;
 
@@ -169,7 +173,7 @@ static void local_scan_entry(const char *full_path, enum dir_entry_flag flags, i
     uhuru_report_init(&report, full_path);
 
     report.status = UHURU_IERROR;
-    report.mod_report = strdup(strerror(errno));
+    report.mod_report = strdup(strerror(entry_errno));
     uhuru_scan_call_callbacks(scan, &report);
 
     uhuru_report_destroy(&report);
@@ -254,22 +258,22 @@ static void remote_scan_handler_scan_file(struct ipc_manager *m, void *data)
 {
   struct uhuru_scan *scan = (struct uhuru_scan *)data;
   char *path;
-  char *status;
+  gint32 status;
   char *mod_name;
   char *x_status;
-  char *action;
+  gint32 action;
   struct uhuru_report report;
 
   ipc_manager_get_arg_at(m, 0, IPC_STRING, &path);
-  ipc_manager_get_arg_at(m, 1, IPC_STRING, &status);
+  ipc_manager_get_arg_at(m, 1, IPC_INT32, &status);
   ipc_manager_get_arg_at(m, 2, IPC_STRING, &mod_name);
   ipc_manager_get_arg_at(m, 3, IPC_STRING, &x_status);
-  ipc_manager_get_arg_at(m, 4, IPC_STRING, &action);
+  ipc_manager_get_arg_at(m, 4, IPC_INT32, &action);
 
   uhuru_report_init(&report, path);
 
-  report.status = (enum uhuru_file_status)atoi(status);
-  report.action = (enum uhuru_action)atoi(action);
+  report.status = (enum uhuru_file_status)status;
+  report.action = (enum uhuru_action)action;
   report.mod_name = mod_name;
   if (x_status != NULL)
     report.mod_report = strdup(x_status);
@@ -281,6 +285,23 @@ static void remote_scan_handler_scan_file(struct ipc_manager *m, void *data)
 
 static void remote_scan_handler_scan_end(struct ipc_manager *m, void *data)
 {
+  struct uhuru_scan *scan = (struct uhuru_scan *)data;
+
+#ifdef DEBUG
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "remote scan end");
+#endif
+  
+#if 0
+#ifdef DEBUG
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "remote scan end, closing socket %d", scan->remote.sock);
+#endif
+  
+  if (close(scan->remote.sock) < 0) {
+    g_log(NULL, G_LOG_LEVEL_WARNING, "closing socket %d failed (%s)", scan->remote.sock, strerror(errno));
+  }
+
+  scan->remote.sock = -1;
+#endif
 }
 
 static enum uhuru_file_status remote_scan_start(struct uhuru_scan *scan)
@@ -292,14 +313,14 @@ static enum uhuru_file_status remote_scan_start(struct uhuru_scan *scan)
   scan->remote.manager = ipc_manager_new(scan->remote.sock, scan->remote.sock);
 
   ipc_manager_add_handler(scan->remote.manager, IPC_MSG_ID_SCAN_FILE, remote_scan_handler_scan_file, scan);
-  ipc_manager_add_handler(scan->remote.manager, IPC_MSG_ID_SCAN_FILE, remote_scan_handler_scan_end, scan);
+  ipc_manager_add_handler(scan->remote.manager, IPC_MSG_ID_SCAN_END, remote_scan_handler_scan_end, scan);
 
   ipc_manager_send_msg(scan->remote.manager, IPC_MSG_ID_SCAN, IPC_STRING, scan->path, IPC_NONE);
 }
 
 static enum uhuru_scan_status remote_scan_run(struct uhuru_scan *scan)
 {
-  if (ipc_manager_receive(scan->remote.manager) < 0)
+  if (ipc_manager_receive(scan->remote.manager) <= 0)
     return UHURU_SCAN_COMPLETED;
 
   return UHURU_SCAN_CONTINUE;
