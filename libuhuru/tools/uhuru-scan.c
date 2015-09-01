@@ -153,7 +153,7 @@ static void poll_add_fd(int epoll_fd, int fd)
 {
   struct epoll_event ev;
 
-  ev.events = EPOLLIN;
+  ev.events = EPOLLIN | EPOLLRDHUP | EPOLLHUP;
   ev.data.fd = fd;
   if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &ev) == -1) {
     perror("epoll_ctl");
@@ -215,10 +215,6 @@ static void do_scan(struct scan_options *opts, struct scan_summary *summary)
     flags |= UHURU_SCAN_THREADED;
 
   u = uhuru_open(opts->use_daemon);
-
-#if 0
-  uhuru_print(u);
-#endif
 
   scan = uhuru_scan_new(u, opts->path, flags);
 

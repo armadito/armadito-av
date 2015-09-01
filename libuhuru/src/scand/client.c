@@ -1,50 +1,54 @@
 #include "client.h"
-#include "lib/protocol.h"
+#include "lib/ipc.h"
 #include "libuhuru-config.h"
 
 #include <stdio.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <glib.h>
 #include <string.h>
 
 struct client {
   int sock;
-  struct protocol_handler *handler;
+  struct ipc_manager *manager;
   struct uhuru *uhuru;
 };
 
-static void cb_ping(struct protocol_handler *h, void *data)
+static void ping_handler(struct ipc_manager *m, void *data)
 {
   struct client *cl = (struct client *)data;
 
-  fprintf(stderr, "callback cb_ping\n");
+#ifdef DEBUG
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "ping_handler");
+#endif
 
-  protocol_handler_send_msg(cl->handler, "PONG", NULL);
+  ipc_manager_send_msg(cl->manager, IPC_MSG_ID_PONG, IPC_NONE);
 }
 
 static void scan_callback(struct uhuru_report *report, void *callback_data)
 {
   struct client *cl = (struct client *)callback_data;
-  char status[32], action[32];
 
-  sprintf(status, "%d", report->status);
-  sprintf(action, "%d", report->action);
-  protocol_handler_send_msg(cl->handler, "SCAN_FILE", 
-			    "Path", report->path, 
-			    "Status", status,
-			    "Module-Name", report->mod_name,
-			    "X-Status", report->mod_report,
-			    "Action", action,
-			    NULL);
+  ipc_manager_send_msg(cl->manager, IPC_MSG_ID_SCAN_FILE, 
+		       IPC_STRING, report->path, 
+		       IPC_INT32, report->status,
+		       IPC_STRING, report->mod_name,
+		       IPC_STRING, report->mod_report,
+		       IPC_INT32, report->action,
+		       IPC_NONE);
 }
 
-static void cb_scan(struct protocol_handler *h, void *data)
+static void scan_handler(struct ipc_manager *m, void *data)
 {
   struct client *cl = (struct client *)data;
-  char *path = protocol_handler_get_header(h, "Path");
+  char *path;
   struct uhuru_scan *scan;
 
-  fprintf(stderr, "callback cb_scan path: %s\n", path);
+#ifdef DEBUG
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "scan_handler");
+#endif
+
+  ipc_manager_get_arg_at(m, 0, IPC_STRING, &path);
 
   scan = uhuru_scan_new(cl->uhuru, path, UHURU_SCAN_RECURSE);
 
@@ -57,19 +61,26 @@ static void cb_scan(struct protocol_handler *h, void *data)
 
   uhuru_scan_free(scan);
 
-  protocol_handler_send_msg(cl->handler, "SCAN_END", NULL);
+  ipc_manager_send_msg(cl->manager, IPC_MSG_ID_SCAN_END, IPC_NONE);
 
-  /* FIXME: should not be there: the UI must close the connexion when processing SCAN_END message, then the server will close */
-  close(cl->sock);
+  if (close(cl->sock) < 0) {
+    g_log(NULL, G_LOG_LEVEL_WARNING, "closing socket %d failed (%s)", cl->sock, strerror(errno));
+  }
 
-  fprintf(stderr, "callback cb_scan end\n");
+  cl->sock = -1;
+
+#ifdef DEBUG
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "scan_handler finished");
+#endif
 }
 
-static void cb_stat(struct protocol_handler *h, void *data)
+static void cb_stat(struct ipc_manager *m, void *data)
 {
   struct client *cl = (struct client *)data;
 
-  fprintf(stderr, "callback cb_stat\n");
+#ifdef DEBUG
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "stat_handler");
+#endif
 }
 
 struct client *client_new(int client_sock, struct uhuru *uhuru)
@@ -77,17 +88,30 @@ struct client *client_new(int client_sock, struct uhuru *uhuru)
   struct client *cl = (struct client *)malloc(sizeof(struct client));
 
   cl->sock = client_sock;
-  cl->handler = protocol_handler_new(cl->sock, cl->sock);
+  cl->manager = ipc_manager_new(cl->sock, cl->sock);
   cl->uhuru = uhuru;
 
-  protocol_handler_add_callback(cl->handler, "PING", cb_ping, cl);
-  protocol_handler_add_callback(cl->handler, "SCAN", cb_scan, cl);
-  protocol_handler_add_callback(cl->handler, "STATS", cb_stat, cl);
+  ipc_manager_add_handler(cl->manager, IPC_MSG_ID_PING, ping_handler, cl);
+  ipc_manager_add_handler(cl->manager, IPC_MSG_ID_SCAN, scan_handler, cl);
 
   return cl;
 }
 
+void client_free(struct client *cl)
+{
+  ipc_manager_free(cl->manager);
+
+  free(cl);
+}
+
 int client_process(struct client *cl)
 {
-  return protocol_handler_receive(cl->handler);
+  int ret;
+
+  if (cl->sock < 0)
+    return 0;
+
+  ret = ipc_manager_receive(cl->manager);
+
+  return ret;
 }

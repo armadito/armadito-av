@@ -10,10 +10,10 @@ confparser.c \
 confparser.h \
 dir.c \
 dir.h \
+ipc.c \
+ipc.h \
 module.c \
 modulep.h \
-protocol.c \
-protocol.h \
 report.c \
 reportp.h \
 scan.c \
