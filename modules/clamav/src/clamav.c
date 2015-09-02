@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#define _XOPEN_SOURCE
+#include <time.h>
 
 struct clamav_data {
   struct cl_engine *clamav_engine;
@@ -123,7 +125,7 @@ static enum uhuru_update_status clamav_update_check(struct uhuru_module *module)
   struct clamav_data *cl_data = (struct clamav_data *)module->data;
   GString *full_path = g_string_new("");
   GString *version = g_string_new("");
-  const char *names[] = { "bytecode.cld", "daily.cld", "main.cvd", };
+  const char *names[] = { "daily.cld", "bytecode.cld", "main.cvd", };
   int n, i;
 
   n = sizeof(names) / sizeof(const char *);
@@ -143,7 +145,19 @@ static enum uhuru_update_status clamav_update_check(struct uhuru_module *module)
     info = g_new(struct uhuru_base_info, 1);
 
     info->name = strdup(names[i]);
-    info->date = strdup(cvd->time);
+
+    info->date.tm_sec = 0;
+    info->date.tm_min = 0;
+    info->date.tm_hour = 0;
+    info->date.tm_mday = 0;
+    info->date.tm_mon = 0;
+    info->date.tm_year = 0;
+    info->date.tm_wday = 0;
+    info->date.tm_yday = 0;
+    info->date.tm_isdst = 0;
+    /* ClamAV format: 17 Sep 2013 10-57 -0400 */
+    strptime(cvd->time, "%d%n%b%n%Y%n%H-%M", &info->date);
+
     g_string_printf(version, "%d", cvd->version);
     info->version = strdup(version->str);
     info->signature_count = cvd->sigs;
