@@ -1,3 +1,7 @@
+2015-09-02  François  <francois@dechelle.net>
+
+	* added first implementation of base information query for modules; tested for clamav
+
 2015-09-01  François  <francois@dechelle.net>
 
 	* tested and debugged new binary IPC; uhuru-scan works ok
