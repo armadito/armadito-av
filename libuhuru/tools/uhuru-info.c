@@ -3,12 +3,13 @@
 #include "lib/uhurup.h"
 
 #include <getopt.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xmlsave.h>
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 struct info_options {
   int output_xml;
@@ -96,17 +97,19 @@ static void info_doc_add_module(xmlDocPtr doc, struct uhuru_module *module)
   xmlNewProp(module_node, "name", module->name);
 
   for(pinfo = module->base_infos; *pinfo != NULL; pinfo++) {
-    char signature_count_buff[64];
+    char buffer[64];
 
     base_node = xmlNewChild(module_node, NULL, "base", NULL);
     xmlNewProp(base_node, "name", (*pinfo)->name);
 
-    date_node = xmlNewChild(base_node, NULL, "date", (*pinfo)->date);
+    strftime(buffer, sizeof(buffer), "%FT%H:%M:%S", &(*pinfo)->date);
+    date_node = xmlNewChild(base_node, NULL, "date", buffer);
+
     xmlNewProp(date_node, "type", "xs:dateTime");
 
     xmlNewChild(base_node, NULL, "version", (*pinfo)->version);
-    sprintf(signature_count_buff, "%d", (*pinfo)->signature_count);
-    xmlNewChild(base_node, NULL, "signature-count", signature_count_buff);
+    sprintf(buffer, "%d", (*pinfo)->signature_count);
+    xmlNewChild(base_node, NULL, "signature-count", buffer);
     xmlNewChild(base_node, NULL, "full-path", (*pinfo)->full_path);
   }
 }

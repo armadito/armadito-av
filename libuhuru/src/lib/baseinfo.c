@@ -38,7 +38,7 @@ const char *uhuru_base_info_debug(struct uhuru_base_info *info)
   const char *ret;
 
   g_string_append_printf(s, "Base '%s':\n", info->name);
-  g_string_append_printf(s, "  date              %s\n", info->date);
+  /* g_string_append_printf(s, "  date              %s\n", info->date); */
   g_string_append_printf(s, "  version           %s\n", info->version);
   g_string_append_printf(s, "  signature_count   %d\n", info->signature_count);
   g_string_append_printf(s, "  full_path         %s\n", info->full_path);

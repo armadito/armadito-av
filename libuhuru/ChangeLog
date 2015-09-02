@@ -1,5 +1,7 @@
 2015-09-02  François  <francois@dechelle.net>
 
+	* changed date field to use a struct tm instead of a string; clamav datetime parsing nightmare...
+
 	* added first implementation of base information query for modules; tested for clamav
 
 2015-09-01  François  <francois@dechelle.net>

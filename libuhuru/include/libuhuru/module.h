@@ -3,6 +3,8 @@
 
 #include <libuhuru/status.h>
 
+#include <time.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -31,7 +33,7 @@ struct uhuru_conf_entry {
 
 struct uhuru_base_info {
   const char *name;
-  const char *date;
+  struct tm date;
   const char *version;
   unsigned int signature_count;
   const char *full_path;
