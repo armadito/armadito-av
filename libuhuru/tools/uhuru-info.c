@@ -78,33 +78,55 @@ static xmlDocPtr info_doc_new(void)
 
   doc = xmlNewDoc("1.0");
   root_node = xmlNewNode(NULL, "uhuru-base-info");
+#if 0
   xmlNewProp(root_node, "xmlns", "http://www.uhuru-am.com/UpdateInfoSchema");
   xmlNewProp(root_node, "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
   xmlNewProp(root_node, "xsi:schemaLocation", "http://www.uhuru-am.com/UpdateInfoSchema UpdateInfoSchema.xsd ");
+#endif
   xmlDocSetRootElement(doc, root_node);
 
   return doc;
 }
 
+static const char *update_status_str(enum uhuru_update_status status)
+{
+  switch(status) {
+  case UHURU_UPDATE_OK:
+    return "ok";
+  case UHURU_UPDATE_LATE:
+    return "late";
+  case UHURU_UPDATE_CRITICAL:
+    return "critical";
+  case UHURU_UPDATE_NON_AVAILABLE:
+    return "non available";
+  }
+
+  return "non available";
+}
+
+
 static void info_doc_add_module(xmlDocPtr doc, struct uhuru_module *module)
 {
   xmlNodePtr root_node, module_node, base_node, date_node;
   struct uhuru_base_info **pinfo;
+  char buffer[64];
 
   root_node = xmlDocGetRootElement(doc);
 
   module_node = xmlNewChild(root_node, NULL, "module", NULL);
   xmlNewProp(module_node, "name", module->name);
 
-  for(pinfo = module->base_infos; *pinfo != NULL; pinfo++) {
-    char buffer[64];
+  xmlNewChild(module_node, NULL, "update-status", update_status_str(module->update_status));
+  strftime(buffer, sizeof(buffer), "%FT%H:%M:%SZ", &module->update_date);
+  date_node = xmlNewChild(module_node, NULL, "update-date", buffer);
+  xmlNewProp(date_node, "type", "xs:dateTime");
 
+  for(pinfo = module->base_infos; *pinfo != NULL; pinfo++) {
     base_node = xmlNewChild(module_node, NULL, "base", NULL);
     xmlNewProp(base_node, "name", (*pinfo)->name);
 
-    strftime(buffer, sizeof(buffer), "%FT%H:%M:%S", &(*pinfo)->date);
+    strftime(buffer, sizeof(buffer), "%FT%H:%M:%SZ", &(*pinfo)->date);
     date_node = xmlNewChild(base_node, NULL, "date", buffer);
-
     xmlNewProp(date_node, "type", "xs:dateTime");
 
     xmlNewChild(base_node, NULL, "version", (*pinfo)->version);

@@ -62,6 +62,8 @@ struct uhuru_module {
 
   enum uhuru_update_status update_status;
 
+  struct tm update_date;
+
   /* NULL terminated array of pointers to struct base_info */
   struct uhuru_base_info **base_infos;
 
