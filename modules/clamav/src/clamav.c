@@ -163,7 +163,7 @@ static void clamav_convert_datetime(const char *clamav_datetime, struct tm *tm_d
   if (ret == NULL)
     return;
 
-  tm_tmp.tm_year += 1900;
+  /* tm_tmp.tm_year += 1900; */
 
   if (*ret != '\0')
     timezone = g_time_zone_new(ret);
