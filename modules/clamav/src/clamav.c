@@ -12,7 +12,12 @@
 struct clamav_data {
   struct cl_engine *clamav_engine;
   const char *db_dir;
+  int late_days;
+  int critical_days;
 };
+
+#define DEFAULT_LATE_DAYS (3)
+#define DEFAULT_CRITICAL_DAYS (10)
 
 static enum uhuru_mod_status clamav_init(struct uhuru_module *module)
 {
@@ -40,6 +45,9 @@ static enum uhuru_mod_status clamav_init(struct uhuru_module *module)
 #endif
   cl_data->db_dir = strdup(MODULE_CLAMAV_DBDIR);
 
+  cl_data->late_days = DEFAULT_LATE_DAYS;
+  cl_data->critical_days = DEFAULT_CRITICAL_DAYS;
+
   module->data = cl_data;
 
   return UHURU_MOD_OK;
@@ -53,6 +61,24 @@ static enum uhuru_mod_status clamav_conf_set_dbdir(struct uhuru_module *module, 
     free((char *)cl_data->db_dir);
 
   cl_data->db_dir = strdup(argv[0]);
+
+  return UHURU_MOD_OK;
+}
+
+static enum uhuru_mod_status clamav_conf_set_late_days(struct uhuru_module *module, const char *directive, const char **argv)
+{
+  struct clamav_data *cl_data = (struct clamav_data *)module->data;
+
+  cl_data->late_days = atoi(argv[0]);
+
+  return UHURU_MOD_OK;
+}
+
+static enum uhuru_mod_status clamav_conf_set_critical_days(struct uhuru_module *module, const char *directive, const char **argv)
+{
+  struct clamav_data *cl_data = (struct clamav_data *)module->data;
+
+  cl_data->critical_days = atoi(argv[0]);
 
   return UHURU_MOD_OK;
 }
@@ -120,9 +146,76 @@ static enum uhuru_mod_status clamav_close(struct uhuru_module *module)
   return UHURU_MOD_OK;
 }
 
+static void clamav_convert_datetime(const char *clamav_datetime, struct tm *tm_datetime)
+{
+  char *ret;
+  int negative = 0;
+  int offset_hour = 0, offset_minute = 0;
+  GTimeZone *timezone = NULL;
+  GDateTime *datetime, *datetime_utc;
+  struct tm tm_tmp;
+
+  memset(&tm_tmp, 0, sizeof(struct tm));
+  memset(tm_datetime, 0, sizeof(struct tm));
+
+  /* ClamAV format: 17 Sep 2013 10-57 -0400 */
+  ret = strptime(clamav_datetime, "%d%n%b%n%Y%n%H-%M%n", &tm_tmp);
+  if (ret == NULL)
+    return;
+
+  tm_tmp.tm_year += 1900;
+
+  if (*ret != '\0')
+    timezone = g_time_zone_new(ret);
+
+  datetime = g_date_time_new(timezone, tm_tmp.tm_year, tm_tmp.tm_mon, tm_tmp.tm_mday, tm_tmp.tm_hour, tm_tmp.tm_min, tm_tmp.tm_sec);  
+  datetime_utc = g_date_time_to_utc(datetime);
+
+  tm_datetime->tm_sec = g_date_time_get_second(datetime_utc);
+  tm_datetime->tm_min = g_date_time_get_minute(datetime_utc);
+  tm_datetime->tm_hour = g_date_time_get_hour(datetime_utc);
+  tm_datetime->tm_mday = g_date_time_get_day_of_month(datetime_utc);
+  tm_datetime->tm_mon = g_date_time_get_month(datetime_utc);
+  tm_datetime->tm_year = g_date_time_get_year(datetime_utc);
+
+  g_date_time_unref(datetime);
+  g_date_time_unref(datetime_utc);
+  if (timezone != NULL)
+    g_time_zone_unref(timezone);
+}
+
+static enum uhuru_update_status clamav_update_status_eval(struct tm *tm_curr, int late_days, int critical_days)
+{
+  GDateTime *now, *late, *critical, *curr;
+  enum uhuru_update_status ret = UHURU_UPDATE_OK;
+
+  now = g_date_time_new_now_utc();
+  late = g_date_time_add_days(now, -late_days);
+  critical = g_date_time_add_days(now, -critical_days);
+  curr = g_date_time_new_utc(tm_curr->tm_year, tm_curr->tm_mon, tm_curr->tm_mday, tm_curr->tm_hour, tm_curr->tm_min, tm_curr->tm_sec);  
+
+  fprintf(stderr, "now       %s\n", g_date_time_format(now, "%FT%H:%M:%SZ"));
+  fprintf(stderr, "late      %s\n", g_date_time_format(late, "%FT%H:%M:%SZ"));
+  fprintf(stderr, "critical  %s\n", g_date_time_format(critical, "%FT%H:%M:%SZ"));
+  fprintf(stderr, "current   %s\n", g_date_time_format(curr, "%FT%H:%M:%SZ"));
+
+  if (g_date_time_compare(curr, critical) < 0)
+    ret = UHURU_UPDATE_CRITICAL;
+  else if (g_date_time_compare(curr, late) < 0)
+    ret = UHURU_UPDATE_LATE;
+
+  g_date_time_unref(now);
+  g_date_time_unref(late);
+  g_date_time_unref(critical);
+  g_date_time_unref(curr);
+
+  return ret;
+}
+
 static enum uhuru_update_status clamav_update_check(struct uhuru_module *module)
 {
   struct clamav_data *cl_data = (struct clamav_data *)module->data;
+  enum uhuru_update_status ret_status = UHURU_UPDATE_OK;
   GString *full_path = g_string_new("");
   GString *version = g_string_new("");
   const char *names[] = { "daily.cld", "bytecode.cld", "main.cvd", };
@@ -145,23 +238,23 @@ static enum uhuru_update_status clamav_update_check(struct uhuru_module *module)
     info = g_new(struct uhuru_base_info, 1);
 
     info->name = strdup(names[i]);
-
-    info->date.tm_sec = 0;
-    info->date.tm_min = 0;
-    info->date.tm_hour = 0;
-    info->date.tm_mday = 0;
-    info->date.tm_mon = 0;
-    info->date.tm_year = 0;
-    info->date.tm_wday = 0;
-    info->date.tm_yday = 0;
-    info->date.tm_isdst = 0;
-    /* ClamAV format: 17 Sep 2013 10-57 -0400 */
-    strptime(cvd->time, "%d%n%b%n%Y%n%H-%M", &info->date);
-
     g_string_printf(version, "%d", cvd->version);
     info->version = strdup(version->str);
+    clamav_convert_datetime(cvd->time, &info->date);
+
     info->signature_count = cvd->sigs;
     info->full_path = strdup(full_path->str);
+
+    /* 
+       daily.cld is the base to use to compute update status of module 
+       more sophisticated behaviour would be to have late and critical
+       offsets for each base, and take the min (or the max, depends) of
+       each base status
+    */
+    if (!strcmp(info->name, "daily.cld")) {
+      ret_status = clamav_update_status_eval(&info->date, cl_data->late_days, cl_data->critical_days);
+      module->update_date = info->date;
+    }
 
     module->base_infos[i] = info;
   }
@@ -169,12 +262,14 @@ static enum uhuru_update_status clamav_update_check(struct uhuru_module *module)
   g_string_free(full_path, TRUE);
   g_string_free(version, TRUE);
   
-  return UHURU_UPDATE_OK;
+  return ret_status;
 }
 
 struct uhuru_conf_entry clamav_conf_table[] = {
   { "dbdir", clamav_conf_set_dbdir},
   /* { "db", clamav_conf_set_db}, */
+  { "late_days", clamav_conf_set_late_days},
+  { "critical_days", clamav_conf_set_critical_days},
   { "db", NULL},
   { NULL, NULL},
 };
