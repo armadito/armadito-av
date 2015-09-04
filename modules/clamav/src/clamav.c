@@ -212,7 +212,7 @@ static enum uhuru_update_status clamav_update_status_eval(struct tm *tm_curr, in
   return ret;
 }
 
-static enum uhuru_update_status clamav_update_check(struct uhuru_module *module, struct uhuru_module_info *info)
+static enum uhuru_update_status clamav_info(struct uhuru_module *module, struct uhuru_module_info *info)
 {
   struct clamav_data *cl_data = (struct clamav_data *)module->data;
   enum uhuru_update_status ret_status = UHURU_UPDATE_OK;
@@ -280,7 +280,7 @@ struct uhuru_module module = {
   .post_init_fun = clamav_post_init,
   .scan_fun = clamav_scan,
   .close_fun = clamav_close,
-  .update_check_fun = clamav_update_check,
+  .info_fun = clamav_info,
   .name = "clamav",
   .size = sizeof(struct clamav_data),
 };

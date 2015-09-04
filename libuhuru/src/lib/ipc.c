@@ -285,45 +285,79 @@ int ipc_manager_receive(struct ipc_manager *manager)
   return 1;
 }
 
-int ipc_manager_send_msg(struct ipc_manager *manager, guchar msg_id, ...)
+int ipc_manager_msg_begin(struct ipc_manager *manager, ipc_msg_id_t msg_id)
 {
-  va_list ap;
-  int i_type;
+  return fwrite(&msg_id, sizeof(guchar), 1, manager->output);
+}
+
+static ipc_manager_msg_addv(struct ipc_manager *manager, va_list ap)
+{
   ipc_type_t type;
-  gint32 v_int32;
-  char *v_str;
-
-  fwrite(&msg_id, sizeof(guchar), 1, manager->output);
-
-  va_start(ap, msg_id);
 
   do {
-    i_type = va_arg(ap, int);
+    gint32 v_int32;
+    char *v_str;
+    int i_type = va_arg(ap, int);
 
     type = (ipc_type_t)(i_type & 0xff);
-    fwrite(&type, sizeof(ipc_type_t), 1, manager->output);
 
-    switch(type) {
-    case IPC_INT32:
-      v_int32 = va_arg(ap, gint32);
-      fwrite(&v_int32, sizeof(gint32), 1, manager->output);
-      break;
-    case IPC_STRING:
-      v_str = va_arg(ap, char *);
-      if (v_str != NULL)
-	fwrite(v_str, strlen(v_str) + 1, 1, manager->output);
-      else
-	fwrite("", 1, 1, manager->output);
-      break;
-    case IPC_NONE:
-      break;
+    if (type != IPC_NONE) {
+      fwrite(&type, sizeof(ipc_type_t), 1, manager->output);
+
+      switch(type) {
+      case IPC_INT32:
+	v_int32 = va_arg(ap, gint32);
+	fwrite(&v_int32, sizeof(gint32), 1, manager->output);
+	break;
+      case IPC_STRING:
+	v_str = va_arg(ap, char *);
+	if (v_str != NULL)
+	  fwrite(v_str, strlen(v_str) + 1, 1, manager->output);
+	else
+	  fwrite("", 1, 1, manager->output);
+	break;
+      }
     }
-
   } while (type != IPC_NONE);
+}
+
+int ipc_manager_msg_add(struct ipc_manager *manager, ...)
+{
+  va_list ap;
+
+  va_start(ap, manager);
+
+  ipc_manager_msg_addv(manager, ap);
 
   va_end(ap);
 
+  return 0;
+}
+
+int ipc_manager_msg_end(struct ipc_manager *manager)
+{
+  ipc_type_t type = IPC_NONE;
+
+  fwrite(&type, sizeof(ipc_type_t), 1, manager->output);
+
   fflush(manager->output);
+
+  return 0;
+}
+
+int ipc_manager_msg_send(struct ipc_manager *manager, guchar msg_id, ...)
+{
+  va_list ap;
+
+  ipc_manager_msg_begin(manager, msg_id);
+
+  va_start(ap, msg_id);
+
+  ipc_manager_msg_addv(manager, ap);
+
+  va_end(ap);
+
+  ipc_manager_msg_end(manager);
 
   return 0;
 }

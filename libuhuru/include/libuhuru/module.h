@@ -59,7 +59,7 @@ struct uhuru_module {
 
   enum uhuru_mod_status (*close_fun)(struct uhuru_module *module);
 
-  enum uhuru_update_status (*update_check_fun)(struct uhuru_module *module, struct uhuru_module_info *info);
+  enum uhuru_update_status (*info_fun)(struct uhuru_module *module, struct uhuru_module_info *info);
 
   const char *name;
 

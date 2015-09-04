@@ -25,7 +25,10 @@ typedef guchar ipc_msg_id_t;
 #define IPC_MSG_ID_SCAN              ((ipc_msg_id_t)2)
 #define IPC_MSG_ID_SCAN_FILE         ((ipc_msg_id_t)3)
 #define IPC_MSG_ID_SCAN_END          ((ipc_msg_id_t)4)
-#define IPC_MSG_ID_LAST              ((ipc_msg_id_t)4)
+#define IPC_MSG_ID_INFO              ((ipc_msg_id_t)5)
+#define IPC_MSG_ID_INFO_MODULE       ((ipc_msg_id_t)6)
+#define IPC_MSG_ID_INFO_END          ((ipc_msg_id_t)7)
+#define IPC_MSG_ID_LAST              ((ipc_msg_id_t)7)
 
 struct ipc_manager;
 
@@ -47,6 +50,10 @@ int ipc_manager_add_handler(struct ipc_manager *manager, ipc_msg_id_t msg_id, ip
 
 int ipc_manager_receive(struct ipc_manager *manager);
 
-int ipc_manager_send_msg(struct ipc_manager *manager, ipc_msg_id_t msg_id, ...);
+int ipc_manager_msg_send(struct ipc_manager *manager, ipc_msg_id_t msg_id, ...);
+
+int ipc_manager_msg_begin(struct ipc_manager *manager, ipc_msg_id_t msg_id);
+int ipc_manager_msg_add(struct ipc_manager *manager, ...);
+int ipc_manager_msg_end(struct ipc_manager *manager);
 
 #endif

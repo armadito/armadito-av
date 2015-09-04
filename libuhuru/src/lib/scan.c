@@ -315,7 +315,7 @@ static enum uhuru_file_status remote_scan_start(struct uhuru_scan *scan)
   ipc_manager_add_handler(scan->remote.manager, IPC_MSG_ID_SCAN_FILE, remote_scan_handler_scan_file, scan);
   ipc_manager_add_handler(scan->remote.manager, IPC_MSG_ID_SCAN_END, remote_scan_handler_scan_end, scan);
 
-  ipc_manager_send_msg(scan->remote.manager, IPC_MSG_ID_SCAN, IPC_STRING, scan->path, IPC_NONE);
+  ipc_manager_msg_send(scan->remote.manager, IPC_MSG_ID_SCAN, IPC_STRING, scan->path, IPC_NONE);
 }
 
 static enum uhuru_scan_status remote_scan_run(struct uhuru_scan *scan)

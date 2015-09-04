@@ -37,7 +37,7 @@ static struct uhuru_module *module_new(struct uhuru_module *src, struct uhuru *u
   mod->post_init_fun = src->post_init_fun;
   mod->scan_fun = src->scan_fun;
   mod->close_fun = src->close_fun;
-  mod->update_check_fun = src->update_check_fun;
+  mod->info_fun = src->info_fun;
 
   mod->name = strdup(src->name);
 

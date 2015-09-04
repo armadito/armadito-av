@@ -147,6 +147,6 @@ struct uhuru_module module = {
   .post_init_fun = module5_2_post_init,
   .scan_fun = module5_2_scan,
   .close_fun = module5_2_close,
-  .update_check_fun = NULL,
-  .name = "module5.2",
+  .info_fun = NULL,
+  .name = "module5_2",
 };
