@@ -39,6 +39,15 @@ struct uhuru_base_info {
   const char *full_path;
 };
 
+struct uhuru_module_info {
+  enum uhuru_update_status update_status;
+
+  struct tm update_date;
+
+  /* NULL terminated array of pointers to struct base_info */
+  struct uhuru_base_info **base_infos;
+};
+
 struct uhuru_module {
   enum uhuru_mod_status (*init_fun)(struct uhuru_module *module);
 
@@ -50,7 +59,7 @@ struct uhuru_module {
 
   enum uhuru_mod_status (*close_fun)(struct uhuru_module *module);
 
-  enum uhuru_update_status (*update_check_fun)(struct uhuru_module *module);
+  enum uhuru_update_status (*update_check_fun)(struct uhuru_module *module, struct uhuru_module_info *info);
 
   const char *name;
 
@@ -59,13 +68,6 @@ struct uhuru_module {
   enum uhuru_mod_status status;
 
   void *data;
-
-  enum uhuru_update_status update_status;
-
-  struct tm update_date;
-
-  /* NULL terminated array of pointers to struct base_info */
-  struct uhuru_base_info **base_infos;
 
   struct uhuru *uhuru;
 };

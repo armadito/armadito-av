@@ -9,6 +9,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 struct info_options {
@@ -77,7 +78,7 @@ static xmlDocPtr info_doc_new(void)
   LIBXML_TEST_VERSION;
 
   doc = xmlNewDoc("1.0");
-  root_node = xmlNewNode(NULL, "uhuru-base-info");
+  root_node = xmlNewNode(NULL, "uhuru-info");
 #if 0
   xmlNewProp(root_node, "xmlns", "http://www.uhuru-am.com/UpdateInfoSchema");
   xmlNewProp(root_node, "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
@@ -91,21 +92,37 @@ static xmlDocPtr info_doc_new(void)
 static const char *update_status_str(enum uhuru_update_status status)
 {
   switch(status) {
+  case UHURU_UPDATE_NON_AVAILABLE:
+    return "non available";
   case UHURU_UPDATE_OK:
     return "ok";
   case UHURU_UPDATE_LATE:
     return "late";
   case UHURU_UPDATE_CRITICAL:
     return "critical";
-  case UHURU_UPDATE_NON_AVAILABLE:
-    return "non available";
   }
 
   return "non available";
 }
 
+static int update_status_compare(enum uhuru_update_status s1, enum uhuru_update_status s2)
+{
+  if (s1 == s2)
+    return 0;
 
-static void info_doc_add_module(xmlDocPtr doc, struct uhuru_module *module)
+  switch(s1) {
+  case UHURU_UPDATE_NON_AVAILABLE:
+    return -1;
+  case UHURU_UPDATE_OK:
+    return (s2 == UHURU_UPDATE_NON_AVAILABLE) ? 1 : -1;
+  case UHURU_UPDATE_LATE:
+    return (s2 == UHURU_UPDATE_NON_AVAILABLE || s2 == UHURU_UPDATE_OK) ? 1 : -1;
+  case UHURU_UPDATE_CRITICAL:
+    return (s2 == UHURU_UPDATE_NON_AVAILABLE || s2 == UHURU_UPDATE_OK || s2 == UHURU_UPDATE_LATE) ? 1 : -1;
+  }
+}
+
+static void info_doc_add_module(xmlDocPtr doc, struct uhuru_module *module, struct uhuru_module_info *info)
 {
   xmlNodePtr root_node, module_node, base_node, date_node;
   struct uhuru_base_info **pinfo;
@@ -116,12 +133,13 @@ static void info_doc_add_module(xmlDocPtr doc, struct uhuru_module *module)
   module_node = xmlNewChild(root_node, NULL, "module", NULL);
   xmlNewProp(module_node, "name", module->name);
 
-  xmlNewChild(module_node, NULL, "update-status", update_status_str(module->update_status));
-  strftime(buffer, sizeof(buffer), "%FT%H:%M:%SZ", &module->update_date);
+  xmlNewChild(module_node, NULL, "update-status", update_status_str(info->update_status));
+
+  strftime(buffer, sizeof(buffer), "%FT%H:%M:%SZ", &info->update_date);
   date_node = xmlNewChild(module_node, NULL, "update-date", buffer);
   xmlNewProp(date_node, "type", "xs:dateTime");
 
-  for(pinfo = module->base_infos; *pinfo != NULL; pinfo++) {
+  for(pinfo = info->base_infos; *pinfo != NULL; pinfo++) {
     base_node = xmlNewChild(module_node, NULL, "base", NULL);
     xmlNewProp(base_node, "name", (*pinfo)->name);
 
@@ -134,6 +152,13 @@ static void info_doc_add_module(xmlDocPtr doc, struct uhuru_module *module)
     xmlNewChild(base_node, NULL, "signature-count", buffer);
     xmlNewChild(base_node, NULL, "full-path", (*pinfo)->full_path);
   }
+}
+
+static void info_doc_add_global(xmlDocPtr doc, enum uhuru_update_status global_update_status)
+{
+  xmlNodePtr root_node = xmlDocGetRootElement(doc);
+
+  xmlNewChild(root_node, NULL, "update-status", update_status_str(global_update_status));
 }
 
 static void info_doc_save_to_fd(xmlDocPtr doc, int fd)
@@ -156,6 +181,7 @@ static void do_info(struct info_options *opts)
   struct uhuru *u;
   struct uhuru_module **modv;
   xmlDocPtr doc;
+  enum uhuru_update_status global_update_status = UHURU_UPDATE_NON_AVAILABLE;
   
   u = uhuru_open(opts->use_daemon);
 
@@ -163,13 +189,21 @@ static void do_info(struct info_options *opts)
 
   for (modv = uhuru_get_modules(u); *modv != NULL; modv++) {
     enum uhuru_update_status status;
+    struct uhuru_module_info info;
 
-    status = uhuru_base_info_update(*modv);
+    memset(&info, 0, sizeof(struct uhuru_module_info));
+
+    status = uhuru_module_info_update(*modv, &info);
 
     if (status != UHURU_UPDATE_NON_AVAILABLE) {
-      info_doc_add_module(doc, *modv);
+      info_doc_add_module(doc, *modv, &info);
     }
+
+    if (update_status_compare(global_update_status, status) < 0)
+      global_update_status = status;
   }
+
+  info_doc_add_global(doc, global_update_status);
 
   info_doc_save_to_fd(doc, STDOUT_FILENO);
   info_doc_free(doc);

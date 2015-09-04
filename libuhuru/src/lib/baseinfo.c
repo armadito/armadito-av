@@ -2,33 +2,35 @@
 #include <libuhuru/module.h>
 
 #include <glib.h>
+#include <string.h>
+#include <stdlib.h>
 
-static void uhuru_base_info_free(struct uhuru_module *module)
+static void module_update_info_free(struct uhuru_module_info *info)
 {
   struct uhuru_base_info **p;
 
-  for(p = module->base_infos; *p != NULL; p++)
+  if (info->base_infos == NULL)
+    return;
+
+  for(p = info->base_infos; *p != NULL; p++)
     free(*p);
 
-  free(module->base_infos);
+  free(info->base_infos);
 
-  module->base_infos = NULL;
+  info->base_infos = NULL;
 }
 
-enum uhuru_update_status uhuru_base_info_update(struct uhuru_module *module)
+enum uhuru_update_status uhuru_module_info_update(struct uhuru_module *module, struct uhuru_module_info *info)
 {
-  if (module->update_check_fun == NULL)
-    return UHURU_UPDATE_NON_AVAILABLE;
+  info->update_status = UHURU_UPDATE_NON_AVAILABLE;
+  memset(&info->update_date, 0, sizeof(struct tm));
+  module_update_info_free(info);
 
-  if (module->base_infos != NULL)
-    uhuru_base_info_free(module);
+  if (module->update_check_fun != NULL) {
+    info->update_status = (*module->update_check_fun)(module, info);
+  }
 
-  module->update_status = (*module->update_check_fun)(module);
-
-  if (module->update_status == UHURU_UPDATE_NON_AVAILABLE)
-    uhuru_base_info_free(module);
-
-  return module->update_status;
+  return info->update_status;
 }
 
 #ifdef DEBUG

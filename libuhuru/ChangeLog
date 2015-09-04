@@ -1,3 +1,7 @@
+2015-09-04  François  <francois@dechelle.net>
+
+	* changed module API for module information: moved structure out of struct uhuru_module, to allow IPC calls without the filled module structure
+
 2015-09-02  François  <francois@dechelle.net>
 
 	* changed date field to use a struct tm instead of a string; clamav datetime parsing nightmare...

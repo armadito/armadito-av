@@ -45,9 +45,6 @@ static struct uhuru_module *module_new(struct uhuru_module *src, struct uhuru *u
 
   mod->status = UHURU_MOD_OK;
   mod->data = NULL;
-  memset(&mod->update_date, 0, sizeof(struct tm));
-  mod->update_status = UHURU_UPDATE_NON_AVAILABLE;
-  mod->base_infos = NULL;
 
   mod->uhuru = uhuru;
 

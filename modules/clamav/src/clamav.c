@@ -212,7 +212,7 @@ static enum uhuru_update_status clamav_update_status_eval(struct tm *tm_curr, in
   return ret;
 }
 
-static enum uhuru_update_status clamav_update_check(struct uhuru_module *module)
+static enum uhuru_update_status clamav_update_check(struct uhuru_module *module, struct uhuru_module_info *info)
 {
   struct clamav_data *cl_data = (struct clamav_data *)module->data;
   enum uhuru_update_status ret_status = UHURU_UPDATE_OK;
@@ -223,11 +223,11 @@ static enum uhuru_update_status clamav_update_check(struct uhuru_module *module)
 
   n = sizeof(names) / sizeof(const char *);
 
-  module->base_infos = g_new0(struct uhuru_base_info *, n + 1);
+  info->base_infos = g_new0(struct uhuru_base_info *, n + 1);
 
   for (i = 0; i < n; i++) {
     struct cl_cvd *cvd;
-    struct uhuru_base_info *info;
+    struct uhuru_base_info *base_info;
 
     g_string_printf(full_path, "%s%s%s", cl_data->db_dir, G_DIR_SEPARATOR_S, names[i]);
 
@@ -235,15 +235,15 @@ static enum uhuru_update_status clamav_update_check(struct uhuru_module *module)
     if (cvd == NULL)
       return UHURU_UPDATE_NON_AVAILABLE;
     
-    info = g_new(struct uhuru_base_info, 1);
+    base_info = g_new(struct uhuru_base_info, 1);
 
-    info->name = strdup(names[i]);
+    base_info->name = strdup(names[i]);
     g_string_printf(version, "%d", cvd->version);
-    info->version = strdup(version->str);
-    clamav_convert_datetime(cvd->time, &info->date);
+    base_info->version = strdup(version->str);
+    clamav_convert_datetime(cvd->time, &base_info->date);
 
-    info->signature_count = cvd->sigs;
-    info->full_path = strdup(full_path->str);
+    base_info->signature_count = cvd->sigs;
+    base_info->full_path = strdup(full_path->str);
 
     /* 
        daily.cld is the base to use to compute update status of module 
@@ -251,12 +251,12 @@ static enum uhuru_update_status clamav_update_check(struct uhuru_module *module)
        offsets for each base, and take the min (or the max, depends) of
        each base status
     */
-    if (!strcmp(info->name, "daily.cld")) {
-      ret_status = clamav_update_status_eval(&info->date, cl_data->late_days, cl_data->critical_days);
-      module->update_date = info->date;
+    if (!strcmp(base_info->name, "daily.cld")) {
+      ret_status = clamav_update_status_eval(&base_info->date, cl_data->late_days, cl_data->critical_days);
+      info->update_date = base_info->date;
     }
 
-    module->base_infos[i] = info;
+    info->base_infos[i] = base_info;
   }
 
   g_string_free(full_path, TRUE);
