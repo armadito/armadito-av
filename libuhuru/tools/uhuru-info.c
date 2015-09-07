@@ -105,23 +105,6 @@ static const char *update_status_str(enum uhuru_update_status status)
   return "non available";
 }
 
-static int update_status_compare(enum uhuru_update_status s1, enum uhuru_update_status s2)
-{
-  if (s1 == s2)
-    return 0;
-
-  switch(s1) {
-  case UHURU_UPDATE_NON_AVAILABLE:
-    return -1;
-  case UHURU_UPDATE_OK:
-    return (s2 == UHURU_UPDATE_NON_AVAILABLE) ? 1 : -1;
-  case UHURU_UPDATE_LATE:
-    return (s2 == UHURU_UPDATE_NON_AVAILABLE || s2 == UHURU_UPDATE_OK) ? 1 : -1;
-  case UHURU_UPDATE_CRITICAL:
-    return (s2 == UHURU_UPDATE_NON_AVAILABLE || s2 == UHURU_UPDATE_OK || s2 == UHURU_UPDATE_LATE) ? 1 : -1;
-  }
-}
-
 static void info_doc_add_module(xmlDocPtr doc, struct uhuru_module *module, struct uhuru_module_info *info)
 {
   xmlNodePtr root_node, module_node, base_node, date_node;
@@ -179,32 +162,13 @@ static void info_doc_free(xmlDocPtr doc)
 static void do_info(struct info_options *opts)
 {
   struct uhuru *u;
-  struct uhuru_module **modv;
   xmlDocPtr doc;
-  enum uhuru_update_status global_update_status = UHURU_UPDATE_NON_AVAILABLE;
   
   u = uhuru_open(opts->use_daemon);
 
   doc = info_doc_new();
 
-  for (modv = uhuru_get_modules(u); *modv != NULL; modv++) {
-    enum uhuru_update_status status;
-    struct uhuru_module_info info;
-
-    memset(&info, 0, sizeof(struct uhuru_module_info));
-
-    /* FIXME */
-    /* status = uhuru_module_info_update(*modv, &info); */
-
-    if (status != UHURU_UPDATE_NON_AVAILABLE) {
-      info_doc_add_module(doc, *modv, &info);
-    }
-
-    if (update_status_compare(global_update_status, status) < 0)
-      global_update_status = status;
-  }
-
-  info_doc_add_global(doc, global_update_status);
+  /* info_doc_add_global(doc, global_update_status); */
 
   info_doc_save_to_fd(doc, STDOUT_FILENO);
   info_doc_free(doc);
