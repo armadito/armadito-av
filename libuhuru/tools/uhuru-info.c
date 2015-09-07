@@ -1,4 +1,4 @@
-#include <libuhuru/module.h>
+#include <libuhuru/info.h>
 #include "lib/infop.h"
 #include "lib/uhurup.h"
 
@@ -105,7 +105,7 @@ static const char *update_status_str(enum uhuru_update_status status)
   return "non available";
 }
 
-static void info_doc_add_module(xmlDocPtr doc, struct uhuru_module *module, struct uhuru_module_info *info)
+static void info_doc_add_module(xmlDocPtr doc, struct uhuru_module_info *info)
 {
   xmlNodePtr root_node, module_node, base_node, date_node;
   struct uhuru_base_info **pinfo;
@@ -114,7 +114,7 @@ static void info_doc_add_module(xmlDocPtr doc, struct uhuru_module *module, stru
   root_node = xmlDocGetRootElement(doc);
 
   module_node = xmlNewChild(root_node, NULL, "module", NULL);
-  xmlNewProp(module_node, "name", module->name);
+  xmlNewProp(module_node, "name", info->name);
 
   xmlNewChild(module_node, NULL, "update-status", update_status_str(info->mod_status));
 
@@ -162,10 +162,11 @@ static void info_doc_free(xmlDocPtr doc)
 static void do_info(struct info_options *opts)
 {
   struct uhuru *u;
+  struct uhuru_info *info;
   xmlDocPtr doc;
   
   u = uhuru_open(opts->use_daemon);
-
+  info = uhuru_info_new(u);
   doc = info_doc_new();
 
   /* info_doc_add_global(doc, global_update_status); */
