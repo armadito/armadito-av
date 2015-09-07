@@ -2,6 +2,7 @@
 #define _LIBUHURU_MODULE_H_
 
 #include <libuhuru/status.h>
+#include <libuhuru/info.h>
 
 #include <time.h>
 
@@ -19,33 +20,9 @@ enum uhuru_mod_status {
   UHURU_MOD_CLOSE_ERROR,
 };
 
-enum uhuru_update_status {
-  UHURU_UPDATE_OK,
-  UHURU_UPDATE_LATE,
-  UHURU_UPDATE_CRITICAL,
-  UHURU_UPDATE_NON_AVAILABLE,
-};
-
 struct uhuru_conf_entry {
   const char *directive;
   enum uhuru_mod_status (*conf_fun)(struct uhuru_module *module, const char *directive, const char **argv);
-};
-
-struct uhuru_base_info {
-  const char *name;
-  struct tm date;
-  const char *version;
-  unsigned int signature_count;
-  const char *full_path;
-};
-
-struct uhuru_module_info {
-  enum uhuru_update_status update_status;
-
-  struct tm update_date;
-
-  /* NULL terminated array of pointers to struct base_info */
-  struct uhuru_base_info **base_infos;
 };
 
 struct uhuru_module {

@@ -83,7 +83,7 @@ static void ipc_info_module(struct ipc_manager *m, struct uhuru_module_info *inf
   ipc_manager_msg_begin(m, IPC_MSG_ID_INFO_MODULE);
 
   ipc_manager_msg_add(m, 
-		      IPC_INT32, info->update_status,
+		      IPC_INT32, info->mod_status,
 		      IPC_INT32, info->update_date.tm_sec,
 		      IPC_INT32, info->update_date.tm_min,
 		      IPC_INT32, info->update_date.tm_hour,

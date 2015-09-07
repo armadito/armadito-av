@@ -1,5 +1,5 @@
 #include <libuhuru/module.h>
-#include "lib/baseinfop.h"
+#include "lib/infop.h"
 #include "lib/uhurup.h"
 
 #include <getopt.h>
@@ -133,7 +133,7 @@ static void info_doc_add_module(xmlDocPtr doc, struct uhuru_module *module, stru
   module_node = xmlNewChild(root_node, NULL, "module", NULL);
   xmlNewProp(module_node, "name", module->name);
 
-  xmlNewChild(module_node, NULL, "update-status", update_status_str(info->update_status));
+  xmlNewChild(module_node, NULL, "update-status", update_status_str(info->mod_status));
 
   strftime(buffer, sizeof(buffer), "%FT%H:%M:%SZ", &info->update_date);
   date_node = xmlNewChild(module_node, NULL, "update-date", buffer);
@@ -193,7 +193,8 @@ static void do_info(struct info_options *opts)
 
     memset(&info, 0, sizeof(struct uhuru_module_info));
 
-    status = uhuru_module_info_update(*modv, &info);
+    /* FIXME */
+    /* status = uhuru_module_info_update(*modv, &info); */
 
     if (status != UHURU_UPDATE_NON_AVAILABLE) {
       info_doc_add_module(doc, *modv, &info);

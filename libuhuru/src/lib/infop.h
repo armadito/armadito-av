@@ -3,6 +3,6 @@
 
 #include <libuhuru/module.h>
 
-enum uhuru_update_status uhuru_base_info_update(struct uhuru_module *module);
+/* enum uhuru_update_status uhuru_base_info_update(struct uhuru_module *module); */
 
 #endif

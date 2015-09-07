@@ -1,3 +1,7 @@
+2015-09-07  François  <francois@dechelle.net>
+
+	* going on with uhuru_info implementation; compiles ok
+
 2015-09-04  François  <francois@dechelle.net>
 
 	* changed module API for module information: moved structure out of struct uhuru_module, to allow IPC calls without the filled module structure

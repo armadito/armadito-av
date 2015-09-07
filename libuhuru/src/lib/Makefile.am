@@ -4,7 +4,8 @@ lib_LTLIBRARIES=libuhuru.la
 
 libuhuru_la_SOURCES= \
 action.c \
-baseinfo.c \
+info.c \
+infop.h \
 conf.c \
 conf.h \
 confparser.c \
