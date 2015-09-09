@@ -13,10 +13,10 @@ static void debug_args(struct ipc_manager *m)
   argv = ipc_manager_get_argv(m);
   for (i = 0; i < ipc_manager_get_argc(m); i++) {
     switch(argv[i].type) {
-    case IPC_INT32:
+    case IPC_INT32_T:
       fprintf(stderr, " [%d] = (int32)%d", i, argv[i].value.v_int32);
       break;
-    case IPC_STRING:
+    case IPC_STRING_T:
       fprintf(stderr, " [%d] = (char *)%s", i, argv[i].value.v_str);
       break;
     default:
@@ -34,9 +34,9 @@ static void handler1(struct ipc_manager *manager, void *data)
   fprintf(stderr, "handler 1: ");
   debug_args(manager);
   fprintf(stderr, "\n");
-  ipc_manager_get_arg_at(manager, 0, IPC_STRING, &ps);
+  ipc_manager_get_arg_at(manager, 0, IPC_STRING_T, &ps);
   fprintf(stderr, "arg 0 %s\n", ps);
-  ipc_manager_get_arg_at(manager, 1, IPC_INT32, &i);
+  ipc_manager_get_arg_at(manager, 1, IPC_INT32_T, &i);
   fprintf(stderr, "arg 1 %d\n", i);
 }
 

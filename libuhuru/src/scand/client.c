@@ -24,7 +24,7 @@ static void ipc_ping_handler(struct ipc_manager *m, void *data)
   g_log(NULL, G_LOG_LEVEL_DEBUG, "ipc_ping_handler");
 #endif
 
-  ipc_manager_msg_send(cl->manager, IPC_MSG_ID_PONG, IPC_NONE);
+  ipc_manager_msg_send(cl->manager, IPC_MSG_ID_PONG, IPC_NONE_T);
 }
 
 static void scan_callback(struct uhuru_report *report, void *callback_data)
@@ -32,12 +32,12 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
   struct client *cl = (struct client *)callback_data;
 
   ipc_manager_msg_send(cl->manager, IPC_MSG_ID_SCAN_FILE, 
-		       IPC_STRING, report->path, 
-		       IPC_INT32, report->status,
-		       IPC_STRING, report->mod_name,
-		       IPC_STRING, report->mod_report,
-		       IPC_INT32, report->action,
-		       IPC_NONE);
+		       IPC_STRING_T, report->path, 
+		       IPC_INT32_T, report->status,
+		       IPC_STRING_T, report->mod_name,
+		       IPC_STRING_T, report->mod_report,
+		       IPC_INT32_T, report->action,
+		       IPC_NONE_T);
 }
 
 static void ipc_scan_handler(struct ipc_manager *m, void *data)
@@ -50,7 +50,7 @@ static void ipc_scan_handler(struct ipc_manager *m, void *data)
   g_log(NULL, G_LOG_LEVEL_DEBUG, "ipc_scan_handler");
 #endif
 
-  ipc_manager_get_arg_at(m, 0, IPC_STRING, &path);
+  ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &path);
 
   scan = uhuru_scan_new(cl->uhuru, path, UHURU_SCAN_RECURSE);
 
@@ -63,7 +63,7 @@ static void ipc_scan_handler(struct ipc_manager *m, void *data)
 
   uhuru_scan_free(scan);
 
-  ipc_manager_msg_send(cl->manager, IPC_MSG_ID_SCAN_END, IPC_NONE);
+  ipc_manager_msg_send(cl->manager, IPC_MSG_ID_SCAN_END, IPC_NONE_T);
 
   if (close(cl->sock) < 0) {
     g_log(NULL, G_LOG_LEVEL_WARNING, "closing socket %d failed (%s)", cl->sock, strerror(errno));
@@ -83,26 +83,16 @@ static void ipc_info_module(struct ipc_manager *m, struct uhuru_module_info *inf
   ipc_manager_msg_begin(m, IPC_MSG_ID_INFO_MODULE);
 
   ipc_manager_msg_add(m, 
-		      IPC_INT32, info->mod_status,
-		      IPC_INT32, info->update_date.tm_sec,
-		      IPC_INT32, info->update_date.tm_min,
-		      IPC_INT32, info->update_date.tm_hour,
-		      IPC_INT32, info->update_date.tm_mday,
-		      IPC_INT32, info->update_date.tm_mon,
-		      IPC_INT32, info->update_date.tm_year);
+		      IPC_INT32_T, info->mod_status,
+		      IPC_STRING_T, info->update_date);
 
   for(pinfo = info->base_infos; *pinfo != NULL; pinfo++) {
     ipc_manager_msg_add(m, 
-			IPC_STRING, (*pinfo)->name,
-			IPC_INT32, (*pinfo)->date.tm_sec,
-			IPC_INT32, (*pinfo)->date.tm_min,
-			IPC_INT32, (*pinfo)->date.tm_hour,
-			IPC_INT32, (*pinfo)->date.tm_mday,
-			IPC_INT32, (*pinfo)->date.tm_mon,
-			IPC_INT32, (*pinfo)->date.tm_year,
-			IPC_STRING, (*pinfo)->version,
-			IPC_INT32, (*pinfo)->signature_count,
-			IPC_STRING, (*pinfo)->full_path);
+			IPC_STRING_T, (*pinfo)->name,
+			IPC_STRING_T, (*pinfo)->date,
+			IPC_STRING_T, (*pinfo)->version,
+			IPC_INT32_T, (*pinfo)->signature_count,
+			IPC_STRING_T, (*pinfo)->full_path);
   }
 
   ipc_manager_msg_end(m);
@@ -117,7 +107,7 @@ static void ipc_info_handler(struct ipc_manager *m, void *data)
 #endif
 
 
-  ipc_manager_msg_send(cl->manager, IPC_MSG_ID_INFO_END, IPC_NONE);
+  ipc_manager_msg_send(cl->manager, IPC_MSG_ID_INFO_END, IPC_NONE_T);
 }
 
 struct client *client_new(int client_sock, struct uhuru *uhuru)

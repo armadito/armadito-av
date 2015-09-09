@@ -1,3 +1,7 @@
+2015-09-09  François  <francois@dechelle.net>
+
+	* changed structure uhuru_info & co to drop use of struct tm and have a string containing UTC datetime in ISO 8601 format
+
 2015-09-07  François  <francois@dechelle.net>
 
 	* going on with uhuru_info implementation; compiles ok

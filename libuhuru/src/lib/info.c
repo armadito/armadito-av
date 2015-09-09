@@ -14,32 +14,23 @@ static void ipc_handler_info_module(struct ipc_manager *m, void *data)
   struct uhuru_module_info *info;
   int n_bases, i, argc;
 
-  ipc_manager_get_arg_at(m, 0, IPC_INT32, &info->mod_status);
-  ipc_manager_get_arg_at(m, 1, IPC_INT32, &info->update_date.tm_sec);
-  ipc_manager_get_arg_at(m, 2, IPC_INT32, &info->update_date.tm_min);
-  ipc_manager_get_arg_at(m, 3, IPC_INT32, &info->update_date.tm_hour);
-  ipc_manager_get_arg_at(m, 4, IPC_INT32, &info->update_date.tm_mday);
-  ipc_manager_get_arg_at(m, 5, IPC_INT32, &info->update_date.tm_mon);
-  ipc_manager_get_arg_at(m, 6, IPC_INT32, &info->update_date.tm_year);
+  ipc_manager_get_arg_at(m, 0, IPC_INT32_T, &info->mod_status);
+  ipc_manager_get_arg_at(m, 1, IPC_STRING_T, &info->update_date);
+
+  n_bases = (ipc_manager_get_argc(m) - 2) / 5 + 1;
 
   info->base_infos = g_new0(struct uhuru_base_info *, n_bases + 1);
 
-  n_bases = (ipc_manager_get_argc(m) - 7) / 10 + 1;
-  argc = 7;
+  argc = 2;
 
   for (i = 0; i < n_bases; i++) {
     struct uhuru_base_info *base_info = g_new(struct uhuru_base_info, 1);
 
-    ipc_manager_get_arg_at(m, argc+0, IPC_STRING, &base_info->name);
-    ipc_manager_get_arg_at(m, argc+1, IPC_INT32, &base_info->date.tm_sec);
-    ipc_manager_get_arg_at(m, argc+2, IPC_INT32, &base_info->date.tm_min);
-    ipc_manager_get_arg_at(m, argc+3, IPC_INT32, &base_info->date.tm_hour);
-    ipc_manager_get_arg_at(m, argc+4, IPC_INT32, &base_info->date.tm_mday);
-    ipc_manager_get_arg_at(m, argc+5, IPC_INT32, &base_info->date.tm_mon);
-    ipc_manager_get_arg_at(m, argc+6, IPC_INT32, &base_info->date.tm_year);
-    ipc_manager_get_arg_at(m, argc+7, IPC_STRING, &base_info->version);
-    ipc_manager_get_arg_at(m, argc+8, IPC_INT32, &base_info->signature_count);
-    ipc_manager_get_arg_at(m, argc+9, IPC_STRING, &base_info->full_path);
+    ipc_manager_get_arg_at(m, argc+0, IPC_STRING_T, &base_info->name);
+    ipc_manager_get_arg_at(m, argc+1, IPC_STRING_T, &base_info->date);
+    ipc_manager_get_arg_at(m, argc+2, IPC_STRING_T, &base_info->version);
+    ipc_manager_get_arg_at(m, argc+3, IPC_INT32_T, &base_info->signature_count);
+    ipc_manager_get_arg_at(m, argc+4, IPC_STRING_T, &base_info->full_path);
 
     info->base_infos[i] = base_info;
   }
@@ -74,18 +65,20 @@ static void info_local_init(struct uhuru_info *info, struct uhuru *uhuru)
 
   for (modv = uhuru_get_modules(uhuru); *modv != NULL; modv++) {
     if ((*modv)->info_fun != NULL) {
-      enum uhuru_update_status module_status;
-      struct uhuru_module_info *module_info = g_new0(struct uhuru_module_info, 1);
+      enum uhuru_update_status mod_status;
+      struct uhuru_module_info *mod_info = g_new0(struct uhuru_module_info, 1);
       
-      module_status = (*(*modv)->info_fun)((*modv), module_info);
+      mod_status = (*(*modv)->info_fun)((*modv), mod_info);
 
-      if (module_status != UHURU_UPDATE_NON_AVAILABLE)
-	g_array_append_val(g_module_infos, module_info);
-      else
-	g_free(module_info);
+      if (mod_status != UHURU_UPDATE_NON_AVAILABLE) {
+	mod_info->name = strdup((*modv)->name);
+	mod_info->mod_status = mod_status;
+	g_array_append_val(g_module_infos, mod_info);
+      } else
+	g_free(mod_info);
 
-      if (update_status_compare(info->global_status, module_status) < 0)
-	info->global_status = module_status;
+      if (update_status_compare(info->global_status, mod_status) < 0)
+	info->global_status = mod_status;
     }
   }
 
@@ -116,14 +109,23 @@ void uhuru_info_free(struct uhuru_info *info)
 
     for(m = info->module_infos; *m != NULL; m++) {
       free((void *)(*m)->name);
+      free((void *)(*m)->update_date);
       if ((*m)->base_infos != NULL) {
 	struct uhuru_base_info **b;
 
-	for(b = (*m)->base_infos; *b != NULL; b++)
+	for(b = (*m)->base_infos; *b != NULL; b++) {
+	  free((void *)(*b)->name);
+	  free((void *)(*b)->date);
+	  free((void *)(*b)->version);
+	  free((void *)(*b)->full_path);
+
 	  free(*b);
+	}
 
 	free((*m)->base_infos);
       }
+
+      free(*m);
     }
 
     free(info->module_infos);

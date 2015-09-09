@@ -5,9 +5,9 @@
 
 typedef guchar ipc_type_t;
 
-#define IPC_NONE     ((ipc_type_t)0x80)
-#define IPC_INT32    ((ipc_type_t)0x81)
-#define IPC_STRING   ((ipc_type_t)0x82)
+#define IPC_NONE_T     ((ipc_type_t)0x80)
+#define IPC_INT32_T    ((ipc_type_t)0x81)
+#define IPC_STRING_T   ((ipc_type_t)0x82)
 
 struct ipc_value {
   ipc_type_t type;

@@ -118,16 +118,14 @@ static void info_doc_add_module(xmlDocPtr doc, struct uhuru_module_info *info)
 
   xmlNewChild(module_node, NULL, "update-status", update_status_str(info->mod_status));
 
-  strftime(buffer, sizeof(buffer), "%FT%H:%M:%SZ", &info->update_date);
-  date_node = xmlNewChild(module_node, NULL, "update-date", buffer);
+  date_node = xmlNewChild(module_node, NULL, "update-date", info->update_date);
   xmlNewProp(date_node, "type", "xs:dateTime");
 
   for(pinfo = info->base_infos; *pinfo != NULL; pinfo++) {
     base_node = xmlNewChild(module_node, NULL, "base", NULL);
     xmlNewProp(base_node, "name", (*pinfo)->name);
 
-    strftime(buffer, sizeof(buffer), "%FT%H:%M:%SZ", &(*pinfo)->date);
-    date_node = xmlNewChild(base_node, NULL, "date", buffer);
+    date_node = xmlNewChild(base_node, NULL, "date", (*pinfo)->date);
     xmlNewProp(date_node, "type", "xs:dateTime");
 
     xmlNewChild(base_node, NULL, "version", (*pinfo)->version);
@@ -159,20 +157,34 @@ static void info_doc_free(xmlDocPtr doc)
   xmlFreeDoc(doc);
 }
 
+static void info_save_to_xml(struct uhuru_info *info)
+{
+  xmlDocPtr doc = info_doc_new();
+  struct uhuru_module_info **m;
+
+  info_doc_add_global(doc, info->global_status);
+
+  for(m = info->module_infos; *m != NULL; m++)
+    info_doc_add_module(doc, *m);
+
+  info_doc_save_to_fd(doc, STDOUT_FILENO);
+  info_doc_free(doc);
+}
+
 static void do_info(struct info_options *opts)
 {
   struct uhuru *u;
   struct uhuru_info *info;
-  xmlDocPtr doc;
   
   u = uhuru_open(opts->use_daemon);
   info = uhuru_info_new(u);
-  doc = info_doc_new();
 
-  /* info_doc_add_global(doc, global_update_status); */
+  if (opts->output_xml)
+    info_save_to_xml(info);
+  else
+    fprintf(stderr, "only XML output implemented!\n");
 
-  info_doc_save_to_fd(doc, STDOUT_FILENO);
-  info_doc_free(doc);
+  uhuru_info_free(info);
 
   uhuru_close(u);
 }

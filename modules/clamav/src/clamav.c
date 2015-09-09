@@ -146,53 +146,48 @@ static enum uhuru_mod_status clamav_close(struct uhuru_module *module)
   return UHURU_MOD_OK;
 }
 
-static void clamav_convert_datetime(const char *clamav_datetime, struct tm *tm_datetime)
+static int get_month(const char *month)
 {
-  char *ret;
-  int negative = 0;
-  int offset_hour = 0, offset_minute = 0;
-  GTimeZone *timezone = NULL;
-  GDateTime *datetime, *datetime_utc;
-  struct tm tm_tmp;
+  static const char *months = "JanFebMarAprMayJunJulAugSepOctNovDec";
+  const char *ret;
 
-  memset(&tm_tmp, 0, sizeof(struct tm));
-  memset(tm_datetime, 0, sizeof(struct tm));
+  if ((ret = strstr(months, month)) == NULL)
+    return -1;
 
-  /* ClamAV format: 17 Sep 2013 10-57 -0400 */
-  ret = strptime(clamav_datetime, "%d%n%b%n%Y%n%H-%M%n", &tm_tmp);
-  if (ret == NULL)
-    return;
-
-  /* tm_tmp.tm_year += 1900; */
-
-  if (*ret != '\0')
-    timezone = g_time_zone_new(ret);
-
-  datetime = g_date_time_new(timezone, tm_tmp.tm_year, tm_tmp.tm_mon, tm_tmp.tm_mday, tm_tmp.tm_hour, tm_tmp.tm_min, tm_tmp.tm_sec);  
-  datetime_utc = g_date_time_to_utc(datetime);
-
-  tm_datetime->tm_sec = g_date_time_get_second(datetime_utc);
-  tm_datetime->tm_min = g_date_time_get_minute(datetime_utc);
-  tm_datetime->tm_hour = g_date_time_get_hour(datetime_utc);
-  tm_datetime->tm_mday = g_date_time_get_day_of_month(datetime_utc);
-  tm_datetime->tm_mon = g_date_time_get_month(datetime_utc);
-  tm_datetime->tm_year = g_date_time_get_year(datetime_utc);
-
-  g_date_time_unref(datetime);
-  g_date_time_unref(datetime_utc);
-  if (timezone != NULL)
-    g_time_zone_unref(timezone);
+  return (ret - months) / 3 + 1;
 }
 
-static enum uhuru_update_status clamav_update_status_eval(struct tm *tm_curr, int late_days, int critical_days)
+static GDateTime *clamav_convert_datetime(const char *clamav_datetime)
 {
-  GDateTime *now, *late, *critical, *curr;
+  int day, year, hour, minute;
+  char s_month[4], s_timezone[6];
+  GDateTime *datetime, *datetime_utc;
+  GTimeZone *timezone = NULL;
+
+  /* ClamAV format: 17 Sep 2013 10-57 -0400 */
+  sscanf(clamav_datetime, "%d %3s %d %2d-%2d %5s", &day, s_month, &year, &hour, &minute, s_timezone);
+
+  timezone = g_time_zone_new(s_timezone);
+
+  datetime = g_date_time_new(timezone, year, get_month(s_month), day, hour, minute, 0);  
+
+  datetime_utc = g_date_time_to_utc(datetime);
+
+  g_date_time_unref(datetime);
+  if (timezone != NULL)
+    g_time_zone_unref(timezone);
+
+  return datetime_utc;
+}
+
+static enum uhuru_update_status clamav_update_status_eval(GDateTime *curr, int late_days, int critical_days)
+{
+  GDateTime *now, *late, *critical;
   enum uhuru_update_status ret = UHURU_UPDATE_OK;
 
   now = g_date_time_new_now_utc();
   late = g_date_time_add_days(now, -late_days);
   critical = g_date_time_add_days(now, -critical_days);
-  curr = g_date_time_new_utc(tm_curr->tm_year, tm_curr->tm_mon, tm_curr->tm_mday, tm_curr->tm_hour, tm_curr->tm_min, tm_curr->tm_sec);  
 
   fprintf(stderr, "now       %s\n", g_date_time_format(now, "%FT%H:%M:%SZ"));
   fprintf(stderr, "late      %s\n", g_date_time_format(late, "%FT%H:%M:%SZ"));
@@ -207,7 +202,6 @@ static enum uhuru_update_status clamav_update_status_eval(struct tm *tm_curr, in
   g_date_time_unref(now);
   g_date_time_unref(late);
   g_date_time_unref(critical);
-  g_date_time_unref(curr);
 
   return ret;
 }
@@ -219,6 +213,7 @@ static enum uhuru_update_status clamav_info(struct uhuru_module *module, struct 
   GString *full_path = g_string_new("");
   GString *version = g_string_new("");
   const char *names[] = { "daily.cld", "bytecode.cld", "main.cvd", };
+  GDateTime *base_datetime;
   int n, i;
 
   n = sizeof(names) / sizeof(const char *);
@@ -228,6 +223,7 @@ static enum uhuru_update_status clamav_info(struct uhuru_module *module, struct 
   for (i = 0; i < n; i++) {
     struct cl_cvd *cvd;
     struct uhuru_base_info *base_info;
+    char *s_base_datetime;
 
     g_string_printf(full_path, "%s%s%s", cl_data->db_dir, G_DIR_SEPARATOR_S, names[i]);
 
@@ -238,9 +234,14 @@ static enum uhuru_update_status clamav_info(struct uhuru_module *module, struct 
     base_info = g_new(struct uhuru_base_info, 1);
 
     base_info->name = strdup(names[i]);
+
     g_string_printf(version, "%d", cvd->version);
     base_info->version = strdup(version->str);
-    clamav_convert_datetime(cvd->time, &base_info->date);
+
+    base_datetime = clamav_convert_datetime(cvd->time);
+    s_base_datetime = g_date_time_format(base_datetime, "%FT%H:%M:%SZ");
+    base_info->date = strdup(s_base_datetime);
+    g_free(s_base_datetime);
 
     base_info->signature_count = cvd->sigs;
     base_info->full_path = strdup(full_path->str);
@@ -252,11 +253,13 @@ static enum uhuru_update_status clamav_info(struct uhuru_module *module, struct 
        each base status
     */
     if (!strcmp(base_info->name, "daily.cld")) {
-      ret_status = clamav_update_status_eval(&base_info->date, cl_data->late_days, cl_data->critical_days);
-      info->update_date = base_info->date;
+      ret_status = clamav_update_status_eval(base_datetime, cl_data->late_days, cl_data->critical_days);
+      info->update_date = strdup(base_info->date);
     }
 
     info->base_infos[i] = base_info;
+
+    g_date_time_unref(base_datetime);
   }
 
   g_string_free(full_path, TRUE);

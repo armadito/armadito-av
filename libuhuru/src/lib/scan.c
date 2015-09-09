@@ -264,11 +264,11 @@ static void remote_scan_handler_scan_file(struct ipc_manager *m, void *data)
   gint32 action;
   struct uhuru_report report;
 
-  ipc_manager_get_arg_at(m, 0, IPC_STRING, &path);
-  ipc_manager_get_arg_at(m, 1, IPC_INT32, &status);
-  ipc_manager_get_arg_at(m, 2, IPC_STRING, &mod_name);
-  ipc_manager_get_arg_at(m, 3, IPC_STRING, &x_status);
-  ipc_manager_get_arg_at(m, 4, IPC_INT32, &action);
+  ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &path);
+  ipc_manager_get_arg_at(m, 1, IPC_INT32_T, &status);
+  ipc_manager_get_arg_at(m, 2, IPC_STRING_T, &mod_name);
+  ipc_manager_get_arg_at(m, 3, IPC_STRING_T, &x_status);
+  ipc_manager_get_arg_at(m, 4, IPC_INT32_T, &action);
 
   uhuru_report_init(&report, path);
 
@@ -315,7 +315,7 @@ static enum uhuru_file_status remote_scan_start(struct uhuru_scan *scan)
   ipc_manager_add_handler(scan->remote.manager, IPC_MSG_ID_SCAN_FILE, remote_scan_handler_scan_file, scan);
   ipc_manager_add_handler(scan->remote.manager, IPC_MSG_ID_SCAN_END, remote_scan_handler_scan_end, scan);
 
-  ipc_manager_msg_send(scan->remote.manager, IPC_MSG_ID_SCAN, IPC_STRING, scan->path, IPC_NONE);
+  ipc_manager_msg_send(scan->remote.manager, IPC_MSG_ID_SCAN, IPC_STRING_T, scan->path, IPC_NONE_T);
 }
 
 static enum uhuru_scan_status remote_scan_run(struct uhuru_scan *scan)
