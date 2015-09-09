@@ -1,11 +1,11 @@
 [mime-type]
 
 mime-type="application/pdf"; clamav
-mime-type="application/x-dosexec"; clamav; "module5_2"
-mime-type="application/x-executable"; "module5.2"; clamav
-mime-type="application/x-msdos-program"; "module5_2"; clamav
-mime-type="application/x-object"; "module5_2"; clamav
-mime-type="application/x-sharedlib"; "module5.2"; clamav
+mime-type="application/x-dosexec"; clamav; module5_2
+mime-type="application/x-executable"; module5_2; clamav
+mime-type="application/x-msdos-program"; module5_2; clamav
+mime-type="application/x-object"; module5_2; clamav
+mime-type="application/x-sharedlib"; module5_2; clamav
 # clamav scans every file if no other module applies
 mime-type="*"; clamav    
 

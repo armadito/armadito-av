@@ -30,13 +30,14 @@ struct module_manager {
  */
 static struct uhuru_module *module_new(struct uhuru_module *src, struct uhuru *uhuru)
 {
-  struct uhuru_module *mod = g_new(struct uhuru_module, 1);
+  struct uhuru_module *mod = g_new0(struct uhuru_module, 1);
 
   mod->init_fun = src->init_fun;
   mod->conf_table = src->conf_table;
   mod->post_init_fun = src->post_init_fun;
   mod->scan_fun = src->scan_fun;
   mod->close_fun = src->close_fun;
+  mod->info_fun = src->info_fun;
 
   mod->name = strdup(src->name);
 
@@ -44,6 +45,7 @@ static struct uhuru_module *module_new(struct uhuru_module *src, struct uhuru *u
 
   mod->status = UHURU_MOD_OK;
   mod->data = NULL;
+
   mod->uhuru = uhuru;
 
   if (mod->init_fun != NULL) {
@@ -122,7 +124,7 @@ void module_manager_load_path(struct module_manager *mm, const char *path)
 
   g_dir_close(dir);
 
-  g_string_free (full_path, TRUE);
+  g_string_free(full_path, TRUE);
 }
 
 void module_manager_post_init_all(struct module_manager *mm)

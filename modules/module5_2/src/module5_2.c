@@ -8,14 +8,41 @@
 #include "uh_errors.h"
 #include "UhuruStatic.h"
 
-const char *module5_2_mime_types[] = {
-  "application/x-sharedlib",
-  "application/x-object",
-  "application/x-executable",
-  "application/x-msdos-program",
-  "application/x-dosexec",
-  NULL,
-};
+/*
+  dirty module 5.2 code has no exported structure and uses only static data...
+ */
+static enum uhuru_mod_status module5_2_init(struct uhuru_module *module)
+{
+  return UHURU_MOD_OK;
+}
+
+static enum uhuru_mod_status module5_2_post_init(struct uhuru_module *module)
+{
+  if (initDB(MODULE5_2_DBDIR "/linux/database.elfdata", 
+	     MODULE5_2_DBDIR "/linux/db_malicious.zip", 
+	     MODULE5_2_DBDIR "/linux/db_safe.zip",
+	     MODULE5_2_DBDIR "/linux/tfidf_m.dat",
+	     MODULE5_2_DBDIR "/linux/tfidf_s.dat") != 0)
+    return UHURU_MOD_INIT_ERROR;
+
+ /* FIXME: use g_log ??? */
+  fprintf(stderr, "Module 5.2 ELF databases loaded from " MODULE5_2_DBDIR "/linux\n");
+
+  if (initDatabases(MODULE5_2_DBDIR "/windows/Database_malsain_2.zip",
+		    MODULE5_2_DBDIR "/windows/Database_malsain_1.zip",
+		    MODULE5_2_DBDIR "/windows/Database_sain_2.zip",
+		    MODULE5_2_DBDIR "/windows/Database_sain_1.zip",
+		    MODULE5_2_DBDIR "/windows/database_2.dat",
+		    MODULE5_2_DBDIR "/windows/database_1.dat",
+		    MODULE5_2_DBDIR "/windows/DBI_inf.dat",
+		    MODULE5_2_DBDIR "/windows/DBI_sain.dat") != 0)
+    return UHURU_MOD_INIT_ERROR;
+
+ /* FIXME: use g_log ??? */
+  fprintf(stderr, "Module 5.2 PE databases loaded from " MODULE5_2_DBDIR "/windows\n");
+
+  return UHURU_MOD_OK;
+}
 
 static const char *error_code_str(ERROR_CODE e)
 {
@@ -76,7 +103,7 @@ static const char *error_code_str(ERROR_CODE e)
   return "UNKNOWN ERROR";
 }
 
-enum uhuru_file_status module5_2_scan(const char *path, const char *mime_type, void *mod_data, char **pmod_report)
+static enum uhuru_file_status module5_2_scan(struct uhuru_module *module, const char *path, const char *mime_type, char **pmod_report)
 {
   ERROR_CODE e;
 
@@ -90,10 +117,6 @@ enum uhuru_file_status module5_2_scan(const char *path, const char *mime_type, v
 
   *pmod_report = strdup(error_code_str(e));
   
-#if 0
-  fprintf(stderr, "module 5.2: %s %s\n", path, error_code_str(e));
-#endif
-
   switch(e) {
   case UH_MALWARE:
     return UHURU_MALWARE;
@@ -107,33 +130,23 @@ enum uhuru_file_status module5_2_scan(const char *path, const char *mime_type, v
   return UHURU_IERROR;
 }
 
-enum uhuru_mod_status module5_2_init(void **pmod_data)
+static enum uhuru_mod_status module5_2_close(struct uhuru_module *module)
 {
-  if (initDB(MODULE5_2_DBDIR "/linux/database.elfdata", 
-	     MODULE5_2_DBDIR "/linux/db_malicious.zip", 
-	     MODULE5_2_DBDIR "/linux/db_safe.zip",
-	     MODULE5_2_DBDIR "/linux/tfidf_m.dat",
-	     MODULE5_2_DBDIR "/linux/tfidf_s.dat") != 0)
-    return UHURU_MOD_INIT_ERROR;
-
-  fprintf(stderr, "Module 5.2 ELF databases loaded from " MODULE5_2_DBDIR "/linux\n");
-
-  if (initDatabases(MODULE5_2_DBDIR "/windows/Database_malsain_2.zip",
-		    MODULE5_2_DBDIR "/windows/Database_malsain_1.zip",
-		    MODULE5_2_DBDIR "/windows/Database_sain_2.zip",
-		    MODULE5_2_DBDIR "/windows/Database_sain_1.zip",
-		    MODULE5_2_DBDIR "/windows/database_2.dat",
-		    MODULE5_2_DBDIR "/windows/database_1.dat",
-		    MODULE5_2_DBDIR "/windows/DBI_inf.dat",
-		    MODULE5_2_DBDIR "/windows/DBI_sain.dat") != 0)
-    return UHURU_MOD_INIT_ERROR;
-
-  fprintf(stderr, "Module 5.2 PE databases loaded from " MODULE5_2_DBDIR "/windows\n");
-
   return UHURU_MOD_OK;
 }
 
-void module5_2_install(void)
+/* FIXME: one day, add bases status */
+static enum uhuru_update_status clamav_update_check(struct uhuru_module *module)
 {
-  fprintf(stderr, "Module 5.2 installed\n");
+  return UHURU_UPDATE_NON_AVAILABLE;
 }
+
+struct uhuru_module module = {
+  .init_fun = module5_2_init,
+  .conf_table= NULL,
+  .post_init_fun = module5_2_post_init,
+  .scan_fun = module5_2_scan,
+  .close_fun = module5_2_close,
+  .info_fun = NULL,
+  .name = "module5_2",
+};

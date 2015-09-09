@@ -7,6 +7,8 @@
 #include <glib.h>
 #include <magic.h>
 
+struct uhuru_module **uhuru_get_modules(struct uhuru *u);
+
 struct uhuru_module *uhuru_get_module_by_name(struct uhuru *u, const char *name);
 
 void uhuru_add_mime_type(struct uhuru *u, const char *mime_type, struct uhuru_module *module);

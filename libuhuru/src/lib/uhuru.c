@@ -70,6 +70,11 @@ int uhuru_is_remote(struct uhuru *u)
   return u->is_remote;
 }
 
+struct uhuru_module **uhuru_get_modules(struct uhuru *u)
+{
+  return module_manager_get_modules(u->module_manager);
+}
+
 struct uhuru_module *uhuru_get_module_by_name(struct uhuru *u, const char *module_name)
 {
   struct uhuru_module **modv;

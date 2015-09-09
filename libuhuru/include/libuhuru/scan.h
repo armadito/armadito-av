@@ -2,20 +2,14 @@
 #define _LIBUHURU_SCAN_H_
 
 #include <libuhuru/status.h>
+#include <libuhuru/handle.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct uhuru;
 struct uhuru_report;
 struct uhuru_scan;
-
-struct uhuru *uhuru_open(int is_remote);
-
-void uhuru_print(struct uhuru *u);
-
-void uhuru_close(struct uhuru *u);
 
 enum uhuru_scan_flags {
   UHURU_SCAN_THREADED   = 1 << 0,

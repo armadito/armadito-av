@@ -2,10 +2,16 @@
 #define _LIBUHURU_MODULE_H_
 
 #include <libuhuru/status.h>
+#include <libuhuru/info.h>
+
+#include <time.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+struct uhuru;
+struct uhuru_module;
 
 enum uhuru_mod_status {
   UHURU_MOD_OK,
@@ -13,9 +19,6 @@ enum uhuru_mod_status {
   UHURU_MOD_CONF_ERROR,
   UHURU_MOD_CLOSE_ERROR,
 };
-
-struct uhuru;
-struct uhuru_module;
 
 struct uhuru_conf_entry {
   const char *directive;
@@ -33,11 +36,12 @@ struct uhuru_module {
 
   enum uhuru_mod_status (*close_fun)(struct uhuru_module *module);
 
+  enum uhuru_update_status (*info_fun)(struct uhuru_module *module, struct uhuru_module_info *info);
+
   const char *name;
 
   size_t size;
 
-  /* following fields will be initialized by the library */
   enum uhuru_mod_status status;
 
   void *data;

@@ -1,6 +1,8 @@
+#include <libuhuru/module.h>
+
+#include "libuhuru-config.h"
 #include "client.h"
 #include "lib/ipc.h"
-#include "libuhuru-config.h"
 
 #include <stdio.h>
 #include <errno.h>
@@ -14,41 +16,41 @@ struct client {
   struct uhuru *uhuru;
 };
 
-static void ping_handler(struct ipc_manager *m, void *data)
+static void ipc_ping_handler(struct ipc_manager *m, void *data)
 {
   struct client *cl = (struct client *)data;
 
 #ifdef DEBUG
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "ping_handler");
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "ipc_ping_handler");
 #endif
 
-  ipc_manager_send_msg(cl->manager, IPC_MSG_ID_PONG, IPC_NONE);
+  ipc_manager_msg_send(cl->manager, IPC_MSG_ID_PONG, IPC_NONE_T);
 }
 
 static void scan_callback(struct uhuru_report *report, void *callback_data)
 {
   struct client *cl = (struct client *)callback_data;
 
-  ipc_manager_send_msg(cl->manager, IPC_MSG_ID_SCAN_FILE, 
-		       IPC_STRING, report->path, 
-		       IPC_INT32, report->status,
-		       IPC_STRING, report->mod_name,
-		       IPC_STRING, report->mod_report,
-		       IPC_INT32, report->action,
-		       IPC_NONE);
+  ipc_manager_msg_send(cl->manager, IPC_MSG_ID_SCAN_FILE, 
+		       IPC_STRING_T, report->path, 
+		       IPC_INT32_T, report->status,
+		       IPC_STRING_T, report->mod_name,
+		       IPC_STRING_T, report->mod_report,
+		       IPC_INT32_T, report->action,
+		       IPC_NONE_T);
 }
 
-static void scan_handler(struct ipc_manager *m, void *data)
+static void ipc_scan_handler(struct ipc_manager *m, void *data)
 {
   struct client *cl = (struct client *)data;
   char *path;
   struct uhuru_scan *scan;
 
 #ifdef DEBUG
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "scan_handler");
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "ipc_scan_handler");
 #endif
 
-  ipc_manager_get_arg_at(m, 0, IPC_STRING, &path);
+  ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &path);
 
   scan = uhuru_scan_new(cl->uhuru, path, UHURU_SCAN_RECURSE);
 
@@ -61,7 +63,7 @@ static void scan_handler(struct ipc_manager *m, void *data)
 
   uhuru_scan_free(scan);
 
-  ipc_manager_send_msg(cl->manager, IPC_MSG_ID_SCAN_END, IPC_NONE);
+  ipc_manager_msg_send(cl->manager, IPC_MSG_ID_SCAN_END, IPC_NONE_T);
 
   if (close(cl->sock) < 0) {
     g_log(NULL, G_LOG_LEVEL_WARNING, "closing socket %d failed (%s)", cl->sock, strerror(errno));
@@ -70,16 +72,64 @@ static void scan_handler(struct ipc_manager *m, void *data)
   cl->sock = -1;
 
 #ifdef DEBUG
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "scan_handler finished");
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "ipc_scan_handler finished");
 #endif
 }
 
-static void cb_stat(struct ipc_manager *m, void *data)
+static void info_send(struct ipc_manager *manager, struct uhuru_info *info)
+{
+  struct uhuru_module_info **m;
+
+  for(m = info->module_infos; *m != NULL; m++) {
+    ipc_manager_msg_begin(manager, IPC_MSG_ID_INFO_MODULE);
+    ipc_manager_msg_add(manager, 
+			IPC_STRING_T, (*m)->name, 
+			IPC_INT32_T, (*m)->mod_status, 
+			IPC_STRING_T, (*m)->update_date, 
+			IPC_NONE_T);
+
+    if ((*m)->base_infos != NULL) {
+      struct uhuru_base_info **b;
+
+      for(b = (*m)->base_infos; *b != NULL; b++)
+	ipc_manager_msg_add(manager, 
+			    IPC_STRING_T, (*b)->name,
+			    IPC_STRING_T, (*b)->date,
+			    IPC_STRING_T, (*b)->version,
+			    IPC_INT32_T, (*b)->signature_count,
+			    IPC_STRING_T, (*b)->full_path,
+			    IPC_NONE_T);
+    }
+
+    ipc_manager_msg_end(manager);
+  }
+
+  ipc_manager_msg_send(manager, IPC_MSG_ID_INFO_END, IPC_INT32_T, info->global_status, IPC_NONE_T);
+}
+
+static void ipc_info_handler(struct ipc_manager *manager, void *data)
 {
   struct client *cl = (struct client *)data;
+  struct uhuru_info *info;
 
 #ifdef DEBUG
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "stat_handler");
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "ipc_info_handler");
+#endif
+
+  info = uhuru_info_new(cl->uhuru);
+
+  info_send(manager, info);
+
+  uhuru_info_free(info);
+
+  if (close(cl->sock) < 0) {
+    g_log(NULL, G_LOG_LEVEL_WARNING, "closing socket %d failed (%s)", cl->sock, strerror(errno));
+  }
+
+  cl->sock = -1;
+
+#ifdef DEBUG
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "ipc_info_handler finished");
 #endif
 }
 
@@ -91,8 +141,9 @@ struct client *client_new(int client_sock, struct uhuru *uhuru)
   cl->manager = ipc_manager_new(cl->sock, cl->sock);
   cl->uhuru = uhuru;
 
-  ipc_manager_add_handler(cl->manager, IPC_MSG_ID_PING, ping_handler, cl);
-  ipc_manager_add_handler(cl->manager, IPC_MSG_ID_SCAN, scan_handler, cl);
+  ipc_manager_add_handler(cl->manager, IPC_MSG_ID_PING, ipc_ping_handler, cl);
+  ipc_manager_add_handler(cl->manager, IPC_MSG_ID_SCAN, ipc_scan_handler, cl);
+  ipc_manager_add_handler(cl->manager, IPC_MSG_ID_INFO, ipc_info_handler, cl);
 
   return cl;
 }
