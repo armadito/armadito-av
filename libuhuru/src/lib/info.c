@@ -4,38 +4,12 @@
 
 #include "ipc.h"
 #include "uhurup.h"
+#include "builtin-modules/remote.h"
 
+#include <assert.h>
 #include <glib.h>
 #include <string.h>
 #include <stdlib.h>
-
-static void ipc_handler_info_module(struct ipc_manager *m, void *data)
-{
-  struct uhuru_module_info *info;
-  int n_bases, i, argc;
-
-  ipc_manager_get_arg_at(m, 0, IPC_INT32_T, &info->mod_status);
-  ipc_manager_get_arg_at(m, 1, IPC_STRING_T, &info->update_date);
-
-  n_bases = (ipc_manager_get_argc(m) - 2) / 5 + 1;
-
-  info->base_infos = g_new0(struct uhuru_base_info *, n_bases + 1);
-
-  argc = 2;
-
-  for (i = 0; i < n_bases; i++) {
-    struct uhuru_base_info *base_info = g_new(struct uhuru_base_info, 1);
-
-    ipc_manager_get_arg_at(m, argc+0, IPC_STRING_T, &base_info->name);
-    ipc_manager_get_arg_at(m, argc+1, IPC_STRING_T, &base_info->date);
-    ipc_manager_get_arg_at(m, argc+2, IPC_STRING_T, &base_info->version);
-    ipc_manager_get_arg_at(m, argc+3, IPC_INT32_T, &base_info->signature_count);
-    ipc_manager_get_arg_at(m, argc+4, IPC_STRING_T, &base_info->full_path);
-
-    info->base_infos[i] = base_info;
-  }
-
-}
 
 static int update_status_compare(enum uhuru_update_status s1, enum uhuru_update_status s2)
 {
@@ -86,13 +60,106 @@ static void info_local_init(struct uhuru_info *info, struct uhuru *uhuru)
   g_array_free(g_module_infos, FALSE);
 }
 
-static void info_remote_init(struct uhuru_info *info, struct uhuru *uhuru)
+struct ipc_handler_info_data {
+  struct uhuru_info *info;
+  GArray *g_module_infos;
+};
+
+static void ipc_handler_info_module(struct ipc_manager *m, void *data)
 {
+  struct ipc_handler_info_data *handler_data = (struct ipc_handler_info_data *)data;
+  struct uhuru_module_info *mod_info = g_new0(struct uhuru_module_info, 1);
+  int n_bases, i, argc;
+  char *mod_name, *update_date;
+
+  ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &mod_name);
+  mod_info->name = strdup(mod_name);
+  ipc_manager_get_arg_at(m, 1, IPC_INT32_T, &mod_info->mod_status);
+  ipc_manager_get_arg_at(m, 2, IPC_STRING_T, &update_date);
+  mod_info->update_date = strdup(update_date);
+
+  n_bases = (ipc_manager_get_argc(m) - 3) / 5;
+
+  mod_info->base_infos = g_new0(struct uhuru_base_info *, n_bases + 1);
+
+  argc = 3;
+
+  for (i = 0; i < n_bases; i++, argc += 5) {
+    struct uhuru_base_info *base_info = g_new(struct uhuru_base_info, 1);
+    char *name, *date, *version, *full_path;
+
+    ipc_manager_get_arg_at(m, argc+0, IPC_STRING_T, &name);
+    base_info->name = strdup(name);
+    ipc_manager_get_arg_at(m, argc+1, IPC_STRING_T, &date);
+    base_info->date = strdup(date);
+    ipc_manager_get_arg_at(m, argc+2, IPC_STRING_T, &version);
+    base_info->version = strdup(version);
+    ipc_manager_get_arg_at(m, argc+3, IPC_INT32_T, &base_info->signature_count);
+    ipc_manager_get_arg_at(m, argc+4, IPC_STRING_T, &full_path);
+    base_info->full_path = strdup(full_path);
+
+    mod_info->base_infos[i] = base_info;
+  }
+
+  g_array_append_val(handler_data->g_module_infos, mod_info);
+}
+
+static void ipc_handler_info_end(struct ipc_manager *m, void *data)
+{
+  struct ipc_handler_info_data *handler_data = (struct ipc_handler_info_data *)data;
+  struct uhuru_info *info = handler_data->info;
+  GArray *g_module_infos = handler_data->g_module_infos;
+
+  info->module_infos = (struct uhuru_module_info **)g_module_infos->data;
+  g_array_free(g_module_infos, FALSE);
+
+  ipc_manager_get_arg_at(m, 0, IPC_INT32_T, &info->global_status);
+}
+
+static int info_remote_init(struct uhuru_info *info, struct uhuru *uhuru)
+{
+  struct uhuru_module *remote_module;
+  const char *sock_dir;
+  GString *sock_path;
+  int sock;
+  struct ipc_manager *manager;
+  struct ipc_handler_info_data *data;
+
+  remote_module = uhuru_get_module_by_name(uhuru, "remote");
+  assert(remote_module != NULL);
+
+  sock_dir = remote_module_get_sock_dir(remote_module);
+  assert(sock_dir != NULL);
+
+  sock_path = g_string_new(sock_dir);
+  g_string_append_printf(sock_path, "/uhuru-%s", getenv("USER"));
+
+  sock = client_socket_create(sock_path->str, 10);
+  if (sock < 0)
+    return -1;
+
+  g_string_free(sock_path, TRUE);
+
+  manager = ipc_manager_new(sock, sock);
+
+  data = g_new(struct ipc_handler_info_data, 1);
+  data->info = info;
+  data->g_module_infos = g_array_new(TRUE, TRUE, sizeof(struct uhuru_module_info *));
+
+  ipc_manager_add_handler(manager, IPC_MSG_ID_INFO_MODULE, ipc_handler_info_module, data);
+  ipc_manager_add_handler(manager, IPC_MSG_ID_INFO_END, ipc_handler_info_end, data);
+
+  ipc_manager_msg_send(manager, IPC_MSG_ID_INFO, IPC_NONE_T);
+
+  while (ipc_manager_receive(manager) > 0)
+    ;
+
+  g_free(data);
 }
 
 struct uhuru_info *uhuru_info_new(struct uhuru *uhuru)
 {
-  struct uhuru_info *info = g_new(struct uhuru_info, 1);
+  struct uhuru_info *info = g_new0(struct uhuru_info, 1);
 
   if (uhuru_is_remote(uhuru))
     info_remote_init(info, uhuru);
@@ -104,12 +171,13 @@ struct uhuru_info *uhuru_info_new(struct uhuru *uhuru)
 
 void uhuru_info_free(struct uhuru_info *info)
 {
-  if (info->module_infos != NULL) {
-    struct uhuru_module_info **m;
+  struct uhuru_module_info **m;
 
+  if (info->module_infos != NULL) {
     for(m = info->module_infos; *m != NULL; m++) {
       free((void *)(*m)->name);
       free((void *)(*m)->update_date);
+
       if ((*m)->base_infos != NULL) {
 	struct uhuru_base_info **b;
 
@@ -125,13 +193,13 @@ void uhuru_info_free(struct uhuru_info *info)
 	free((*m)->base_infos);
       }
 
-      free(*m);
+      g_free(*m);
     }
 
-    free(info->module_infos);
+    g_free(info->module_infos);
   }
 
-  free(info);
+  g_free(info);
 }
 
 #ifdef DEBUG

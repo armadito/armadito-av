@@ -44,7 +44,7 @@ static void parse_options(int argc, char *argv[], struct info_options *opts)
   int c;
 
   opts->output_xml = 0;
-  opts->use_daemon = 0;
+  opts->use_daemon = 1;
 
   while (1) {
     int option_index = 0;
@@ -164,8 +164,10 @@ static void info_save_to_xml(struct uhuru_info *info)
 
   info_doc_add_global(doc, info->global_status);
 
+  if (info->module_infos != NULL) {
   for(m = info->module_infos; *m != NULL; m++)
     info_doc_add_module(doc, *m);
+  }
 
   info_doc_save_to_fd(doc, STDOUT_FILENO);
   info_doc_free(doc);

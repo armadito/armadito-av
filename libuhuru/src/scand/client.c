@@ -76,38 +76,61 @@ static void ipc_scan_handler(struct ipc_manager *m, void *data)
 #endif
 }
 
-static void ipc_info_module(struct ipc_manager *m, struct uhuru_module_info *info)
+static void info_send(struct ipc_manager *manager, struct uhuru_info *info)
 {
-  struct uhuru_base_info **pinfo;
+  struct uhuru_module_info **m;
 
-  ipc_manager_msg_begin(m, IPC_MSG_ID_INFO_MODULE);
+  for(m = info->module_infos; *m != NULL; m++) {
+    ipc_manager_msg_begin(manager, IPC_MSG_ID_INFO_MODULE);
+    ipc_manager_msg_add(manager, 
+			IPC_STRING_T, (*m)->name, 
+			IPC_INT32_T, (*m)->mod_status, 
+			IPC_STRING_T, (*m)->update_date, 
+			IPC_NONE_T);
 
-  ipc_manager_msg_add(m, 
-		      IPC_INT32_T, info->mod_status,
-		      IPC_STRING_T, info->update_date);
+    if ((*m)->base_infos != NULL) {
+      struct uhuru_base_info **b;
 
-  for(pinfo = info->base_infos; *pinfo != NULL; pinfo++) {
-    ipc_manager_msg_add(m, 
-			IPC_STRING_T, (*pinfo)->name,
-			IPC_STRING_T, (*pinfo)->date,
-			IPC_STRING_T, (*pinfo)->version,
-			IPC_INT32_T, (*pinfo)->signature_count,
-			IPC_STRING_T, (*pinfo)->full_path);
+      for(b = (*m)->base_infos; *b != NULL; b++)
+	ipc_manager_msg_add(manager, 
+			    IPC_STRING_T, (*b)->name,
+			    IPC_STRING_T, (*b)->date,
+			    IPC_STRING_T, (*b)->version,
+			    IPC_INT32_T, (*b)->signature_count,
+			    IPC_STRING_T, (*b)->full_path,
+			    IPC_NONE_T);
+    }
+
+    ipc_manager_msg_end(manager);
   }
 
-  ipc_manager_msg_end(m);
+  ipc_manager_msg_send(manager, IPC_MSG_ID_INFO_END, IPC_INT32_T, info->global_status, IPC_NONE_T);
 }
 
-static void ipc_info_handler(struct ipc_manager *m, void *data)
+static void ipc_info_handler(struct ipc_manager *manager, void *data)
 {
   struct client *cl = (struct client *)data;
+  struct uhuru_info *info;
 
 #ifdef DEBUG
   g_log(NULL, G_LOG_LEVEL_DEBUG, "ipc_info_handler");
 #endif
 
+  info = uhuru_info_new(cl->uhuru);
 
-  ipc_manager_msg_send(cl->manager, IPC_MSG_ID_INFO_END, IPC_NONE_T);
+  info_send(manager, info);
+
+  uhuru_info_free(info);
+
+  if (close(cl->sock) < 0) {
+    g_log(NULL, G_LOG_LEVEL_WARNING, "closing socket %d failed (%s)", cl->sock, strerror(errno));
+  }
+
+  cl->sock = -1;
+
+#ifdef DEBUG
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "ipc_info_handler finished");
+#endif
 }
 
 struct client *client_new(int client_sock, struct uhuru *uhuru)

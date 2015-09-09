@@ -303,7 +303,6 @@ static ipc_manager_msg_addv(struct ipc_manager *manager, va_list ap)
 
     if (type != IPC_NONE_T) {
       fwrite(&type, sizeof(ipc_type_t), 1, manager->output);
-
       switch(type) {
       case IPC_INT32_T:
 	v_int32 = va_arg(ap, gint32);
