@@ -26,7 +26,9 @@ int main(int argc, char ** argv){
 	add_fanotify_watch(argv[1]);
 
 
+#if 0
 	add_mount_watch();
+#endif
 
 	// Starting the main loop
 	loop = g_main_loop_new(NULL, FALSE);

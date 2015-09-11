@@ -53,7 +53,7 @@ void fanotify_callback(GIOChannel * source, GIOCondition * condition, gpointer d
    //printf("fd = %d\n",fd);
    /* Loop while events can be read from fanotify file descriptor */
 
-   for(;;) {
+   /* for(;;) { */
 
        /* Read some events */
 
@@ -66,7 +66,8 @@ void fanotify_callback(GIOChannel * source, GIOCondition * condition, gpointer d
        /* Check if end of available data reached */
 
        if (len <= 0)
-           break;
+	 //break;
+	 return;
 
        /* Point to the first event in the buffer */
 
@@ -152,7 +153,7 @@ void fanotify_callback(GIOChannel * source, GIOCondition * condition, gpointer d
 
            metadata = FAN_EVENT_NEXT(metadata, len);
        }
-   }
+   /* } */
 
 	return;
 
