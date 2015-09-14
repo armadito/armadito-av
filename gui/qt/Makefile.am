@@ -20,6 +20,8 @@ uhuru_qt_SOURCES= \
 	ui/scanwindow.h \
 	ui/systray.cpp \
 	ui/systray.h \
+	ui/updatedialog.cpp \
+	ui/updatedialog.h \
 	utils/stdpaths.h \
 	utils/dbus.cpp \
 	utils/dbus.h \
@@ -34,8 +36,10 @@ nodist_uhuru_qt_SOURCES= \
 	ui/moc_scanwindow.cpp \
 	ui/moc_scanwidget.cpp \
 	ui/moc_systray.cpp \
+	ui/moc_updatedialog.cpp \
 	ui/ui_aboutdialog.h \
 	ui/ui_scanwidget.h \
+	ui/ui_updatedialog.h \
 	utils/moc_uhuru.cpp \
 	utils/moc_dbus.cpp \
 	qrc_uhuru.cpp
@@ -48,8 +52,10 @@ BUILT_SOURCES= \
 	ui/moc_scanwindow.cpp \
 	ui/moc_scanwidget.cpp \
 	ui/moc_systray.cpp \
+	ui/moc_updatedialog.cpp \
 	ui/ui_aboutdialog.h \
 	ui/ui_scanwidget.h \
+	ui/ui_updatedialog.h \
 	utils/moc_uhuru.cpp \
 	utils/moc_dbus.cpp \
 	qrc_uhuru.cpp

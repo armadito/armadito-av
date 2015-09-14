@@ -21,6 +21,7 @@ public:
 public slots:
   void scan(const QString &path);
   void scan();
+  void update();
   void about();
 
 private:
@@ -30,6 +31,7 @@ private:
   QIcon *getIcon();
 
   QAction *scanAction;
+  QAction *updateAction;
   QAction *aboutAction;
   QSystemTrayIcon *trayIcon;
   QMenu *recentScanMenu;

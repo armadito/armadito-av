@@ -3,6 +3,7 @@
 #include "model/scanmodel.h"
 #include "scanwindow.h"
 #include "aboutdialog.h"
+#include "updatedialog.h"
 
 #include <QtGui>
 #include <QPainter>
@@ -19,22 +20,15 @@ Systray::Systray()
   createTrayIcon();
 
   trayIcon->show();
-
-#if 0
-  QString user = QString(getenv("USER"));
-  QString r = "/media/";
-  QString watchDir = r + user;
-  _watchThread = new WatchThread(watchDir);
-
-  QObject::connect(_watchThread, SIGNAL(watched(const QString &)), this, SLOT(scan(const QString &)));
-  _watchThread->start();
-#endif
 }
 
 void Systray::createActions()
 {
   scanAction = new QAction(tr("&Scan"), this);
   connect(scanAction, SIGNAL(triggered()), this, SLOT(scan()));
+
+  updateAction = new QAction(tr("&Update"), this);
+  connect(updateAction, SIGNAL(triggered()), this, SLOT(update()));
 
   aboutAction = new QAction(tr("&About"), this);
   connect(aboutAction, SIGNAL(triggered()), this, SLOT(about()));
@@ -74,6 +68,8 @@ void Systray::createTrayIcon()
   trayIconMenu->addSeparator();
   recentScanMenu = trayIconMenu->addMenu(tr("&Recent analysis"));
 #endif
+  trayIconMenu->addSeparator();
+  trayIconMenu->addAction(updateAction);
   trayIconMenu->addSeparator();
   trayIconMenu->addAction(aboutAction);
 
@@ -143,6 +139,13 @@ void Systray::scan()
 
   scan(fileName);
 }
+
+void Systray::update()
+{
+  UpdateDialog *update = new UpdateDialog();
+  update->show();
+}
+
 
 RecentScanAction::RecentScanAction(QObject *parent, ScanModel *model)
   : QAction(parent), _model(model)

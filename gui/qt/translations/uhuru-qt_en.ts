@@ -109,28 +109,33 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>Systray</name>
     <message>
-        <location filename="../ui/systray.cpp" line="36"/>
+        <location filename="../ui/systray.cpp" line="26"/>
         <source>&amp;Scan</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/systray.cpp" line="39"/>
+        <location filename="../ui/systray.cpp" line="29"/>
+        <source>&amp;Update</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/systray.cpp" line="32"/>
         <source>&amp;About</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/systray.cpp" line="75"/>
+        <location filename="../ui/systray.cpp" line="68"/>
         <source>&amp;Recent analysis</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/systray.cpp" line="135"/>
+        <location filename="../ui/systray.cpp" line="128"/>
         <source>Scan File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/systray.cpp" line="138"/>
-        <location filename="../ui/systray.cpp" line="141"/>
+        <location filename="../ui/systray.cpp" line="131"/>
+        <location filename="../ui/systray.cpp" line="134"/>
         <source>Scan Directory</source>
         <translation type="unfinished"></translation>
     </message>

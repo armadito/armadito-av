@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     model/scanreportmodel.cpp \
     ui/aboutdialog.cpp \
     utils/uhuru.cpp \
-    ui/scanwindow.cpp
+    ui/scanwindow.cpp \
+    ui/updatedialog.cpp
 
 HEADERS  +=  \
     model/scanmodel.h \ 
@@ -30,11 +31,13 @@ HEADERS  +=  \
     model/scanreportmodel.h \
     ui/aboutdialog.h \
     utils/uhuru.h \
-    ui/scanwindow.h
+    ui/scanwindow.h \
+    ui/updatedialog.h
 
 FORMS    += \  
     ui/scanwidget.ui \
-    ui/aboutdialog.ui
+    ui/aboutdialog.ui \
+    ui/updatedialog.ui
 
 RESOURCES = uhuru.qrc
 
