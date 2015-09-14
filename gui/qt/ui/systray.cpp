@@ -114,6 +114,9 @@ void Systray::scan(const QString &path)
 
 void Systray::scan()
 {
+  QString fileName = "";
+
+#if 0
   QFileDialog *fileDialog = new QFileDialog(0);
 
   fileDialog->setFileMode(QFileDialog::DirectoryOnly);
@@ -122,14 +125,23 @@ void Systray::scan()
   fileDialog->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
   fileDialog->setDirectory(StdPaths::desktopLocation());
 
-  //  QString fileName = QFileDialog::getOpenFileName(0, tr("Scan File"));
-
   if (fileDialog->exec() == QDialog::Accepted) {
     QStringList list = fileDialog->selectedFiles();
-    if(list.size() > 0) {
-      scan(list[0]);
-    }
+    if(list.size() > 0)
+      fileName = list[0];
   }
+#endif
+#if 0
+  fileName = QFileDialog::getOpenFileName(0, tr("Scan File"), StdPaths::desktopLocation(), "", 0, QFileDialog::ShowDirsOnly);
+#endif
+#if 0
+  fileName = QFileDialog::getExistingDirectory(0, tr("Scan Directory"), "", QFileDialog::ShowDirsOnly);
+#endif
+#if 1
+  fileName = QFileDialog::getExistingDirectory(0, tr("Scan Directory"), "", 0);
+#endif
+
+  scan(fileName);
 }
 
 RecentScanAction::RecentScanAction(QObject *parent, ScanModel *model)
@@ -158,27 +170,4 @@ void Systray::about()
   AboutDialog *about = new AboutDialog();
   about->show();
 }
-
-#if 0
-void WatchThread::run()
-{
-  QByteArray ba = _path.toLocal8Bit();
-  const char *c_path = ba.data();
-  struct uhuru_watch_event watch_event;
-
-  uhuru_watch(UHURU::instance(), c_path);
-
-  while (!uhuru_watch_next_event(UHURU::instance(), &watch_event)) {
-    switch(watch_event.event_type) {
-    case UHURU_WATCH_DIRECTORY_CREATE:
-      std::cerr << "watch: must scan " << watch_event.full_path << "\n";
-
-      emit watched(QString(watch_event.full_path));
-      break;
-    default:
-      break;
-    }
-  }
-}
-#endif
 

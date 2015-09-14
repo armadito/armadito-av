@@ -9,8 +9,6 @@
 #include <QAction>
 #include <QMenu>
 
-class WatchThread;
-
 class Systray : public QObject {
     Q_OBJECT
 
@@ -35,7 +33,6 @@ private:
   QAction *aboutAction;
   QSystemTrayIcon *trayIcon;
   QMenu *recentScanMenu;
-  WatchThread *_watchThread;
 };
 
 class RecentScanAction: public QAction {
@@ -52,24 +49,5 @@ class RecentScanAction: public QAction {
  private:
   ScanModel *_model;
 };
-
-#if 0
-class WatchThread: public QThread {
-  Q_OBJECT
-
-public:
-  WatchThread(const QString &path/* , Systray *systray */) : _path(path)/* , _systray(systray) */ {}
-
-signals:
-  void watched(const QString &path);
-
-protected:
-  void run();
-
-private:
-  QString _path;
-  /* Systray *_systray; */
-};
-#endif
 
 #endif

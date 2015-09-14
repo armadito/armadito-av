@@ -109,18 +109,29 @@ p, li { white-space: pre-wrap; }
 <context>
     <name>Systray</name>
     <message>
-        <location filename="../ui/systray.cpp" line="34"/>
+        <location filename="../ui/systray.cpp" line="36"/>
         <source>&amp;Scan</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/systray.cpp" line="37"/>
+        <location filename="../ui/systray.cpp" line="39"/>
         <source>&amp;About</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/systray.cpp" line="72"/>
+        <location filename="../ui/systray.cpp" line="75"/>
         <source>&amp;Recent analysis</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/systray.cpp" line="135"/>
+        <source>Scan File</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/systray.cpp" line="138"/>
+        <location filename="../ui/systray.cpp" line="141"/>
+        <source>Scan Directory</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -1,5 +1,7 @@
 2015-09-14  François  <francois@dechelle.net>
 
+	* trying to fix analysis file selection box; cannot select file and directories apparently
+
 	* fixed compilation; works; commented out 'Recent analysis' for now
 
 2015-07-31  François  <francois@dechelle.net>

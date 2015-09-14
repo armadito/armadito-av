@@ -8,9 +8,8 @@ QT       += core gui svg
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = uhuru
+TARGET = uhuru-qt
 TEMPLATE = app
-
 
 SOURCES += main.cpp\
     model/scanmodel.cpp \
@@ -39,16 +38,11 @@ FORMS    += \
 
 RESOURCES = uhuru.qrc
 
-TRANSLATIONS = \
- translations/$${TARGET}_fr.ts \
- translations/$${TARGET}_en.ts
+TRANSLATIONS = translations/uhuru-qt_fr.ts \
+                translations/uhuru-qt_en.ts
 
 unix: CONFIG += link_pkgconfig
 unix: PKGCONFIG += libuhuru
 
 target.path =    $$PREFIX/bin
 INSTALLS += target
-
-customdist.commands = $$_PRO_FILE_PWD_/../scripts/makedist.sh uhuruihm-1.0.0 $$_PRO_FILE_PWD_ $$OUT_PWD $$SOURCES $$HEADERS $$RESOURCES $$FORMS $$RC_FILE uhuru.pro icons/uhuru.svg
-customdist.target = customdist
-QMAKE_EXTRA_TARGETS += customdist
