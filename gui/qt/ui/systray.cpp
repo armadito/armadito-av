@@ -20,6 +20,7 @@ Systray::Systray()
 
   trayIcon->show();
 
+#if 0
   QString user = QString(getenv("USER"));
   QString r = "/media/";
   QString watchDir = r + user;
@@ -27,6 +28,7 @@ Systray::Systray()
 
   QObject::connect(_watchThread, SIGNAL(watched(const QString &)), this, SLOT(scan(const QString &)));
   _watchThread->start();
+#endif
 }
 
 void Systray::createActions()
@@ -68,8 +70,10 @@ void Systray::createTrayIcon()
   QMenu *trayIconMenu = new QMenu();
 
   trayIconMenu->addAction(scanAction);
+#if 0
   trayIconMenu->addSeparator();
   recentScanMenu = trayIconMenu->addMenu(tr("&Recent analysis"));
+#endif
   trayIconMenu->addSeparator();
   trayIconMenu->addAction(aboutAction);
 
@@ -97,12 +101,15 @@ void Systray::scan(const QString &path)
 {
   std::cerr << "scanning " << path.toStdString().c_str() << "\n";
 
-  ScanWindow *w = new ScanWindow(path);
+  ScanModel *model = new ScanModel(path);
+  ScanWindow *w = new ScanWindow(model);
   w->show();
   w->raise();
   w->activateWindow();
 
-  //  addRecentScan(model);
+#if 0
+  addRecentScan(model);
+#endif
 }
 
 void Systray::scan()
@@ -152,6 +159,7 @@ void Systray::about()
   about->show();
 }
 
+#if 0
 void WatchThread::run()
 {
   QByteArray ba = _path.toLocal8Bit();
@@ -172,3 +180,5 @@ void WatchThread::run()
     }
   }
 }
+#endif
+

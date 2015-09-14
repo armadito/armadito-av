@@ -53,6 +53,7 @@ class RecentScanAction: public QAction {
   ScanModel *_model;
 };
 
+#if 0
 class WatchThread: public QThread {
   Q_OBJECT
 
@@ -69,5 +70,6 @@ private:
   QString _path;
   /* Systray *_systray; */
 };
+#endif
 
 #endif

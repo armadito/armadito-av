@@ -1,7 +1,6 @@
 #include "scanwindow.h"
 #include "scanwidget.h"
 
-//#include <QVBoxLayout>
 #include <QApplication>
 #include <QDesktopWidget>
 
