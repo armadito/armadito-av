@@ -1,3 +1,7 @@
+2015-09-16  François  <francois@dechelle.net>
+
+	* fixed wrong month in alert XML
+
 2015-09-09  François  <francois@dechelle.net>
 
 	* implemented info using IPC for remote scan daemon; tested with uhuru-info --xml

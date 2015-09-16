@@ -49,7 +49,7 @@ static xmlNodePtr alert_doc_gdh_node(void)
 
   /* format: "2001-12-31T12:00:00" */
   /* FIXME: use g_string_printf */
-  snprintf(buff, sizeof(buff) - 1, "%04d-%02d-%02dT%02d:%02d:%02d", 1900 + l_tm.tm_year, l_tm.tm_mon, l_tm.tm_mday, l_tm.tm_hour, l_tm.tm_min, l_tm.tm_sec);
+  snprintf(buff, sizeof(buff) - 1, "%04d-%02d-%02dT%02d:%02d:%02d", 1900 + l_tm.tm_year, 1 + l_tm.tm_mon, l_tm.tm_mday, l_tm.tm_hour, l_tm.tm_min, l_tm.tm_sec);
   buff[sizeof(buff) - 1] = '\0';
   xmlAddChild(node, xmlNewText(buff));
 
