@@ -41,7 +41,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\david\Documents\uhuru-av\libuhuru\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\david\Documents\uhuru-av\VS\glib\glib-2.28\lib\glib-2.0\include;C:\Users\david\Documents\uhuru-av\VS\glib\glib-2.28\include\glib-2.0;C:\Users\david\Documents\uhuru-av\libuhuru\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\david\Documents\uhuru-av\VS\glib\glib-2.28\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
