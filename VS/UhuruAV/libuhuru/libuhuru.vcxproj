@@ -41,6 +41,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>C:\Users\david\Documents\uhuru-av\libuhuru\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -53,10 +54,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\Users\david\Documents\uhuru-av\libuhuru;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -78,6 +81,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\libuhuru\src\lib\action.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\lib\conf.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\lib\confparser.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\lib\dir.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\lib\info.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\lib\ipc.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\lib\module.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\lib\report.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\lib\scan.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\lib\status.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\lib\uhuru.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
