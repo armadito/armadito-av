@@ -4,12 +4,6 @@
 #include <QMainWindow>
 #include "model/scanmodel.h"
 
-#if 0
-namespace Ui {
-class MainWindow;
-}
-#endif
-
 class ScanWindow : public QMainWindow
 {
     Q_OBJECT

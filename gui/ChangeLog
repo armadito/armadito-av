@@ -1,3 +1,7 @@
+2015-09-23  François  <francois@dechelle.net>
+
+	* fixed crash if 'cancel' pressed when selecting directory to scan
+
 2015-09-14  François  <francois@dechelle.net>
 
 	* trying to fix analysis file selection box; cannot select file and directories apparently

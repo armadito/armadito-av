@@ -78,4 +78,4 @@ qrc_%.cpp: %.qrc
 
 CLEANFILES= $(nodist_uhuru_qt_SOURCES)
 
-EXTRA_DIST= uhuru.pro ui/aboutdialog.ui ui/scanwidget.ui uhuru.qrc
+EXTRA_DIST= uhuru.pro ui/aboutdialog.ui ui/scanwidget.ui ui/updatedialog.ui uhuru.qrc

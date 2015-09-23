@@ -137,7 +137,8 @@ void Systray::scan()
   fileName = QFileDialog::getExistingDirectory(0, tr("Scan Directory"), "", 0);
 #endif
 
-  scan(fileName);
+  if(!fileName.isNull())
+    scan(fileName);
 }
 
 void Systray::update()
