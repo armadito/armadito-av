@@ -30,7 +30,7 @@ quarantine-dir="@localstatedir@/lib/uhuru/quarantine"
 
 [remote]
 
-socket-dir="/tmp"
+socket-dir="@/uhuru"
 
 
 # [uhuru]

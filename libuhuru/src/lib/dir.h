@@ -1,8 +1,6 @@
 #ifndef _LIBUHURU_DIR_H_
 #define _LIBUHURU_DIR_H_
 
-#include <dirent.h>
-
 enum dir_entry_flag {
   DIR_ENTRY_IS_ERROR     = 1 << 0,
   DIR_ENTRY_IS_DIR       = 1 << 1,
