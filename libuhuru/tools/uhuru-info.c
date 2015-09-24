@@ -1,6 +1,4 @@
 #include <libuhuru/info.h>
-#include "lib/infop.h"
-#include "lib/uhurup.h"
 
 #include <getopt.h>
 #include <libxml/parser.h>
