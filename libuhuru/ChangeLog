@@ -1,3 +1,9 @@
+2015-09-24  François  <francois@dechelle.net>
+
+	* added #include "libuhuru-config.h" in all C files
+
+	* moved config include files to include/config; added stuff to have win32 config and autoconf generated config
+
 2015-09-16  François  <francois@dechelle.net>
 
 	* fixed wrong month in alert XML
