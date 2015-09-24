@@ -9,7 +9,7 @@ AC_ARG_ENABLE([debug],
 	enable_debug="yes")
 
 # configuration header
-AM_CONFIG_HEADER(libuhuru-config.h)
+AM_CONFIG_HEADER(include/config/libuhuru-config-autoconf.h)
 
 # This is needed when the first PKG_CHECK_MODULES call is inside a conditional (not the case here, but who knows)
 PKG_PROG_PKG_CONFIG
@@ -89,6 +89,7 @@ doc/Makefile
 doc/man/Makefile
 doc/man/fr/Makefile
 include/Makefile
+include/config/Makefile
 include/libuhuru/Makefile
 pkgconfig/Makefile
 src/Makefile

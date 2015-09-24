@@ -1,1 +1,1 @@
-SUBDIRS=libuhuru
+SUBDIRS=libuhuru config

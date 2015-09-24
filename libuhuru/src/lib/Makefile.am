@@ -35,7 +35,7 @@ builtin-modules/remote.c \
 builtin-modules/remote.h 
 
 AM_CPPFLAGS= -DLIBUHURU_MODULES_PATH='"$(pkglibdir)/modules"' -DLIBUHURU_CONF_DIR='"$(sysconfdir)/uhuru"' -DG_LOG_DOMAIN='"libuhuru"'
-libuhuru_la_CFLAGS= -I$(top_srcdir)/include
+libuhuru_la_CFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/include/config
 libuhuru_la_LIBADD= 
 
 libuhuru_la_CFLAGS+= @GMODULE2_CFLAGS@
