@@ -1,6 +1,7 @@
 #include "systray.h"
 #include "utils/stdpaths.h"
 #include "model/scanmodel.h"
+#include "model/updateinfomodel.h"
 #include "scanwindow.h"
 #include "aboutdialog.h"
 #include "updatedialog.h"
@@ -145,6 +146,9 @@ void Systray::update()
 {
   UpdateDialog *update = new UpdateDialog();
   update->show();
+
+  UpdateInfoModel *model = new UpdateInfoModel();
+
 }
 
 
