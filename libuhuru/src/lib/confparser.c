@@ -1,3 +1,5 @@
+#include "libuhuru-config.h"
+
 #include "confparser.h"
 
 #include <glib.h>

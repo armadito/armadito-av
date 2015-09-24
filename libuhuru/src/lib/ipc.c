@@ -1,4 +1,5 @@
 #include "libuhuru-config.h"
+
 #include "ipc.h"
 
 #include <glib.h>

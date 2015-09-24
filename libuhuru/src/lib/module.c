@@ -1,9 +1,13 @@
-#include <libuhuru/module.h>
-#include "modulep.h"
 #include "libuhuru-config.h"
+
+#include <libuhuru/module.h>
+
+#include "modulep.h"
 
 #include <assert.h>
 #include <gmodule.h>
+#include <glib.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 

@@ -2,10 +2,6 @@
 #define _LIBUHURU_MODULEP_H_
 
 #include <libuhuru/module.h>
-#include "libuhuru-config.h"
-
-#include <stdio.h>
-#include <glib.h>
 
 struct module_manager;
 

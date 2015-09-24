@@ -1,6 +1,8 @@
 #include "libuhuru-config.h"
+
 #include <libuhuru/module.h>
 #include <libuhuru/scan.h>
+
 #include "conf.h"
 #include "dir.h"
 #include "modulep.h"

@@ -1,3 +1,5 @@
+#include "libuhuru-config.h"
+
 #include "statusp.h"
 #include "reportp.h"
 

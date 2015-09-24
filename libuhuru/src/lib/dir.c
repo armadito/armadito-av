@@ -1,3 +1,5 @@
+#include "libuhuru-config.h"
+
 #include "dir.h"
 
 #include <glib.h>

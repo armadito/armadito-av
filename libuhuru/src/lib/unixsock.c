@@ -1,5 +1,10 @@
+#include "libuhuru-config.h"
+
 #include "unixsock.h"
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <assert.h>
 #include <sys/socket.h>
 #include <sys/un.h>

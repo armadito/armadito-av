@@ -5,7 +5,7 @@
 #undef HAVE_UNIX_SOCKET
 
 /* headers */
-#undef HAVE_UNISTD_H 
+#undef HAVE_UNISTD_H
 
 /* mapping posix names to win32 names */
 #define strdup _strdup
