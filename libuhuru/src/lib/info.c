@@ -202,6 +202,32 @@ void uhuru_info_free(struct uhuru_info *info)
   g_free(info);
 }
 
+void info_to_stdout(struct uhuru_info *info)
+{
+     struct uhuru_module_info **m;
+     struct uhuru_base_info **b;
+
+     fprintf(stdout, "--- Uhuru_info --- \n");
+     fprintf(stdout, "Update global status : %d\n", info->global_status);
+     if (info->module_infos != NULL) {
+	     for(m = info->module_infos; *m != NULL; m++){
+		fprintf(stdout, "Module %s \n", (*m)->name );
+		fprintf(stdout, "- Update date : %s \n", (*m)->update_date );
+		fprintf(stdout, "- Update status : %d\n", (*m)->mod_status);
+
+		if ((*m)->base_infos != NULL) {
+		  for(b = (*m)->base_infos; *b != NULL; b++){
+		      fprintf(stdout, "-- Base %s \n", (*b)->name );
+		      fprintf(stdout, "--- Update date : %s \n", (*b)->date );
+		      fprintf(stdout, "--- Version : %s \n", (*b)->version );
+		      fprintf(stdout, "--- Signature count : %d \n", (*b)->signature_count );
+		      fprintf(stdout, "--- Full path : %s \n", (*b)->full_path );
+		  }
+		}
+	   }
+     }
+}
+
 #ifdef DEBUG
 const char *uhuru_base_info_debug(struct uhuru_base_info *info)
 {

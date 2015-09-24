@@ -184,7 +184,7 @@ static void do_info(struct info_options *opts)
   if (opts->output_xml)
     info_save_to_xml(info);
   else
-    fprintf(stderr, "only XML output implemented!\n");
+    info_to_stdout(info);
 
   uhuru_info_free(info);
 
