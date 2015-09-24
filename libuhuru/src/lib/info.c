@@ -45,9 +45,15 @@ static void info_local_init(struct uhuru_info *info, struct uhuru *uhuru)
       mod_status = (*(*modv)->info_fun)((*modv), mod_info);
 
       if (mod_status != UHURU_UPDATE_NON_AVAILABLE) {
-	mod_info->name = strdup((*modv)->name);
-	mod_info->mod_status = mod_status;
-	g_array_append_val(g_module_infos, mod_info);
+
+		#ifdef WIN32
+			mod_info->name = _strdup((*modv)->name);
+		#else
+			mod_info->name = strdup((*modv)->name);
+		#endif
+
+		mod_info->mod_status = mod_status;
+		g_array_append_val(g_module_infos, mod_info);
       } else
 	g_free(mod_info);
 
@@ -73,10 +79,19 @@ static void ipc_handler_info_module(struct ipc_manager *m, void *data)
   char *mod_name, *update_date;
 
   ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &mod_name);
-  mod_info->name = strdup(mod_name);
+	#ifdef WIN32
+		mod_info->name = _strdup(mod_name);
+	#else
+		mod_info->name = strdup(mod_name);
+	#endif
   ipc_manager_get_arg_at(m, 1, IPC_INT32_T, &mod_info->mod_status);
   ipc_manager_get_arg_at(m, 2, IPC_STRING_T, &update_date);
-  mod_info->update_date = strdup(update_date);
+
+	#ifdef WIN32
+	  mod_info->update_date = _strdup(update_date);
+	#else
+	  mod_info->update_date = strdup(update_date);
+	#endif
 
   n_bases = (ipc_manager_get_argc(m) - 3) / 5;
 
@@ -89,14 +104,35 @@ static void ipc_handler_info_module(struct ipc_manager *m, void *data)
     char *name, *date, *version, *full_path;
 
     ipc_manager_get_arg_at(m, argc+0, IPC_STRING_T, &name);
-    base_info->name = strdup(name);
+	#ifdef WIN32
+		base_info->name = _strdup(name);
+	#else
+		ase_info->name = strdup(name);
+	#endif
     ipc_manager_get_arg_at(m, argc+1, IPC_STRING_T, &date);
-    base_info->date = strdup(date);
+
+	#ifdef WIN32
+		base_info->date = _strdup(date);
+	#else
+		base_info->date = strdup(date);
+	#endif
     ipc_manager_get_arg_at(m, argc+2, IPC_STRING_T, &version);
-    base_info->version = strdup(version);
+
+	#ifdef WIN32
+		base_info->version = _strdup(version);
+	#else
+		base_info->version = strdup(version);
+	#endif
+    
     ipc_manager_get_arg_at(m, argc+3, IPC_INT32_T, &base_info->signature_count);
     ipc_manager_get_arg_at(m, argc+4, IPC_STRING_T, &full_path);
-    base_info->full_path = strdup(full_path);
+
+	#ifdef WIN32
+		base_info->full_path = _strdup(full_path);
+	#else
+		base_info->full_path = strdup(full_path);
+	#endif
+    
 
     mod_info->base_infos[i] = base_info;
   }
@@ -124,6 +160,9 @@ static int info_remote_init(struct uhuru_info *info, struct uhuru *uhuru)
   int sock;
   struct ipc_manager *manager;
   struct ipc_handler_info_data *data;
+  char * envar = NULL;
+  size_t size;
+  errno_t err;
 
   remote_module = uhuru_get_module_by_name(uhuru, "remote");
   assert(remote_module != NULL);
@@ -132,7 +171,14 @@ static int info_remote_init(struct uhuru_info *info, struct uhuru *uhuru)
   assert(sock_dir != NULL);
 
   sock_path = g_string_new(sock_dir);
-  g_string_append_printf(sock_path, "/uhuru-%s", getenv("USER"));
+	#ifdef WIN32
+		err = _dupenv_s(&envar, &size, "USER");
+		if (err == 0)
+			g_string_append_printf(sock_path, "/uhuru-%s", envar);
+	#else
+		g_string_append_printf(sock_path, "/uhuru-%s", getenv("USER"));
+	#endif
+  
 
   sock = client_socket_create(sock_path->str, 10);
   if (sock < 0)
