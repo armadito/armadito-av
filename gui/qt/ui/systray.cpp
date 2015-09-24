@@ -144,11 +144,12 @@ void Systray::scan()
 
 void Systray::update()
 {
-  UpdateDialog *update = new UpdateDialog();
-  update->show();
-
+  // Init model => retrieve uhuruinfo for the first time.
   UpdateInfoModel *model = new UpdateInfoModel();
 
+  // Init UpdateDialog ui, set first values and init connexions
+  UpdateDialog *update = new UpdateDialog(model);
+  update->show();
 }
 
 
