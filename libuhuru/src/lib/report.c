@@ -7,7 +7,12 @@
 
 void uhuru_report_init(struct uhuru_report *report, const char *path)
 {
-  report->path = strdup(path);
+	#ifdef WIN32
+		report->path = _strdup(path);
+	#else
+		report->path = strdup(path);
+	#endif
+
   report->status = UHURU_UNDECIDED;
   report->action = UHURU_ACTION_NONE;
   report->mod_name = NULL;

@@ -21,6 +21,8 @@ int client_socket_create(const char *socket_path, int max_retry)
 
   server_addr.sun_family = AF_UNIX;
   strncpy(server_addr.sun_path, socket_path, sizeof(server_addr.sun_path) - 1);
+  if (socket_path[0] == '@')
+    server_addr.sun_path[0] = '\0';
 
   do {
     r = connect(fd, (struct sockaddr *)&server_addr, sizeof(server_addr));
@@ -48,6 +50,8 @@ int server_socket_create(const char *socket_path)
 
   listening_addr.sun_family = AF_UNIX;
   strncpy(listening_addr.sun_path, socket_path, sizeof(listening_addr.sun_path) - 1);
+  if (socket_path[0] == '@')
+    listening_addr.sun_path[0] = '\0';
 
   r = bind(fd, (struct sockaddr *)&listening_addr, sizeof(listening_addr));
   if (r < 0) {

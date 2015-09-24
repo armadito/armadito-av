@@ -183,7 +183,13 @@ struct uhuru_conf_parser *uhuru_conf_parser_new(const char *filename, conf_parse
 {
   struct uhuru_conf_parser *cp = g_new0(struct uhuru_conf_parser, 1);
 
-  cp->input = fopen(filename, "r");
+  
+	#ifdef WIN32
+		fopen_s(&(cp->input), filename, "r");
+	#else
+		cp->input = fopen(filename, "r");
+	#endif
+  
   if (cp->input == NULL) {
     g_log(NULL, G_LOG_LEVEL_WARNING, "cannot open conf file %s", filename);
 
@@ -298,8 +304,13 @@ static void free_and_set(char **old, char *new)
 {
   if (*old != NULL)
     free(*old);
+  
+	#ifdef WIN32
+		*old = _strdup(new);
+	#else
+		*old = strdup(new);
+	#endif
 
-  *old = strdup(new);
 }
 
 /* configuration : group_list */
@@ -381,7 +392,12 @@ static void r_opt_value_list(struct uhuru_conf_parser *cp)
 static void r_value(struct uhuru_conf_parser *cp)
 {
   /* store current value */
-  g_ptr_array_add(cp->current_args, strdup(scanner_token_text(cp->scanner)));
+	#ifdef WIN32
+		g_ptr_array_add(cp->current_args, _strdup(scanner_token_text(cp->scanner)));
+	#else
+		g_ptr_array_add(cp->current_args, strdup(scanner_token_text(cp->scanner)));
+	#endif
+  
 
   accept(cp, TOKEN_STRING);
 }
