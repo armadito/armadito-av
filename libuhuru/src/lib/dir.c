@@ -21,11 +21,11 @@ static enum dir_entry_flag dirent_flags(struct dirent *entry)
   case DT_BLK:
   case DT_CHR:
     return DIR_ENTRY_IS_DEV;
-  //case DT_SOCK: // commented due to error C2196: La valeur associée à case '0' est déjà utilisée.
+  case DT_SOCK:
   case DT_FIFO:
     return DIR_ENTRY_IS_IPC;
-  //case DT_LNK:	// commented due to error C2196: La valeur associée à case '0' est déjà utilisée.
-    //return DIR_ENTRY_IS_LINK;
+  case DT_LNK:
+    return DIR_ENTRY_IS_LINK;
   case DT_REG:
     return DIR_ENTRY_IS_REG;
   default:
@@ -44,12 +44,7 @@ int dir_map(const char *path, int recurse, dirent_fun_t dirent_fun, void *data)
     
   d = opendir(path);
   if (d == NULL) {
-
-	#ifdef WIN32
-		g_log(NULL, G_LOG_LEVEL_WARNING, "error opening directory %s (TODO::replace call strerror(errno) )", path);
-	#else
-		g_log(NULL, G_LOG_LEVEL_WARNING, "error opening directory %s (%s)", path, strerror(errno));
-	#endif
+    g_log(NULL, G_LOG_LEVEL_WARNING, "error opening directory %s (%s)", path, strerror(errno));
 
     flags |= DIR_ENTRY_IS_ERROR;
     (*dirent_fun)(path, flags, errno, data);
@@ -65,11 +60,7 @@ int dir_map(const char *path, int recurse, dirent_fun_t dirent_fun, void *data)
     int r = readdir_r(d, &entry, &result);
 
     if (r != 0) {
-		#ifdef WIN32
-			g_log(NULL, G_LOG_LEVEL_WARNING, "error reading directory entry (dir.c::TODO::replace call strerror(errno) )");
-		#else
-			g_log(NULL, G_LOG_LEVEL_WARNING, "error reading directory entry (%s)", strerror(errno));
-		#endif
+      g_log(NULL, G_LOG_LEVEL_WARNING, "error reading directory entry (%s)", strerror(errno));
       ret = 1;
       goto cleanup;
     }
@@ -128,12 +119,7 @@ int mkdir_p(const char *path)
   char *token, *full, *end;
   int ret = 0;
      
-	#ifdef WIN32
-		token = full = _strdup(path);
-	#else
-		token = full = strdup(path);
-	#endif
-  
+  token = full = strdup(path);
   do {
     end = strchr(token, '/');
 

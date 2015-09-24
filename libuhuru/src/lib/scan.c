@@ -173,14 +173,7 @@ static void local_scan_entry(const char *full_path, enum dir_entry_flag flags, i
     uhuru_report_init(&report, full_path);
 
     report.status = UHURU_IERROR;
-	
-	#ifdef WIN32
-		//report.mod_report = _strdup(strerror(entry_errno));
-		report.mod_report = _strdup("TODO::replace strerror(entry_errno)");
-	#else
-		report.mod_report = strdup(strerror(entry_errno));
-	#endif
-    
+    report.mod_report = strdup(strerror(entry_errno));
     uhuru_scan_call_callbacks(scan, &report);
 
     uhuru_report_destroy(&report);
@@ -190,13 +183,7 @@ static void local_scan_entry(const char *full_path, enum dir_entry_flag flags, i
     return;
 
   if (scan->flags & UHURU_SCAN_THREADED)
-	
-	#ifdef WIN32
-		g_thread_pool_push(scan->local.thread_pool, (gpointer)_strdup(full_path), NULL);
-	#else
-		g_thread_pool_push(scan->local.thread_pool, (gpointer)strdup(full_path), NULL);
-	#endif
-
+    g_thread_pool_push(scan->local.thread_pool, (gpointer)strdup(full_path), NULL);
   else
     local_scan_file(scan, NULL, full_path);
 }
@@ -227,11 +214,7 @@ static enum uhuru_scan_status local_scan_run(struct uhuru_scan *scan)
 
   if (S_ISREG(sb.st_mode)) {
     if (scan->flags & UHURU_SCAN_THREADED)
-		#ifdef WIN32
-			g_thread_pool_push(scan->local.thread_pool, (gpointer)_strdup(scan->path), NULL);
-		#else
-			g_thread_pool_push(scan->local.thread_pool, (gpointer)strdup(scan->path), NULL);
-		#endif
+      g_thread_pool_push(scan->local.thread_pool, (gpointer)strdup(scan->path), NULL);
     else
       local_scan_file(scan, NULL, scan->path);
   } else if (S_ISDIR(sb.st_mode)) {
@@ -257,9 +240,6 @@ static void remote_scan_init(struct uhuru_scan *scan)
   struct uhuru_module *remote_module;
   const char *sock_dir;
   GString *sock_path;
-  char * envar = NULL;
-  ssize_t size =0 ;
-  errno_t err;
 
   remote_module = uhuru_get_module_by_name(scan->uhuru, "remote");
   assert(remote_module != NULL);
@@ -269,14 +249,7 @@ static void remote_scan_init(struct uhuru_scan *scan)
 
   sock_path = g_string_new(sock_dir);
 
-#ifdef WIN32
-	err = _dupenv_s(&envar,&size, "USER");
-	if (err == 0)
-		g_string_append_printf(sock_path, "/uhuru-%s", &envar);
-#else
-	g_string_append_printf(sock_path, "/uhuru-%s", getenv("USER"));
-#endif
-
+  g_string_append_printf(sock_path, "/uhuru-%s", getenv("USER"));
   scan->remote.sock_path = sock_path->str;
   g_string_free(sock_path, FALSE);
 }
@@ -302,14 +275,8 @@ static void remote_scan_handler_scan_file(struct ipc_manager *m, void *data)
   report.status = (enum uhuru_file_status)status;
   report.action = (enum uhuru_action)action;
   report.mod_name = mod_name;
-  if (x_status != NULL) {
-	#ifdef WIN32
-		report.mod_report = _strdup(x_status);
-	#else
-		report.mod_report = strdup(x_status);
-	#endif
-  }
-    
+  if (x_status != NULL)
+    report.mod_report = strdup(x_status);
 
   uhuru_scan_call_callbacks(scan, &report);
 

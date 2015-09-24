@@ -39,11 +39,7 @@ static struct uhuru_module *module_new(struct uhuru_module *src, struct uhuru *u
   mod->close_fun = src->close_fun;
   mod->info_fun = src->info_fun;
 
-	#ifdef WIN32
-		mod->name = _strdup(src->name);
-	#else
-		mod->name = strdup(src->name);
-	#endif
+  mod->name = strdup(src->name);
 
   mod->size = src->size;
 

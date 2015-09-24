@@ -96,12 +96,7 @@ void uhuru_add_mime_type(struct uhuru *u, const char *mime_type, struct uhuru_mo
   if (modules == NULL) {
     modules = g_array_new(TRUE, TRUE, sizeof(struct uhuru_module *));
 
-	#ifdef WIN32
-		g_hash_table_insert(u->mime_type_table, (gpointer)(_strdup(mime_type)), modules);
-	#else
-		g_hash_table_insert(u->mime_type_table, (gpointer)(strdup(mime_type)), modules);
-	#endif
-    
+    g_hash_table_insert(u->mime_type_table, (gpointer)(strdup(mime_type)), modules);
   }
 
   g_array_append_val(modules, module);
@@ -116,12 +111,7 @@ struct uhuru_module **uhuru_get_applicable_modules(struct uhuru *u, magic_t magi
     magic = u->magic;
 
   mime_type = magic_file(magic, path);
-
-	#ifdef WIN32
-	  *p_mime_type = _strdup(mime_type);
-	#else
-	  *p_mime_type = strdup(mime_type);
-	#endif
+  *p_mime_type = strdup(mime_type);
 
   modules = (GArray *)g_hash_table_lookup(u->mime_type_table, mime_type);
 
