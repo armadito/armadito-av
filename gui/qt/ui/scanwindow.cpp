@@ -10,6 +10,7 @@ void ScanWindow::construct(ScanModel *model)
 
   ScanWidget *s = new ScanWidget(_model);
 
+  setWindowTitle(QString("Analyse antivirale"));
   setCentralWidget(s);
 
   resize(800, 500);

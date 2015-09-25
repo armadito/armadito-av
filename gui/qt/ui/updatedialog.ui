@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string/>
+   <string>Etat des mises à jour</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../uhuru.qrc">
+    <normaloff>:/icons/uhuru.svg</normaloff>:/icons/uhuru.svg</iconset>
   </property>
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
@@ -79,7 +83,9 @@
    </layout>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="../uhuru.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>
