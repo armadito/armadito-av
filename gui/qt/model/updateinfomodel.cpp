@@ -11,26 +11,18 @@ struct uhuru_info *UpdateInfoModel::RetrieveUpdateInfo(int use_daemon)
      //info_to_stdout(info);
 
      uhuru_close(u);
-
-     //emit UpdateInfoChanged(&info);
-
      return info;
 }
 
-void UpdateInfoModel::freeUpdateInfo()
-{
-     uhuru_info_free(Uinfo);     	
-}	
-
-struct uhuru_info *UpdateInfoModel::getUpdateInfo()
+struct uhuru_info *UpdateInfoModel::RefreshUpdateInfo()
 { 
-     return Uinfo; 
+     Uinfo = RetrieveUpdateInfo((int)1);
+     return Uinfo;
 }
-
+	
 UpdateInfoModel::UpdateInfoModel()
 {
-     // Retrieve info from libuhuru, using daemon
-     Uinfo = RetrieveUpdateInfo((int)1);
+
 }
 
 

@@ -144,7 +144,7 @@ void Systray::scan()
 
 void Systray::update()
 {
-  // Init model => retrieve uhuruinfo for the first time.
+  // Init model => this model will be re-used each time user click on refresh button
   UpdateInfoModel *model = new UpdateInfoModel();
 
   // Init UpdateDialog ui, set first values and init connexions
