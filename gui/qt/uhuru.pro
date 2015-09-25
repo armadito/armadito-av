@@ -41,6 +41,7 @@ FORMS    += \
     ui/aboutdialog.ui \
     ui/updatedialog.ui
 
+RC_FILE = uhuru.rc
 RESOURCES = uhuru.qrc
 
 TRANSLATIONS = translations/uhuru-qt_fr.ts \

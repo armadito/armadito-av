@@ -2,6 +2,7 @@
 #define UPDATEDIALOG_H
 
 #include <QDialog>
+#include <QListWidget>
 #include "model/updateinfomodel.h"
 
 namespace Ui {
@@ -17,7 +18,10 @@ public:
     ~UpdateDialog();
 
 private:
-    void doConnect(UpdateInfoModel *model);
+    QString getStatusQString(int status);
+    void AddModuleItem(struct uhuru_module_info **m, QListWidget *pListWidget);
+    void fillView(UpdateInfoModel *model);
+    QIcon *getIcon();
     Ui::UpdateDialog *ui;
 };
 
