@@ -9,11 +9,7 @@ class UpdateInfoModel : public QObject {
 
 public:
     UpdateInfoModel();
-    struct uhuru_info *getUpdateInfo();
-    void freeUpdateInfo();
-
-//signals:
-//    void UpdateInfoChanged(struct uhuru_info ** info);
+    struct uhuru_info *RefreshUpdateInfo();
 
 private:
     struct uhuru_info *RetrieveUpdateInfo(int use_daemon);

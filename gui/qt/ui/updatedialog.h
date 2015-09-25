@@ -17,12 +17,17 @@ public:
     explicit UpdateDialog(UpdateInfoModel *model = NULL, QWidget *parent = 0);
     ~UpdateDialog();
 
+public slots:
+    void RefreshUpdateInfo();
+
 private:
     QString getStatusQString(int status);
     void AddModuleItem(struct uhuru_module_info **m, QListWidget *pListWidget);
     void fillView(UpdateInfoModel *model);
+    void SetupRefreshButton();
     QIcon *getIcon();
     Ui::UpdateDialog *ui;
+    UpdateInfoModel *_model;
 };
 
 #endif // UPDATEDIALOG_H
