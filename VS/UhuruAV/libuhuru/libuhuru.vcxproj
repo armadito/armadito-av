@@ -94,6 +94,7 @@
     <ClCompile Include="..\..\..\libuhuru\src\lib\scan.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\status.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\uhuru.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\lib\utils.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

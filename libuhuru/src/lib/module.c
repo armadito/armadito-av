@@ -43,7 +43,7 @@ static struct uhuru_module *module_new(struct uhuru_module *src, struct uhuru *u
   mod->close_fun = src->close_fun;
   mod->info_fun = src->info_fun;
 
-  mod->name = strdup(src->name);
+  mod->name = os_strdup(src->name);
 
   mod->size = src->size;
 

@@ -45,7 +45,12 @@ struct ipc_manager *ipc_manager_new(int input_fd, int output_fd)
   struct ipc_manager *m = g_new(struct ipc_manager, 1);
 
   m->input_fd = input_fd;
-  m->output = fdopen(output_fd, "w");
+#ifdef WIN32
+  m->output = _fdopen(output_fd, "w");
+#else
+	m->output = fdopen(output_fd, "w");
+#endif
+  
   if (m->output == NULL) {
     perror("fdopen");
     free(m);
@@ -149,7 +154,7 @@ static void ipc_manager_add_str_arg(struct ipc_manager *m)
   struct ipc_value v;
 
   v.type = IPC_STRING_T;
-  v.value.v_str = strdup(m->str_arg->str);
+  v.value.v_str = os_strdup(m->str_arg->str);
 
   g_array_append_val(m->argv, v);
 }
@@ -272,7 +277,7 @@ int ipc_manager_receive(struct ipc_manager *manager)
   n_read = read(manager->input_fd, manager->input_buffer, manager->input_buffer_size);
 
   if (n_read == -1) {
-    g_log(NULL, G_LOG_LEVEL_ERROR, "error in ipc_manager_receive: %s", strerror(errno));
+    g_log(NULL, G_LOG_LEVEL_ERROR, "error in ipc_manager_receive: %s", os_strerror(errno));
   }
 
   if (n_read < 0)
