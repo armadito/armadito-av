@@ -41,8 +41,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\david\Documents\uhuru-av\VS\glib\glib-2.28\lib\glib-2.0\include;C:\Users\david\Documents\uhuru-av\VS\glib\glib-2.28\include\glib-2.0;C:\Users\david\Documents\uhuru-av\libuhuru\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\david\Documents\uhuru-av\VS\glib\glib-2.28\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)..\..\libuhuru\include;$(SolutionDir)..\glib\glib-2.28\lib\glib-2.0\include;$(SolutionDir)..\glib\glib-2.28\include\glib-2.0;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\glib\glib-2.28\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -55,7 +55,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\david\Documents\uhuru-av\libuhuru;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\libuhuru\include\config;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
