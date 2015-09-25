@@ -9,15 +9,17 @@
 void ScanWidget::connectLineEdit(const char *lineEditName, Counter *counter)
 {
   QLineEdit *ui_lineEdit = findChild<QLineEdit*>(lineEditName);
-
   assert(ui_lineEdit != NULL);
 
   QObject::connect(counter, SIGNAL(changed(const QString &)), ui_lineEdit, SLOT(setText(const QString &)));
+
+  // We set the value now
   ui_lineEdit->setText(QString::number(counter->value()));
 }
 
 void ScanWidget::doConnect(ScanModel *model)
 {
+  // We create counters connexions
   connectLineEdit("totalCount", model->totalCount());
   connectLineEdit("scannedCount", model->scannedCount());
   connectLineEdit("malwareCount", model->malwareCount());
@@ -25,23 +27,30 @@ void ScanWidget::doConnect(ScanModel *model)
   connectLineEdit("unhandledCount", model->unhandledCount());
   connectLineEdit("cleanCount", model->cleanCount());
 
+  // ProgressBar Maximum
   QProgressBar *ui_progressBar = findChild<QProgressBar*>("progressBar");
   assert(ui_progressBar != NULL);
   ui_progressBar->setMaximum(model->totalCount()->value());
   QObject::connect(model->totalCount(), SIGNAL(changed(int)), ui_progressBar, SLOT(setMaximum(int)));
+
+  // ProgressBar Value
   ui_progressBar->setValue(model->scannedCount()->value());
   QObject::connect(model->scannedCount(), SIGNAL(changed(int)), ui_progressBar, SLOT(setValue(int)));
 
+  // Current scanned file path 
   QLineEdit *ui_currentScannedPath = findChild<QLineEdit*>("currentScannedPath");
   assert(ui_currentScannedPath != NULL);
   ui_currentScannedPath->setText(model->path());
   QObject::connect(model, SIGNAL(scanning(QString)), ui_currentScannedPath, SLOT(setText(QString)));
 
+  // Close button enabled at end of scan
   ui_closeButton = findChild<QPushButton*>("closeButton");
   assert(ui_closeButton != NULL);
   QObject::connect(model, SIGNAL(scanComplete()), this, SLOT(enableCloseButton()));
+
   if (model->completed())
     enableCloseButton();
+
 }
 
 ScanWidget::ScanWidget(ScanModel *model, QWidget *parent) :
@@ -50,8 +59,10 @@ ScanWidget::ScanWidget(ScanModel *model, QWidget *parent) :
 {
   ui->setupUi(this);
 
+  // Init values and connexions
   doConnect(model);
 
+  // Set report model 
   QTableView *ui_reportView = findChild<QTableView*>("reportView");
   assert(ui_reportView != NULL);
   ui_reportView->setModel(model->report());

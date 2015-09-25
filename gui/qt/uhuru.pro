@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     ui/aboutdialog.cpp \
     utils/uhuru.cpp \
     ui/scanwindow.cpp \
-    ui/updatedialog.cpp
+    ui/updatedialog.cpp \
+    model/updateinfomodel.cpp
 
 HEADERS  +=  \
     model/scanmodel.h \ 
@@ -32,13 +33,15 @@ HEADERS  +=  \
     ui/aboutdialog.h \
     utils/uhuru.h \
     ui/scanwindow.h \
-    ui/updatedialog.h
+    ui/updatedialog.h \
+    model/updateinfomodel.h
 
 FORMS    += \  
     ui/scanwidget.ui \
     ui/aboutdialog.ui \
     ui/updatedialog.ui
 
+RC_FILE = uhuru.rc
 RESOURCES = uhuru.qrc
 
 TRANSLATIONS = translations/uhuru-qt_fr.ts \

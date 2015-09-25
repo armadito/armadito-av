@@ -12,6 +12,8 @@ uhuru_qt_SOURCES= \
 	model/scanmodel.h \
 	model/scanreportmodel.cpp \
 	model/scanreportmodel.h \
+	model/updateinfomodel.cpp \
+	model/updateinfomodel.h \
 	ui/aboutdialog.cpp \
 	ui/aboutdialog.h \
 	ui/scanwidget.cpp \
@@ -32,6 +34,7 @@ nodist_uhuru_qt_SOURCES= \
 	model/moc_counter.cpp  \
 	model/moc_scanmodel.cpp \
 	model/moc_scanreportmodel.cpp \
+	model/moc_updateinfomodel.cpp \
 	ui/moc_aboutdialog.cpp \
 	ui/moc_scanwindow.cpp \
 	ui/moc_scanwidget.cpp \
@@ -48,6 +51,7 @@ BUILT_SOURCES= \
 	model/moc_counter.cpp  \
 	model/moc_scanmodel.cpp \
 	model/moc_scanreportmodel.cpp \
+	model/moc_updateinfomodel.cpp \
 	ui/moc_aboutdialog.cpp \
 	ui/moc_scanwindow.cpp \
 	ui/moc_scanwidget.cpp \

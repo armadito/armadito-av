@@ -1,6 +1,7 @@
 #include "systray.h"
 #include "utils/stdpaths.h"
 #include "model/scanmodel.h"
+#include "model/updateinfomodel.h"
 #include "scanwindow.h"
 #include "aboutdialog.h"
 #include "updatedialog.h"
@@ -143,7 +144,11 @@ void Systray::scan()
 
 void Systray::update()
 {
-  UpdateDialog *update = new UpdateDialog();
+  // Init model => retrieve uhuruinfo for the first time.
+  UpdateInfoModel *model = new UpdateInfoModel();
+
+  // Init UpdateDialog ui, set first values and init connexions
+  UpdateDialog *update = new UpdateDialog(model);
   update->show();
 }
 
