@@ -136,9 +136,14 @@ static enum uhuru_mod_status module5_2_close(struct uhuru_module *module)
 }
 
 /* FIXME: one day, add bases status */
-static enum uhuru_update_status clamav_update_check(struct uhuru_module *module)
+static enum uhuru_update_status module5_2_info(struct uhuru_module *module, struct uhuru_module_info *info)
 {
-  return UHURU_UPDATE_NON_AVAILABLE;
+  info->base_infos = (struct uhuru_base_info **)malloc(sizeof(struct uhuru_base_info *));
+  info->base_infos[0] = NULL;
+
+  info->update_date = strdup("2014-09-01T09:30:00Z");
+
+  return UHURU_UPDATE_OK;
 }
 
 struct uhuru_module module = {
@@ -147,6 +152,6 @@ struct uhuru_module module = {
   .post_init_fun = module5_2_post_init,
   .scan_fun = module5_2_scan,
   .close_fun = module5_2_close,
-  .info_fun = NULL,
+  .info_fun = module5_2_info,
   .name = "module5_2",
 };

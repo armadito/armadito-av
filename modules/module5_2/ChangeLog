@@ -1,3 +1,7 @@
+2015-09-25  François  <francois@dechelle.net>
+
+	* changed code for module info retrieval; update_date is fake
+
 2015-08-04  François  <francois@dechelle.net>
 
 	* changed bases default directory; now /var/lib/uhuru/bases/module5_2
