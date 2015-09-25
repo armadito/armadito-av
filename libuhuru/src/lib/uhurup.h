@@ -5,7 +5,11 @@
 #include "libuhuru-config.h"
 
 #include <glib.h>
+#ifdef WIN32
+#include "uhuru-libmagic\magic.h"
+#else
 #include <magic.h>
+#endif
 
 struct uhuru_module **uhuru_get_modules(struct uhuru *u);
 

@@ -46,7 +46,7 @@ static void info_local_init(struct uhuru_info *info, struct uhuru *uhuru)
       mod_status = (*(*modv)->info_fun)((*modv), mod_info);
 
       if (mod_status != UHURU_UPDATE_NON_AVAILABLE) {
-	mod_info->name = strdup((*modv)->name);
+	mod_info->name = os_strdup((*modv)->name);
 	mod_info->mod_status = mod_status;
 	g_array_append_val(g_module_infos, mod_info);
       } else
@@ -74,10 +74,10 @@ static void ipc_handler_info_module(struct ipc_manager *m, void *data)
   char *mod_name, *update_date;
 
   ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &mod_name);
-  mod_info->name = strdup(mod_name);
+  mod_info->name = os_strdup(mod_name);
   ipc_manager_get_arg_at(m, 1, IPC_INT32_T, &mod_info->mod_status);
   ipc_manager_get_arg_at(m, 2, IPC_STRING_T, &update_date);
-  mod_info->update_date = strdup(update_date);
+  mod_info->update_date = os_strdup(update_date);
 
   n_bases = (ipc_manager_get_argc(m) - 3) / 5;
 
@@ -90,14 +90,14 @@ static void ipc_handler_info_module(struct ipc_manager *m, void *data)
     char *name, *date, *version, *full_path;
 
     ipc_manager_get_arg_at(m, argc+0, IPC_STRING_T, &name);
-    base_info->name = strdup(name);
+    base_info->name = os_strdup(name);
     ipc_manager_get_arg_at(m, argc+1, IPC_STRING_T, &date);
-    base_info->date = strdup(date);
+    base_info->date = os_strdup(date);
     ipc_manager_get_arg_at(m, argc+2, IPC_STRING_T, &version);
-    base_info->version = strdup(version);
+    base_info->version = os_strdup(version);
     ipc_manager_get_arg_at(m, argc+3, IPC_INT32_T, &base_info->signature_count);
     ipc_manager_get_arg_at(m, argc+4, IPC_STRING_T, &full_path);
-    base_info->full_path = strdup(full_path);
+    base_info->full_path = os_strdup(full_path);
 
     mod_info->base_infos[i] = base_info;
   }

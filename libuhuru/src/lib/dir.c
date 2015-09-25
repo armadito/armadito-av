@@ -10,7 +10,9 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#ifndef WIN32
 #include <unistd.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -23,11 +25,15 @@ static enum dir_entry_flag dirent_flags(struct dirent *entry)
   case DT_BLK:
   case DT_CHR:
     return DIR_ENTRY_IS_DEV;
+#ifndef WIN32
   case DT_SOCK:
+#endif
   case DT_FIFO:
     return DIR_ENTRY_IS_IPC;
+#ifndef WIN32
   case DT_LNK:
     return DIR_ENTRY_IS_LINK;
+#endif
   case DT_REG:
     return DIR_ENTRY_IS_REG;
   default:
@@ -46,7 +52,7 @@ int dir_map(const char *path, int recurse, dirent_fun_t dirent_fun, void *data)
     
   d = opendir(path);
   if (d == NULL) {
-    g_log(NULL, G_LOG_LEVEL_WARNING, "error opening directory %s (%s)", path, strerror(errno));
+    g_log(NULL, G_LOG_LEVEL_WARNING, "error opening directory %s (%s)", path, os_strerror(errno));
 
     flags |= DIR_ENTRY_IS_ERROR;
     (*dirent_fun)(path, flags, errno, data);
@@ -62,7 +68,7 @@ int dir_map(const char *path, int recurse, dirent_fun_t dirent_fun, void *data)
     int r = readdir_r(d, &entry, &result);
 
     if (r != 0) {
-      g_log(NULL, G_LOG_LEVEL_WARNING, "error reading directory entry (%s)", strerror(errno));
+      g_log(NULL, G_LOG_LEVEL_WARNING, "error reading directory entry (%s)", os_strerror(errno));
       ret = 1;
       goto cleanup;
     }
@@ -121,7 +127,7 @@ int mkdir_p(const char *path)
   char *token, *full, *end;
   int ret = 0;
      
-  token = full = strdup(path);
+  token = full = os_strdup(path);
   do {
     end = strchr(token, '/');
 
