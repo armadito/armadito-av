@@ -51,5 +51,8 @@
     <ClCompile Include="..\..\..\libuhuru\src\lib\utils.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\lib\uhuru-libmagic\magic.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
