@@ -15,6 +15,7 @@ public:
 
 private:
     void construct(ScanModel *model);
+    QIcon *getIcon();
     ScanModel *_model;
 };
 

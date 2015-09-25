@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>769</width>
-    <height>536</height>
+    <height>557</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -20,7 +20,11 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Analyse en cours...</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../uhuru.qrc">
+    <normaloff>:/icons/uhuru.svg</normaloff>:/icons/uhuru.svg</iconset>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
@@ -289,6 +293,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../uhuru.qrc"/>
+ </resources>
  <connections/>
 </ui>
