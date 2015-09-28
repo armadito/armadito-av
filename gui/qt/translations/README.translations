@@ -1,0 +1,35 @@
+How to make translations with Qt
+================================
+
+After adding new elements to the user interface, either with C++ code or 
+with interface designer, texts must be translated.
+
+Update translation files
+------------------------
+
+First step is to update the translation files (i.e. the .ts files in translations/).
+
+This is done with the `lupdate-qt4` command line tool:
+
+    lupdate-qt4 uhuru.pro
+
+Argument is the Qt project file (it must therefore must be up to date with respect
+to file lists)
+
+Translating
+-----------
+
+The translation itself can then be done using the `linguist-qt4` tool:
+
+    linguist-qt4 translations/uhuru-qt_fr.ts
+
+This graphical user interface shows the strings to be translated, the already translated
+strings...
+
+Don't forget to save your translations before quitting `linguist-qt4`
+
+Releasing
+---------
+
+Translations are automatically released when creating a debian package and installed
+in the right location.
