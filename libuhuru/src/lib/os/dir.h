@@ -13,7 +13,7 @@ enum dir_entry_flag {
 
 typedef void (*dirent_cb_t)(const char *full_path, enum dir_entry_flag flags, int entry_errno, void *data);
 
-int os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data);
+void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data);
 
 int os_mkdir_p(const char *path);
 
