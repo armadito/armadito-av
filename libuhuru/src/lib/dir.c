@@ -69,7 +69,12 @@ int dir_map(const char *path, int recurse, dirent_fun_t dirent_fun, void *data)
 
     if (r != 0) {
       g_log(NULL, G_LOG_LEVEL_WARNING, "error reading directory entry (%s)", os_strerror(errno));
-      ret = 1;
+     
+      flags |= DIR_ENTRY_IS_ERROR;
+      (*dirent_fun)(path, flags, errno, data);
+
+      //  ret = 1;
+
       goto cleanup;
     }
 
