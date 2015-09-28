@@ -1,6 +1,6 @@
 #include "libuhuru-config.h"
 
-#include "dir.h"
+#include "os/dir.h"
 
 #include <glib.h>
 #include <dirent.h>
@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-#ifndef WIN32
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <sys/types.h>
@@ -21,21 +21,17 @@ static enum dir_entry_flag dirent_flags(struct dirent *entry)
 {
   switch(entry->d_type) {
   case DT_DIR:
-    return DIR_ENTRY_IS_DIR;
+    return DIR_ENTRY_IS_DIRECTORY;
   case DT_BLK:
   case DT_CHR:
-    return DIR_ENTRY_IS_DEV;
-#ifndef WIN32
+    return DIR_ENTRY_IS_DEVICE;
   case DT_SOCK:
-#endif
   case DT_FIFO:
     return DIR_ENTRY_IS_IPC;
-#ifndef WIN32
   case DT_LNK:
     return DIR_ENTRY_IS_LINK;
-#endif
   case DT_REG:
-    return DIR_ENTRY_IS_REG;
+    return DIR_ENTRY_IS_PLAIN_FILE;
   default:
     return DIR_ENTRY_IS_UNKNOWN;
   }
@@ -43,7 +39,7 @@ static enum dir_entry_flag dirent_flags(struct dirent *entry)
   return DIR_ENTRY_IS_UNKNOWN;
 }
 
-int dir_map(const char *path, int recurse, dirent_fun_t dirent_fun, void *data)
+int os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data)
 {
   DIR *d;
   struct dirent entry, *result;
@@ -55,7 +51,7 @@ int dir_map(const char *path, int recurse, dirent_fun_t dirent_fun, void *data)
     g_log(NULL, G_LOG_LEVEL_WARNING, "error opening directory %s (%s)", path, os_strerror(errno));
 
     flags |= DIR_ENTRY_IS_ERROR;
-    (*dirent_fun)(path, flags, errno, data);
+    (*dirent_cb)(path, flags, errno, data);
     
     if (errno != EACCES && errno != ENOENT && errno != ENOTDIR)
       ret = 1;
@@ -90,7 +86,7 @@ int dir_map(const char *path, int recurse, dirent_fun_t dirent_fun, void *data)
     }
 
     if (entry.d_type == DT_DIR && recurse) {
-      r = dir_map(entry_path, recurse, dirent_fun, data);
+      r = os_dir_map(entry_path, recurse, dirent_cb, data);
 
       if (r != 0) {
 	ret = 1;
@@ -100,7 +96,7 @@ int dir_map(const char *path, int recurse, dirent_fun_t dirent_fun, void *data)
     }
 
     flags = dirent_flags(&entry);
-    (*dirent_fun)(entry_path, flags, 0, data);
+    (*dirent_cb)(entry_path, flags, 0, data);
 
     free(entry_path);
   }
@@ -127,7 +123,7 @@ static int stat_dir(const char *path)
   return (errno == ENOENT) ? 0 : -1;
 }
 
-int mkdir_p(const char *path)
+int os_mkdir_p(const char *path)
 {
   char *token, *full, *end;
   int ret = 0;

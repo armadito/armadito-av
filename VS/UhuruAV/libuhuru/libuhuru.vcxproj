@@ -41,8 +41,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)..\..\libuhuru\include;$(SolutionDir)..\glib\glib-2.28\lib\glib-2.0\include;$(SolutionDir)..\glib\glib-2.28\include\glib-2.0;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)..\glib\glib-2.28\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)..\..\libuhuru\include;$(SolutionDir)..\glib\win32\glib_2.28.8\lib\glib-2.0\include;$(SolutionDir)..\glib\win32\glib_2.28.8\include\glib-2.0;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\glib\win32\glib_2.28.8\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -93,8 +93,22 @@
     <ClCompile Include="..\..\..\libuhuru\src\lib\report.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\scan.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\status.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\lib\uhuru-libmagic\magic.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\uhuru.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\utils.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\libuhuru\src\lib\conf.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\lib\confparser.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\lib\dir.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\lib\infop.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\lib\ipc.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\lib\modulep.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\lib\reportp.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\lib\sock.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\lib\statusp.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\lib\uhurup.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\lib\unixsock.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

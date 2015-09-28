@@ -51,5 +51,43 @@
     <ClCompile Include="..\..\..\libuhuru\src\lib\utils.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\lib\uhuru-libmagic\magic.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\libuhuru\src\lib\conf.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\lib\confparser.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\lib\dir.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\lib\infop.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\lib\ipc.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\lib\modulep.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\lib\reportp.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\lib\sock.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\lib\statusp.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\lib\uhurup.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\lib\unixsock.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

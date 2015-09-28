@@ -1,5 +1,5 @@
 #include <libuhuru/module.h>
-#include "dir.h"
+#include "os/dir.h"
 #include "quarantine.h"
 
 #include <assert.h>

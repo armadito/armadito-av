@@ -10,8 +10,6 @@ conf.c \
 conf.h \
 confparser.c \
 confparser.h \
-dir.c \
-dir.h \
 ipc.c \
 ipc.h \
 module.c \
@@ -32,7 +30,9 @@ builtin-modules/mimetype.h \
 builtin-modules/quarantine.c \
 builtin-modules/quarantine.h \
 builtin-modules/remote.c \
-builtin-modules/remote.h 
+builtin-modules/remote.h \
+os/dir.h \
+os/linux/dir.c
 
 AM_CPPFLAGS= -DLIBUHURU_MODULES_PATH='"$(pkglibdir)/modules"' -DLIBUHURU_CONF_DIR='"$(sysconfdir)/uhuru"' -DG_LOG_DOMAIN='"libuhuru"'
 libuhuru_la_CFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/include/config
