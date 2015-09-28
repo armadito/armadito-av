@@ -42,16 +42,14 @@ static enum dir_entry_flag dirent_flags(struct dirent *entry)
 int os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data)
 {
   DIR *d;
-  struct dirent entry, *result;
   int ret = 0;
-  enum dir_entry_flag flags = 0;
+  struct dirent *entry;
     
   d = opendir(path);
   if (d == NULL) {
     g_log(NULL, G_LOG_LEVEL_WARNING, "error opening directory %s (%s)", path, os_strerror(errno));
 
-    flags |= DIR_ENTRY_IS_ERROR;
-    (*dirent_cb)(path, flags, errno, data);
+    (*dirent_cb)(path, DIR_ENTRY_IS_ERROR, errno, data);
     
     if (errno != EACCES && errno != ENOENT && errno != ENOTDIR)
       ret = 1;
@@ -61,31 +59,34 @@ int os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data)
 
   while(1) {
     char *entry_path;
-    int r = readdir_r(d, &entry, &result);
+    struct dirent *entry;
 
-    if (r != 0) {
-      g_log(NULL, G_LOG_LEVEL_WARNING, "error reading directory entry (%s)", os_strerror(errno));
+    errno = 0;
+    entry = readdir(d);
+
+    if (entry == NULL) {
+      /* from man readdir: If the end of the directory stream is reached, NULL is returned and errno is not changed */
+      if (errno == 0)
+	break;
+
+      g_log(NULL, G_LOG_LEVEL_WARNING, "error reading directory entry in directory %s (error %s)", path, os_strerror(errno));
      
-      flags |= DIR_ENTRY_IS_ERROR;
-      (*dirent_cb)(path, flags, errno, data);
+      (*dirent_cb)(path, DIR_ENTRY_IS_ERROR, errno, data);
 
       ret = 1;
 
       goto cleanup;
     }
 
-    if (result == NULL)
-      break;
-
-    if (entry.d_type == DT_DIR && (!strcmp(entry.d_name, ".") || !strcmp(entry.d_name, "..")))
+    if (entry->d_type == DT_DIR && (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")))
       continue;
 
-    if (asprintf(&entry_path, "%s/%s", path, entry.d_name) == -1) {
+    if (asprintf(&entry_path, "%s/%s", path, entry->d_name) == -1) {
       ret = 1;
       goto cleanup;
     }
 
-    if (entry.d_type == DT_DIR && recurse) {
+    if (entry->d_type == DT_DIR && recurse) {
       r = os_dir_map(entry_path, recurse, dirent_cb, data);
 
       if (r != 0) {
@@ -95,8 +96,7 @@ int os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data)
       }
     }
 
-    flags = dirent_flags(&entry);
-    (*dirent_cb)(entry_path, flags, 0, data);
+    (*dirent_cb)(entry_path, dirent_flags(entry), 0, data);
 
     free(entry_path);
   }
