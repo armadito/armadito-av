@@ -117,6 +117,8 @@ static void local_scan_file(struct uhuru_scan *scan, magic_t magic, const char *
   struct uhuru_module **modules;
   const char *mime_type;
 
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "local_scan_file - %s", path);
+
   uhuru_report_init(&report, path);
 
   modules = uhuru_get_applicable_modules(scan->uhuru, magic, path, &mime_type);
@@ -173,6 +175,7 @@ static void local_scan_entry(const char *full_path, enum dir_entry_flag flags, i
     struct uhuru_report report;
 
     uhuru_report_init(&report, full_path);
+    g_log(NULL, G_LOG_LEVEL_WARNING, "local_scan_entry: Error - %s", full_path);
 
     report.status = UHURU_IERROR;
     report.mod_report = strdup(strerror(entry_errno));

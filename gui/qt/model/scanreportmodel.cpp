@@ -94,7 +94,7 @@ void ScanReportModel::append(const QString &status, const QString &action, const
 
   QFileInfo info(path);
 
-  struct report_entry entry = { status, action, info.fileName(), report};
+  struct report_entry entry = { status, action, path, report};
 
   _reports.append(entry);
 

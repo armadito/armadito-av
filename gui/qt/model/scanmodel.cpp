@@ -2,6 +2,7 @@
 
 #include <QDirIterator>
 #include <iostream>
+#include <QDebug>
 
 static void scanmodel_callback(struct uhuru_report *report, void *callback_data);
 
@@ -56,6 +57,8 @@ void ScanModel::countFiles()
 void ScanModel::callback(enum uhuru_file_status status, const char *path, const char *report)
 {
 
+  qDebug() << "DEBUG: ScanMode::callback - file path : " << path;
+
   emit scanning(QString(path));
 
   _scannedCount.increment();
@@ -63,18 +66,18 @@ void ScanModel::callback(enum uhuru_file_status status, const char *path, const 
   switch(status) {
   case UHURU_MALWARE:
     _malwareCount.increment();
-    _reportModel.append(QString("malicieux"), QString("aucune"), QString(path), QString(report));
+    _reportModel.append(QString("Malicieux"), QString("aucune"), QString(path), QString(report));
     break;
   case UHURU_SUSPICIOUS:
     _suspiciousCount.increment();
-    _reportModel.append(QString("suspect"), QString("aucune"), QString(path), QString(report));
+    _reportModel.append(QString("Suspect"), QString("aucune"), QString(path), QString(report));
     break;
   case UHURU_EINVAL:
   case UHURU_IERROR:
   case UHURU_UNKNOWN_FILE_TYPE:
   case UHURU_UNDECIDED:
     _unhandledCount.increment();
-    _reportModel.append(QString("non traite"), QString("aucune"), QString(path), "");
+    _reportModel.append(tr("Not processed"), QString("aucune"), QString(path), "");
     break;
   case UHURU_WHITE_LISTED:
   case UHURU_CLEAN:
