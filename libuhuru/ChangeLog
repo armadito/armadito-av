@@ -1,3 +1,7 @@
+2015-09-28  François  <francois@dechelle.net>
+
+	* moved dir.h to os/dir.h, dir.c to os/linux/dir.c; some cleanup; rewriten directory walking with glib by calls to os_dir_map
+
 2015-09-24  François  <francois@dechelle.net>
 
 	* added #include "libuhuru-config.h" in all C files

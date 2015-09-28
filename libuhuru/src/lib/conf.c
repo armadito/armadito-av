@@ -3,6 +3,7 @@
 #include "conf.h"
 #include "uhurup.h"
 #include "confparser.h"
+#include "os/dir.h"
 
 #include <glib.h>
 #include <stdlib.h>
@@ -50,35 +51,6 @@ static int conf_set(struct uhuru *uhuru, const char *mod_name, const char *direc
   return 0;
 }
 
-/* const char **conf_get_value(struct uhuru *uhuru, const char *mod_name, const char *key) */
-/* { */
-/*   struct uhuru_module *mod; */
-/*   struct uhuru_conf_entry *conf_entry; */
-/*   enum uhuru_mod_status mod_status; */
-/*   const char **argv; */
- 
-/*   mod = uhuru_get_module_by_name(uhuru, mod_name); */
-/*   if (mod == NULL) { */
-/*     g_log(NULL, G_LOG_LEVEL_WARNING, "conf_get: no module '%s'", mod_name); */
-/*     return NULL; */
-/*   } */
-
-/*   conf_entry = conf_entry_get(mod, key); */
-/*   if (conf_entry == NULL || conf_entry->conf_get_fun == NULL) { */
-/*     g_log(NULL, G_LOG_LEVEL_WARNING, "conf_get: no key '%s' for module '%s'", key, mod_name); */
-/*     return NULL; */
-/*   } */
-
-/*   argv = (*conf_entry->conf_get_fun)(mod->data, key, &mod_status); */
-
-/*   if (mod_status != UHURU_MOD_OK) { */
-/*     g_log(NULL, G_LOG_LEVEL_WARNING, "conf_get: cannot get value of key '%s' for module '%s'", key, mod_name); */
-/*     return NULL; */
-/*   } */
-
-/*   return argv; */
-/* } */
-
 static void conf_parser_set_cb(const char *group, const char *directive, const char **argv, void *user_data)
 {
   conf_set((struct uhuru *)user_data, group, directive, argv);
@@ -93,25 +65,19 @@ void conf_load_file(struct uhuru *uhuru, const char *filename)
   uhuru_conf_parser_free(cp);
 }
 
+static void conf_load_dirent_cb(const char *full_path, enum dir_entry_flag flags, int entry_errno, void *data)
+{
+  if (flags & DIR_ENTRY_IS_PLAIN_FILE) {
+    size_t len = strlen(full_path);
+
+    if (len > 5 && !strcmp(full_path + len - 5, ".conf"))
+      conf_load_file((struct uhuru *)data, full_path);
+  }
+}
+
 void conf_load_path(struct uhuru *uhuru, const char *path)
 {
-  GDir *dir;
-  const char *filename;
-  GString *full_path = g_string_new("");
-  GError *err = NULL;
-
-  dir = g_dir_open(path, 0, &err);
-
-  while((filename = g_dir_read_name(dir)) != NULL) {
-    if (g_str_has_suffix(filename, ".conf"))
-      g_string_printf(full_path, "%s%s%s", path, G_DIR_SEPARATOR_S, filename);
-
-      conf_load_file(uhuru, full_path->str);
-  }
-
-  g_dir_close(dir);
-
-  g_string_free(full_path, TRUE);
+  os_dir_map(path, 0, conf_load_dirent_cb, uhuru);
 }
 
 

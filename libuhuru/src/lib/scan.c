@@ -4,7 +4,7 @@
 #include <libuhuru/scan.h>
 
 #include "conf.h"
-#include "dir.h"
+#include "os/dir.h"
 #include "modulep.h"
 #include "ipc.h"
 #include "statusp.h"
@@ -181,7 +181,7 @@ static void local_scan_entry(const char *full_path, enum dir_entry_flag flags, i
     uhuru_report_destroy(&report);
   }
 
-  if (!(flags & DIR_ENTRY_IS_REG))
+  if (!(flags & DIR_ENTRY_IS_PLAIN_FILE))
     return;
 
   if (scan->flags & UHURU_SCAN_THREADED)
@@ -222,7 +222,7 @@ static enum uhuru_scan_status local_scan_run(struct uhuru_scan *scan)
   } else if (S_ISDIR(sb.st_mode)) {
     int recurse = scan->flags & UHURU_SCAN_RECURSE;
 
-    dir_map(scan->path, recurse, local_scan_entry, scan);
+    os_dir_map(scan->path, recurse, local_scan_entry, scan);
   }
 
   if (scan->flags & UHURU_SCAN_THREADED)

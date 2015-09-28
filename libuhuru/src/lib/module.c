@@ -3,6 +3,7 @@
 #include <libuhuru/module.h>
 
 #include "modulep.h"
+#include "os/dir.h"
 
 #include <assert.h>
 #include <gmodule.h>
@@ -106,29 +107,21 @@ void module_manager_add(struct module_manager *mm, struct uhuru_module *module)
   g_array_append_val(mm->modules, clone);
 }
 
-void module_manager_load_path(struct module_manager *mm, const char *path)
+static void module_load_dirent_cb(const char *full_path, enum dir_entry_flag flags, int entry_errno, void *data)
 {
-  GDir *dir;
-  const char *filename;
-  GString *full_path = g_string_new("");
-  GError *err = NULL;
-
-  dir = g_dir_open(path, 0, &err);
-
-  while((filename = g_dir_read_name(dir)) != NULL) {
+  if (flags & DIR_ENTRY_IS_PLAIN_FILE) {
     struct uhuru_module *mod_loaded;
 
-    g_string_printf(full_path, "%s%s%s", path, G_DIR_SEPARATOR_S, filename);
-
-    mod_loaded = module_load(full_path->str);
+    mod_loaded = module_load(full_path);
 
     if (mod_loaded != NULL)
-      module_manager_add(mm, mod_loaded);
+      module_manager_add((struct module_manager *)data, mod_loaded);
   }
+}
 
-  g_dir_close(dir);
-
-  g_string_free(full_path, TRUE);
+void module_manager_load_path(struct module_manager *mm, const char *path)
+{
+  os_dir_map(path, 0, module_load_dirent_cb, mm);
 }
 
 void module_manager_post_init_all(struct module_manager *mm)
