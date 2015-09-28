@@ -14,6 +14,8 @@ void module_manager_load_path(struct module_manager *mm, const char *path);
 /* NULL terminated array of struct uhuru_module */
 struct uhuru_module **module_manager_get_modules(struct module_manager *mm);
 
+void module_manager_post_init_all(struct module_manager *mm);
+
 void module_manager_close_all(struct module_manager *mm);
 
 #ifdef DEBUG
