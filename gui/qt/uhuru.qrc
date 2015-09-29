@@ -4,5 +4,6 @@
   <file>icons/uhuru.svg</file>
   <file>icons/clamav.ico</file>
   <file>images/uhuru_am.png</file>
+  <file>images/loupe.png</file>
 </qresource>
 </RCC>

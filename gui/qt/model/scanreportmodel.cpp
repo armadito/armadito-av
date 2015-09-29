@@ -99,7 +99,9 @@ void ScanReportModel::append(const QString &status, const QString &action, const
   _reports.append(entry);
 
   endInsertRows();
-
+  
+  emit endInsert();
+  
 #if 0
   int row = _reports.size() - 1;
   QModelIndex topLeft = createIndex(row,0);

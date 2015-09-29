@@ -31,6 +31,10 @@ public:
 
 private:
   QVector<struct report_entry> _reports;
+
+signals:
+  void endInsert();
+
 };
 
 #endif

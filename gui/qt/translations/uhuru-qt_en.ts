@@ -48,7 +48,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../model/scanreportmodel.cpp" line="55"/>
-        <source>file</source>
+        <source>File Path</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -60,58 +60,68 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/scanwidget.ui" line="40"/>
+        <location filename="../ui/scanwidget.ui" line="114"/>
+        <source>Performing scan...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/scanwidget.ui" line="146"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Scanning:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/scanwidget.ui" line="50"/>
+        <location filename="../ui/scanwidget.ui" line="156"/>
         <source>/home/francois</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/scanwidget.ui" line="76"/>
-        <location filename="../ui/scanwidget.ui" line="99"/>
-        <location filename="../ui/scanwidget.ui" line="139"/>
-        <location filename="../ui/scanwidget.ui" line="162"/>
-        <location filename="../ui/scanwidget.ui" line="185"/>
-        <location filename="../ui/scanwidget.ui" line="208"/>
+        <location filename="../ui/scanwidget.ui" line="182"/>
+        <location filename="../ui/scanwidget.ui" line="205"/>
+        <location filename="../ui/scanwidget.ui" line="245"/>
+        <location filename="../ui/scanwidget.ui" line="268"/>
+        <location filename="../ui/scanwidget.ui" line="291"/>
+        <location filename="../ui/scanwidget.ui" line="314"/>
         <source>0</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/scanwidget.ui" line="89"/>
+        <location filename="../ui/scanwidget.ui" line="195"/>
         <source>Scanned files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/scanwidget.ui" line="112"/>
+        <location filename="../ui/scanwidget.ui" line="218"/>
         <source>Files to scan</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/scanwidget.ui" line="129"/>
+        <location filename="../ui/scanwidget.ui" line="235"/>
         <source>Malicious</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/scanwidget.ui" line="152"/>
+        <location filename="../ui/scanwidget.ui" line="258"/>
         <source>Suspicious</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/scanwidget.ui" line="175"/>
+        <location filename="../ui/scanwidget.ui" line="281"/>
         <source>Unhandled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/scanwidget.ui" line="198"/>
+        <location filename="../ui/scanwidget.ui" line="304"/>
         <source>Clean</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/scanwidget.ui" line="286"/>
+        <location filename="../ui/scanwidget.ui" line="407"/>
         <source>Close</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/scanwidget.cpp" line="99"/>
+        <source>Scan has finished</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -138,13 +148,13 @@ p, li { white-space: pre-wrap; }
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/systray.cpp" line="132"/>
+        <location filename="../ui/systray.cpp" line="133"/>
         <source>Scan File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/systray.cpp" line="135"/>
-        <location filename="../ui/systray.cpp" line="138"/>
+        <location filename="../ui/systray.cpp" line="136"/>
+        <location filename="../ui/systray.cpp" line="139"/>
         <source>Scan Directory</source>
         <translation type="unfinished"></translation>
     </message>

@@ -48,6 +48,11 @@ void ScanWidget::doConnect(ScanModel *model)
   assert(ui_closeButton != NULL);
   QObject::connect(model, SIGNAL(scanComplete()), this, SLOT(enableCloseButton()));
 
+  // Signal to update Title 
+  ui_labelTitle = findChild<QLabel*>("Title");
+  assert(ui_labelTitle != NULL);
+ // QObject::connect(model, SIGNAL(scanComplete()), this, );
+
   if (model->completed())
     enableCloseButton();
 
@@ -63,24 +68,35 @@ ScanWidget::ScanWidget(ScanModel *model, QWidget *parent) :
   doConnect(model);
 
   // Set report model 
-  QTableView* ui_reportView = findChild<QTableView*>("reportView");
+  ui_reportView = findChild<QTableView*>("reportView");
   assert(ui_reportView != NULL);
 
   // We must use a proxyModel in order to sort
   QSortFilterProxyModel *proxyModel = new QSortFilterProxyModel();
-  proxyModel->setSourceModel(model->report());
+  ScanReportModel *report_model = model->report();
+  QObject::connect(report_model, SIGNAL(endInsert()), this, SLOT(afterEndInsert()));
+
+  proxyModel->setSourceModel(report_model);
   ui_reportView->setModel(proxyModel); 
 
 #if QT_VERSION < 0x050000
-  ui_reportView->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+  ui_reportView->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
 #else
-  ui_reportView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+  ui_reportView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 #endif
 
 }
 
+void ScanWidget::afterEndInsert()
+{  
+  // do something on ui_reportView
+  	
+}
+
+
 void ScanWidget::enableCloseButton() 
 {
+  ui_labelTitle->setText(tr("Scan has finished"));
   ui_closeButton->setEnabled(true);
 }
 
