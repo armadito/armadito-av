@@ -24,9 +24,6 @@
     <ClCompile Include="..\..\..\libuhuru\src\lib\confparser.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\libuhuru\src\lib\dir.c">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\libuhuru\src\lib\info.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
@@ -52,6 +49,9 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\libuhuru\src\lib\uhuru-libmagic\magic.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\lib\os\windows\dir.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
