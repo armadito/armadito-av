@@ -9,21 +9,25 @@
 /* We create a new magic_t for each thread, and keep it  */
 /* in thread's private data, so that it is created only once. */
 
+static int init_done = 0;
+static GPrivate *private_key;
+
 static void magic_destroy_notify(gpointer data)
 {
   magic_close((magic_t)data);
 }
 
-static magic_t get_private_magic(void)
+void os_mime_type_init(void)
 {
-  static int init_done = 0;
-  static GPrivate *private_key;
-  magic_t m;
-
-  if (init_done) {
+  if (!init_done) {
     private_key = g_private_new(magic_destroy_notify);
     init_done = 1;
   }
+}
+
+static magic_t get_private_magic(void)
+{
+  magic_t m;
 
   m = (magic_t)g_private_get(private_key);
 

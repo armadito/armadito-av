@@ -55,7 +55,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\libuhuru\include\config;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\libuhuru\src\lib;$(SolutionDir)..\..\libuhuru\include\config;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -86,10 +86,10 @@
     <ClCompile Include="..\..\..\libuhuru\src\lib\action.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\conf.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\confparser.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\lib\dir.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\info.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\ipc.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\module.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\lib\os\windows\dir.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\report.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\scan.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\status.c" />

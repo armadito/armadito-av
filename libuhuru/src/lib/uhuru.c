@@ -7,6 +7,7 @@
 #include "modulep.h"
 #include "statusp.h"
 #include "uhurup.h"
+#include "os/mimetype.h"
 #include "builtin-modules/alert.h"
 #include "builtin-modules/quarantine.h"
 #include "builtin-modules/remote.h"
@@ -22,8 +23,6 @@ struct uhuru {
   int is_remote;
   struct module_manager *module_manager;
   GHashTable *mime_type_table;
-  /* FIXME: to be removed */
-  magic_t magic;
 };
 
 static struct uhuru *uhuru_new(int is_remote)
@@ -36,15 +35,16 @@ static struct uhuru *uhuru_new(int is_remote)
 
   u->mime_type_table = g_hash_table_new(g_str_hash, g_str_equal);
 
-  u->magic = magic_open(MAGIC_MIME_TYPE);
-  magic_load(u->magic, NULL);
-
   return u;
 }
 
 struct uhuru *uhuru_open(int is_remote)
 {
-  struct uhuru *u = uhuru_new(is_remote);
+  struct uhuru *u;
+
+  os_mime_type_init();
+
+  u = uhuru_new(is_remote);
 
   module_manager_add(u->module_manager, &remote_module);
 
@@ -105,16 +105,9 @@ void uhuru_add_mime_type(struct uhuru *u, const char *mime_type, struct uhuru_mo
   g_array_append_val(modules, module);
 }
 
-struct uhuru_module **uhuru_get_applicable_modules(struct uhuru *u, magic_t magic, const char *path, const char **p_mime_type)
+struct uhuru_module **uhuru_get_applicable_modules(struct uhuru *u, const char *mime_type)
 {
   GArray *modules;
-  const char *mime_type;
-
-  if (magic == NULL)
-    magic = u->magic;
-
-  mime_type = magic_file(magic, path);
-  *p_mime_type = strdup(mime_type);
 
   modules = (GArray *)g_hash_table_lookup(u->mime_type_table, mime_type);
 
@@ -131,8 +124,6 @@ struct uhuru_module **uhuru_get_applicable_modules(struct uhuru *u, magic_t magi
 
 void uhuru_close(struct uhuru *u)
 {
-  magic_close(u->magic);
-
   module_manager_close_all(u->module_manager);
 }
 
