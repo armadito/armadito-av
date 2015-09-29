@@ -98,6 +98,7 @@ void Systray::scan(const QString &path)
 {
   std::cerr << "scanning " << path.toStdString().c_str() << "\n";
 
+  	
   ScanModel *model = new ScanModel(path);
   ScanWindow *w = new ScanWindow(model);
   w->show();

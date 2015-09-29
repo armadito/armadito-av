@@ -63,15 +63,20 @@ ScanWidget::ScanWidget(ScanModel *model, QWidget *parent) :
   doConnect(model);
 
   // Set report model 
-  QTableView *ui_reportView = findChild<QTableView*>("reportView");
+  QTableView* ui_reportView = findChild<QTableView*>("reportView");
   assert(ui_reportView != NULL);
-  ui_reportView->setModel(model->report());
+
+  // We must use a proxyModel in order to sort
+  QSortFilterProxyModel *proxyModel = new QSortFilterProxyModel();
+  proxyModel->setSourceModel(model->report());
+  ui_reportView->setModel(proxyModel); 
 
 #if QT_VERSION < 0x050000
   ui_reportView->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 #else
   ui_reportView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 #endif
+
 }
 
 void ScanWidget::enableCloseButton() 

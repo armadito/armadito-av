@@ -52,7 +52,7 @@ QVariant ScanReportModel::headerData(int section, Qt::Orientation orientation, i
       case 1:
 	return QString(tr("Detail"));
       case 2:
-	return QString(tr("file"));
+	return QString(tr("File Path"));
       }
     }
   } 

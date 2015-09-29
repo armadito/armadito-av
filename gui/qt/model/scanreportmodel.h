@@ -30,7 +30,6 @@ public:
   void append(const QString &status, const QString &action, const QString &path, const QString &report);
 
 private:
-
   QVector<struct report_entry> _reports;
 };
 
