@@ -5,6 +5,7 @@
 
 #include "conf.h"
 #include "os/dir.h"
+#include "os/mimetype.h"
 #include "modulep.h"
 #include "ipc.h"
 #include "statusp.h"
@@ -17,7 +18,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <glib.h>
-#include <magic.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,7 +33,6 @@ struct callback_entry {
 
 struct local_scan {
   GThreadPool *thread_pool;  
-  GPrivate *private_magic_key;
 };
 
 struct remote_scan {
@@ -68,7 +67,6 @@ static void local_scan_init(struct uhuru_scan *scan)
   struct uhuru_module *alert_module, *quarantine_module;
 
   scan->local.thread_pool = NULL;
-  scan->local.private_magic_key = NULL;
 
   alert_module = uhuru_get_module_by_name(scan->uhuru, "alert");
   uhuru_scan_add_callback(scan, alert_callback, alert_module->data);
@@ -110,7 +108,7 @@ static enum uhuru_file_status local_scan_apply_modules(const char *path, const c
   return current_status;
 }
 
-static void local_scan_file(struct uhuru_scan *scan, magic_t magic, const char *path)
+static void local_scan_file(struct uhuru_scan *scan, const char *path)
 {
   enum uhuru_file_status status;
   struct uhuru_report report;
@@ -121,7 +119,8 @@ static void local_scan_file(struct uhuru_scan *scan, magic_t magic, const char *
 
   uhuru_report_init(&report, path);
 
-  modules = uhuru_get_applicable_modules(scan->uhuru, magic, path, &mime_type);
+  mime_type = os_mime_type_guess(path);
+  modules = uhuru_get_applicable_modules(scan->uhuru, mime_type);
 
   if (modules == NULL)
     report.status = UHURU_UNKNOWN_FILE_TYPE;
@@ -131,30 +130,6 @@ static void local_scan_file(struct uhuru_scan *scan, magic_t magic, const char *
   uhuru_scan_call_callbacks(scan, &report);
 
   uhuru_report_destroy(&report);
-
-  free((void *)mime_type);
-}
-
-/* Unfortunately, libmagic is not thread-safe. */
-/* We create a new magic_t for each thread, and keep it  */
-/* in thread's private data, so that it is created only once. */
-static void magic_destroy_notify(gpointer data)
-{
-  magic_close((magic_t)data);
-}
-
-static magic_t get_private_magic(struct uhuru_scan *scan)
-{
-  magic_t m = (magic_t)g_private_get(scan->local.private_magic_key);
-
-  if (m == NULL) {
-    m = magic_open(MAGIC_MIME_TYPE);
-    magic_load(m, NULL);
-
-    g_private_set(scan->local.private_magic_key, (gpointer)m);
-  }
-
-  return m;
 }
 
 static void local_scan_entry_thread_fun(gpointer data, gpointer user_data)
@@ -162,7 +137,7 @@ static void local_scan_entry_thread_fun(gpointer data, gpointer user_data)
   struct uhuru_scan *scan = (struct uhuru_scan *)user_data;
   char *path = (char *)data;
 
-  local_scan_file(scan, get_private_magic(scan), path);
+  local_scan_file(scan, path);
 
   free(path);
 }
@@ -190,7 +165,7 @@ static void local_scan_entry(const char *full_path, enum dir_entry_flag flags, i
   if (scan->flags & UHURU_SCAN_THREADED)
     g_thread_pool_push(scan->local.thread_pool, (gpointer)strdup(full_path), NULL);
   else
-    local_scan_file(scan, NULL, full_path);
+    local_scan_file(scan, full_path);
 }
 
 static int get_max_threads(void)
@@ -202,7 +177,6 @@ static enum uhuru_scan_status local_scan_start(struct uhuru_scan *scan)
 {
   if (scan->flags & UHURU_SCAN_THREADED) {
     scan->local.thread_pool = g_thread_pool_new(local_scan_entry_thread_fun, scan, get_max_threads(), FALSE, NULL);
-    scan->local.private_magic_key = g_private_new(magic_destroy_notify);
   }
 
   return UHURU_SCAN_OK;
@@ -221,7 +195,7 @@ static enum uhuru_scan_status local_scan_run(struct uhuru_scan *scan)
     if (scan->flags & UHURU_SCAN_THREADED)
       g_thread_pool_push(scan->local.thread_pool, (gpointer)strdup(scan->path), NULL);
     else
-      local_scan_file(scan, NULL, scan->path);
+      local_scan_file(scan, scan->path);
   } else if (S_ISDIR(sb.st_mode)) {
     int recurse = scan->flags & UHURU_SCAN_RECURSE;
 

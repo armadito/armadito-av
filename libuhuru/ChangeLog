@@ -1,3 +1,7 @@
+2015-09-29  François  <francois@dechelle.net>
+
+	* isolated calls to libmagic in a OS-specific function (os/mimetype.h, os/linux/mimetype.c); tested
+
 2015-09-28  François  <francois@dechelle.net>
 
 	* fixed bugs in directory traversal in os/linux/dir.c (exiting too early if error, invalid errno passed to callback)

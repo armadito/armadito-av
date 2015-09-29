@@ -11,4 +11,14 @@
  */
 const char *os_mime_type_guess(const char *path);
 
+/**
+ *      \fn void os_mime_type_init(void);
+ *      \brief Initializes mime type detection
+ *
+ *      Must be called prior to any call to os_mime_type_guess()
+ *      This function must be safe w.r.t. multiple calls.
+ *
+ */
+void os_mime_type_init(void);
+
 #endif
