@@ -11,13 +11,13 @@
 #include "vector.h"
 #include "windowsTypes.h"
 #include "databases.h"
-#include "errors.h"
+#include "uh_errors.h"
 
 /**
  * initialize the PORTABLE_EXECUTABLE used to store the file
  * @param  Pe       a pointer on an empty PORTABLE_EXECUTABLE
  * @param  filename the file to read
- * @return          an ERROR_CODE value between : 
+ * @return          an ERROR_CODE value between :
  *                     E_FILE_NOT_FOUND, E_FILE_EMPTY, E_CALLOC_ERROR, E_READING_ERROR, E_NOT_MZ, E_NOT_PE, E_BAD_ARCHITECTURE and UH_SUCCESS
  */
 ERROR_CODE PeInit(PPORTABLE_EXECUTABLE Pe, CHAR *filename);
@@ -37,14 +37,14 @@ ERROR_CODE PeHasValidStructure(PPORTABLE_EXECUTABLE Pe);
 
 /**
  * Check if a file has an entry point
- * @param  Pe the PORTABLE_EXECUTABLE representing the file 
+ * @param  Pe the PORTABLE_EXECUTABLE representing the file
  * @return    an ERROR_CODE value between : E_NO_ENTRY_POINT, E_INVALID_ENTRY_POINT and UH_SUCCESS
  */
 ERROR_CODE PeHasEntryPoint(PPORTABLE_EXECUTABLE Pe);
 
 /**
  * Check if a file has the wanted data directory entry
- * @param  Pe                  the PORTABLE_EXECUTABLE representing the file 
+ * @param  Pe                  the PORTABLE_EXECUTABLE representing the file
  * @param  imageDirectoryEntry the wanted entry
  * @return                     an ERROR_CODE value between : E_NO_ENTRY and UH_SUCCESS
  */
@@ -52,8 +52,8 @@ ERROR_CODE PeHasDataDirectory(PPORTABLE_EXECUTABLE Pe, DWORD imageDirectoryEntry
 
 /**
  * Extract the EAT of a file in a vector
- * @param  Pe                the PORTABLE_EXECUTABLE representing the file 
- * @param  DataBase          the EAT database 
+ * @param  Pe                the PORTABLE_EXECUTABLE representing the file
+ * @param  DataBase          the EAT database
  * @param  TotalSizeDataBase the size of the EAT database
  * @param  testFile          the PVECTOR where the EAT is stored
  * @return                   an ERROR_CODE value between : E_EAT_NOT_GOOD, E_EAT_EMPTY, E_CALLOC_ERROR, E_DLL_NAME_ERROR, E_FUNCTION_NAME_ERROR and UH_SUCCESS
@@ -62,8 +62,8 @@ ERROR_CODE GenerateExportedFunctions(PPORTABLE_EXECUTABLE Pe, PDATABASE_NODE Dat
 
 /**
  * Extract the IAT of a file in a vector
- * @param  Pe                the PORTABLE_EXECUTABLE representing the file 
- * @param  DataBase          the IAT database 
+ * @param  Pe                the PORTABLE_EXECUTABLE representing the file
+ * @param  DataBase          the IAT database
  * @param  TotalSizeDataBase the size of the IAT database
  * @param  testFile          the PVECTOR where the IAT is stored
  * @return                   an ERROR_CODE value between : E_IAT_NOT_GOOD, E_IAT_EMPTY, E_FUNCTION_NAME_ERROR, E_CALLOC_ERROR, E_DLL_NAME_ERROR and UH_SUCCESS

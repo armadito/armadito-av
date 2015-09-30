@@ -39,6 +39,6 @@ QWORD GetIdNumberFromName(PDATABASE_NODE DataBase, DWORD dwSizeDataBase, UCHAR *
  * @return                   a PDATABASE_NODE containing the database, or 0 if an error occurred
  */
 PDATABASE_NODE LoadDataBase(UCHAR *szFileName, PDWORD TotalSizeDataBase);
-
+PDATABASE_NODE LoadElfDataBase(UCHAR *szFileName, PDWORD TotalSizeDataBase);
 
 #endif /* DATABASES_H */

@@ -24,9 +24,6 @@
     <ClCompile Include="..\..\..\modules\module5_2\src\lib\src\distances.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\modules\module5_2\src\lib\src\errors.c">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\modules\module5_2\src\lib\src\gestionPE.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
@@ -49,6 +46,21 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\modules\module5_2\src\lib\src\vector.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\modules\module5_2\src\lib\src\windows\osdeps.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\modules\module5_2\src\lib\src\uh_errors.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\modules\module5_2\src\lib\src\utils.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\modules\module5_2\src\lib\src\elfReader.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="main.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>

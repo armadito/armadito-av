@@ -6,7 +6,7 @@
 
 #ifndef WINDOWS_TYPES_H
 #define WINDOWS_TYPES_H
- 
+
 #include <stdint.h>
 
 #ifndef _MSC_VER

@@ -7,7 +7,7 @@
 #define TABLE_H
 
 #include "windowsTypes.h"
-#include "errors.h"
+#include "uh_errors.h"
 
 /* these defines are used in order to characterize the model of an element */
 #define 	ELEMENT_NO_MODEL 			 0
@@ -22,7 +22,7 @@
 *-an array of 'element', representing all the neighbours
 *
 *-the element structure is:
-*-a double representing the distance between the neighbour and the testing file 
+*-a double representing the distance between the neighbour and the testing file
 *-a char representing the origin of the neighbour, defined by the calling function, with th default value being ELEMENT_NO_MODEL
 */
 
@@ -75,6 +75,5 @@ CHAR tableElementModel(PTABLE t, DWORD i);
  * Print the table
  */
 VOID tableShow(PTABLE t);
-
 
 #endif /* TABLE_H */

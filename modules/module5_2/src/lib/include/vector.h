@@ -21,7 +21,6 @@ typedef struct _VECTOR{
 	VEC_TYPE* v;
 } VECTOR, *PVECTOR;
 
-
 /**
  * create a new empty PVECTOR of size n
  * @param  n the size of the vector
@@ -67,7 +66,7 @@ VEC_TYPE vectorGetValueWithPaddedVector(PVECTOR v, DWORD i);
 VOID vectorDelete(PVECTOR x);
 
 /**
- * load a file into a vector by reading element of size : sizeof(VEC_TYPE) 
+ * load a file into a vector by reading element of size : sizeof(VEC_TYPE)
  * @param  fileName the file to load
  * @return          the created vector, or NULL if an error occured
  */

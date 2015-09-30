@@ -13,7 +13,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\modules\module5_2\src\lib\src\databases.c" />
     <ClCompile Include="..\..\..\modules\module5_2\src\lib\src\distances.c" />
-    <ClCompile Include="..\..\..\modules\module5_2\src\lib\src\errors.c" />
+    <ClCompile Include="..\..\..\modules\module5_2\src\lib\src\elfReader.c" />
     <ClCompile Include="..\..\..\modules\module5_2\src\lib\src\gestionPE.c" />
     <ClCompile Include="..\..\..\modules\module5_2\src\lib\src\kNN.c" />
     <ClCompile Include="..\..\..\modules\module5_2\src\lib\src\miniz.c" />
@@ -21,8 +21,12 @@
     <ClCompile Include="..\..\..\modules\module5_2\src\lib\src\table.c" />
     <ClCompile Include="..\..\..\modules\module5_2\src\lib\src\tfidfDetection.c" />
     <ClCompile Include="..\..\..\modules\module5_2\src\lib\src\UhuruStatic.c" />
+    <ClCompile Include="..\..\..\modules\module5_2\src\lib\src\uh_errors.c" />
+    <ClCompile Include="..\..\..\modules\module5_2\src\lib\src\utils.c" />
     <ClCompile Include="..\..\..\modules\module5_2\src\lib\src\vector.c" />
+    <ClCompile Include="..\..\..\modules\module5_2\src\lib\src\windows\osdeps.c" />
     <ClCompile Include="..\..\..\modules\module5_2\src\module\module5_2.c" />
+    <ClCompile Include="main.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5CEDB44A-6891-4931-802F-8D63981298DD}</ProjectGuid>
@@ -55,7 +59,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)..\..\libuhuru\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\..\libuhuru\include;$(SolutionDir)..\..\modules\module5_2\src\lib\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>

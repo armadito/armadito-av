@@ -94,7 +94,7 @@ typedef struct _IMAGE_OPTIONAL_HEADER {
 	DWORD 	SizeOfHeapCommit;
 	DWORD 	LoaderFlags;
 	DWORD 	NumberOfRvaAndSizes;
-	IMAGE_DATA_DIRECTORY DataDirectory [IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
+	IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
 } IMAGE_OPTIONAL_HEADER32, *PIMAGE_OPTIONAL_HEADER32;
 
 typedef struct _IMAGE_OPTIONAL_HEADER64 {
@@ -142,37 +142,37 @@ typedef struct _IMAGE_NT_HEADERS64 {
 	IMAGE_OPTIONAL_HEADER64 	OptionalHeader;
 } IMAGE_NT_HEADERS64, *PIMAGE_NT_HEADERS64;
 
-typedef struct _IMAGE_DOS_HEADER {      
-	WORD   e_magic;                     
-    WORD   e_cblp;                      
-    WORD   e_cp;                        
-    WORD   e_crlc;                      
-    WORD   e_cparhdr;                   
-    WORD   e_minalloc;                  
-    WORD   e_maxalloc;                  
-    WORD   e_ss;                        
-    WORD   e_sp;                        
-    WORD   e_csum;                      
-    WORD   e_ip;                        
-    WORD   e_cs;                        
-    WORD   e_lfarlc;                    
-    WORD   e_ovno;                      
-    WORD   e_res[4];                    
-    WORD   e_oemid;                     
-    WORD   e_oeminfo;                   
-    WORD   e_res2[10];                  
-    LONG   e_lfanew;                    
+typedef struct _IMAGE_DOS_HEADER {
+	WORD   e_magic;
+	WORD   e_cblp;
+	WORD   e_cp;
+	WORD   e_crlc;
+	WORD   e_cparhdr;
+	WORD   e_minalloc;
+	WORD   e_maxalloc;
+	WORD   e_ss;
+	WORD   e_sp;
+	WORD   e_csum;
+	WORD   e_ip;
+	WORD   e_cs;
+	WORD   e_lfarlc;
+	WORD   e_ovno;
+	WORD   e_res[4];
+	WORD   e_oemid;
+	WORD   e_oeminfo;
+	WORD   e_res2[10];
+	LONG   e_lfanew;
 } IMAGE_DOS_HEADER, *PIMAGE_DOS_HEADER;
 
 typedef struct _IMAGE_IMPORT_DESCRIPTOR {
 	union{
 		ULONG OriginalFirstThunk;
 		ULONG Characteristics;
-	} ;
-	ULONG TimeDateStamp; 		
-	ULONG ForwarderChain; 		
+	};
+	ULONG TimeDateStamp;
+	ULONG ForwarderChain;
 	ULONG Name;
-	ULONG FirstThunk; 			
+	ULONG FirstThunk;
 } IMAGE_IMPORT_DESCRIPTOR, *PIMAGE_IMPORT_DESCRIPTOR;
 
 typedef struct _IMAGE_IMPORT_BY_NAME {
@@ -182,19 +182,19 @@ typedef struct _IMAGE_IMPORT_BY_NAME {
 
 typedef struct _IMAGE_THUNK_DATA64 {
 	union {
-		ULONGLONG ForwarderString; 
-		ULONGLONG Function; 		
+		ULONGLONG ForwarderString;
+		ULONGLONG Function;
 		ULONGLONG Ordinal;
-		ULONGLONG AddressOfData; 	
+		ULONGLONG AddressOfData;
 	} u1;
 } IMAGE_THUNK_DATA64, *PIMAGE_THUNK_DATA64;
 
 typedef struct _IMAGE_THUNK_DATA {
 	union {
-		DWORD ForwarderString; 
-		DWORD Function; 
+		DWORD ForwarderString;
+		DWORD Function;
 		DWORD Ordinal;
-		DWORD AddressOfData; 
+		DWORD AddressOfData;
 	} u1;
 } IMAGE_THUNK_DATA32, *PIMAGE_THUNK_DATA32;
 
@@ -215,21 +215,21 @@ typedef struct _IMAGE_SECTION_HEADER {
 } IMAGE_SECTION_HEADER, *PIMAGE_SECTION_HEADER;
 
 typedef struct _IMAGE_EXPORT_DIRECTORY {
-    DWORD   Characteristics;        /* 0x00 */
-    DWORD   TimeDateStamp;          /* 0x04 */
-    WORD    MajorVersion;           /* 0x08 */
-    WORD    MinorVersion;           /* 0x0a */
-    DWORD   Name;                   /* 0x0c */
-    DWORD   Base;                   /* 0x10 */
-    DWORD   NumberOfFunctions;      /* 0x14 */
-    DWORD   NumberOfNames;          /* 0x18 */
-    DWORD   AddressOfFunctions;     /* 0x1c RVA from base of image */
-    DWORD   AddressOfNames;         /* 0x20 RVA from base of image */
-    DWORD   AddressOfNameOrdinals;  /* 0x24 RVA from base of image */
+	DWORD   Characteristics;        /* 0x00 */
+	DWORD   TimeDateStamp;          /* 0x04 */
+	WORD    MajorVersion;           /* 0x08 */
+	WORD    MinorVersion;           /* 0x0a */
+	DWORD   Name;                   /* 0x0c */
+	DWORD   Base;                   /* 0x10 */
+	DWORD   NumberOfFunctions;      /* 0x14 */
+	DWORD   NumberOfNames;          /* 0x18 */
+	DWORD   AddressOfFunctions;     /* 0x1c RVA from base of image */
+	DWORD   AddressOfNames;         /* 0x20 RVA from base of image */
+	DWORD   AddressOfNameOrdinals;  /* 0x24 RVA from base of image */
 } IMAGE_EXPORT_DIRECTORY, *PIMAGE_EXPORT_DIRECTORY;
 
 typedef struct _IMAGE_DELAY_IMPORT_DESCRIPTOR {
-    DWORD	Flags;
+	DWORD	Flags;
 	DWORD	Name;
 	DWORD	Module;
 	DWORD	FirstThunk;
@@ -262,14 +262,14 @@ typedef struct _IMAGE_DELAY_IMPORT_DESCRIPTOR {
 #define		IMAGE_DIRECTORY_ENTRY_END			15
 
 typedef struct _PORTABLE_EXECUTABLE {
-    ULONG_PTR 				BaseAddress;
-    DWORD 					FileSize;
-    WORD 					Machine;
-    IMAGE_DOS_HEADER      	ImageDosHeader; /* 'MZ' structure */
-    IMAGE_FILE_HEADER     	ImageFileHeader; /* 'Pe' structure */
-    IMAGE_OPTIONAL_HEADER32 ImageOptionalHeader32; /* optional header structure */
-    IMAGE_OPTIONAL_HEADER64 ImageOptionalHeader64; /* optional header structure for 64 bits*/
-    PIMAGE_SECTION_HEADER   ImagesSectionHeader; /* array of section headers */
+	ULONG_PTR 				BaseAddress;
+	DWORD 					FileSize;
+	WORD 					Machine;
+	IMAGE_DOS_HEADER      	ImageDosHeader; /* 'MZ' structure */
+	IMAGE_FILE_HEADER     	ImageFileHeader; /* 'Pe' structure */
+	IMAGE_OPTIONAL_HEADER32 ImageOptionalHeader32; /* optional header structure */
+	IMAGE_OPTIONAL_HEADER64 ImageOptionalHeader64; /* optional header structure for 64 bits*/
+	PIMAGE_SECTION_HEADER   ImagesSectionHeader; /* array of section headers */
 } PORTABLE_EXECUTABLE, *PPORTABLE_EXECUTABLE;
 
 #endif /* PEUTILS_H */

@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <dirent.h>
 
-#include "errors.h"
+#include "uh_errors.h"
 #include "model.h"
 #include "utils.h"
 #include "tfidfDetection.h"
@@ -16,6 +16,7 @@
 #include "windowsTypes.h"
 #include "kNN.h"
 #include "databases.h"
+#include "elfReader.h"
 
 /* dll utils */
 #define 	WINAPI 				__stdcall
@@ -24,11 +25,18 @@
 #define 	DLL_THREAD_DETACH 	3
 #define 	DLL_PROCESS_DETACH 	0
 
-/* global variable for the bases loading */
+/* global variable for the PE part */
 PMODEL modelArrayMalwareEat = NULL, modelArrayMalwareIat = NULL, modelArrayNotMalwareEat = NULL, modelArrayNotMalwareIat = NULL;
 DWORD TotalSizeDataBaseEat = 0, TotalSizeDataBaseIat = 0, TotalSizeDataBaseTFIDFInf = 0, nbDocsTFIDFInf = 0, TotalSizeDataBaseTFIDFSain = 0, nbDocsTFIDFSain = 0;
 PDATABASE_NODE DataBaseEat = NULL, DataBaseIat = NULL;
 PTFIDF_NODE DataBaseTFIDFInf = NULL, DataBaseTFIDFSain = NULL;
+
+/* global variable for the ELF part */
+PDATABASE_NODE db = NULL;
+DWORD db_size = 0;
+PMODEL elfModelArrayMalwareIat = NULL, elfModelArrayNotMalwareIat = NULL;
+PTFIDF_NODE ElfDataBaseTFIDFInf = NULL, ElfDataBaseTFIDFSain = NULL;
+DWORD TotalSizeElfDataBaseTFIDFInf = 0, elfNbDocsTFIDFInf = 0, TotalSizeElfDataBaseTFIDFSain = 0, elfNbDocsTFIDFSain = 0;
 
 /**
  * this function is for testing a file and deciding if it is a malicious file, a benign file, or something else
@@ -38,48 +46,45 @@ PTFIDF_NODE DataBaseTFIDFInf = NULL, DataBaseTFIDFSain = NULL;
 ERROR_CODE fileAnalysis(CHAR* fileName){
 	/*variable initialization*/
 	PVECTOR testFileEat = NULL, testFileIat = NULL;
-	ERROR_CODE infosArray[9] = {UH_NULL, UH_NULL, UH_NULL, UH_NULL, UH_NULL, UH_NULL, UH_NULL, UH_NULL, UH_NULL}; /* ERROR_CODE array for tests return values */
+	/* ERROR_CODE array for tests return values */
+	ERROR_CODE infosArray[9] = { UH_NULL, UH_NULL, UH_NULL, UH_NULL, UH_NULL, UH_NULL, UH_NULL, UH_NULL, UH_NULL };
 	PORTABLE_EXECUTABLE Pe;
 
 	/* initialization of the Pe structure */
 	infosArray[0] = PeInit(&Pe, fileName);
 	/* if errors happened before the calloc */
 	if (infosArray[0] == E_FILE_NOT_FOUND || infosArray[0] == E_FILE_EMPTY || infosArray[0] == E_INVALID_FILE_SIZE){
-		return UH_NOT_DECIDED;
+		//DBG_PRNT("> %s\ninfosArray[0] == E_FILE_NOT_FOUND || infosArray[0] == E_FILE_EMPTY || infosArray[0] == E_INVALID_FILE_SIZE\n", fileName);
+		return UH_UNSUPPORTED_FILE;
 	}
-	if(infosArray[0] == E_CALLOC_ERROR){
+	if (infosArray[0] == E_CALLOC_ERROR){
 		return E_CALLOC_ERROR;
 	}
+
+	/* if the file is not a MZ file, the test won't respond UH_NOT_DECIDED, since this is only for
+	MZ file that can't be classified, so the test return UH_NOT_MALWARE*/
 	if (infosArray[0] == E_NOT_MZ){
 		PeDestroy(&Pe);
-		return UH_NOT_MALWARE;
+		return UH_UNSUPPORTED_FILE; // returns UH_UNSUPPPORTED_FILE instead of UH_NOT_MALWARE
 	}
-	if(infosArray[0] != UH_SUCCESS){
+	if (infosArray[0] != UH_SUCCESS){
 		PeDestroy(&Pe);
-		return UH_NOT_DECIDED;
+		//DBG_PRNT("> %s\ninfosArray[0] != UH_SUCCESS\n", fileName);
+		return UH_UNSUPPORTED_FILE;
 	}
 
 	/////////////////////////////////////////////////////////////////
 	// Place used for indev tests
 	/////////////////////////////////////////////////////////////////
 
-
-
-	/////////////////////////////////////////////////////////////////
-
-	if (PeHasValidStructure(&Pe) == E_INVALID_STRUCTURE){
-#if defined(_DEBUG) && defined(_MSC_VER)
-		printf("> %s\nPeHasValidStructure(&Pe) == E_INVALID_STRUCTURE : %s\n", fileName, GetErrorCodeMsg(GetCurrentError()));
-#endif
+	// Do not analyze .NET files
+	if (PeHasDataDirectory(&Pe, IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR) == UH_SUCCESS)
+	{
 		PeDestroy(&Pe);
-		return UH_MALWARE;
+		return UH_UNSUPPORTED_FILE;
 	}
 
-// uncomment in order to only test the structure of the file
-#if 0
-	PeDestroy(&Pe);
-	return UH_NOT_MALWARE;
-#endif
+	/////////////////////////////////////////////////////////////////
 
 	/*Iat, Eat and Entry point detection*/
 	infosArray[1] = PeHasDataDirectory(&Pe, IMAGE_DIRECTORY_ENTRY_EXPORT);
@@ -87,169 +92,158 @@ ERROR_CODE fileAnalysis(CHAR* fileName){
 	infosArray[3] = PeHasEntryPoint(&Pe);
 	if (infosArray[3] == E_INVALID_ENTRY_POINT){
 		PeDestroy(&Pe);
-#if defined(_DEBUG) && defined(_MSC_VER)
-		printf("> %s\ninfosArray[3] == E_INVALID_ENTRY_POINT\n", fileName);
-#endif
+		DBG_PRNT("> %s\ninfosArray[3] == E_INVALID_ENTRY_POINT\n", fileName);
 		return UH_MALWARE;
 	}
 
-	if(infosArray[1] == E_NO_ENTRY && infosArray[2] == E_NO_ENTRY){
+	// if the file does not have an IAT and an EAT, it is the entry point which is the deciding parameter
+	if (infosArray[1] == E_NO_ENTRY && infosArray[2] == E_NO_ENTRY){
 		PeDestroy(&Pe);
-		if(infosArray[3] == UH_SUCCESS){
-#if defined(_DEBUG) && defined(_MSC_VER)
-			printf("> %s\ninfosArray[1] == E_NO_ENTRY && infosArray[2] == E_NO_ENTRY && infosArray[3] == UH_SUCCESS\n", fileName);
-#endif
+		if (infosArray[3] == UH_SUCCESS){
+			DBG_PRNT("> %s\ninfosArray[1] == E_NO_ENTRY && infosArray[2] == E_NO_ENTRY && infosArray[3] == UH_SUCCESS\n", fileName);
 			return UH_MALWARE;
 		}
 		else{
-#if defined(_DEBUG) && defined(_MSC_VER)
-			printf("> %s\ninfosArray[1] == E_NO_ENTRY && infosArray[2] == E_NO_ENTRY && infosArray[3] != UH_SUCCESS\n", fileName);
-#endif
-			return UH_NOT_DECIDED;
+			//DBG_PRNT("> %s\ninfosArray[1] == E_NO_ENTRY && infosArray[2] == E_NO_ENTRY && infosArray[3] != UH_SUCCESS\n", fileName);
+			return UH_UNSUPPORTED_FILE;
 		}
 	}
-	
-	if(infosArray[1] != E_NO_ENTRY){ 
+
+	if (PeHasValidStructure(&Pe) == E_INVALID_STRUCTURE){
+		DBG_PRNT("> %s\nPeHasValidStructure(&Pe) == E_INVALID_STRUCTURE : %s\n", fileName, GetErrorCodeMsg(GetCurrentError()));
+		PeDestroy(&Pe);
+		return UH_MALWARE;
+	}
+
+	// uncomment in order to only test the structure of the file
+#if 0
+	PeDestroy(&Pe);
+	return UH_NOT_MALWARE;
+#endif
+
+	if (infosArray[1] != E_NO_ENTRY){
 		/*generation of the EAT*/
 		infosArray[4] = GenerateExportedFunctions(&Pe, DataBaseEat, TotalSizeDataBaseEat, &testFileEat);
-		if(infosArray[4] == E_CALLOC_ERROR){
+		if (infosArray[4] == E_CALLOC_ERROR){
 			PeDestroy(&Pe);
 			return E_CALLOC_ERROR;
-		}else if(infosArray[4] == E_EMPTY_VECTOR){
-			if(infosArray[2] == E_NO_ENTRY){
+		}
+		else if (infosArray[4] == E_EMPTY_VECTOR){
+			if (infosArray[2] == E_NO_ENTRY){
 				PeDestroy(&Pe);
-#if defined(_DEBUG) && defined(_MSC_VER)
-				printf("> %s\ninfosArray[4] == E_EMPTY_VECTOR && infosArray[2] == E_NO_ENTRY\n", fileName);
-#endif
 				return UH_NOT_DECIDED;
 			}
 		}
 		/* the eat of some safe file can be empty but present due to some compilers */
-		else if(infosArray[4] == E_EAT_EMPTY){
-			if(infosArray[2] == E_NO_ENTRY){
+		else if (infosArray[4] == E_EAT_EMPTY){
+			if (infosArray[2] == E_NO_ENTRY){
 				PeDestroy(&Pe);
-				if(infosArray[3] == UH_SUCCESS){
-#if defined(_DEBUG) && defined(_MSC_VER)
-					printf("> %s\ninfosArray[2] == E_NO_ENTRY && infosArray[3] == UH_SUCCESS\n", fileName);
-#endif
+				if (infosArray[3] == UH_SUCCESS){
+					DBG_PRNT("> %s\ninfosArray[2] == E_NO_ENTRY && infosArray[3] == UH_SUCCESS\n", fileName);
 					return UH_MALWARE;
 				}
 				else{
-#if defined(_DEBUG) && defined(_MSC_VER)
-					printf("> %s\ninfosArray[2] == E_NO_ENTRY && infosArray[3] != UH_SUCCESS\n", fileName);
-#endif
 					return UH_NOT_DECIDED;
 				}
 			}
-		}else if(infosArray[4] != UH_SUCCESS){
-#if defined(_DEBUG) && defined(_MSC_VER)
-			printf("> %s\ninfosArray[4] != UH_SUCCESS : %s\n", fileName, GetErrorCodeMsg(infosArray[4]));
-#endif
+		}
+		else if (infosArray[4] != UH_SUCCESS){
+			DBG_PRNT("> %s\ninfosArray[4] != UH_SUCCESS : %s\n", fileName, GetErrorCodeMsg(infosArray[4]));
 			return UH_MALWARE;
-		}else { /*tests on the EAT*/
+		}
+		else { /*tests on the EAT*/
 			infosArray[4] = UH_SUCCESS;
 			infosArray[6] = isKnownEAT(testFileEat, modelArrayMalwareEat, modelArrayNotMalwareEat);
 
 			vectorDelete(testFileEat);
 
-			if(infosArray[6] == UH_MALWARE){
+			if (infosArray[6] == UH_MALWARE){
 				PeDestroy(&Pe);
-#if defined(_DEBUG) && defined(_MSC_VER)
-				printf("> %s\ninfosArray[6] == UH_MALWARE\n", fileName);
-#endif
+				DBG_PRNT("> %s\ninfosArray[6] == UH_MALWARE\n", fileName);
 				return UH_MALWARE;
 			}
-			if(infosArray[2] == E_NO_ENTRY && infosArray[6] == UH_NOT_MALWARE){
+			if (infosArray[2] == E_NO_ENTRY && infosArray[6] == UH_NOT_MALWARE){
 				PeDestroy(&Pe);
-#if defined(_DEBUG) && defined(_MSC_VER)
-				printf("> %s\ninfosArray[2] == E_NO_ENTRY && infosArray[6] == UH_NOT_MALWARE\n", fileName);
-#endif
 				return UH_NOT_MALWARE;
 			}
-			if(infosArray[6] == UH_EAT_UNKNOWN && infosArray[2] == E_NO_ENTRY){
+			if (infosArray[6] == UH_EAT_UNKNOWN && infosArray[2] == E_NO_ENTRY){
 				PeDestroy(&Pe);
-#if defined(_DEBUG) && defined(_MSC_VER)
-				printf("> %s\ninfosArray[6] == UH_EAT_UNKNOWN && infosArray[2] == E_NO_ENTRY\n", fileName);
-#endif
 				return UH_NOT_DECIDED;
 			}
 		}
 	}
-	
 
-
-	if(infosArray[2] != E_NO_ENTRY){
+	if (infosArray[2] != E_NO_ENTRY){
 		infosArray[5] = GenerateImportedFunctions(&Pe, DataBaseIat, TotalSizeDataBaseIat, &testFileIat);
-		if(infosArray[5] == E_EMPTY_VECTOR){
+		if (infosArray[5] == E_EMPTY_VECTOR){
 			PeDestroy(&Pe);
-#if defined(_DEBUG) && defined(_MSC_VER)
-			printf("> %s\ninfosArray[5] == E_EMPTY_VECTOR\n", fileName);
-#endif
 			return UH_NOT_DECIDED;
 		}
-		if(infosArray[5] == E_CALLOC_ERROR){
+		if (infosArray[5] == E_CALLOC_ERROR){
 			PeDestroy(&Pe);
-#if defined(_DEBUG) && defined(_MSC_VER)
-			printf("> %s\ninfosArray[5] == E_CALLOC_ERROR\n", fileName);
-#endif
 			return UH_NOT_DECIDED;
 		}
 		if (infosArray[5] != UH_SUCCESS){
 			PeDestroy(&Pe);
-#if defined(_DEBUG) && defined(_MSC_VER)
-			printf("> %s\ninfosArray[5] != UH_SUCCESS : %s\n", fileName, GetErrorCodeMsg(infosArray[5]));
-#endif
+			//DBG_PRNT("> %s\ninfosArray[5] != UH_SUCCESS : %s\n", fileName, GetErrorCodeMsg(infosArray[5]));
 			return UH_MALWARE;
-		}else{ /*tests on the IAT*/
-			infosArray[8] = tfidfTest(testFileIat,
-									  DataBaseTFIDFInf, 
-									  DataBaseTFIDFSain, 
-									  TotalSizeDataBaseTFIDFInf, 
-									  TotalSizeDataBaseTFIDFSain,
-									  nbDocsTFIDFInf,
-									  nbDocsTFIDFSain);
-			
-			if(infosArray[8] == UH_NOT_MALWARE){
+		}
+		else{ /*tests on the IAT*/
+
+
+			// Perform Knn IAT test before TFIDF test.
+
+			infosArray[7] = hasMalwareIAT(testFileIat, modelArrayMalwareIat, modelArrayNotMalwareIat);
+
+			if (infosArray[7] == UH_NOT_MALWARE){
 				PeDestroy(&Pe);
 				vectorDelete(testFileIat);
-#if defined(_DEBUG) && defined(_MSC_VER)
-				printf("> %s\ninfosArray[8] == UH_NOT_MALWARE\n", fileName);
-#endif
 				return UH_NOT_MALWARE;
 			}
-			if(infosArray[8] == UH_MALWARE){
+
+			if (infosArray[7] == UH_MALWARE){
 				PeDestroy(&Pe);
 				vectorDelete(testFileIat);
-#if defined(_DEBUG) && defined(_MSC_VER)
-				printf("> %s\ninfosArray[8] == UH_MALWARE\n", fileName);
-#endif
+				//DBG_PRNT("> %s\ninfosArray[8] == UH_MALWARE\n", fileName);
 				return UH_MALWARE;
 			}
 
-			infosArray[7] = hasMalwareIAT(testFileIat, modelArrayMalwareIat, modelArrayNotMalwareIat);
+			infosArray[8] = tfidfTest(testFileIat,
+				DataBaseTFIDFInf,
+				DataBaseTFIDFSain,
+				TotalSizeDataBaseTFIDFInf,
+				TotalSizeDataBaseTFIDFSain,
+				nbDocsTFIDFInf,
+				nbDocsTFIDFSain);
+
+			/*
+			if (infosArray[8] == UH_NOT_MALWARE){
+				PeDestroy(&Pe);
+				vectorDelete(testFileIat);
+				return UH_NOT_MALWARE;
+			}
+			if (infosArray[8] == UH_MALWARE){
+				PeDestroy(&Pe);
+				vectorDelete(testFileIat);
+				DBG_PRNT("> %s\ninfosArray[8] == UH_MALWARE\n", fileName);
+				return UH_MALWARE;
+			}*/
+
+			
 			vectorDelete(testFileIat);
 		}
 	}
 
 	PeDestroy(&Pe);
 
-	if(infosArray[7] == UH_MALWARE){
-#if defined(_DEBUG) && defined(_MSC_VER)
-		printf("> %s\ninfosArray[7] == UH_MALWARE\n", fileName);
-#endif
+	if (infosArray[8] == UH_MALWARE){
+		//DBG_PRNT("> %s\ninfosArray[7] == UH_MALWARE\n", fileName);
 		return UH_MALWARE;
 	}
 
-	if((infosArray[7] == UH_NOT_MALWARE && infosArray[6] != UH_MALWARE) || (infosArray[6] == UH_NOT_MALWARE && infosArray[7] != UH_MALWARE)){
-#if defined(_DEBUG) && defined(_MSC_VER)
-		printf("> %s\n(infosArray[7] == UH_NOT_MALWARE && infosArray[6] != UH_MALWARE) || (infosArray[6] == UH_NOT_MALWARE && infosArray[7] != UH_MALWARE) : %d : %d\n", fileName, infosArray[7], infosArray[6]);
-#endif
+	if ((infosArray[8] == UH_NOT_MALWARE && infosArray[6] != UH_MALWARE) || (infosArray[6] == UH_NOT_MALWARE && infosArray[8] != UH_MALWARE)){
 		return UH_NOT_MALWARE;
 	}
-
-#if defined(_DEBUG) && defined(_MSC_VER)
-	printf("> %s\nreturn UH_NOT_DECIDED\n", fileName);
-#endif
 
 	return UH_NOT_DECIDED;
 }
@@ -271,121 +265,129 @@ ERROR_CODE fileAnalysis(CHAR* fileName){
  *                            				if the highest bit is set to 0, then there was a probleme during the loading of the base
  */
 SHORT initDatabases(
-	CHAR* modelMalwareEat, 
-	CHAR* modelMalwareIat, 
-	CHAR* modelNotMalwareEat, 
-	CHAR* modelNotMalwareIat, 
-	CHAR* databaseEat, 
-	CHAR* databaseIat, 
-	CHAR* databaseTFIDFInf, 
+	CHAR* modelMalwareEat,
+	CHAR* modelMalwareIat,
+	CHAR* modelNotMalwareEat,
+	CHAR* modelNotMalwareIat,
+	CHAR* databaseEat,
+	CHAR* databaseIat,
+	CHAR* databaseTFIDFInf,
 	CHAR* databaseTFIDFSain
 	){
 	FILE* fd = NULL;
-	SHORT filesTestsFlag = 0; 
+	SHORT filesTestsFlag = 0;
 
-	fd = fopen(modelMalwareEat, "rb");
+	fd = os_fopen(modelMalwareEat, "rb");
 	if (fd == NULL){
-	    filesTestsFlag += 0x1;
-	}else{
+		filesTestsFlag += 0x1;
+	}
+	else{
 		fclose(fd);
 	}
 
-	fd = fopen(modelMalwareIat, "rb");
+	fd = os_fopen(modelMalwareIat, "rb");
 	if (fd == NULL){
-	    filesTestsFlag += 0x2;
-	}else{
+		filesTestsFlag += 0x2;
+	}
+	else{
 		fclose(fd);
 	}
 
-	fd = fopen(modelNotMalwareEat, "rb");
+	fd = os_fopen(modelNotMalwareEat, "rb");
 	if (fd == NULL){
-	    filesTestsFlag += 0x4;
-	}else{
+		filesTestsFlag += 0x4;
+	}
+	else{
 		fclose(fd);
 	}
 
-	fd = fopen(modelNotMalwareIat, "rb");
+	fd = os_fopen(modelNotMalwareIat, "rb");
 	if (fd == NULL){
-	    filesTestsFlag += 0x8;
-	}else{
+		filesTestsFlag += 0x8;
+	}
+	else{
 		fclose(fd);
 	}
 
-	fd = fopen(databaseEat, "rb");
+	fd = os_fopen(databaseEat, "rb");
 	if (fd == NULL){
-	    filesTestsFlag += 0x10;
-	}else{
+		filesTestsFlag += 0x10;
+	}
+	else{
 		fclose(fd);
 	}
 
-	fd = fopen(databaseIat, "rb");
+	fd = os_fopen(databaseIat, "rb");
 	if (fd == NULL){
-	    filesTestsFlag += 0x20;
-	}else{
+		filesTestsFlag += 0x20;
+	}
+	else{
 		fclose(fd);
 	}
 
-	fd = fopen(databaseTFIDFInf, "rb");
+	fd = os_fopen(databaseTFIDFInf, "rb");
 	if (fd == NULL){
-	    filesTestsFlag += 0x40;
-	}else{
+		filesTestsFlag += 0x40;
+	}
+	else{
 		fclose(fd);
 	}
 
-	fd = fopen(databaseTFIDFSain, "rb");
+	fd = os_fopen(databaseTFIDFSain, "rb");
 	if (fd == NULL){
-	    filesTestsFlag += 0x80;
-	}else{
+		filesTestsFlag += 0x80;
+	}
+	else{
 		fclose(fd);
 	}
 
-	if(filesTestsFlag != 0){
+	if (filesTestsFlag != 0){
 		return filesTestsFlag;
 	}
 
 	/*tfidf database loading*/
 	DataBaseTFIDFInf = loadTFIDFBases(databaseTFIDFInf, &TotalSizeDataBaseTFIDFInf, &nbDocsTFIDFInf);
-	if(DataBaseTFIDFInf == NULL){
+	if (DataBaseTFIDFInf == NULL){
 		filesTestsFlag += 0x40;
 	}
 	DataBaseTFIDFSain = loadTFIDFBases(databaseTFIDFSain, &TotalSizeDataBaseTFIDFSain, &nbDocsTFIDFSain);
-	if(DataBaseTFIDFSain == NULL){
+	if (DataBaseTFIDFSain == NULL){
 		filesTestsFlag += 0x80;
 	}
 
 	/*databases initialization*/
-	DataBaseEat = LoadDataBase((UCHAR*) databaseEat, &TotalSizeDataBaseEat);
-	if(DataBaseEat == NULL){
+	DataBaseEat = LoadDataBase((UCHAR*)databaseEat, &TotalSizeDataBaseEat);
+	if (DataBaseEat == NULL){
 		filesTestsFlag += 0x10;
 	}
 
-	DataBaseIat = LoadDataBase((UCHAR*) databaseIat, &TotalSizeDataBaseIat);
-	if(DataBaseIat == NULL){
+	DataBaseIat = LoadDataBase((UCHAR*)databaseIat, &TotalSizeDataBaseIat);
+	if (DataBaseIat == NULL){
 		filesTestsFlag += 0x20;
 	}
 
 	/*loading of models*/
 	modelArrayMalwareEat = modelLoadFromZip(modelMalwareEat);
-	if(modelArrayMalwareEat == NULL){
+	if (modelArrayMalwareEat == NULL){
 		filesTestsFlag += 0x1;
 	}
 
 	modelArrayNotMalwareEat = modelLoadFromZip(modelNotMalwareEat);
-	if(modelArrayNotMalwareEat == NULL){
+	if (modelArrayNotMalwareEat == NULL){
 		filesTestsFlag += 0x4;
 	}
 
 	modelArrayMalwareIat = modelLoadFromZip(modelMalwareIat);
-	if(modelArrayMalwareIat == NULL){
+	if (modelArrayMalwareIat == NULL){
 		filesTestsFlag += 0x2;
 	}
 
 	modelArrayNotMalwareIat = modelLoadFromZip(modelNotMalwareIat);
-	if(modelArrayNotMalwareIat == NULL){
+	if (modelArrayNotMalwareIat == NULL){
 		filesTestsFlag += 0x8;
 	}
 
-	if(filesTestsFlag != 0){
+	if (filesTestsFlag != 0){
 		filesTestsFlag += 0x100;
 	}
 
@@ -406,13 +408,13 @@ VOID freeDatabases(){
 	modelArrayMalwareEat = NULL;
 	modelDelete(modelArrayNotMalwareEat);
 	modelArrayNotMalwareEat = NULL;
-	for(ui = 0; ui < TotalSizeDataBaseEat; ui++){
+	for (ui = 0; ui < TotalSizeDataBaseEat; ui++){
 		free(DataBaseEat[ui].szDllFunctionName);
 		DataBaseEat[ui].szDllFunctionName = NULL;
 	}
 	free(DataBaseEat);
 	DataBaseEat = NULL;
-	for(ui = 0; ui < TotalSizeDataBaseIat; ui++){
+	for (ui = 0; ui < TotalSizeDataBaseIat; ui++){
 		free(DataBaseIat[ui].szDllFunctionName);
 		DataBaseIat[ui].szDllFunctionName = NULL;
 	}
@@ -425,26 +427,140 @@ VOID freeDatabases(){
 }
 
 #ifdef _WIN32
-/* hinstDLL and lpvReserved are unused, by needed by the windows API */
+/* hinstDLL and lpvReserved are unused, but needed by the windows API */
 INT WINAPI DllMain(PVOID hinstDLL, DWORD fdwReason, PVOID lpvReserved){
 	switch (fdwReason){
-		case DLL_PROCESS_ATTACH:{
-			break;
-		}
+	case DLL_PROCESS_ATTACH:{
+		break;
+	}
 
-		case DLL_THREAD_ATTACH:{
-			break;
-		}
+	case DLL_THREAD_ATTACH:{
+		break;
+	}
 
-		case DLL_THREAD_DETACH:{
-			break;
-		}
+	case DLL_THREAD_DETACH:{
+		break;
+	}
 
-		case DLL_PROCESS_DETACH:{
-			break;
-		}
+	case DLL_PROCESS_DETACH:{
+		break;
+	}
 	}
 
 	return TRUE;
 }
 #endif
+
+/**
+* initialize the databases used for the analysis
+* @param  dbName            the name of the symbols database
+* @param  malicousDbName    the name of the malicious model (in .zip)
+* @param  notMalicousDbName the name of the not malicious model (in .zip)
+* @return                   1, 2, 3, 4 or 5 if an error occured,
+*                           0 if everything went right
+*/
+int initDB(char* dbName,
+	char* malicousDbName,
+	char* notMalicousDbName,
+	char* ElfdatabaseTFIDFInf,
+	char* ElfdatabaseTFIDFSain){
+	ElfDataBaseTFIDFInf = loadTFIDFBases(ElfdatabaseTFIDFInf, &TotalSizeElfDataBaseTFIDFInf, &elfNbDocsTFIDFInf);
+	if (ElfDataBaseTFIDFInf == NULL){
+		return 1;
+	}
+	ElfDataBaseTFIDFSain = loadTFIDFBases(ElfdatabaseTFIDFSain, &TotalSizeElfDataBaseTFIDFSain, &elfNbDocsTFIDFSain);
+	if (ElfDataBaseTFIDFSain == NULL){
+		return 2;
+	}
+
+	elfModelArrayMalwareIat = modelLoadFromZip(malicousDbName);
+	if (elfModelArrayMalwareIat == NULL){
+		return 3;
+	}
+	elfModelArrayNotMalwareIat = modelLoadFromZip(notMalicousDbName);
+	if (elfModelArrayNotMalwareIat == NULL){
+		return 4;
+	}
+	db = LoadElfDataBase((UCHAR*)dbName, &db_size);
+	if (db == NULL){
+		return 5;
+	}
+
+	return 0;
+}
+
+/**
+* free the memory used for the databases
+*/
+void freeDB(void){
+	DWORD i;
+
+	/* memory freeing */
+	modelDelete(elfModelArrayNotMalwareIat);
+	elfModelArrayNotMalwareIat = NULL;
+	modelDelete(elfModelArrayMalwareIat);
+	elfModelArrayMalwareIat = NULL;
+	for (i = 0; i < db_size; i++){
+		free(db[i].szDllFunctionName);
+		db[i].szDllFunctionName = NULL;
+	}
+	free(db);
+	db = NULL;
+
+	free(ElfDataBaseTFIDFInf);
+	ElfDataBaseTFIDFInf = NULL;
+	free(ElfDataBaseTFIDFSain);
+	ElfDataBaseTFIDFSain = NULL;
+}
+
+/**
+* analyse an elf file and decide on its nature
+* @param  fileName the name of the file
+* @return          E_MALWARE     if malware,
+*                  E_NOT_MALWARE if not malware
+*                  E_NOT_DECIDED if the function can't decide
+*/
+ERROR_CODE analyseElfFile(char* fileName){
+	ELF_CONTAINER elfOfFile;
+	ERROR_CODE retvalue;
+	PVECTOR symbolVector = NULL;
+
+	/* reading of the content of the file into an ELF_CONTAINER variable */
+	retvalue = ElfInit(fileName, &elfOfFile);
+	if (retvalue == E_BAD_FORMAT){
+		DBG_PRNT("> %s\nElfInit == E_BAD_FORMAT\n", fileName);
+		return UH_MALWARE;
+	}
+
+	if (retvalue != UH_SUCCESS){
+		DBG_PRNT("> %s\nElfInit != UH_SUCCESS\n", fileName);
+		return UH_NOT_DECIDED;
+	}
+
+	/* extraction of the symbol table into a PVECTOR variable */
+	retvalue = ElfSymbolTable(&elfOfFile, &symbolVector, db, db_size);
+	if (retvalue == E_BAD_FORMAT || retvalue == E_SYMBOL_TABLE_EMPTY){
+		DBG_PRNT("> %s\nElfSymbolTable == E_BAD_FORMAT || ElfSymbolTable == E_SYMBOL_TABLE_EMPTY\n", fileName);
+		ElfDestroy(&elfOfFile);
+		return UH_MALWARE;
+	}
+	if (retvalue == E_NO_KNOWN_SYMBOLS){
+		DBG_PRNT("> %s\nElfSymbolTable == E_NO_KNOWN_SYMBOLS\n", fileName);
+		ElfDestroy(&elfOfFile);
+		return UH_NOT_DECIDED;
+	}
+
+	if (retvalue != UH_SUCCESS){
+		DBG_PRNT("> %s\nElfSymbolTable != UH_SUCCESS\n", fileName);
+		ElfDestroy(&elfOfFile);
+		return UH_NOT_DECIDED;
+	}
+
+	/* file testing using the hasMalwareIAT function with 7 nearest neighbours */
+	retvalue = hasMalwareIAT(symbolVector, elfModelArrayMalwareIat, elfModelArrayNotMalwareIat);
+
+	ElfDestroy(&elfOfFile);
+	vectorDelete(symbolVector);
+
+	return retvalue;
+}

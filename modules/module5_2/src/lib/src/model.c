@@ -18,10 +18,10 @@ PMODEL modelLoadFromZip(CHAR* zipName){
 	DWORD i = 0, j = 0, k = 0;
 	PVOID p = NULL;
 	QWORD* s = NULL;
-	PMODEL modelArray = NULL; 
+	PMODEL modelArray = NULL;
 	size_t uncomp_size;
 
-	modelArray = (PMODEL) calloc(1, sizeof(MODEL));
+	modelArray = (PMODEL)calloc(1, sizeof(MODEL));
 	if (modelArray == NULL){
 		return NULL;
 	}
@@ -35,7 +35,7 @@ PMODEL modelLoadFromZip(CHAR* zipName){
 		return NULL;
 	}
 
-	modelArray->modelFiles = (PVECTOR*) calloc((DWORD)mz_zip_reader_get_num_files(&zip_archive), sizeof(PVECTOR));
+	modelArray->modelFiles = (PVECTOR*)calloc((DWORD)mz_zip_reader_get_num_files(&zip_archive), sizeof(PVECTOR));
 	if (modelArray->modelFiles == NULL){
 		free(modelArray);
 		return NULL;
@@ -54,20 +54,19 @@ PMODEL modelLoadFromZip(CHAR* zipName){
 			return NULL;
 		}
 
-
-		if(!mz_zip_reader_is_file_a_directory(&zip_archive, i)){
+		if (!mz_zip_reader_is_file_a_directory(&zip_archive, i)){
 			p = mz_zip_reader_extract_file_to_heap(&zip_archive, file_stat.m_filename, &uncomp_size, 0);
-			s = (QWORD*) p;
+			s = (QWORD*)p;
 			if (!p){
 				printf("mz_zip_reader_extract_file_to_heap() failed!\n");
 				mz_zip_reader_end(&zip_archive);
 				return NULL;
 			}
-			modelArray->modelFiles[i] = vectorNew((DWORD)(uncomp_size/8));
-			for (k = 0; k < uncomp_size/8; k++){
+			modelArray->modelFiles[i] = vectorNew((DWORD)(uncomp_size / 8));
+			for (k = 0; k < uncomp_size / 8; k++){
 				modelArray->modelFiles[i]->v[k] = s[k];
 			}
-			if(modelArray->modelFiles[i] == NULL){
+			if (modelArray->modelFiles[i] == NULL){
 				for (j = 0; j < i; j++){
 					vectorDelete(modelArray->modelFiles[j]);
 				}
@@ -89,11 +88,11 @@ PMODEL modelLoadFromZip(CHAR* zipName){
 PMODEL modelLoad(CHAR* dirName){
 	DWORD nbFilesInDir = 0, i = 0, j = 0;
 	DIR* rep = NULL;
-	PMODEL modelArray = NULL; 
+	PMODEL modelArray = NULL;
 	CHAR fileName[NAMESIZE];
 	struct dirent* file = NULL;
 
-	modelArray = (PMODEL) calloc(1, sizeof(MODEL));
+	modelArray = (PMODEL)calloc(1, sizeof(MODEL));
 	if (modelArray == NULL){
 		return NULL;
 	}
@@ -102,19 +101,19 @@ PMODEL modelLoad(CHAR* dirName){
 	rep = opendir(dirName);
 	if (rep == NULL){
 		free(modelArray);
-	    return NULL;
+		return NULL;
 	}
 
 	/* Count the number of files in the model */
 	while ((file = readdir(rep)) != NULL){
-		if(strcmp(file->d_name, "..") && strcmp(file->d_name, ".")  && strcmp(file->d_name, ".directory")){ /* avoid files . and .. and .directory*/
-			nbFilesInDir ++;
+		if (strcmp(file->d_name, "..") && strcmp(file->d_name, ".") && strcmp(file->d_name, ".directory")){ /* avoid files . and .. and .directory*/
+			nbFilesInDir++;
 		}
 	}
 	rewinddir(rep);
 
 	/* init of the model array */
-	modelArray->modelFiles = (PVECTOR*) calloc(nbFilesInDir, sizeof(PVECTOR));
+	modelArray->modelFiles = (PVECTOR*)calloc(nbFilesInDir, sizeof(PVECTOR));
 	if (modelArray->modelFiles == NULL){
 		free(modelArray);
 		return NULL;
@@ -123,7 +122,7 @@ PMODEL modelLoad(CHAR* dirName){
 
 	/* Load all the files of the model in an array */
 	while ((file = readdir(rep)) != NULL && i < nbFilesInDir){
-		if(strcmp(file->d_name, "..") && strcmp(file->d_name, ".") && strcmp(file->d_name, ".directory")){
+		if (strcmp(file->d_name, "..") && strcmp(file->d_name, ".") && strcmp(file->d_name, ".directory")){
 #ifndef _MSC_VER
 			snprintf(fileName, strlen(dirName) + strlen(file->d_name), "%s/%s", dirName, file->d_name);
 #else
@@ -131,7 +130,7 @@ PMODEL modelLoad(CHAR* dirName){
 #endif
 			/* we add each file read to the array */
 			modelArray->modelFiles[i] = vectorLoad(fileName);
-			if(modelArray->modelFiles[i] == NULL){
+			if (modelArray->modelFiles[i] == NULL){
 				for (j = 0; j < i; j++){
 					vectorDelete(modelArray->modelFiles[j]);
 				}
@@ -149,14 +148,14 @@ PMODEL modelLoad(CHAR* dirName){
 
 VOID modelDelete(PMODEL M){
 	DWORD i = 0;
-	if(M == NULL || M->modelFiles == NULL){
+	if (M == NULL || M->modelFiles == NULL){
 		return;
 	}
 	for (i = 0; i < M->numberOfFile; i++){
 		vectorDelete(M->modelFiles[i]);
 	}
 	free(M->modelFiles);
-	if(M == NULL){
+	if (M == NULL){
 		return;
 	}
 	free(M);

@@ -12,3 +12,13 @@ short initDatabases(
 	);
 
 void freeDatabases();
+
+int initDB(char* dbName,
+	char* malicousDbName,
+	char* notMalicousDbName,
+	char* ElfdatabaseTFIDFInf,
+	char* ElfdatabaseTFIDFSain);
+
+void freeDB(void);
+
+short analyseElfFile(char* fileName);

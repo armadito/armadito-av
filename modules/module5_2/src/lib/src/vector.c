@@ -4,6 +4,7 @@
 #include <math.h>
 #include <dirent.h>
 #include <string.h>
+#include "osdeps.h"
 
 PVECTOR vectorNew(DWORD n){
 	PVECTOR x = NULL;
@@ -12,12 +13,12 @@ PVECTOR vectorNew(DWORD n){
 		return NULL;
 	}
 
-	x = (PVECTOR) calloc(1, sizeof(VECTOR));
+	x = (PVECTOR)calloc(1, sizeof(VECTOR));
 	if (x == NULL){
 		return NULL;
 	}
 
-	x->v = (VEC_TYPE*) calloc(n, sizeof(VEC_TYPE));
+	x->v = (VEC_TYPE*)calloc(n, sizeof(VEC_TYPE));
 	if (x->v == NULL){
 		free(x);
 		return NULL;
@@ -32,22 +33,21 @@ PVECTOR VectorCreateFromArray(VEC_TYPE* QwordArray, DWORD n){
 	if (QwordArray == NULL || n == 0){
 		return NULL;
 	}
-	x = NULL;
-	
-	x = (PVECTOR) calloc(1, sizeof(VECTOR));
+
+	x = (PVECTOR)calloc(1, sizeof(VECTOR));
 	if (x == NULL){
 		return NULL;
 	}
-	
+
 	x->v = QwordArray;
-	
+
 	x->n = n;
 
 	return x;
 }
 
 DWORD vectorGetSize(PVECTOR v){
-	if(v == NULL){
+	if (v == NULL){
 		return (DWORD)-1;
 	}
 
@@ -55,32 +55,32 @@ DWORD vectorGetSize(PVECTOR v){
 }
 
 VEC_TYPE vectorGetValue(PVECTOR v, DWORD i){
-	if(v == NULL || i >= v->n){
+	if (v == NULL || i >= v->n){
 		return (VEC_TYPE)-1;
 	}
-	
+
 	return v->v[i];
 }
 
 VEC_TYPE vectorGetValueWithPaddedVector(PVECTOR v, DWORD i){
-	if(i >= v->n){
+	if (i >= v->n){
 		return 0;
 	}
-	if(v == NULL){
+	if (v == NULL){
 		return (VEC_TYPE)-1;
 	}
-	
+
 	return v->v[i];
 }
 
 VOID vectorDelete(PVECTOR x){
-	if(x == NULL ||x->v == NULL){
+	if (x == NULL || x->v == NULL){
 		return;
 	}
 	free(x->v);
 	x->v = NULL;
 
-	if(x == NULL){
+	if (x == NULL){
 		return;
 	}
 	free(x);
@@ -93,23 +93,26 @@ PVECTOR vectorLoad(CHAR* fileName){
 	FILE* fd = NULL;
 
 	/*file reading*/
-	fd = fopen(fileName, "rb");
+	fd = os_fopen(fileName, "rb");
 	if (fd == NULL){
 		return NULL;
-	}else{
-		/*file size calcultation*/
+	}
+	else{
+		/*file size calculation*/
 		fseek(fd, 0L, SEEK_END);
-		currentSize = ftell(fd); 
+		currentSize = ftell(fd);
 		rewind(fd);
 
-		content = vectorNew(currentSize/sizeof(VEC_TYPE));
-		if(content == NULL){
+		content = vectorNew(currentSize / sizeof(VEC_TYPE));
+		if (content == NULL){
+			fclose(fd);
 			return NULL;
 		}
 
 		/*content reading*/
 		if (fread(content->v, 1, currentSize, fd) != currentSize) {
 			vectorDelete(content);
+			fclose(fd);
 			return NULL;
 		}
 
