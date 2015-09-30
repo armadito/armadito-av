@@ -7,10 +7,9 @@
 #include "os/dir.h"
 #include "os/mimetype.h"
 #include "modulep.h"
-#include "ipc.h"
+#include "ipcman.h"
 #include "statusp.h"
 #include "uhurup.h"
-#include "unixsock.h"
 #include "builtin-modules/alert.h"
 #include "builtin-modules/quarantine.h"
 #include "builtin-modules/remote.h"
@@ -36,8 +35,8 @@ struct local_scan {
 };
 
 struct remote_scan {
-  char *sock_path;
-  int sock;
+  char *connect_url;
+  int connect_fd;
   struct ipc_manager *manager;
 };
 
@@ -216,21 +215,7 @@ static enum uhuru_scan_status local_scan_run(struct uhuru_scan *scan)
 
 static void remote_scan_init(struct uhuru_scan *scan)
 {
-  struct uhuru_module *remote_module;
-  const char *sock_dir;
-  GString *sock_path;
-
-  remote_module = uhuru_get_module_by_name(scan->uhuru, "remote");
-  assert(remote_module != NULL);
-
-  sock_dir = remote_module_get_sock_dir(remote_module);
-  assert(sock_dir != NULL);
-
-  sock_path = g_string_new(sock_dir);
-
-  g_string_append_printf(sock_path, "/uhuru-%s", getenv("USER"));
-  scan->remote.sock_path = sock_path->str;
-  g_string_free(sock_path, FALSE);
+  scan->remote.connect_url = uhuru_get_remote_url(scan->uhuru);
 }
 
 static void remote_scan_handler_scan_file(struct ipc_manager *m, void *data)
@@ -272,24 +257,24 @@ static void remote_scan_handler_scan_end(struct ipc_manager *m, void *data)
   
 #if 0
 #ifdef DEBUG
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "remote scan end, closing socket %d", scan->remote.sock);
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "remote scan end, closing socket %d", scan->remote.connect_fd);
 #endif
   
-  if (close(scan->remote.sock) < 0) {
-    g_log(NULL, G_LOG_LEVEL_WARNING, "closing socket %d failed (%s)", scan->remote.sock, strerror(errno));
+  if (close(scan->remote.connect_fd) < 0) {
+    g_log(NULL, G_LOG_LEVEL_WARNING, "closing socket %d failed (%s)", scan->remote.connect_fd, strerror(errno));
   }
 
-  scan->remote.sock = -1;
+  scan->remote.connect_fd = -1;
 #endif
 }
 
 static enum uhuru_file_status remote_scan_start(struct uhuru_scan *scan)
 {
-  scan->remote.sock = client_socket_create(scan->remote.sock_path, 10);
-  if (scan->remote.sock < 0)
+  scan->remote.connect_fd = os_ipc_connect(scan->remote.connect_url, 10);
+  if (scan->remote.connect_fd < 0)
     return UHURU_IERROR;
 
-  scan->remote.manager = ipc_manager_new(scan->remote.sock, scan->remote.sock);
+  scan->remote.manager = ipc_manager_new(scan->remote.connect_fd);
 
   ipc_manager_add_handler(scan->remote.manager, IPC_MSG_ID_SCAN_FILE, remote_scan_handler_scan_file, scan);
   ipc_manager_add_handler(scan->remote.manager, IPC_MSG_ID_SCAN_END, remote_scan_handler_scan_end, scan);
@@ -316,6 +301,7 @@ struct uhuru_scan *uhuru_scan_new(struct uhuru *uhuru, const char *path, enum uh
   struct uhuru_scan *scan = (struct uhuru_scan *)malloc(sizeof(struct uhuru_scan));
 
   scan->uhuru = uhuru;
+
   scan->path = (const char *)realpath(path, NULL);
   if (scan->path == NULL) {
     perror("realpath");
@@ -365,7 +351,7 @@ int uhuru_scan_get_poll_fd(struct uhuru_scan *scan)
     return -1;
   }
 
-  return scan->remote.sock;
+  return scan->remote.connect_fd;
 }
 
 enum uhuru_scan_status uhuru_scan_start(struct uhuru_scan *scan)

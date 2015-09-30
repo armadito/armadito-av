@@ -1,6 +1,7 @@
 #include "libuhuru-config.h"
 
 #include "os/dir.h"
+#include "os/string.h"
 
 #include <glib.h>
 #include <dirent.h>

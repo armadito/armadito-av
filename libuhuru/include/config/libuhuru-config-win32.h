@@ -7,13 +7,15 @@
 /* headers */
 #undef HAVE_UNISTD_H
 
-/* windows implemented libmagic*/
-
-
 /* mapping posix names to win32 names */
-#define os_strdup _strdup
-
-//#define os_fopen fopen_s
+#undef HAVE_STRDUP
+#define HAVE__STRDUP
+#undef HAVE_READ
+#define HAVE__READ
+#undef HAVE_WRITE
+#define HAVE__WRITE
+#undef HAVE_CLOSE
+#define HAVE__CLOSE
 
 /* file handling macros */
 #define MAXPATHLEN _MAX_PATH

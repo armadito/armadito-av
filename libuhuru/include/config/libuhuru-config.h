@@ -5,8 +5,6 @@
 #include "libuhuru-config-win32.h"
 #else
 #include <libuhuru-config-autoconf.h>
-#define os_strdup strdup
-#define os_strerror strerror
 #endif
 
 #endif

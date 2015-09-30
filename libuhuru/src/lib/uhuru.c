@@ -73,6 +73,20 @@ int uhuru_is_remote(struct uhuru *u)
   return u->is_remote;
 }
 
+const char *uhuru_get_remote_url(struct uhuru *u)
+{
+  struct uhuru_module *remote_module;
+  const char *remote_url;
+
+  remote_module = uhuru_get_module_by_name(u, "remote");
+  assert(remote_module != NULL);
+
+  remote_url = remote_module_get_sock_dir(remote_module);
+  assert(remote_url != NULL);
+
+  return remote_url;
+}
+
 struct uhuru_module **uhuru_get_modules(struct uhuru *u)
 {
   return module_manager_get_modules(u->module_manager);

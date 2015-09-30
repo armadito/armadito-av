@@ -4,6 +4,7 @@
 
 #include "modulep.h"
 #include "os/dir.h"
+#include "os/string.h"
 
 #include <assert.h>
 #include <gmodule.h>

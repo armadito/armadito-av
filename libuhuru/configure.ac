@@ -18,6 +18,12 @@ PKG_PROG_PKG_CONFIG
 AC_PROG_CC([gcc])
 AC_PROG_LIBTOOL
 
+# check for functions
+AC_CHECK_FUNCS(strdup)
+AC_CHECK_FUNCS(read)
+AC_CHECK_FUNCS(write)
+AC_CHECK_FUNCS(close)
+
 # check for debug
 AC_MSG_CHECKING(for debug)
 AC_MSG_RESULT($enable_debug)

@@ -2,6 +2,7 @@
 
 #include "statusp.h"
 #include "reportp.h"
+#include "os/string.h"
 
 #include <stdio.h>
 #include <stdlib.h>
