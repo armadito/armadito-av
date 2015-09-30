@@ -90,10 +90,10 @@
     <ClCompile Include="..\..\..\libuhuru\src\lib\ipc.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\module.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\os\windows\dir.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\lib\os\windows\mimetype.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\report.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\scan.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\status.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\lib\uhuru-libmagic\magic.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\uhuru.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\utils.c" />
   </ItemGroup>

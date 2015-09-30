@@ -6,9 +6,11 @@
 #include "conf.h"
 #include "os/dir.h"
 #include "os/mimetype.h"
+#include "os/string.h"
 #include "modulep.h"
 #include "ipcman.h"
 #include "statusp.h"
+#include "reportp.h"
 #include "uhurup.h"
 #include "builtin-modules/alert.h"
 #include "builtin-modules/quarantine.h"
@@ -23,7 +25,9 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifdef HAS_UNISTD_H
 #include <unistd.h>
+#endif
 
 struct callback_entry {
   uhuru_scan_callback_t callback;
@@ -152,7 +156,7 @@ static void local_scan_entry(const char *full_path, enum dir_entry_flag flags, i
     g_log(NULL, G_LOG_LEVEL_WARNING, "local_scan_entry: Error - %s", full_path);
 
     report.status = UHURU_IERROR;
-    report.mod_report = strdup(strerror(entry_errno));
+    report.mod_report = os_strdup(os_strerror(entry_errno));
     uhuru_scan_call_callbacks(scan, &report);
 
     uhuru_report_destroy(&report);
@@ -162,7 +166,7 @@ static void local_scan_entry(const char *full_path, enum dir_entry_flag flags, i
     return;
 
   if (scan->flags & UHURU_SCAN_THREADED)
-    g_thread_pool_push(scan->local.thread_pool, (gpointer)strdup(full_path), NULL);
+    g_thread_pool_push(scan->local.thread_pool, (gpointer)os_strdup(full_path), NULL);
   else
     local_scan_file(scan, full_path);
 }
@@ -192,7 +196,7 @@ static enum uhuru_scan_status local_scan_run(struct uhuru_scan *scan)
 
   if (S_ISREG(sb.st_mode)) {
     if (scan->flags & UHURU_SCAN_THREADED)
-      g_thread_pool_push(scan->local.thread_pool, (gpointer)strdup(scan->path), NULL);
+      g_thread_pool_push(scan->local.thread_pool, (gpointer)os_strdup(scan->path), NULL);
     else
       local_scan_file(scan, scan->path);
   } else if (S_ISDIR(sb.st_mode)) {

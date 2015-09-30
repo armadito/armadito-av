@@ -48,10 +48,10 @@
     <ClCompile Include="..\..\..\libuhuru\src\lib\utils.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\libuhuru\src\lib\uhuru-libmagic\magic.c">
+    <ClCompile Include="..\..\..\libuhuru\src\lib\os\windows\dir.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\libuhuru\src\lib\os\windows\dir.c">
+    <ClCompile Include="..\..\..\libuhuru\src\lib\os\windows\mimetype.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>

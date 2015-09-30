@@ -54,3 +54,10 @@ const char *os_mime_type_guess(const char *path)
 
 	return mime_type;
 }
+
+
+void os_mime_type_init(void) {
+
+	// This function is empty in windows version.
+	return;
+}

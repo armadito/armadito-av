@@ -2,14 +2,8 @@
 #define _LIBUHURU_UHURUP_H_
 
 #include <libuhuru/scan.h>
-#include "libuhuru-config.h"
 
 #include <glib.h>
-#ifdef WIN32
-#include "uhuru-libmagic\magic.h"
-#else
-#include <magic.h>
-#endif
 
 struct uhuru_module **uhuru_get_modules(struct uhuru *u);
 
