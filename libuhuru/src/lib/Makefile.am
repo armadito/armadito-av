@@ -31,6 +31,8 @@ builtin-modules/remote.c \
 builtin-modules/remote.h \
 os/dir.h \
 os/linux/dir.c \
+os/file.h \
+os/linux/file.c \
 os/ipc.h \
 os/linux/ipc.c \
 os/mimetype.h \

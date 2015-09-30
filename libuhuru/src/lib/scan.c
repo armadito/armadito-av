@@ -5,6 +5,7 @@
 
 #include "conf.h"
 #include "os/dir.h"
+#include "os/file.h"
 #include "os/mimetype.h"
 #include "os/string.h"
 #include "modulep.h"
@@ -17,17 +18,11 @@
 #include "builtin-modules/remote.h"
 
 #include <assert.h>
-#include <errno.h>
 #include <glib.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#ifdef HAS_UNISTD_H
-#include <unistd.h>
-#endif
 
 struct callback_entry {
   uhuru_scan_callback_t callback;
@@ -145,11 +140,11 @@ static void local_scan_entry_thread_fun(gpointer data, gpointer user_data)
   free(path);
 }
 
-static void local_scan_entry(const char *full_path, enum dir_entry_flag flags, int entry_errno, void *data)
+static void local_scan_entry(const char *full_path, enum os_file_flag flags, int entry_errno, void *data)
 {
   struct uhuru_scan *scan = (struct uhuru_scan *)data;
 
-  if (flags & DIR_ENTRY_IS_ERROR) {
+  if (flags & FILE_FLAG_IS_ERROR) {
     struct uhuru_report report;
 
     uhuru_report_init(&report, full_path);
@@ -162,7 +157,7 @@ static void local_scan_entry(const char *full_path, enum dir_entry_flag flags, i
     uhuru_report_destroy(&report);
   }
 
-  if (!(flags & DIR_ENTRY_IS_PLAIN_FILE))
+  if (!(flags & FILE_FLAG_IS_PLAIN_FILE))
     return;
 
   if (scan->flags & UHURU_SCAN_THREADED)
@@ -187,19 +182,17 @@ static enum uhuru_scan_status local_scan_start(struct uhuru_scan *scan)
 
 static enum uhuru_scan_status local_scan_run(struct uhuru_scan *scan)
 {
-  struct stat sb;
+  struct os_file_stat stat_buf;
+  int stat_errno;
 
-  if (stat(scan->path, &sb) == -1) {
-    perror("stat");
-    /* exit(EXIT_FAILURE); */
-  }
+  os_file_stat(scan->path, &stat_buf, &stat_errno);
 
-  if (S_ISREG(sb.st_mode)) {
+  if (stat_buf.flags & FILE_FLAG_IS_PLAIN_FILE) {
     if (scan->flags & UHURU_SCAN_THREADED)
       g_thread_pool_push(scan->local.thread_pool, (gpointer)os_strdup(scan->path), NULL);
     else
       local_scan_file(scan, scan->path);
-  } else if (S_ISDIR(sb.st_mode)) {
+  } else if (stat_buf.flags & FILE_FLAG_IS_DIRECTORY) {
     int recurse = scan->flags & UHURU_SCAN_RECURSE;
 
     os_dir_map(scan->path, recurse, local_scan_entry, scan);
@@ -265,7 +258,7 @@ static void remote_scan_handler_scan_end(struct ipc_manager *m, void *data)
 #endif
   
   if (close(scan->remote.connect_fd) < 0) {
-    g_log(NULL, G_LOG_LEVEL_WARNING, "closing socket %d failed (%s)", scan->remote.connect_fd, strerror(errno));
+    g_log(NULL, G_LOG_LEVEL_WARNING, "closing socket %d failed (%s)", scan->remote.connect_fd, os_strerror(errno));
   }
 
   scan->remote.connect_fd = -1;

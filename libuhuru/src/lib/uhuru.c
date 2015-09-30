@@ -8,6 +8,7 @@
 #include "statusp.h"
 #include "uhurup.h"
 #include "os/mimetype.h"
+#include "os/string.h"
 #include "builtin-modules/alert.h"
 #include "builtin-modules/quarantine.h"
 #include "builtin-modules/remote.h"

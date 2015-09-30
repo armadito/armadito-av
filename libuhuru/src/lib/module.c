@@ -108,9 +108,9 @@ void module_manager_add(struct module_manager *mm, struct uhuru_module *module)
   g_array_append_val(mm->modules, clone);
 }
 
-static void module_load_dirent_cb(const char *full_path, enum dir_entry_flag flags, int entry_errno, void *data)
+static void module_load_dirent_cb(const char *full_path, enum os_file_flag flags, int entry_errno, void *data)
 {
-  if (flags & DIR_ENTRY_IS_PLAIN_FILE) {
+  if (flags & FILE_FLAG_IS_PLAIN_FILE) {
     struct uhuru_module *mod_loaded;
 
     mod_loaded = module_load(full_path);

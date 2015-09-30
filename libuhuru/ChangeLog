@@ -1,5 +1,7 @@
 2015-09-30  François  <francois@dechelle.net>
 
+	* added lib/os/file.h to encapsulate calls to stat(); changed lib/os/dir.h to use same file flags as lib/os/file.h
+
 	* added lib/os/io.h and lib/os/string.h for definition of platform abstraction macros related to I/O (read/write/close) and strings (strdup)
 
 	* isolated platform specific calls for IPC in os/ipc.h and os/linux/ipc.c

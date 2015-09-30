@@ -18,26 +18,26 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-static enum dir_entry_flag dirent_flags(struct dirent *entry)
+static enum os_file_flag dirent_flags(struct dirent *entry)
 {
   switch(entry->d_type) {
   case DT_DIR:
-    return DIR_ENTRY_IS_DIRECTORY;
+    return FILE_FLAG_IS_DIRECTORY;
   case DT_BLK:
   case DT_CHR:
-    return DIR_ENTRY_IS_DEVICE;
+    return FILE_FLAG_IS_DEVICE;
   case DT_SOCK:
   case DT_FIFO:
-    return DIR_ENTRY_IS_IPC;
+    return FILE_FLAG_IS_IPC;
   case DT_LNK:
-    return DIR_ENTRY_IS_LINK;
+    return FILE_FLAG_IS_LINK;
   case DT_REG:
-    return DIR_ENTRY_IS_PLAIN_FILE;
+    return FILE_FLAG_IS_PLAIN_FILE;
   default:
-    return DIR_ENTRY_IS_UNKNOWN;
+    return FILE_FLAG_IS_UNKNOWN;
   }
 
-  return DIR_ENTRY_IS_UNKNOWN;
+  return FILE_FLAG_IS_UNKNOWN;
 }
 
 void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data)
@@ -48,7 +48,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
   if (d == NULL) {
     g_log(NULL, G_LOG_LEVEL_WARNING, "error opening directory %s (%s)", path, os_strerror(errno));
 
-    (*dirent_cb)(path, DIR_ENTRY_IS_ERROR, errno, data);
+    (*dirent_cb)(path, FILE_FLAG_IS_ERROR, errno, data);
     
 #if 0
     if (errno != EACCES && errno != ENOENT && errno != ENOTDIR)
@@ -74,7 +74,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
       saved_errno = errno;
       g_log(NULL, G_LOG_LEVEL_WARNING, "error reading directory entry in directory %s (error %s)", path, os_strerror(saved_errno));
      
-      (*dirent_cb)(path, DIR_ENTRY_IS_ERROR, saved_errno, data);
+      (*dirent_cb)(path, FILE_FLAG_IS_ERROR, saved_errno, data);
 
       goto cleanup;
     }
