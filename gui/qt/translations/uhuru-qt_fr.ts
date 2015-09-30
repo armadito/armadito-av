@@ -14,7 +14,8 @@
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;Ubuntu&apos;; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt; &lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;         &lt;img src=&quot;:/icons/uhuru.svg&quot; width=&quot;128&quot; height=&quot;128&quot; /&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:18pt; font-weight:600;&quot;&gt;Uhuru&lt;/span&gt;&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Solution antivirus pour Linux&lt;/p&gt;
 &lt;p align=&quot;center&quot; style=&quot; margin-top:12px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;© Nov&apos;IT 2014&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
@@ -26,7 +27,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../model/scanmodel.cpp" line="80"/>
         <source>Not processed</source>
-        <translation type="unfinished">Non traité</translation>
+        <translation>Non traité</translation>
     </message>
 </context>
 <context>
@@ -49,7 +50,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../model/scanreportmodel.cpp" line="55"/>
         <source>File Path</source>
-        <translation type="unfinished"></translation>
+        <translation>Chemin du fichier</translation>
     </message>
     <message>
         <source>file</source>
@@ -65,12 +66,16 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui/scanwidget.ui" line="23"/>
         <source>Analyse en cours...</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Performing scan...</source>
+        <translation type="obsolete">Analyse en cours...</translation>
     </message>
     <message>
         <location filename="../ui/scanwidget.ui" line="114"/>
-        <source>Performing scan...</source>
-        <translation type="unfinished">Analyse en cours...</translation>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Performing scan...&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Analyse en cours...&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../ui/scanwidget.ui" line="146"/>
@@ -172,12 +177,12 @@ p, li { white-space: pre-wrap; }
     <message utf8="true">
         <location filename="../ui/updatedialog.ui" line="14"/>
         <source>Etat des mises à jour</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../ui/updatedialog.ui" line="79"/>
         <source>Refresh</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 </TS>
