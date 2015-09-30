@@ -6,7 +6,6 @@
 
 #include <glib.h>
 #ifdef WIN32
-#include "uhuru-libmagic\magic.h"
 #else
 #include <magic.h>
 #endif

@@ -99,7 +99,7 @@ void uhuru_add_mime_type(struct uhuru *u, const char *mime_type, struct uhuru_mo
   if (modules == NULL) {
     modules = g_array_new(TRUE, TRUE, sizeof(struct uhuru_module *));
 
-    g_hash_table_insert(u->mime_type_table, (gpointer)(strdup(mime_type)), modules);
+    g_hash_table_insert(u->mime_type_table, (gpointer)(os_strdup(mime_type)), modules);
   }
 
   g_array_append_val(modules, module);
