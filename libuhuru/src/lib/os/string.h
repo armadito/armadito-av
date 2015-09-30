@@ -9,6 +9,10 @@
 #define os_strdup _strdup
 #endif
 
+#ifdef HAVE_STRERROR
 #define os_strerror strerror
+#else
+char *os_strerror(int errnum);
+#endif
 
 #endif

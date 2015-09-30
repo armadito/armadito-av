@@ -17,6 +17,9 @@
 #undef HAVE_CLOSE
 #define HAVE__CLOSE
 
+/* specific strerror */
+#undef HAVE_STRERROR
+
 /* file handling macros */
 #define MAXPATHLEN _MAX_PATH
 
