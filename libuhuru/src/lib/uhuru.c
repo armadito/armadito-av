@@ -7,6 +7,7 @@
 #include "modulep.h"
 #include "statusp.h"
 #include "uhurup.h"
+#include "os/string.h"
 #include "os/mimetype.h"
 #include "os/string.h"
 #include "builtin-modules/alert.h"

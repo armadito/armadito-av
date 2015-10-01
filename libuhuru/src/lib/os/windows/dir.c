@@ -1,5 +1,6 @@
 #include "libuhuru-config.h"
 
+#include "os/string.h"
 #include "os/dir.h"
 #include "Windows.h"
 #include <glib.h>
