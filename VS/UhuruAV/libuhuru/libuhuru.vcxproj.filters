@@ -119,5 +119,25 @@
     <ClInclude Include="..\..\..\libuhuru\src\lib\builtin-modules\mimetypemod.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\handle.h">
+      <Filter>Fichiers de ressources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\info.h">
+      <Filter>Fichiers de ressources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\module.h">
+      <Filter>Fichiers de ressources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\scan.h">
+      <Filter>Fichiers de ressources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\status.h">
+      <Filter>Fichiers de ressources</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="libuhuru.def">
+      <Filter>Fichiers sources</Filter>
+    </None>
   </ItemGroup>
 </Project>
