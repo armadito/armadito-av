@@ -1,8 +1,10 @@
+
 #include <libuhuru/scan.h>
 #include "lib/statusp.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 struct scan_summary {
   int scanned;
