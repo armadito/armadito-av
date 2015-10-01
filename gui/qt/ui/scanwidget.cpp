@@ -8,7 +8,7 @@
 
 void ScanWidget::connectLineEdit(const char *lineEditName, Counter *counter)
 {
-  QLineEdit *ui_lineEdit = findChild<QLineEdit*>(lineEditName);
+  QLabel *ui_lineEdit = findChild<QLabel*>(lineEditName);
   assert(ui_lineEdit != NULL);
 
   QObject::connect(counter, SIGNAL(changed(const QString &)), ui_lineEdit, SLOT(setText(const QString &)));
@@ -20,7 +20,7 @@ void ScanWidget::connectLineEdit(const char *lineEditName, Counter *counter)
 void ScanWidget::doConnect(ScanModel *model)
 {
   // We create counters connexions
-  connectLineEdit("totalCount", model->totalCount());
+  //connectLineEdit("totalCount", model->totalCount());
   connectLineEdit("scannedCount", model->scannedCount());
   connectLineEdit("malwareCount", model->malwareCount());
   connectLineEdit("suspiciousCount", model->suspiciousCount());
@@ -51,7 +51,6 @@ void ScanWidget::doConnect(ScanModel *model)
   // Signal to update Title 
   ui_labelTitle = findChild<QLabel*>("Title");
   assert(ui_labelTitle != NULL);
- // QObject::connect(model, SIGNAL(scanComplete()), this, );
 
   if (model->completed())
     enableCloseButton();
@@ -92,7 +91,6 @@ void ScanWidget::afterEndInsert()
   // do something on ui_reportView
   	
 }
-
 
 void ScanWidget::enableCloseButton() 
 {
