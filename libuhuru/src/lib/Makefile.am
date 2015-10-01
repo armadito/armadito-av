@@ -10,8 +10,8 @@ conf.c \
 conf.h \
 confparser.c \
 confparser.h \
-ipc.c \
-ipc.h \
+ipcman.c \
+ipcman.h \
 module.c \
 modulep.h \
 report.c \
@@ -21,8 +21,6 @@ status.c \
 statusp.h \
 uhuru.c \
 uhurup.h \
-unixsock.c \
-unixsock.h \
 builtin-modules/alert.c \
 builtin-modules/alert.h \
 builtin-modules/mimetype.c \
@@ -33,8 +31,12 @@ builtin-modules/remote.c \
 builtin-modules/remote.h \
 os/dir.h \
 os/linux/dir.c \
+os/file.h \
+os/linux/file.c \
+os/ipc.h \
+os/linux/ipc.c \
 os/mimetype.h \
-os/linux/mimetype.c
+os/linux/mimetype.c 
 
 AM_CPPFLAGS= -DLIBUHURU_MODULES_PATH='"$(pkglibdir)/modules"' -DLIBUHURU_CONF_DIR='"$(sysconfdir)/uhuru"' -DG_LOG_DOMAIN='"libuhuru"'
 libuhuru_la_CFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/include/config

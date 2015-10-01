@@ -7,6 +7,8 @@ main.c \
 client.c \
 client.h \
 server.c \
-server.h
+server.h \
+unixsock.c \
+unixsock.h 
 
 EXTRA_DIST=uhuru-scan-daemon.desktop

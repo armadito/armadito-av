@@ -1,7 +1,7 @@
 #include "server.h"
 #include "client.h"
+#include "unixsock.h"
 #include "lib/conf.h"
-#include "lib/unixsock.h"
 #include "lib/uhurup.h"
 #include "lib/builtin-modules/remote.h"
 
@@ -21,28 +21,6 @@ struct server {
   GThreadPool *thread_pool;  
   struct uhuru *uhuru;
 };
-
-static const char *server_get_sock_path(struct server *server)
-{
-  struct uhuru_module *remote_module;
-  const char *sock_dir, *ret;
-  GString *sock_path;
-
-  remote_module = uhuru_get_module_by_name(server->uhuru, "remote");
-  assert(remote_module != NULL);
-
-  sock_dir = remote_module_get_sock_dir(remote_module);
-  assert(sock_dir != NULL);
-  /* was: argv = conf_get_value(server->uhuru, "remote", "socket-dir"); */
-
-  sock_path = g_string_new(sock_dir);
-
-  g_string_append_printf(sock_path, "/uhuru-%s", getenv("USER"));
-  ret = sock_path->str;
-  g_string_free(sock_path, FALSE);
-
-  return ret;
-}
 
 static void client_thread(gpointer data, gpointer user_data)
 {
@@ -70,6 +48,8 @@ static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpo
 
   client_sock = server_socket_accept(server->listen_sock);
 
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "accepted client connection: fd = %d", client_sock);
+
   client = client_new(client_sock, server->uhuru);
 
   g_thread_pool_push(server->thread_pool, (gpointer)client, NULL);
@@ -88,12 +68,14 @@ struct server *server_new(void)
   server->uhuru = uhuru_open(0);
   assert(server->uhuru != NULL);
 
-  sock_path = server_get_sock_path(server);
+  sock_path = uhuru_get_remote_url(server->uhuru);
 
+#if 0
   if (unlink(sock_path) && errno != ENOENT) {
     perror("unlink");
     exit(EXIT_FAILURE);
   }
+#endif
 
   server->listen_sock = server_socket_create(sock_path);
 

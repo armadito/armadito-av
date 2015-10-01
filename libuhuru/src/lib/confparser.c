@@ -1,6 +1,7 @@
 #include "libuhuru-config.h"
 
 #include "confparser.h"
+#include "os/string.h"
 
 #include <glib.h>
 #include <stdlib.h>

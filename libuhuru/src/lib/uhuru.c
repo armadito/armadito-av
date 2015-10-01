@@ -8,6 +8,7 @@
 #include "statusp.h"
 #include "uhurup.h"
 #include "os/mimetype.h"
+#include "os/string.h"
 #include "builtin-modules/alert.h"
 #include "builtin-modules/quarantine.h"
 #include "builtin-modules/remote.h"
@@ -73,6 +74,20 @@ int uhuru_is_remote(struct uhuru *u)
   return u->is_remote;
 }
 
+const char *uhuru_get_remote_url(struct uhuru *u)
+{
+  struct uhuru_module *remote_module;
+  const char *remote_url;
+
+  remote_module = uhuru_get_module_by_name(u, "remote");
+  assert(remote_module != NULL);
+
+  remote_url = remote_module_get_sock_dir(remote_module);
+  assert(remote_url != NULL);
+
+  return remote_url;
+}
+
 struct uhuru_module **uhuru_get_modules(struct uhuru *u)
 {
   return module_manager_get_modules(u->module_manager);
@@ -99,7 +114,7 @@ void uhuru_add_mime_type(struct uhuru *u, const char *mime_type, struct uhuru_mo
   if (modules == NULL) {
     modules = g_array_new(TRUE, TRUE, sizeof(struct uhuru_module *));
 
-    g_hash_table_insert(u->mime_type_table, (gpointer)(strdup(mime_type)), modules);
+    g_hash_table_insert(u->mime_type_table, (gpointer)(os_strdup(mime_type)), modules);
   }
 
   g_array_append_val(modules, module);

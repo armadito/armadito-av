@@ -1,7 +1,10 @@
 #include "libuhuru-config.h"
 
-#include "ipc.h"
+#include "ipcman.h"
+#include "os/io.h"
+#include "os/string.h"
 
+#include <assert.h>
 #include <glib.h>
 #include <errno.h>
 #include <stdarg.h>
@@ -24,8 +27,7 @@ struct ipc_handler_entry {
 };
 
 struct ipc_manager {
-  int input_fd;
-  FILE *output;
+  int io_fd;
   size_t input_buffer_size;
   char *input_buffer;
   enum ipc_manager_state state;
@@ -40,23 +42,12 @@ struct ipc_manager {
   struct ipc_handler_entry *handlers;
 };
 
-struct ipc_manager *ipc_manager_new(int input_fd, int output_fd)
+struct ipc_manager *ipc_manager_new(int io_fd)
 {
   struct ipc_manager *m = g_new(struct ipc_manager, 1);
 
-  m->input_fd = input_fd;
-#ifdef WIN32
-  m->output = _fdopen(output_fd, "w");
-#else
-	m->output = fdopen(output_fd, "w");
-#endif
+  m->io_fd = io_fd;
   
-  if (m->output == NULL) {
-    perror("fdopen");
-    free(m);
-    return NULL;
-  }
-
   m->input_buffer_size = DEFAULT_INPUT_BUFFER_SIZE;
   m->input_buffer = (char *)malloc(m->input_buffer_size);
 
@@ -76,7 +67,6 @@ void ipc_manager_free(struct ipc_manager *manager)
 {
   free(manager->input_buffer);
   g_string_free(manager->str_arg, TRUE);
-  /* FIXME: to be completed */
 }
 
 ipc_msg_id_t ipc_manager_get_msg_id(struct ipc_manager *manager)
@@ -274,7 +264,7 @@ int ipc_manager_receive(struct ipc_manager *manager)
 {
   int n_read, i;
 
-  n_read = read(manager->input_fd, manager->input_buffer, manager->input_buffer_size);
+  n_read = os_read(manager->io_fd, manager->input_buffer, manager->input_buffer_size);
 
   if (n_read == -1) {
     g_log(NULL, G_LOG_LEVEL_ERROR, "error in ipc_manager_receive: %s", os_strerror(errno));
@@ -291,9 +281,33 @@ int ipc_manager_receive(struct ipc_manager *manager)
   return 1;
 }
 
+static ssize_t ipc_manager_write(struct ipc_manager *manager, char *buffer, size_t len)
+{
+  size_t to_write = len;
+
+  assert(len > 0);
+
+  while (to_write > 0) {
+    int w = os_write(manager->io_fd, buffer, to_write);
+
+    if (w < 0) {
+      g_log(NULL, G_LOG_LEVEL_ERROR, "error in ipc_manager_write_buffer: %s", os_strerror(errno));
+      return -1;
+    }
+
+    if (w == 0)
+      return 0;
+
+    buffer += w;
+    to_write -= w;
+  }
+
+  return len;
+}
+
 int ipc_manager_msg_begin(struct ipc_manager *manager, ipc_msg_id_t msg_id)
 {
-  return fwrite(&msg_id, sizeof(guchar), 1, manager->output);
+  return ipc_manager_write(manager, &msg_id, sizeof(guchar));
 }
 
 static ipc_manager_msg_addv(struct ipc_manager *manager, va_list ap)
@@ -308,18 +322,18 @@ static ipc_manager_msg_addv(struct ipc_manager *manager, va_list ap)
     type = (ipc_type_t)(i_type & 0xff);
 
     if (type != IPC_NONE_T) {
-      fwrite(&type, sizeof(ipc_type_t), 1, manager->output);
+      ipc_manager_write(manager, &type, sizeof(ipc_type_t));
       switch(type) {
       case IPC_INT32_T:
 	v_int32 = va_arg(ap, gint32);
-	fwrite(&v_int32, sizeof(gint32), 1, manager->output);
+	ipc_manager_write(manager, (char *)&v_int32, sizeof(gint32));
 	break;
       case IPC_STRING_T:
 	v_str = va_arg(ap, char *);
 	if (v_str != NULL)
-	  fwrite(v_str, strlen(v_str) + 1, 1, manager->output);
+	  ipc_manager_write(manager, v_str, strlen(v_str) + 1);
 	else
-	  fwrite("", 1, 1, manager->output);
+	  ipc_manager_write(manager, "", sizeof(char));
 	break;
       }
     }
@@ -343,9 +357,7 @@ int ipc_manager_msg_end(struct ipc_manager *manager)
 {
   ipc_type_t type = IPC_NONE_T;
 
-  fwrite(&type, sizeof(ipc_type_t), 1, manager->output);
-
-  fflush(manager->output);
+  ipc_manager_write(manager, &type, sizeof(ipc_type_t));
 
   return 0;
 }

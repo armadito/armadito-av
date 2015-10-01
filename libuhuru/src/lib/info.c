@@ -3,9 +3,11 @@
 #include <libuhuru/module.h>
 #include <libuhuru/info.h>
 
-#include "ipc.h"
+#include "ipcman.h"
 #include "uhurup.h"
 #include "builtin-modules/remote.h"
+#include "os/string.h"
+#include "os/io.h"
 
 #include <assert.h>
 #include <glib.h>
@@ -120,28 +122,19 @@ static void ipc_handler_info_end(struct ipc_manager *m, void *data)
 static int info_remote_init(struct uhuru_info *info, struct uhuru *uhuru)
 {
   struct uhuru_module *remote_module;
-  const char *sock_dir;
-  GString *sock_path;
-  int sock;
   struct ipc_manager *manager;
   struct ipc_handler_info_data *data;
+  const char *connect_url;
+  int connect_fd;
 
-  remote_module = uhuru_get_module_by_name(uhuru, "remote");
-  assert(remote_module != NULL);
+  connect_url = uhuru_get_remote_url(uhuru);
 
-  sock_dir = remote_module_get_sock_dir(remote_module);
-  assert(sock_dir != NULL);
+  connect_fd = os_ipc_connect(connect_url, 10);
 
-  sock_path = g_string_new(sock_dir);
-  g_string_append_printf(sock_path, "/uhuru-%s", getenv("USER"));
-
-  sock = client_socket_create(sock_path->str, 10);
-  if (sock < 0)
+  if (connect_fd < 0)
     return -1;
 
-  g_string_free(sock_path, TRUE);
-
-  manager = ipc_manager_new(sock, sock);
+  manager = ipc_manager_new(connect_fd);
 
   data = g_new(struct ipc_handler_info_data, 1);
   data->info = info;
@@ -154,6 +147,10 @@ static int info_remote_init(struct uhuru_info *info, struct uhuru *uhuru)
 
   while (ipc_manager_receive(manager) > 0)
     ;
+
+  ipc_manager_free(manager);
+
+  os_close(connect_fd);
 
   g_free(data);
 }
@@ -205,28 +202,28 @@ void uhuru_info_free(struct uhuru_info *info)
 
 void info_to_stdout(struct uhuru_info *info)
 {
-     struct uhuru_module_info **m;
-     struct uhuru_base_info **b;
+  struct uhuru_module_info **m;
+  struct uhuru_base_info **b;
 
-     fprintf(stdout, "--- Uhuru_info --- \n");
-     fprintf(stdout, "Update global status : %d\n", info->global_status);
-     if (info->module_infos != NULL) {
-	     for(m = info->module_infos; *m != NULL; m++){
-		fprintf(stdout, "Module %s \n", (*m)->name );
-		fprintf(stdout, "- Update date : %s \n", (*m)->update_date );
-		fprintf(stdout, "- Update status : %d\n", (*m)->mod_status);
+  fprintf(stdout, "--- Uhuru_info --- \n");
+  fprintf(stdout, "Update global status : %d\n", info->global_status);
+  if (info->module_infos != NULL) {
+    for(m = info->module_infos; *m != NULL; m++){
+      fprintf(stdout, "Module %s \n", (*m)->name );
+      fprintf(stdout, "- Update date : %s \n", (*m)->update_date );
+      fprintf(stdout, "- Update status : %d\n", (*m)->mod_status);
 
-		if ((*m)->base_infos != NULL) {
-		  for(b = (*m)->base_infos; *b != NULL; b++){
-		      fprintf(stdout, "-- Base %s \n", (*b)->name );
-		      fprintf(stdout, "--- Update date : %s \n", (*b)->date );
-		      fprintf(stdout, "--- Version : %s \n", (*b)->version );
-		      fprintf(stdout, "--- Signature count : %d \n", (*b)->signature_count );
-		      fprintf(stdout, "--- Full path : %s \n", (*b)->full_path );
-		  }
-		}
-	   }
-     }
+      if ((*m)->base_infos != NULL) {
+	for(b = (*m)->base_infos; *b != NULL; b++){
+	  fprintf(stdout, "-- Base %s \n", (*b)->name );
+	  fprintf(stdout, "--- Update date : %s \n", (*b)->date );
+	  fprintf(stdout, "--- Version : %s \n", (*b)->version );
+	  fprintf(stdout, "--- Signature count : %d \n", (*b)->signature_count );
+	  fprintf(stdout, "--- Full path : %s \n", (*b)->full_path );
+	}
+      }
+    }
+  }
 }
 
 #ifdef DEBUG

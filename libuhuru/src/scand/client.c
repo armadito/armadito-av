@@ -2,7 +2,7 @@
 
 #include "libuhuru-config.h"
 #include "client.h"
-#include "lib/ipc.h"
+#include "lib/ipcman.h"
 
 #include <stdio.h>
 #include <errno.h>
@@ -138,7 +138,7 @@ struct client *client_new(int client_sock, struct uhuru *uhuru)
   struct client *cl = (struct client *)malloc(sizeof(struct client));
 
   cl->sock = client_sock;
-  cl->manager = ipc_manager_new(cl->sock, cl->sock);
+  cl->manager = ipc_manager_new(cl->sock);
   cl->uhuru = uhuru;
 
   ipc_manager_add_handler(cl->manager, IPC_MSG_ID_PING, ipc_ping_handler, cl);

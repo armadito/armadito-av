@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "osdeps.h"
 #include "uh_errors.h"
 #include "UhuruStatic.h"
 
@@ -115,7 +116,7 @@ static enum uhuru_file_status module5_2_scan(struct uhuru_module *module, const 
     e = fileAnalysis((char *)path);
   }
 
-  *pmod_report = strdup(error_code_str(e));
+  *pmod_report = os_strdup(error_code_str(e));
   
   switch(e) {
   case UH_MALWARE:
@@ -141,7 +142,7 @@ static enum uhuru_update_status module5_2_info(struct uhuru_module *module, stru
   info->base_infos = (struct uhuru_base_info **)malloc(sizeof(struct uhuru_base_info *));
   info->base_infos[0] = NULL;
 
-  info->update_date = strdup("2014-09-01T09:30:00Z");
+  info->update_date = os_strdup("2014-09-01T09:30:00Z");
 
   return UHURU_UPDATE_OK;
 }

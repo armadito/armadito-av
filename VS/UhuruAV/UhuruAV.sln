@@ -7,6 +7,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UhuruAV", "UhuruAV\UhuruAV.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libuhuru", "libuhuru\libuhuru.vcxproj", "{6CF9FA23-7F1A-4D07-92B9-A61ED738AE0B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "module_5_2", "module_5_2\module_5_2.vcxproj", "{5CEDB44A-6891-4931-802F-8D63981298DD}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "clamav", "clamav\clamav.vcxproj", "{F13F6C50-94F8-4020-A27F-CDEA83904815}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -21,6 +25,14 @@ Global
 		{6CF9FA23-7F1A-4D07-92B9-A61ED738AE0B}.Debug|Win32.Build.0 = Debug|Win32
 		{6CF9FA23-7F1A-4D07-92B9-A61ED738AE0B}.Release|Win32.ActiveCfg = Release|Win32
 		{6CF9FA23-7F1A-4D07-92B9-A61ED738AE0B}.Release|Win32.Build.0 = Release|Win32
+		{5CEDB44A-6891-4931-802F-8D63981298DD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5CEDB44A-6891-4931-802F-8D63981298DD}.Debug|Win32.Build.0 = Debug|Win32
+		{5CEDB44A-6891-4931-802F-8D63981298DD}.Release|Win32.ActiveCfg = Release|Win32
+		{5CEDB44A-6891-4931-802F-8D63981298DD}.Release|Win32.Build.0 = Release|Win32
+		{F13F6C50-94F8-4020-A27F-CDEA83904815}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F13F6C50-94F8-4020-A27F-CDEA83904815}.Debug|Win32.Build.0 = Debug|Win32
+		{F13F6C50-94F8-4020-A27F-CDEA83904815}.Release|Win32.ActiveCfg = Release|Win32
+		{F13F6C50-94F8-4020-A27F-CDEA83904815}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

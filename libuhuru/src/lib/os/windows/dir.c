@@ -18,21 +18,21 @@ static enum dir_entry_flag dirent_flags(DWORD fileAttributes)
 	switch(fileAttributes) {
 
 		case FILE_ATTRIBUTE_DIRECTORY:
-			return DIR_ENTRY_IS_DIRECTORY;	  
+			return FILE_FLAG_IS_DIRECTORY;	  
 		case FILE_ATTRIBUTE_DEVICE:
-			return DIR_ENTRY_IS_DEVICE;	  	  
+			return FILE_FLAG_IS_DEVICE;	  	  
 		//case DT_LNK:
-		//return DIR_ENTRY_IS_LINK;
+		//return FILE_FLAG_IS_LINK;
 		case FILE_ATTRIBUTE_NORMAL:
-			return DIR_ENTRY_IS_PLAIN_FILE;
+			return FILE_FLAG_IS_PLAIN_FILE;
 		case FILE_ATTRIBUTE_ARCHIVE:
-			return DIR_ENTRY_IS_PLAIN_FILE;
+			return FILE_FLAG_IS_PLAIN_FILE;
 		default:
-			return DIR_ENTRY_IS_UNKNOWN;
+			return FILE_FLAG_IS_UNKNOWN;
 
 	}
 
-  return DIR_ENTRY_IS_UNKNOWN;
+  return FILE_FLAG_IS_UNKNOWN;
 }
 
 
@@ -43,7 +43,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 	int size = 0;
 	WIN32_FIND_DATAA fdata ;
 	WIN32_FIND_DATAA tmp ;
-	enum dir_entry_flag flags;
+	enum os_file_flag flags;
 
 	// Check parameters
 	if (path == NULL || dirent_cb == NULL) {

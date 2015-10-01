@@ -65,9 +65,9 @@ void conf_load_file(struct uhuru *uhuru, const char *filename)
   uhuru_conf_parser_free(cp);
 }
 
-static void conf_load_dirent_cb(const char *full_path, enum dir_entry_flag flags, int entry_errno, void *data)
+static void conf_load_dirent_cb(const char *full_path, enum os_file_flag flags, int entry_errno, void *data)
 {
-  if (flags & DIR_ENTRY_IS_PLAIN_FILE) {
+  if (flags & FILE_FLAG_IS_PLAIN_FILE) {
     size_t len = strlen(full_path);
 
     if (len > 5 && !strcmp(full_path + len - 5, ".conf"))

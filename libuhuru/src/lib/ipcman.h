@@ -1,5 +1,5 @@
-#ifndef _LIBUHURU_IPC_H_
-#define _LIBUHURU_IPC_H_
+#ifndef _LIBUHURU_IPCMAN_H_
+#define _LIBUHURU_IPCMAN_H_
 
 #include <glib.h>
 
@@ -32,7 +32,7 @@ typedef guchar ipc_msg_id_t;
 
 struct ipc_manager;
 
-struct ipc_manager *ipc_manager_new(int input_fd, int output_fd);
+struct ipc_manager *ipc_manager_new(int io_fd);
 
 void ipc_manager_free(struct ipc_manager *manager);
 
