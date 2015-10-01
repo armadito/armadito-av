@@ -23,8 +23,8 @@ uhuru.c \
 uhurup.h \
 builtin-modules/alert.c \
 builtin-modules/alert.h \
-builtin-modules/mimetype.c \
-builtin-modules/mimetype.h \
+builtin-modules/mimetypemod.c \
+builtin-modules/mimetypemod.h \
 builtin-modules/quarantine.c \
 builtin-modules/quarantine.h \
 builtin-modules/remote.c \
