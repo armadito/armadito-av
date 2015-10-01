@@ -244,7 +244,7 @@ static void remote_scan_handler_scan_file(struct ipc_manager *m, void *data)
   report.action = (enum uhuru_action)action;
   report.mod_name = mod_name;
   if (x_status != NULL)
-    report.mod_report = strdup(x_status);
+    report.mod_report = os_strdup(x_status);
 
   uhuru_scan_call_callbacks(scan, &report);
 

@@ -281,7 +281,7 @@ int ipc_manager_receive(struct ipc_manager *manager)
   return 1;
 }
 
-static ssize_t ipc_manager_write(struct ipc_manager *manager, char *buffer, size_t len)
+static size_t ipc_manager_write(struct ipc_manager *manager, char *buffer, size_t len)
 {
   size_t to_write = len;
 

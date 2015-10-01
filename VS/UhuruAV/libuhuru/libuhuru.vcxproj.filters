@@ -27,9 +27,6 @@
     <ClCompile Include="..\..\..\libuhuru\src\lib\info.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\libuhuru\src\lib\ipc.c">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\libuhuru\src\lib\module.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
@@ -52,6 +49,15 @@
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\libuhuru\src\lib\os\windows\mimetype.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\lib\os\windows\ipc.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\lib\ipcman.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="main.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>

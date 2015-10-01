@@ -61,7 +61,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;gobject-2.0.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;gobject-2.0.lib;urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -87,15 +87,17 @@
     <ClCompile Include="..\..\..\libuhuru\src\lib\conf.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\confparser.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\info.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\lib\ipc.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\lib\ipcman.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\module.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\os\windows\dir.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\lib\os\windows\ipc.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\os\windows\mimetype.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\report.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\scan.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\status.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\uhuru.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\utils.c" />
+    <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\libuhuru\src\lib\conf.h" />
