@@ -1,10 +1,9 @@
 #include <libuhuru/module.h>
-#include "mimetype.h"
+#include "mimetypemod.h"
 #include "uhurup.h"
 
 #include <assert.h>
 #include <glib.h>
-#include <magic.h>
 #include <stdlib.h>
 #include <string.h>
 

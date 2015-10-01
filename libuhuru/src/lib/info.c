@@ -8,6 +8,7 @@
 #include "builtin-modules/remote.h"
 #include "os/string.h"
 #include "os/io.h"
+#include "os/ipc.h"
 
 #include <assert.h>
 #include <glib.h>
@@ -29,6 +30,8 @@ static int update_status_compare(enum uhuru_update_status s1, enum uhuru_update_
   case UHURU_UPDATE_CRITICAL:
     return (s2 == UHURU_UPDATE_NON_AVAILABLE || s2 == UHURU_UPDATE_OK || s2 == UHURU_UPDATE_LATE) ? 1 : -1;
   }
+
+  return 666;
 }
 
 static void info_local_init(struct uhuru_info *info, struct uhuru *uhuru)
@@ -121,7 +124,6 @@ static void ipc_handler_info_end(struct ipc_manager *m, void *data)
 
 static int info_remote_init(struct uhuru_info *info, struct uhuru *uhuru)
 {
-  struct uhuru_module *remote_module;
   struct ipc_manager *manager;
   struct ipc_handler_info_data *data;
   const char *connect_url;
@@ -153,6 +155,8 @@ static int info_remote_init(struct uhuru_info *info, struct uhuru *uhuru)
   os_close(connect_fd);
 
   g_free(data);
+
+  return 0;
 }
 
 struct uhuru_info *uhuru_info_new(struct uhuru *uhuru)

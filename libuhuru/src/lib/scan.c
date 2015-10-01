@@ -6,6 +6,7 @@
 #include "conf.h"
 #include "os/dir.h"
 #include "os/file.h"
+#include "os/ipc.h"
 #include "os/mimetype.h"
 #include "os/string.h"
 #include "modulep.h"
@@ -13,8 +14,12 @@
 #include "statusp.h"
 #include "reportp.h"
 #include "uhurup.h"
+#ifdef HAVE_ALERT_MODULE
 #include "builtin-modules/alert.h"
+#endif
+#ifdef HAVE_QUARANTINE_MODULE
 #include "builtin-modules/quarantine.h"
+#endif
 #include "builtin-modules/remote.h"
 
 #include <assert.h>
@@ -34,7 +39,7 @@ struct local_scan {
 };
 
 struct remote_scan {
-  char *connect_url;
+  const char *connect_url;
   int connect_fd;
   struct ipc_manager *manager;
 };
@@ -66,11 +71,15 @@ static void local_scan_init(struct uhuru_scan *scan)
 
   scan->local.thread_pool = NULL;
 
+#ifdef HAVE_ALERT_MODULE
   alert_module = uhuru_get_module_by_name(scan->uhuru, "alert");
   uhuru_scan_add_callback(scan, alert_callback, alert_module->data);
+#endif
 
+#ifdef HAVE_QUARANTINE_MODULE
   quarantine_module = uhuru_get_module_by_name(scan->uhuru, "quarantine");
   uhuru_scan_add_callback(scan, quarantine_callback, quarantine_module->data);
+#endif
 }
 
 static enum uhuru_file_status local_scan_apply_modules(const char *path, const char *mime_type, struct uhuru_module **modules,  struct uhuru_report *report)

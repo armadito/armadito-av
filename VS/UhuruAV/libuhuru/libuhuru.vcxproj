@@ -17,7 +17,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -84,6 +84,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\libuhuru\src\lib\action.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\lib\builtin-modules\mimetypemod.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\lib\builtin-modules\remote.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\conf.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\confparser.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\info.c" />
@@ -92,25 +94,30 @@
     <ClCompile Include="..\..\..\libuhuru\src\lib\os\windows\dir.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\os\windows\ipc.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\os\windows\mimetype.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\lib\os\windows\string.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\report.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\scan.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\status.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\uhuru.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\lib\utils.c" />
-    <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\libuhuru\include\config\libuhuru-config-win32.h" />
+    <ClInclude Include="..\..\..\libuhuru\include\config\libuhuru-config.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\lib\builtin-modules\mimetypemod.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\lib\builtin-modules\remote.h" />
     <ClInclude Include="..\..\..\libuhuru\src\lib\conf.h" />
     <ClInclude Include="..\..\..\libuhuru\src\lib\confparser.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\lib\dir.h" />
     <ClInclude Include="..\..\..\libuhuru\src\lib\infop.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\lib\ipc.h" />
     <ClInclude Include="..\..\..\libuhuru\src\lib\modulep.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\lib\os\dir.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\lib\os\file.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\lib\os\io.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\lib\os\ipc.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\lib\os\mimetype.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\lib\os\string.h" />
     <ClInclude Include="..\..\..\libuhuru\src\lib\reportp.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\lib\sock.h" />
     <ClInclude Include="..\..\..\libuhuru\src\lib\statusp.h" />
     <ClInclude Include="..\..\..\libuhuru\src\lib\uhurup.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\lib\unixsock.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

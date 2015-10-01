@@ -3,6 +3,7 @@
 #include "os/mimetype.h"
 #include <glib.h>
 #include <Windows.h>
+#include <stdio.h>
 
 #define MIME_SIZE 100
 

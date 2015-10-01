@@ -6,6 +6,7 @@
 
 /* headers */
 #undef HAVE_UNISTD_H
+#define HAVE_IO_H
 
 /* mapping posix names to win32 names */
 #undef HAVE_STRDUP
@@ -27,6 +28,8 @@
 #define LIBUHURU_CONF_DIR "Path/to/conf/dir"
 #define LIBUHURU_MODULES_PATH "Path/to/module"
 
-char * os_strerror(int errnum);
+/* modules */
+#undef HAVE_ALERT_MODULE
+#undef HAVE_QUARANTINE_MODULE
 
 #endif

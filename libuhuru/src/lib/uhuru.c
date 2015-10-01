@@ -10,10 +10,14 @@
 #include "os/string.h"
 #include "os/mimetype.h"
 #include "os/string.h"
+#ifdef HAVE_ALERT_MODULE
 #include "builtin-modules/alert.h"
+#endif
+#ifdef HAVE_QUARANTINE_MODULE
 #include "builtin-modules/quarantine.h"
+#endif
 #include "builtin-modules/remote.h"
-#include "builtin-modules/mimetype.h"
+#include "builtin-modules/mimetypemod.h"
 
 #include <assert.h>
 #include <glib.h>
@@ -52,8 +56,12 @@ struct uhuru *uhuru_open(int is_remote)
 
   if (!u->is_remote) {
     module_manager_add(u->module_manager, &mimetype_module);
+#ifdef HAVE_ALERT_MODULE
     module_manager_add(u->module_manager, &alert_module);
+#endif
+#ifdef HAVE_QUARANTINE_MODULE
     module_manager_add(u->module_manager, &quarantine_module);
+#endif
 
     module_manager_load_path(u->module_manager, LIBUHURU_MODULES_PATH);
   }

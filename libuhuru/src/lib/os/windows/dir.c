@@ -108,6 +108,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
  * 0 it path does not exist and must be created
  * -1 if error (path exists and is not a directory, or other error)
  */
+#if 0
 static int stat_dir(const char *path)
 {
   struct stat st;
@@ -117,29 +118,10 @@ static int stat_dir(const char *path)
 
   return (errno == ENOENT) ? 0 : -1;
 }
+#endif
 
 int os_mkdir_p(const char *path)
 {
-  char *token, *full, *end;
-  int ret = 0;
-     
-  token = full = os_strdup(path);
-  do {
-    end = strchr(token, '/');
-
-    if (token != end) {
-      if (end != NULL)
-	*end = '\0';
-
-      if (!(ret = stat_dir(full))) {
-	ret = mkdir(full, 0777);
-      }
-
-      if (end != NULL)
-	*end = '/';
-    }
-    token = end + 1;
-  } while (end != NULL && ret >= 0);
-
-  return ret;
+	fprintf(stderr, "os_mkdir_p not implemented\n");
+	return -1;
 }

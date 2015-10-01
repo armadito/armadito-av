@@ -3,6 +3,10 @@
 
 #include "libuhuru-config.h"
 
+#ifdef HAVE_IO_H
+#include <io.h>
+#endif
+
 #if defined(HAVE_READ)
 #define os_read read
 #elif defined(HAVE__READ)
