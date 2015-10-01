@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <dirent.h>
 
+#include "osdeps.h"
 #include "uh_errors.h"
 #include "model.h"
 #include "utils.h"

@@ -4,39 +4,39 @@ modulesdir=$(libdir)/libuhuru/modules
 modules_LTLIBRARIES=module5_2.la
 
 module5_2_la_SOURCES= \
-module5_2.c \
-module5_2_sources/UhuruStatic/include/PEUtils.h \
-module5_2_sources/UhuruStatic/src/databases.c \
-module5_2_sources/UhuruStatic/include/databases.h \
-module5_2_sources/UhuruStatic/src/distances.c \
-module5_2_sources/UhuruStatic/include/distances.h \
-module5_2_sources/UhuruStatic/src/elfReader.c \
-module5_2_sources/UhuruStatic/include/elfReader.h \
-module5_2_sources/UhuruStatic/src/gestionPE.c \
-module5_2_sources/UhuruStatic/include/gestionPE.h \
-module5_2_sources/UhuruStatic/src/kNN.c \
-module5_2_sources/UhuruStatic/include/kNN.h \
-module5_2_sources/UhuruStatic/src/miniz.c \
-module5_2_sources/UhuruStatic/include/miniz.h \
-module5_2_sources/UhuruStatic/src/model.c \
-module5_2_sources/UhuruStatic/include/model.h \
-module5_2_sources/UhuruStatic/src/table.c \
-module5_2_sources/UhuruStatic/include/table.h \
-module5_2_sources/UhuruStatic/src/tfidfDetection.c \
-module5_2_sources/UhuruStatic/include/tfidfDetection.h \
-module5_2_sources/UhuruStatic/src/uh_errors.c \
-module5_2_sources/UhuruStatic/include/uh_errors.h \
-module5_2_sources/UhuruStatic/src/UhuruStatic.c \
-module5_2_sources/UhuruStatic/resources/UhuruStatic.h \
-module5_2_sources/UhuruStatic/src/utils.c \
-module5_2_sources/UhuruStatic/include/utils.h \
-module5_2_sources/UhuruStatic/src/vector.c \
-module5_2_sources/UhuruStatic/include/vector.h \
-module5_2_sources/UhuruStatic/include/windowsTypes.h
+module/module5_2.c \
+module/UhuruStatic.h \
+lib/include/PEUtils.h \
+lib/include/databases.h \
+lib/include/distances.h \
+lib/include/elfReader.h \
+lib/include/gestionPE.h \
+lib/include/kNN.h \
+lib/include/miniz.h \
+lib/include/model.h \
+lib/include/table.h \
+lib/include/tfidfDetection.h \
+lib/include/uh_errors.h \
+lib/include/utils.h \
+lib/include/vector.h \
+lib/include/windowsTypes.h \
+lib/src/UhuruStatic.c \
+lib/src/databases.c \
+lib/src/distances.c \
+lib/src/elfReader.c \
+lib/src/gestionPE.c \
+lib/src/kNN.c \
+lib/src/miniz.c \
+lib/src/model.c \
+lib/src/table.c \
+lib/src/tfidfDetection.c \
+lib/src/uh_errors.c \
+lib/src/utils.c \
+lib/src/vector.c 
 
 AM_CPPFLAGS= -DMODULE5_2_DBDIR='"@MODULE5_2_DBDIR@"'
 module5_2_la_LDFLAGS= -module -avoid-version
-module5_2_la_CFLAGS= -I$(srcdir)/module5_2_sources/UhuruStatic/include -I$(srcdir)/module5_2_sources/UhuruStatic/resources
+module5_2_la_CFLAGS= -I$(srcdir)/lib/include
 module5_2_la_LIBADD=
 module5_2_la_CFLAGS+= @LIBUHURU_CFLAGS@
 module5_2_la_LIBADD+= @LIBUHURU_LIBS@
