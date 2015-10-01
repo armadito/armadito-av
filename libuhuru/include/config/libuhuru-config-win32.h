@@ -17,6 +17,8 @@
 #define HAVE__WRITE
 #undef HAVE_CLOSE
 #define HAVE__CLOSE
+/* windows does not have realpath() */
+#undef HAVE_REALPATH
 
 /* specific strerror */
 #undef HAVE_STRERROR

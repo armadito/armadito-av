@@ -92,6 +92,7 @@
     <ClCompile Include="..\..\..\libuhuru\src\lib\ipcman.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\module.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\os\windows\dir.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\lib\os\windows\file.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\os\windows\ipc.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\os\windows\mimetype.c" />
     <ClCompile Include="..\..\..\libuhuru\src\lib\os\windows\string.c" />

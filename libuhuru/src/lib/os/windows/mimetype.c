@@ -1,6 +1,7 @@
 #include "libuhuru-config.h"
 
 #include "os/mimetype.h"
+#include "os/string.h"
 #include <glib.h>
 #include <Windows.h>
 #include <stdio.h>

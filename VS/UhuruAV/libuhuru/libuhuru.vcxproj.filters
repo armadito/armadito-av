@@ -63,6 +63,9 @@
     <ClCompile Include="..\..\..\libuhuru\src\lib\builtin-modules\mimetypemod.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\lib\os\windows\file.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\libuhuru\src\lib\conf.h">

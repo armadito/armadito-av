@@ -67,7 +67,12 @@ static void uhuru_scan_call_callbacks(struct uhuru_scan *scan, struct uhuru_repo
 
 static void local_scan_init(struct uhuru_scan *scan)
 {
-  struct uhuru_module *alert_module, *quarantine_module;
+#ifdef HAVE_ALERT_MODULE
+	struct uhuru_module *alert_module;
+#endif
+#ifdef HAVE_QUARANTINE_MODULE
+	struct uhuru_module *quarantine_module;
+#endif
 
   scan->local.thread_pool = NULL;
 
@@ -308,12 +313,16 @@ struct uhuru_scan *uhuru_scan_new(struct uhuru *uhuru, const char *path, enum uh
 
   scan->uhuru = uhuru;
 
+#ifdef HAVE_REALPATH
   scan->path = (const char *)realpath(path, NULL);
   if (scan->path == NULL) {
     perror("realpath");
     free(scan);
     return NULL;
   }
+#else
+  scan->path = os_strdup(path);
+#endif
 
   scan->flags = flags;
   scan->callbacks = g_array_new(FALSE, FALSE, sizeof(struct callback_entry));
