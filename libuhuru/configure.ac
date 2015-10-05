@@ -102,7 +102,8 @@ pkgconfig/Makefile
 src/Makefile
 src/lib/Makefile
 src/scand/Makefile
-src/watchd/Makefile
+src/on-access/Makefile
+src/on-access/linux/Makefile
 tests/Makefile
 tools/Makefile
 ])
