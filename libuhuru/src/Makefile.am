@@ -1,1 +1,2 @@
-SUBDIRS=lib scand 
+SUBDIRS=lib scand on-access
+
