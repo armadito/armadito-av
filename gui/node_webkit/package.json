@@ -2,8 +2,8 @@
  "name": "uhuru-av",
  "main": "index.html",
  "window": {
-   "toolbar": false,
-   "width": 1024,
-   "height": 768
+   "toolbar": true,
+   "width": 800,
+   "height": 600
  }
 }

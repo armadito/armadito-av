@@ -1,60 +1,22 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Hello Node-webkit!</title>
-	<!-- Bring to you by http://www.CSSTableGenerator.com -->
-	<link rel="stylesheet" href="css/table.css" type="text/css"/>
+    <title>Node-Webkit POC</title>
+	<link href="css/style.css" rel="stylesheet" media="all" type="text/css"> 
   </head>
   <body>
-	<h2 align="center" > Uhuru-AV 2</h2>
+  
+	<h3 align="center" > Uhuru-AV NW.JS POC</h2>
 
-	<div class="CSS_Table_Example" style="width:600px;height:150px;">
-			<table align="center" >
-				<tr> 
-					<td>
-						Title 1
-					</td>
-					<td >
-						Title 2
-					</td>
-					<td>
-						Title 3
-					</td>
-				</tr>
-				<tr>
-					<td >
-						Row 1
-					</td>
-					<td>
-						Row 1
-					</td>
-					<td>
-						Row 1
-					</td>
-				</tr>
-				<tr>
-					<td >
-						Row 2
-					</td>
-					<td>
-						Row 2
-					</td>
-					<td>
-						Row 2
-					</td>
-				</tr>
-				<tr>
-					<td >
-						Row 2
-					</td>
-					<td>
-						Row 2
-					</td>
-					<td>
-						Row 2
-					</td>
-				</tr>
-			</table>
-		</div>
+	<!-- We include all JS files to be used -->
+	<script language ="javascript" src="js/systray.js" > </script>
+    <script language ="javascript" src="js/systray_onclick.js"> </script>
+	
+	
+        <p align="center">
+			<button onclick="initSystray()">Init Systray</button> 
+			   <br><br>
+			<button onclick="closeSystray()">Remove Systray</button>
+		</p>
   </body>
 </html>
