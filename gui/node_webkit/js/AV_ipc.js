@@ -4,6 +4,7 @@ ipc.config.id   = 'world';
 ipc.config.retry= 1500;
 ipc.config.rawBuffer=true;
 ipc.config.encoding='ascii';
+ipc.config.networkPort='8077';
 
 function start_world_server_ipc(){
 
@@ -12,21 +13,14 @@ function start_world_server_ipc(){
 			ipc.server.on(
 				'connect',
 				function(socket){
-					ipc.server.emit(
-						socket,
-						'hello'
-					);
+					server_on_connect(socket);
 				}
 			);
 
 			ipc.server.on(
 				'data',
 				function(data,socket){
-					ipc.log('got a message'.debug, data,data.toString());
-					ipc.server.emit(
-						socket,
-						'goodbye'
-					);
+					server_on_data_received(data,socket);
 				}
 			);
 		}
@@ -44,17 +38,21 @@ function hello_world_ipc (){
 			ipc.of.world.on(
 				'connect',
 				function(){
-					ipc.log('## connected to world ##'.rainbow, ipc.config.delay);
-					ipc.of.world.emit(
-						'hello'
-					)
+					client_on_connect();	
 				}
 			);
 
 			ipc.of.world.on(
+				'disconnect',
+				function(){
+					client_on_disconnect();
+				}
+			);
+			
+			ipc.of.world.on(
 				'data',
 				function(data){
-					ipc.log('got a message from world : '.debug, data,data.toString());
+					client_on_data_received(data);
 				}
 			);
 		}
