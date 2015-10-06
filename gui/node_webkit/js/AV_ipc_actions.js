@@ -1,9 +1,11 @@
 
 function server_on_connect( socket )
 {
+	var message = create_message();
+	
 	ipc.server.emit(
 		socket,
-		'hello bitch'
+		message
 	);		
 }
 
