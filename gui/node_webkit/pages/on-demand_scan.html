@@ -6,25 +6,46 @@
   </head>
   <body>
   
+    <p align="center">
+     <img id="uhuru_grey_logo" src="../img/helmet_loupe.jpg"> </img>
+    </p>
+	
 	<h3 align="center" > On-demand scan</h2>
 
 		<p align="center">
 		    <form id="myForm" align="center" >
 				<input type="file" id="fileDialog" nwdirectory />
 				  
+				 <br><br>
+				  
+				 Param 1 :
 				 <select id="param1" onchange="update_param1();"> 
-				   Paramètre 1 :
+				  
+				   <option value="valeur1">Option 1</option> 
+				   <option value="valeur2">Option 2</option> 
+				   <option value="valeur3">Option 3</option> 
+				</select> 	
+				
+				&nbsp; &nbsp;
+				
+				 Param 2 :
+				 <select id="param2" onchange="update_param2();"> 
+				  
 				   <option value="valeur1">Option 1</option> 
 				   <option value="valeur2">Option 2</option> 
 				   <option value="valeur3">Option 3</option> 
 				</select> 
 				
-				 <select id="param2" onchange="update_param2();"> 
-				   Paramètre 2 :
-				   <option value="valeur1">Option 1</option> 
-				   <option value="valeur2">Option 2</option> 
-				   <option value="valeur3">Option 3</option> 
-				</select> 
+				<br><br>
+				
+				<h4>Type of scan :</h4>
+				Complete <input type="radio" name="group1" value="Complete">  <br>
+				Fast <input type="radio" name="group1" value="Fast"> <br>
+				Slow <input type="radio" name="group1" value="Slow" checked> <br>
+				
+				<br>
+
+				Use heuristic analysis : <input type="checkbox" name="heuristic_mode" value="y">
 				
 			</form>
 		</p>
