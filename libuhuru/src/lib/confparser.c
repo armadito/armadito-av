@@ -162,7 +162,7 @@ int scanner_get_next_token(struct scanner *s)
 static void scanner_free(struct scanner *s)
 {
   g_string_free(s->token_text, TRUE);
-  free(s);
+  g_free(s);
 }
 
 /*
@@ -446,5 +446,5 @@ void uhuru_conf_parser_free(struct uhuru_conf_parser *cp)
     g_ptr_array_free(cp->current_args, TRUE);
   }
 
-  free(cp);
+  g_free(cp);
 }
