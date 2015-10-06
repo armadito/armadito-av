@@ -22,8 +22,7 @@ struct watchd {
 
 static gboolean watchd_cb(GIOChannel *source, GIOCondition condition, gpointer data);
 
-/* Size of buffer to use when reading fanotify events */
-/* 8192 is recommended by fanotify man page */
+/* Size of buffer to use when reading fanotify events, 8192 recommended by fanotify man page */
 #define FANOTIFY_BUFFER_SIZE 8192
 
 struct watchd *watchd_new(void)
