@@ -8,10 +8,18 @@
   
 	<h3 align="center" > On-demand scan</h2>
 
-	<!-- We include all JS files to be used -->
-	<script language ="javascript" src="../js/AVscan.js" > </script>
-        <p align="center">
-			<button onclick="new_ondemand_scan()">New Scan</button>
+		<p align="center">
+		    <form id="myForm" align="center" >
+				<input type="file" id="fileDialog" nwdirectory />
+			</form>
 		</p>
+		
+		<p align="center">
+		  <button onclick="new_ondemand_scan()">Start scan now!</button> 
+		</p>
+		
+
+	<script language ="javascript" src="../js/AV_scan.js" > </script>
+		
   </body>
 </html>

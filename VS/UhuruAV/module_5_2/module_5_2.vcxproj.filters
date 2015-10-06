@@ -60,8 +60,10 @@
     <ClCompile Include="..\..\..\modules\module5_2\src\lib\src\elfReader.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="main.c">
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="module5_2.def">
       <Filter>Fichiers sources</Filter>
-    </ClCompile>
+    </None>
   </ItemGroup>
 </Project>
