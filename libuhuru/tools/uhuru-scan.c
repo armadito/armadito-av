@@ -75,7 +75,7 @@ static void parse_options(int argc, char *argv[], struct scan_options *scan_opts
 
   scan_opts->use_daemon = 1;
   scan_opts->recursive = 0;
-  scan_opts->threaded = 1;
+  scan_opts->threaded = 0;
   scan_opts->no_summary = 0;
   scan_opts->print_clean = 0;
   scan_opts->path = NULL;
@@ -218,8 +218,9 @@ int main(int argc, char **argv)
 
   if (!opts->no_summary)
     summary = (struct scan_summary *)malloc(sizeof(struct scan_summary));
-
+  printf("point1\n" );
   do_scan(opts, summary);
+  printf("point2\n" );
 
   if (!opts->no_summary)
     print_summary(summary);
