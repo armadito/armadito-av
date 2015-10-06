@@ -37,8 +37,9 @@ void Systray::createActions()
 
 QIcon *Systray::getIcon()
 {
+
 #if 0
-  QSvgRenderer renderer(QString(":/icons/uhuru.svg"));
+  QSvgRenderer renderer(QString(":/icons/uhuru_white.svg"));
 
   QPixmap pixmap(24, 24);
   //  pixmap.fill(0xaaA08080);  // partly transparent red-ish background
@@ -55,8 +56,9 @@ QIcon *Systray::getIcon()
 
   return new QIcon(pixmap);
 #endif
+
 #if 1
-  return new QIcon(":/icons/uhuru.svg");
+  return new QIcon(":/icons/uhuru_white.svg");
 #endif
 }
 
@@ -98,6 +100,7 @@ void Systray::scan(const QString &path)
 {
   std::cerr << "scanning " << path.toStdString().c_str() << "\n";
 
+  	
   ScanModel *model = new ScanModel(path);
   ScanWindow *w = new ScanWindow(model);
   w->show();

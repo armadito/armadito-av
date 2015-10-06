@@ -19,7 +19,7 @@ UpdateDialog::UpdateDialog(UpdateInfoModel *model, QWidget *parent) :
 QIcon *UpdateDialog::getIcon()
 {
 #if 0
-  QSvgRenderer renderer(QString(":/icons/uhuru.svg"));
+  QSvgRenderer renderer(QString(":/icons/uhuru_grey.svg"));
 
   QPixmap pixmap(24, 24);
   //  pixmap.fill(0xaaA08080);  // partly transparent red-ish background
@@ -37,7 +37,7 @@ QIcon *UpdateDialog::getIcon()
   return new QIcon(pixmap);
 #endif
 #if 1
-  return new QIcon(":/icons/uhuru.svg");
+  return new QIcon(":/icons/uhuru_grey.svg");
 #endif
 }
 

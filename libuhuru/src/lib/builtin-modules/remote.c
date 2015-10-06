@@ -1,5 +1,6 @@
 #include <libuhuru/module.h>
 #include "remote.h"
+#include "os/string.h"
 
 #include <assert.h>
 #include <glib.h>
@@ -25,7 +26,7 @@ static enum uhuru_mod_status remote_conf_socket_dir(struct uhuru_module *module,
 {
   struct remote_data *re_data = (struct remote_data *)module->data;
 
-  re_data->remote_sock_dir = strdup(argv[0]);
+  re_data->remote_sock_dir = os_strdup(argv[0]);
 
   return UHURU_MOD_OK;
 }

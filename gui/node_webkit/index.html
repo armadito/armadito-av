@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Node-Webkit POC</title>
+	<link href="css/style.css" rel="stylesheet" media="all" type="text/css"> 
+  </head>
+  <body>
+  
+	<h3 align="center" > Uhuru-AV NW.JS POC</h2>
+
+	<!-- We include all JS files to be used -->
+	<script language ="javascript" src="js/systray.js" > </script>
+    <script language ="javascript" src="js/systray_onclick.js"> </script>
+	<script language ="javascript" src="js/AV_ipc.js" > </script>
+
+	
+        <p align="center">
+			<button onclick="initSystray()">Init Systray</button> 
+			   <br><br>
+			<button onclick="closeSystray()">Remove Systray</button>
+		</p>
+		
+		<p align="center">
+			<button onclick="start_world_server_ipc()">Start world server</button> 
+			   <br><br>
+			<button onclick="hello_world_ipc()">Send hello to World</button>
+		</p>
+		
+		
+		
+  </body>
+</html>

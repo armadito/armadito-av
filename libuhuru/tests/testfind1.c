@@ -9,5 +9,5 @@ static void print_entry(const char *full_path, void *data)
 
 int main(int argc, char **argv)
 {
-  dir_map(argv[1], 1, print_entry, NULL);
+  os_dir_map(argv[1], 1, print_entry, NULL);
 }

@@ -1,1 +1,2 @@
-SUBDIRS=lib scand #watchd
+SUBDIRS=lib scand on-access
+

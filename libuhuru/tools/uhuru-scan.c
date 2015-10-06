@@ -1,11 +1,10 @@
+
 #include <libuhuru/scan.h>
 #include "lib/statusp.h"
 
-#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/epoll.h>
+#include <string.h>
 
 struct scan_summary {
   int scanned;
@@ -25,14 +24,17 @@ struct scan_options {
   char *path;
 };
 
-static struct option long_options[] = {
-  {"help",         no_argument,       0, 'h'},
-  {"local",        no_argument,       0, 'l'},
-  {"recursive",    no_argument,       0, 'r'},
-  {"threaded",     no_argument,       0, 't'},
-  {"no-summary",   no_argument,       0, 'n'},
-  {"print-clean",  no_argument,       0, 'c'},
-  {0, 0, 0, 0}
+static struct optdef {
+  const char *long_form;
+  char short_form;
+} scan_optdefs[] = {
+  {"help",         'h'},
+  {"local",        'l'},
+  {"recursive",    'r'},
+  {"threaded",     't'},
+  {"no-summary",   'n'},
+  {"print-clean",  'c'},
+  {NULL, '\0'}
 };
 
 static void usage(void)
@@ -53,21 +55,35 @@ static void usage(void)
   exit(1);
 }
 
-static void parse_options(int argc, char *argv[], struct scan_options *opts)
+static char get_option(const char *argv, struct optdef *od)
 {
-  int c;
+  while(od->long_form != NULL) {
+    if (argv[0] == '-' && argv[1] == '-' && !strcmp(argv + 2, od->long_form))
+      return od->short_form;
+    else if (argv[0] == '-' && argv[1] == od->short_form)
+      return od->short_form;
 
-  opts->use_daemon = 1;
-  opts->recursive = 0;
-  opts->threaded = 1;
-  opts->no_summary = 0;
-  opts->print_clean = 0;
-  opts->path = NULL;
+    od++;
+  }
 
-  while (1) {
-    int option_index = 0;
+  return -1;
+}
 
-    c = getopt_long(argc, argv, "hlrtnc", long_options, &option_index);
+static void parse_options(int argc, char *argv[], struct scan_options *scan_opts)
+{
+  int optind;
+
+  scan_opts->use_daemon = 1;
+  scan_opts->recursive = 0;
+  scan_opts->threaded = 1;
+  scan_opts->no_summary = 0;
+  scan_opts->print_clean = 0;
+  scan_opts->path = NULL;
+
+  for(optind = 1; optind < argc; optind++) {
+    int c;
+
+    c = get_option(argv[optind], scan_optdefs);
 
     if (c == -1)
       break;
@@ -77,19 +93,19 @@ static void parse_options(int argc, char *argv[], struct scan_options *opts)
       usage();
       break;
     case 'l':
-      opts->use_daemon = 0;
+      scan_opts->use_daemon = 0;
       break;
     case 'r':
-      opts->recursive = 1;
+      scan_opts->recursive = 1;
       break;
     case 't':
-      opts->threaded = 1;
+      scan_opts->threaded = 1;
       break;
     case 'n':
-      opts->no_summary = 1;
+      scan_opts->no_summary = 1;
       break;
     case 'c':
-      opts->print_clean = 1;
+      scan_opts->print_clean = 1;
       break;
     default:
       usage();
@@ -97,9 +113,9 @@ static void parse_options(int argc, char *argv[], struct scan_options *opts)
   }
 
   if (optind < argc)
-    opts->path = argv[optind];
+    scan_opts->path = argv[optind];
 
-  if (opts->path == NULL)
+  if (scan_opts->path == NULL)
     usage();
 }
 
@@ -149,59 +165,6 @@ static void summary_callback(struct uhuru_report *report, void *callback_data)
   }
 }
 
-static void poll_add_fd(int epoll_fd, int fd)
-{
-  struct epoll_event ev;
-
-  ev.events = EPOLLIN | EPOLLRDHUP | EPOLLHUP;
-  ev.data.fd = fd;
-  if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &ev) == -1) {
-    perror("epoll_ctl");
-    exit(EXIT_FAILURE);
-  }
-}
-
-static void scan_loop_poll(struct uhuru_scan *scan)
-{
-#define MAX_EVENTS 10
-  struct epoll_event events[MAX_EVENTS];
-  int epoll_fd;
-
-  epoll_fd = epoll_create(42);
-  if (epoll_fd < 0) {
-    perror("epoll_create");
-    exit(EXIT_FAILURE);
-  }
-
-  poll_add_fd(epoll_fd, STDIN_FILENO);
-  poll_add_fd(epoll_fd, uhuru_scan_get_poll_fd(scan));
-
-  while (1) {
-    int n_ev, n;
-
-    n_ev = epoll_wait(epoll_fd, events, MAX_EVENTS, -1);
-    if (n_ev == -1) {
-      perror("epoll_wait");
-      exit(EXIT_FAILURE);
-    }
-
-    for (n = 0; n < n_ev; n++) {
-      if (events[n].data.fd == STDIN_FILENO) {
-	;
-      } else {
-	if (uhuru_scan_run(scan) != UHURU_SCAN_CONTINUE)
-	  return;
-      }
-    }
-  }
-}
-
-static void scan_loop_no_poll(struct uhuru_scan *scan)
-{
-  while(uhuru_scan_run(scan) == UHURU_SCAN_CONTINUE)
-    ;
-}
-
 static void do_scan(struct scan_options *opts, struct scan_summary *summary)
 {
   enum uhuru_scan_flags flags = 0;
@@ -228,10 +191,8 @@ static void do_scan(struct scan_options *opts, struct scan_summary *summary)
 
   uhuru_scan_start(scan);
 
-  if (opts->use_daemon)
-    scan_loop_poll(scan);
-  else
-    scan_loop_no_poll(scan);
+  while(uhuru_scan_run(scan) == UHURU_SCAN_CONTINUE)
+    ;
 
   uhuru_scan_free(scan);
 

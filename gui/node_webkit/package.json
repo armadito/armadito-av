@@ -1,0 +1,9 @@
+{
+ "name": "uhuru-av",
+ "main": "index.html",
+ "window": {
+   "toolbar": true,
+   "width": 800,
+   "height": 600
+ }
+}

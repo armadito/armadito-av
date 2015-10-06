@@ -19,6 +19,7 @@ public:
   const QString &path() { return _path; }
   const QDateTime &startDate() { return _startDate; }
   const bool completed() { return _completed; }
+  
 
   void scan();
 

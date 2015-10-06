@@ -4,27 +4,30 @@
 #include <libuhuru/scan.h>
 
 #include "conf.h"
-#include "dir.h"
+#include "os/dir.h"
+#include "os/file.h"
+#include "os/ipc.h"
+#include "os/mimetype.h"
+#include "os/string.h"
 #include "modulep.h"
-#include "ipc.h"
+#include "ipcman.h"
 #include "statusp.h"
+#include "reportp.h"
 #include "uhurup.h"
-#include "unixsock.h"
+#ifdef HAVE_ALERT_MODULE
 #include "builtin-modules/alert.h"
+#endif
+#ifdef HAVE_QUARANTINE_MODULE
 #include "builtin-modules/quarantine.h"
+#endif
 #include "builtin-modules/remote.h"
 
 #include <assert.h>
-#include <errno.h>
 #include <glib.h>
-#include <magic.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
 struct callback_entry {
   uhuru_scan_callback_t callback;
@@ -33,12 +36,11 @@ struct callback_entry {
 
 struct local_scan {
   GThreadPool *thread_pool;  
-  GPrivate *private_magic_key;
 };
 
 struct remote_scan {
-  char *sock_path;
-  int sock;
+  const char *connect_url;
+  int connect_fd;
   struct ipc_manager *manager;
 };
 
@@ -65,16 +67,24 @@ static void uhuru_scan_call_callbacks(struct uhuru_scan *scan, struct uhuru_repo
 
 static void local_scan_init(struct uhuru_scan *scan)
 {
-  struct uhuru_module *alert_module, *quarantine_module;
+#ifdef HAVE_ALERT_MODULE
+	struct uhuru_module *alert_module;
+#endif
+#ifdef HAVE_QUARANTINE_MODULE
+	struct uhuru_module *quarantine_module;
+#endif
 
   scan->local.thread_pool = NULL;
-  scan->local.private_magic_key = NULL;
 
+#ifdef HAVE_ALERT_MODULE
   alert_module = uhuru_get_module_by_name(scan->uhuru, "alert");
   uhuru_scan_add_callback(scan, alert_callback, alert_module->data);
+#endif
 
+#ifdef HAVE_QUARANTINE_MODULE
   quarantine_module = uhuru_get_module_by_name(scan->uhuru, "quarantine");
   uhuru_scan_add_callback(scan, quarantine_callback, quarantine_module->data);
+#endif
 }
 
 static enum uhuru_file_status local_scan_apply_modules(const char *path, const char *mime_type, struct uhuru_module **modules,  struct uhuru_report *report)
@@ -110,16 +120,19 @@ static enum uhuru_file_status local_scan_apply_modules(const char *path, const c
   return current_status;
 }
 
-static void local_scan_file(struct uhuru_scan *scan, magic_t magic, const char *path)
+static void local_scan_file(struct uhuru_scan *scan, const char *path)
 {
   enum uhuru_file_status status;
   struct uhuru_report report;
   struct uhuru_module **modules;
   const char *mime_type;
 
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "local_scan_file - %s", path);
+
   uhuru_report_init(&report, path);
 
-  modules = uhuru_get_applicable_modules(scan->uhuru, magic, path, &mime_type);
+  mime_type = os_mime_type_guess(path);
+  modules = uhuru_get_applicable_modules(scan->uhuru, mime_type);
 
   if (modules == NULL)
     report.status = UHURU_UNKNOWN_FILE_TYPE;
@@ -129,30 +142,6 @@ static void local_scan_file(struct uhuru_scan *scan, magic_t magic, const char *
   uhuru_scan_call_callbacks(scan, &report);
 
   uhuru_report_destroy(&report);
-
-  free((void *)mime_type);
-}
-
-/* Unfortunately, libmagic is not thread-safe. */
-/* We create a new magic_t for each thread, and keep it  */
-/* in thread's private data, so that it is created only once. */
-static void magic_destroy_notify(gpointer data)
-{
-  magic_close((magic_t)data);
-}
-
-static magic_t get_private_magic(struct uhuru_scan *scan)
-{
-  magic_t m = (magic_t)g_private_get(scan->local.private_magic_key);
-
-  if (m == NULL) {
-    m = magic_open(MAGIC_MIME_TYPE);
-    magic_load(m, NULL);
-
-    g_private_set(scan->local.private_magic_key, (gpointer)m);
-  }
-
-  return m;
 }
 
 static void local_scan_entry_thread_fun(gpointer data, gpointer user_data)
@@ -160,34 +149,35 @@ static void local_scan_entry_thread_fun(gpointer data, gpointer user_data)
   struct uhuru_scan *scan = (struct uhuru_scan *)user_data;
   char *path = (char *)data;
 
-  local_scan_file(scan, get_private_magic(scan), path);
+  local_scan_file(scan, path);
 
   free(path);
 }
 
-static void local_scan_entry(const char *full_path, enum dir_entry_flag flags, int entry_errno, void *data)
+static void local_scan_entry(const char *full_path, enum os_file_flag flags, int entry_errno, void *data)
 {
   struct uhuru_scan *scan = (struct uhuru_scan *)data;
 
-  if (flags & DIR_ENTRY_IS_ERROR) {
+  if (flags & FILE_FLAG_IS_ERROR) {
     struct uhuru_report report;
 
     uhuru_report_init(&report, full_path);
+    g_log(NULL, G_LOG_LEVEL_WARNING, "local_scan_entry: Error - %s", full_path);
 
     report.status = UHURU_IERROR;
-    report.mod_report = strdup(strerror(entry_errno));
+    report.mod_report = os_strdup(os_strerror(entry_errno));
     uhuru_scan_call_callbacks(scan, &report);
 
     uhuru_report_destroy(&report);
   }
 
-  if (!(flags & DIR_ENTRY_IS_REG))
+  if (!(flags & FILE_FLAG_IS_PLAIN_FILE))
     return;
 
   if (scan->flags & UHURU_SCAN_THREADED)
-    g_thread_pool_push(scan->local.thread_pool, (gpointer)strdup(full_path), NULL);
+    g_thread_pool_push(scan->local.thread_pool, (gpointer)os_strdup(full_path), NULL);
   else
-    local_scan_file(scan, NULL, full_path);
+    local_scan_file(scan, full_path);
 }
 
 static int get_max_threads(void)
@@ -199,7 +189,6 @@ static enum uhuru_scan_status local_scan_start(struct uhuru_scan *scan)
 {
   if (scan->flags & UHURU_SCAN_THREADED) {
     scan->local.thread_pool = g_thread_pool_new(local_scan_entry_thread_fun, scan, get_max_threads(), FALSE, NULL);
-    scan->local.private_magic_key = g_private_new(magic_destroy_notify);
   }
 
   return UHURU_SCAN_OK;
@@ -207,22 +196,20 @@ static enum uhuru_scan_status local_scan_start(struct uhuru_scan *scan)
 
 static enum uhuru_scan_status local_scan_run(struct uhuru_scan *scan)
 {
-  struct stat sb;
+  struct os_file_stat stat_buf;
+  int stat_errno;
 
-  if (stat(scan->path, &sb) == -1) {
-    perror("stat");
-    /* exit(EXIT_FAILURE); */
-  }
+  os_file_stat(scan->path, &stat_buf, &stat_errno);
 
-  if (S_ISREG(sb.st_mode)) {
+  if (stat_buf.flags & FILE_FLAG_IS_PLAIN_FILE) {
     if (scan->flags & UHURU_SCAN_THREADED)
-      g_thread_pool_push(scan->local.thread_pool, (gpointer)strdup(scan->path), NULL);
+      g_thread_pool_push(scan->local.thread_pool, (gpointer)os_strdup(scan->path), NULL);
     else
-      local_scan_file(scan, NULL, scan->path);
-  } else if (S_ISDIR(sb.st_mode)) {
+      local_scan_file(scan, scan->path);
+  } else if (stat_buf.flags & FILE_FLAG_IS_DIRECTORY) {
     int recurse = scan->flags & UHURU_SCAN_RECURSE;
 
-    dir_map(scan->path, recurse, local_scan_entry, scan);
+    os_dir_map(scan->path, recurse, local_scan_entry, scan);
   }
 
   if (scan->flags & UHURU_SCAN_THREADED)
@@ -239,21 +226,7 @@ static enum uhuru_scan_status local_scan_run(struct uhuru_scan *scan)
 
 static void remote_scan_init(struct uhuru_scan *scan)
 {
-  struct uhuru_module *remote_module;
-  const char *sock_dir;
-  GString *sock_path;
-
-  remote_module = uhuru_get_module_by_name(scan->uhuru, "remote");
-  assert(remote_module != NULL);
-
-  sock_dir = remote_module_get_sock_dir(remote_module);
-  assert(sock_dir != NULL);
-
-  sock_path = g_string_new(sock_dir);
-
-  g_string_append_printf(sock_path, "/uhuru-%s", getenv("USER"));
-  scan->remote.sock_path = sock_path->str;
-  g_string_free(sock_path, FALSE);
+  scan->remote.connect_url = uhuru_get_remote_url(scan->uhuru);
 }
 
 static void remote_scan_handler_scan_file(struct ipc_manager *m, void *data)
@@ -278,7 +251,7 @@ static void remote_scan_handler_scan_file(struct ipc_manager *m, void *data)
   report.action = (enum uhuru_action)action;
   report.mod_name = mod_name;
   if (x_status != NULL)
-    report.mod_report = strdup(x_status);
+    report.mod_report = os_strdup(x_status);
 
   uhuru_scan_call_callbacks(scan, &report);
 
@@ -295,24 +268,24 @@ static void remote_scan_handler_scan_end(struct ipc_manager *m, void *data)
   
 #if 0
 #ifdef DEBUG
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "remote scan end, closing socket %d", scan->remote.sock);
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "remote scan end, closing socket %d", scan->remote.connect_fd);
 #endif
   
-  if (close(scan->remote.sock) < 0) {
-    g_log(NULL, G_LOG_LEVEL_WARNING, "closing socket %d failed (%s)", scan->remote.sock, strerror(errno));
+  if (close(scan->remote.connect_fd) < 0) {
+    g_log(NULL, G_LOG_LEVEL_WARNING, "closing socket %d failed (%s)", scan->remote.connect_fd, os_strerror(errno));
   }
 
-  scan->remote.sock = -1;
+  scan->remote.connect_fd = -1;
 #endif
 }
 
 static enum uhuru_file_status remote_scan_start(struct uhuru_scan *scan)
 {
-  scan->remote.sock = client_socket_create(scan->remote.sock_path, 10);
-  if (scan->remote.sock < 0)
+  scan->remote.connect_fd = os_ipc_connect(scan->remote.connect_url, 10);
+  if (scan->remote.connect_fd < 0)
     return UHURU_IERROR;
 
-  scan->remote.manager = ipc_manager_new(scan->remote.sock, scan->remote.sock);
+  scan->remote.manager = ipc_manager_new(scan->remote.connect_fd);
 
   ipc_manager_add_handler(scan->remote.manager, IPC_MSG_ID_SCAN_FILE, remote_scan_handler_scan_file, scan);
   ipc_manager_add_handler(scan->remote.manager, IPC_MSG_ID_SCAN_END, remote_scan_handler_scan_end, scan);
@@ -339,12 +312,17 @@ struct uhuru_scan *uhuru_scan_new(struct uhuru *uhuru, const char *path, enum uh
   struct uhuru_scan *scan = (struct uhuru_scan *)malloc(sizeof(struct uhuru_scan));
 
   scan->uhuru = uhuru;
+
+#ifdef HAVE_REALPATH
   scan->path = (const char *)realpath(path, NULL);
   if (scan->path == NULL) {
     perror("realpath");
     free(scan);
     return NULL;
   }
+#else
+  scan->path = os_strdup(path);
+#endif
 
   scan->flags = flags;
   scan->callbacks = g_array_new(FALSE, FALSE, sizeof(struct callback_entry));
@@ -388,7 +366,7 @@ int uhuru_scan_get_poll_fd(struct uhuru_scan *scan)
     return -1;
   }
 
-  return scan->remote.sock;
+  return scan->remote.connect_fd;
 }
 
 enum uhuru_scan_status uhuru_scan_start(struct uhuru_scan *scan)

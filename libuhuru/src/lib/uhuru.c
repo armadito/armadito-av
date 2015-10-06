@@ -7,10 +7,17 @@
 #include "modulep.h"
 #include "statusp.h"
 #include "uhurup.h"
+#include "os/string.h"
+#include "os/mimetype.h"
+#include "os/string.h"
+#ifdef HAVE_ALERT_MODULE
 #include "builtin-modules/alert.h"
+#endif
+#ifdef HAVE_QUARANTINE_MODULE
 #include "builtin-modules/quarantine.h"
+#endif
 #include "builtin-modules/remote.h"
-#include "builtin-modules/mimetype.h"
+#include "builtin-modules/mimetypemod.h"
 
 #include <assert.h>
 #include <glib.h>
@@ -22,8 +29,6 @@ struct uhuru {
   int is_remote;
   struct module_manager *module_manager;
   GHashTable *mime_type_table;
-  /* FIXME: to be removed */
-  magic_t magic;
 };
 
 static struct uhuru *uhuru_new(int is_remote)
@@ -36,22 +41,27 @@ static struct uhuru *uhuru_new(int is_remote)
 
   u->mime_type_table = g_hash_table_new(g_str_hash, g_str_equal);
 
-  u->magic = magic_open(MAGIC_MIME_TYPE);
-  magic_load(u->magic, NULL);
-
   return u;
 }
 
 struct uhuru *uhuru_open(int is_remote)
 {
-  struct uhuru *u = uhuru_new(is_remote);
+  struct uhuru *u;
+
+  os_mime_type_init();
+
+  u = uhuru_new(is_remote);
 
   module_manager_add(u->module_manager, &remote_module);
 
   if (!u->is_remote) {
     module_manager_add(u->module_manager, &mimetype_module);
+#ifdef HAVE_ALERT_MODULE
     module_manager_add(u->module_manager, &alert_module);
+#endif
+#ifdef HAVE_QUARANTINE_MODULE
     module_manager_add(u->module_manager, &quarantine_module);
+#endif
 
     module_manager_load_path(u->module_manager, LIBUHURU_MODULES_PATH);
   }
@@ -71,6 +81,20 @@ struct uhuru *uhuru_open(int is_remote)
 int uhuru_is_remote(struct uhuru *u)
 {
   return u->is_remote;
+}
+
+const char *uhuru_get_remote_url(struct uhuru *u)
+{
+  struct uhuru_module *remote_module;
+  const char *remote_url;
+
+  remote_module = uhuru_get_module_by_name(u, "remote");
+  assert(remote_module != NULL);
+
+  remote_url = remote_module_get_sock_dir(remote_module);
+  assert(remote_url != NULL);
+
+  return remote_url;
 }
 
 struct uhuru_module **uhuru_get_modules(struct uhuru *u)
@@ -99,22 +123,15 @@ void uhuru_add_mime_type(struct uhuru *u, const char *mime_type, struct uhuru_mo
   if (modules == NULL) {
     modules = g_array_new(TRUE, TRUE, sizeof(struct uhuru_module *));
 
-    g_hash_table_insert(u->mime_type_table, (gpointer)(strdup(mime_type)), modules);
+    g_hash_table_insert(u->mime_type_table, (gpointer)(os_strdup(mime_type)), modules);
   }
 
   g_array_append_val(modules, module);
 }
 
-struct uhuru_module **uhuru_get_applicable_modules(struct uhuru *u, magic_t magic, const char *path, const char **p_mime_type)
+struct uhuru_module **uhuru_get_applicable_modules(struct uhuru *u, const char *mime_type)
 {
   GArray *modules;
-  const char *mime_type;
-
-  if (magic == NULL)
-    magic = u->magic;
-
-  mime_type = magic_file(magic, path);
-  *p_mime_type = strdup(mime_type);
 
   modules = (GArray *)g_hash_table_lookup(u->mime_type_table, mime_type);
 
@@ -131,8 +148,6 @@ struct uhuru_module **uhuru_get_applicable_modules(struct uhuru *u, magic_t magi
 
 void uhuru_close(struct uhuru *u)
 {
-  magic_close(u->magic);
-
   module_manager_close_all(u->module_manager);
 }
 

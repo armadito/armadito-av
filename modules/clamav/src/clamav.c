@@ -1,13 +1,13 @@
 #include <libuhuru/module.h>
 
 #include <assert.h>
-#include <clamav.h>
 #include <glib.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #define _XOPEN_SOURCE
 #include <time.h>
+#include "os/osdeps.h"
 
 struct clamav_data {
   struct cl_engine *clamav_engine;
@@ -43,7 +43,7 @@ static enum uhuru_mod_status clamav_init(struct uhuru_module *module)
   /* this if you want to use clamav bases from clamav standard directory */
   cl_data->db_dir = cl_retdbdir();
 #endif
-  cl_data->db_dir = strdup(MODULE_CLAMAV_DBDIR);
+  cl_data->db_dir = os_strdup(MODULE_CLAMAV_DBDIR);
 
   cl_data->late_days = DEFAULT_LATE_DAYS;
   cl_data->critical_days = DEFAULT_CRITICAL_DAYS;
@@ -60,7 +60,7 @@ static enum uhuru_mod_status clamav_conf_set_dbdir(struct uhuru_module *module, 
   if (cl_data->db_dir != NULL)
     free((char *)cl_data->db_dir);
 
-  cl_data->db_dir = strdup(argv[0]);
+  cl_data->db_dir = os_strdup(argv[0]);
 
   return UHURU_MOD_OK;
 }
@@ -123,7 +123,7 @@ static enum uhuru_file_status clamav_scan(struct uhuru_module *module, const cha
   cl_scan_status = cl_scanfile(path, &virus_name, &scanned, cl_data->clamav_engine, CL_SCAN_STDOPT);
 
   if (cl_scan_status == CL_VIRUS) {
-    *pmod_report = strdup(virus_name);
+    *pmod_report = os_strdup(virus_name);
 
     return UHURU_MALWARE;
   }
@@ -165,7 +165,7 @@ static GDateTime *clamav_convert_datetime(const char *clamav_datetime)
   GTimeZone *timezone = NULL;
 
   /* ClamAV format: 17 Sep 2013 10-57 -0400 */
-  sscanf(clamav_datetime, "%d %3s %d %2d-%2d %5s", &day, s_month, &year, &hour, &minute, s_timezone);
+  os_sscanf(clamav_datetime, "%d %3s %d %2d-%2d %5s", &day, s_month, &year, &hour, &minute, s_timezone);
 
   timezone = g_time_zone_new(s_timezone);
 
@@ -233,18 +233,18 @@ static enum uhuru_update_status clamav_info(struct uhuru_module *module, struct 
     
     base_info = g_new(struct uhuru_base_info, 1);
 
-    base_info->name = strdup(names[i]);
+    base_info->name = os_strdup(names[i]);
 
     g_string_printf(version, "%d", cvd->version);
-    base_info->version = strdup(version->str);
+    base_info->version = os_strdup(version->str);
 
     base_datetime = clamav_convert_datetime(cvd->time);
     s_base_datetime = g_date_time_format(base_datetime, "%FT%H:%M:%SZ");
-    base_info->date = strdup(s_base_datetime);
+    base_info->date = os_strdup(s_base_datetime);
     g_free(s_base_datetime);
 
     base_info->signature_count = cvd->sigs;
-    base_info->full_path = strdup(full_path->str);
+    base_info->full_path = os_strdup(full_path->str);
 
     /* 
        daily.cld is the base to use to compute update status of module 
@@ -254,7 +254,7 @@ static enum uhuru_update_status clamav_info(struct uhuru_module *module, struct 
     */
     if (!strcmp(base_info->name, "daily.cld")) {
       ret_status = clamav_update_status_eval(base_datetime, cl_data->late_days, cl_data->critical_days);
-      info->update_date = strdup(base_info->date);
+      info->update_date = os_strdup(base_info->date);
     }
 
     info->base_infos[i] = base_info;

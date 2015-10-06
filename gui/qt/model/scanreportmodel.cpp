@@ -52,7 +52,7 @@ QVariant ScanReportModel::headerData(int section, Qt::Orientation orientation, i
       case 1:
 	return QString(tr("Detail"));
       case 2:
-	return QString(tr("file"));
+	return QString(tr("File Path"));
       }
     }
   } 
@@ -94,12 +94,14 @@ void ScanReportModel::append(const QString &status, const QString &action, const
 
   QFileInfo info(path);
 
-  struct report_entry entry = { status, action, info.fileName(), report};
+  struct report_entry entry = { status, action, path, report};
 
   _reports.append(entry);
 
   endInsertRows();
-
+  
+  emit endInsert();
+  
 #if 0
   int row = _reports.size() - 1;
   QModelIndex topLeft = createIndex(row,0);

@@ -1,3 +1,21 @@
+2015-09-30  François  <francois@dechelle.net>
+
+	* added lib/os/file.h to encapsulate calls to stat(); changed lib/os/dir.h to use same file flags as lib/os/file.h
+
+	* added lib/os/io.h and lib/os/string.h for definition of platform abstraction macros related to I/O (read/write/close) and strings (strdup)
+
+	* isolated platform specific calls for IPC in os/ipc.h and os/linux/ipc.c
+
+2015-09-29  François  <francois@dechelle.net>
+
+	* isolated calls to libmagic in a OS-specific function (os/mimetype.h, os/linux/mimetype.c); tested
+
+2015-09-28  François  <francois@dechelle.net>
+
+	* fixed bugs in directory traversal in os/linux/dir.c (exiting too early if error, invalid errno passed to callback)
+
+	* moved dir.h to os/dir.h, dir.c to os/linux/dir.c; some cleanup; rewriten directory walking with glib by calls to os_dir_map
+
 2015-09-24  François  <francois@dechelle.net>
 
 	* added #include "libuhuru-config.h" in all C files

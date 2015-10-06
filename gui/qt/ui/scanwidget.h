@@ -6,6 +6,8 @@
 
 #include <QWidget>
 #include <QPushButton>
+#include <QtGui>
+#include <QtCore>
 
 namespace Ui {
   class ScanWidget;
@@ -19,6 +21,9 @@ class ScanWidget : public QWidget
   explicit ScanWidget(ScanModel *model, QWidget *parent = 0);
   ~ScanWidget();
 
+ public slots:
+  void afterEndInsert();
+
  private slots:
   void enableCloseButton();
   void on_closeButton_clicked();
@@ -29,7 +34,10 @@ class ScanWidget : public QWidget
 
   Ui::ScanWidget *ui;
   ScanModel *model;
-  QPushButton *ui_closeButton;    
+  QLabel *ui_labelTitle; 
+  QPushButton *ui_closeButton;
+  QTableView *ui_reportView;
+
 };
 
 #endif

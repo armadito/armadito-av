@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../uhuru.qrc">
-    <normaloff>:/icons/uhuru.svg</normaloff>:/icons/uhuru.svg</iconset>
+    <normaloff>:/icons/uhuru_grey.svg</normaloff>:/icons/uhuru_grey.svg</iconset>
   </property>
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">

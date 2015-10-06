@@ -8,7 +8,7 @@
 
 void ScanWidget::connectLineEdit(const char *lineEditName, Counter *counter)
 {
-  QLineEdit *ui_lineEdit = findChild<QLineEdit*>(lineEditName);
+  QLabel *ui_lineEdit = findChild<QLabel*>(lineEditName);
   assert(ui_lineEdit != NULL);
 
   QObject::connect(counter, SIGNAL(changed(const QString &)), ui_lineEdit, SLOT(setText(const QString &)));
@@ -20,7 +20,7 @@ void ScanWidget::connectLineEdit(const char *lineEditName, Counter *counter)
 void ScanWidget::doConnect(ScanModel *model)
 {
   // We create counters connexions
-  connectLineEdit("totalCount", model->totalCount());
+  //connectLineEdit("totalCount", model->totalCount());
   connectLineEdit("scannedCount", model->scannedCount());
   connectLineEdit("malwareCount", model->malwareCount());
   connectLineEdit("suspiciousCount", model->suspiciousCount());
@@ -48,6 +48,10 @@ void ScanWidget::doConnect(ScanModel *model)
   assert(ui_closeButton != NULL);
   QObject::connect(model, SIGNAL(scanComplete()), this, SLOT(enableCloseButton()));
 
+  // Signal to update Title 
+  ui_labelTitle = findChild<QLabel*>("Title");
+  assert(ui_labelTitle != NULL);
+
   if (model->completed())
     enableCloseButton();
 
@@ -63,19 +67,34 @@ ScanWidget::ScanWidget(ScanModel *model, QWidget *parent) :
   doConnect(model);
 
   // Set report model 
-  QTableView *ui_reportView = findChild<QTableView*>("reportView");
+  ui_reportView = findChild<QTableView*>("reportView");
   assert(ui_reportView != NULL);
-  ui_reportView->setModel(model->report());
+
+  // We must use a proxyModel in order to sort
+  QSortFilterProxyModel *proxyModel = new QSortFilterProxyModel();
+  ScanReportModel *report_model = model->report();
+  QObject::connect(report_model, SIGNAL(endInsert()), this, SLOT(afterEndInsert()));
+
+  proxyModel->setSourceModel(report_model);
+  ui_reportView->setModel(proxyModel); 
 
 #if QT_VERSION < 0x050000
-  ui_reportView->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+  ui_reportView->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
 #else
-  ui_reportView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+  ui_reportView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 #endif
+
+}
+
+void ScanWidget::afterEndInsert()
+{  
+  // do something on ui_reportView
+  	
 }
 
 void ScanWidget::enableCloseButton() 
 {
+  ui_labelTitle->setText(tr("Scan has finished"));
   ui_closeButton->setEnabled(true);
 }
 

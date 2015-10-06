@@ -1,7 +1,9 @@
 icondir=$(datarootdir)/icons/hicolor/scalable/apps
 
 icon_DATA= \
-        uhuru.svg
+        uhuru_white.svg \
+        uhuru_grey.svg
 
 EXTRA_DIST= \
-        uhuru.svg 
+        uhuru_white.svg \
+        uhuru_grey.svg

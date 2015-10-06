@@ -1,6 +1,6 @@
 #include <libuhuru/scan.h>
 #include <libuhuru/module.h>
-#include "dir.h"
+#include "os/dir.h"
 #include "modulep.h"
 #include "alert.h"
 
@@ -362,7 +362,7 @@ static enum uhuru_mod_status alert_conf_alert_dir(struct uhuru_module *module, c
   al_data->alert_dir = strdup(argv[0]);
 
   /* really necessary??? */
-  mkdir_p(al_data->alert_dir);
+  os_mkdir_p(al_data->alert_dir);
 
   return UHURU_MOD_OK;
 }
