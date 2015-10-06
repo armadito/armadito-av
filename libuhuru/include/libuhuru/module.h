@@ -34,6 +34,8 @@ struct uhuru_module {
 
   enum uhuru_file_status (*scan_fun)(struct uhuru_module *module, const char *path, const char *mime_type, char **pmod_report);
 
+  enum uhuru_file_status (*scan_fd_fun)(struct uhuru_module *module, const char *path, const char *mime_type, char **pmod_report);
+
   enum uhuru_mod_status (*close_fun)(struct uhuru_module *module);
 
   enum uhuru_update_status (*info_fun)(struct uhuru_module *module, struct uhuru_module_info *info);
