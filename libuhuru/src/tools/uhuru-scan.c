@@ -1,5 +1,5 @@
-
 #include <libuhuru/ipc.h>
+#include <libuhuru/status.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -120,31 +120,32 @@ static void parse_options(int argc, char *argv[], struct scan_options *scan_opts
 
 static void report_print(struct uhuru_report *report, FILE *out)
 {
-  fprintf(out, "%s: %s", report->path, uhuru_file_status_pretty_str(report->status));
-  if (report->status != UHURU_UNDECIDED && report->status != UHURU_CLEAN && report->status != UHURU_UNKNOWN_FILE_TYPE)
-    fprintf(out, " [%s - %s]", report->mod_name, report->mod_report);
-  if (report->action != UHURU_ACTION_NONE)
-    fprintf(out, " (action %s)", uhuru_action_pretty_str(report->action));
-  fprintf(out, "\n");
 }
 
-static void report_print_callback(struct uhuru_report *report, void *callback_data)
-{
-  int *print_clean = (int *)callback_data;
-
-  if (!*print_clean && (report->status == UHURU_WHITE_LISTED || report->status == UHURU_CLEAN))
-    return;
-
-  report_print(report, stdout);
-}
-
-static void summary_callback(struct uhuru_report *report, void *callback_data)
+static void remote_scan_handler_scan_file(struct ipc_manager *m, void *data)
 {
   struct scan_summary *s = (struct scan_summary *)callback_data;
+  char *path;
+  gint32 i_status;
+  enum uhuru_file_status status;
+  char *mod_name;
+  char *x_status;
+  gint32 i_action;
+  enum uhuru_action action;
+  struct uhuru_report report;
+
+  ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &path);
+  ipc_manager_get_arg_at(m, 1, IPC_INT32_T, &i_status);
+  ipc_manager_get_arg_at(m, 2, IPC_STRING_T, &mod_name);
+  ipc_manager_get_arg_at(m, 3, IPC_STRING_T, &x_status);
+  ipc_manager_get_arg_at(m, 4, IPC_INT32_T, &i_action);
+
+  status = (enum uhuru_file_status)i_status;
+  action = (enum uhuru_action)i_action;
 
   s->scanned++;
 
-  switch(report->status) {
+  switch(status) {
   case UHURU_MALWARE:
     s->malware++;
     break;
@@ -162,7 +163,54 @@ static void summary_callback(struct uhuru_report *report, void *callback_data)
     s->clean++;
     break;
   }
+
+  if (!*print_clean && (status == UHURU_WHITE_LISTED || status == UHURU_CLEAN))
+    return;
+
+  fprintf(out, "%s: %s", >path, uhuru_file_status_pretty_str(status));
+  if (status != UHURU_UNDECIDED && status != UHURU_CLEAN && status != UHURU_UNKNOWN_FILE_TYPE)
+    fprintf(out, " [%s - %s]", mod_name, mod_report);
+  if (action != UHURU_ACTION_NONE)
+    fprintf(out, " (action %s)", uhuru_action_pretty_str(action));
+  fprintf(out, "\n");
 }
+
+static void remote_scan_handler_scan_end(struct ipc_manager *m, void *data)
+{
+  struct uhuru_scan *scan = (struct uhuru_scan *)data;
+
+#ifdef DEBUG
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "remote scan end");
+#endif
+  
+#if 0
+#ifdef DEBUG
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "remote scan end, closing socket %d", scan->remote.connect_fd);
+#endif
+  
+  if (close(scan->remote.connect_fd) < 0) {
+    g_log(NULL, G_LOG_LEVEL_WARNING, "closing socket %d failed (%s)", scan->remote.connect_fd, os_strerror(errno));
+  }
+
+  scan->remote.connect_fd = -1;
+#endif
+}
+
+static enum uhuru_file_status remote_scan_start(struct uhuru_scan *scan)
+{
+  scan->remote.connect_fd = os_ipc_connect(scan->remote.connect_url, 10);
+  if (scan->remote.connect_fd < 0)
+    return UHURU_IERROR;
+
+  scan->remote.manager = ipc_manager_new(scan->remote.connect_fd);
+
+  ipc_manager_add_handler(scan->remote.manager, IPC_MSG_ID_SCAN_FILE, remote_scan_handler_scan_file, scan);
+  ipc_manager_add_handler(scan->remote.manager, IPC_MSG_ID_SCAN_END, remote_scan_handler_scan_end, scan);
+
+  ipc_manager_msg_send(scan->remote.manager, IPC_MSG_ID_SCAN, IPC_STRING_T, scan->path, IPC_NONE_T);
+}
+
+
 
 static void do_scan(struct scan_options *opts, struct scan_summary *summary)
 {

@@ -1,5 +1,4 @@
-#SUBDIRS= os libipc libcore scand on-access
-SUBDIRS= libipc libcore scand on-access
+SUBDIRS= libipc libcore scand on-access tools
 DIST_SUBDIRS=$(SUBDIRS) os
 
 
