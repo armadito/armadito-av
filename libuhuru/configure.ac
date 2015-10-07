@@ -100,7 +100,8 @@ include/config/Makefile
 include/libuhuru/Makefile
 pkgconfig/Makefile
 src/Makefile
-src/lib/Makefile
+src/libcore/Makefile
+src/libipc/Makefile
 src/scand/Makefile
 src/on-access/Makefile
 src/on-access/linux/Makefile

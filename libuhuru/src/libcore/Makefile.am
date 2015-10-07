@@ -1,8 +1,8 @@
 AUTOMAKE_OPTIONS=subdir-objects
 
-lib_LTLIBRARIES=libuhuru.la
+lib_LTLIBRARIES=libuhuru_core.la
 
-libuhuru_la_SOURCES= \
+libuhuru_core_la_SOURCES= \
 action.c \
 info.c \
 infop.h \
@@ -30,26 +30,28 @@ builtin-modules/quarantine.h \
 builtin-modules/remote.c \
 builtin-modules/remote.h \
 os/dir.h \
-os/linux/dir.c \
 os/file.h \
-os/linux/file.c \
+os/io.h \
 os/ipc.h \
-os/linux/ipc.c \
 os/mimetype.h \
+os/string.h \
+os/linux/dir.c \
+os/linux/file.c \
+os/linux/ipc.c \
 os/linux/mimetype.c 
 
 AM_CPPFLAGS= -DLIBUHURU_MODULES_PATH='"$(pkglibdir)/modules"' -DLIBUHURU_CONF_DIR='"$(sysconfdir)/uhuru"' -DG_LOG_DOMAIN='"libuhuru"'
-libuhuru_la_CFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/include/config
-libuhuru_la_LIBADD= 
+libuhuru_core_la_CFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/include/config
+libuhuru_core_la_LIBADD= 
 
-libuhuru_la_CFLAGS+= @GMODULE2_CFLAGS@
-libuhuru_la_LIBADD+= @GMODULE2_LIBS@
+libuhuru_core_la_CFLAGS+= @GMODULE2_CFLAGS@
+libuhuru_core_la_LIBADD+= @GMODULE2_LIBS@
 
-libuhuru_la_CFLAGS+= @LIBXML2_CFLAGS@
-libuhuru_la_LIBADD+= @LIBXML2_LIBS@
+libuhuru_core_la_CFLAGS+= @LIBXML2_CFLAGS@
+libuhuru_core_la_LIBADD+= @LIBXML2_LIBS@
 
-#libuhuru_la_CFLAGS+= @LIBCURL_CFLAGS@
-#libuhuru_la_LIBADD+= @LIBCURL_LIBS@
+#libuhuru_core_la_CFLAGS+= @LIBCURL_CFLAGS@
+#libuhuru_core_la_LIBADD+= @LIBCURL_LIBS@
 
 install-exec-hook:
 	-mkdir -p $(DESTDIR)$(localstatedir)/spool/uhuru

@@ -1,2 +1,2 @@
-SUBDIRS=lib scand on-access
+SUBDIRS= libipc libcore scand on-access
 

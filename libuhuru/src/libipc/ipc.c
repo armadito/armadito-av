@@ -1,6 +1,6 @@
 #include "libuhuru-config.h"
 
-#include "ipcman.h"
+#include "ipc.h"
 #include "os/io.h"
 #include "os/string.h"
 
