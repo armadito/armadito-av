@@ -97,7 +97,6 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	printf("########JSON######## \n");
 
-	// TODO
 	char * string = "{\"sitename\" : \"joys of programming\",\"categories\" :[\"c\", [\"c++\", \"c\"], \"java\", \"PHP\"],\"author-details\" : { \"admin\": false, \"name\" : \"Joys of Programming\", \"Number of Posts\" : 10 }}";
 
 	printf("JSON string: %s\n", string);

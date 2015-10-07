@@ -859,9 +859,7 @@ struct json_object* json_tokener_parse_ex(struct json_tokener *tok,
     case json_tokener_state_object_value_add:
       json_object_object_add(current, obj_field_name, obj);
 	  
-		// free here ?
-		//		  free(obj_field_name);
-	 
+	  free(obj_field_name);
       obj_field_name = NULL;
       saved_state = json_tokener_state_object_sep;
       state = json_tokener_state_eatws;
