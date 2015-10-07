@@ -1,14 +1,21 @@
-bin_PROGRAMS=uhuru-scan-daemon
+AUTOMAKE_OPTIONS=subdir-objects
 
-uhuru_scan_daemon_CFLAGS=-I$(top_srcdir)/include -I$(top_srcdir)/include/config -I$(top_srcdir)/src @GMODULE2_CFLAGS@ @GIO2_CFLAGS@
-uhuru_scan_daemon_LDADD=$(top_builddir)/src/lib/libuhuru.la @GMODULE2_LIBS@ @GIO2_LIBS@ -lmagic
-uhuru_scan_daemon_SOURCES= \
+bin_PROGRAMS=uhuru-scand
+
+uhuru_scand_CFLAGS=-I$(top_srcdir)/include -I$(top_srcdir)/include/config -I$(top_srcdir)/src @GLIB2_CFLAGS@ @GIO2_CFLAGS@ @GTHREAD2_CFLAGS@
+uhuru_scand_LDADD=$(top_builddir)/src/libcore/libuhuru_core.la $(top_builddir)/src/libipc/libuhuru_ipc.la @GLIB2_LIBS@ @GIO2_LIBS@ @GTHREAD2_LIBS@ -lmagic
+
+uhuru_scand_SOURCES= \
 main.c \
 client.c \
 client.h \
 server.c \
 server.h \
-unixsock.c \
-unixsock.h 
+tcpsock.c \
+tcpsock.h \
+os/linux/daemonize.c \
+os/linux/daemonize.h \
+os/linux/unixsock.c \
+os/linux/unixsock.h 
 
 EXTRA_DIST=uhuru-scan-daemon.desktop

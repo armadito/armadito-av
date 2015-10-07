@@ -1,7 +1,8 @@
+#include "libuhuru-config.h"
+
 #include <libuhuru/core.h>
 #include <libuhuru/ipc.h>
 
-#include "libuhuru-config.h"
 #include "client.h"
 
 #include <stdio.h>

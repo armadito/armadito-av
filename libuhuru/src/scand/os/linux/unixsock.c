@@ -6,6 +6,7 @@
 #include <unistd.h>
 #endif
 #include <assert.h>
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <stdlib.h>

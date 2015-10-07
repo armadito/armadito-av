@@ -1,6 +1,5 @@
 
-#include <libuhuru/scan.h>
-#include "lib/statusp.h"
+#include <libuhuru/ipc.h>
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -123,13 +123,13 @@ static enum uhuru_file_status uhuru_scan_apply_modules(const char *path, const c
   return current_status;
 }
 
-static void uhuru_scan_file(struct uhuru_scan *scan, const char *path)
+static void scan_file(struct uhuru_scan *scan, const char *path)
 {
   struct uhuru_report report;
   struct uhuru_module **modules;
   const char *mime_type;
 
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "local_scan_file - %s", path);
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "scan_file - %s", path);
 
   uhuru_report_init(&report, path);
 
@@ -151,7 +151,7 @@ static void scan_entry_thread_fun(gpointer data, gpointer user_data)
   struct uhuru_scan *scan = (struct uhuru_scan *)user_data;
   char *path = (char *)data;
 
-  local_scan_file(scan, path);
+  scan_file(scan, path);
 
   free(path);
 }
@@ -179,7 +179,7 @@ static void scan_entry(const char *full_path, enum os_file_flag flags, int entry
   if (scan->flags & UHURU_SCAN_THREADED)
     g_thread_pool_push(scan->thread_pool, (gpointer)os_strdup(full_path), NULL);
   else
-    local_scan_file(scan, full_path);
+    scan_file(scan, full_path);
 }
 
 static int get_max_threads(void)
@@ -207,7 +207,7 @@ enum uhuru_scan_status uhuru_scan_run(struct uhuru_scan *scan)
     if (scan->flags & UHURU_SCAN_THREADED)
       g_thread_pool_push(scan->thread_pool, (gpointer)os_strdup(scan->path), NULL);
     else
-      local_scan_file(scan, scan->path);
+      scan_file(scan, scan->path);
   } else if (stat_buf.flags & FILE_FLAG_IS_DIRECTORY) {
     int recurse = scan->flags & UHURU_SCAN_RECURSE;
 
