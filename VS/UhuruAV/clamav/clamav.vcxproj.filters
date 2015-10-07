@@ -23,5 +23,8 @@
     <None Include="..\..\..\..\..\Desktop\clamav-0.98.7\win32\Win32\Debug\libclamav.exp">
       <Filter>Fichiers de ressources</Filter>
     </None>
+    <None Include="clamav.def">
+      <Filter>Fichiers sources</Filter>
+    </None>
   </ItemGroup>
 </Project>
