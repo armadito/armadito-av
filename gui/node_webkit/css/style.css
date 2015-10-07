@@ -3,6 +3,18 @@ body {
     padding: 0;
 }
 
-#scan_results_table {
-	text-align:center;	
+#scan_table_results {
+	text-align:center;
+	overflow:auto;
+}
+
+#div_table_results {
+	margin-left: 15%;
+    margin-right: 15%;
+	text-align: center;
+	width: 70%;
+}
+
+#credit {
+	font-size:8px;
 }
