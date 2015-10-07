@@ -14,7 +14,11 @@ function new_ondemand_scan(){
 	console.log("New On-demand scan for directory :" + selected_dir);
 	console.log("Scan params :\n param1 : "+param1+" \n param2 : "+param2 ); 
 	
+	
+	window.open('on-demand_scan_results.html', '_blank', 'screenX=0,screenY=0,width=100,height=100');
+	
     // TODO: Communicate with libuhuru
+	
 }
 
 // Examples of AV params

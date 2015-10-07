@@ -2,3 +2,7 @@ body {
 	margin: 0;
     padding: 0;
 }
+
+#scan_results_table {
+	text-align:center;	
+}

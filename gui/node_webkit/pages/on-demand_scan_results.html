@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>On-demand scan results</title>
+	<link href="../css/style.css" rel="stylesheet" media="all" type="text/css"> 
+  </head>
+  <body>
+  
+  <script language ="javascript" src="../js/AV_scan.js" > </script>
+  <script language ="javascript" src="../js/AV_scan_results.js" > </script>
+  
+    <p align="center">
+     <img id="uhuru_grey_logo" src="../img/helmet_loupe.jpg"> </img>
+    </p>
+	
+	<h3 align="center" > On-demand scan results</h2>
+
+		
+		<p align=center > <b>Scan progress :</b> 
+		   <progress id="scan_progress" value="50" max="100"></progress>
+		   <span id="pourcentage"></span>
+		   <input type="button" onclick="modif(-10);" value="-">
+		   <input type="button" onclick="modif(10);" value="+">
+		</p>
+	
+		<p align="center">
+			<table align="center" id="scan_results_table" border="1" width="75%">
+			  <tr>
+			      <th> Threat </th>
+				  <th> Status </th>
+				  <th> File path </th>
+			  </tr>
+			 
+			  <tr>
+			      <td> TrojanX86.Back8</td>
+				  <td> Infected </td>
+				  <td> C:/Oh/My/God.pdf</td>   
+			  </tr>
+			  
+			  <tr>
+			      <td> Virus5874.X86</td>
+				  <td> Infected </td>
+				  <td> C:/Win32/1452879999.exe</td>
+			  </tr>
+
+			  <tr>
+			      <td> Backdoor.NSA77</td>
+				  <td> Infected </td>
+				  <td> C:/C/C/A/D/Offuscated.apk</td>
+			  </tr>
+			  
+			</table>
+		</p>
+
+	
+		
+  </body>
+</html>
