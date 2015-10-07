@@ -1,7 +1,6 @@
 #include "libuhuru-config.h"
 
 #include "os/dir.h"
-#include "os/string.h"
 
 #include <glib.h>
 #include <dirent.h>
@@ -46,7 +45,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
     
   d = opendir(path);
   if (d == NULL) {
-    g_log(NULL, G_LOG_LEVEL_WARNING, "error opening directory %s (%s)", path, os_strerror(errno));
+    g_log(NULL, G_LOG_LEVEL_WARNING, "error opening directory %s (%s)", path, strerror(errno));
 
     (*dirent_cb)(path, FILE_FLAG_IS_ERROR, errno, data);
     
@@ -72,7 +71,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 	break;
 
       saved_errno = errno;
-      g_log(NULL, G_LOG_LEVEL_WARNING, "error reading directory entry in directory %s (error %s)", path, os_strerror(saved_errno));
+      g_log(NULL, G_LOG_LEVEL_WARNING, "error reading directory entry in directory %s (error %s)", path, strerror(saved_errno));
      
       (*dirent_cb)(path, FILE_FLAG_IS_ERROR, saved_errno, data);
 
@@ -118,7 +117,7 @@ int os_mkdir_p(const char *path)
   char *token, *full, *end;
   int ret = 0;
      
-  token = full = os_strdup(path);
+  token = full = strdup(path);
   do {
     end = strchr(token, '/');
 

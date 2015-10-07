@@ -16,7 +16,6 @@
 #ifdef HAVE_QUARANTINE_MODULE
 #include "builtin-modules/quarantine.h"
 #endif
-#include "builtin-modules/remote.h"
 #include "builtin-modules/mimetypemod.h"
 
 #include <assert.h>
@@ -26,16 +25,13 @@
 #include <stdio.h>
 
 struct uhuru {
-  int is_remote;
   struct module_manager *module_manager;
   GHashTable *mime_type_table;
 };
 
-static struct uhuru *uhuru_new(int is_remote)
+static struct uhuru *uhuru_new(void)
 {
   struct uhuru *u = g_new(struct uhuru, 1);
-
-  u->is_remote = is_remote;
 
   u->module_manager = module_manager_new(u);
 
@@ -44,27 +40,23 @@ static struct uhuru *uhuru_new(int is_remote)
   return u;
 }
 
-struct uhuru *uhuru_open(int is_remote)
+struct uhuru *uhuru_open(void)
 {
   struct uhuru *u;
 
   os_mime_type_init();
 
-  u = uhuru_new(is_remote);
+  u = uhuru_new();
 
-  module_manager_add(u->module_manager, &remote_module);
-
-  if (!u->is_remote) {
-    module_manager_add(u->module_manager, &mimetype_module);
+  module_manager_add(u->module_manager, &mimetype_module);
 #ifdef HAVE_ALERT_MODULE
-    module_manager_add(u->module_manager, &alert_module);
+  module_manager_add(u->module_manager, &alert_module);
 #endif
 #ifdef HAVE_QUARANTINE_MODULE
-    module_manager_add(u->module_manager, &quarantine_module);
+  module_manager_add(u->module_manager, &quarantine_module);
 #endif
 
-    module_manager_load_path(u->module_manager, LIBUHURU_MODULES_PATH);
-  }
+  module_manager_load_path(u->module_manager, LIBUHURU_MODULES_PATH);
 
   conf_load_file(u, LIBUHURU_CONF_DIR "/uhuru.conf");
   conf_load_path(u, LIBUHURU_CONF_DIR "/conf.d");
@@ -76,25 +68,6 @@ struct uhuru *uhuru_open(int is_remote)
 #endif
 
   return u;
-}
-
-int uhuru_is_remote(struct uhuru *u)
-{
-  return u->is_remote;
-}
-
-const char *uhuru_get_remote_url(struct uhuru *u)
-{
-  struct uhuru_module *remote_module;
-  const char *remote_url;
-
-  remote_module = uhuru_get_module_by_name(u, "remote");
-  assert(remote_module != NULL);
-
-  remote_url = remote_module_get_sock_dir(remote_module);
-  assert(remote_url != NULL);
-
-  return remote_url;
 }
 
 struct uhuru_module **uhuru_get_modules(struct uhuru *u)

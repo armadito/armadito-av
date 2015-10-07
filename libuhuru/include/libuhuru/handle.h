@@ -7,7 +7,7 @@ extern "C" {
 
 struct uhuru;
 
-struct uhuru *uhuru_open(int is_remote);
+struct uhuru *uhuru_open(void);
 
 void uhuru_print(struct uhuru *u);
 

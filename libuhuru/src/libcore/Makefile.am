@@ -4,14 +4,11 @@ lib_LTLIBRARIES=libuhuru_core.la
 
 libuhuru_core_la_SOURCES= \
 action.c \
-info.c \
-infop.h \
 conf.c \
 conf.h \
 confparser.c \
 confparser.h \
-ipcman.c \
-ipcman.h \
+info.c \
 module.c \
 modulep.h \
 report.c \
@@ -27,25 +24,23 @@ builtin-modules/mimetypemod.c \
 builtin-modules/mimetypemod.h \
 builtin-modules/quarantine.c \
 builtin-modules/quarantine.h \
-builtin-modules/remote.c \
-builtin-modules/remote.h \
-os/dir.h \
-os/file.h \
-os/io.h \
-os/ipc.h \
-os/mimetype.h \
-os/string.h \
-os/linux/dir.c \
-os/linux/file.c \
-os/linux/ipc.c \
-os/linux/mimetype.c 
+../os/linux/dir.c \
+../os/linux/file.c \
+../os/linux/mimetype.c 
 
 AM_CPPFLAGS= -DLIBUHURU_MODULES_PATH='"$(pkglibdir)/modules"' -DLIBUHURU_CONF_DIR='"$(sysconfdir)/uhuru"' -DG_LOG_DOMAIN='"libuhuru"'
-libuhuru_core_la_CFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/include/config
+libuhuru_core_la_CFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/include/config -I$(top_srcdir)/src
+#libuhuru_core_la_LIBADD= $(top_builddir)/src/os/linux/dir.$(OBJEXT) $(top_builddir)/src/os/linux/file.$(OBJEXT) $(top_builddir)/src/os/linux/mimetype.$(OBJEXT)
 libuhuru_core_la_LIBADD= 
+
+libuhuru_core_la_CFLAGS+= @GLIB2_CFLAGS@
+libuhuru_core_la_LIBADD+= @GLIB2_LIBS@
 
 libuhuru_core_la_CFLAGS+= @GMODULE2_CFLAGS@
 libuhuru_core_la_LIBADD+= @GMODULE2_LIBS@
+
+libuhuru_core_la_CFLAGS+= @GTHREAD2_CFLAGS@
+libuhuru_core_la_LIBADD+= @GTHREAD2_LIBS@
 
 libuhuru_core_la_CFLAGS+= @LIBXML2_CFLAGS@
 libuhuru_core_la_LIBADD+= @LIBXML2_LIBS@

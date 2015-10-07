@@ -1,5 +1,5 @@
-#ifndef _LIBUHURU_IPCMAN_H_
-#define _LIBUHURU_IPCMAN_H_
+#ifndef _LIBUHURU_IPC_H_
+#define _LIBUHURU_IPC_H_
 
 #include <glib.h>
 
