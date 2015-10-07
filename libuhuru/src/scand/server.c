@@ -1,11 +1,8 @@
+#include <libuhuru/core.h>
+
 #include "server.h"
 #include "client.h"
 #include "unixsock.h"
-#include "lib/conf.h"
-#include "lib/uhurup.h"
-#include "lib/builtin-modules/remote.h"
-
-#include <libuhuru/scan.h>
 
 #include <assert.h>
 #include <errno.h>
@@ -65,7 +62,7 @@ struct server *server_new(void)
   server = (struct server *)malloc(sizeof(struct server));
   assert(server != NULL);
 
-  server->uhuru = uhuru_open(0);
+  server->uhuru = uhuru_open();
   assert(server->uhuru != NULL);
 
   sock_path = uhuru_get_remote_url(server->uhuru);

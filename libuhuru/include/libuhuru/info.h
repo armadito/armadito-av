@@ -41,7 +41,7 @@ struct uhuru_info {
 
 struct uhuru_info *uhuru_info_new(struct uhuru *uhuru);
 
-void info_to_stdout(struct uhuru_info *info);
+void uhuru_info_to_stdout(struct uhuru_info *info);
 void uhuru_info_free(struct uhuru_info *info);
 
 #ifdef __cplusplus

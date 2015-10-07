@@ -1,7 +1,6 @@
 #include "libuhuru-config.h"
 
-#include <libuhuru/module.h>
-#include <libuhuru/info.h>
+#include <libuhuru/core.h>
 
 #include "uhurup.h"
 #include "os/string.h"

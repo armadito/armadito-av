@@ -1,7 +1,7 @@
 #ifndef _LIBUHURU_REPORTP_H_
 #define _LIBUHURU_REPORTP_H_
 
-#include <libuhuru/scan.h>
+#include <libuhuru/core.h>
 
 void uhuru_report_init(struct uhuru_report *report, const char *path);
 

@@ -2,6 +2,7 @@
 #define _LIBUHURU_IPC_H_
 
 #include <glib.h>
+#include <libuhuru/status.h>
 
 typedef guchar ipc_type_t;
 

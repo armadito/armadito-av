@@ -1,7 +1,7 @@
 #ifndef _LIBUHURU_MODULEP_H_
 #define _LIBUHURU_MODULEP_H_
 
-#include <libuhuru/module.h>
+#include <libuhuru/core.h>
 
 struct module_manager;
 

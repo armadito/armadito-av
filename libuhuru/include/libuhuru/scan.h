@@ -31,7 +31,6 @@ void uhuru_scan_add_callback(struct uhuru_scan *scan, uhuru_scan_callback_t call
 
 enum uhuru_scan_status uhuru_scan_start(struct uhuru_scan *scan);
 
-int uhuru_scan_get_poll_fd(struct uhuru_scan *scan);
 enum uhuru_scan_status uhuru_scan_run(struct uhuru_scan *scan);
 
 /* enum uhuru_scan_status uhuru_scan_wait_for_completion(struct uhuru_scan *scan); */

@@ -1,8 +1,8 @@
-#include <libuhuru/module.h>
+#include <libuhuru/core.h>
+#include <libuhuru/ipc.h>
 
 #include "libuhuru-config.h"
 #include "client.h"
-#include "libipc/ipc.h"
 
 #include <stdio.h>
 #include <errno.h>

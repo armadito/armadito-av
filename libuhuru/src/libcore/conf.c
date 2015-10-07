@@ -1,5 +1,7 @@
 #include "libuhuru-config.h"
 
+#include <libuhuru/core.h>
+
 #include "conf.h"
 #include "uhurup.h"
 #include "confparser.h"

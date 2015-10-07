@@ -1,8 +1,7 @@
 #ifndef _LIBUHURU_CONF_H_
 #define _LIBUHURU_CONF_H_
 
-#include <libuhuru/module.h>
-#include <libuhuru/scan.h>
+#include <libuhuru/core.h>
 
 int conf_set_value(struct uhuru *uhuru, const char *mod_name, const char *key, const char **argv);
 

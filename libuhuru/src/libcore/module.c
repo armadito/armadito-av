@@ -1,6 +1,6 @@
 #include "libuhuru-config.h"
 
-#include <libuhuru/module.h>
+#include <libuhuru/core.h>
 
 #include "modulep.h"
 #include "os/dir.h"

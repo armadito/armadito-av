@@ -1,4 +1,4 @@
-#include <libuhuru/scan.h>
+#include <libuhuru/core.h>
 
 #include "libuhuru-config.h"
 

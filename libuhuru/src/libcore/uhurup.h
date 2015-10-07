@@ -3,6 +3,8 @@
 
 #include <glib.h>
 
+#include <libuhuru/core.h>
+
 struct uhuru_module **uhuru_get_modules(struct uhuru *u);
 
 struct uhuru_module *uhuru_get_module_by_name(struct uhuru *u, const char *name);
