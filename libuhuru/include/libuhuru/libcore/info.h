@@ -1,8 +1,8 @@
-#ifndef _LIBUHURU_INFO_H_
-#define _LIBUHURU_INFO_H_
+#ifndef _LIBUHURU_LIBCORE_INFO_H_
+#define _LIBUHURU_LIBCORE_INFO_H_
 
-#include <libuhuru/status.h>
-#include <libuhuru/handle.h>
+#include <libuhuru/common/status.h>
+#include <libuhuru/libcore/handle.h>
 
 #ifdef __cplusplus
 extern "C" {

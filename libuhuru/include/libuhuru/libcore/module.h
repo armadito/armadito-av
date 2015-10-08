@@ -1,8 +1,8 @@
-#ifndef _LIBUHURU_MODULE_H_
-#define _LIBUHURU_MODULE_H_
+#ifndef _LIBUHURU_LIBCORE_MODULE_H_
+#define _LIBUHURU_LIBCORE_MODULE_H_
 
-#include <libuhuru/status.h>
-#include <libuhuru/info.h>
+#include <libuhuru/common/status.h>
+#include <libuhuru/libcore/info.h>
 
 #include <time.h>
 

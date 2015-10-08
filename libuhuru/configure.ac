@@ -108,8 +108,8 @@ src/libipc/Makefile
 src/on-access/Makefile
 src/on-access/linux/Makefile
 src/os/Makefile
-src/tools/Makefile
 src/scand/Makefile
+src/tools/Makefile
 tests/Makefile
 ])
 AC_OUTPUT

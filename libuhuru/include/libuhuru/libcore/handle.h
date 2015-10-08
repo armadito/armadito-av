@@ -1,5 +1,5 @@
-#ifndef _LIBUHURU_HANDLE_H_
-#define _LIBUHURU_HANDLE_H_
+#ifndef _LIBUHURU_LIBCORE_HANDLE_H_
+#define _LIBUHURU_LIBCORE_HANDLE_H_
 
 #ifdef __cplusplus
 extern "C" {

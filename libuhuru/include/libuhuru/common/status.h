@@ -1,5 +1,5 @@
-#ifndef _LIBUHURU_STATUS_H_
-#define _LIBUHURU_STATUS_H_
+#ifndef _LIBUHURU_COMMON_STATUS_H_
+#define _LIBUHURU_COMMON_STATUS_H_
 
 #include <stdio.h>
 

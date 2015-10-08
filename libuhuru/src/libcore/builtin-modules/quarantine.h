@@ -1,8 +1,7 @@
 #ifndef _LIBUHURU_QUARANTINE_H_
 #define _LIBUHURU_QUARANTINE_H_
 
-#include <libuhuru/module.h>
-#include <libuhuru/scan.h>
+#include <libuhuru/core.h>
 
 extern struct uhuru_module quarantine_module;
 

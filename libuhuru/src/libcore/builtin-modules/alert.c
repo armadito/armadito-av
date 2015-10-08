@@ -1,5 +1,5 @@
-#include <libuhuru/scan.h>
-#include <libuhuru/module.h>
+#include <libuhuru/core.h>
+
 #include "os/dir.h"
 #include "modulep.h"
 #include "alert.h"

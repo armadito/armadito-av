@@ -1,4 +1,4 @@
-#include <libuhuru/module.h>
+#include <libuhuru/core.h>
 #include "mimetypemod.h"
 #include "uhurup.h"
 

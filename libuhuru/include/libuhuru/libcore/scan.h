@@ -1,8 +1,8 @@
-#ifndef _LIBUHURU_SCAN_H_
-#define _LIBUHURU_SCAN_H_
+#ifndef _LIBUHURU_LIBCORE_SCAN_H_
+#define _LIBUHURU_LIBCORE_SCAN_H_
 
-#include <libuhuru/status.h>
-#include <libuhuru/handle.h>
+#include <libuhuru/common/status.h>
+#include <libuhuru/libcore/handle.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,16 +36,6 @@ enum uhuru_scan_status uhuru_scan_run(struct uhuru_scan *scan);
 /* enum uhuru_scan_status uhuru_scan_wait_for_completion(struct uhuru_scan *scan); */
 
 void uhuru_scan_free(struct uhuru_scan *scan);
-
-enum uhuru_action {
-  UHURU_ACTION_NONE         = 0,
-  UHURU_ACTION_ALERT        = 1 << 1,
-  UHURU_ACTION_QUARANTINE   = 1 << 2,
-  UHURU_ACTION_REMOVE       = 1 << 3,
-};
-
-/* const char *uhuru_action_str(enum uhuru_action action); */
-const char *uhuru_action_pretty_str(enum uhuru_action action);
 
 struct uhuru_report {
   char *path;

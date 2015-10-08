@@ -1,4 +1,4 @@
-#include <libuhuru/module.h>
+#include <libuhuru/core.h>
 #include "os/dir.h"
 #include "quarantine.h"
 

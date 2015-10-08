@@ -1,5 +1,4 @@
 #include <libuhuru/ipc.h>
-#include <libuhuru/status.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,6 +10,11 @@ struct scan_summary {
   int suspicious;
   int unhandled;
   int clean;
+};
+
+struct scan {
+  struct scan_summary *summary;
+  int print_clean;
 };
 
 struct scan_options {
@@ -118,13 +122,9 @@ static void parse_options(int argc, char *argv[], struct scan_options *scan_opts
     usage();
 }
 
-static void report_print(struct uhuru_report *report, FILE *out)
+static void ipc_handler_scan_file(struct ipc_manager *m, void *data)
 {
-}
-
-static void remote_scan_handler_scan_file(struct ipc_manager *m, void *data)
-{
-  struct scan_summary *s = (struct scan_summary *)callback_data;
+  struct scan *scan = (struct scan *)data;
   char *path;
   gint32 i_status;
   enum uhuru_file_status status;
@@ -132,7 +132,6 @@ static void remote_scan_handler_scan_file(struct ipc_manager *m, void *data)
   char *x_status;
   gint32 i_action;
   enum uhuru_action action;
-  struct uhuru_report report;
 
   ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &path);
   ipc_manager_get_arg_at(m, 1, IPC_INT32_T, &i_status);
@@ -143,39 +142,41 @@ static void remote_scan_handler_scan_file(struct ipc_manager *m, void *data)
   status = (enum uhuru_file_status)i_status;
   action = (enum uhuru_action)i_action;
 
-  s->scanned++;
+  if (scan->summary != NULL) {
+    scan->summary->scanned++;
 
-  switch(status) {
-  case UHURU_MALWARE:
-    s->malware++;
-    break;
-  case UHURU_SUSPICIOUS:
-    s->suspicious++;
-    break;
-  case UHURU_EINVAL:
-  case UHURU_IERROR:
-  case UHURU_UNKNOWN_FILE_TYPE:
-  case UHURU_UNDECIDED:
-    s->unhandled++;
-    break;
-  case UHURU_WHITE_LISTED:
-  case UHURU_CLEAN:
-    s->clean++;
-    break;
+    switch(status) {
+    case UHURU_MALWARE:
+      scan->summary->malware++;
+      break;
+    case UHURU_SUSPICIOUS:
+      scan->summary->suspicious++;
+      break;
+    case UHURU_EINVAL:
+    case UHURU_IERROR:
+    case UHURU_UNKNOWN_FILE_TYPE:
+    case UHURU_UNDECIDED:
+      scan->summary->unhandled++;
+      break;
+    case UHURU_WHITE_LISTED:
+    case UHURU_CLEAN:
+      scan->summary->clean++;
+      break;
+    }
   }
 
-  if (!*print_clean && (status == UHURU_WHITE_LISTED || status == UHURU_CLEAN))
+  if (!scan->print_clean && (status == UHURU_WHITE_LISTED || status == UHURU_CLEAN))
     return;
 
-  fprintf(out, "%s: %s", >path, uhuru_file_status_pretty_str(status));
+  printf("%s: %s", path, uhuru_file_status_pretty_str(status));
   if (status != UHURU_UNDECIDED && status != UHURU_CLEAN && status != UHURU_UNKNOWN_FILE_TYPE)
-    fprintf(out, " [%s - %s]", mod_name, mod_report);
+    printf(" [%s - %s]", mod_name, x_status);
   if (action != UHURU_ACTION_NONE)
-    fprintf(out, " (action %s)", uhuru_action_pretty_str(action));
-  fprintf(out, "\n");
+    printf(" (action %s)", uhuru_action_pretty_str(action));
+  printf("\n");
 }
 
-static void remote_scan_handler_scan_end(struct ipc_manager *m, void *data)
+static void ipc_handler_scan_end(struct ipc_manager *m, void *data)
 {
   struct uhuru_scan *scan = (struct uhuru_scan *)data;
 
@@ -196,56 +197,6 @@ static void remote_scan_handler_scan_end(struct ipc_manager *m, void *data)
 #endif
 }
 
-static enum uhuru_file_status remote_scan_start(struct uhuru_scan *scan)
-{
-  scan->remote.connect_fd = os_ipc_connect(scan->remote.connect_url, 10);
-  if (scan->remote.connect_fd < 0)
-    return UHURU_IERROR;
-
-  scan->remote.manager = ipc_manager_new(scan->remote.connect_fd);
-
-  ipc_manager_add_handler(scan->remote.manager, IPC_MSG_ID_SCAN_FILE, remote_scan_handler_scan_file, scan);
-  ipc_manager_add_handler(scan->remote.manager, IPC_MSG_ID_SCAN_END, remote_scan_handler_scan_end, scan);
-
-  ipc_manager_msg_send(scan->remote.manager, IPC_MSG_ID_SCAN, IPC_STRING_T, scan->path, IPC_NONE_T);
-}
-
-
-
-static void do_scan(struct scan_options *opts, struct scan_summary *summary)
-{
-  enum uhuru_scan_flags flags = 0;
-  struct uhuru *u;
-  struct uhuru_scan *scan;
-
-  if (opts->recursive)
-    flags |= UHURU_SCAN_RECURSE;
-
-  if (opts->threaded)
-    flags |= UHURU_SCAN_THREADED;
-
-  u = uhuru_open(opts->use_daemon);
-
-  scan = uhuru_scan_new(u, opts->path, flags);
-
-  uhuru_scan_add_callback(scan, report_print_callback, &opts->print_clean);
-
-  if (!opts->no_summary) {
-    summary->scanned = summary->malware = summary->suspicious = summary->unhandled = summary->clean = 0;
-
-    uhuru_scan_add_callback(scan, summary_callback, summary);
-  }
-
-  uhuru_scan_start(scan);
-
-  while(uhuru_scan_run(scan) == UHURU_SCAN_CONTINUE)
-    ;
-
-  uhuru_scan_free(scan);
-
-  uhuru_close(u);
-}
-
 static void print_summary(struct scan_summary *summary)
 {
   printf("\nSCAN SUMMARY:\n");
@@ -256,20 +207,44 @@ static void print_summary(struct scan_summary *summary)
   printf("clean files       : %d\n", summary->clean);
 }
 
+static void do_scan(struct scan_options *opts)
+{
+  struct scan *scan;
+  struct ipc_manager *manager;
+
+  scan = (struct scan *)malloc(sizeof(struct scan));
+  assert(scan != NULL);
+
+  scan->summary = (opts->no_summary) ? NULL : (struct scan_summary *)malloc(sizeof(struct scan_summary));
+  scan->print_clean = opts->print_clean;
+
+  connect_fd = os_ipc_connect(connect_url, 10);
+  if (connect_fd < 0)
+    return;
+
+  manager = ipc_manager_new(connect_fd);
+
+  ipc_manager_add_handler(manager, IPC_MSG_ID_SCAN_FILE, ipc_handler_scan_file, scan);
+  ipc_manager_add_handler(manager, IPC_MSG_ID_SCAN_END, ipc_handler_scan_end, scan);
+
+  ipc_manager_msg_send(manager, IPC_MSG_ID_SCAN, IPC_STRING_T, opts->path, IPC_NONE_T);
+
+  while (ipc_manager_receive(manager) > 0)
+    ;
+
+  if (!opts->no_summary) {
+    print_summary(scan->summary);
+    free(scan->summary);
+  }
+}
+
 int main(int argc, char **argv)
 {
   struct scan_options *opts = (struct scan_options *)malloc(sizeof(struct scan_options));
-  struct scan_summary *summary = NULL;
 
   parse_options(argc, argv, opts);
 
-  if (!opts->no_summary)
-    summary = (struct scan_summary *)malloc(sizeof(struct scan_summary));
-
-  do_scan(opts, summary);
-
-  if (!opts->no_summary)
-    print_summary(summary);
+  do_scan(opts);
 
   return 0;
 }
