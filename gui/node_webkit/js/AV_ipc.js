@@ -1,13 +1,14 @@
 // global definitions
 
 var net = require('net');
-var tcp_server;
+var server;
 
 function start_tcp_server() {
 	
-	var listening_port = 8125;
+	// A port value of zero will assign a random port.
+	var listening_port = 0;
 	
-	tcp_server = net.createServer(function(connection) { //'connection' listener
+	server = net.createServer(function(connection) { //'connection' listener
 	  console.log('client connected');
 	  
 	  connection.on('end', function() {
@@ -18,12 +19,23 @@ function start_tcp_server() {
 	  connection.pipe(connection);
 	});
 	
-	tcp_server.listen(listening_port, function() { //'listening' listener
-	  console.log('server listening on port ' + listening_port );
+	server.on('error', function (e) {
+	  if (e.code == 'EADDRINUSE') {
+		console.log('Address in use, retrying...');
+		setTimeout(function () {
+		  server.close();
+		  server.listen(listening_port, on_server_listening);
+		}, 1000);
+	  }
 	});
+	
+	server.listen(listening_port, on_server_listening );
+
 }
+
+
 
 function stop_tcp_server(){
 
-	tcp_server.close();
+	server.close();
 }
