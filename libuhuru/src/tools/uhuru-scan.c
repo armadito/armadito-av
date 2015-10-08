@@ -1,5 +1,6 @@
 #include <libuhuru/ipc.h>
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -211,6 +212,8 @@ static void do_scan(struct scan_options *opts)
 {
   struct scan *scan;
   struct ipc_manager *manager;
+  int connect_fd = -1;
+  const char *connect_url = NULL;
 
   scan = (struct scan *)malloc(sizeof(struct scan));
   assert(scan != NULL);
@@ -218,7 +221,7 @@ static void do_scan(struct scan_options *opts)
   scan->summary = (opts->no_summary) ? NULL : (struct scan_summary *)malloc(sizeof(struct scan_summary));
   scan->print_clean = opts->print_clean;
 
-  connect_fd = os_ipc_connect(connect_url, 10);
+  /* connect_fd = os_ipc_connect(connect_url, 10); */
   if (connect_fd < 0)
     return;
 
