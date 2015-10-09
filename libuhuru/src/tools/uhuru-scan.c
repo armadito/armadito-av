@@ -1,5 +1,7 @@
 #include <libuhuru/ipc.h>
 
+#include "utils/getopt.h"
+
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,17 +30,14 @@ struct scan_options {
   char *path;
 };
 
-static struct optdef {
-  const char *long_form;
-  char short_form;
-} scan_optdefs[] = {
-  {"help",         'h'},
-  {"local",        'l'},
-  {"recursive",    'r'},
-  {"threaded",     't'},
-  {"no-summary",   'n'},
-  {"print-clean",  'c'},
-  {NULL, '\0'}
+struct opt scan_opt_defs[] = {
+  { .long_form = "help", .short_form = 'h', .need_arg = 0, .is_set = 0, .value = NULL},
+  { .long_form = "local", .short_form = 'l', .need_arg = 0, .is_set = 0, .value = NULL},
+  { .long_form = "recursive", .short_form = 'r', .need_arg = 0, .is_set = 0, .value = NULL},
+  { .long_form = "threaded", .short_form = 't', .need_arg = 0, .is_set = 0, .value = NULL},
+  { .long_form = "no-summary", .short_form = 'n', .need_arg = 0, .is_set = 0, .value = NULL},
+  { .long_form = "print-clean", .short_form = 'c', .need_arg = 0, .is_set = 0, .value = NULL},
+  { .long_form = NULL, .short_form = '\0', .need_arg = 0, .is_set = 0, .value = NULL},
 };
 
 static void usage(void)
@@ -59,68 +58,17 @@ static void usage(void)
   exit(1);
 }
 
-static char get_option(const char *argv, struct optdef *od)
+static void parse_options(int argc, const char *argv[], struct scan_options *opts)
 {
-  while(od->long_form != NULL) {
-    if (argv[0] == '-' && argv[1] == '-' && !strcmp(argv + 2, od->long_form))
-      return od->short_form;
-    else if (argv[0] == '-' && argv[1] == od->short_form)
-      return od->short_form;
-
-    od++;
-  }
-
-  return -1;
-}
-
-static void parse_options(int argc, char *argv[], struct scan_options *scan_opts)
-{
-  int optind;
-
-  scan_opts->use_daemon = 1;
-  scan_opts->recursive = 0;
-  scan_opts->threaded = 1;
-  scan_opts->no_summary = 0;
-  scan_opts->print_clean = 0;
-  scan_opts->path = NULL;
-
-  for(optind = 1; optind < argc; optind++) {
-    int c;
-
-    c = get_option(argv[optind], scan_optdefs);
-
-    if (c == -1)
-      break;
-
-    switch (c) {
-    case 'h':
-      usage();
-      break;
-    case 'l':
-      scan_opts->use_daemon = 0;
-      break;
-    case 'r':
-      scan_opts->recursive = 1;
-      break;
-    case 't':
-      scan_opts->threaded = 1;
-      break;
-    case 'n':
-      scan_opts->no_summary = 1;
-      break;
-    case 'c':
-      scan_opts->print_clean = 1;
-      break;
-    default:
-      usage();
-    }
-  }
-
-  if (optind < argc)
-    scan_opts->path = argv[optind];
-
-  if (scan_opts->path == NULL)
+  if (get_opt(scan_opt_defs, argc, argv) < 0)
     usage();
+
+  opts->use_daemon = 1;
+  opts->recursive = 0;
+  opts->threaded = 1;
+  opts->no_summary = 0;
+  opts->print_clean = 0;
+  opts->path = NULL;
 }
 
 static void ipc_handler_scan_file(struct ipc_manager *m, void *data)
@@ -241,7 +189,7 @@ static void do_scan(struct scan_options *opts)
   }
 }
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
   struct scan_options *opts = (struct scan_options *)malloc(sizeof(struct scan_options));
 

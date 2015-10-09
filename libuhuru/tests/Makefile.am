@@ -22,3 +22,21 @@ testdir1_SOURCES=testdir1.c
 #testmodule_la_SOURCES=testmodule.c
 #testmodule_la_LDFLAGS= -module -avoid-version
 #testmodule_la_CFLAGS=-I$(top_srcdir)/include
+
+test_options:
+	-./testopt -h
+	-./testopt --help
+	-./testopt --nopt
+	-./testopt -n
+	-./testopt --mopt
+	-./testopt -m
+	-./testopt --aarg=42
+	-./testopt -a 42
+	-./testopt --barg=43
+	-./testopt -b 43
+	-./testopt --foo
+	-./testopt --foo=666
+	-./testopt -f
+	-./testopt -f 666
+	-./testopt --nopt -a 42
+	-./testopt -m --barg=43
