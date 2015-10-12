@@ -4,18 +4,20 @@
 
 #include "server.h"
 #include "utils/getopt.h"
+#include "utils/tcpsock.h"
 #ifdef linux
 #include "os/linux/daemonize.h"
 #endif
 
 #include <glib.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 struct uhuru_daemon_options {
   int no_daemon;
   int use_tcp;
-  int port_number;
+  unsigned short port_number;
 };
 
 struct opt daemon_opt_defs[] = {
@@ -50,15 +52,19 @@ static void parse_options(int argc, const char **argv, struct uhuru_daemon_optio
   if (r < 0|| r > argc)
     usage();
 
+  if (opt_is_set(daemon_opt_defs, "help"))
+      usage();
+
   opts->no_daemon = opt_is_set(daemon_opt_defs, "no-daemon");
   opts->use_tcp = opt_is_set(daemon_opt_defs, "tcp");
-  s_port = opt_value(daemon_opt_defs, "port", "15444");
-  opts->port_number = atoi(s_port);
+  s_port = opt_value(daemon_opt_defs, "port", "14444");
+  opts->port_number = (unsigned short)atoi(s_port);
 }
 
 int main(int argc, const char **argv)
 {
   struct uhuru_daemon_options opts;
+  int server_sock;
 
   g_thread_init(NULL);
   g_type_init();
@@ -70,7 +76,14 @@ int main(int argc, const char **argv)
     daemonize();
 #endif
 
-  server_loop(server_new(0));
+  server_sock = tcp_server_listen(opts.port_number, "127.0.0.1");
+
+  if (server_sock < 0) {
+    fprintf(stderr, "cannot open server socket (errno %d)\n", errno);
+    return 1;
+  }
+
+  server_loop(server_new(server_sock));
 
   return 0;
 }

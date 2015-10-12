@@ -11,13 +11,13 @@ client.c \
 client.h \
 server.c \
 server.h \
-tcpsock.c \
-tcpsock.h \
 os/linux/daemonize.c \
 os/linux/daemonize.h \
 os/linux/unixsock.c \
 os/linux/unixsock.h \
 ../utils/getopt.c \
-../utils/getopt.h
+../utils/getopt.h \
+../utils/tcpsock.c \
+../utils/tcpsock.h 
 
 EXTRA_DIST=uhuru-scan-daemon.desktop

@@ -67,19 +67,19 @@ int tcp_client_connect(char *hostname, short port_number, int max_retry)
 
 int tcp_server_listen(short port_number, const char *dotted)
 {
-  int fd, optval;
+  int sock, optval;
   struct sockaddr_in listening_addr;
   in_addr_t bind_addr = htonl(INADDR_ANY);
   int r;
 
-  fd = socket(AF_INET, SOCK_STREAM, 0);
-  if (fd < 0) {
+  sock = socket(AF_INET, SOCK_STREAM, 0);
+  if (sock < 0) {
     perror("socket() failed");
     return -1;
   }
 
   optval = 1;
-  if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char *)&optval, sizeof(optval)) < 0) {
+  if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&optval, sizeof(optval)) < 0) {
     perror("setsockopt()");
     return -1;
   }
@@ -91,17 +91,17 @@ int tcp_server_listen(short port_number, const char *dotted)
   listening_addr.sin_port = htons(port_number);
   listening_addr.sin_addr.s_addr = bind_addr;
 
-  r = bind(fd, (struct sockaddr *)&listening_addr, sizeof(listening_addr));
+  r = bind(sock, (struct sockaddr *)&listening_addr, sizeof(listening_addr));
   if (r < 0) {
     perror("bind() failed");
     return -1;
   }
   
-  r = listen(fd, 5);
+  r = listen(sock, 5);
   if (r < 0) {
     perror("listen() failed");
     return -1;
   }
 
-  return fd;
+  return sock;
 }

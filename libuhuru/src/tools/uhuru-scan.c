@@ -1,8 +1,10 @@
 #include <libuhuru/ipc.h>
 
 #include "utils/getopt.h"
+#include "utils/tcpsock.h"
 
 #include <assert.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,6 +27,8 @@ struct scan_options {
   int threaded;
   int no_summary;
   int print_clean;
+  int use_tcp;
+  unsigned short port_number;
   const char *path;
 };
 
@@ -34,6 +38,8 @@ struct opt scan_opt_defs[] = {
   { .long_form = "threaded", .short_form = 't', .need_arg = 0, .is_set = 0, .value = NULL},
   { .long_form = "no-summary", .short_form = 'n', .need_arg = 0, .is_set = 0, .value = NULL},
   { .long_form = "print-clean", .short_form = 'c', .need_arg = 0, .is_set = 0, .value = NULL},
+  { .long_form = "tcp", .short_form = 't', .need_arg = 0, .is_set = 0, .value = NULL},
+  { .long_form = "port", .short_form = 'p', .need_arg = 1, .is_set = 0, .value = NULL},
   { .long_form = NULL, .short_form = '\0', .need_arg = 0, .is_set = 0, .value = NULL},
 };
 
@@ -49,6 +55,8 @@ static void usage(void)
   fprintf(stderr, "  --threaded -t            scan using multiple threads\n");
   fprintf(stderr, "  --no-summary -n          disable summary at end of scanning\n");
   fprintf(stderr, "  --print-clean -c         print also clean files as they are scanned\n");
+  fprintf(stderr, "  --tcp -t                 use TCP socket\n");
+  fprintf(stderr, "  --port -p                TCP port number\n");
   fprintf(stderr, "\n");
 
   exit(1);
@@ -57,6 +65,7 @@ static void usage(void)
 static void parse_options(int argc, const char *argv[], struct scan_options *opts)
 {
   int r = opt_parse(scan_opt_defs, argc, argv);
+  const char *s_port;
 
   if (r < 0|| r >= argc)
     usage();
@@ -65,6 +74,10 @@ static void parse_options(int argc, const char *argv[], struct scan_options *opt
   opts->threaded = opt_is_set(scan_opt_defs, "threaded");
   opts->no_summary = opt_is_set(scan_opt_defs, "no-summary");
   opts->print_clean = opt_is_set(scan_opt_defs, "print-clean");
+  opts->use_tcp = opt_is_set(scan_opt_defs, "tcp");
+  s_port = opt_value(scan_opt_defs, "port", "14444");
+  opts->port_number = (unsigned short)atoi(s_port);
+
   opts->path = argv[r];
 }
 
@@ -188,12 +201,10 @@ static void print_summary(struct scan_summary *summary)
   printf("clean files       : %d\n", summary->clean);
 }
 
-static void do_scan(struct scan_options *opts)
+static void do_scan(struct scan_options *opts, int client_sock)
 {
   struct scan *scan;
   struct ipc_manager *manager;
-  int connect_fd = -1;
-  const char *connect_url = NULL;
 
   scan = (struct scan *)malloc(sizeof(struct scan));
   assert(scan != NULL);
@@ -201,11 +212,7 @@ static void do_scan(struct scan_options *opts)
   scan->summary = (opts->no_summary) ? NULL : (struct scan_summary *)malloc(sizeof(struct scan_summary));
   scan->print_clean = opts->print_clean;
 
-  /* connect_fd = os_ipc_connect(connect_url, 10); */
-  if (connect_fd < 0)
-    return;
-
-  manager = ipc_manager_new(connect_fd);
+  manager = ipc_manager_new(client_sock);
 
   ipc_manager_add_handler(manager, IPC_MSG_ID_SCAN_FILE, ipc_handler_scan_file, scan);
   ipc_manager_add_handler(manager, IPC_MSG_ID_SCAN_END, ipc_handler_scan_end, scan);
@@ -224,10 +231,18 @@ static void do_scan(struct scan_options *opts)
 int main(int argc, const char **argv)
 {
   struct scan_options *opts = (struct scan_options *)malloc(sizeof(struct scan_options));
+  int client_sock;
 
   parse_options(argc, argv, opts);
 
-  do_scan(opts);
+  client_sock = tcp_client_connect("127.0.0.1", opts->port_number, 10);
+
+  if (client_sock < 0) {
+    fprintf(stderr, "cannot open client socket (errno %d)\n", errno);
+    return 1;
+  }
+
+  do_scan(opts, client_sock);
 
   return 0;
 }
