@@ -8,7 +8,4 @@ enum uhuru_action {
   UHURU_ACTION_REMOVE       = 1 << 3,
 };
 
-/* const char *uhuru_action_str(enum uhuru_action action); */
-const char *uhuru_action_pretty_str(enum uhuru_action action);
-
 #endif

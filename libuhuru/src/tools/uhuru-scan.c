@@ -68,6 +68,41 @@ static void parse_options(int argc, const char *argv[], struct scan_options *opt
   opts->path = argv[r];
 }
 
+static const char *file_status_pretty_str(enum uhuru_file_status status)
+{
+  switch(status) {
+  case UHURU_UNDECIDED:
+    return "undecided";
+  case UHURU_CLEAN:
+    return "clean";
+  case UHURU_UNKNOWN_FILE_TYPE:
+    return "ignored";
+  case UHURU_EINVAL:
+    return "invalid argument";
+  case UHURU_IERROR:
+    return "internal error";
+  case UHURU_SUSPICIOUS:
+    return "suspicious";
+  case UHURU_WHITE_LISTED:
+    return "white listed";
+  case UHURU_MALWARE:
+    return "malware";
+  }
+
+  return "unknown status";
+}
+
+static const char *action_pretty_str(enum uhuru_action action)
+{
+  switch(action & (UHURU_ACTION_ALERT | UHURU_ACTION_QUARANTINE | UHURU_ACTION_REMOVE)) {
+  case UHURU_ACTION_ALERT: return "alert";
+  case UHURU_ACTION_ALERT | UHURU_ACTION_QUARANTINE: return "alert+quarantine";
+  case UHURU_ACTION_ALERT | UHURU_ACTION_REMOVE: return "alert+removed";
+  }
+
+  return "none";
+}
+
 static void ipc_handler_scan_file(struct ipc_manager *m, void *data)
 {
   struct scan *scan = (struct scan *)data;
@@ -114,11 +149,11 @@ static void ipc_handler_scan_file(struct ipc_manager *m, void *data)
   if (!scan->print_clean && (status == UHURU_WHITE_LISTED || status == UHURU_CLEAN))
     return;
 
-  printf("%s: %s", path, uhuru_file_status_pretty_str(status));
+  printf("%s: %s", path, file_status_pretty_str(status));
   if (status != UHURU_UNDECIDED && status != UHURU_CLEAN && status != UHURU_UNKNOWN_FILE_TYPE)
     printf(" [%s - %s]", mod_name, x_status);
   if (action != UHURU_ACTION_NONE)
-    printf(" (action %s)", uhuru_action_pretty_str(action));
+    printf(" (action %s)", action_pretty_str(action));
   printf("\n");
 }
 
