@@ -1,8 +1,9 @@
-#include <libuhuru/module.h>
-
 #include "libuhuru-config.h"
+
+#include <libuhuru/core.h>
+#include <libuhuru/ipc.h>
+
 #include "client.h"
-#include "lib/ipcman.h"
 
 #include <stdio.h>
 #include <errno.h>
@@ -68,7 +69,6 @@ static void ipc_scan_handler(struct ipc_manager *m, void *data)
   if (close(cl->sock) < 0) {
     g_log(NULL, G_LOG_LEVEL_WARNING, "closing socket %d failed (%s)", cl->sock, strerror(errno));
   }
-
   cl->sock = -1;
 
 #ifdef DEBUG
