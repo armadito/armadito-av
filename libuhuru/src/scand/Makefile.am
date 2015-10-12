@@ -16,6 +16,8 @@ tcpsock.h \
 os/linux/daemonize.c \
 os/linux/daemonize.h \
 os/linux/unixsock.c \
-os/linux/unixsock.h 
+os/linux/unixsock.h \
+../utils/getopt.c \
+../utils/getopt.h
 
 EXTRA_DIST=uhuru-scan-daemon.desktop

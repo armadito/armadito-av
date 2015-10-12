@@ -21,18 +21,15 @@ struct scan {
 };
 
 struct scan_options {
-  int use_daemon;
   int recursive;
   int threaded;
   int no_summary;
   int print_clean;
-  /* more options later */
-  char *path;
+  const char *path;
 };
 
 struct opt scan_opt_defs[] = {
   { .long_form = "help", .short_form = 'h', .need_arg = 0, .is_set = 0, .value = NULL},
-  { .long_form = "local", .short_form = 'l', .need_arg = 0, .is_set = 0, .value = NULL},
   { .long_form = "recursive", .short_form = 'r', .need_arg = 0, .is_set = 0, .value = NULL},
   { .long_form = "threaded", .short_form = 't', .need_arg = 0, .is_set = 0, .value = NULL},
   { .long_form = "no-summary", .short_form = 'n', .need_arg = 0, .is_set = 0, .value = NULL},
@@ -48,7 +45,6 @@ static void usage(void)
   fprintf(stderr, "\n");
   fprintf(stderr, "Options:\n");
   fprintf(stderr, "  --help  -h               print help and quit\n");
-  fprintf(stderr, "  --local  -l              do not use the scan daemon\n");
   fprintf(stderr, "  --recursive  -r          scan directories recursively\n");
   fprintf(stderr, "  --threaded -t            scan using multiple threads\n");
   fprintf(stderr, "  --no-summary -n          disable summary at end of scanning\n");
@@ -60,15 +56,16 @@ static void usage(void)
 
 static void parse_options(int argc, const char *argv[], struct scan_options *opts)
 {
-  if (get_opt(scan_opt_defs, argc, argv) < 0)
+  int r = opt_parse(scan_opt_defs, argc, argv);
+
+  if (r < 0|| r >= argc)
     usage();
 
-  opts->use_daemon = 1;
-  opts->recursive = 0;
-  opts->threaded = 1;
-  opts->no_summary = 0;
-  opts->print_clean = 0;
-  opts->path = NULL;
+  opts->recursive = opt_is_set(scan_opt_defs, "recursive");
+  opts->threaded = opt_is_set(scan_opt_defs, "threaded");
+  opts->no_summary = opt_is_set(scan_opt_defs, "no-summary");
+  opts->print_clean = opt_is_set(scan_opt_defs, "print-clean");
+  opts->path = argv[r];
 }
 
 static void ipc_handler_scan_file(struct ipc_manager *m, void *data)

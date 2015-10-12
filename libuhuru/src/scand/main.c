@@ -17,10 +17,10 @@ struct uhuru_daemon_options {
   /* more options later */
 };
 
-static struct option long_options[] = {
-  {"help",         no_argument,       0, 'h'},
-  {"no-daemon",    no_argument,       0, 'n'},
-  {0, 0, 0, 0}
+struct opt scan_opt_defs[] = {
+  { .long_form = "help", .short_form = 'h', .need_arg = 0, .is_set = 0, .value = NULL},
+  { .long_form = "no-daemon", .short_form = 'n', .need_arg = 0, .is_set = 0, .value = NULL},
+  { .long_form = NULL, .short_form = '\0', .need_arg = 0, .is_set = 0, .value = NULL},
 };
 
 static void usage(void)

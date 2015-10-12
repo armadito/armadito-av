@@ -24,7 +24,7 @@ static in_addr_t get_host_ip(char *hostname)
   return ipaddr->s_addr;
 }
 
-int client_tcp_socket_create(char *hostname, short port_number, int max_retry)
+int tcp_client_connect(char *hostname, short port_number, int max_retry)
 {
   in_addr_t host_ipaddr;
   int fd, r;
@@ -65,7 +65,7 @@ int client_tcp_socket_create(char *hostname, short port_number, int max_retry)
   return fd;
 }
 
-int server_tcp_socket_create(short port_number, const char *dotted)
+int tcp_server_listen(short port_number, const char *dotted)
 {
   int fd, optval;
   struct sockaddr_in listening_addr;

@@ -56,7 +56,7 @@ static struct opt *find_short_opt(struct opt *opt, const char *arg)
 
 #define is_long_option(a) ((a)[1] == '-')
 
-int get_opt(struct opt *opt, int argc, const char **argv)
+int opt_parse(struct opt *opt, int argc, const char **argv)
 {
   int i;
   struct opt *found_opt;
@@ -91,5 +91,29 @@ int get_opt(struct opt *opt, int argc, const char **argv)
   }
 
   return i;
+}
+
+int opt_is_set(struct opt *opt, const char *opt_name)
+{
+  while(opt->long_form != NULL) {
+    if (!strcmp(opt_name, opt->long_form))
+      return opt->is_set;
+
+    opt++;
+  }
+
+  return 0;
+}
+
+const char *opt_value(struct opt *opt, const char *opt_name, const char *default_value)
+{
+  while(opt->long_form != NULL) {
+    if (!strcmp(opt_name, opt->long_form))
+      return opt->value;
+
+    opt++;
+  }
+
+  return default_value;
 }
 
