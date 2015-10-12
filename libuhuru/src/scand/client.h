@@ -1,7 +1,7 @@
 #ifndef _DAEMON_CLIENT_H_
 #define _DAEMON_CLIENT_H_
 
-#include <libuhuru/scan.h>
+#include <libuhuru/core.h>
 
 struct client;
 

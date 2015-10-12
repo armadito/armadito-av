@@ -1,11 +1,7 @@
+#include <libuhuru/core.h>
+
 #include "server.h"
 #include "client.h"
-#include "unixsock.h"
-#include "lib/conf.h"
-#include "lib/uhurup.h"
-#include "lib/builtin-modules/remote.h"
-
-#include <libuhuru/scan.h>
 
 #include <assert.h>
 #include <errno.h>
@@ -13,7 +9,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 struct server {
   int listen_sock;
@@ -46,7 +43,12 @@ static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpo
   struct client *client;
   int client_sock;
 
-  client_sock = server_socket_accept(server->listen_sock);
+  client_sock = accept(server->listen_sock, NULL, NULL);
+
+  if (client_sock < 0) {
+    g_log(NULL, G_LOG_LEVEL_CRITICAL, "accept() failed: errno = %d", errno);
+    return FALSE;
+  }
 
   g_log(NULL, G_LOG_LEVEL_DEBUG, "accepted client connection: fd = %d", client_sock);
 
@@ -57,17 +59,8 @@ static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpo
   return TRUE;
 }
 
-struct server *server_new(void)
-{
-  struct server *server;
-  const char *sock_path;
-
-  server = (struct server *)malloc(sizeof(struct server));
-  assert(server != NULL);
-
-  server->uhuru = uhuru_open(0);
-  assert(server->uhuru != NULL);
-
+#if 0
+to be moved to linux main.c
   sock_path = uhuru_get_remote_url(server->uhuru);
 
 #if 0
@@ -76,8 +69,20 @@ struct server *server_new(void)
     exit(EXIT_FAILURE);
   }
 #endif
+#endif
 
-  server->listen_sock = server_socket_create(sock_path);
+struct server *server_new(int server_sock)
+{
+  struct server *server;
+  const char *sock_path;
+
+  server = (struct server *)malloc(sizeof(struct server));
+  assert(server != NULL);
+
+  server->uhuru = uhuru_open();
+  assert(server->uhuru != NULL);
+
+  server->listen_sock = server_sock;
 
   server->channel = g_io_channel_unix_new(server->listen_sock);
   g_io_add_watch(server->channel, G_IO_IN, server_listen_cb, server);
