@@ -52,3 +52,15 @@ const char *os_mime_type_guess(const char *path)
 
   return mime_type;
 }
+
+const char *os_mime_type_guess_fd(int fd)
+{
+  magic_t m;
+  const char *mime_type;
+
+  m = get_private_magic();
+
+  mime_type = magic_descriptor(m, fd);
+
+  return mime_type;
+}

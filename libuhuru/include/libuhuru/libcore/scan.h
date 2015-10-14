@@ -16,24 +16,15 @@ enum uhuru_scan_flags {
   UHURU_SCAN_RECURSE    = 1 << 1,
 };
 
-enum uhuru_scan_status {
-  UHURU_SCAN_OK = 1,
-  UHURU_SCAN_CANNOT_CONNECT,
-  UHURU_SCAN_CONTINUE,
-  UHURU_SCAN_COMPLETED,
-};
-
-struct uhuru_scan *uhuru_scan_new(struct uhuru *uhuru, const char *path, enum uhuru_scan_flags flags);
+struct uhuru_scan *uhuru_scan_new(struct uhuru *uhuru);
 
 typedef void (*uhuru_scan_callback_t)(struct uhuru_report *report, void *callback_data);
 
 void uhuru_scan_add_callback(struct uhuru_scan *scan, uhuru_scan_callback_t callback, void *callback_data);
 
-enum uhuru_scan_status uhuru_scan_start(struct uhuru_scan *scan);
+enum uhuru_file_status uhuru_scan_fd(struct uhuru_scan *scan, int fd, const char *path);
 
-enum uhuru_scan_status uhuru_scan_run(struct uhuru_scan *scan);
-
-/* enum uhuru_scan_status uhuru_scan_wait_for_completion(struct uhuru_scan *scan); */
+void uhuru_scan_path(struct uhuru_scan *scan, const char *path, enum uhuru_scan_flags flags);
 
 void uhuru_scan_free(struct uhuru_scan *scan);
 

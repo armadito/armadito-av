@@ -7,6 +7,12 @@
 #include <io.h>
 #endif
 
+#if defined(HAVE_OPEN)
+#define os_open open
+#elif defined(HAVE__OPEN)
+#define os_open _open
+#endif
+
 #if defined(HAVE_READ)
 #define os_read read
 #elif defined(HAVE__READ)
@@ -23,6 +29,12 @@
 #define os_close close
 #elif defined(HAVE__CLOSE)
 #define os_close _close
+#endif
+
+#if defined(HAVE_LSEEK)
+#define os_lseek lseek
+#elif defined(HAVE__LSEEK)
+#define os_lseek _lseek
 #endif
 
 #endif
