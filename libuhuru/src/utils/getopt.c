@@ -5,7 +5,7 @@
 static void clear_opt(struct opt *opt)
 {
   while(opt->long_form != NULL) {
-    opt->is_set == 0;
+    opt->is_set = 0;
     opt->value = NULL;
 
     opt++;

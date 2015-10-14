@@ -1,0 +1,14 @@
+LIBRARY libuhuru_ipc
+EXPORTS
+ipc_manager_new
+ipc_manager_free
+ipc_manager_get_msg_id
+ipc_manager_get_argc
+ipc_manager_get_argv
+ipc_manager_get_arg_at
+ipc_manager_add_handler
+ipc_manager_receive
+ipc_manager_msg_send
+ipc_manager_msg_begin
+ipc_manager_msg_add
+ipc_manager_msg_end

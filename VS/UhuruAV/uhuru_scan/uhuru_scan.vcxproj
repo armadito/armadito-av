@@ -11,14 +11,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{6CF9FA23-7F1A-4D07-92B9-A61ED738AE0B}</ProjectGuid>
+    <ProjectGuid>{8D1E2794-4C8C-49E7-931C-2B63F79264F8}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>libuhuru_core</RootNamespace>
-    <ProjectName>libuhuru_old</ProjectName>
+    <RootNamespace>uhuru_scan</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -42,8 +41,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)..\..\libuhuru\include;$(SolutionDir)..\..\libuhuru\src;$(SolutionDir)..\..\libuhuru\src\libcore;$(SolutionDir)..\glib\win32\glib_2.28.8\lib\glib-2.0\include;$(SolutionDir)..\glib\win32\glib_2.28.8\include\glib-2.0;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)..\glib\win32\glib_2.28.8\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)\$(Configuration);$(SolutionDir)..\glib\win32\glib_2.28.8\lib;$(SolutionDir)..\glib\win32\glib_2.28.8\bin;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)..\glib\win32\glib_2.28.8\lib\glib-2.0\include;$(SolutionDir)..\glib\win32\glib_2.28.8\include\glib-2.0;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -56,14 +55,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\libuhuru\src\lib;$(SolutionDir)..\..\libuhuru\include\config;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\libuhuru\include;$(SolutionDir)..\..\libuhuru\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;gobject-2.0.lib;urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>libuhuru.def</ModuleDefinitionFile>
+      <AdditionalDependencies>libuhuru_ipc.lib;glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;gio-2.0.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -82,48 +79,16 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ModuleDefinitionFile>libuhuru.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\libuhuru\include\config\libuhuru-config-win32.h" />
-    <ClInclude Include="..\..\..\libuhuru\include\config\libuhuru-config.h" />
-    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\common\action.h" />
-    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\common\status.h" />
-    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\core.h" />
-    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\handle.h" />
-    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\info.h" />
-    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\module.h" />
-    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\scan.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\libcore\builtin-modules\mimetypemod.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\libcore\conf.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\libcore\confparser.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\libcore\modulep.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\libcore\reportp.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\libcore\statusp.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\libcore\uhurup.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\os\dir.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\os\file.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\os\io.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\os\ipc.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\os\mimetype.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\os\string.h" />
+    <ClCompile Include="..\..\..\libuhuru\src\tools\uhuru-scan.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\utils\getopt.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\utils\tcpsock.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\libuhuru\src\libcore\action.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\libcore\builtin-modules\mimetypemod.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\libcore\conf.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\libcore\confparser.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\libcore\info.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\libcore\module.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\libcore\report.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\libcore\scan.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\libcore\status.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\libcore\uhuru.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\os\windows\dir.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\os\windows\file.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\os\windows\mimetype.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\os\windows\string.c" />
+    <ClInclude Include="..\..\..\libuhuru\src\utils\getopt.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\utils\tcpsock.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
