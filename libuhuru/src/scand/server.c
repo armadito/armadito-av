@@ -9,8 +9,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#if defined(linux)
 #include <sys/types.h>
 #include <sys/socket.h>
+#elif defined(WIN32)
+#include <WinSock2.h>
+#endif
 
 struct server {
   int listen_sock;
@@ -74,7 +78,6 @@ to be moved to linux main.c
 struct server *server_new(int server_sock)
 {
   struct server *server;
-  const char *sock_path;
 
   server = (struct server *)malloc(sizeof(struct server));
   assert(server != NULL);

@@ -55,6 +55,7 @@
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
+      <ModuleDefinitionFile>libuhuru_core.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -69,6 +70,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <ModuleDefinitionFile>libuhuru_core.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -104,6 +106,9 @@
     <ClCompile Include="..\..\..\libuhuru\src\os\windows\file.c" />
     <ClCompile Include="..\..\..\libuhuru\src\os\windows\mimetype.c" />
     <ClCompile Include="..\..\..\libuhuru\src\os\windows\string.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="libuhuru_core.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

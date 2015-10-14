@@ -1,5 +1,3 @@
-#include "libuhuru-config.h"
-
 #include <libuhuru/core.h>
 
 #include "server.h"
@@ -67,7 +65,10 @@ int main(int argc, const char **argv)
   int server_sock;
 
   g_thread_init(NULL);
+#if 0
+  /* a priori no longer needed; depends on glib version; was deprecated in 2.36 */
   g_type_init();
+#endif
 
   parse_options(argc, argv, &opts);
 

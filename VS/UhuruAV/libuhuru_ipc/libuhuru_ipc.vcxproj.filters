@@ -61,8 +61,8 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="libipc.def">
-      <Filter>Source Files\libipc</Filter>
+    <None Include="libuhuru_ipc.def">
+      <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
 </Project>

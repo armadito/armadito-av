@@ -7,6 +7,8 @@ struct client;
 
 struct client *client_new(int client_sock, struct uhuru *uhuru);
 
+void client_free(struct client *cl);
+
 int client_process(struct client *cl);
 
 #endif

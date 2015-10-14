@@ -10,35 +10,20 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\..\libuhuru\src\libipc\ipc.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\os\windows\string.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\..\libuhuru\include\config\libuhuru-config-win32.h" />
-    <ClInclude Include="..\..\..\libuhuru\include\config\libuhuru-config.h" />
-    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\common\action.h" />
-    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\common\status.h" />
-    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\ipc.h" />
-    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libipc\ipc.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="libuhuru_ipc.def" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{8146AD7E-B632-4F3E-9131-4D724A8C1528}</ProjectGuid>
+    <ProjectGuid>{9C04AEB7-E235-4FC9-A5A0-C210F0C3EE71}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>libuhuru_ipc</RootNamespace>
+    <RootNamespace>scand</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -56,46 +41,59 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)\..\glib\win32\glib_2.28.8\include\glib-2.0;$(SolutionDir)\..\glib\win32\glib_2.28.8\lib\glib-2.0\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\..\glib\win32\glib_2.28.8\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)..\glib\win32\glib_2.28.8\lib\glib-2.0\include;$(SolutionDir)\..\glib\win32\glib_2.28.8\include\glib-2.0;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>$(SolutionDir)\$(Configuration);$(SolutionDir)..\glib\win32\glib_2.28.8\lib;$(SolutionDir)..\glib\win21\glib_2.28.8\bin;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;LIBUHURU_IPC_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\libuhuru\src;$(SolutionDir)\..\..\libuhuru\include;$(SolutionDir)..\..\libuhuru\include\config;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\libuhuru\include;$(SolutionDir)..\..\libuhuru\src;$(SolutionDir)..\..\libuhuru\include\config</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glib-2.0.lib;gthread-2.0.lib;urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>libuhuru_ipc.def</ModuleDefinitionFile>
+      <AdditionalDependencies>libuhuru_core.lib;libuhuru_ipc.lib;glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;gio-2.0.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBUHURU_IPC_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ModuleDefinitionFile>libipc.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\libuhuru\src\scand\client.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\scand\main.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\scand\server.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\utils\getopt.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\utils\tcpsock.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\libuhuru\src\scand\client.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\scand\server.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\utils\getopt.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\utils\tcpsock.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -2,6 +2,7 @@ VS/glib/*
 VS/UhuruAV/libuhuru_core/Debug/*
 VS/UhuruAV/libuhuru_ipc/Debug/*
 VS/UhuruAV/uhuru_scan/Debug/*
+VS/UhuruAV/scand/Debug/*
 VS/UhuruAV/module_5_2/Debug/*
 VS/UhuruAV/UhuruAV/Debug/
 VS/UhuruAV/UhuruScanCommandLine/Debug/
