@@ -1,12 +1,18 @@
 #include "tcpsock.h"
 
+#if defined(linux)
 #include <arpa/inet.h>
-#include <assert.h>
 #include <netdb.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#elif defined(WIN32)
+#include <winsock.h>
+typedef unsigned long in_addr_t;
+#endif
+
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 static in_addr_t get_host_ip(char *hostname)
 {
