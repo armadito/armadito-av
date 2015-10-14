@@ -74,8 +74,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\libuhuru\include\config\libuhuru-config-win32.h" />
-    <ClInclude Include="..\..\..\libuhuru\include\config\libuhuru-config.h" />
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\common\action.h" />
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\common\status.h" />
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\core.h" />
