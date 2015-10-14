@@ -16,9 +16,6 @@
     <Filter Include="Source Files\libipc">
       <UniqueIdentifier>{b65b9292-87d5-4577-a00b-604fa71f54ac}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\config">
-      <UniqueIdentifier>{f654bc58-4d4a-40b3-88ac-0959b382e647}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\libipc">
       <UniqueIdentifier>{9a08b6f8-4dc1-4178-acd7-0a4d27782651}</UniqueIdentifier>
     </Filter>
@@ -52,12 +49,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libipc\ipc.h">
       <Filter>Header Files\libipc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\libuhuru\include\config\libuhuru-config.h">
-      <Filter>Header Files\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\libuhuru\include\config\libuhuru-config-win32.h">
-      <Filter>Header Files\config</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

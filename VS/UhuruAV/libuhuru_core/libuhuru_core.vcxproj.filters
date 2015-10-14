@@ -16,9 +16,6 @@
     <Filter Include="Header Files\common">
       <UniqueIdentifier>{bfcb4503-c9e5-4e44-a924-01e2bd00242a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\config">
-      <UniqueIdentifier>{17294ba3-8713-48a5-8c8b-5c88bb28f717}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\libcore">
       <UniqueIdentifier>{14c5e85f-8fa0-4a8e-9cdc-fac979abd341}</UniqueIdentifier>
     </Filter>
@@ -53,12 +50,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\core.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\libuhuru\include\config\libuhuru-config.h">
-      <Filter>Header Files\config</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\libuhuru\include\config\libuhuru-config-win32.h">
-      <Filter>Header Files\config</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\libuhuru\src\libcore\conf.h">
       <Filter>Source Files\libcore</Filter>
