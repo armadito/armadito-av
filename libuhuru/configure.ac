@@ -24,9 +24,11 @@ AC_PROG_LIBTOOL
 
 # check for functions
 AC_CHECK_FUNCS(strdup)
+AC_CHECK_FUNCS(open)
 AC_CHECK_FUNCS(read)
 AC_CHECK_FUNCS(write)
 AC_CHECK_FUNCS(close)
+AC_CHECK_FUNCS(lseek)
 AC_CHECK_FUNCS(strerror)
 
 # check for debug
