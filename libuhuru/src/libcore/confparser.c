@@ -186,7 +186,6 @@ struct uhuru_conf_parser *uhuru_conf_parser_new(const char *filename, conf_parse
 {
   struct uhuru_conf_parser *cp = g_new0(struct uhuru_conf_parser, 1);
 
-  
 #ifdef WIN32
   fopen_s(&cp->input,filename, "r");
 #else
