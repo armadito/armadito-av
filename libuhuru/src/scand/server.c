@@ -94,11 +94,3 @@ struct server *server_new(int server_sock)
 
   return server;
 }
-
-void server_loop(struct server *server)
-{
-  GMainLoop *loop;
-
-  loop = g_main_loop_new(NULL, FALSE);
-  g_main_loop_run(loop);
-}
