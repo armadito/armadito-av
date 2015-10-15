@@ -42,7 +42,6 @@ static struct uhuru_module *module_new(struct uhuru_module *src, struct uhuru *u
   mod->conf_table = src->conf_table;
   mod->post_init_fun = src->post_init_fun;
   mod->scan_fun = src->scan_fun;
-  mod->scan_fd_fun = src->scan_fd_fun;
   mod->close_fun = src->close_fun;
   mod->info_fun = src->info_fun;
 
@@ -167,7 +166,6 @@ const char *module_debug(struct uhuru_module *module)
   g_string_append_printf(s, "  init       %p\n", module->init_fun);
   g_string_append_printf(s, "  post_init  %p\n", module->post_init_fun);
   g_string_append_printf(s, "  scan       %p\n", module->scan_fun);
-  g_string_append_printf(s, "  scan_fd    %p\n", module->scan_fd_fun);
   g_string_append_printf(s, "  close      %p\n", module->close_fun);
 
   if (module->conf_table != NULL) {

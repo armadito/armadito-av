@@ -5,6 +5,4 @@ struct server;
 
 struct server *server_new(int server_sock);
 
-void server_loop(struct server *server);
-
 #endif

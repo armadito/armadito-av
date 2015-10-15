@@ -59,10 +59,18 @@ static void parse_options(int argc, const char **argv, struct uhuru_daemon_optio
   opts->port_number = (unsigned short)atoi(s_port);
 }
 
+static void main_loop(void)
+{
+  GMainLoop *loop = g_main_loop_new(NULL, FALSE);
+
+  g_main_loop_run(loop);
+}
+
 int main(int argc, const char **argv)
 {
   struct uhuru_daemon_options opts;
   int server_sock;
+  struct server *server;
 
   g_thread_init(NULL);
 #if 0
@@ -84,7 +92,9 @@ int main(int argc, const char **argv)
     return 1;
   }
 
-  server_loop(server_new(server_sock));
+  server = server_new(server_sock);
+
+  main_loop();
 
   return 0;
 }

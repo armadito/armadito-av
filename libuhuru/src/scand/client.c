@@ -33,7 +33,8 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
 {
   struct client *cl = (struct client *)callback_data;
 
-  ipc_manager_msg_send(cl->manager, IPC_MSG_ID_SCAN_FILE, 
+  ipc_manager_msg_send(cl->manager, 
+		       IPC_MSG_ID_SCAN_FILE, 
 		       IPC_STRING_T, report->path, 
 		       IPC_INT32_T, report->status,
 		       IPC_STRING_T, report->mod_name,
@@ -54,11 +55,11 @@ static void ipc_scan_handler(struct ipc_manager *m, void *data)
 
   ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &path);
 
-  scan = uhuru_scan_new(cl->uhuru);
+  scan = uhuru_scan_new(cl->uhuru, path, UHURU_SCAN_THREADED | UHURU_SCAN_RECURSE);
 
   uhuru_scan_add_callback(scan, scan_callback, cl);
 
-  uhuru_scan_path(scan, path, UHURU_SCAN_THREADED | UHURU_SCAN_RECURSE);
+  uhuru_scan_run(scan);
 
   uhuru_scan_free(scan);
 
@@ -102,7 +103,10 @@ static void info_send(struct ipc_manager *manager, struct uhuru_info *info)
     ipc_manager_msg_end(manager);
   }
 
-  ipc_manager_msg_send(manager, IPC_MSG_ID_INFO_END, IPC_INT32_T, info->global_status, IPC_NONE_T);
+  ipc_manager_msg_send(manager, 
+		       IPC_MSG_ID_INFO_END, 
+		       IPC_INT32_T, info->global_status, 
+		       IPC_NONE_T);
 }
 
 static void ipc_info_handler(struct ipc_manager *manager, void *data)
