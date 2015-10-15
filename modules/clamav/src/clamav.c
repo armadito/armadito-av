@@ -120,7 +120,7 @@ static enum uhuru_file_status clamav_scan(struct uhuru_module *module, int fd, c
   if (cl_data ->clamav_engine == NULL)
     return UHURU_IERROR;
 
-  cl_scan_status = cl_scandesc(path, &virus_name, &scanned, cl_data->clamav_engine, CL_SCAN_STDOPT);
+  cl_scan_status = cl_scandesc(fd, &virus_name, &scanned, cl_data->clamav_engine, CL_SCAN_STDOPT);
 
   if (cl_scan_status == CL_VIRUS) {
     *pmod_report = os_strdup(virus_name);
