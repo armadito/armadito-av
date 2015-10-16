@@ -1,7 +1,7 @@
 modulesdir=$(libdir)/libuhuru/modules
 modules_LTLIBRARIES=fanotify.la
 
-fanotify_la_SOURCES=fanotify.c
+fanotify_la_SOURCES=fanotify.c fawatch.c fawatch.h
 
 AM_CPPFLAGS= 
 fanotify_la_LDFLAGS= -module -avoid-version
