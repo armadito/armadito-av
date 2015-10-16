@@ -29,6 +29,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdio.h>
+#if 1
+#include <unistd.h>
+#include <fcntl.h>
+#endif
 
 struct callback_entry {
   uhuru_scan_callback_t callback;
@@ -120,6 +124,31 @@ static void uhuru_scan_call_callbacks(struct uhuru_scan *scan, struct uhuru_repo
   }
 }
 
+static const char *get_access_mode(int access_mode)
+{
+  switch(access_mode) {
+  case O_RDONLY:
+    return "O_RDONLY"
+  case O_WRONLY:
+    return "O_WRONLY";
+  case O_RDWR:
+    return "O_RDWR"
+  }
+
+  return "UNKNOWN";
+}
+
+static void check_fd(int fd)
+{
+  int flags = fcntl(fd, F_GETFL);
+
+  if (flags < 0) {
+    g_log(NULL, G_LOG_LEVEL_DEBUG, "cannot get file flags for fd %d (%s)", fd, os_strerror(errno));
+  } else {
+    g_log(NULL, G_LOG_LEVEL_DEBUG, "file fd %d access_mode %s", fd, get_access_mode(flags & O_ACCMODE));
+  }
+}
+
 static enum uhuru_file_status scan_apply_modules(int fd, const char *path, const char *mime_type, struct uhuru_module **modules,  struct uhuru_report *report)
 {
   enum uhuru_file_status current_status = UHURU_UNDECIDED;
@@ -132,8 +161,9 @@ static enum uhuru_file_status scan_apply_modules(int fd, const char *path, const
     if (mod->status != UHURU_MOD_OK)
       continue;
 
+    check_fd(fd);
     if (os_lseek(fd, 0L, SEEK_SET) < 0) {
-      g_log(NULL, G_LOG_LEVEL_WARNING, "cannot lseek file %s Error - %d", path, errno);
+      g_log(NULL, G_LOG_LEVEL_WARNING, "cannot lseek file %s Error - %s", path, os_strerror(errno));
       return UHURU_IERROR;
     }
 
@@ -163,7 +193,10 @@ static enum uhuru_file_status scan_fd(struct uhuru_scan *scan, int fd, const cha
 
   uhuru_report_init(&report, path);
 
+  check_fd(fd);
   mime_type = os_mime_type_guess_fd(fd);
+  check_fd(fd);
+
   modules = uhuru_get_applicable_modules(scan->uhuru, mime_type);
 
   if (modules == NULL)

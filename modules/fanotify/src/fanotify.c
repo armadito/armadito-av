@@ -1,18 +1,18 @@
 #include <libuhuru/core.h>
 
-#include "fawatch.h"
+#include "monitor.h"
 
 #include <glib.h>
 
 struct fanotify_data {
-  struct fa_watch *w;
+  struct access_monitor *monitor;
 };
 
 static enum uhuru_mod_status mod_fanotify_init(struct uhuru_module *module)
 {
   struct fanotify_data *fa_data = g_new(struct fanotify_data, 1);
 
-  fa_data->w = fa_watch_new();
+  fa_data->monitor = access_monitor_new(module->uhuru);
 
   module->data = fa_data;
 
@@ -24,7 +24,7 @@ static enum uhuru_mod_status mod_fanotify_conf_set_watch_dir(struct uhuru_module
   struct fanotify_data *fa_data = (struct fanotify_data *)module->data;
 
   while (*argv != NULL) {
-    fa_watch_add(fa_data->w, *argv);
+    access_monitor_add(fa_data->monitor, *argv);
 
     argv++;
   }
@@ -43,9 +43,9 @@ static enum uhuru_mod_status mod_fanotify_close(struct uhuru_module *module)
 {
   struct fanotify_data *fa_data = (struct fanotify_data *)module->data;
 
-  fa_watch_free(fa_data->w);
+  access_monitor_free(fa_data->monitor);
 
-  fa_data->w = NULL;
+  fa_data->monitor = NULL;
 
   return UHURU_MOD_OK;
 }
