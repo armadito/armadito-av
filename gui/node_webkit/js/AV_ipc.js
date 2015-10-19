@@ -33,8 +33,6 @@ function start_tcp_server() {
 
 }
 
-
-
 function stop_tcp_server(){
 
 	server.close();
