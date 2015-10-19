@@ -11,6 +11,10 @@ AC_ARG_ENABLE([debug],
 # configuration header
 AM_CONFIG_HEADER(include/config/libuhuru-config-autoconf.h)
 
+# for now, add builtin modules by hand
+AC_DEFINE([HAVE_ALERT_MODULE],[1],[Define to compile builtin module alert])
+AC_DEFINE([HAVE_QUARANTINE_MODULE],[1],[Define to compile builtin module quarantine])
+
 # This is needed when the first PKG_CHECK_MODULES call is inside a conditional (not the case here, but who knows)
 PKG_PROG_PKG_CONFIG
 
@@ -20,9 +24,11 @@ AC_PROG_LIBTOOL
 
 # check for functions
 AC_CHECK_FUNCS(strdup)
+AC_CHECK_FUNCS(open)
 AC_CHECK_FUNCS(read)
 AC_CHECK_FUNCS(write)
 AC_CHECK_FUNCS(close)
+AC_CHECK_FUNCS(lseek)
 AC_CHECK_FUNCS(strerror)
 
 # check for debug
@@ -36,10 +42,19 @@ if test "$enable_debug" = "yes"; then
 fi
 
 # check for glib stuff
-PKG_CHECK_MODULES(GMODULE2, gmodule-2.0 gthread-2.0, [HAVE_GMODULE2=yes], [HAVE_GMODULE2=no])
+PKG_CHECK_MODULES(GLIB2, glib-2.0, [HAVE_GLIB2=yes], [HAVE_GLIB2=no])
+if test "$HAVE_GLIB2" = "no"; then
+   AC_MSG_ERROR("cannot find glib2 library")
+fi
+PKG_CHECK_MODULES(GMODULE2, gmodule-2.0, [HAVE_GMODULE2=yes], [HAVE_GMODULE2=no])
 if test "$HAVE_GMODULE2" = "no"; then
    AC_MSG_ERROR("cannot find gmodule2 library")
 fi
+PKG_CHECK_MODULES(GTHREAD2, gthread-2.0, [HAVE_GTHREAD2=yes], [HAVE_GTHREAD2=no])
+if test "$HAVE_GTHREAD2" = "no"; then
+   AC_MSG_ERROR("cannot find gthread2 library")
+fi
+# still needed?
 PKG_CHECK_MODULES(GIO2, gio-2.0 gio-unix-2.0, [HAVE_GIO2=yes], [HAVE_GIO2=no])
 if test "$HAVE_GIO2" = "no"; then
    AC_MSG_ERROR("cannot find glib gio library")
@@ -65,12 +80,6 @@ PKG_CHECK_MODULES(LIBXML2, libxml-2.0, [HAVE_LIBXML2=yes], [HAVE_LIBXML2=no])
 if test "$HAVE_LIBXML2" = "no"; then
    AC_MSG_ERROR("cannot find libxml2 library")
 fi
-
-# check for libcurl
-#PKG_CHECK_MODULES(LIBCURL, libcurl, [HAVE_LIBCURL=yes], [HAVE_LIBCURL=no])
-#if test "$HAVE_LIBCURL" = "no"; then
-#   AC_MSG_ERROR("cannot find libcurl library")
-#fi
 
 # check for libmagic, that has no pkg-config
 AC_CHECK_LIB(magic, magic_open, [HAVE_LIBMAGIC=yes], [HAVE_LIBMAGIC=no])
@@ -100,11 +109,13 @@ include/config/Makefile
 include/libuhuru/Makefile
 pkgconfig/Makefile
 src/Makefile
-src/lib/Makefile
-src/scand/Makefile
+src/libcore/Makefile
+src/libipc/Makefile
 src/on-access/Makefile
 src/on-access/linux/Makefile
+src/os/Makefile
+src/scand/Makefile
+src/tools/Makefile
 tests/Makefile
-tools/Makefile
 ])
 AC_OUTPUT

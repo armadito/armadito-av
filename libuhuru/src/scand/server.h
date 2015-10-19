@@ -3,8 +3,6 @@
 
 struct server;
 
-struct server *server_new(void);
-
-void server_loop(struct server *server);
+struct server *server_new(int server_sock);
 
 #endif

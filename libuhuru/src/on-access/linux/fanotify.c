@@ -1,3 +1,7 @@
+/* 
+   code inspired by: http://www.lanedo.com/filesystem-monitoring-linux-kernel/ 
+*/
+
 #include "fanotify.h"
 
 #define _GNU_SOURCE
