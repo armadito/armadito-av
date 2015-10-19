@@ -29,10 +29,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdio.h>
-#if 1
+#if 0
 #include <unistd.h>
-#include <fcntl.h>
 #endif
+
 
 struct callback_entry {
   uhuru_scan_callback_t callback;
@@ -128,11 +128,11 @@ static const char *get_access_mode(int access_mode)
 {
   switch(access_mode) {
   case O_RDONLY:
-    return "O_RDONLY"
+    return "O_RDONLY";
   case O_WRONLY:
     return "O_WRONLY";
   case O_RDWR:
-    return "O_RDWR"
+	 return "O_RDWR";
   }
 
   return "UNKNOWN";
