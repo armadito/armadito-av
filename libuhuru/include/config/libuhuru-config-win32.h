@@ -11,6 +11,8 @@
 /* mapping posix names to win32 names */
 #undef HAVE_STRDUP
 #define HAVE__STRDUP
+#undef HAVE_OPEN
+#define HAVE__OPEN
 #undef HAVE_READ
 #define HAVE__READ
 #undef HAVE_WRITE
