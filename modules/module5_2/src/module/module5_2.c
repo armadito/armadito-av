@@ -1,4 +1,4 @@
-#include <libuhuru/module.h>
+#include <libuhuru/core.h>
 
 #include <assert.h>
 #include <stdlib.h>
