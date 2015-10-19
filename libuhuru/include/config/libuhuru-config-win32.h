@@ -17,6 +17,8 @@
 #define HAVE__WRITE
 #undef HAVE_CLOSE
 #define HAVE__CLOSE
+#undef HAVE_LSEEK
+#define HAVE__LSEEK
 /* windows does not have realpath() */
 #undef HAVE_REALPATH
 

@@ -1,3 +1,7 @@
+2015-10-07  François  <francois@dechelle.net>
+
+	* removed all remote calls from libuhuru API; separated API into core and ipc
+
 2015-09-30  François  <francois@dechelle.net>
 
 	* added lib/os/file.h to encapsulate calls to stat(); changed lib/os/dir.h to use same file flags as lib/os/file.h

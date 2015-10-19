@@ -28,12 +28,6 @@ enable=0
 quarantine-dir="@localstatedir@/lib/uhuru/quarantine"
 
 
-[remote]
-
-socket-dir="@/tmp/uhuru"
-#socket-dir="/tmp/uhuru"
-
-
 # [uhuru]
 # REMOVED, path loading directly from uhuru.c
 # this directive trigs loading of the configuration files of the dynamically 

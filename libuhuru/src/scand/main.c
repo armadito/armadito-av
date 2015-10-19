@@ -1,29 +1,29 @@
-#include "libuhuru-config.h"
-#include <libuhuru/scan.h>
-#include "server.h"
+#include <libuhuru/core.h>
 
+#include "server.h"
+#include "utils/getopt.h"
+#include "utils/tcpsock.h"
+#ifdef linux
+#include "os/linux/daemonize.h"
+#endif
+
+#include <glib.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
-#include <glib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <unistd.h>
-#include <syslog.h>
-#include <string.h>
-#include <signal.h>
 
 struct uhuru_daemon_options {
   int no_daemon;
-  /* more options later */
+  int use_tcp;
+  unsigned short port_number;
 };
 
-static struct option long_options[] = {
-  {"help",         no_argument,       0, 'h'},
-  {"no-daemon",    no_argument,       0, 'n'},
-  {0, 0, 0, 0}
+struct opt daemon_opt_defs[] = {
+  { .long_form = "help", .short_form = 'h', .need_arg = 0, .is_set = 0, .value = NULL},
+  { .long_form = "no-daemon", .short_form = 'n', .need_arg = 0, .is_set = 0, .value = NULL},
+  { .long_form = "tcp", .short_form = 't', .need_arg = 0, .is_set = 0, .value = NULL},
+  { .long_form = "port", .short_form = 'p', .need_arg = 1, .is_set = 0, .value = NULL},
+  { .long_form = NULL, .short_form = '\0', .need_arg = 0, .is_set = 0, .value = NULL},
 };
 
 static void usage(void)
@@ -35,145 +35,66 @@ static void usage(void)
   fprintf(stderr, "Options:\n");
   fprintf(stderr, "  --help  -h               print help and quit\n");
   fprintf(stderr, "  --no-daemon -n           do not fork and go to background\n");
+  fprintf(stderr, "  --tcp -t                 use TCP socket\n");
+  fprintf(stderr, "  --port -p                TCP port number\n");
   fprintf(stderr, "\n");
 
   exit(1);
 }
 
-static void parse_options(int argc, char *argv[], struct uhuru_daemon_options *opts)
+static void parse_options(int argc, const char **argv, struct uhuru_daemon_options *opts)
 {
-  int c;
+  int r = opt_parse(daemon_opt_defs, argc, argv);
+  const char *s_port;
 
-  opts->no_daemon = 0;
+  if (r < 0|| r > argc)
+    usage();
 
-  while (1) {
-    int option_index = 0;
-
-    c = getopt_long(argc, argv, "hn", long_options, &option_index);
-
-    if (c == -1)
-      break;
-
-    switch (c) {
-    case 'h':
+  if (opt_is_set(daemon_opt_defs, "help"))
       usage();
-      break;
-    case 'n':
-      opts->no_daemon = 1;
-      break;
-    default:
-      usage();
-    }
-  }
+
+  opts->no_daemon = opt_is_set(daemon_opt_defs, "no-daemon");
+  opts->use_tcp = opt_is_set(daemon_opt_defs, "tcp");
+  s_port = opt_value(daemon_opt_defs, "port", "14444");
+  opts->port_number = (unsigned short)atoi(s_port);
 }
 
-static int daemonize(void)
+static void main_loop(void)
 {
-  pid_t pid, sid;
-        
-  pid = fork();
-  if (pid < 0) {
-    exit(EXIT_FAILURE);
-  } else if (pid > 0) {
-    exit(EXIT_SUCCESS);
-  }
+  GMainLoop *loop = g_main_loop_new(NULL, FALSE);
 
-  umask(0);
-                
-  /* Open any logs here */        
-                
-  sid = setsid();
-  if (sid < 0) {
-    /* Log the failure */
-    exit(EXIT_FAILURE);
-  }
-        
-  if ((chdir("/")) < 0) {
-    /* Log the failure */
-    exit(EXIT_FAILURE);
-  }
-        
-  close(STDIN_FILENO);
-  close(STDOUT_FILENO);
-  close(STDERR_FILENO);
+  g_main_loop_run(loop);
 }
 
-/* refs:
-   http://stackoverflow.com/questions/17954432/creating-a-daemon-in-linux 
-   http://www.netzmafia.de/skripten/unix/linux-daemon-howto.html
-   http://shahmirj.com/blog/beginners-guide-to-creating-a-daemon-in-linux
-*/
-static int other_daemonize(char* name, char* path, char* outfile, char* errfile, char* infile )
-{
-  if(!path) { path="/"; }
-  if(!name) { name="medaemon"; }
-  if(!infile) { infile="/dev/null"; }
-  if(!outfile) { outfile="/dev/null"; }
-  if(!errfile) { errfile="/dev/null"; }
-  //printf("%s %s %s %s\n",name,path,outfile,infile);
-  pid_t child;
-
-  //fork, detach from process group leader
-  if( (child=fork())<0 ) { //failed fork
-    fprintf(stderr,"error: failed fork\n");
-    exit(EXIT_FAILURE);
-  }
-  if (child>0) { //parent
-    exit(EXIT_SUCCESS);
-  }
-  if( setsid()<0 ) { //failed to become session leader
-    fprintf(stderr,"error: failed setsid\n");
-    exit(EXIT_FAILURE);
-  }
-
-  //catch/ignore signals
-  signal(SIGCHLD,SIG_IGN);
-  signal(SIGHUP,SIG_IGN);
-
-  //fork second time
-  if ( (child=fork())<0) { //failed fork
-    fprintf(stderr,"error: failed fork\n");
-    exit(EXIT_FAILURE);
-  }
-  if( child>0 ) { //parent
-    exit(EXIT_SUCCESS);
-  }
-
-  //new file permissions
-  umask(0);
-  //change to path directory
-  chdir(path);
-
-  //Close all open file descriptors
-  int fd;
-  for( fd=sysconf(_SC_OPEN_MAX); fd>0; --fd )
-    {
-      close(fd);
-    }
-
-  //reopen stdin, stdout, stderr
-  stdin=fopen(infile,"r");   //fd=0
-  stdout=fopen(outfile,"w+");  //fd=1
-  stderr=fopen(errfile,"w+");  //fd=2
-  
-  //open syslog
-  openlog(name,LOG_PID,LOG_DAEMON);
-  return(0);
-}
-
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
   struct uhuru_daemon_options opts;
+  int server_sock;
+  struct server *server;
 
   g_thread_init(NULL);
+#if 0
+  /* a priori no longer needed; depends on glib version; was deprecated in 2.36 */
   g_type_init();
+#endif
 
   parse_options(argc, argv, &opts);
 
+#ifdef linux
   if (!opts.no_daemon)
     daemonize();
+#endif
 
-  server_loop(server_new());
+  server_sock = tcp_server_listen(opts.port_number, "127.0.0.1");
+
+  if (server_sock < 0) {
+    fprintf(stderr, "cannot open server socket (errno %d)\n", errno);
+    return 1;
+  }
+
+  server = server_new(server_sock);
+
+  main_loop();
 
   return 0;
 }
