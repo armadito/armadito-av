@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include "tfidfDetection.h"
 #include "utils.h"
+#include "osdeps.h"
 
 PTFIDF_NODE loadTFIDFBases(CHAR *szFileName, PDWORD TotalSizeDataBase, PDWORD nbDocsInBase){
 	FILE *DL = NULL;

@@ -1,62 +1,41 @@
 // global definitions
-var ipc = require('node-ipc');
-ipc.config.id   = 'world';
-ipc.config.retry= 1500;
-ipc.config.rawBuffer=true;
-ipc.config.encoding='ascii';
-ipc.config.networkPort='8077';
 
-function start_world_server_ipc(){
+var net = require('net');
+var server;
 
-	ipc.serveNet(
-		function(){
-			ipc.server.on(
-				'connect',
-				function(socket){
-					server_on_connect(socket);
-				}
-			);
-
-			ipc.server.on(
-				'data',
-				function(data,socket){
-					server_on_data_received(data,socket);
-				}
-			);
-		}
-	);
-
-	ipc.server.start();
-
-}
-
-function hello_world_ipc (){
+function start_tcp_server() {
 	
-	ipc.connectToNet(
-		'world',
-		function(){
-			ipc.of.world.on(
-				'connect',
-				function(){
-					client_on_connect();	
-				}
-			);
-
-			ipc.of.world.on(
-				'disconnect',
-				function(){
-					client_on_disconnect();
-				}
-			);
-			
-			ipc.of.world.on(
-				'data',
-				function(data){
-					client_on_data_received(data);
-				}
-			);
-		}
-	);
+	// A port value of zero will assign a random port.
+	var listening_port = 0;
+	
+	server = net.createServer(function(connection) { //'connection' listener
+	  console.log('client connected');
+	  
+	  connection.on('end', function() {
+		console.log('client disconnected');
+	  });
+	  
+	  connection.write('hello\r\n');
+	  connection.pipe(connection);
+	});
+	
+	server.on('error', function (e) {
+	  if (e.code == 'EADDRINUSE') {
+		console.log('Address in use, retrying...');
+		setTimeout(function () {
+		  server.close();
+		  server.listen(listening_port, on_server_listening);
+		}, 1000);
+	  }
+	});
+	
+	server.listen(listening_port, on_server_listening );
 
 }
 
+
+
+function stop_tcp_server(){
+
+	server.close();
+}

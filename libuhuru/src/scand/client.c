@@ -1,8 +1,10 @@
-#include <libuhuru/module.h>
+#include <libuhuru-config.h>
 
-#include "libuhuru-config.h"
+#include <libuhuru/core.h>
+#include <libuhuru/ipc.h>
+#include <os/io.h>
+
 #include "client.h"
-#include "lib/ipcman.h"
 
 #include <stdio.h>
 #include <errno.h>
@@ -31,7 +33,8 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
 {
   struct client *cl = (struct client *)callback_data;
 
-  ipc_manager_msg_send(cl->manager, IPC_MSG_ID_SCAN_FILE, 
+  ipc_manager_msg_send(cl->manager, 
+		       IPC_MSG_ID_SCAN_FILE, 
 		       IPC_STRING_T, report->path, 
 		       IPC_INT32_T, report->status,
 		       IPC_STRING_T, report->mod_name,
@@ -52,23 +55,19 @@ static void ipc_scan_handler(struct ipc_manager *m, void *data)
 
   ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &path);
 
-  scan = uhuru_scan_new(cl->uhuru, path, UHURU_SCAN_RECURSE);
+  scan = uhuru_scan_new(cl->uhuru, path, UHURU_SCAN_THREADED | UHURU_SCAN_RECURSE);
 
   uhuru_scan_add_callback(scan, scan_callback, cl);
 
-  uhuru_scan_start(scan);
-
-  while (uhuru_scan_run(scan) == UHURU_SCAN_CONTINUE)
-    ;
+  uhuru_scan_run(scan);
 
   uhuru_scan_free(scan);
 
   ipc_manager_msg_send(cl->manager, IPC_MSG_ID_SCAN_END, IPC_NONE_T);
 
-  if (close(cl->sock) < 0) {
-    g_log(NULL, G_LOG_LEVEL_WARNING, "closing socket %d failed (%s)", cl->sock, strerror(errno));
+  if (os_close(cl->sock) < 0) {
+    g_log(NULL, G_LOG_LEVEL_WARNING, "closing socket %d failed (%d)", cl->sock, errno);
   }
-
   cl->sock = -1;
 
 #ifdef DEBUG
@@ -104,7 +103,10 @@ static void info_send(struct ipc_manager *manager, struct uhuru_info *info)
     ipc_manager_msg_end(manager);
   }
 
-  ipc_manager_msg_send(manager, IPC_MSG_ID_INFO_END, IPC_INT32_T, info->global_status, IPC_NONE_T);
+  ipc_manager_msg_send(manager, 
+		       IPC_MSG_ID_INFO_END, 
+		       IPC_INT32_T, info->global_status, 
+		       IPC_NONE_T);
 }
 
 static void ipc_info_handler(struct ipc_manager *manager, void *data)
@@ -122,8 +124,8 @@ static void ipc_info_handler(struct ipc_manager *manager, void *data)
 
   uhuru_info_free(info);
 
-  if (close(cl->sock) < 0) {
-    g_log(NULL, G_LOG_LEVEL_WARNING, "closing socket %d failed (%s)", cl->sock, strerror(errno));
+  if (os_close(cl->sock) < 0) {
+    g_log(NULL, G_LOG_LEVEL_WARNING, "closing socket %d failed (%d)", cl->sock, errno);
   }
 
   cl->sock = -1;

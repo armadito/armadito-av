@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\common">
+      <UniqueIdentifier>{bfcb4503-c9e5-4e44-a924-01e2bd00242a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\libcore">
+      <UniqueIdentifier>{14c5e85f-8fa0-4a8e-9cdc-fac979abd341}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\libcore">
+      <UniqueIdentifier>{5b6ce4fa-a7a5-4584-b2aa-3910f84e509f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\os">
+      <UniqueIdentifier>{31c54a81-9d11-456e-85c3-86c97c66bc39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\os\windows">
+      <UniqueIdentifier>{ff62ffda-90de-4e0e-b8c5-115cc8835090}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\common\action.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\common\status.h">
+      <Filter>Header Files\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\handle.h">
+      <Filter>Header Files\libcore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\info.h">
+      <Filter>Header Files\libcore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\module.h">
+      <Filter>Header Files\libcore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\scan.h">
+      <Filter>Header Files\libcore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\core.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\libcore\conf.h">
+      <Filter>Source Files\libcore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\libcore\confparser.h">
+      <Filter>Source Files\libcore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\libcore\modulep.h">
+      <Filter>Source Files\libcore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\libcore\reportp.h">
+      <Filter>Source Files\libcore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\libcore\statusp.h">
+      <Filter>Source Files\libcore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\libcore\uhurup.h">
+      <Filter>Source Files\libcore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\libcore\builtin-modules\mimetypemod.h">
+      <Filter>Source Files\libcore</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\action.c">
+      <Filter>Source Files\libcore</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\conf.c">
+      <Filter>Source Files\libcore</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\confparser.c">
+      <Filter>Source Files\libcore</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\info.c">
+      <Filter>Source Files\libcore</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\module.c">
+      <Filter>Source Files\libcore</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\report.c">
+      <Filter>Source Files\libcore</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\scan.c">
+      <Filter>Source Files\libcore</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\status.c">
+      <Filter>Source Files\libcore</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\uhuru.c">
+      <Filter>Source Files\libcore</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\builtin-modules\mimetypemod.c">
+      <Filter>Source Files\libcore</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\os\windows\dir.c">
+      <Filter>Source Files\os\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\os\windows\file.c">
+      <Filter>Source Files\os\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\os\windows\mimetype.c">
+      <Filter>Source Files\os\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\os\windows\string.c">
+      <Filter>Source Files\os\windows</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="libuhuru_core.def">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,3 @@
+
+int daemonize(void);
+
