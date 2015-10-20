@@ -53,7 +53,6 @@ static struct opt *find_short_opt(struct opt *opt, const char *arg)
 }
 
 #define is_option(a) ((a)[0] == '-')
-
 #define is_long_option(a) ((a)[1] == '-')
 
 int opt_parse(struct opt *opt, int argc, const char **argv)
