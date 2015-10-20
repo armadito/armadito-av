@@ -29,10 +29,11 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdio.h>
-#if 1
+/* for now, dirty while debugging on-access on linux */
+#ifdef linux
 #include <unistd.h>
-#include <fcntl.h>
 #endif
+
 
 struct callback_entry {
   uhuru_scan_callback_t callback;
@@ -124,15 +125,16 @@ static void uhuru_scan_call_callbacks(struct uhuru_scan *scan, struct uhuru_repo
   }
 }
 
+#ifdef linux
 static const char *get_access_mode(int access_mode)
 {
   switch(access_mode) {
   case O_RDONLY:
-    return "O_RDONLY"
+    return "O_RDONLY";
   case O_WRONLY:
     return "O_WRONLY";
   case O_RDWR:
-    return "O_RDWR"
+	 return "O_RDWR";
   }
 
   return "UNKNOWN";
@@ -148,6 +150,12 @@ static void check_fd(int fd)
     g_log(NULL, G_LOG_LEVEL_DEBUG, "file fd %d access_mode %s", fd, get_access_mode(flags & O_ACCMODE));
   }
 }
+#endif
+#ifdef WIN32
+static void check_fd(int fd)
+{
+}
+#endif
 
 static enum uhuru_file_status scan_apply_modules(int fd, const char *path, const char *mime_type, struct uhuru_module **modules,  struct uhuru_report *report)
 {
@@ -213,12 +221,14 @@ static enum uhuru_file_status scan_fd(struct uhuru_scan *scan, int fd, const cha
 
 static enum uhuru_file_status scan_file_path(struct uhuru_scan *scan, const char *path)
 {
-  int fd;
+	int fd = -1;
 
   g_log(NULL, G_LOG_LEVEL_DEBUG, "scan_path - %s", path);
 
+#ifdef linux
   /* FIXME: on windows, must find a way to OR the flag with _O_BINARY */
   fd = os_open(path, O_RDONLY);
+#endif
 
   if (fd < 0) {
     g_log(NULL, G_LOG_LEVEL_WARNING, "cannot open file %s Error - %d", path, errno);
