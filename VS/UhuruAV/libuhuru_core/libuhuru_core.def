@@ -4,7 +4,6 @@ uhuru_open
 uhuru_close
 uhuru_scan_new
 uhuru_scan_add_callback
-uhuru_scan_start
 uhuru_scan_run
 uhuru_scan_free
 uhuru_action_pretty_str
