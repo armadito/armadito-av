@@ -2,6 +2,7 @@
 
 #include "utils/getopt.h"
 #include "utils/tcpsock.h"
+#include "utils/named_pipe_server.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -231,18 +232,24 @@ static void do_scan(struct scan_options *opts, int client_sock)
 int main(int argc, const char **argv)
 {
   struct scan_options *opts = (struct scan_options *)malloc(sizeof(struct scan_options));
-  int client_sock;
+  int named_pipe = 0;
 
-  parse_options(argc, argv, opts);
+  //parse_options(argc, argv, opts);
 
+  // Notes : If you intend to use a named pipe locally only, deny access to NT AUTHORITY\NETWORK or switch to local RPC.
+
+  named_pipe = start_named_pipe_server();
+
+  /*
   client_sock = tcp_client_connect("127.0.0.1", opts->port_number, 10);
 
   if (client_sock < 0) {
     fprintf(stderr, "cannot open client socket (errno %d)\n", errno);
     return 1;
   }
+  */
 
-  do_scan(opts, client_sock);
+  // do_scan(opts, client_sock);
 
   return 0;
 }

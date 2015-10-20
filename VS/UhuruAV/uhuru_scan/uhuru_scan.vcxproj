@@ -61,6 +61,8 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>libuhuru_ipc.lib;glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;gio-2.0.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>
+      </AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -84,10 +86,14 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\libuhuru\src\tools\uhuru-scan.c" />
     <ClCompile Include="..\..\..\libuhuru\src\utils\getopt.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\utils\named_pipe_client.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\utils\named_pipe_server.c" />
     <ClCompile Include="..\..\..\libuhuru\src\utils\tcpsock.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\libuhuru\src\utils\getopt.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\utils\named_pipe_client.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\utils\named_pipe_server.h" />
     <ClInclude Include="..\..\..\libuhuru\src\utils\tcpsock.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
