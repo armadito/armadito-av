@@ -25,6 +25,7 @@
 #include <unistd.h>
 
 struct access_monitor {
+  int enable_permission;
   int fanotify_fd;
   GPtrArray *paths;
   struct uhuru *uhuru;
@@ -43,7 +44,9 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
   struct access_monitor *m = g_new(struct access_monitor, 1);
   GIOChannel *channel;
 
-  m->fanotify_fd = fanotify_init(FAN_CLOEXEC | FAN_CLASS_CONTENT, O_RDONLY | O_CLOEXEC | O_LARGEFILE | O_NOATIME);
+  m->enable_permission = 0;
+
+  m->fanotify_fd = fanotify_init(FAN_CLASS_CONTENT | FAN_CLOEXEC, O_RDONLY | O_CLOEXEC | O_LARGEFILE | O_NOATIME);
 
   if (m->fanotify_fd < 0)
     g_log(NULL, G_LOG_LEVEL_ERROR, "fanotify: init failed (%s)", strerror(errno));
@@ -61,6 +64,11 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
   g_log(NULL, G_LOG_LEVEL_DEBUG, "fanotify: init ok");
 
   return m;
+}
+
+int access_monitor_enable_permission(struct access_monitor *m, int enable_permission)
+{
+  return m->enable_permission = enable_permission;
 }
 
 int access_monitor_add(struct access_monitor *m, const char *path)
@@ -144,35 +152,31 @@ static __u32 file_status_2_response(enum uhuru_file_status status)
 static void event_process(struct access_monitor *m, struct fanotify_event_metadata *event)
 {
   char file_path[PATH_MAX];
-  char program_path[PATH_MAX];
   char *p;
 
   p = get_file_path_from_fd(event->fd, file_path, PATH_MAX);
 
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "fanotify: event 0x%llx fd %d path '%s'", event->mask, event->fd, p ? p : "unknown");
-
   if (event->mask & FAN_OPEN_PERM) {
-    struct fanotify_response access;
+    struct fanotify_response response;
     enum uhuru_file_status status;
 
-    access.fd = event->fd;
+    response.fd = event->fd;
 
-    if (event->pid == m->my_pid) 
-      access.response = FAN_ALLOW;
+    if (m->my_pid == event->pid)   /* file was opened by myself, always allow */
+      response.response = FAN_ALLOW;
+    else if (m->enable_permission == 0)  /* permission check is disabled, always allow */
+      response.response = FAN_ALLOW;
     else {
-#if 1
-      status = uhuru_scan_fd(m->uhuru, event->fd, p);
-      access.response = file_status_2_response(status);
-#endif
-#if 0
-      access.response = FAN_ALLOW;
-#endif
+      status = uhuru_scan_simple(m->uhuru, p);
+      response.response = file_status_2_response(status);
     }
 
-    write(m->fanotify_fd, &access, sizeof(access));
+    write(m->fanotify_fd, &response, sizeof(struct fanotify_response));
 
     g_log(NULL, G_LOG_LEVEL_DEBUG, "fanotify: fd %d path '%s' -> %s", 
-	  event->fd, p ? p : "unknown", (access.response == FAN_ALLOW) ? "ALLOW" : "DENY");
+	  event->fd, p ? p : "unknown", (response.response == FAN_ALLOW) ? "ALLOW" : "DENY");
+  } else {
+    g_log(NULL, G_LOG_LEVEL_WARNING, "fanotify: unprocessed event 0x%llx fd %d path '%s'", event->mask, event->fd, p ? p : "unknown");
   }
 
   close(event->fd);

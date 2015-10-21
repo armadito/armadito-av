@@ -110,7 +110,7 @@ static enum uhuru_mod_status clamav_post_init(struct uhuru_module *module)
   return UHURU_MOD_OK;
 }
 
-static enum uhuru_file_status clamav_scan(struct uhuru_module *module, int fd, const char *mime_type, char **pmod_report)
+static enum uhuru_file_status clamav_scan(struct uhuru_module *module, const char *path, const char *mime_type, char **pmod_report)
 {
   struct clamav_data *cl_data = (struct clamav_data *)module->data;
   const char *virus_name = NULL;
@@ -120,7 +120,7 @@ static enum uhuru_file_status clamav_scan(struct uhuru_module *module, int fd, c
   if (cl_data ->clamav_engine == NULL)
     return UHURU_IERROR;
 
-  cl_scan_status = cl_scandesc(fd, &virus_name, &scanned, cl_data->clamav_engine, CL_SCAN_STDOPT);
+  cl_scan_status = cl_scanfile(path, &virus_name, &scanned, cl_data->clamav_engine, CL_SCAN_STDOPT);
 
   if (cl_scan_status == CL_VIRUS) {
     *pmod_report = os_strdup(virus_name);
