@@ -20,7 +20,7 @@ if(os.platform() == "win32")
 	client_path = '\\\\.\\pipe\\'+ client_path;
 }
 
-
+// Parse a node.js Buffer 
 function parse_json_buffer ( buffer ){
 	
 	// Note - JSON.parse can tie up the current thread because it is a synchronous method. So if you are planning to parse big JSON objects use a streaming json parser.		
@@ -37,6 +37,7 @@ function parse_json_buffer ( buffer ){
 	return json_object;
 }
 
+// Write a JSON formatted string on socket to AV
 function write_to_AV( data ){
  	
 	var buff_to_write = new Buffer( data, data_encoding );
@@ -53,6 +54,7 @@ function write_to_AV( data ){
 	return 0;
 }
 
+// Function called when data is received from AV
 function read_from_AV ( data ) {
 	
 	var buff = new Buffer(data, data_encoding);
@@ -68,6 +70,7 @@ function read_from_AV ( data ) {
 	return 0;
 }
 
+// Try to connect to AV named pipe or linux
 function connect_to_AV(){
 
     console.log('Requested connection to ' + client_id+ ' ' + client_path);

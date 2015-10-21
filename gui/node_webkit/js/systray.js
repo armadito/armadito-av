@@ -51,3 +51,9 @@ function closeSystray(){
 	tray.remove();
     tray = null;
 }
+
+
+// automatically init systray icon at start
+initSystray();
+
+
