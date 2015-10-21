@@ -36,6 +36,9 @@
     <ClCompile Include="..\..\..\libuhuru\src\utils\named_pipe_server.c">
       <Filter>Source Files\utils</Filter>
     </ClCompile>
+    <ClCompile Include="json.c">
+      <Filter>Source Files\utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\libuhuru\src\utils\getopt.h">
@@ -48,6 +51,12 @@
       <Filter>Header Files\utils</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\libuhuru\src\utils\named_pipe_server.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="json.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\json-c\json-c\linkhash.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
   </ItemGroup>

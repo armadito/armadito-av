@@ -14,7 +14,7 @@ static void clear_opt(struct opt *opt)
 
 static struct opt *find_long_opt(struct opt *opt, const char *arg)
 {
-  char *p = strchr(arg + 2, '=');
+  const char *p = strchr(arg + 2, '=');
   int l = p - arg - 2;
 
   while(opt->long_form != NULL) {
