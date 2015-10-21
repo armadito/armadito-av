@@ -26,9 +26,7 @@ void uhuru_scan_run(struct uhuru_scan *scan);
 
 void uhuru_scan_free(struct uhuru_scan *scan);
 
-/* for on-access scan */
-/* path is provided just for reporting; it can be NULL; it won't be open()ed */
-enum uhuru_file_status uhuru_scan_fd(struct uhuru *uhuru, int fd, const char *path);
+enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path);
 
 struct uhuru_report {
   char *path;

@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <limits.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/signalfd.h>
 #include <fcntl.h>
@@ -25,13 +26,17 @@
 #include <unistd.h>
 
 struct access_monitor {
+  int enable_permission;
   int fanotify_fd;
   GPtrArray *paths;
   struct uhuru *uhuru;
   pid_t my_pid;
+  GThreadPool *thread_pool;  
 };
 
 static gboolean access_monitor_cb(GIOChannel *source, GIOCondition condition, gpointer data);
+
+void scan_file_thread_fun(gpointer data, gpointer user_data);
 
 void path_destroy_notify(gpointer data)
 {
@@ -43,7 +48,9 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
   struct access_monitor *m = g_new(struct access_monitor, 1);
   GIOChannel *channel;
 
-  m->fanotify_fd = fanotify_init(FAN_CLOEXEC | FAN_CLASS_CONTENT, O_RDONLY | O_CLOEXEC | O_LARGEFILE | O_NOATIME);
+  m->enable_permission = 0;
+
+  m->fanotify_fd = fanotify_init(FAN_CLASS_CONTENT | FAN_CLOEXEC, O_RDONLY | O_CLOEXEC | O_LARGEFILE | O_NOATIME);
 
   if (m->fanotify_fd < 0)
     g_log(NULL, G_LOG_LEVEL_ERROR, "fanotify: init failed (%s)", strerror(errno));
@@ -58,9 +65,16 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
 
   m->my_pid = getpid();
   
+  m->thread_pool = g_thread_pool_new(scan_file_thread_fun, m, -1, FALSE, NULL);
+
   g_log(NULL, G_LOG_LEVEL_DEBUG, "fanotify: init ok");
 
   return m;
+}
+
+int access_monitor_enable_permission(struct access_monitor *m, int enable_permission)
+{
+  return m->enable_permission = enable_permission;
 }
 
 int access_monitor_add(struct access_monitor *m, const char *path)
@@ -123,10 +137,11 @@ static char *get_file_path_from_fd(int fd, char *buffer, size_t buffer_size)
     return NULL;
 
   sprintf (buffer, "/proc/self/fd/%d", fd);
-  if ((len = readlink (buffer, buffer, buffer_size - 1)) < 0)
+  if ((len = readlink(buffer, buffer, buffer_size - 1)) < 0)
     return NULL;
 
   buffer[len] = '\0';
+
   return buffer;
 }
 
@@ -141,41 +156,66 @@ static __u32 file_status_2_response(enum uhuru_file_status status)
   return FAN_ALLOW;
 }
 
-static void event_process(struct access_monitor *m, struct fanotify_event_metadata *event)
+static int write_response(struct access_monitor *m, int fd, const char *path, __u32 r)
 {
-  char file_path[PATH_MAX];
-  char program_path[PATH_MAX];
-  char *p;
+  struct fanotify_response response;
 
-  p = get_file_path_from_fd(event->fd, file_path, PATH_MAX);
+  response.fd = fd;
+  response.response = r;
 
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "fanotify: event 0x%llx fd %d path '%s'", event->mask, event->fd, p ? p : "unknown");
+  write(m->fanotify_fd, &response, sizeof(struct fanotify_response));
+  
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "fanotify: fd %d path '%s' -> %s", fd, path ? path : "unknown", (r == FAN_ALLOW) ? "ALLOW": "DENY");
 
-  if (event->mask & FAN_OPEN_PERM) {
-    struct fanotify_response access;
-    enum uhuru_file_status status;
+  close(fd);
 
-    access.fd = event->fd;
+  return r;
+}
 
-    if (event->pid == m->my_pid) 
-      access.response = FAN_ALLOW;
-    else {
-#if 1
-      status = uhuru_scan_fd(m->uhuru, event->fd, p);
-      access.response = file_status_2_response(status);
-#endif
-#if 0
-      access.response = FAN_ALLOW;
-#endif
-    }
+struct access_thread_data {
+  int fd;
+  const char *path;
+};
 
-    write(m->fanotify_fd, &access, sizeof(access));
+void scan_file_thread_fun(gpointer data, gpointer user_data)
+{
+  enum uhuru_file_status status;
+  struct access_monitor *m = (struct access_monitor *)user_data;
+  struct access_thread_data *td = (struct access_thread_data *)data;
+	
+  status = uhuru_scan_simple(m->uhuru, td->path);
 
-    g_log(NULL, G_LOG_LEVEL_DEBUG, "fanotify: fd %d path '%s' -> %s", 
-	  event->fd, p ? p : "unknown", (access.response == FAN_ALLOW) ? "ALLOW" : "DENY");
-  }
+  write_response(m, td->fd, td->path, file_status_2_response(status));
 
-  close(event->fd);
+  free((void *)td->path);
+  free((void *)td);
+}
+
+static int perm_event_process(struct access_monitor *m, struct fanotify_event_metadata *event, const char *path)
+{
+  struct stat buf;
+  struct access_thread_data *td;
+
+  if (m->my_pid == event->pid)   /* file was opened by myself, always allow */
+    return write_response(m, event->fd, path, FAN_ALLOW);
+
+  if (m->enable_permission == 0)  /* permission check is disabled, always allow */
+    return write_response(m, event->fd, path, FAN_ALLOW);
+
+  if (fstat(event->fd, &buf) < 0)
+    return write_response(m, event->fd, path, FAN_ALLOW);
+
+  if (!S_ISREG(buf.st_mode))
+    return write_response(m, event->fd, path, FAN_ALLOW);
+
+  td = (struct access_thread_data *)malloc(sizeof(struct access_thread_data));
+
+  td->fd = event->fd;
+  td->path = strdup(path);
+
+  g_thread_pool_push(m->thread_pool, (gpointer)td, NULL);
+
+  return 0;
 }
 
 /* Size of buffer to use when reading fanotify events */
@@ -189,10 +229,19 @@ static gboolean access_monitor_cb(GIOChannel *source, GIOCondition condition, gp
   ssize_t len;
 
   if ((len = read (m->fanotify_fd, buf, FANOTIFY_BUFFER_SIZE)) > 0)  {
-    struct fanotify_event_metadata *ev;
+    struct fanotify_event_metadata *event;
 
-    for(ev = (struct fanotify_event_metadata *)buf; FAN_EVENT_OK(ev, len); ev = FAN_EVENT_NEXT(ev, len))
-      event_process(m, ev);
+    for(event = (struct fanotify_event_metadata *)buf; FAN_EVENT_OK(event, len); event = FAN_EVENT_NEXT(event, len)) {
+      char file_path[PATH_MAX + 1];
+      char *p;
+
+      p = get_file_path_from_fd(event->fd, file_path, PATH_MAX);
+
+      if (event->mask & FAN_OPEN_PERM)
+	perm_event_process(m, event, p);
+      else
+	g_log(NULL, G_LOG_LEVEL_WARNING, "fanotify: unprocessed event 0x%llx fd %d path '%s'", event->mask, event->fd, p ? p : "unknown");
+    }
   }
 
   return TRUE;
