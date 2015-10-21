@@ -29,11 +29,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdio.h>
-/* for now, dirty while debugging on-access on linux */
-#ifdef linux
-#include <unistd.h>
-#endif
-
 
 struct callback_entry {
   uhuru_scan_callback_t callback;
@@ -78,20 +73,15 @@ struct uhuru_scan *uhuru_scan_new(struct uhuru *uhuru, const char *path, enum uh
 
   scan->uhuru = uhuru;
 
-  scan->path = NULL;
-
 #ifdef HAVE_REALPATH
-  if (path != NULL) {
-    scan->path = (const char *)realpath(path, NULL);
-    if (scan->path == NULL) {
-      perror("realpath");
-      free(scan);
-      return NULL;
-    }
+  scan->path = (const char *)realpath(path, NULL);
+  if (scan->path == NULL) {
+    perror("realpath");
+    free(scan);
+    return NULL;
   }
 #else
-  if (path != NULL)
-    scan->path = os_strdup(path);
+  scan->path = os_strdup(path);
 #endif
 
   scan->flags = flags;
@@ -125,41 +115,11 @@ static void uhuru_scan_call_callbacks(struct uhuru_scan *scan, struct uhuru_repo
   }
 }
 
-#ifdef linux
-static const char *get_access_mode(int access_mode)
-{
-  switch(access_mode) {
-  case O_RDONLY:
-    return "O_RDONLY";
-  case O_WRONLY:
-    return "O_WRONLY";
-  case O_RDWR:
-	 return "O_RDWR";
-  }
-
-  return "UNKNOWN";
-}
-
-static void check_fd(int fd)
-{
-  int flags = fcntl(fd, F_GETFL);
-
-  if (flags < 0) {
-    g_log(NULL, G_LOG_LEVEL_DEBUG, "cannot get file flags for fd %d (%s)", fd, os_strerror(errno));
-  } else {
-    g_log(NULL, G_LOG_LEVEL_DEBUG, "file fd %d access_mode %s", fd, get_access_mode(flags & O_ACCMODE));
-  }
-}
-#endif
-#ifdef WIN32
-static void check_fd(int fd)
-{
-}
-#endif
-
-static enum uhuru_file_status scan_apply_modules(int fd, const char *path, const char *mime_type, struct uhuru_module **modules,  struct uhuru_report *report)
+static enum uhuru_file_status scan_apply_modules(const char *path, const char *mime_type, struct uhuru_module **modules,  struct uhuru_report *report)
 {
   enum uhuru_file_status current_status = UHURU_UNDECIDED;
+  /* enum t00_file_status current_status = T00_UNDECIDED; */
+  /* enum tatou_file_status current_status = TATOU_UNDECIDED; */
 
   for (; *modules != NULL; modules++) {
     struct uhuru_module *mod = *modules;
@@ -169,17 +129,12 @@ static enum uhuru_file_status scan_apply_modules(int fd, const char *path, const
     if (mod->status != UHURU_MOD_OK)
       continue;
 
-    check_fd(fd);
-    if (os_lseek(fd, 0L, SEEK_SET) < 0) {
-      g_log(NULL, G_LOG_LEVEL_WARNING, "cannot lseek file %s Error - %s", path, os_strerror(errno));
-      return UHURU_IERROR;
-    }
-
-    mod_status = (*mod->scan_fun)(mod, fd, mime_type, &mod_report);
+    mod_status = (*mod->scan_fun)(mod, path, mime_type, &mod_report);
 
     if (uhuru_file_status_cmp(current_status, mod_status) < 0) {
       current_status = mod_status;
-      uhuru_report_change(report, mod_status, (char *)mod->name, mod_report);
+      if (report != NULL)
+	uhuru_report_change(report, mod_status, (char *)mod->name, mod_report);
     } else if (mod_report != NULL)
       free(mod_report);
 
@@ -190,27 +145,25 @@ static enum uhuru_file_status scan_apply_modules(int fd, const char *path, const
   return current_status;
 }
 
-static enum uhuru_file_status scan_fd(struct uhuru_scan *scan, int fd, const char *path)
+static enum uhuru_file_status scan_file(struct uhuru_scan *scan, const char *path)
 {
   struct uhuru_report report;
   struct uhuru_module **modules;
   const char *mime_type;
   enum uhuru_file_status status;
 
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "uhuru_scan_fd - %d (path %s)", fd, (path != NULL) ? path : "unknown");
+  g_log(NULL, G_LOG_LEVEL_DEBUG, "scan_file - %s", path);
 
   uhuru_report_init(&report, path);
 
-  check_fd(fd);
-  mime_type = os_mime_type_guess_fd(fd);
-  check_fd(fd);
-
+  mime_type = os_mime_type_guess(path);
   modules = uhuru_get_applicable_modules(scan->uhuru, mime_type);
 
-  if (modules == NULL)
+  if (modules == NULL) {
     status = UHURU_UNKNOWN_FILE_TYPE;
-  else
-    status = scan_apply_modules(fd, path, mime_type, modules, &report);
+    uhuru_report_change(&report, status, NULL, NULL);
+  } else
+    status = scan_apply_modules(path, mime_type, modules, &report);
 
   uhuru_scan_call_callbacks(scan, &report);
 
@@ -219,31 +172,12 @@ static enum uhuru_file_status scan_fd(struct uhuru_scan *scan, int fd, const cha
   return status;
 }
 
-static enum uhuru_file_status scan_file_path(struct uhuru_scan *scan, const char *path)
-{
-	int fd = -1;
-
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "scan_path - %s", path);
-
-#ifdef linux
-  /* FIXME: on windows, must find a way to OR the flag with _O_BINARY */
-  fd = os_open(path, O_RDONLY);
-#endif
-
-  if (fd < 0) {
-    g_log(NULL, G_LOG_LEVEL_WARNING, "cannot open file %s Error - %d", path, errno);
-    return UHURU_IERROR;
-  }
-
-  return scan_fd(scan, fd, path);
-}
-
 static void scan_entry_thread_fun(gpointer data, gpointer user_data)
 {
   struct uhuru_scan *scan = (struct uhuru_scan *)user_data;
   char *path = (char *)data;
 
-  scan_file_path(scan, path);
+  scan_file(scan, path);
 
   free(path);
 }
@@ -278,7 +212,7 @@ static void scan_entry(const char *full_path, enum os_file_flag flags, int entry
   if (scan->flags & UHURU_SCAN_THREADED)
     g_thread_pool_push(scan->thread_pool, (gpointer)os_strdup(full_path), NULL);
   else
-    scan_file_path(scan, full_path);
+    scan_file(scan, full_path);
 }
 
 static int get_max_threads(void)
@@ -300,7 +234,7 @@ void uhuru_scan_run(struct uhuru_scan *scan)
     if (scan->flags & UHURU_SCAN_THREADED)
       g_thread_pool_push(scan->thread_pool, (gpointer)os_strdup(scan->path), NULL);
     else
-      scan_file_path(scan, scan->path);
+      scan_file(scan, scan->path);
   } else if (stat_buf.flags & FILE_FLAG_IS_DIRECTORY) {
     int recurse = scan->flags & UHURU_SCAN_RECURSE;
 
@@ -320,15 +254,18 @@ void uhuru_scan_free(struct uhuru_scan *scan)
   free(scan);
 }
 
-enum uhuru_file_status uhuru_scan_fd(struct uhuru *uhuru, int fd, const char *path)
+enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path)
 {
-  struct uhuru_scan *scan = uhuru_scan_new(uhuru, NULL, 0);
+  struct uhuru_module **modules;
+  const char *mime_type;
   enum uhuru_file_status status;
 
-  status = scan_fd(scan, fd, path);
+  mime_type = os_mime_type_guess(path);
+  modules = uhuru_get_applicable_modules(uhuru, mime_type);
 
-  uhuru_scan_free(scan);
+  if (modules == NULL)
+    return UHURU_UNKNOWN_FILE_TYPE;
 
-  return status;
+  return scan_apply_modules(path, mime_type, modules, NULL);
 }
 
