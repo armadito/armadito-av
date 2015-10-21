@@ -196,7 +196,9 @@ VOID GetAnswerToRequest(LPTSTR pchRequest,
 	// of an instance thread. Keep in mind the main thread will continue to wait for
 	// and receive other client connections while the instance thread is working.
 {
-	_tprintf(TEXT("Client Request String:\"%s\"\n"), pchRequest);
+
+	printf("Client Request String: -%s-\n", pchRequest);
+	// _tprintf(TEXT("Client Request String: -%s-\n"), pchRequest);
 
 	// Check the outgoing message to make sure it's not too long for the buffer.
 	if (FAILED(StringCchCopy(pchReply, BUFSIZE, TEXT("default answer from server"))))
