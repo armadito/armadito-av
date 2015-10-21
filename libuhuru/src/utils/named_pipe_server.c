@@ -4,6 +4,7 @@
 #include <stdio.h> 
 #include <tchar.h>
 #include <strsafe.h>
+#include "json.h"
 
 #define BUFSIZE 512
 
@@ -200,13 +201,25 @@ VOID GetAnswerToRequest(LPTSTR pchRequest,
 	printf("Client Request String: -%s-\n", pchRequest);
 	// _tprintf(TEXT("Client Request String: -%s-\n"), pchRequest);
 
+	void json_parse(json_object * jobj); /* Forward declaration */
+
+	json_object * jobj = json_tokener_parse(pchRequest);
+	json_parse(jobj);
+
+	// TODO Modify json_object jobj
+	char * string = "{\"sitename\" : \"joys of programming\",\"categories\" :[\"c\", [\"c++\", \"c\"], \"java\", \"PHP\"],\"author-details\" : { \"admin\": false, \"name\" : \"Joys of Programming\", \"Number of Posts\" : 10 }}";
+
 	// Check the outgoing message to make sure it's not too long for the buffer.
-	if (FAILED(StringCchCopy(pchReply, BUFSIZE, TEXT("default answer from server"))))
+	if (FAILED(StringCchCopy(pchReply, BUFSIZE, string )))
 	{
 		*pchBytes = 0;
 		pchReply[0] = 0;
 		printf("StringCchCopy failed, no outgoing message.\n");
 		return;
 	}
-	*pchBytes = (lstrlen(pchReply) + 1)*sizeof(TCHAR);
+
+	*pchBytes = (lstrlen(pchReply))*sizeof(TCHAR);
+
+	printf("Strlen = %d -- BUFSIZE = %d -- Written = %d bytes\n", strlen(string), BUFSIZE, *pchBytes);
+
 }

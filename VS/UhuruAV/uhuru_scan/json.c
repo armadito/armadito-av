@@ -1,16 +1,13 @@
-// JSONcmd.cpp : Defines the entry point for the console application.
-//
-
-// #include "stdafx.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "json_util.h"
+#include <tchar.h>
+
 #include "json.h"
 
 /*printing the value corresponding to boolean, double, integer and strings*/
 void print_json_value(json_object *jobj){
 	enum json_type type;
-	
+
 	type = json_object_get_type(jobj); /*Getting the type of the json object*/
 	printf("type: ", type);
 
@@ -68,7 +65,7 @@ void json_parse(json_object * jobj) {
 	enum json_type type;
 
 	json_object_object_foreach(jobj, key, val) { /*Passing through every array element*/
-		
+
 		if (key == NULL){
 			printf("Error: uninitialized key char*\n");
 			continue;
@@ -92,21 +89,3 @@ void json_parse(json_object * jobj) {
 		}
 	}
 }
-
-int main(int argc, char* argv[])
-{
-	printf("########JSON######## \n");
-
-	char * string = "{\"sitename\" : \"joys of programming\",\"categories\" :[\"c\", [\"c++\", \"c\"], \"java\", \"PHP\"],\"author-details\" : { \"admin\": false, \"name\" : \"Joys of Programming\", \"Number of Posts\" : 10 }}";
-
-	printf("JSON string: %s\n", string);
-
-	json_object * jobj = json_tokener_parse(string);
-	json_parse(jobj);
-
-	printf("Parsing OK !\n", string);
-
-	system("pause");
-	return 0;
-}
-
