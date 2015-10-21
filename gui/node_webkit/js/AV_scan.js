@@ -3,6 +3,9 @@ var selected_dir = "";
 var param1 = "";
 var param2 = "";
 
+
+console.log("AV_scan loaded.");
+
 // Function who asks libuhuru for a scan
 function new_ondemand_scan(){
 
@@ -14,10 +17,8 @@ function new_ondemand_scan(){
 	console.log("New On-demand scan for directory :" + selected_dir);
 	console.log("Scan params :\n param1 : "+param1+" \n param2 : "+param2 ); 
 	
-	
+    // TODO: Transfer scan parameters to this new window 
 	window.open('on-demand_scan_results.html', '_blank', 'screenX=0,screenY=0,width=100,height=100');
-	
-    // TODO: Communicate with libuhuru
 	
 }
 
