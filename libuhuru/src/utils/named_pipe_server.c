@@ -202,6 +202,9 @@ VOID GetAnswerToRequest(LPTSTR pchRequest,
 	// _tprintf(TEXT("Client Request String: -%s-\n"), pchRequest);
 
 	void json_parse(json_object * jobj); /* Forward declaration */
+	json_object * create_json_obj(); /* Forward declaration */
+
+	create_json_obj();
 
 	json_object * jobj = json_tokener_parse(pchRequest);
 	json_parse(jobj);
