@@ -11,7 +11,7 @@ var client_connected = false;
 
 function write_to_AV(){
  	
-	var buff_to_write = new Buffer( "Hello AV, I want a fucking scan!", data_encoding);
+	var buff_to_write = new Buffer( '{"type":"Buffer","data":[116,101,115,116]}' , data_encoding );
 	client_socket.write(buff_to_write, data_encoding, function (){  console.log("data_written.");  } );
 }
 
