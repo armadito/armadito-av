@@ -3,21 +3,30 @@
 function TrayMenu1_onclick()
 {
 	console.log("TrayMenu1 Clicked");
-	window.open('pages/on-demand_scan.html', '_blank', 'screenX=0,screenY=0,width=100,height=100');
+	var win = gui.Window.open('pages/AV_scan_window.html');
+	
 }
 
 // "AV Updates state"
 function TrayMenu2_onclick()
 {
-	// TODO
+	// TO CHANGE
 	console.log("TrayMenu2 Clicked");
-	window.open('pages/update_status.html', '_blank', 'screenX=0,screenY=0,width=72,height=72');
+	var win = gui.Window.open('pages/update_status_window.html');
 }
 
 // "About"
 function TrayMenu3_onclick()
 {
-	// TODO
+	// TO CHANGE
 	console.log("TrayMenu3 Clicked");
-	window.open('pages/about.html', '_blank', 'screenX=0,screenY=0,width=35,height=35');
+	var win = gui.Window.open('pages/about_window.html');
+}
+
+// "Stop AV"
+function TrayMenu4_onclick()
+{
+	// TO CHANGE
+	console.log("TrayMenu4 Clicked. Closing AV.");
+	closeWindow();
 }

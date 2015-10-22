@@ -1,6 +1,6 @@
 {
  "name": "uhuru-av",
- "main": "index.html",
+ "main": "index_window.html",
  "window": {
    "frame": true,
    "toolbar": true,

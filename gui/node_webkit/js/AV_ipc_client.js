@@ -20,23 +20,6 @@ if(os.platform() == "win32")
 	client_path = '\\\\.\\pipe\\'+ client_path;
 }
 
-// Parse a node.js Buffer 
-function parse_json_buffer ( buffer ){
-	
-	// Note - JSON.parse can tie up the current thread because it is a synchronous method. So if you are planning to parse big JSON objects use a streaming json parser.		
-	var json_object = null;
-
-	try {
-		json_object = JSON.parse(buffer.toString('ascii'));
-	}
-	catch(e){
-		console.error("Parsing error:", e); 
-		return null;
-	}
-	
-	return json_object;
-}
-
 // Write a JSON formatted string on socket to AV
 function write_to_AV( data ){
  	

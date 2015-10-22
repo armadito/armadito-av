@@ -3,11 +3,15 @@ var selected_dir = "";
 var param1 = "";
 var param2 = "";
 
-
-console.log("AV_scan loaded.");
+var gui = require('nw.gui');
 
 // Function who asks libuhuru for a scan
 function new_ondemand_scan(){
+
+	if( global.new_scan != null ){
+		console.log("Already processing scan.");
+		return;
+	}
 
     if(selected_dir == ""){
 		console.log("Nothing selected.");
@@ -17,8 +21,17 @@ function new_ondemand_scan(){
 	console.log("New On-demand scan for directory :" + selected_dir);
 	console.log("Scan params :\n param1 : "+param1+" \n param2 : "+param2 ); 
 	
-    // TODO: Transfer scan parameters to this new window 
-	window.open('on-demand_scan_results.html', '_blank', 'screenX=0,screenY=0,width=100,height=100');
+	// transfer parameters to new window by global variable
+	var new_scan = '{ path : "'+selected_dir+'", param1 : "'+param1+'", param2 : "'+param2+'" }'; 
+	global.new_scan = new_scan;
+	
+	var win = gui.Window.open('AV_scan_results_window.html');
+	win.on( 'closed', function (){
+		console.log("on-demand-scan results window onclosed!");
+		global.new_scan = null;
+    });
+
+	//win.maximize();
 	
 }
 
