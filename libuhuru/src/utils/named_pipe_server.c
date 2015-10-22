@@ -1,4 +1,5 @@
 #include "named_pipe_server.h"
+#include "named_pipe_client.h"
 
 #include <windows.h> 
 #include <stdio.h> 
@@ -198,22 +199,21 @@ VOID GetAnswerToRequest(LPTSTR pchRequest,
 	// and receive other client connections while the instance thread is working.
 {
 
-	printf("Client Request String: -%s-\n", pchRequest);
+	printf("Client Request String: %s\n", pchRequest);
 	// _tprintf(TEXT("Client Request String: -%s-\n"), pchRequest);
 
-	void json_parse(json_object * jobj); /* Forward declaration */
-	json_object * create_json_obj(); /* Forward declaration */
+	void json_parse_and_print(json_object * jobj); /* Forward declaration */
+    const char* json_parse_and_process(json_object * jobj);  /* Forward declaration */
 
-	create_json_obj();
+	//json_object * create_json_obj(); /* Forward declaration */
+	//create_json_obj();
 
 	json_object * jobj = json_tokener_parse(pchRequest);
-	json_parse(jobj);
-
-	// TODO Modify json_object jobj
-	char * string = "{\"sitename\" : \"joys of programming\",\"categories\" :[\"c\", [\"c++\", \"c\"], \"java\", \"PHP\"],\"author-details\" : { \"admin\": false, \"name\" : \"Joys of Programming\", \"Number of Posts\" : 10 }}";
+	json_parse_and_print(jobj);
+	const char* response = json_parse_and_process(jobj);
 
 	// Check the outgoing message to make sure it's not too long for the buffer.
-	if (FAILED(StringCchCopy(pchReply, BUFSIZE, string )))
+	if (FAILED(StringCchCopy(pchReply, BUFSIZE, response)))
 	{
 		*pchBytes = 0;
 		pchReply[0] = 0;
@@ -223,6 +223,6 @@ VOID GetAnswerToRequest(LPTSTR pchRequest,
 
 	*pchBytes = (lstrlen(pchReply))*sizeof(TCHAR);
 
-	printf("Strlen = %d -- BUFSIZE = %d -- Written = %d bytes\n", strlen(string), BUFSIZE, *pchBytes);
+	printf("BUFSIZE = %d -- Written = %d bytes\n", BUFSIZE, *pchBytes);
 
 }

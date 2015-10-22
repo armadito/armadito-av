@@ -7,20 +7,33 @@
 
 #define BUFSIZE 512
 
-int start_named_pipe_client()
+int connect_to_IHM(int scan_id, char ** response)
+{
+	// if win32
+	char * server_path = "";
+	char * server_response = "";
+	int ret = 0;
+
+	sprintf(server_path, "\\\\.\\pipe\\IHM_scan_%d", scan_id );
+
+	//ret = start_named_pipe_client(server_path, "{ \"hello\" : \"hello bitch\" }", &server_response);
+	*response = server_response;
+
+	return ret;
+}
+
+int start_named_pipe_client( char* path, char * message, char** server_response)
 {
 	HANDLE hPipe;
-	LPTSTR lpvMessage = TEXT("Default message from client.");
+	LPTSTR lpvMessage = "";
 	TCHAR  chBuf[BUFSIZE];
 	BOOL   fSuccess = FALSE;
 	DWORD  cbRead, cbToWrite, cbWritten, dwMode;
-	LPTSTR lpszPipename = TEXT("\\\\.\\pipe\\mynamedpipe");
+	LPTSTR lpszPipename = path;
 
-	//if (argc > 1)
-	//	lpvMessage = argv[1];
+	lpvMessage = message;
 
 	// Try to open a named pipe; wait for it, if necessary. 
-
 	while (1)
 	{
 		hPipe = CreateFile(
@@ -103,7 +116,10 @@ int start_named_pipe_client()
 		if (!fSuccess && GetLastError() != ERROR_MORE_DATA)
 			break;
 
-		_tprintf(TEXT("\"%s\"\n"), chBuf);
+		printf(" Server response : %s ", chBuf);
+		*server_response = chBuf;
+
+		//_tprintf(TEXT("\"%s\"\n"), chBuf);
 	} while (!fSuccess);  // repeat loop if ERROR_MORE_DATA 
 
 	if (!fSuccess)
@@ -112,9 +128,7 @@ int start_named_pipe_client()
 		return -1;
 	}
 
-	printf("\n<End of message, press ENTER to terminate connection and exit>");
-	_getch();
-
+	// Close connection and exit by default
 	CloseHandle(hPipe);
 
 	return 0;

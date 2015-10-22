@@ -3,7 +3,7 @@
 #include <tchar.h>
 
 #include "json.h"
-
+#include "utils/named_pipe_client.h"
 
 json_object * create_json_obj(){
 
@@ -73,8 +73,8 @@ void print_json_value(json_object *jobj){
 
 }
 
-void json_parse_array(json_object *jobj, char *key) {
-	void json_parse(json_object * jobj); /*Forward Declaration*/
+void json_parse_array_and_print(json_object *jobj, char *key) {
+	void json_parse_and_print(json_object * jobj); /*Forward Declaration*/
 	enum json_type type;
 
 	json_object *jarray = jobj; /*Simply get the array*/
@@ -91,23 +91,24 @@ void json_parse_array(json_object *jobj, char *key) {
 		jvalue = json_object_array_get_idx(jarray, i); /*Getting the array element at position i*/
 		type = json_object_get_type(jvalue);
 		if (type == json_type_array) {
-			json_parse_array(jvalue, NULL);
+			json_parse_array_and_print(jvalue, NULL);
 		}
 		else if (type != json_type_object) {
 			printf("value[%d]: ", i);
 			print_json_value(jvalue);
 		}
 		else {
-			json_parse(jvalue);
+			json_parse_and_print(jvalue);
 		}
 	}
 }
 
 /*Parsing the json object*/
-void json_parse(json_object * jobj) {
+void json_parse_and_print(json_object * jobj) {
 
 	json_object * jfound;
 	enum json_type type;
+
 
 	json_object_object_foreach(jobj, key, val) { /*Passing through every array element*/
 
@@ -115,8 +116,9 @@ void json_parse(json_object * jobj) {
 			printf("Error: uninitialized key char*\n");
 			continue;
 		}
+
+		printf(" %s : ", key);
 		type = json_object_get_type(val);
-		printf("type: ", type);
 
 		switch (type) {
 		case json_type_boolean:
@@ -126,11 +128,96 @@ void json_parse(json_object * jobj) {
 			break;
 		case json_type_object: printf("json_type_object \n");
 			json_object_object_get_ex(jobj, key, &jfound);
-			json_parse(jfound);
+			json_parse_and_print(jfound);
 			break;
 		case json_type_array: printf("type: json_type_array, ");
-			json_parse_array(jobj, key);
+			json_parse_array_and_print(jobj, key);
 			break;
 		}
 	}
 }
+
+/*Parsing the json object*/
+const char* json_parse_and_process(json_object * jobj) {
+
+	json_object * jfound;
+	enum json_type type;
+	int scan_id = -1;
+	char * server_response = "";
+	const char * scan_path = "";
+
+	json_object_object_foreach(jobj, key, val) { /*Passing through every array element*/
+
+		if (key == NULL){
+			printf("Error: uninitialized key char*\n");
+			continue;
+		}
+
+		if (strcmp(key,"new_scan_id") == 0){
+
+			if (json_object_get_type(val) != json_type_int){
+				// Step 3
+				return json_get_protocol_err_msg("The new_scan_id value must be an integer > 0.");
+			}
+
+			scan_id = json_object_get_int(val);
+			if (scan_id <= 0){
+				// Step 3
+				return json_get_protocol_err_msg("The new_scan_id value must be an integer > 0.");
+			}
+
+		}
+		else if (strcmp(key, "scan_path") == 0 ){
+
+			if (json_object_get_type(val) != json_type_string){
+				// Step 3
+				return json_get_protocol_err_msg("The path value must be a valid json string.");
+			}
+
+			scan_path = json_object_get_string(val);
+		}
+	}
+
+	if (scan_id <= 0){
+		// Step 3
+		return json_get_protocol_err_msg("new_scan_id key was not found.");
+	}
+
+	if (strcmp(scan_path, "") == 0){
+		// Step 3
+		return json_get_protocol_err_msg("scan_path was empty or not found.");
+	}
+
+
+	// Ask libuhuru_core to perform a scan on scan_path HERE
+	// TODO
+
+	// Step 3 : send ok to IHM
+	return json_get_basic_scan_response(scan_id);
+}
+
+const char* json_get_basic_scan_response(int scan_id)
+{
+
+	json_object * jobj = json_object_new_object();
+	json_object *jint = json_object_new_int(scan_id);
+	json_object *jstr = json_object_new_string("ok");
+
+	json_object_object_add(jobj, "new_scan", jstr);
+	json_object_object_add(jobj, "scan_id", jint);
+
+	return json_object_to_json_string(jobj);
+}
+
+// log error and prepare json to be sent back to IHM
+const char* json_get_protocol_err_msg( const char* err_msg )
+{
+	printf("error:  %s\n", err_msg);
+
+	json_object * jobj = json_object_new_object();
+	json_object *jstring = json_object_new_string(err_msg);
+	json_object_object_add(jobj, "error", jstring);
+
+	return json_object_to_json_string(jobj);
+}
+
