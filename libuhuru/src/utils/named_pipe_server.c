@@ -13,7 +13,7 @@ int start_named_pipe_server()
 	BOOL   fConnected = FALSE;
 	DWORD  dwThreadId = 0;
 	HANDLE hPipe = INVALID_HANDLE_VALUE, hThread = NULL;
-	LPTSTR lpszPipename = TEXT("\\\\.\\pipe\\mynamedpipe");
+	LPTSTR lpszPipename = TEXT("\\\\.\\pipe\\uhuruAV_ondemand");
 
 	// The main loop creates an instance of the named pipe and 
 	// then waits for a client to connect to it. When the client 
