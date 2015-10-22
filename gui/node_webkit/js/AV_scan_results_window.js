@@ -1,8 +1,9 @@
+var gui = require('nw.gui');
 
 // New scan instance here
 // Init connexion to AV
-var scan_id = 5;
 connect_to_AV();
+ask_for_new_scan(global.new_scan);
 
 
 // Demo implementation of an HTML progress bar, updated from JS
