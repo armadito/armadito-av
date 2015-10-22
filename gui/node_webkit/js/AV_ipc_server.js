@@ -2,6 +2,10 @@
 
 var scan_id = 7744;
 var server_path = "IHM_scan_" + scan_id;
+var server;
+
+//  For the moment, only one server can be running.
+//  For multiple servers, create an array of servers , n_id * server[id]
 
 if(os.platform() == "win32")
 {
@@ -10,7 +14,7 @@ if(os.platform() == "win32")
 	
 function create_IHM_scan_server(){
 	
-	var server = net.createServer(function(connection) { //'connection' listener
+	server = net.createServer(function(connection) { //'connection' listener
 	  console.log('client connected');
 	  
 	  connection.on('end', function() {
@@ -19,6 +23,10 @@ function create_IHM_scan_server(){
 	  
 	  connection.write('Well received from u, AV !');
 	  connection.pipe(connection);
+	});
+	
+	server.on( 'closed', function (){
+		console.log(' IHM Scan server ('+scan_id+') closed.');
 	});
 
 	server.listen( server_path , function() { //'listening' listener
@@ -29,3 +37,6 @@ function create_IHM_scan_server(){
 	return scan_id;
 }	
 	
+function shutdown_scan_server(){
+	server.close();
+}

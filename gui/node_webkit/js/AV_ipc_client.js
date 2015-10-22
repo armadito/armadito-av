@@ -33,7 +33,6 @@ function write_to_AV( data ){
 	}
 	
 	client_socket.write(buff_to_write, data_encoding, function (){  console.log("data_written.");  } );
-	
 	return 0;
 }
 
@@ -41,15 +40,27 @@ function write_to_AV( data ){
 function read_from_AV ( data ) {
 	
 	var buff = new Buffer(data, data_encoding);
-	console.log(' received buffer ('+data_encoding+'): -' + buff +'-');
 	console.log(' received string -'+buff.toString()+'-');
 	
-	if(!parse_json_buffer(buff))
-	{
+	var AV_response = parse_json_buffer(buff);
+	if(!AV_response){	
 		console.log('Error on json_object received from AV. Stopping action.');
 		return -1;
+	}else{
+		
+		if( process_AV_response(AV_response) < 0){ // if response not valid
+			// Step 3
+			client_socket.close();
+			shutdown_scan_server();
+		}
+		else{ 
+		    // Step 3
+			client_socket.close();
+			// Now waiting for connections from AV on scan_server.
+		}
 	}
-
+	
+	
 	return 0;
 }
 
@@ -59,23 +70,21 @@ function connect_to_AV(){
     console.log('Requested connection to ' + client_id+ ' ' + client_path);
 	console.log('Connecting client on Socket :' + client_path);
 	
-	client_socket = net.connect(
-		{
-			path:client_path
-		}
-	);
+	client_socket = net.connect({path:client_path});
 
     client_socket.on(
         'error',
         function(err){
-            console.log('\n\n######\nerror: '.error, err);
+            console.error('\n\n######\nerror: '.error, err);
+			return -1;
         }
     );
 
     client_socket.on(
         'connect',
         function(){
-            console.log('Successfully connected.')
+            console.log('Successfully connected.');
+			return 0;
         }
     );
 
@@ -118,6 +127,9 @@ function connect_to_AV(){
 			return read_from_AV(data);
         }
     );
+	
+	return 0;
+	
 }
 
 

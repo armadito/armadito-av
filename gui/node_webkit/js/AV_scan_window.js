@@ -22,9 +22,9 @@ function new_ondemand_scan(){
 	console.log("Scan params :\n param1 : "+param1+" \n param2 : "+param2 ); 
 	
 	// transfer parameters to new window by global variable
-	selected_dir = escape_str(selected_dir);
+
 	
-	var new_scan = '{ "path" : "'+selected_dir+'", "param1" : "'+param1+'", "param2": "'+param2+'"}'; 
+	var new_scan = '{ "scan_path" : "'+selected_dir+'", "param1" : "'+param1+'", "param2": "'+param2+'"}'; 
 	global.new_scan = new_scan;
 	
 	var win = gui.Window.open('AV_scan_results_window.html');
@@ -56,7 +56,7 @@ function update_param2()
 function chooseFile(name) {
 	var chooser = document.querySelector(name);
 	chooser.addEventListener("change", function(evt) {
-	  selected_dir = this.value;
+	  selected_dir = escape_str(this.value);
 	  console.log(this.value);
 	}, false);
 
