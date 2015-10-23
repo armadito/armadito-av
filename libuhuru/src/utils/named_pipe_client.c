@@ -7,36 +7,24 @@
 
 #define BUFSIZE 512
 
-int connect_to_IHM(int scan_id, char ** response)
+int connect_to_IHM(int scan_id, char ** response, HANDLE * hPipe)
 {
 	// if win32
 	char * server_path = "";
-	char * server_response = "";
-	int ret = 0;
-
 	sprintf(server_path, "\\\\.\\pipe\\IHM_scan_%d", scan_id );
-
-	//ret = start_named_pipe_client(server_path, "{ \"hello\" : \"hello bitch\" }", &server_response);
-	*response = server_response;
-
-	return ret;
+	return start_named_pipe_client(server_path, hPipe);
 }
 
-int start_named_pipe_client( char* path, char * message, char** server_response)
+int start_named_pipe_client(char* path, HANDLE * hPipe)
 {
-	HANDLE hPipe;
-	LPTSTR lpvMessage = "";
-	TCHAR  chBuf[BUFSIZE];
 	BOOL   fSuccess = FALSE;
-	DWORD  cbRead, cbToWrite, cbWritten, dwMode;
+	DWORD  dwMode;
 	LPTSTR lpszPipename = path;
-
-	lpvMessage = message;
 
 	// Try to open a named pipe; wait for it, if necessary. 
 	while (1)
 	{
-		hPipe = CreateFile(
+		*hPipe = CreateFile(
 			lpszPipename,   // pipe name 
 			GENERIC_READ |  // read and write access 
 			GENERIC_WRITE,
@@ -48,7 +36,7 @@ int start_named_pipe_client( char* path, char * message, char** server_response)
 
 		// Break if the pipe handle is valid. 
 
-		if (hPipe != INVALID_HANDLE_VALUE)
+		if (*hPipe != INVALID_HANDLE_VALUE)
 			break;
 
 		// Exit if an error other than ERROR_PIPE_BUSY occurs. 
@@ -72,7 +60,7 @@ int start_named_pipe_client( char* path, char * message, char** server_response)
 
 	dwMode = PIPE_READMODE_MESSAGE;
 	fSuccess = SetNamedPipeHandleState(
-		hPipe,    // pipe handle 
+		*hPipe,    // pipe handle 
 		&dwMode,  // new pipe mode 
 		NULL,     // don't set maximum bytes 
 		NULL);    // don't set maximum time 
@@ -82,13 +70,24 @@ int start_named_pipe_client( char* path, char * message, char** server_response)
 		return -1;
 	}
 
-	// Send a message to the pipe server. 
+	return 0;
+}
 
+// Send a message to the pipe server. 
+int send_message_to_IHM(HANDLE * hPipe, char * message, char** server_response)
+{
+
+	LPTSTR lpvMessage = "";
+	TCHAR  chBuf[BUFSIZE];
+	BOOL   fSuccess = FALSE;
+	DWORD  cbRead, cbToWrite, cbWritten;
+
+	lpvMessage = message;
 	cbToWrite = (lstrlen(lpvMessage) + 1)*sizeof(TCHAR);
 	_tprintf(TEXT("Sending %d byte message: \"%s\"\n"), cbToWrite, lpvMessage);
 
 	fSuccess = WriteFile(
-		hPipe,                  // pipe handle 
+		*hPipe,                  // pipe handle 
 		lpvMessage,             // message 
 		cbToWrite,              // message length 
 		&cbWritten,             // bytes written 
@@ -107,7 +106,7 @@ int start_named_pipe_client( char* path, char * message, char** server_response)
 		// Read from the pipe. 
 
 		fSuccess = ReadFile(
-			hPipe,    // pipe handle 
+			*hPipe,    // pipe handle 
 			chBuf,    // buffer to receive reply 
 			BUFSIZE*sizeof(TCHAR),  // size of buffer 
 			&cbRead,  // number of bytes read 
@@ -128,8 +127,14 @@ int start_named_pipe_client( char* path, char * message, char** server_response)
 		return -1;
 	}
 
-	// Close connection and exit by default
-	CloseHandle(hPipe);
+	return 0;
 
+}
+
+int closeConnection_to_IHM( HANDLE * hPipe){
+
+	CloseHandle(*hPipe);
 	return 0;
 }
+
+

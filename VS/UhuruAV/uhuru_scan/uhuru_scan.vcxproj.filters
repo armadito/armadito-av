@@ -36,7 +36,10 @@
     <ClCompile Include="..\..\..\libuhuru\src\utils\named_pipe_server.c">
       <Filter>Source Files\utils</Filter>
     </ClCompile>
-    <ClCompile Include="json.c">
+    <ClCompile Include="..\..\..\libuhuru\src\utils\scan.c">
+      <Filter>Source Files\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\utils\json.c">
       <Filter>Source Files\utils</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,10 +56,13 @@
     <ClInclude Include="..\..\..\libuhuru\src\utils\named_pipe_server.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
-    <ClInclude Include="json.h">
+    <ClInclude Include="..\..\json-c\json-c\linkhash.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\json-c\json-c\linkhash.h">
+    <ClInclude Include="..\..\..\libuhuru\src\utils\json.h">
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\utils\scan.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
   </ItemGroup>

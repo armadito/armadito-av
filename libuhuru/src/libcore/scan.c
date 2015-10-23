@@ -331,4 +331,3 @@ enum uhuru_file_status uhuru_scan_fd(struct uhuru *uhuru, int fd, const char *pa
 
   return status;
 }
-
