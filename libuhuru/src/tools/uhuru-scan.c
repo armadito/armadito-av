@@ -237,17 +237,7 @@ int main(int argc, const char **argv)
   //parse_options(argc, argv, opts);
 
   // Notes : If you intend to use a named pipe locally only, deny access to NT AUTHORITY\NETWORK or switch to local RPC.
-
   named_pipe = start_named_pipe_server();
-
-  /*
-  client_sock = tcp_client_connect("127.0.0.1", opts->port_number, 10);
-
-  if (client_sock < 0) {
-    fprintf(stderr, "cannot open client socket (errno %d)\n", errno);
-    return 1;
-  }
-  */
 
   // do_scan(opts, client_sock);
 

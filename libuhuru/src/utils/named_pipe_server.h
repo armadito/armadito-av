@@ -3,9 +3,10 @@
 
 #include <windows.h> 
 #include "json.h"
+#include "scan.h"
 
 int start_named_pipe_server();
 DWORD WINAPI InstanceThread(LPVOID);
-VOID GetAnswerToRequest(LPTSTR, LPTSTR, LPDWORD);
+VOID GetAnswerToRequest(LPTSTR, LPTSTR, LPDWORD, struct new_scan* scan);
 
 #endif

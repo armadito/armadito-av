@@ -4,6 +4,7 @@
 
 #include "json.h"
 #include "utils/named_pipe_client.h"
+#include "scan.h"
 
 json_object * create_json_obj(){
 
@@ -138,10 +139,8 @@ void json_parse_and_print(json_object * jobj) {
 }
 
 /*Parsing the json object*/
-const char* json_parse_and_process(json_object * jobj) {
+const char* json_parse_and_process(json_object * jobj, struct new_scan* scan) {
 
-	json_object * jfound;
-	enum json_type type;
 	int scan_id = -1;
 	char * server_response = "";
 	const char * scan_path = "";
@@ -188,9 +187,8 @@ const char* json_parse_and_process(json_object * jobj) {
 		return json_get_protocol_err_msg("scan_path was empty or not found.");
 	}
 
-
-	// Ask libuhuru_core to perform a scan on scan_path HERE
-	// TODO
+	scan->scan_path = scan_path;
+	scan->scan_id = scan_id;
 
 	// Step 3 : send ok to IHM
 	return json_get_basic_scan_response(scan_id);

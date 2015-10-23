@@ -5,7 +5,9 @@
 #include <stdio.h> 
 #include <tchar.h>
 #include <strsafe.h>
-#include "json.h"
+#include "utils/json.h"
+#include "utils/scan.h"
+#include "json_tokener.h"
 
 #define BUFSIZE 512
 
@@ -93,6 +95,8 @@ DWORD WINAPI InstanceThread(LPVOID lpvParam)
 	BOOL fSuccess = FALSE;
 	HANDLE hPipe = NULL;
 
+	struct new_scan* scan; 
+
 	// Do some extra error checking since the app will keep running even if this
 	// thread fails.
 
@@ -103,6 +107,7 @@ DWORD WINAPI InstanceThread(LPVOID lpvParam)
 		printf("   InstanceThread exitting.\n");
 		if (pchReply != NULL) HeapFree(hHeap, 0, pchReply);
 		if (pchRequest != NULL) HeapFree(hHeap, 0, pchRequest);
+
 		return (DWORD)-1;
 	}
 
@@ -156,8 +161,10 @@ DWORD WINAPI InstanceThread(LPVOID lpvParam)
 			break;
 		}
 
+		scan = (struct new_scan*)malloc(sizeof(struct new_scan));
+
 		// Process the incoming message.
-		GetAnswerToRequest(pchRequest, pchReply, &cbReplyBytes);
+		GetAnswerToRequest(pchRequest, pchReply, &cbReplyBytes, scan);
 
 		// Write the reply to the pipe. 
 		fSuccess = WriteFile(
@@ -170,8 +177,18 @@ DWORD WINAPI InstanceThread(LPVOID lpvParam)
 		if (!fSuccess || cbReplyBytes != cbWritten)
 		{
 			_tprintf(TEXT("InstanceThread WriteFile failed, GLE=%d.\n"), GetLastError());
+			free(scan);
 			break;
 		}
+
+		int start_new_scan(struct new_scan* scan); /* Forward declaration */
+
+		// Step 4 -- Start Scan here if message already sent
+		if (scan != NULL){
+			start_new_scan(scan);
+		}
+		
+		free(scan);
 	}
 
 	// Flush the pipe to allow the client to read the pipe's contents 
@@ -191,7 +208,7 @@ DWORD WINAPI InstanceThread(LPVOID lpvParam)
 
 VOID GetAnswerToRequest(LPTSTR pchRequest,
 	LPTSTR pchReply,
-	LPDWORD pchBytes)
+	LPDWORD pchBytes, struct new_scan* scan)
 	// This routine is a simple function to print the client request to the console
 	// and populate the reply buffer with a default data string. This is where you
 	// would put the actual client request processing code that runs in the context
@@ -203,14 +220,14 @@ VOID GetAnswerToRequest(LPTSTR pchRequest,
 	// _tprintf(TEXT("Client Request String: -%s-\n"), pchRequest);
 
 	void json_parse_and_print(json_object * jobj); /* Forward declaration */
-    const char* json_parse_and_process(json_object * jobj);  /* Forward declaration */
+	const char* json_parse_and_process(json_object * jobj, struct new_scan* scan);  /* Forward declaration */
 
-	//json_object * create_json_obj(); /* Forward declaration */
-	//create_json_obj();
-
+	// We parse on-demand scan requests from IHM
 	json_object * jobj = json_tokener_parse(pchRequest);
 	json_parse_and_print(jobj);
-	const char* response = json_parse_and_process(jobj);
+
+	// In this function, a scan demand is made to libuhuru_core
+	const char* response = json_parse_and_process(jobj, scan);
 
 	// Check the outgoing message to make sure it's not too long for the buffer.
 	if (FAILED(StringCchCopy(pchReply, BUFSIZE, response)))
