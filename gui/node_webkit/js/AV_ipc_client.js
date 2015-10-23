@@ -20,22 +20,6 @@ if(os.platform() == "win32")
 	client_path = '\\\\.\\pipe\\'+ client_path;
 }
 
-// Write a JSON formatted string on socket to AV
-function write_to_AV( data ){
- 	
-	var buff_to_write = new Buffer( data, data_encoding );
-	
-	// We check json_object before writing on socket to AV
-	if(!parse_json_buffer(buff_to_write))
-	{
-		console.log('Error on json_object what sould be sent to AV. Stopping action.');
-		return -1;
-	}
-	
-	client_socket.write(buff_to_write, data_encoding, function (){  console.log("data_written.");  } );
-	return 0;
-}
-
 // Function called when data is received from AV
 function read_from_AV ( data ) {
 	
@@ -50,17 +34,38 @@ function read_from_AV ( data ) {
 		
 		if( process_AV_response(AV_response) < 0){ // if response not valid
 			// Step 3
-			client_socket.close();
+			client_socket.destroy();
 			shutdown_scan_server();
+			global.new_scan = null;
 		}
 		else{ 
 		    // Step 3
-			client_socket.close();
+			console.log("Closing socket.");
+			client_socket.destroy();
+			
+			// We know that a scan is in progress only when AV sent back "ok"
 			// Now waiting for connections from AV on scan_server.
+			// Scan_in_progress = named pipe server running
+			global.scan_in_progress = true;
 		}
 	}
 	
+	return 0;
+}
+
+// Write a JSON formatted string on socket to AV
+function write_to_AV( data ){
+ 	
+	var buff_to_write = new Buffer( data, data_encoding );
 	
+	// We check json_object before writing on socket to AV
+	if(!parse_json_buffer(buff_to_write))
+	{
+		console.log('Error on json_object what sould be sent to AV. Stopping action.');
+		return -1;
+	}
+	
+	client_socket.write(buff_to_write, data_encoding, function (){  console.log("data_written.");  } );
 	return 0;
 }
 
@@ -88,36 +93,14 @@ function connect_to_AV(){
         }
     );
 
-	// Retry mode TO BE TESTED
     client_socket.on(
         'close',
         function(){
             console.log('connection closed' + client_id + ' ' + client_path);
-
-            if( !client_connnect_retrying || client_retriesRemaining < 1 ){
-                client_socket.destroy();
-                return;
-            }
-
-			// Retrying 
-		    client_isRetrying=true;
-				
-            setTimeout(
-                    function(){
-                        return function(){
-                            client_retriesRemaining--;
-                            client_isRetrying=false;
-                            connect_to_AV();
-                            setTimeout(
-                                function(){
-                                    if(!client_isRetrying)
-                                        client_retriesRemaining = client_maxRetries;
-                                },
-                                100
-                            )
-                        }
-                    },
-             client_retry );
+			client_socket.destroy();
+			return;
+			
+			// may retry here ?
         }
     );
 
