@@ -12,10 +12,15 @@ if(os.platform() == "win32")
 	server_path = '\\\\.\\pipe\\'+ server_path;
 }
 	
+// Configure a keep-alive??
 function create_IHM_scan_server(){
 	
 	server = net.createServer(function(connection) { //'connection' listener
 	  console.log('client connected');
+	  
+	  // Normalement global.scan_in_progress = true;
+	  // We receive here the scan_progress value from AV
+	  // What if we receive nothing ??? ( if AV_Scan crashed ?)
 	  
 	  connection.on('end', function() {
 		console.log('client disconnected');
