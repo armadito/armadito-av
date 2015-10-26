@@ -258,7 +258,6 @@ enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path)
 {
   struct uhuru_module **modules;
   const char *mime_type;
-  enum uhuru_file_status status;
 
   mime_type = os_mime_type_guess(path);
   modules = uhuru_get_applicable_modules(uhuru, mime_type);
@@ -268,4 +267,3 @@ enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path)
 
   return scan_apply_modules(path, mime_type, modules, NULL);
 }
-
