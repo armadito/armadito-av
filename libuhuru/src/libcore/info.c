@@ -5,7 +5,6 @@
 #include "uhurup.h"
 #include "os/string.h"
 #include "os/io.h"
-#include "os/ipc.h"
 
 #include <assert.h>
 #include <glib.h>

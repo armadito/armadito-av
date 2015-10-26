@@ -11,10 +11,10 @@ client.c \
 client.h \
 server.c \
 server.h \
-os/linux/daemonize.c \
-os/linux/daemonize.h \
-os/linux/unixsock.c \
-os/linux/unixsock.h \
+daemonize.c \
+daemonize.h \
+unixsock.c \
+unixsock.h \
 ../utils/getopt.c \
 ../utils/getopt.h \
 ../utils/tcpsock.c \
