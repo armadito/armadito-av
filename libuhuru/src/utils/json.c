@@ -3,8 +3,7 @@
 #include <tchar.h>
 
 #include "json.h"
-#include "utils/named_pipe_client.h"
-#include "scan.h"
+#include "windows-service/scan.h"
 
 json_object * create_json_obj(){
 

@@ -15,7 +15,6 @@ int start_new_scan(struct new_scan* scan)
 		
 		// CALL libuhuru here
 
-
 		if (connect_to_IHM(scan->scan_id, &hPipe) < 0){
 			printf("Error when trying to connect to \\.\pipe\IHM_scan_%d \n", scan->scan_id);
 			return -1;

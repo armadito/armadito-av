@@ -1,15 +1,16 @@
 // Some variables are already defined in AV_ipc_client.js -- same JS context
 
-var scan_id = 7744;
-var server_path = "IHM_scan_" + scan_id;
+var scan_id = 77;
+var server_path = 'IHM_scan_' + scan_id;
 var server;
+var path = require('path');
 
 //  For the moment, only one server can be running.
 //  For multiple servers, create an array of servers , n_id * server[id]
 
 if(os.platform() == "win32")
 {
-	server_path = '\\\\.\\pipe\\'+ server_path;
+	server_path= '\\\\.\\pipe\\'+server_path;
 }
 	
 // Configure a keep-alive??
@@ -30,6 +31,10 @@ function create_IHM_scan_server(){
 	  connection.pipe(connection);
 	});
 	
+	server.on( 'close', function (){
+		console.log(' Closing IHM Scan server ('+scan_id+').');
+	});
+	
 	server.on( 'closed', function (){
 		console.log(' IHM Scan server ('+scan_id+') closed.');
 	});
@@ -43,5 +48,6 @@ function create_IHM_scan_server(){
 }	
 	
 function shutdown_scan_server(){
+	console.log("shutdown server");
 	server.close();
 }
