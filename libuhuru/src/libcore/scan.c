@@ -249,7 +249,7 @@ void uhuru_scan_free(struct uhuru_scan *scan)
 {
   free((char *)scan->path);
 
- g_array_free(scan->callbacks, TRUE);
+  g_array_free(scan->callbacks, TRUE);
 
   free(scan);
 }

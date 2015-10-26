@@ -45,14 +45,13 @@ enum uhuru_scan_flags {
  * \fn struct uhuru_scan *uhuru_scan_new(struct uhuru *uhuru, int scan_id, const char *root_path, enum uhuru_scan_flags flags);
  * \brief allocate and initialize a scan
  *
- * This function allocates and initialize a scan, but does not start it.
+ * This function allocates and initializes a scan, but does not start it.
  * BEWARE: after calling this function, the scan has not started. It must be started with uhuru_scan_run()
  *
  * This function uses malloc() to allocate the structure
  *
  * \param[in] uhuru        uhuru handle that was returned by uhuru_open()
  * \param[in] scan_id      the scan id for the user interface
- * \param[in] root_path    the root path of the scan, can be a file or a directory
  * \param[in] root_path    the root path of the scan, can be a file or a directory
  * \param[in] flags        the scan flags, specifying in particular if directory must be scanned recursively. It is recommended to pass UHURU_SCAN_STANDARD as flags value
  *
@@ -67,8 +66,9 @@ struct uhuru_scan *uhuru_scan_new(struct uhuru *uhuru, int scan_id, const char *
  *
  * A scan callback will be called during a scan.
  * The callbacks are called:
- * - after the scan status of a file is known
+ * - after the definitive scan status of a file is known
  * - and after all the scan modules have done their work
+ * 
  * BEWARE: a scan callback can be called from a different thread than the thread in which uhuru_scan_run was called
  * 
  * A callback arguments are:
