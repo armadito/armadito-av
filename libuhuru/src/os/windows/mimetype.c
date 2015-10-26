@@ -57,11 +57,6 @@ const char *os_mime_type_guess(const char *path)
 	return mime_type;
 }
 
-const char *os_mime_type_guess_fd(int fd)
-{
-	return "application/octet-stream";
-}
-
 void os_mime_type_init(void) {
 
 	// This function is empty in windows version.

@@ -53,6 +53,7 @@ const char *os_mime_type_guess(const char *path)
   return mime_type;
 }
 
+#ifdef USE_FILE_DESCRIPTORS
 const char *os_mime_type_guess_fd(int fd)
 {
   magic_t m;
@@ -64,3 +65,4 @@ const char *os_mime_type_guess_fd(int fd)
 
   return mime_type;
 }
+#endif

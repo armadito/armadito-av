@@ -32,6 +32,15 @@ static enum uhuru_mod_status mod_fanotify_conf_set_watch_dir(struct uhuru_module
   return UHURU_MOD_OK;
 }
 
+static enum uhuru_mod_status mod_fanotify_conf_set_enable_permission(struct uhuru_module *module, const char *directive, const char **argv)
+{
+  struct fanotify_data *fa_data = (struct fanotify_data *)module->data;
+
+  access_monitor_enable_permission(fa_data->monitor, atoi(argv[0]));
+
+  return UHURU_MOD_OK;
+}
+
 static enum uhuru_mod_status mod_fanotify_post_init(struct uhuru_module *module)
 {
   struct fanotify_data *fa_data = (struct fanotify_data *)module->data;
@@ -52,6 +61,7 @@ static enum uhuru_mod_status mod_fanotify_close(struct uhuru_module *module)
 
 struct uhuru_conf_entry mod_fanotify_conf_table[] = {
   { "watch-dir", mod_fanotify_conf_set_watch_dir},
+  { "enable-permission", mod_fanotify_conf_set_enable_permission},
   { NULL, NULL},
 };
 
