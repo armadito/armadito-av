@@ -3,9 +3,7 @@
 #include "server.h"
 #include "utils/getopt.h"
 #include "utils/tcpsock.h"
-#ifdef linux
-#include "os/linux/daemonize.h"
-#endif
+#include "daemonize.h"
 
 #include <glib.h>
 #include <errno.h>

@@ -111,10 +111,8 @@ pkgconfig/Makefile
 src/Makefile
 src/libcore/Makefile
 src/libipc/Makefile
-src/on-access/Makefile
-src/on-access/linux/Makefile
+src/linux-daemon/Makefile
 src/os/Makefile
-src/scand/Makefile
 src/tools/Makefile
 tests/Makefile
 ])
