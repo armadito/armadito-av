@@ -2,6 +2,7 @@
 
 #include "utils/getopt.h"
 #include "utils/tcpsock.h"
+#include "utils/named_pipe_server.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -33,14 +34,14 @@ struct scan_options {
 };
 
 struct opt scan_opt_defs[] = {
-  { .long_form = "help", .short_form = 'h', .need_arg = 0, .is_set = 0, .value = NULL},
-  { .long_form = "recursive", .short_form = 'r', .need_arg = 0, .is_set = 0, .value = NULL},
-  { .long_form = "threaded", .short_form = 't', .need_arg = 0, .is_set = 0, .value = NULL},
-  { .long_form = "no-summary", .short_form = 'n', .need_arg = 0, .is_set = 0, .value = NULL},
-  { .long_form = "print-clean", .short_form = 'c', .need_arg = 0, .is_set = 0, .value = NULL},
-  { .long_form = "tcp", .short_form = 't', .need_arg = 0, .is_set = 0, .value = NULL},
-  { .long_form = "port", .short_form = 'p', .need_arg = 1, .is_set = 0, .value = NULL},
-  { .long_form = NULL, .short_form = '\0', .need_arg = 0, .is_set = 0, .value = NULL},
+  { "help", 'h', 0, 0, NULL},
+  { "recursive", 'r', 0, 0, NULL},
+  { "threaded", 't', 0, 0, NULL},
+  { "no-summary", 'n',  0, 0, NULL},
+  { "print-clean", 'c', 0, 0, NULL},
+  { "tcp", 't', 0, 0, NULL},
+  { "port", 'p', 1, 0, NULL},
+  { NULL, '\0', 0, 0, NULL},
 };
 
 static void usage(void)
@@ -231,18 +232,14 @@ static void do_scan(struct scan_options *opts, int client_sock)
 int main(int argc, const char **argv)
 {
   struct scan_options *opts = (struct scan_options *)malloc(sizeof(struct scan_options));
-  int client_sock;
+  int named_pipe = 0;
 
-  parse_options(argc, argv, opts);
+  //parse_options(argc, argv, opts);
 
-  client_sock = tcp_client_connect("127.0.0.1", opts->port_number, 10);
+  // Notes : If you intend to use a named pipe locally only, deny access to NT AUTHORITY\NETWORK or switch to local RPC.
+  named_pipe = start_named_pipe_server();
 
-  if (client_sock < 0) {
-    fprintf(stderr, "cannot open client socket (errno %d)\n", errno);
-    return 1;
-  }
-
-  do_scan(opts, client_sock);
+  // do_scan(opts, client_sock);
 
   return 0;
 }
