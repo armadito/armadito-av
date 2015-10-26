@@ -118,6 +118,11 @@ void json_parse_and_print(json_object * jobj) {
 			continue;
 		}
 
+		if (val == NULL){
+			printf("Error: uninitialized val object\n");
+			continue;
+		}
+
 		printf(" %s : ", key);
 		type = json_object_get_type(val);
 
@@ -156,13 +161,13 @@ const char* json_parse_and_process(json_object * jobj, struct new_scan* scan) {
 
 			if (json_object_get_type(val) != json_type_int){
 				// Step 3
-				return json_get_protocol_err_msg("The new_scan_id value must be an integer > 0.");
+				return json_get_protocol_err_msg("The new_scan_id value must be an integer > 0 && < 100.");
 			}
 
 			scan_id = json_object_get_int(val);
-			if (scan_id <= 0){
+			if (scan_id <= 0 || scan_id >= 100){ // 1 - 99 , for security reasons
 				// Step 3
-				return json_get_protocol_err_msg("The new_scan_id value must be an integer > 0.");
+				return json_get_protocol_err_msg("The new_scan_id value must be an integer > 0 && < 100.");
 			}
 
 		}

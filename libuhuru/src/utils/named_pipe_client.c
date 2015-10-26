@@ -6,12 +6,15 @@
 #include "named_pipe_client.h"
 
 #define BUFSIZE 512
+#define MAX_NAMED_PIPE_SIZE 18
 
-int connect_to_IHM(int scan_id, char ** response, HANDLE * hPipe)
+int connect_to_IHM(int scan_id, HANDLE * hPipe)
 {
 	// if win32
-	char * server_path = "";
-	sprintf(server_path, "\\\\.\\pipe\\IHM_scan_%d", scan_id );
+	char * server_path = (char*)malloc((MAX_NAMED_PIPE_SIZE+1)*sizeof(char));
+	sprintf(server_path, "\\\\.\\pipe\\IHM_scan_%d", scan_id ); 
+
+	// TODO : free(server_path) ??
 	return start_named_pipe_client(server_path, hPipe);
 }
 
@@ -19,7 +22,8 @@ int start_named_pipe_client(char* path, HANDLE * hPipe)
 {
 	BOOL   fSuccess = FALSE;
 	DWORD  dwMode;
-	LPTSTR lpszPipename = path;
+	// HANDLE _hPipe;
+	LPTSTR lpszPipename = "\\\\.\\pipe\\IHM_scan_77";
 
 	// Try to open a named pipe; wait for it, if necessary. 
 	while (1)
@@ -35,12 +39,10 @@ int start_named_pipe_client(char* path, HANDLE * hPipe)
 			NULL);          // no template file 
 
 		// Break if the pipe handle is valid. 
-
 		if (*hPipe != INVALID_HANDLE_VALUE)
 			break;
 
 		// Exit if an error other than ERROR_PIPE_BUSY occurs. 
-
 		if (GetLastError() != ERROR_PIPE_BUSY)
 		{
 			_tprintf(TEXT("Could not open pipe. GLE=%d\n"), GetLastError());
@@ -57,13 +59,19 @@ int start_named_pipe_client(char* path, HANDLE * hPipe)
 	}
 
 	// The pipe connected; change to message-read mode. 
+	printf("SetNamedPipeHandleState : -%s- ", lpszPipename);
+	
+	// This is needed to change from byte-mode to readmode client. 
+	// Maybe it doesn't works because it's already in READMODE_MESSAGE
 
-	dwMode = PIPE_READMODE_MESSAGE;
+	//dwMode = PIPE_READMODE_MESSAGE;
+	dwMode = NULL;
 	fSuccess = SetNamedPipeHandleState(
 		*hPipe,    // pipe handle 
 		&dwMode,  // new pipe mode 
 		NULL,     // don't set maximum bytes 
 		NULL);    // don't set maximum time 
+
 	if (!fSuccess)
 	{
 		_tprintf(TEXT("SetNamedPipeHandleState failed. GLE=%d\n"), GetLastError());
