@@ -2,9 +2,6 @@
 
 #include "utils/getopt.h"
 #include "utils/tcpsock.h"
-#ifdef WIN32
-#include "utils/named_pipe_server.h"
-#endif
 
 #include <assert.h>
 #include <errno.h>
@@ -236,12 +233,7 @@ int main(int argc, const char **argv)
   struct scan_options *opts = (struct scan_options *)malloc(sizeof(struct scan_options));
   int named_pipe = 0;
 
-  //parse_options(argc, argv, opts);
-
-  // Notes : If you intend to use a named pipe locally only, deny access to NT AUTHORITY\NETWORK or switch to local RPC.
-#ifdef WIN32
-  named_pipe = start_named_pipe_server();
-#endif
+  parse_options(argc, argv, opts);
 
   // do_scan(opts, client_sock);
 
