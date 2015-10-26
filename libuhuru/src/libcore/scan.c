@@ -37,6 +37,7 @@ struct callback_entry {
 
 struct uhuru_scan {
   struct uhuru *uhuru;
+  int scan_id;
   const char *path;
   enum uhuru_scan_flags flags;
   GThreadPool *thread_pool;  
@@ -67,11 +68,12 @@ static void uhuru_scan_add_builtin_callbacks(struct uhuru_scan *scan)
 #endif
 }
 
-struct uhuru_scan *uhuru_scan_new(struct uhuru *uhuru, const char *path, enum uhuru_scan_flags flags)
+struct uhuru_scan *uhuru_scan_new(struct uhuru *uhuru, int scan_id, const char *path, enum uhuru_scan_flags flags)
 {
   struct uhuru_scan *scan = (struct uhuru_scan *)malloc(sizeof(struct uhuru_scan));
 
   scan->uhuru = uhuru;
+  scan->scan_id = scan_id;
 
 #ifdef HAVE_REALPATH
   scan->path = (const char *)realpath(path, NULL);
@@ -118,8 +120,6 @@ static void uhuru_scan_call_callbacks(struct uhuru_scan *scan, struct uhuru_repo
 static enum uhuru_file_status scan_apply_modules(const char *path, const char *mime_type, struct uhuru_module **modules,  struct uhuru_report *report)
 {
   enum uhuru_file_status current_status = UHURU_UNDECIDED;
-  /* enum t00_file_status current_status = T00_UNDECIDED; */
-  /* enum tatou_file_status current_status = TATOU_UNDECIDED; */
 
   for (; *modules != NULL; modules++) {
     struct uhuru_module *mod = *modules;
@@ -154,7 +154,7 @@ static enum uhuru_file_status scan_file(struct uhuru_scan *scan, const char *pat
 
   g_log(NULL, G_LOG_LEVEL_DEBUG, "scan_file - %s", path);
 
-  uhuru_report_init(&report, path);
+  uhuru_report_init(&report, scan->scan_id, path);
 
   mime_type = os_mime_type_guess(path);
   modules = uhuru_get_applicable_modules(scan->uhuru, mime_type);
@@ -186,7 +186,7 @@ static void process_error(struct uhuru_scan *scan, const char *full_path, int en
 {
   struct uhuru_report report;
 
-  uhuru_report_init(&report, full_path);
+  uhuru_report_init(&report, scan->scan_id, full_path);
 
   g_log(NULL, G_LOG_LEVEL_WARNING, "local_scan_entry: Error - %s", full_path);
 
