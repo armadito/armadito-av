@@ -181,13 +181,8 @@ DWORD WINAPI InstanceThread(LPVOID lpvParam)
 			break;
 		}
 
-		int start_new_scan(struct new_scan* scan); /* Forward declaration */
-
 		// Step 4 -- Start Scan here if message already sent
-		if (scan != NULL){
-			start_new_scan(scan);
-		}
-		
+		start_new_scan(scan);
 		free(scan);
 	}
 
