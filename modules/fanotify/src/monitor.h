@@ -7,6 +7,8 @@ struct access_monitor;
 
 struct access_monitor *access_monitor_new(struct uhuru *uhuru);
 
+int access_monitor_enable_permission(struct access_monitor *m, int enable_permission);
+
 int access_monitor_add(struct access_monitor *m, const char *path);
 
 int access_monitor_remove(struct access_monitor *m, const char *path);
