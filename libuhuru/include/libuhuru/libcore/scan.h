@@ -8,35 +8,131 @@
 extern "C" {
 #endif
 
-struct uhuru_report;
+/**
+ * \struct struct uhuru_report
+ * \brief a structure containing the result of a file scan
+ *
+ * This structure is filled during a scan and passed to the scan callbacks after a
+ * file has been scanned.
+ *
+ */
+
+struct uhuru_report {
+  int scan_id;                          /*!< the id of the scan this report belongs to                          */
+  char *path;                           /*!< the path of the scanned file                                       */
+  enum uhuru_file_status status;        /*!< the scan status of the file (i.e. clean, malware, etc)             */
+  enum uhuru_action action;             /*!< the action that was executed on this file (alert, quarantine, etc) */
+  char *mod_name;                       /*!< name of the module that decided the file scan status               */
+  char *mod_report;                     /*!< the report of this module, usually a malware name                  */
+};
+
+/* this function is no longer implemented anywhere */
+/* void uhuru_report_print(struct uhuru_report *report, FILE *out); */
+
+/**
+ * \struct struct uhuru_scan
+ * \brief an opaque structure for file or directory scanning
+ */
 struct uhuru_scan;
 
 enum uhuru_scan_flags {
   UHURU_SCAN_THREADED   = 1 << 0,
   UHURU_SCAN_RECURSE    = 1 << 1,
+  UHURU_SCAN_STANDARD   = UHURU_SCAN_THREADED | UHURU_SCAN_RECURSE,
 };
 
-struct uhuru_scan *uhuru_scan_new(struct uhuru *uhuru, const char *path, enum uhuru_scan_flags flags);
+/**
+ * \fn struct uhuru_scan *uhuru_scan_new(struct uhuru *uhuru, int scan_id, const char *root_path, enum uhuru_scan_flags flags);
+ * \brief allocate and initialize a scan
+ *
+ * This function allocates and initializes a scan, but does not start it.
+ * BEWARE: after calling this function, the scan has not started. It must be started with uhuru_scan_run()
+ *
+ * This function uses malloc() to allocate the structure
+ *
+ * \param[in] uhuru        uhuru handle that was returned by uhuru_open()
+ * \param[in] scan_id      the scan id for the user interface
+ * \param[in] root_path    the root path of the scan, can be a file or a directory
+ * \param[in] flags        the scan flags, specifying in particular if directory must be scanned recursively. It is recommended to pass UHURU_SCAN_STANDARD as flags value
+ *
+ * \return  a pointer to the scan opaque structure
+ *
+ */
+struct uhuru_scan *uhuru_scan_new(struct uhuru *uhuru, int scan_id, const char *path, enum uhuru_scan_flags flags);
 
+/**
+ * \var typedef void (*uhuru_scan_callback_t)(struct uhuru_report *report, void *callback_data);
+ * \brief the type definition for a scan callback
+ *
+ * A scan callback will be called during a scan.
+ * The callbacks are called:
+ * - after the definitive scan status of a file is known
+ * - and after all the scan modules have done their work
+ * 
+ * BEWARE: a scan callback can be called from a different thread than the thread in which uhuru_scan_run was called
+ * 
+ * A callback arguments are:
+ * \param[in] report          a pointer to a uhuru_report structure (see above)
+ * \param[in] callback_data   a generic pointer, the same that was passed to uhuru_scan_add_callback
+ * 
+ */
 typedef void (*uhuru_scan_callback_t)(struct uhuru_report *report, void *callback_data);
 
+/**
+ * \fn void uhuru_scan_add_callback(struct uhuru_scan *scan, uhuru_scan_callback_t callback, void *callback_data);
+ * \brief adds a callback to the scan
+ *
+ * This function registers a callback for the scan.
+ * The registered callback will be called from the scan threads, once the scan has been started by uhuru_scan_run()
+ *
+ * \param[in] scan            pointer to the scan opaque structure
+ * \param[in] callback        the callback to be registered
+ * \param[in] callback_data   a generic pointer that will be passed to the callback call
+ *
+ */
 void uhuru_scan_add_callback(struct uhuru_scan *scan, uhuru_scan_callback_t callback, void *callback_data);
 
+/**
+ * \fn void uhuru_scan_run(struct uhuru_scan *scan);
+ * \brief runs a scan
+ *
+ * This function starts a scan and waits for its completion.
+ * After each file scan, the callbacks that were registered by uhuru_scan_add_callback() are called
+ * This function can start threads if UHURU_SCAN_THREADED was defined in scan's flags
+ * This function will recurse into sub-directories if UHURU_SCAN_RECURSE was defined in scan's flags
+ * Execution of this function can be lengthy, if scanning large directories.
+ *
+ * \param[in] scan            pointer to the scan opaque structure
+ *
+ */
 void uhuru_scan_run(struct uhuru_scan *scan);
 
+/**
+ * \fn void uhuru_scan_run(struct uhuru_scan *scan);
+ * \brief frees a scan
+ *
+ * This function frees a scan. The scan must be completed, i.e. uhuru_scan_run() must have been called
+ *
+ * \param[in] scan            pointer to the scan opaque structure
+ *
+ */
 void uhuru_scan_free(struct uhuru_scan *scan);
 
+/**
+ * \fn enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path);
+ * \brief scan a single file, without callbacks
+ *
+ * This function makes a simple scan, to scan a single file.
+ * It is dedicated to on-access scan, where the scan status must be available directly.
+ * BEWARE: the scan will be run inside the caller's thread.
+ *
+ * \param[in] uhuru        uhuru handle that was returned by uhuru_open()
+ * \param[in] path         path of file to scan, must be a regular file
+ *
+ * \return  the scan status of the file, as defined in file status.h
+ *
+ */
 enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path);
-
-struct uhuru_report {
-  char *path;
-  enum uhuru_file_status status;
-  enum uhuru_action action;
-  char *mod_name;
-  char *mod_report;
-};
-
-void uhuru_report_print(struct uhuru_report *report, FILE *out);
 
 #ifdef __cplusplus
 }
