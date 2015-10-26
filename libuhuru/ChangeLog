@@ -1,3 +1,7 @@
+2015-10-26  François  <francois@dechelle.net>
+
+	* added scan_id to scan structure; added comments to include/libuhuru/libcore
+
 2015-10-07  François  <francois@dechelle.net>
 
 	* removed all remote calls from libuhuru API; separated API into core and ipc
