@@ -40,7 +40,7 @@ function read_from_AV ( data ) {
 		}
 		else{ 
 		    // Step 3
-			console.log("Closing socket.");
+			console.log("AV_response OK. Closing socket.");
 			client_socket.destroy();
 			
 			// We know that a scan is in progress only when AV sent back "ok"
