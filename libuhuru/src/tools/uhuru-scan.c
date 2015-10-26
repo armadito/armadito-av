@@ -2,7 +2,6 @@
 
 #include "utils/getopt.h"
 #include "utils/tcpsock.h"
-#include "utils/named_pipe_server.h"
 
 #include <assert.h>
 #include <errno.h>

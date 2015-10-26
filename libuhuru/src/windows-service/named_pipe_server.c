@@ -6,7 +6,7 @@
 #include <tchar.h>
 #include <strsafe.h>
 #include "utils/json.h"
-#include "utils/scan.h"
+#include "scan.h"
 #include "json_tokener.h"
 
 #define BUFSIZE 512
