@@ -101,6 +101,7 @@ void uhuru_scan_add_callback(struct uhuru_scan *scan, uhuru_scan_callback_t call
  * This function can start threads if UHURU_SCAN_THREADED was defined in scan's flags
  * This function will recurse into sub-directories if UHURU_SCAN_RECURSE was defined in scan's flags
  * Execution of this function can be lengthy, if scanning large directories.
+ * BEWARE: calling this function will *block* caller, even if scan is multi-threaded
  *
  * \param[in] scan            pointer to the scan opaque structure
  *
