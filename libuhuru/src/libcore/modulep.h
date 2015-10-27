@@ -11,7 +11,7 @@ int module_manager_add(struct module_manager *mm, struct uhuru_module *module, u
 
 int module_manager_load_path(struct module_manager *mm, const char *path, uhuru_error **error);
 
-/* NULL terminated array of struct uhuru_module */
+/* returns a NULL-terminated array of struct uhuru_module */
 struct uhuru_module **module_manager_get_modules(struct module_manager *mm);
 
 int module_manager_post_init_all(struct module_manager *mm, uhuru_error **error);
