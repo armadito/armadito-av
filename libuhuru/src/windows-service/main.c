@@ -12,6 +12,11 @@ int main(int argc, const char **argv)
 	// load modules db etc.
 	uhuru * uhuru = uhuru_open();
 
+	if (uhuru == NULL){
+
+		return -1;
+	}
+
 	// Notes : If you intend to use a named pipe locally only, deny access to NT AUTHORITY\NETWORK or switch to local RPC.
 	named_pipe = start_named_pipe_server(uhuru);
 

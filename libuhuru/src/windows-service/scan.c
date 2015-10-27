@@ -65,6 +65,10 @@ int start_new_scan(struct new_scan* scan, uhuru* uhuru)
 
 		printf("--- uhuru_scan_free() ---\n");
 
+
+		// TODO : Try fake callback
+
+
 		// free and close all
 		uhuru_scan_free(u_scan);
 		closeConnection_to_IHM(&hPipe);

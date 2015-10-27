@@ -63,6 +63,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>json-c.lib;libuhuru_core.lib;libuhuru_ipc.lib;glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;gio-2.0.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\toto\projects\uhuru\git\uhuru-av\VS\UhuruAV\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
