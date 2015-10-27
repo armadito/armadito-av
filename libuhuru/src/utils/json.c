@@ -1,9 +1,11 @@
+#include <libuhuru/core.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <tchar.h>
 
 #include "json.h"
 #include "windows-service/scan.h"
+
 
 json_object * create_json_obj(){
 
@@ -160,13 +162,13 @@ const char* json_parse_and_process(json_object * jobj, struct new_scan* scan) {
 
 			if (json_object_get_type(val) != json_type_int){
 				// Step 3
-				return json_get_protocol_err_msg("The new_scan_id value must be an integer > 0 && < 100.");
+				return json_get_protocol_err_msg("The new_scan_id value must be an integer > 0 && < 100.", 101);
 			}
 
 			scan_id = json_object_get_int(val);
 			if (scan_id <= 0 || scan_id >= 100){ // 1 - 99 , for security reasons
 				// Step 3
-				return json_get_protocol_err_msg("The new_scan_id value must be an integer > 0 && < 100.");
+				return json_get_protocol_err_msg("The new_scan_id value must be an integer > 0 && < 100.", 101);
 			}
 
 		}
@@ -174,7 +176,7 @@ const char* json_parse_and_process(json_object * jobj, struct new_scan* scan) {
 
 			if (json_object_get_type(val) != json_type_string){
 				// Step 3
-				return json_get_protocol_err_msg("The path value must be a valid json string.");
+				return json_get_protocol_err_msg("The path value must be a valid json string.", 101);
 			}
 
 			scan_path = json_object_get_string(val);
@@ -183,12 +185,12 @@ const char* json_parse_and_process(json_object * jobj, struct new_scan* scan) {
 
 	if (scan_id <= 0){
 		// Step 3
-		return json_get_protocol_err_msg("new_scan_id key was not found.");
+		return json_get_protocol_err_msg("new_scan_id key was not found.", 101);
 	}
 
 	if (strcmp(scan_path, "") == 0){
 		// Step 3
-		return json_get_protocol_err_msg("scan_path was empty or not found.");
+		return json_get_protocol_err_msg("scan_path was empty or not found.", scan_id);
 	}
 
 	scan->scan_path = scan_path;
@@ -212,14 +214,29 @@ const char* json_get_basic_scan_response(int scan_id)
 }
 
 // log error and prepare json to be sent back to IHM
-const char* json_get_protocol_err_msg( const char* err_msg )
+// scan_id = 101 means error with unknown scan_id value.
+const char* json_get_protocol_err_msg( const char* err_msg, int scan_id )
 {
 	printf("error:  %s\n", err_msg);
 
 	json_object * jobj = json_object_new_object();
+	json_object *jint = json_object_new_int(scan_id);
 	json_object *jstring = json_object_new_string(err_msg);
+
 	json_object_object_add(jobj, "error", jstring);
+	json_object_object_add(jobj, "scan_id", jint);
 
 	return json_object_to_json_string(jobj);
 }
 
+const char* json_get_report_msg(uhuru_report* report){
+
+	json_object * jobj = json_object_new_object();
+	json_object *jint = json_object_new_int(report->scan_id);
+	json_object *jstring = json_object_new_string(uhuru_file_status_pretty_str(report->status));
+
+	json_object_object_add(jobj, "scan_status", jstring);
+	json_object_object_add(jobj, "scan_id", jint);
+
+	return json_object_to_json_string(jobj);
+}
