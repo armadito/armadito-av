@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <conio.h>
 #include <tchar.h>
-
+#include <libuhuru-config.h>
+#include <libuhuru/core.h>
+#include <libuhuru/ipc.h>
 #include "named_pipe_client.h"
 
 #define BUFSIZE 512
@@ -89,6 +91,20 @@ int send_message_to_IHM(HANDLE * hPipe, char * message, char** server_response)
 	TCHAR  chBuf[BUFSIZE];
 	BOOL   fSuccess = FALSE;
 	DWORD  cbRead, cbToWrite, cbWritten;
+
+	if (hPipe == NULL){
+		printf("Null handle pointer passed to send_message_to_IHM()");
+		return -1;
+	}
+
+	if (*hPipe == INVALID_HANDLE_VALUE){
+		printf("Invalid handle passed to send_message_to_IHM()");
+		return -1;
+	}
+
+	// TODO: Checker le message avant envoi
+
+
 
 	lpvMessage = message;
 	cbToWrite = (lstrlen(lpvMessage) + 1)*sizeof(TCHAR);
