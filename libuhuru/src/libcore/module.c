@@ -170,9 +170,9 @@ int module_manager_post_init_all(struct module_manager *mm, uhuru_error **error)
 
     /* if post_init failed, return an error */
     if (mod->status != UHURU_MOD_OK) {
-      g_log(NULL, G_LOG_LEVEL_WARNING, "post_initialization error for module '%s'\n", mod->name);
+      g_log(NULL, G_LOG_LEVEL_WARNING, "post_init error for module '%s'\n", mod->name);
 
-      uhuru_error_set(error, UHURU_ERROR_MODULE_POST_INIT_FAILED, "initialization error for module");
+      uhuru_error_set(error, UHURU_ERROR_MODULE_POST_INIT_FAILED, "post_init error for module");
 
       return UHURU_ERROR_MODULE_POST_INIT_FAILED;
     }
@@ -190,13 +190,28 @@ int module_manager_close_all(struct module_manager *mm, uhuru_error **error)
 {
   struct uhuru_module **modv;
 
-  /* FIXME: for now, dirty stuff, do nothing with error */
-
   for (modv = module_manager_get_modules(mm); *modv != NULL; modv++) {
     struct uhuru_module *mod = *modv;
 
-    if (mod->close_fun != NULL && mod->status == UHURU_MOD_OK)
-      mod->status = (*mod->close_fun)(mod);
+    /* module has no close_fun, do nothing */
+    if (mod->close_fun == NULL)
+      continue;
+
+    /* module is not ok, do nothing */
+    if (mod->status != UHURU_MOD_OK)
+      continue;
+
+    /* call the close function */
+    mod->status = (*mod->close_fun)(mod);
+
+    /* if close failed, return an error */
+    if (mod->status != UHURU_MOD_OK) {
+      g_log(NULL, G_LOG_LEVEL_WARNING, "close error for module '%s'\n", mod->name);
+
+      uhuru_error_set(error, UHURU_ERROR_MODULE_POST_INIT_FAILED, "close error for module");
+
+      return UHURU_ERROR_MODULE_CLOSE_FAILED;
+    }
   }
 
   return 0;
