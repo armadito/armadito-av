@@ -15,9 +15,6 @@
 extern "C" {
 #endif
 
-const char *uhuru_file_status_pretty_str(enum uhuru_file_status status);
-
-
 enum uhuru_file_status {
   UHURU_UNDECIDED = 1,         /*!< not yet decided by scan                                */
   UHURU_CLEAN,                 /*!< file is clean and does not contain a malware           */
@@ -28,6 +25,8 @@ enum uhuru_file_status {
   UHURU_WHITE_LISTED,          /*!< file is while listed, i.e. guaranteed clean            */
   UHURU_MALWARE,               /*!< file contains a malware                                */
 };
+
+const char *uhuru_file_status_pretty_str(enum uhuru_file_status status);
 
 #ifdef __cplusplus
 }
