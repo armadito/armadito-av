@@ -2,7 +2,7 @@
 
 #include "server.h"
 #include "utils/getopt.h"
-#include "utils/tcpsock.h"
+#include "tcpsock.h"
 #include "daemonize.h"
 
 #include <glib.h>
