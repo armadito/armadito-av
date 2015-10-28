@@ -14,6 +14,5 @@ const char* json_parse_and_process(json_object * jobj, struct new_scan* scan);
 const char* json_get_protocol_err_msg(const char* err_msg, int scan_id);
 const char* json_get_basic_scan_response(int scan_id);
 const char* json_get_report_msg(uhuru_report* report);
-json_object * create_json_obj();
 
 #endif
