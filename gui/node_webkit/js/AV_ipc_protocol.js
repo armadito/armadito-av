@@ -38,13 +38,19 @@ function process_scan_report( scan_report )
 		console.error("AV scan_report error msg : "+ scan_report.error );
 		return -1;
 	}
-	
-	if( scan_report.scan_progress ){
+
+	if( scan_report.scan_progress && scan_report.scan_progress > 0){
 		console.log (" scan_progress = " +  scan_report.scan_progress);
 		scan_progress_on_change(scan_report.scan_progress);
 	}
 	
-	// Step 4
+	if( scan_report.scan_file_path && scan_report.scan_file_path != "null" ){
+	
+		console.log(" scanned file : " + scan_report.scan_file_path);
+		update_scan_file_path(scan_report.scan_file_path);
+	}
+
+	
 	return 0;
 }
 

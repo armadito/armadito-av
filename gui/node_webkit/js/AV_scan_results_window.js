@@ -30,18 +30,27 @@ else{
 	// Waiting for connexions on scan_server
 }
 
-// Demo implementation of an HTML progress bar, updated from JS
+
+
+
+// --- Update HTML with DOM functions ---
+
 function update_scan_progress_bar() {
   var progress = document.getElementById("scan_progress");
   var prc = document.getElementById("pourcentage");
   prc.innerHTML = progress.value + "%";
 }
 
-update_scan_progress_bar(); //Initialisation de la progress bar
-
-// TODO : Call this function when receive a message from AV scan in progress
 function scan_progress_on_change (val) {
   var progress = document.getElementById("scan_progress");
   progress.value = val;
   update_scan_progress_bar();
 }
+
+function update_scan_file_path (file_path)
+{
+	var td = document.getElementById("scan_file_path");
+	td.innerHTML = file_path;
+}
+
+update_scan_progress_bar(); //Initialisation de la progress bar
