@@ -3,7 +3,7 @@
 
 #include <libuhuru/core.h>
 
-void uhuru_report_init(struct uhuru_report *report, int scan_id, const char *path);
+void uhuru_report_init(struct uhuru_report *report, int scan_id, const char *path, int progress);
 
 void uhuru_report_destroy(struct uhuru_report *report);
 

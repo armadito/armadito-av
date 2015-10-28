@@ -38,9 +38,12 @@ extern "C" {
  *
  */
 
+#define REPORT_PROGRESS_UNKNOW (-1)
+
 struct uhuru_report {
   int scan_id;                          /*!< the id of the scan this report belongs to                          */
   char *path;                           /*!< the path of the scanned file                                       */
+  int progress;                         /*!< the progress, can be an int (0 <= <= 100), or PROGRESS_UNKNOWN     */
   enum uhuru_file_status status;        /*!< the scan status of the file (i.e. clean, malware, etc)             */
   enum uhuru_action action;             /*!< the action that was executed on this file (alert, quarantine, etc) */
   char *mod_name;                       /*!< name of the module that decided the file scan status               */
