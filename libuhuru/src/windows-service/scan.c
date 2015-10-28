@@ -40,6 +40,18 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
 
 }
 
+int test_connection(int scan_id, HANDLE* hPipe){
+	// We test connection to IHM before launching a new scan
+	
+	if (connect_to_IHM(scan_id, hPipe) < 0){
+		printf("Error when trying to connect to \\\\.\\pipe\\IHM_scan_%d \n", scan_id);
+		return -1;
+	}
+
+	closeConnection_to_IHM(hPipe);
+	return 0;
+}
+
 int start_new_scan(struct new_scan* scan, uhuru* uhuru)
 {
 	HANDLE hPipe = INVALID_HANDLE_VALUE;
@@ -50,16 +62,10 @@ int start_new_scan(struct new_scan* scan, uhuru* uhuru)
 
 	if (scan != NULL && scan->scan_id > 0 && scan->scan_path != NULL){
 
-		// We test connection to IHM before launching a new scan
 		printf("\n\n #### Start scanning (%d) %s ####\n", scan->scan_id, scan->scan_path);
-		if (connect_to_IHM(scan->scan_id, &hPipe) < 0){
-			printf("Error when trying to connect to \\\\.\\pipe\\IHM_scan_%d \n", scan->scan_id);
-			return -1;
-		}
 
-		closeConnection_to_IHM(&hPipe);
-
-
+		// We test connection before starting to scan
+		if (test_connection(scan->scan_id, &hPipe) < 0 ) { return -1; }
 
 		// Not really used currently
 		np_info = (struct named_pipe_info*)malloc(sizeof(struct named_pipe_info));
@@ -75,19 +81,6 @@ int start_new_scan(struct new_scan* scan, uhuru* uhuru)
 		uhuru_scan_run(u_scan);
 
 		printf("--- uhuru_scan_free() ---\n");
-
-		// fake callback
-		/*
-		struct uhuru_report *report = (struct uhuru_report *)malloc(sizeof(struct uhuru_report));
-		report->mod_name = "clamav";
-		report->mod_report = "Trojan.Mal32-77";
-		report->action = UHURU_ACTION_QUARANTINE;
-		report->path = "C://cygwin64//home//malware.exe";
-		report->status = UHURU_MALWARE;
-
-		scan_callback(report, np_info);
-		free(report);
-		*/
 
 		// free and close all
 		uhuru_scan_free(u_scan);

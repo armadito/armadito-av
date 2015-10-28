@@ -17,7 +17,6 @@
 #endif
 #include "builtin-modules/mimetypemod.h"
 
-#include <assert.h>
 #include <glib.h>
 #include <stdlib.h>
 #include <string.h>
@@ -39,6 +38,13 @@ static struct uhuru *uhuru_new(void)
   return u;
 }
 
+static void uhuru_free(struct uhuru *u)
+{
+  module_manager_free(u->module_manager);
+  g_hash_table_destroy(u->mime_type_table);
+  free(u);
+}
+
 struct uhuru *uhuru_open(uhuru_error **error)
 {
   struct uhuru *u;
@@ -47,26 +53,37 @@ struct uhuru *uhuru_open(uhuru_error **error)
 
   u = uhuru_new();
 
-  module_manager_add(u->module_manager, &mimetype_module, NULL);
+  module_manager_add(u->module_manager, &mimetype_module);
+
 #ifdef HAVE_ALERT_MODULE
-  module_manager_add(u->module_manager, &alert_module, NULL);
+  module_manager_add(u->module_manager, &alert_module);
 #endif
 #ifdef HAVE_QUARANTINE_MODULE
-  module_manager_add(u->module_manager, &quarantine_module, NULL);
+  module_manager_add(u->module_manager, &quarantine_module);
 #endif
 
-  module_manager_load_path(u->module_manager, LIBUHURU_MODULES_PATH, NULL);
+  if (module_manager_load_path(u->module_manager, LIBUHURU_MODULES_PATH, error))
+    goto error;
 
+  if (module_manager_init_all(u->module_manager, error))
+    goto error;
+
+  /* FIXME: error checking */
   conf_load_file(u, LIBUHURU_CONF_DIR "/uhuru.conf");
   conf_load_path(u, LIBUHURU_CONF_DIR "/conf.d");
 
-  module_manager_post_init_all(u->module_manager, NULL);
+  if (module_manager_post_init_all(u->module_manager, error))
+    goto error;
 
 #ifdef DEBUG
   g_log(NULL, G_LOG_LEVEL_DEBUG, "after post_init:\n%s\n", uhuru_debug(u));
 #endif
 
   return u;
+
+ error:
+  uhuru_free(u);
+  return NULL;
 }
 
 struct uhuru_module **uhuru_get_modules(struct uhuru *u)
