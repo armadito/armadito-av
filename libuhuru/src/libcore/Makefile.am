@@ -8,6 +8,7 @@ conf.c \
 conf.h \
 confparser.c \
 confparser.h \
+error.c \
 info.c \
 module.c \
 modulep.h \

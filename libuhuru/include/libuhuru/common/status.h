@@ -26,6 +26,8 @@ enum uhuru_file_status {
   UHURU_MALWARE,               /*!< file contains a malware                                */
 };
 
+const char *uhuru_file_status_pretty_str(enum uhuru_file_status status);
+
 #ifdef __cplusplus
 }
 #endif

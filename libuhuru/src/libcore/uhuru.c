@@ -39,7 +39,7 @@ static struct uhuru *uhuru_new(void)
   return u;
 }
 
-struct uhuru *uhuru_open(void)
+struct uhuru *uhuru_open(uhuru_error **error)
 {
   struct uhuru *u;
 
@@ -47,20 +47,20 @@ struct uhuru *uhuru_open(void)
 
   u = uhuru_new();
 
-  module_manager_add(u->module_manager, &mimetype_module);
+  module_manager_add(u->module_manager, &mimetype_module, NULL);
 #ifdef HAVE_ALERT_MODULE
-  module_manager_add(u->module_manager, &alert_module);
+  module_manager_add(u->module_manager, &alert_module, NULL);
 #endif
 #ifdef HAVE_QUARANTINE_MODULE
-  module_manager_add(u->module_manager, &quarantine_module);
+  module_manager_add(u->module_manager, &quarantine_module, NULL);
 #endif
 
-  module_manager_load_path(u->module_manager, LIBUHURU_MODULES_PATH);
+  module_manager_load_path(u->module_manager, LIBUHURU_MODULES_PATH, NULL);
 
   conf_load_file(u, LIBUHURU_CONF_DIR "/uhuru.conf");
   conf_load_path(u, LIBUHURU_CONF_DIR "/conf.d");
 
-  module_manager_post_init_all(u->module_manager);
+  module_manager_post_init_all(u->module_manager, NULL);
 
 #ifdef DEBUG
   g_log(NULL, G_LOG_LEVEL_DEBUG, "after post_init:\n%s\n", uhuru_debug(u));
@@ -118,9 +118,9 @@ struct uhuru_module **uhuru_get_applicable_modules(struct uhuru *u, const char *
   return NULL;
 }
 
-void uhuru_close(struct uhuru *u)
+int uhuru_close(struct uhuru *u, uhuru_error **error)
 {
-  module_manager_close_all(u->module_manager);
+  return module_manager_close_all(u->module_manager, error);
 }
 
 #ifdef DEBUG

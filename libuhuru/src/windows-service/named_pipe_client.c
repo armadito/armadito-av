@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <conio.h>
 #include <tchar.h>
-
+#include <libuhuru-config.h>
+#include <libuhuru/core.h>
+#include <libuhuru/ipc.h>
 #include "named_pipe_client.h"
 
 #define BUFSIZE 512
@@ -90,6 +92,17 @@ int send_message_to_IHM(HANDLE * hPipe, char * message, char** server_response)
 	BOOL   fSuccess = FALSE;
 	DWORD  cbRead, cbToWrite, cbWritten;
 
+	if (hPipe == NULL){
+		printf("Null handle pointer passed to send_message_to_IHM()");
+		return -1;
+	}
+
+	if (*hPipe == INVALID_HANDLE_VALUE){
+		printf("Invalid handle passed to send_message_to_IHM()");
+		return -1;
+	}
+
+	// TODO: Checker le message avant envoi
 	lpvMessage = message;
 	cbToWrite = (lstrlen(lpvMessage) + 1)*sizeof(TCHAR);
 	_tprintf(TEXT("Sending %d byte message: \"%s\"\n"), cbToWrite, lpvMessage);
@@ -123,10 +136,15 @@ int send_message_to_IHM(HANDLE * hPipe, char * message, char** server_response)
 		if (!fSuccess && GetLastError() != ERROR_MORE_DATA)
 			break;
 
-		printf(" Server response : %s ", chBuf);
+		printf(" Server response : %s \n", chBuf);
+		printf(" %d bytes read \n", cbRead);
+
 		*server_response = chBuf;
 
+		printf(" After assign response \n");
+
 		//_tprintf(TEXT("\"%s\"\n"), chBuf);
+
 	} while (!fSuccess);  // repeat loop if ERROR_MORE_DATA 
 
 	if (!fSuccess)

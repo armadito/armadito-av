@@ -1,7 +1,9 @@
 #include <libuhuru/ipc.h>
 
 #include "utils/getopt.h"
-#include "utils/tcpsock.h"
+#if 0
+#include "tcpsock.h"
+#endif
 
 #include <assert.h>
 #include <errno.h>
