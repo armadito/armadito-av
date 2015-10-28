@@ -24,8 +24,6 @@ struct module_manager {
  * module 
  */
 
-static void module_free(struct uhuru_module *mod);
-
 /*
   is module copy really needed?
   module management modifies the uhuru_module structure, namely the fields
@@ -36,7 +34,7 @@ static void module_free(struct uhuru_module *mod);
   should not happen
   so for now, we copy
  */
-static struct uhuru_module *module_new(struct uhuru_module *src, struct uhuru *uhuru, uhuru_error **error)
+static struct uhuru_module *module_new(struct uhuru_module *src, struct uhuru *uhuru)
 {
   struct uhuru_module *mod = g_new0(struct uhuru_module, 1);
 
@@ -61,6 +59,9 @@ static struct uhuru_module *module_new(struct uhuru_module *src, struct uhuru *u
 static void module_free(struct uhuru_module *mod)
 {
   free((void *)mod->name);
+
+  if (mod->data != NULL)
+    free(mod->data);
 
   free(mod);
 }
@@ -116,13 +117,11 @@ void module_manager_free(struct module_manager *mm)
   g_array_free(mm->modules, TRUE);
 }
 
-int module_manager_add(struct module_manager *mm, struct uhuru_module *module, uhuru_error **error)
+void module_manager_add(struct module_manager *mm, struct uhuru_module *module)
 {
-  struct uhuru_module *clone = module_new(module, mm->uhuru, error);
+  struct uhuru_module *clone = module_new(module, mm->uhuru);
 
   g_array_append_val(mm->modules, clone);
-
-  return 0;
 }
 
 static void module_load_dirent_cb(const char *full_path, enum os_file_flag flags, int entry_errno, void *data)
@@ -133,7 +132,7 @@ static void module_load_dirent_cb(const char *full_path, enum os_file_flag flags
     uhuru_error *error = NULL;
 
     if (!module_load(full_path, &mod_loaded, &error) && mod_loaded != NULL)
-      module_manager_add((struct module_manager *)data, mod_loaded, NULL);
+      module_manager_add((struct module_manager *)data, mod_loaded);
   }
 }
 
@@ -179,7 +178,7 @@ static int module_init(struct uhuru_module *mod, uhuru_error **error)
   mod->status = (*mod->init_fun)(mod);
 
   /* everything's ok */
-  if (mod->status == UHURU_MOD_OK) {
+  if (mod->status != UHURU_MOD_OK) {
     /* module init failed, set error and return NULL */
     g_log(NULL, G_LOG_LEVEL_WARNING, "initialization error for module '%s'\n", mod->name);
 

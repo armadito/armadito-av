@@ -9,18 +9,18 @@ struct module_manager *module_manager_new(struct uhuru *uhuru);
 
 void module_manager_free(struct module_manager *mm);
 
-int module_manager_add(struct module_manager *mm, struct uhuru_module *module, uhuru_error **error);
+void module_manager_add(struct module_manager *mm, struct uhuru_module *module);
 
 int module_manager_load_path(struct module_manager *mm, const char *path, uhuru_error **error);
-
-/* returns a NULL-terminated array of struct uhuru_module */
-struct uhuru_module **module_manager_get_modules(struct module_manager *mm);
 
 int module_manager_init_all(struct module_manager *mm, uhuru_error **error);
 
 int module_manager_post_init_all(struct module_manager *mm, uhuru_error **error);
 
 int module_manager_close_all(struct module_manager *mm, uhuru_error **error);
+
+/* returns a NULL-terminated array of struct uhuru_module */
+struct uhuru_module **module_manager_get_modules(struct module_manager *mm);
 
 #ifdef DEBUG
 const char *module_debug(struct uhuru_module *module);
