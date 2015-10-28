@@ -36,7 +36,14 @@ The overwriting error message was: %s", error_message);
 
 void uhuru_error_free(uhuru_error *err)
 {
-  free(err);
+  if (err != NULL)
+    free(err);
 }
 
+void uhuru_error_print(uhuru_error *err, FILE *out)
+{
+  if (err == NULL)
+    return;
 
+  fprintf(out, "** Uhuru: ERROR: %s\n", err->error_message);
+}
