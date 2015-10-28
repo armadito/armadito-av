@@ -17,6 +17,8 @@
 #ifndef _LIBUHURU_LIBCORE_ERROR_H_
 #define _LIBUHURU_LIBCORE_ERROR_H_
 
+#include <stdio.h>  /* for FILE * */
+
 /**
  * \var typedef struct _uhuru_error uhuru_error;
  * \struct struct _uhuru_error
@@ -66,10 +68,18 @@ void uhuru_error_set(uhuru_error **error, int error_code, const char *error_mess
  * \fn void uhuru_error_free(uhuru_error *err);
  * \brief frees an uhuru_error structure
  *
- * \param[in] err            a pointer to the uhuru_error struct
+ * \param[in] err            a pointer to the uhuru_error struct, if NULL, function does nothing
  */
 void uhuru_error_free(uhuru_error *err);
 
+/**
+ * \fn void uhuru_error_print(uhuru_error *err, FILE *out)
+ * \brief prints an uhuru_error structure on `out`
+ *
+ * \param[in] err            a pointer to the uhuru_error struct, if NULL, function does nothing
+ * \param[in] out            a pointer to the FILE output
+ */
+void uhuru_error_print(uhuru_error *err, FILE *out);
 
 /*
  * Error codes for module
