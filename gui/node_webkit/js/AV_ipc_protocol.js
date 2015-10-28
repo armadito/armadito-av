@@ -31,6 +31,23 @@ function process_AV_response ( AV_response )
 	return -1;
 }
 
+function process_scan_report( scan_report )
+{
+	// Step 4
+	if( scan_report.error ){
+		console.error("AV scan_report error msg : "+ scan_report.error );
+		return -1;
+	}
+	
+	if( scan_report.scan_progress ){
+		console.log (" scan_progress = " +  scan_report.scan_progress);
+	}
+	
+	// Step 4
+	return 0;
+}
+
+
 
 
 

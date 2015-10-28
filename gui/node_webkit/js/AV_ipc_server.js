@@ -31,15 +31,32 @@ function create_IHM_scan_server(){
 		 console.log("data received on server " );
 		 console.log("data received on server : " + data);
 		 
+		 // Parsing here
+		//var buff = new Buffer( data, data_encoding );
+	    var scan_report = parse_json_str(data);
+		
+		if(!scan_report)
+		{	
+			console.log('Error on json_object received from AV. Waiting for another scan_report msg from AV.');
+			server_socket.write("{\"error\",\"JSON scan_report msg parsing error.\"}");
+		}
+		else
+		{	
+			if(process_scan_report(scan_report) < 0)
+			{
+				//server_socket.write("{\"scan_results\",\"error\"}");
+				console.error(" process_scan_report error !");
+				server_socket.write("{\"error\",\"process_scan_report error\"}");
+				
+			}
+			else{
+				server_socket.write("{\"scan_results\",\"ok\"}");
+			}
+		}
 		 
-		 
-		 // TODO: Parsing here
-		 server_socket.write("{\"scan_results\",\"ok\"}");
 		 
 	  });
 	  
-	  //server_socket.write("{ \"scan_server\": \"ok\" }");
-	  // server_socket.pipe(server_socket);
 	});
 	
 	server.on( 'close', function (){
