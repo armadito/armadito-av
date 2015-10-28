@@ -27,15 +27,9 @@
     <ClCompile Include="..\..\..\libuhuru\src\utils\getopt.c">
       <Filter>Source Files\utils</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\libuhuru\src\utils\tcpsock.c">
-      <Filter>Source Files\utils</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\libuhuru\src\utils\getopt.h">
-      <Filter>Header Files\utils</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\libuhuru\src\utils\tcpsock.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
   </ItemGroup>

@@ -82,7 +82,7 @@ struct server *server_new(int server_sock)
   server = (struct server *)malloc(sizeof(struct server));
   assert(server != NULL);
 
-  server->uhuru = uhuru_open();
+  server->uhuru = uhuru_open(NULL);
   assert(server->uhuru != NULL);
 
   server->listen_sock = server_sock;

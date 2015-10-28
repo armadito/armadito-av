@@ -1,4 +1,4 @@
-SUBDIRS= libipc libcore on-access tools scand
+SUBDIRS= libcore libipc linux-daemon tools 
 DIST_SUBDIRS=$(SUBDIRS) os
 
 

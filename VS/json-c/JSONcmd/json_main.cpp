@@ -1,7 +1,7 @@
 // JSONcmd.cpp : Defines the entry point for the console application.
 //
 
-#include "stdafx.h"
+// #include "stdafx.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "json_util.h"
@@ -93,7 +93,7 @@ void json_parse(json_object * jobj) {
 	}
 }
 
-int _tmain(int argc, _TCHAR* argv[])
+int main(int argc, char* argv[])
 {
 	printf("########JSON######## \n");
 

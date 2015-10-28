@@ -8,8 +8,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-void uhuru_report_init(struct uhuru_report *report, const char *path)
+void uhuru_report_init(struct uhuru_report *report, int scan_id, const char *path)
 {
+  report->scan_id = scan_id;
   report->path = os_strdup(path);
   report->status = UHURU_UNDECIDED;
   report->action = UHURU_ACTION_NONE;

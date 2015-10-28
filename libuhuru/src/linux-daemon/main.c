@@ -2,10 +2,8 @@
 
 #include "server.h"
 #include "utils/getopt.h"
-#include "utils/tcpsock.h"
-#ifdef linux
-#include "os/linux/daemonize.h"
-#endif
+#include "tcpsock.h"
+#include "daemonize.h"
 
 #include <glib.h>
 #include <errno.h>
@@ -73,6 +71,7 @@ int main(int argc, const char **argv)
   struct server *server;
 
   g_thread_init(NULL);
+
 #if 0
   /* a priori no longer needed; depends on glib version; was deprecated in 2.36 */
   g_type_init();
@@ -80,10 +79,8 @@ int main(int argc, const char **argv)
 
   parse_options(argc, argv, &opts);
 
-#ifdef linux
   if (!opts.no_daemon)
     daemonize();
-#endif
 
   server_sock = tcp_server_listen(opts.port_number, "127.0.0.1");
 

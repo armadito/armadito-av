@@ -1,28 +1,66 @@
 // Some variables are already defined in AV_ipc_client.js -- same JS context
 
-var scan_id = 7744;
-var server_path = "IHM_scan_" + scan_id;
+var scan_id = 77;
+var server_path = 'IHM_scan_' + scan_id;
 var server;
+var path = require('path');
 
 //  For the moment, only one server can be running.
 //  For multiple servers, create an array of servers , n_id * server[id]
 
 if(os.platform() == "win32")
 {
-	server_path = '\\\\.\\pipe\\'+ server_path;
+	server_path= '\\\\.\\pipe\\'+server_path;
 }
 	
+// Configure a keep-alive??
 function create_IHM_scan_server(){
 	
-	server = net.createServer(function(connection) { //'connection' listener
+	server = net.createServer(function(server_socket) { //'connection' listener
 	  console.log('client connected');
 	  
-	  connection.on('end', function() {
+	  // Normalement global.scan_in_progress = true;
+	  // We receive here the scan_progress value from AV
+	  // What if we receive nothing ??? ( if AV_Scan crashed ?)
+	  
+	  server_socket.on('end', function() {
 		console.log('client disconnected');
 	  });
 	  
-	  connection.write('Well received from u, AV !');
-	  connection.pipe(connection);
+	  server_socket.on('data', function(data) {
+		 console.log("data received on server " );
+		 console.log("data received on server : " + data);
+		 
+		 // Parsing here
+		//var buff = new Buffer( data, data_encoding );
+	    var scan_report = parse_json_str(data);
+		
+		if(!scan_report)
+		{	
+			console.log('Error on json_object received from AV. Waiting for another scan_report msg from AV.');
+			server_socket.write("{\"error\",\"JSON scan_report msg parsing error.\"}");
+		}
+		else
+		{	
+			if(process_scan_report(scan_report) < 0)
+			{
+				//server_socket.write("{\"scan_results\",\"error\"}");
+				console.error(" process_scan_report error !");
+				server_socket.write("{\"error\",\"process_scan_report error\"}");
+				
+			}
+			else{
+				server_socket.write("{\"scan_results\",\"ok\"}");
+			}
+		}
+		 
+		 
+	  });
+	  
+	});
+	
+	server.on( 'close', function (){
+		console.log(' Closing IHM Scan server ('+scan_id+').');
 	});
 	
 	server.on( 'closed', function (){
@@ -38,5 +76,6 @@ function create_IHM_scan_server(){
 }	
 	
 function shutdown_scan_server(){
+	console.log("shutdown server");
 	server.close();
 }
