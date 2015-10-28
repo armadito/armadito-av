@@ -116,6 +116,9 @@
     <ClCompile Include="..\..\..\libuhuru\src\os\windows\string.c">
       <Filter>Source Files\os\windows</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\error.c">
+      <Filter>Source Files\libcore</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="libuhuru_core.def">
