@@ -16,19 +16,30 @@ if(os.platform() == "win32")
 // Configure a keep-alive??
 function create_IHM_scan_server(){
 	
-	server = net.createServer(function(connection) { //'connection' listener
+	server = net.createServer(function(server_socket) { //'connection' listener
 	  console.log('client connected');
 	  
 	  // Normalement global.scan_in_progress = true;
 	  // We receive here the scan_progress value from AV
 	  // What if we receive nothing ??? ( if AV_Scan crashed ?)
 	  
-	  connection.on('end', function() {
+	  server_socket.on('end', function() {
 		console.log('client disconnected');
 	  });
 	  
-	  connection.write('Well received from u, AV !');
-	  connection.pipe(connection);
+	  server_socket.on('data', function(data) {
+		 console.log("data received on server " );
+		 console.log("data received on server : " + data);
+		 
+		 
+		 
+		 // TODO: Parsing here
+		 server_socket.write("{\"scan_results\",\"ok\"}");
+		 
+	  });
+	  
+	  //server_socket.write("{ \"scan_server\": \"ok\" }");
+	  // server_socket.pipe(server_socket);
 	});
 	
 	server.on( 'close', function (){
