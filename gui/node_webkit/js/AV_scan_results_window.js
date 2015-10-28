@@ -14,7 +14,7 @@ if( scan == null){
 }
 else{
 	
-	// We connect to AV (IPC)
+	// We connect to AV 
 	connect_to_AV();
 	
 	// We ask for a new scan by sending a message to AV
@@ -23,6 +23,8 @@ else{
 	    // TODO : message to user in window, ask him to retry scan.
 		console.error("ask_for_new_scan failed, closing connections. Shutdown server.");
 		shutdown_scan_server();
+		client_socket.destroy();
+		global.new_scan = null;
 	}
 	
 	// Waiting for connexions on scan_server
@@ -35,8 +37,7 @@ function update_scan_progress_bar() {
   prc.innerHTML = progress.value + "%";
 }
 
-update_scan_progress_bar(); //Initialisation
-
+update_scan_progress_bar(); //Initialisation de la progress bar
 
 // TODO : Call this function when receive a message from AV scan in progress
 function scan_progress_on_change (val) {

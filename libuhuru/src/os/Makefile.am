@@ -2,7 +2,6 @@ EXTRA_DIST= \
 dir.h \
 file.h \
 io.h \
-ipc.h \
 mimetype.h \
 string.h \
 linux/dir.c \

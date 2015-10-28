@@ -1,10 +1,4 @@
 
-// test function clickable on IHM
-function TestWrite()
-{	
-	var str = "{\"sitename\" : \"joys of programming\",\"categories\" :[\"c\", [\"c++\", \"c\"], \"java\", \"PHP\"],\"author-details\" : { \"admin\": false, \"name\" : \"Joys of Programming\", \"Number of Posts\" : 10 }}";
-	write_to_AV(str);
-}
 
 
 function ask_for_new_scan( new_scan, scan_id )
@@ -22,7 +16,7 @@ function process_AV_response ( AV_response )
 {
 	// Step 3
 	if( AV_response.error ){
-		console.log("AV_response sent error msg : "+ AV_response.error );
+		console.error("AV_response sent error msg : "+ AV_response.error );
 		return -1;
 	}
 	
@@ -36,3 +30,25 @@ function process_AV_response ( AV_response )
 	
 	return -1;
 }
+
+function process_scan_report( scan_report )
+{
+	// Step 4
+	if( scan_report.error ){
+		console.error("AV scan_report error msg : "+ scan_report.error );
+		return -1;
+	}
+	
+	if( scan_report.scan_progress ){
+		console.log (" scan_progress = " +  scan_report.scan_progress);
+	}
+	
+	// Step 4
+	return 0;
+}
+
+
+
+
+
+
