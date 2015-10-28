@@ -55,7 +55,8 @@ static void ipc_scan_handler(struct ipc_manager *m, void *data)
 
   ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &path);
 
-  scan = uhuru_scan_new(cl->uhuru, 0, path, UHURU_SCAN_THREADED | UHURU_SCAN_RECURSE);
+  /* scan = uhuru_scan_new(cl->uhuru, 0, path, UHURU_SCAN_THREADED | UHURU_SCAN_RECURSE); */
+  scan = uhuru_scan_new(cl->uhuru, 0, path, UHURU_SCAN_RECURSE);
 
   uhuru_scan_add_callback(scan, scan_callback, cl);
 

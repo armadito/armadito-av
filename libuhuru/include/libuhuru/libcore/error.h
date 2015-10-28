@@ -88,6 +88,7 @@ void uhuru_error_print(uhuru_error *err, FILE *out);
 #define UHURU_ERROR_MODULE_INIT_FAILED          (UHURU_ERROR_MODULE + 1)
 #define UHURU_ERROR_MODULE_POST_INIT_FAILED     (UHURU_ERROR_MODULE + 2)
 #define UHURU_ERROR_MODULE_CLOSE_FAILED         (UHURU_ERROR_MODULE + 3)
+#define UHURU_ERROR_MODULE_SYMBOL_NOT_FOUND     (UHURU_ERROR_MODULE + 4)
 
 /*
  * Error codes for scan

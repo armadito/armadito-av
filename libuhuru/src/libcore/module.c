@@ -24,8 +24,6 @@ struct module_manager {
  * module 
  */
 
-static void module_free(struct uhuru_module *mod);
-
 /*
   is module copy really needed?
   module management modifies the uhuru_module structure, namely the fields
@@ -36,7 +34,7 @@ static void module_free(struct uhuru_module *mod);
   should not happen
   so for now, we copy
  */
-static struct uhuru_module *module_new(struct uhuru_module *src, struct uhuru *uhuru, uhuru_error **error)
+static struct uhuru_module *module_new(struct uhuru_module *src, struct uhuru *uhuru)
 {
   struct uhuru_module *mod = g_new0(struct uhuru_module, 1);
 
@@ -52,56 +50,53 @@ static struct uhuru_module *module_new(struct uhuru_module *src, struct uhuru *u
   mod->data = NULL;
   mod->uhuru = uhuru;
 
-  /* module has no init_fun, nothing else to do */
-  if (mod->init_fun == NULL)
-    return mod;
-
   if (mod->size > 0)
     mod->data = g_malloc(mod->size);
 
-  /* call the init function */
-  mod->status = (*mod->init_fun)(mod);
-
-  /* everything's ok */
-  if (mod->status == UHURU_MOD_OK)
-    return mod;
-
-  /* module init failed, set error and return NULL */
-  g_log(NULL, G_LOG_LEVEL_WARNING, "initialization error for module '%s'\n", mod->name);
-
-  uhuru_error_set(error, UHURU_ERROR_MODULE_INIT_FAILED, "initialization error for module");
-
-  module_free(mod);
-
-  return NULL;
+  return mod;
 }
 
 static void module_free(struct uhuru_module *mod)
 {
   free((void *)mod->name);
 
+  if (mod->data != NULL)
+    free(mod->data);
+
   free(mod);
 }
 
-static struct uhuru_module *module_load(const char *filename)
+static module_load(const char *filename, struct uhuru_module **pmodule, uhuru_error **error)
 {
   struct uhuru_module *mod_loaded;
   GModule *g_mod;
 
   g_mod = g_module_open(filename, G_MODULE_BIND_LAZY);
 
-  if (!g_mod)
-    return NULL;
+  /* this is not considered as an error: the module load path may contain */
+  /* files that are not dynamic libraries, we simply ignore them */
+  if (!g_mod) {
+    *pmodule = NULL;
+    return 0;
+  }
 
+  /* the module must export a "module" symbol that is a struct uhuru_module */
+  /* if the symbol is not found, then module cannot be loaded */
   if (!g_module_symbol(g_mod, "module", (gpointer *)&mod_loaded)) {
+    uhuru_error_set(error, UHURU_ERROR_MODULE_SYMBOL_NOT_FOUND, "symbol 'module' not found in file");
+
     g_log(NULL, G_LOG_LEVEL_WARNING, "symbol %s not found in file %s", "module", filename);
 
-    return NULL;
+    *pmodule = NULL;
+
+    return UHURU_ERROR_MODULE_SYMBOL_NOT_FOUND;
   }
 
   g_log(NULL, G_LOG_LEVEL_DEBUG, "module %s loaded from file %s\n", mod_loaded->name, filename);
 
-  return mod_loaded;
+  *pmodule = mod_loaded;
+
+  return 0;
 }
 
 /*
@@ -117,26 +112,27 @@ struct module_manager *module_manager_new(struct uhuru *uhuru)
   return mm;
 }
 
-int module_manager_add(struct module_manager *mm, struct uhuru_module *module, uhuru_error **error)
+void module_manager_free(struct module_manager *mm)
 {
-  /* FIXME: dirty without error checking */
-  struct uhuru_module *clone = module_new(module, mm->uhuru, error);
+  g_array_free(mm->modules, TRUE);
+}
 
-  if (clone != NULL)
-    g_array_append_val(mm->modules, clone);
+void module_manager_add(struct module_manager *mm, struct uhuru_module *module)
+{
+  struct uhuru_module *clone = module_new(module, mm->uhuru);
 
-  return 0;
+  g_array_append_val(mm->modules, clone);
 }
 
 static void module_load_dirent_cb(const char *full_path, enum os_file_flag flags, int entry_errno, void *data)
 {
+  /* FIXME: must return an error */
   if (flags & FILE_FLAG_IS_PLAIN_FILE) {
     struct uhuru_module *mod_loaded;
+    uhuru_error *error = NULL;
 
-    mod_loaded = module_load(full_path);
-
-    if (mod_loaded != NULL)
-      module_manager_add((struct module_manager *)data, mod_loaded, NULL);
+    if (!module_load(full_path, &mod_loaded, &error) && mod_loaded != NULL)
+      module_manager_add((struct module_manager *)data, mod_loaded);
   }
 }
 
@@ -149,57 +145,108 @@ int module_manager_load_path(struct module_manager *mm, const char *path, uhuru_
   return 0;
 }
 
-int module_manager_post_init_all(struct module_manager *mm, uhuru_error **error)
+/* apply `module_fun` to all modules that have an OK status */
+/* breaks if a module returns an error and return it */
+static int module_manager_all(struct module_manager *mm, int (*module_fun)(struct uhuru_module *, uhuru_error **error), uhuru_error **error)
 {
   struct uhuru_module **modv;
 
-  /* iterate over all modules */
   for (modv = module_manager_get_modules(mm); *modv != NULL; modv++) {
     struct uhuru_module *mod = *modv;
-
-    /* module has no post_init_fun, do nothing */
-    if (mod->post_init_fun == NULL)
-      continue;
+    int ret;
 
     /* module is not ok, do nothing */
     if (mod->status != UHURU_MOD_OK)
       continue;
 
-    /* call the post_init function */
-    mod->status = (*mod->post_init_fun)(mod);
+    ret = (*module_fun)(mod, error);
 
-    /* if post_init failed, return an error */
-    if (mod->status != UHURU_MOD_OK) {
-      g_log(NULL, G_LOG_LEVEL_WARNING, "post_initialization error for module '%s'\n", mod->name);
-
-      uhuru_error_set(error, UHURU_ERROR_MODULE_POST_INIT_FAILED, "initialization error for module");
-
-      return UHURU_ERROR_MODULE_POST_INIT_FAILED;
-    }
+    if (ret)
+      return ret;
   }
 
   return 0;
+}
+
+static int module_init(struct uhuru_module *mod, uhuru_error **error)
+{
+  /* module has no init_fun, nothing else to do */
+  if (mod->init_fun == NULL)
+    return 0;
+
+  /* call the init function */
+  mod->status = (*mod->init_fun)(mod);
+
+  /* everything's ok */
+  if (mod->status != UHURU_MOD_OK) {
+    /* module init failed, set error and return NULL */
+    g_log(NULL, G_LOG_LEVEL_WARNING, "initialization error for module '%s'\n", mod->name);
+
+    uhuru_error_set(error, UHURU_ERROR_MODULE_INIT_FAILED, "initialization error for module");
+
+    return UHURU_ERROR_MODULE_INIT_FAILED;
+  }
+  
+  return 0;
+}
+
+int module_manager_init_all(struct module_manager *mm, uhuru_error **error)
+{
+  return module_manager_all(mm, module_init, error);
+}
+
+static int module_post_init(struct uhuru_module *mod, uhuru_error **error)
+{
+  if (mod->post_init_fun == NULL)
+    return 0;
+
+  mod->status = (*mod->post_init_fun)(mod);
+
+  if (mod->status != UHURU_MOD_OK) {
+    g_log(NULL, G_LOG_LEVEL_WARNING, "post_init error for module '%s'\n", mod->name);
+
+    uhuru_error_set(error, UHURU_ERROR_MODULE_POST_INIT_FAILED, "post_init error for module");
+
+    return UHURU_ERROR_MODULE_POST_INIT_FAILED;
+  }
+
+  return 0;
+}
+
+int module_manager_post_init_all(struct module_manager *mm, uhuru_error **error)
+{
+  return module_manager_all(mm, module_post_init, error);
+}
+
+static int module_close(struct uhuru_module *mod, uhuru_error **error)
+{
+  /* module has no close_fun, do nothing */
+  if (mod->close_fun == NULL)
+    return 0;
+
+  /* call the close function */
+  mod->status = (*mod->close_fun)(mod);
+
+  /* if close failed, return an error */
+  if (mod->status != UHURU_MOD_OK) {
+    g_log(NULL, G_LOG_LEVEL_WARNING, "close error for module '%s'\n", mod->name);
+
+    uhuru_error_set(error, UHURU_ERROR_MODULE_CLOSE_FAILED, "close error for module");
+
+    return UHURU_ERROR_MODULE_CLOSE_FAILED;
+  }
+
+  return 0;
+}
+
+int module_manager_close_all(struct module_manager *mm, uhuru_error **error)
+{
+  return module_manager_all(mm, module_close, error);
 }
 
 struct uhuru_module **module_manager_get_modules(struct module_manager *mm)
 {
   return (struct uhuru_module **)mm->modules->data;
-}
-
-int module_manager_close_all(struct module_manager *mm, uhuru_error **error)
-{
-  struct uhuru_module **modv;
-
-  /* FIXME: for now, dirty stuff, do nothing with error */
-
-  for (modv = module_manager_get_modules(mm); *modv != NULL; modv++) {
-    struct uhuru_module *mod = *modv;
-
-    if (mod->close_fun != NULL && mod->status == UHURU_MOD_OK)
-      mod->status = (*mod->close_fun)(mod);
-  }
-
-  return 0;
 }
 
 #ifdef DEBUG
