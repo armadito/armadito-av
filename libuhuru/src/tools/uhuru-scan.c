@@ -128,12 +128,14 @@ static void ipc_handler_scan_file(struct ipc_manager *m, void *data)
   char *x_status;
   gint32 i_action;
   enum uhuru_action action;
+  int progress;
 
   ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &path);
   ipc_manager_get_arg_at(m, 1, IPC_INT32_T, &i_status);
   ipc_manager_get_arg_at(m, 2, IPC_STRING_T, &mod_name);
   ipc_manager_get_arg_at(m, 3, IPC_STRING_T, &x_status);
   ipc_manager_get_arg_at(m, 4, IPC_INT32_T, &i_action);
+  ipc_manager_get_arg_at(m, 5, IPC_INT32_T, &progress);
 
   status = (enum uhuru_file_status)i_status;
   action = (enum uhuru_action)i_action;
@@ -169,7 +171,7 @@ static void ipc_handler_scan_file(struct ipc_manager *m, void *data)
     printf(" [%s - %s]", mod_name, x_status);
   if (action != UHURU_ACTION_NONE)
     printf(" (action %s)", action_pretty_str(action));
-  printf("\n");
+  printf("[%d]\n", progress);
 }
 
 static void ipc_handler_scan_end(struct ipc_manager *m, void *data)
