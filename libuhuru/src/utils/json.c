@@ -6,7 +6,7 @@
 #include "json.h"
 #include "windows-service/scan.h"
 
-
+/* Create json_obj example -- not used */
 json_object * create_json_obj(){
 
 	/*Creating a json object*/
@@ -229,14 +229,26 @@ const char* json_get_protocol_err_msg( const char* err_msg, int scan_id )
 	return json_object_to_json_string(jobj);
 }
 
+// uhuru_report* to JSON
 const char* json_get_report_msg(uhuru_report* report){
+
+	const char* report_status;
+	const char* report_action;
+
+	// In order to send "null" string in JSON.
+	if (report->mod_name == NULL){report->mod_name = "null";}
+	if (report->mod_report == NULL){report->mod_report = "null";}
+	if (report->path == NULL){report->path = "null";}
+
+	report_status = uhuru_file_status_pretty_str(report->status);
+	report_action = uhuru_action_pretty_str(report->action);
 
 	json_object * jobj = json_object_new_object();
 	json_object *jint = json_object_new_int(report->scan_id);
-	json_object *jstring1 = json_object_new_string(uhuru_file_status_pretty_str(report->status));
+	json_object *jstring1 = json_object_new_string(report_status);
 	json_object *jstring2 = json_object_new_string(report->path);
 	json_object *jstring3 = json_object_new_string("10");
-	json_object *jstring4 = json_object_new_string(uhuru_action_pretty_str(report->action));
+	json_object *jstring4 = json_object_new_string(report_action);
 	json_object *jstring5 = json_object_new_string(report->mod_name);
 	json_object *jstring6 = json_object_new_string(report->mod_report);
 
@@ -248,6 +260,11 @@ const char* json_get_report_msg(uhuru_report* report){
 	json_object_object_add(jobj, "scan_action", jstring4);
 	json_object_object_add(jobj, "mod_name", jstring5);
 	json_object_object_add(jobj, "mod_report", jstring6);
+
+	// NULL in order that free is not called
+	if (report->mod_name == "null"){ report->mod_name = NULL; }
+	if (report->mod_report == "null"){ report->mod_report = NULL; }
+	if (report->path == "null"){ report->path = NULL; }
 
 	return json_object_to_json_string(jobj);
 }
