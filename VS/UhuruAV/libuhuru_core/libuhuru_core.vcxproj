@@ -94,6 +94,7 @@
     <ClCompile Include="..\..\..\libuhuru\src\libcore\builtin-modules\mimetypemod.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\conf.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\confparser.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\error.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\info.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\module.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\report.c" />
