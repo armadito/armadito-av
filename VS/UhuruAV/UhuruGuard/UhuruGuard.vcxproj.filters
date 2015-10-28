@@ -30,6 +30,9 @@
     <ClCompile Include="callbacks.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="communication.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="UhuruGuard.rc">
@@ -38,6 +41,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="callbacks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Struct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="communication.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
