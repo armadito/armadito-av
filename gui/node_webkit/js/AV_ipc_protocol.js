@@ -41,6 +41,7 @@ function process_scan_report( scan_report )
 	
 	if( scan_report.scan_progress ){
 		console.log (" scan_progress = " +  scan_report.scan_progress);
+		scan_progress_on_change(scan_report.scan_progress);
 	}
 	
 	// Step 4
