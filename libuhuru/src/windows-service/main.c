@@ -7,18 +7,19 @@
 
 int main(int argc, const char **argv)
 {
-	int named_pipe = 0;
-
 	// load modules db etc.
-	uhuru * uhuru = uhuru_open();
-
+	uhuru_error *err = NULL;
+	uhuru * uhuru = uhuru_open(&err);
 	if (uhuru == NULL){
-
+		printf("uhuru_open() error - %s \n", err->error_message );
 		return -1;
 	}
 
 	// Notes : If you intend to use a named pipe locally only, deny access to NT AUTHORITY\NETWORK or switch to local RPC.
-	named_pipe = start_named_pipe_server(uhuru);
+	if (start_named_pipe_server(uhuru) < 0){
+		printf("named_pipe_server - error \n");
+		return -1;
+	}
 
 	return 0;
 }
