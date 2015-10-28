@@ -38,6 +38,9 @@ struct callback_entry {
 struct uhuru_scan {
   struct uhuru *uhuru;                /* pointer to uhuru handle */
   int scan_id;                        /* scan id for GUI */
+  int to_scan_count;                  /* files to scan counter, to compute progress */
+  int scanned_count;                  /* already scanned counter, to compute progress */
+  GThread *to_scan_count_thread;      /* thread used to count the files to compute progress */
   const char *path;                   /* root path of the scan */
   enum uhuru_scan_flags flags;        /* scan flags (recursive, threaded, etc) */
   GThreadPool *thread_pool;           /* the thread pool if multi-threaded */
@@ -73,6 +76,9 @@ struct uhuru_scan *uhuru_scan_new(struct uhuru *uhuru, int scan_id, const char *
 
   scan->uhuru = uhuru;
   scan->scan_id = scan_id;
+  scan->to_scan_count = 0;
+  scan->scanned_count = 0;
+  scan->to_scan_count_thread = NULL;
 
 #ifdef HAVE_REALPATH
   scan->path = (const char *)realpath(path, NULL);
@@ -160,6 +166,21 @@ static enum uhuru_file_status scan_apply_modules(const char *path, const char *m
   return current_status;
 }
 
+static int compute_progress(struct uhuru_scan *scan)
+{
+  int progress;
+
+  if (scan->to_scan_count == 0)
+    return REPORT_PROGRESS_UNKNOWN;
+
+  progress = (int)((100.0 * scan->scanned_count) / scan->to_scan_count);
+
+  if (progress > 100)
+    progress = 100;
+
+  return progress;
+}
+
 /* scan a file: */
 /* - find its mime type */
 /* - get the modules that apply to this mime type */
@@ -175,7 +196,7 @@ static enum uhuru_file_status scan_file(struct uhuru_scan *scan, const char *pat
   g_log(NULL, G_LOG_LEVEL_DEBUG, "scan_file - %s", path);
 
   /* initializes the structure passed to callbacks */
-  uhuru_report_init(&report, scan->scan_id, path, REPORT_PROGRESS_UNKNOW);
+  uhuru_report_init(&report, scan->scan_id, path, REPORT_PROGRESS_UNKNOWN);
 
   /* find the mime type using OS specific function (magic_* on linux, FindMimeFromData on windows */
   mime_type = os_mime_type_guess(path);
@@ -189,6 +210,12 @@ static enum uhuru_file_status scan_file(struct uhuru_scan *scan, const char *pat
   } else
     /* otherwise we scan it by applying the modules */
     status = scan_apply_modules(path, mime_type, modules, &report);
+
+  /* update the progress */
+  /* may be not thread safe, but who cares about precise values? */
+  scan->scanned_count++;
+
+  report.progress = compute_progress(scan);
 
   /* once done, call the callbacks */
   uhuru_scan_call_callbacks(scan, &report);
@@ -216,7 +243,7 @@ static void process_error(struct uhuru_scan *scan, const char *full_path, int en
 {
   struct uhuru_report report;
 
-  uhuru_report_init(&report, scan->scan_id, full_path, REPORT_PROGRESS_UNKNOW);
+  uhuru_report_init(&report, scan->scan_id, full_path, REPORT_PROGRESS_UNKNOWN);
 
   g_log(NULL, G_LOG_LEVEL_WARNING, "local_scan_entry: Error - %s", full_path);
 
@@ -255,8 +282,38 @@ static int get_max_threads(void)
   return 8;
 }
 
+static void count_entry(const char *full_path, enum os_file_flag flags, int entry_errno, void *data)
+{
+  int *pcount = (int *)data;
+
+  if (!(flags & FILE_FLAG_IS_PLAIN_FILE))
+    return;
+
+  (*pcount)++;
+}
+
+static gpointer to_scan_count_thread_fun(gpointer data)
+{
+  struct uhuru_scan *scan = (struct uhuru_scan *)data;
+  int recurse = scan->flags & UHURU_SCAN_RECURSE;
+  int count = 0;
+
+  os_dir_map(scan->path, recurse, count_entry, &count);
+
+  /* set the counter inside the uhuru_scan struct only at the end, so */
+  /* that the scan function does not see the intermediate values, only the last one */
+  scan->to_scan_count = count;
+
+  return NULL;
+}
+
+static void to_scan_count(struct uhuru_scan *scan)
+{
+  scan->to_scan_count_thread = g_thread_new("to_scan_count_thread", to_scan_count_thread_fun, scan);
+}
+
 /* this function is called at the end of a scan, to send the 100% progress */
-static void final_countdown(struct uhuru_scan *scan)
+static void final_progress(struct uhuru_scan *scan)
 {
   struct uhuru_report report;
 
@@ -268,9 +325,10 @@ static void final_countdown(struct uhuru_scan *scan)
 }
 
 /* NOTE: this function has several shortcomings: */
-/* it should return also a file status for directories (but how to compute it?) */
-/* it should be made simpler by separating the file case and the directory case */
-/* run a scan by walking through the directory (if scan root_path is a directory) */
+/* - it should return also a file status for directories (but how to compute it?) */
+/* - it should be made simpler by separating the file case and the directory case */
+/* - it should use a thread pool also for traversing directories */
+/* run a scan by traversing the directory (if scan root_path is a directory) */
 /* or scanning the file (if not) */
 /* blocks until scan is finished, even if scan is multi-threaded */
 void uhuru_scan_run(struct uhuru_scan *scan)
@@ -288,12 +346,16 @@ void uhuru_scan_run(struct uhuru_scan *scan)
   /* it is a file, scan it, in a thread if scan is threaded */
   /* otherwise, walk through the directory and apply 'scan_entry' function to each entry (either file or directory) */
   if (stat_buf.flags & FILE_FLAG_IS_PLAIN_FILE) {
+    scan->to_scan_count = 1;
+
     if (scan->flags & UHURU_SCAN_THREADED)
       g_thread_pool_push(scan->thread_pool, (gpointer)os_strdup(scan->path), NULL);
     else
       scan_file(scan, scan->path);
   } else if (stat_buf.flags & FILE_FLAG_IS_DIRECTORY) {
     int recurse = scan->flags & UHURU_SCAN_RECURSE;
+
+    to_scan_count(scan);
 
     os_dir_map(scan->path, recurse, scan_entry, scan);
   }
@@ -303,8 +365,11 @@ void uhuru_scan_run(struct uhuru_scan *scan)
   if (scan->flags & UHURU_SCAN_THREADED)
     g_thread_pool_free(scan->thread_pool, FALSE, TRUE);
 
-  /* send the final countdown */
-  final_countdown(scan);
+  /* send the final progress (100%) */
+  final_progress(scan);
+
+  if (scan->to_scan_count_thread != NULL)
+    g_thread_join(scan->to_scan_count_thread);
 }
 
 /* just free the structure */
