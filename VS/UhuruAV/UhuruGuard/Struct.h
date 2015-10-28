@@ -11,7 +11,7 @@ typedef enum _SCAN_RESULT
 	TIMEOUT,		// scan not finished due to timeout.
 	ERROR
 
-}SCAN_RESULT;
+}SCAN_RESULT, *PSCAN_RESULT;
 
 
 
