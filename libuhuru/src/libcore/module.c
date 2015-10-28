@@ -83,25 +83,37 @@ static void module_free(struct uhuru_module *mod)
   free(mod);
 }
 
-static struct uhuru_module *module_load(const char *filename)
+static module_load(const char *filename, struct uhuru_module **pmodule, uhuru_error **error)
 {
   struct uhuru_module *mod_loaded;
   GModule *g_mod;
 
   g_mod = g_module_open(filename, G_MODULE_BIND_LAZY);
 
-  if (!g_mod)
-    return NULL;
+  /* this is not considered as an error: the module load path may contain */
+  /* files that are not dynamic libraries, we simply ignore them */
+  if (!g_mod) {
+    *pmodule = NULL;
+    return 0;
+  }
 
+  /* the module must export a "module" symbol that is a struct uhuru_module */
+  /* if the symbol is not found, then module cannot be loaded */
   if (!g_module_symbol(g_mod, "module", (gpointer *)&mod_loaded)) {
+    uhuru_error_set(error, UHURU_ERROR_MODULE_SYMBOL_NOT_FOUND, "symbol 'module' not found in file");
+
     g_log(NULL, G_LOG_LEVEL_WARNING, "symbol %s not found in file %s", "module", filename);
 
-    return NULL;
+    *pmodule = NULL;
+
+    return UHURU_ERROR_MODULE_SYMBOL_NOT_FOUND;
   }
 
   g_log(NULL, G_LOG_LEVEL_DEBUG, "module %s loaded from file %s\n", mod_loaded->name, filename);
 
-  return mod_loaded;
+  *pmodule = mod_loaded;
+
+  return 0;
 }
 
 /*
@@ -130,12 +142,12 @@ int module_manager_add(struct module_manager *mm, struct uhuru_module *module, u
 
 static void module_load_dirent_cb(const char *full_path, enum os_file_flag flags, int entry_errno, void *data)
 {
+  /* FIXME: must return an error */
   if (flags & FILE_FLAG_IS_PLAIN_FILE) {
     struct uhuru_module *mod_loaded;
+    uhuru_error *error = NULL;
 
-    mod_loaded = module_load(full_path);
-
-    if (mod_loaded != NULL)
+    if (!module_load(full_path, &mod_loaded, &error) && mod_loaded != NULL)
       module_manager_add((struct module_manager *)data, mod_loaded, NULL);
   }
 }
@@ -153,7 +165,6 @@ int module_manager_post_init_all(struct module_manager *mm, uhuru_error **error)
 {
   struct uhuru_module **modv;
 
-  /* iterate over all modules */
   for (modv = module_manager_get_modules(mm); *modv != NULL; modv++) {
     struct uhuru_module *mod = *modv;
 
@@ -165,10 +176,9 @@ int module_manager_post_init_all(struct module_manager *mm, uhuru_error **error)
     if (mod->status != UHURU_MOD_OK)
       continue;
 
-    /* call the post_init function */
+    /* call the post_init function and return error if failed */
     mod->status = (*mod->post_init_fun)(mod);
 
-    /* if post_init failed, return an error */
     if (mod->status != UHURU_MOD_OK) {
       g_log(NULL, G_LOG_LEVEL_WARNING, "post_init error for module '%s'\n", mod->name);
 
