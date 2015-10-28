@@ -53,12 +53,13 @@ struct uhuru *uhuru_open(uhuru_error **error)
 
   u = uhuru_new();
 
-  module_manager_add(u->module_manager, &mimetype_module, NULL);
+  module_manager_add(u->module_manager, &mimetype_module);
+
 #ifdef HAVE_ALERT_MODULE
-  module_manager_add(u->module_manager, &alert_module, NULL);
+  module_manager_add(u->module_manager, &alert_module);
 #endif
 #ifdef HAVE_QUARANTINE_MODULE
-  module_manager_add(u->module_manager, &quarantine_module, NULL);
+  module_manager_add(u->module_manager, &quarantine_module);
 #endif
 
   if (module_manager_load_path(u->module_manager, LIBUHURU_MODULES_PATH, error))
@@ -67,6 +68,7 @@ struct uhuru *uhuru_open(uhuru_error **error)
   if (module_manager_init_all(u->module_manager, error))
     goto error;
 
+  /* FIXME: error checking */
   conf_load_file(u, LIBUHURU_CONF_DIR "/uhuru.conf");
   conf_load_path(u, LIBUHURU_CONF_DIR "/conf.d");
 

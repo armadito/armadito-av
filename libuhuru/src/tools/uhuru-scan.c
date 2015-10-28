@@ -1,8 +1,8 @@
 #include <libuhuru/ipc.h>
 
 #include "utils/getopt.h"
-#if 0
-#include "tcpsock.h"
+#ifdef linux
+#include "linux-daemon/tcpsock.h"
 #endif
 
 #include <assert.h>
@@ -233,11 +233,20 @@ static void do_scan(struct scan_options *opts, int client_sock)
 int main(int argc, const char **argv)
 {
   struct scan_options *opts = (struct scan_options *)malloc(sizeof(struct scan_options));
-  int named_pipe = 0;
+  int client_sock;
 
   parse_options(argc, argv, opts);
 
-  // do_scan(opts, client_sock);
+#ifdef linux
+  client_sock = tcp_client_connect("127.0.0.1", opts->port_number, 10);
+
+  if (client_sock < 0) {
+    fprintf(stderr, "cannot open client socket (errno %d)\n", errno);
+    return 1;
+  }
+
+  do_scan(opts, client_sock);
+#endif
 
   return 0;
 }
