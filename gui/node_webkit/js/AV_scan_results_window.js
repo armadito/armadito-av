@@ -42,8 +42,6 @@ update_scan_progress_bar(); //Initialisation de la progress bar
 // TODO : Call this function when receive a message from AV scan in progress
 function scan_progress_on_change (val) {
   var progress = document.getElementById("scan_progress");
-  if((progress.value+val)<=progress.max && (progress.value+val)>=0) {
-     progress.value += val;
-  }
+  progress.value = val;
   update_scan_progress_bar();
 }
