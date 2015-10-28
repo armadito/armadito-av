@@ -245,15 +245,15 @@ const char* json_get_report_msg(uhuru_report* report){
 
 	json_object * jobj = json_object_new_object();
 	json_object *jint = json_object_new_int(report->scan_id);
+	json_object *jint2 = json_object_new_int(report->progress);
 	json_object *jstring1 = json_object_new_string(report_status);
 	json_object *jstring2 = json_object_new_string(report->path);
-	json_object *jstring3 = json_object_new_string("10");
 	json_object *jstring4 = json_object_new_string(report_action);
 	json_object *jstring5 = json_object_new_string(report->mod_name);
 	json_object *jstring6 = json_object_new_string(report->mod_report);
 
 	// add order is kept
-	json_object_object_add(jobj, "scan_progress", jstring3);
+	json_object_object_add(jobj, "scan_progress", jint2);
 	json_object_object_add(jobj, "scan_id", jint);
 	json_object_object_add(jobj, "scan_file_path", jstring2);
 	json_object_object_add(jobj, "scan_status", jstring1);
