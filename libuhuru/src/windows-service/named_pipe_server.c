@@ -1,6 +1,8 @@
 #include "named_pipe_server.h"
 #include "named_pipe_client.h"
-
+#include <libuhuru-config.h>
+#include <libuhuru/core.h>
+#include <libuhuru/ipc.h>
 #include <windows.h> 
 #include <stdio.h> 
 #include <tchar.h>
@@ -11,7 +13,8 @@
 
 #define BUFSIZE 512
 
-int start_named_pipe_server()
+
+int start_named_pipe_server(uhuru* uhuru)
 {
 	BOOL   fConnected = FALSE;
 	DWORD  dwThreadId = 0;
@@ -55,22 +58,28 @@ int start_named_pipe_server()
 		if (fConnected)
 		{
 			printf("Client connected, creating a processing thread.\n");
+			thread_parameters * params = (thread_parameters*)malloc(sizeof(thread_parameters));
+			params->hPipe = hPipe;
+			params->uhuru = uhuru;
 
 			// Create a thread for this client. 
 			hThread = CreateThread(
 				NULL,              // no security attribute 
 				0,                 // default stack size 
 				InstanceThread,    // thread proc
-				(LPVOID)hPipe,    // thread parameter 
+				params,			   // thread parameter 
 				0,                 // not suspended 
 				&dwThreadId);      // returns thread ID 
 
 			if (hThread == NULL)
 			{
+				free(params);
 				_tprintf(TEXT("CreateThread failed, GLE=%d.\n"), GetLastError());
 				return -1;
 			}
-			else CloseHandle(hThread);
+			else{
+				CloseHandle(hThread);
+			}
 		}
 		else
 			// The client could not connect, so close the pipe. 
@@ -93,21 +102,23 @@ DWORD WINAPI InstanceThread(LPVOID lpvParam)
 
 	DWORD cbBytesRead = 0, cbReplyBytes = 0, cbWritten = 0;
 	BOOL fSuccess = FALSE;
-	HANDLE hPipe = NULL;
+	//HANDLE* hPipe = NULL;
 
 	struct new_scan* scan; 
 
 	// Do some extra error checking since the app will keep running even if this
 	// thread fails.
 
-	if (lpvParam == NULL)
+	thread_parameters * params = (thread_parameters*)lpvParam;
+
+	if (params->hPipe == NULL)
 	{
 		printf("\nERROR - Pipe Server Failure:\n");
 		printf("   InstanceThread got an unexpected NULL value in lpvParam.\n");
 		printf("   InstanceThread exitting.\n");
 		if (pchReply != NULL) HeapFree(hHeap, 0, pchReply);
 		if (pchRequest != NULL) HeapFree(hHeap, 0, pchRequest);
-
+		if (params != NULL) free(params);
 		return (DWORD)-1;
 	}
 
@@ -117,6 +128,7 @@ DWORD WINAPI InstanceThread(LPVOID lpvParam)
 		printf("   InstanceThread got an unexpected NULL heap allocation.\n");
 		printf("   InstanceThread exitting.\n");
 		if (pchReply != NULL) HeapFree(hHeap, 0, pchReply);
+		if (params != NULL) free(params);
 		return (DWORD)-1;
 	}
 
@@ -126,23 +138,22 @@ DWORD WINAPI InstanceThread(LPVOID lpvParam)
 		printf("   InstanceThread got an unexpected NULL heap allocation.\n");
 		printf("   InstanceThread exitting.\n");
 		if (pchRequest != NULL) HeapFree(hHeap, 0, pchRequest);
+		if (params != NULL) free(params);
 		return (DWORD)-1;
 	}
 
 	// Print verbose messages. In production code, this should be for debugging only.
 	printf("InstanceThread created, receiving and processing messages.\n");
 
-	// The thread's parameter is a handle to a pipe object instance. 
-
-	hPipe = (HANDLE)lpvParam;
 
 	// Loop until done reading
 	while (1)
 	{
+
 		// Read client requests from the pipe. This simplistic code only allows messages
 		// up to BUFSIZE characters in length.
 		fSuccess = ReadFile(
-			hPipe,        // handle to pipe 
+			params->hPipe,        // handle to pipe 
 			pchRequest,    // buffer to receive data 
 			BUFSIZE*sizeof(TCHAR), // size of buffer 
 			&cbBytesRead, // number of bytes read 
@@ -150,6 +161,7 @@ DWORD WINAPI InstanceThread(LPVOID lpvParam)
 
 		if (!fSuccess || cbBytesRead == 0)
 		{
+
 			if (GetLastError() == ERROR_BROKEN_PIPE)
 			{
 				_tprintf(TEXT("InstanceThread: client disconnected.\n"), GetLastError());
@@ -168,7 +180,7 @@ DWORD WINAPI InstanceThread(LPVOID lpvParam)
 
 		// Write the reply to the pipe. 
 		fSuccess = WriteFile(
-			hPipe,        // handle to pipe 
+			params->hPipe,        // handle to pipe 
 			pchReply,     // buffer to write from 
 			cbReplyBytes, // number of bytes to write 
 			&cbWritten,   // number of bytes written 
@@ -182,7 +194,7 @@ DWORD WINAPI InstanceThread(LPVOID lpvParam)
 		}
 
 		// Step 4 -- Start Scan here if message already sent
-		start_new_scan(scan);
+		start_new_scan(scan, params->uhuru);
 		free(scan);
 	}
 
@@ -190,12 +202,13 @@ DWORD WINAPI InstanceThread(LPVOID lpvParam)
 	// before disconnecting. Then disconnect the pipe, and close the 
 	// handle to this pipe instance. 
 
-	FlushFileBuffers(hPipe);
-	DisconnectNamedPipe(hPipe);
-	CloseHandle(hPipe);
+	FlushFileBuffers(params->hPipe);
+	DisconnectNamedPipe(params->hPipe);
+	CloseHandle(params->hPipe);
 
 	HeapFree(hHeap, 0, pchRequest);
 	HeapFree(hHeap, 0, pchReply);
+	if (params != NULL) free(params);
 
 	printf("InstanceThread exitting.\n");
 	return 1;

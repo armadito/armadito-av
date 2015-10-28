@@ -3,6 +3,7 @@
 
 #include <libuhuru/common/action.h>
 #include <libuhuru/common/status.h>
+#include <libuhuru/libcore/error.h>
 #include <libuhuru/libcore/handle.h>
 #include <libuhuru/libcore/info.h>
 #include <libuhuru/libcore/module.h>

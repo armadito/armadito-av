@@ -1,3 +1,24 @@
+/**
+ * \file scan.h
+ *
+ * \brief definition of the scan API
+ *
+ * The scan API allows to scan files or directories, possibly using a pool of thread.
+ * 
+ * A scan assigns a uhuru_file_status to a file or to each file located under a directory, by calling the scan function of the Uhuru modules.
+ * During the scan, callbacks are used 
+ *
+ * Basic operations are:
+ * - create a scan using uhuru_scan_new()
+ * - add callbacks to the created scan using uhuru_scan_add_callback(); callbacks are functions that will be called after
+ * a file has been scanned by all the scan modules
+ * - launch the scan and wait for its completion using uhuru_scan_run(); during the execution of this function, callbacks may be called
+ * - free the scan using uhuru_scan_free()
+ *
+ * A helper function is provided for on-access scan; this function does not create threads and does not allow to register callbacks.
+ *
+ */
+
 #ifndef _LIBUHURU_LIBCORE_SCAN_H_
 #define _LIBUHURU_LIBCORE_SCAN_H_
 
@@ -101,6 +122,7 @@ void uhuru_scan_add_callback(struct uhuru_scan *scan, uhuru_scan_callback_t call
  * This function can start threads if UHURU_SCAN_THREADED was defined in scan's flags
  * This function will recurse into sub-directories if UHURU_SCAN_RECURSE was defined in scan's flags
  * Execution of this function can be lengthy, if scanning large directories.
+ * BEWARE: calling this function will *block* caller, even if scan is multi-threaded
  *
  * \param[in] scan            pointer to the scan opaque structure
  *
