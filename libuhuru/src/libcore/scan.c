@@ -175,7 +175,7 @@ static enum uhuru_file_status scan_file(struct uhuru_scan *scan, const char *pat
   g_log(NULL, G_LOG_LEVEL_DEBUG, "scan_file - %s", path);
 
   /* initializes the structure passed to callbacks */
-  uhuru_report_init(&report, scan->scan_id, path);
+  uhuru_report_init(&report, scan->scan_id, path, REPORT_PROGRESS_UNKNOW);
 
   /* find the mime type using OS specific function (magic_* on linux, FindMimeFromData on windows */
   mime_type = os_mime_type_guess(path);
@@ -216,7 +216,7 @@ static void process_error(struct uhuru_scan *scan, const char *full_path, int en
 {
   struct uhuru_report report;
 
-  uhuru_report_init(&report, scan->scan_id, full_path);
+  uhuru_report_init(&report, scan->scan_id, full_path, REPORT_PROGRESS_UNKNOW);
 
   g_log(NULL, G_LOG_LEVEL_WARNING, "local_scan_entry: Error - %s", full_path);
 
@@ -255,6 +255,18 @@ static int get_max_threads(void)
   return 8;
 }
 
+/* this function is called at the end of a scan, to send the 100% progress */
+static void final_countdown(struct uhuru_scan *scan)
+{
+  struct uhuru_report report;
+
+  uhuru_report_init(&report, scan->scan_id, NULL, 100);
+
+  uhuru_scan_call_callbacks(scan, &report);
+
+  uhuru_report_destroy(&report);
+}
+
 /* NOTE: this function has several shortcomings: */
 /* it should return also a file status for directories (but how to compute it?) */
 /* it should be made simpler by separating the file case and the directory case */
@@ -290,6 +302,9 @@ void uhuru_scan_run(struct uhuru_scan *scan)
   /* this has a side effect to wait for completion of *all* the scans queue'd in the thread pool */
   if (scan->flags & UHURU_SCAN_THREADED)
     g_thread_pool_free(scan->thread_pool, FALSE, TRUE);
+
+  /* send the final countdown */
+  final_countdown(scan);
 }
 
 /* just free the structure */
