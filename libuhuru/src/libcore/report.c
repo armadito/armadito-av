@@ -9,12 +9,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-void uhuru_report_init(struct uhuru_report *report, int scan_id, const char *path)
+void uhuru_report_init(struct uhuru_report *report, int scan_id, const char *path, int progress)
 {
-  assert(path != NULL);
-
   report->scan_id = scan_id;
-  report->path = os_strdup(path);
+  if (path != NULL)
+    report->path = os_strdup(path);
+  else
+    report->path = NULL;
+  report->progress = progress;
   report->status = UHURU_UNDECIDED;
   report->action = UHURU_ACTION_NONE;
   report->mod_name = NULL;
@@ -23,7 +25,8 @@ void uhuru_report_init(struct uhuru_report *report, int scan_id, const char *pat
 
 void uhuru_report_destroy(struct uhuru_report *report)
 {
-  free(report->path);
+  if (report->path != NULL)
+    free(report->path);
   if (report->mod_report != NULL)
     free(report->mod_report);
 }
