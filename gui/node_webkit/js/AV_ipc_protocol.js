@@ -47,10 +47,10 @@ function process_scan_report( scan_report )
 	if( scan_report.scan_file_path && scan_report.scan_file_path != "null" ){
 	
 		console.log(" scanned file : " + scan_report.scan_file_path);
+		update_scan_file_path(scan_report.scan_file_path);
 	}
 
 	
-	// Step 4
 	return 0;
 }
 
