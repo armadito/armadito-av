@@ -104,7 +104,7 @@ int send_message_to_IHM(HANDLE * hPipe, char * message, char** server_response)
 
 	// TODO: Checker le message avant envoi
 	lpvMessage = message;
-	cbToWrite = (lstrlen(lpvMessage) + 1)*sizeof(TCHAR);
+	cbToWrite = (lstrlen(lpvMessage))*sizeof(TCHAR);
 	_tprintf(TEXT("Sending %d byte message: \"%s\"\n"), cbToWrite, lpvMessage);
 
 	fSuccess = WriteFile(
@@ -136,9 +136,10 @@ int send_message_to_IHM(HANDLE * hPipe, char * message, char** server_response)
 		if (!fSuccess && GetLastError() != ERROR_MORE_DATA)
 			break;
 
-		printf(" Server response : %s \n", chBuf);
 		printf(" %d bytes read \n", cbRead);
+		chBuf[cbRead] = '\0';
 
+		printf(" Server response : %s \n", chBuf);
 		*server_response = chBuf;
 
 		printf(" After assign response \n");
