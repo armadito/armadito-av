@@ -13,9 +13,9 @@
 #include <string.h>
 #include <stddef.h>
 
-#define UNIX_PATH_MAX	108  /* sic... from taken from /usr/include/linux/un.h */
+#define UNIX_PATH_MAX	108  /* sic... taken from /usr/include/linux/un.h */
 
-int server_socket_create(const char *socket_path)
+int unix_server_listen(const char *socket_path)
 {
   int fd, r;
   struct sockaddr_un listening_addr;
@@ -57,6 +57,7 @@ int server_socket_create(const char *socket_path)
   return fd;
 }
 
+#if 0
 int server_socket_accept(int server_sock)
 {
   struct sockaddr_un client_addr;
@@ -72,4 +73,4 @@ int server_socket_accept(int server_sock)
 
   return client_sock;
 }
-
+#endif
