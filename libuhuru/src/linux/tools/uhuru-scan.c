@@ -2,8 +2,8 @@
 
 #include "utils/getopt.h"
 #ifdef linux
-#include <linux-daemon/ipc.h>
-#include "linux-daemon/tcpsock.h"
+#include <daemon/ipc.h>
+#include "daemon/tcpsock.h"
 #endif
 
 #include <assert.h>
