@@ -1,5 +1,3 @@
-#include "libuhuru-config.h"
-
 #include "unixsock.h"
 
 #ifdef HAVE_UNISTD_H
@@ -20,10 +18,10 @@ int unix_server_listen(const char *socket_path)
   int fd, r;
   struct sockaddr_un listening_addr;
   socklen_t addrlen;
-  size_t pathlen;
+  size_t path_len;
 
-  pathlen = strlen(socket_path);
-  assert(pathlen < UNIX_PATH_MAX);
+  path_len = strlen(socket_path);
+  assert(path_len < UNIX_PATH_MAX);
 
   fd = socket(AF_UNIX, SOCK_STREAM, 0);
   if (fd < 0) {
@@ -32,15 +30,13 @@ int unix_server_listen(const char *socket_path)
   }
 
   memset(&listening_addr, 0, sizeof(listening_addr));
-
   listening_addr.sun_family = AF_UNIX;
-
-  strncpy(listening_addr.sun_path, socket_path, strlen(socket_path));
-
-  addrlen = offsetof(struct sockaddr_un, sun_path) + pathlen + 1;
+  strncpy(listening_addr.sun_path, socket_path, path_len);
 
   if (socket_path[0] == '@')
     listening_addr.sun_path[0] = '\0';
+
+  addrlen = offsetof(struct sockaddr_un, sun_path) + path_len + 1;
 
   r = bind(fd, (struct sockaddr *)&listening_addr, addrlen);
   if (r < 0) {
@@ -57,20 +53,44 @@ int unix_server_listen(const char *socket_path)
   return fd;
 }
 
-#if 0
-int server_socket_accept(int server_sock)
+int unix_client_connect(const char *socket_path, int max_retry)
 {
-  struct sockaddr_un client_addr;
-  int client_addr_len = sizeof(client_addr);
-  int client_sock;
+  int fd, r, retry_count = 0;
+  struct sockaddr_un connect_addr;
+  socklen_t addrlen;
+  size_t path_len;
 
-  client_sock = accept(server_sock, (struct sockaddr *)&client_addr, &client_addr_len);
-  
-  if (client_sock < 0) {
-    perror("accept() failed");
+  path_len = strlen(socket_path);
+  assert(path_len < UNIX_PATH_MAX);
+
+  fd = socket( AF_UNIX, SOCK_STREAM, 0);
+  if (fd < 0) {
+    perror("socket() failed");
     return -1;
   }
 
-  return client_sock;
+  if (max_retry <= 0)
+    max_retry = 1;
+
+  memset(&connect_addr, 0, sizeof(connect_addr));
+  connect_addr.sun_family = AF_UNIX;
+  strncpy(connect_addr.sun_path, socket_path, path_len);
+
+  if (socket_path[0] == '@')
+    connect_addr.sun_path[0] = '\0';
+
+  addrlen = offsetof(struct sockaddr_un, sun_path) + path_len + 1;
+
+  do {
+    r = connect(fd, (struct sockaddr *)&connect_addr, addrlen);
+    retry_count++;
+  } while (r < 0 && retry_count <= max_retry);
+
+  if (r < 0) {
+    perror("connect() failed");
+    return -1;
+  }
+
+  return fd;
 }
-#endif
+
