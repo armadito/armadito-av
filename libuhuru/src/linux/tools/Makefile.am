@@ -11,7 +11,9 @@ uhuru-scan.c \
 ../daemon/ipc.c \
 ../daemon/ipc.h \
 ../daemon/tcpsock.c \
-../daemon/tcpsock.h
+../daemon/tcpsock.h \
+../daemon/unixsock.c \
+../daemon/unixsock.h
 
 #uhuru_info_CFLAGS=-I$(top_srcdir)/include -I$(top_srcdir)/src @GLIB2_CFLAGS@ @LIBXML2_CFLAGS@
 #uhuru_info_LDADD=$(top_builddir)/src/lib/libuhuru.la @GLIB2_LIBS@ @LIBXML2_LIBS@
