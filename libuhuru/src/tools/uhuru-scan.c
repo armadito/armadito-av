@@ -1,7 +1,8 @@
-#include <libuhuru/ipc.h>
+#include <libuhuru/core.h>
 
 #include "utils/getopt.h"
 #ifdef linux
+#include <linux-daemon/ipc.h>
 #include "linux-daemon/tcpsock.h"
 #endif
 
