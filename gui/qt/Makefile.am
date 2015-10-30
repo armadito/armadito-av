@@ -27,6 +27,8 @@ uhuru_qt_SOURCES= \
 	utils/stdpaths.h \
 	utils/dbus.cpp \
 	utils/dbus.h \
+	utils/ipc.c \
+	utils/ipc.h \
 	utils/uhuru.cpp \
 	utils/uhuru.h
 
