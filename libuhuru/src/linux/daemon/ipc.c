@@ -1,8 +1,4 @@
-#include "libuhuru-config.h"
-
 #include "ipc.h"
-#include "os/io.h"
-#include "os/string.h"
 
 #include <assert.h>
 #include <glib.h>
@@ -144,7 +140,7 @@ static void ipc_manager_add_str_arg(struct ipc_manager *m)
   struct ipc_value v;
 
   v.type = IPC_STRING_T;
-  v.value.v_str = os_strdup(m->str_arg->str);
+  v.value.v_str = strdup(m->str_arg->str);
 
   g_array_append_val(m->argv, v);
 }
@@ -264,10 +260,10 @@ int ipc_manager_receive(struct ipc_manager *manager)
 {
   int n_read, i;
 
-  n_read = os_read(manager->io_fd, manager->input_buffer, manager->input_buffer_size);
+  n_read = read(manager->io_fd, manager->input_buffer, manager->input_buffer_size);
 
   if (n_read == -1) {
-    g_log(NULL, G_LOG_LEVEL_ERROR, "error in ipc_manager_receive: %s", os_strerror(errno));
+    g_log(NULL, G_LOG_LEVEL_ERROR, "error in ipc_manager_receive: %s", strerror(errno));
   }
 
   if (n_read < 0)
@@ -288,10 +284,10 @@ static size_t ipc_manager_write(struct ipc_manager *manager, char *buffer, size_
   assert(len > 0);
 
   while (to_write > 0) {
-    int w = os_write(manager->io_fd, buffer, to_write);
+    int w = write(manager->io_fd, buffer, to_write);
 
     if (w < 0) {
-      g_log(NULL, G_LOG_LEVEL_ERROR, "error in ipc_manager_write_buffer: %s", os_strerror(errno));
+      g_log(NULL, G_LOG_LEVEL_ERROR, "error in ipc_manager_write_buffer: %s", strerror(errno));
       return -1;
     }
 
