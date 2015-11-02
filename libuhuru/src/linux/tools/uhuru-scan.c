@@ -1,8 +1,10 @@
-#include <libuhuru/ipc.h>
+#include <libuhuru/core.h>
 
 #include "utils/getopt.h"
 #ifdef linux
-#include "linux-daemon/tcpsock.h"
+#include <daemon/ipc.h>
+#include "daemon/tcpsock.h"
+#include "daemon/unixsock.h"
 #endif
 
 #include <assert.h>
@@ -25,11 +27,15 @@ struct scan {
 };
 
 struct scan_options {
+  enum {
+    TCP_SOCKET,
+    UNIX_SOCKET,
+  } socket_type;
+  const char *unix_path;
   int recursive;
   int threaded;
   int no_summary;
   int print_clean;
-  int use_tcp;
   unsigned short port_number;
   const char *path;
 };
@@ -40,9 +46,10 @@ struct opt scan_opt_defs[] = {
   { "threaded", 't', 0, 0, NULL},
   { "no-summary", 'n',  0, 0, NULL},
   { "print-clean", 'c', 0, 0, NULL},
-  { "tcp", 't', 0, 0, NULL},
-  { "port", 'p', 1, 0, NULL},
-  { NULL, '\0', 0, 0, NULL},
+  { .long_form = "tcp", .short_form = 't', .need_arg = 0, .is_set = 0, .value = NULL},
+  { .long_form = "port", .short_form = 'p', .need_arg = 1, .is_set = 0, .value = NULL},
+  { .long_form = "unix", .short_form = 'u', .need_arg = 0, .is_set = 0, .value = NULL},
+  { .long_form = "path", .short_form = 'a', .need_arg = 1, .is_set = 0, .value = NULL},
 };
 
 static void usage(void)
@@ -57,8 +64,9 @@ static void usage(void)
   fprintf(stderr, "  --threaded -t            scan using multiple threads\n");
   fprintf(stderr, "  --no-summary -n          disable summary at end of scanning\n");
   fprintf(stderr, "  --print-clean -c         print also clean files as they are scanned\n");
-  fprintf(stderr, "  --tcp -t                 use TCP socket\n");
-  fprintf(stderr, "  --port -p                TCP port number\n");
+  fprintf(stderr, "  --tcp -t | --unix -u     use TCP (--tcp) or unix (--unix) socket (default is unix)\n");
+  fprintf(stderr, "  --port=PORT -p PORT      TCP port number\n");
+  fprintf(stderr, "  --path=PATH -a PATH      unix socket path\n");
   fprintf(stderr, "\n");
 
   exit(1);
@@ -72,13 +80,31 @@ static void parse_options(int argc, const char *argv[], struct scan_options *opt
   if (r < 0|| r >= argc)
     usage();
 
+  if (opt_is_set(scan_opt_defs, "help"))
+      usage();
+
+  if (opt_is_set(scan_opt_defs, "tcp") && opt_is_set(scan_opt_defs, "unix"))
+    usage();
+
+  if (opt_is_set(scan_opt_defs, "help"))
+      usage();
+
+  if (opt_is_set(scan_opt_defs, "tcp") && opt_is_set(scan_opt_defs, "unix"))
+    usage();
+
+  opts->socket_type = UNIX_SOCKET;
+  if (opt_is_set(scan_opt_defs, "tcp"))
+    opts->socket_type = TCP_SOCKET;
+
+  s_port = opt_value(scan_opt_defs, "port", "14444");
+  opts->port_number = (unsigned short)atoi(s_port);
+
+  opts->unix_path = opt_value(scan_opt_defs, "path", "@/tmp/.uhuru/daemon");
+
   opts->recursive = opt_is_set(scan_opt_defs, "recursive");
   opts->threaded = opt_is_set(scan_opt_defs, "threaded");
   opts->no_summary = opt_is_set(scan_opt_defs, "no-summary");
   opts->print_clean = opt_is_set(scan_opt_defs, "print-clean");
-  opts->use_tcp = opt_is_set(scan_opt_defs, "tcp");
-  s_port = opt_value(scan_opt_defs, "port", "14444");
-  opts->port_number = (unsigned short)atoi(s_port);
 
   opts->path = argv[r];
 }
@@ -128,15 +154,21 @@ static void ipc_handler_scan_file(struct ipc_manager *m, void *data)
   char *x_status;
   gint32 i_action;
   enum uhuru_action action;
+  int progress;
 
   ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &path);
   ipc_manager_get_arg_at(m, 1, IPC_INT32_T, &i_status);
   ipc_manager_get_arg_at(m, 2, IPC_STRING_T, &mod_name);
   ipc_manager_get_arg_at(m, 3, IPC_STRING_T, &x_status);
   ipc_manager_get_arg_at(m, 4, IPC_INT32_T, &i_action);
+  ipc_manager_get_arg_at(m, 5, IPC_INT32_T, &progress);
 
   status = (enum uhuru_file_status)i_status;
   action = (enum uhuru_action)i_action;
+
+  /* path is empty string, do nothing */
+  if (!*path)
+    return;
 
   if (scan->summary != NULL) {
     scan->summary->scanned++;
@@ -169,7 +201,7 @@ static void ipc_handler_scan_file(struct ipc_manager *m, void *data)
     printf(" [%s - %s]", mod_name, x_status);
   if (action != UHURU_ACTION_NONE)
     printf(" (action %s)", action_pretty_str(action));
-  printf("\n");
+  printf("[%d]\n", progress);
 }
 
 static void ipc_handler_scan_end(struct ipc_manager *m, void *data)
@@ -237,8 +269,10 @@ int main(int argc, const char **argv)
 
   parse_options(argc, argv, opts);
 
-#ifdef linux
-  client_sock = tcp_client_connect("127.0.0.1", opts->port_number, 10);
+  if (opts->socket_type == TCP_SOCKET)
+    client_sock = tcp_client_connect("127.0.0.1", opts->port_number, 10);
+  else
+    client_sock = unix_client_connect(opts->unix_path);
 
   if (client_sock < 0) {
     fprintf(stderr, "cannot open client socket (errno %d)\n", errno);
@@ -246,7 +280,6 @@ int main(int argc, const char **argv)
   }
 
   do_scan(opts, client_sock);
-#endif
 
   return 0;
 }

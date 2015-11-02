@@ -110,10 +110,10 @@ include/libuhuru/Makefile
 pkgconfig/Makefile
 src/Makefile
 src/libcore/Makefile
-src/libipc/Makefile
-src/linux-daemon/Makefile
+src/linux/Makefile
+src/linux/daemon/Makefile
+src/linux/tools/Makefile
 src/os/Makefile
-src/tools/Makefile
 tests/Makefile
 ])
 AC_OUTPUT

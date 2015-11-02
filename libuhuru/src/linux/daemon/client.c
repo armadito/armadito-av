@@ -1,7 +1,7 @@
 #include <libuhuru-config.h>
 
 #include <libuhuru/core.h>
-#include <libuhuru/ipc.h>
+#include "ipc.h"
 #include <os/io.h>
 
 #include "client.h"
@@ -40,6 +40,7 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
 		       IPC_STRING_T, report->mod_name,
 		       IPC_STRING_T, report->mod_report,
 		       IPC_INT32_T, report->action,
+		       IPC_INT32_T, report->progress,
 		       IPC_NONE_T);
 }
 
