@@ -4,6 +4,8 @@
 #include <iostream>
 #include <QDebug>
 
+#define DEFAULT_SOCKET_PATH "@/tmp/.uhuru/daemon"
+
 static void scanmodel_callback(struct uhuru_report *report, void *callback_data);
 
 void ScanModelThread::run()

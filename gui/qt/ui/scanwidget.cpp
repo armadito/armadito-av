@@ -6,20 +6,20 @@
 #include <assert.h>
 #include <iostream>
 
-void ScanWidget::connectLineEdit(const char *lineEditName, Counter *counter)
+void ScanWidget::connectLineEdit(const char *lineEditName, Value *value)
 {
   QLabel *ui_lineEdit = findChild<QLabel*>(lineEditName);
   assert(ui_lineEdit != NULL);
 
-  QObject::connect(counter, SIGNAL(changed(const QString &)), ui_lineEdit, SLOT(setText(const QString &)));
+  QObject::connect(value, SIGNAL(changed(const QString &)), ui_lineEdit, SLOT(setText(const QString &)));
 
   // We set the value now
-  ui_lineEdit->setText(QString::number(counter->value()));
+  ui_lineEdit->setText(QString::number(value->value()));
 }
 
 void ScanWidget::doConnect(ScanModel *model)
 {
-  // We create counters connexions
+  // We create values connexions
   connectLineEdit("scannedCount", model->scannedCount());
   connectLineEdit("malwareCount", model->malwareCount());
   connectLineEdit("suspiciousCount", model->suspiciousCount());
@@ -32,8 +32,8 @@ void ScanWidget::doConnect(ScanModel *model)
   ui_progressBar->setMaximum(100);
 
   // ProgressBar Value
-  ui_progressBar->setValue(model->scannedCount()->value());
-  QObject::connect(model->scannedCount(), SIGNAL(changed(int)), ui_progressBar, SLOT(setValue(int)));
+  ui_progressBar->setValue(0);
+  QObject::connect(model->progress(), SIGNAL(changed(int)), ui_progressBar, SLOT(setValue(int)));
 
   // Current scanned file path 
   QLineEdit *ui_currentScannedPath = findChild<QLineEdit*>("currentScannedPath");

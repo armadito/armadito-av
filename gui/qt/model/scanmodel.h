@@ -1,7 +1,7 @@
 #ifndef _SCANMODEL_H_
 #define _SCANMODEL_H_
 
-#include "counter.h"
+#include "value.h"
 #include "utils/uhuru.h"
 #include "scanreportmodel.h"
 
@@ -23,11 +23,12 @@ public:
 
   void scan();
 
-  Counter *scannedCount() { return &_scannedCount; }
-  Counter *malwareCount() { return &_malwareCount; }
-  Counter *suspiciousCount() { return &_suspiciousCount; }
-  Counter *unhandledCount() { return &_unhandledCount; }
-  Counter *cleanCount() { return &_cleanCount; }
+  Value *scannedCount() { return &_scannedCount; }
+  Value *malwareCount() { return &_malwareCount; }
+  Value *suspiciousCount() { return &_suspiciousCount; }
+  Value *unhandledCount() { return &_unhandledCount; }
+  Value *cleanCount() { return &_cleanCount; }
+  Value *progress() { return &_progress; }
 
   ScanReportModel *report() { return &_reportModel; }
 
@@ -45,11 +46,12 @@ private:
   QDateTime _startDate;
   bool _completed;
 
-  Counter _scannedCount;
-  Counter _malwareCount;
-  Counter _suspiciousCount;
-  Counter _unhandledCount;
-  Counter _cleanCount;
+  Value _scannedCount;
+  Value _malwareCount;
+  Value _suspiciousCount;
+  Value _unhandledCount;
+  Value _cleanCount;
+  Value _progress;
 
   ScanReportModel _reportModel;
 };

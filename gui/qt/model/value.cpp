@@ -1,6 +1,6 @@
-#include "counter.h"
+#include "value.h"
 
-void Counter::set(int value)
+void Value::set(int value)
 {
   if (value != _value) {
     _value = value;
