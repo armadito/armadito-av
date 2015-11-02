@@ -8,8 +8,6 @@ static void scanmodel_callback(struct uhuru_report *report, void *callback_data)
 
 void ScanModelThread::run()
 {
-  _model->countFiles();
-
   QByteArray ba = _model->path().toLocal8Bit();
   const char *c_path = ba.data();
   //  enum uhuru_scan_flags flags = static_cast<enum uhuru_scan_flags>(0);
@@ -38,17 +36,6 @@ void ScanModel::scanThreadFinished()
 {
   emit scanComplete();
   _completed = true;
-}
-
-void ScanModel::countFiles()
-{
-  QDirIterator iter(_path, QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks, QDirIterator::Subdirectories);
-  int count = 0;
-
-  for( ; iter.hasNext(); iter.next())
-    count++;
-
-  _totalCount.set(count);
 }
 
 void ScanModel::callback(enum uhuru_file_status status, const char *path, const char *report)

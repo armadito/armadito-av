@@ -23,7 +23,6 @@ public:
 
   void scan();
 
-  Counter *totalCount() { return &_totalCount; }
   Counter *scannedCount() { return &_scannedCount; }
   Counter *malwareCount() { return &_malwareCount; }
   Counter *suspiciousCount() { return &_suspiciousCount; }
@@ -31,8 +30,6 @@ public:
   Counter *cleanCount() { return &_cleanCount; }
 
   ScanReportModel *report() { return &_reportModel; }
-
-  void countFiles();
 
   void callback(enum uhuru_file_status status, const char *path, const char *report);
 
@@ -48,7 +45,6 @@ private:
   QDateTime _startDate;
   bool _completed;
 
-  Counter _totalCount;
   Counter _scannedCount;
   Counter _malwareCount;
   Counter _suspiciousCount;
