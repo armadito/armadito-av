@@ -309,7 +309,11 @@ static gpointer to_scan_count_thread_fun(gpointer data)
 
 static void to_scan_count(struct uhuru_scan *scan)
 {
+#if defined(HAVE_GTHREAD_NEW)
   scan->to_scan_count_thread = g_thread_new("to_scan_count_thread", to_scan_count_thread_fun, scan);
+#elif defined(HAVE_GTHREAD_CREATE)
+  scan->to_scan_count_thread = g_thread_create(to_scan_count_thread_fun, scan, TRUE, NULL);
+#endif
 }
 
 /* this function is called at the end of a scan, to send the 100% progress */
