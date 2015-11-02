@@ -1,6 +1,10 @@
 #ifndef _UTILS_IPC_H_
 #define _UTILS_IPC_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef int ipc_int32_t;
 
 typedef unsigned char ipc_type_t;
@@ -32,7 +36,7 @@ typedef unsigned char ipc_msg_id_t;
 
 struct ipc_manager;
 
-struct ipc_manager *ipc_manager_new(int io_fd);
+struct ipc_manager *ipc_manager_new(const char *socket_path);
 
 void ipc_manager_free(struct ipc_manager *manager);
 
@@ -55,5 +59,9 @@ int ipc_manager_msg_send(struct ipc_manager *manager, ipc_msg_id_t msg_id, ...);
 int ipc_manager_msg_begin(struct ipc_manager *manager, ipc_msg_id_t msg_id);
 int ipc_manager_msg_add(struct ipc_manager *manager, ...);
 int ipc_manager_msg_end(struct ipc_manager *manager);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

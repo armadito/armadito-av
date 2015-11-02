@@ -1,8 +1,7 @@
 #ifndef _SCANMODEL_H_
 #define _SCANMODEL_H_
 
-#include "counter.h"
-#include "utils/uhuru.h"
+#include "value.h"
 #include "scanreportmodel.h"
 
 #include <QObject>
@@ -19,22 +18,19 @@ public:
   const QString &path() { return _path; }
   const QDateTime &startDate() { return _startDate; }
   const bool completed() { return _completed; }
-  
 
   void scan();
 
-  Counter *totalCount() { return &_totalCount; }
-  Counter *scannedCount() { return &_scannedCount; }
-  Counter *malwareCount() { return &_malwareCount; }
-  Counter *suspiciousCount() { return &_suspiciousCount; }
-  Counter *unhandledCount() { return &_unhandledCount; }
-  Counter *cleanCount() { return &_cleanCount; }
+  Value *scannedCount() { return &_scannedCount; }
+  Value *malwareCount() { return &_malwareCount; }
+  Value *suspiciousCount() { return &_suspiciousCount; }
+  Value *unhandledCount() { return &_unhandledCount; }
+  Value *cleanCount() { return &_cleanCount; }
+  Value *progress() { return &_progress; }
 
   ScanReportModel *report() { return &_reportModel; }
 
-  void countFiles();
-
-  void callback(enum uhuru_file_status status, const char *path, const char *report);
+  void callback(const char *path, const char *status, const char *mod_name, const char *mod_report, const char *action, int progress);
 
 signals:
   void scanning(const QString &path);
@@ -48,12 +44,12 @@ private:
   QDateTime _startDate;
   bool _completed;
 
-  Counter _totalCount;
-  Counter _scannedCount;
-  Counter _malwareCount;
-  Counter _suspiciousCount;
-  Counter _unhandledCount;
-  Counter _cleanCount;
+  Value _scannedCount;
+  Value _malwareCount;
+  Value _suspiciousCount;
+  Value _unhandledCount;
+  Value _cleanCount;
+  Value _progress;
 
   ScanReportModel _reportModel;
 };

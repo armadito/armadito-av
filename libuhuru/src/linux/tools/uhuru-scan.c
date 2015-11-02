@@ -13,6 +13,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define DEFAULT_TCP_PORT "14444"
+#define DEFAULT_SOCKET_PATH "@/tmp/.uhuru/daemon"
+
 struct scan_summary {
   int scanned;
   int malware;
@@ -96,10 +99,10 @@ static void parse_options(int argc, const char *argv[], struct scan_options *opt
   if (opt_is_set(scan_opt_defs, "tcp"))
     opts->socket_type = TCP_SOCKET;
 
-  s_port = opt_value(scan_opt_defs, "port", "14444");
+  s_port = opt_value(scan_opt_defs, "port", DEFAULT_TCP_PORT);
   opts->port_number = (unsigned short)atoi(s_port);
 
-  opts->unix_path = opt_value(scan_opt_defs, "path", "@/tmp/.uhuru/daemon");
+  opts->unix_path = opt_value(scan_opt_defs, "path", DEFAULT_SOCKET_PATH);
 
   opts->recursive = opt_is_set(scan_opt_defs, "recursive");
   opts->threaded = opt_is_set(scan_opt_defs, "threaded");
@@ -109,62 +112,18 @@ static void parse_options(int argc, const char *argv[], struct scan_options *opt
   opts->path = argv[r];
 }
 
-static const char *file_status_pretty_str(enum uhuru_file_status status)
-{
-  switch(status) {
-  case UHURU_UNDECIDED:
-    return "undecided";
-  case UHURU_CLEAN:
-    return "clean";
-  case UHURU_UNKNOWN_FILE_TYPE:
-    return "ignored";
-  case UHURU_EINVAL:
-    return "invalid argument";
-  case UHURU_IERROR:
-    return "internal error";
-  case UHURU_SUSPICIOUS:
-    return "suspicious";
-  case UHURU_WHITE_LISTED:
-    return "white listed";
-  case UHURU_MALWARE:
-    return "malware";
-  }
-
-  return "unknown status";
-}
-
-static const char *action_pretty_str(enum uhuru_action action)
-{
-  switch(action & (UHURU_ACTION_ALERT | UHURU_ACTION_QUARANTINE | UHURU_ACTION_REMOVE)) {
-  case UHURU_ACTION_ALERT: return "alert";
-  case UHURU_ACTION_ALERT | UHURU_ACTION_QUARANTINE: return "alert+quarantine";
-  case UHURU_ACTION_ALERT | UHURU_ACTION_REMOVE: return "alert+removed";
-  }
-
-  return "none";
-}
-
 static void ipc_handler_scan_file(struct ipc_manager *m, void *data)
 {
   struct scan *scan = (struct scan *)data;
-  char *path;
-  gint32 i_status;
-  enum uhuru_file_status status;
-  char *mod_name;
-  char *x_status;
-  gint32 i_action;
-  enum uhuru_action action;
-  int progress;
+  char *path, *status, *mod_name, *mod_report, *action;
+  int progress, clean = 0;
 
   ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &path);
-  ipc_manager_get_arg_at(m, 1, IPC_INT32_T, &i_status);
+  ipc_manager_get_arg_at(m, 1, IPC_STRING_T, &status);
   ipc_manager_get_arg_at(m, 2, IPC_STRING_T, &mod_name);
-  ipc_manager_get_arg_at(m, 3, IPC_STRING_T, &x_status);
-  ipc_manager_get_arg_at(m, 4, IPC_INT32_T, &i_action);
+  ipc_manager_get_arg_at(m, 3, IPC_STRING_T, &mod_report);
+  ipc_manager_get_arg_at(m, 4, IPC_STRING_T, &action);
   ipc_manager_get_arg_at(m, 5, IPC_INT32_T, &progress);
-
-  status = (enum uhuru_file_status)i_status;
-  action = (enum uhuru_action)i_action;
 
   /* path is empty string, do nothing */
   if (!*path)
@@ -173,34 +132,29 @@ static void ipc_handler_scan_file(struct ipc_manager *m, void *data)
   if (scan->summary != NULL) {
     scan->summary->scanned++;
 
-    switch(status) {
-    case UHURU_MALWARE:
+    if (!strcmp(status, "UHURU_MALWARE")) 
       scan->summary->malware++;
-      break;
-    case UHURU_SUSPICIOUS:
+    else if (!strcmp(status, "UHURU_SUSPICIOUS"))
       scan->summary->suspicious++;
-      break;
-    case UHURU_EINVAL:
-    case UHURU_IERROR:
-    case UHURU_UNKNOWN_FILE_TYPE:
-    case UHURU_UNDECIDED:
+    else if (!strcmp(status, "UHURU_EINVAL") 
+	     || !strcmp(status, "UHURU_IERROR")
+	     || !strcmp(status, "UHURU_UNKNOWN_FILE_TYPE")
+	     || !strcmp(status, "UHURU_UNDECIDED"))
       scan->summary->unhandled++;
-      break;
-    case UHURU_WHITE_LISTED:
-    case UHURU_CLEAN:
+    else if (!strcmp(status, "UHURU_WHITE_LISTED")
+	     || !strcmp(status, "UHURU_CLEAN")) {
       scan->summary->clean++;
-      break;
+      clean = 1;
     }
   }
 
-  if (!scan->print_clean && (status == UHURU_WHITE_LISTED || status == UHURU_CLEAN))
+  if (!scan->print_clean && clean)
     return;
 
-  printf("%s: %s", path, file_status_pretty_str(status));
-  if (status != UHURU_UNDECIDED && status != UHURU_CLEAN && status != UHURU_UNKNOWN_FILE_TYPE)
-    printf(" [%s - %s]", mod_name, x_status);
-  if (action != UHURU_ACTION_NONE)
-    printf(" (action %s)", action_pretty_str(action));
+  printf("%s: %s", path, status);
+  /* if (status != UHURU_UNDECIDED && status != UHURU_CLEAN && status != UHURU_UNKNOWN_FILE_TYPE) */
+  printf(" [%s - %s]", mod_name, mod_report);
+  printf(" (action %s) ", action);
   printf("[%d]\n", progress);
 }
 
@@ -272,7 +226,7 @@ int main(int argc, const char **argv)
   if (opts->socket_type == TCP_SOCKET)
     client_sock = tcp_client_connect("127.0.0.1", opts->port_number, 10);
   else
-    client_sock = unix_client_connect(opts->unix_path);
+    client_sock = unix_client_connect(opts->unix_path, 10);
 
   if (client_sock < 0) {
     fprintf(stderr, "cannot open client socket (errno %d)\n", errno);
