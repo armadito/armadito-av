@@ -1,5 +1,6 @@
 #include "updateinfomodel.h"
 
+#if 0
 struct uhuru_info *UpdateInfoModel::RetrieveUpdateInfo(int use_daemon)
 {
      struct uhuru *u;
@@ -19,6 +20,7 @@ struct uhuru_info *UpdateInfoModel::RefreshUpdateInfo()
      Uinfo = RetrieveUpdateInfo((int)1);
      return Uinfo;
 }
+#endif
 	
 UpdateInfoModel::UpdateInfoModel()
 {
