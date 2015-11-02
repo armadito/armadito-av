@@ -68,6 +68,8 @@ AC_CHECK_LIB([glib-2.0], [g_thread_new],
 		      [AC_DEFINE([HAVE_GTHREAD_NEW], [], [Define this if glib has the 'g_thread_new' function])])
 AC_CHECK_LIB([glib-2.0], [g_thread_create],
 		      [AC_DEFINE([HAVE_GTHREAD_CREATE], [], [Define this if glib has the 'g_thread_create' function])])
+AC_CHECK_LIB([glib-2.0], [g_thread_init],
+		      [AC_DEFINE([HAVE_GTHREAD_INIT], [], [Define this if glib has the 'g_thread_init' function])])
 CFLAGS=${SAVE_CFLAGS}
 unset SAVE_CFLAGS
 LDFLAGS=${SAVE_LDFLAGS}
