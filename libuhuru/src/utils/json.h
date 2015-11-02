@@ -5,7 +5,6 @@
 #include "json_util.h"
 #include <libuhuru-config.h>
 #include <libuhuru/core.h>
-#include <libuhuru/ipc.h>
 
 void print_json_value(json_object *jobj);
 void json_parse_array(json_object *jobj, char *key);
