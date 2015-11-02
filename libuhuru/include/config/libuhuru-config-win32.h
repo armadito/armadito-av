@@ -38,4 +38,8 @@
 #undef HAVE_ALERT_MODULE
 #undef HAVE_QUARANTINE_MODULE
 
+/* glib (current version of glib on windows is 2.28.8, which had g_thread_create) */
+#undef HAVE_GTHREAD_NEW
+#define HAVE_GTHREAD_CREATE
+
 #endif
