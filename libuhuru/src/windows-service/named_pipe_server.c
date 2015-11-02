@@ -234,7 +234,6 @@ VOID GetAnswerToRequest(LPTSTR pchRequest,
 	const char* json_parse_and_process(json_object * jobj, struct new_scan* scan);  /* Forward declaration */
 
 
-
 	// We parse on-demand scan requests from IHM
 	json_object * jobj = json_tokener_parse(pchRequest);
 	json_parse_and_print(jobj);
