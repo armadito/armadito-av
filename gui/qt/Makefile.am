@@ -68,8 +68,9 @@ BUILT_SOURCES= \
 
 uhuru_qt_LDADD= @QT_LIBS@ #@DEFS@
 uhuru_qt_CXXFLAGS= @QT_CFLAGS@ -I$(builddir)/ui -fPIC
-uhuru_qt_LDADD+= @LIBUHURU_LIBS@
+uhuru_qt_LDADD+= @LIBUHURU_LIBS@ @GLIB2_LIBS@
 uhuru_qt_CXXFLAGS+= @LIBUHURU_CFLAGS@
+uhuru_qt_CFLAGS= @LIBUHURU_CFLAGS@ @GLIB2_CFLAGS@
 DEFS = -DTRANSLATIONSDIR=\"$(pkgdatadir)/translations\" @DEFS@
 #uhuru_LDFLAGS= -Wl,-rpath=$(libdir)
 

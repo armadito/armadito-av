@@ -19,7 +19,7 @@ struct uhuru *UHURU::getHandle()
 
 void UHURUOpenThread::run()
 {
-  _uhuru->_uhuruHandle = uhuru_open(1);
+  _uhuru->_uhuruHandle = uhuru_open(NULL);
 #if 0
   uhuru_print(_uhuru->_uhuruHandle);
 #endif
