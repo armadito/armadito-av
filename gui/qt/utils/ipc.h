@@ -1,9 +1,9 @@
-#ifndef _LIBUHURU_LIBIPC_IPC_H_
-#define _LIBUHURU_LIBIPC_IPC_H_
+#ifndef _UTILS_IPC_H_
+#define _UTILS_IPC_H_
 
-#include <glib.h>
+typedef int ipc_int32_t;
 
-typedef guchar ipc_type_t;
+typedef unsigned char ipc_type_t;
 
 #define IPC_NONE_T     ((ipc_type_t)0x80)
 #define IPC_INT32_T    ((ipc_type_t)0x81)
@@ -12,12 +12,12 @@ typedef guchar ipc_type_t;
 struct ipc_value {
   ipc_type_t type;
   union {
-    gint32 v_int32;
+    ipc_int32_t v_int32;
     char *v_str;
   } value;
 };
 
-typedef guchar ipc_msg_id_t;
+typedef unsigned char ipc_msg_id_t;
 
 #define IPC_MSG_ID_FIRST             ((ipc_msg_id_t)0)
 #define IPC_MSG_ID_PING              ((ipc_msg_id_t)0)
