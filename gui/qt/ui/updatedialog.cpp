@@ -57,6 +57,7 @@ void UpdateDialog::RefreshUpdateInfo()
 void UpdateDialog::fillView(UpdateInfoModel *model)
 {
 
+#if 0
     struct uhuru_info * info = NULL;
     struct uhuru_module_info **m;
     struct uhuru_base_info **b;
@@ -70,13 +71,17 @@ void UpdateDialog::fillView(UpdateInfoModel *model)
 
     if (info->module_infos != NULL) {
        for(m = info->module_infos; *m != NULL; m++){
+#if 0
             AddModuleItem(m, pListWidget);
+#endif
        }
     }
 
     uhuru_info_free(info); 
+#endif
 }
 
+#if 0
 void UpdateDialog::AddModuleItem(struct uhuru_module_info **m, QListWidget *pListWidget)
 {
     QIcon *icon_uhuru = getIcon();
@@ -117,10 +122,12 @@ void UpdateDialog::AddModuleItem(struct uhuru_module_info **m, QListWidget *pLis
 
     pListWidget->addItem(item);
 }
+#endif
 
 QString UpdateDialog::getStatusQString(int status)
 {
    switch(status){
+#if 0
      case UHURU_UPDATE_OK:
        return QString("OK");
      case UHURU_UPDATE_LATE:
@@ -129,6 +136,7 @@ QString UpdateDialog::getStatusQString(int status)
        return QString("CRITICAL");
      case UHURU_UPDATE_NON_AVAILABLE:
        return QString("NON_AVAILABLE");
+#endif
      default:
        return QString("UNKNOWN");
    }

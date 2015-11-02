@@ -6,12 +6,12 @@
 
 #define DEFAULT_SOCKET_PATH "@/tmp/.uhuru/daemon"
 
-static void scanmodel_callback(struct uhuru_report *report, void *callback_data);
-
 void ScanModelThread::run()
 {
   QByteArray ba = _model->path().toLocal8Bit();
   const char *c_path = ba.data();
+
+#if 0
   //  enum uhuru_scan_flags flags = static_cast<enum uhuru_scan_flags>(0);
   //enum uhuru_scan_flags flags = static_cast<enum uhuru_scan_flags>(UHURU_SCAN_RECURSE | UHURU_SCAN_THREADED);
   enum uhuru_scan_flags flags = static_cast<enum uhuru_scan_flags>(UHURU_SCAN_RECURSE);
@@ -23,6 +23,7 @@ void ScanModelThread::run()
   uhuru_scan_run(scan);
 
   uhuru_scan_free(scan);
+#endif
 }
 
 void ScanModel::scan()
@@ -40,6 +41,7 @@ void ScanModel::scanThreadFinished()
   _completed = true;
 }
 
+#if 0
 void ScanModel::callback(enum uhuru_file_status status, const char *path, const char *report)
 {
 
@@ -78,4 +80,4 @@ static void scanmodel_callback(struct uhuru_report *report, void *callback_data)
 
   s->callback(report->status, report->path, report->mod_report);
 }
-
+#endif

@@ -2,7 +2,6 @@
 #define _SCANMODEL_H_
 
 #include "value.h"
-#include "utils/uhuru.h"
 #include "scanreportmodel.h"
 
 #include <QObject>
@@ -32,7 +31,9 @@ public:
 
   ScanReportModel *report() { return &_reportModel; }
 
+#if 0
   void callback(enum uhuru_file_status status, const char *path, const char *report);
+#endif
 
 signals:
   void scanning(const QString &path);

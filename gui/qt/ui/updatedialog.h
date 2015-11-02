@@ -22,7 +22,9 @@ public slots:
 
 private:
     QString getStatusQString(int status);
+#if 0
     void AddModuleItem(struct uhuru_module_info **m, QListWidget *pListWidget);
+#endif
     void fillView(UpdateInfoModel *model);
     void SetupRefreshButton();
     QIcon *getIcon();
