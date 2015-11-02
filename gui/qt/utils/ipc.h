@@ -32,7 +32,7 @@ typedef unsigned char ipc_msg_id_t;
 
 struct ipc_manager;
 
-struct ipc_manager *ipc_manager_new(int io_fd);
+struct ipc_manager *ipc_manager_new(const char *socket_path);
 
 void ipc_manager_free(struct ipc_manager *manager);
 
