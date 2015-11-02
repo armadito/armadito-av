@@ -28,9 +28,7 @@ uhuru_qt_SOURCES= \
 	utils/dbus.cpp \
 	utils/dbus.h \
 	utils/ipc.c \
-	utils/ipc.h \
-	utils/uhuru.cpp \
-	utils/uhuru.h
+	utils/ipc.h 
 
 nodist_uhuru_qt_SOURCES= \
 	model/moc_value.cpp  \
@@ -45,7 +43,6 @@ nodist_uhuru_qt_SOURCES= \
 	ui/ui_aboutdialog.h \
 	ui/ui_scanwidget.h \
 	ui/ui_updatedialog.h \
-	utils/moc_uhuru.cpp \
 	utils/moc_dbus.cpp \
 	qrc_uhuru.cpp
 
@@ -62,15 +59,13 @@ BUILT_SOURCES= \
 	ui/ui_aboutdialog.h \
 	ui/ui_scanwidget.h \
 	ui/ui_updatedialog.h \
-	utils/moc_uhuru.cpp \
 	utils/moc_dbus.cpp \
 	qrc_uhuru.cpp
 
 uhuru_qt_LDADD= @QT_LIBS@ #@DEFS@
 uhuru_qt_CXXFLAGS= @QT_CFLAGS@ -I$(builddir)/ui -fPIC
-uhuru_qt_LDADD+= @LIBUHURU_LIBS@ @GLIB2_LIBS@
-uhuru_qt_CXXFLAGS+= @LIBUHURU_CFLAGS@
-uhuru_qt_CFLAGS= @LIBUHURU_CFLAGS@ @GLIB2_CFLAGS@
+uhuru_qt_LDADD+= @GLIB2_LIBS@
+uhuru_qt_CFLAGS= @GLIB2_CFLAGS@
 DEFS = -DTRANSLATIONSDIR=\"$(pkgdatadir)/translations\" @DEFS@
 #uhuru_LDFLAGS= -Wl,-rpath=$(libdir)
 
