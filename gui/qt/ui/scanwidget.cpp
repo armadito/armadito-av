@@ -20,7 +20,6 @@ void ScanWidget::connectLineEdit(const char *lineEditName, Counter *counter)
 void ScanWidget::doConnect(ScanModel *model)
 {
   // We create counters connexions
-  //connectLineEdit("totalCount", model->totalCount());
   connectLineEdit("scannedCount", model->scannedCount());
   connectLineEdit("malwareCount", model->malwareCount());
   connectLineEdit("suspiciousCount", model->suspiciousCount());
@@ -30,8 +29,7 @@ void ScanWidget::doConnect(ScanModel *model)
   // ProgressBar Maximum
   QProgressBar *ui_progressBar = findChild<QProgressBar*>("progressBar");
   assert(ui_progressBar != NULL);
-  ui_progressBar->setMaximum(model->totalCount()->value());
-  QObject::connect(model->totalCount(), SIGNAL(changed(int)), ui_progressBar, SLOT(setMaximum(int)));
+  ui_progressBar->setMaximum(100);
 
   // ProgressBar Value
   ui_progressBar->setValue(model->scannedCount()->value());
