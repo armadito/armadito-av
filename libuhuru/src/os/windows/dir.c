@@ -36,6 +36,14 @@ static enum dir_entry_flag dirent_flags(DWORD fileAttributes)
   return FILE_FLAG_IS_UNKNOWN;
 }
 
+BOOL DirectoryExists(LPCTSTR szPath)
+{
+	DWORD dwAttrib = GetFileAttributes(szPath);
+
+	return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
+		(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
+
 
 void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data ) {
 
@@ -51,10 +59,10 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 		g_log(NULL, G_LOG_LEVEL_WARNING, "error :: NULL parameter in function os_dir_map()");
 		return;
 	}
-
-	// Check if it's a directory path
-	if (GetFileAttributesA(path) != FILE_ATTRIBUTE_DIRECTORY) {
-		g_log(NULL, G_LOG_LEVEL_WARNING, "warning :: os_dir_map() :: (%s) is not a directory",path);
+	
+	// Check if it is a directory
+	if (!(GetFileAttributesA(path) & FILE_ATTRIBUTE_DIRECTORY)) {
+		g_log(NULL, G_LOG_LEVEL_WARNING, "Warning :: os_dir_map() :: (%s) is not a directory. ", path);
 		return;
 	}
 
@@ -63,18 +71,19 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 	sPath[size] = '\0';
 	sprintf_s(sPath, size, "%s\\*", path);
 
+	// g_log(NULL, G_LOG_LEVEL_WARNING, "os_dir_map() :: (%s)", sPath);
 
 	fh = FindFirstFileA(sPath, &fdata);
-	
 	if (fh == INVALID_HANDLE_VALUE) {
-		g_log(NULL, G_LOG_LEVEL_WARNING, "warning :: os_dir_map() :: FindFirstFileA() failed ::  (%s) ",os_strerror(errno));		
+		g_log(NULL, G_LOG_LEVEL_WARNING, "warning :: os_dir_map() :: FindFirstFileA() failed ::  (%s) ",os_strerror(errno));
 		return;
 	}
 
 	while (FindNextFileA(fh, &tmp) != FALSE) {
 
 		// exclude paths "." and ".."
-		if (strncmp(tmp.cFileName,".",strlen(tmp.cFileName)) == 0 || strncmp(tmp.cFileName,"..",strlen(tmp.cFileName)) == 0) {
+		if (strncmp(tmp.cFileName,".",strlen(tmp.cFileName)) == 0 || strncmp(tmp.cFileName,"..",strlen(tmp.cFileName)) == 0)
+		{
 			continue;
 		}
 
@@ -85,19 +94,23 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 		entryPath[size] = '\0';
 		sprintf_s(entryPath, size,"%s\\%s", path, tmp.cFileName);
 
-		if (tmp.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY  && recurse == 1) {
+
+		// If it is a directory and we do recursive scan
+		if ((GetFileAttributesA(entryPath) & FILE_ATTRIBUTE_DIRECTORY) && recurse >= 1) {
 			os_dir_map(entryPath, recurse, dirent_cb, NULL);
 		}
 		else {
+			// Add file to scan
+			// g_log(NULL, G_LOG_LEVEL_WARNING, "Scanning file !: %s", entryPath);
+
 			flags = dirent_flags(tmp.dwFileAttributes);
 			(*dirent_cb)(entryPath, flags, 0, data);
 		}
-
 	}
 
 	free(entryPath);
 	free(sPath);
-	//CloseHandle(fh);
+	CloseHandle(fh);
 
 	return;
 }
