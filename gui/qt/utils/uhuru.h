@@ -1,7 +1,7 @@
 #ifndef _UTILS_UHURU_H_
 #define _UTILS_UHURU_H_
 
-#include <libuhuru/scan.h>
+#include <libuhuru/core.h>
 #include <QThread>
 
 class UHURUOpenThread;
@@ -24,7 +24,7 @@ class UHURU {
 
   ~UHURU()
     {
-      uhuru_close(_uhuruHandle);
+      uhuru_close(_uhuruHandle, NULL);
     }
 
   UHURU(UHURU const&);            // Don't Implement
