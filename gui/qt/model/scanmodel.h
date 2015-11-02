@@ -18,7 +18,6 @@ public:
   const QString &path() { return _path; }
   const QDateTime &startDate() { return _startDate; }
   const bool completed() { return _completed; }
-  
 
   void scan();
 
@@ -31,9 +30,7 @@ public:
 
   ScanReportModel *report() { return &_reportModel; }
 
-#if 0
-  void callback(enum uhuru_file_status status, const char *path, const char *report);
-#endif
+  void callback(const char *path, const char *status, const char *mod_name, const char *mod_report, const char *action, int progress);
 
 signals:
   void scanning(const QString &path);

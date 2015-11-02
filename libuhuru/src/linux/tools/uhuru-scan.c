@@ -13,6 +13,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define DEFAULT_TCP_PORT "14444"
+#define DEFAULT_SOCKET_PATH "@/tmp/.uhuru/daemon"
+
 struct scan_summary {
   int scanned;
   int malware;
@@ -96,10 +99,10 @@ static void parse_options(int argc, const char *argv[], struct scan_options *opt
   if (opt_is_set(scan_opt_defs, "tcp"))
     opts->socket_type = TCP_SOCKET;
 
-  s_port = opt_value(scan_opt_defs, "port", "14444");
+  s_port = opt_value(scan_opt_defs, "port", DEFAULT_TCP_PORT);
   opts->port_number = (unsigned short)atoi(s_port);
 
-  opts->unix_path = opt_value(scan_opt_defs, "path", "@/tmp/.uhuru/daemon");
+  opts->unix_path = opt_value(scan_opt_defs, "path", DEFAULT_SOCKET_PATH);
 
   opts->recursive = opt_is_set(scan_opt_defs, "recursive");
   opts->threaded = opt_is_set(scan_opt_defs, "threaded");
