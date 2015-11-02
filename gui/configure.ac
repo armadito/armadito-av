@@ -77,6 +77,10 @@ if test "$HAVE_QT" = "yes" ; then
       AC_MSG_WARN([cannot find 'moc', 'uic', 'rcc', 'lupdate' or 'lrelease', please install the Qt development tools package.])
       HAVE_QT="no"
    fi
+
+   if test "$HAVE_QT" = "yes" ; then
+      PKG_CHECK_MODULES(GLIB2, glib-2.0 gio-2.0 gio-unix-2.0)
+   fi
 fi
 AM_CONDITIONAL(COND_QT_GUI, test x"$HAVE_QT" = "xyes")
 

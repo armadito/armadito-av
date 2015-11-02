@@ -1,7 +1,7 @@
 #ifndef UPDATEINFOMODEL_H
 #define UPDATEINFOMODEL_H
 
-#include <libuhuru/info.h>
+#include <libuhuru/core.h>
 #include <QObject>
 
 class UpdateInfoModel : public QObject {

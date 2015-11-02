@@ -16,14 +16,11 @@ void ScanModelThread::run()
   //enum uhuru_scan_flags flags = static_cast<enum uhuru_scan_flags>(UHURU_SCAN_RECURSE | UHURU_SCAN_THREADED);
   enum uhuru_scan_flags flags = static_cast<enum uhuru_scan_flags>(UHURU_SCAN_RECURSE);
 
-  struct uhuru_scan *scan = uhuru_scan_new(UHURU::instance(), c_path, flags);
+  struct uhuru_scan *scan = uhuru_scan_new(UHURU::instance(), 1, c_path, flags);
 
   uhuru_scan_add_callback(scan, scanmodel_callback, _model);
 
-  uhuru_scan_start(scan);
-
-  while(uhuru_scan_run(scan) == UHURU_SCAN_CONTINUE)
-    ;
+  uhuru_scan_run(scan);
 
   uhuru_scan_free(scan);
 }
