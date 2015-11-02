@@ -97,7 +97,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 
 		// If it is a directory and we do recursive scan
 		if ((GetFileAttributesA(entryPath) & FILE_ATTRIBUTE_DIRECTORY) && recurse >= 1) {
-			os_dir_map(entryPath, recurse, dirent_cb, NULL);
+			os_dir_map(entryPath, recurse, dirent_cb, data);
 		}
 		else {
 			// Add file to scan
