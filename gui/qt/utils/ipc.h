@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#define DEFAULT_SOCKET_PATH "@/tmp/.uhuru/daemon"
+
 typedef int ipc_int32_t;
 
 typedef unsigned char ipc_type_t;

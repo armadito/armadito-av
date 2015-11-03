@@ -6,6 +6,8 @@ bin_PROGRAMS= uhuru-qt
 
 uhuru_qt_SOURCES= \
 	main.cpp \
+	model/infomodel.cpp \
+	model/infomodel.h \
 	model/value.cpp \
 	model/value.h \
 	model/scanmodel.cpp \
@@ -31,6 +33,7 @@ uhuru_qt_SOURCES= \
 	utils/ipc.h 
 
 nodist_uhuru_qt_SOURCES= \
+	model/moc_infomodel.cpp \
 	model/moc_value.cpp  \
 	model/moc_scanmodel.cpp \
 	model/moc_scanreportmodel.cpp \
@@ -47,6 +50,7 @@ nodist_uhuru_qt_SOURCES= \
 	qrc_uhuru.cpp
 
 BUILT_SOURCES= \
+	model/moc_infomodel.cpp \
 	model/moc_value.cpp  \
 	model/moc_scanmodel.cpp \
 	model/moc_scanreportmodel.cpp \
