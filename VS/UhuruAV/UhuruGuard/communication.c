@@ -154,6 +154,8 @@ OUT PULONG ReturnOutputBufferLength
 	UNREFERENCED_PARAMETER(OutputBufferLength );
 	UNREFERENCED_PARAMETER(ReturnOutputBufferLength );
 	
+	DbgPrint("[-] Debug :: UhuruGuard!MessageNotifyCallback :: Message received from user-mode app!! \n");
+
 
 	return STATUS_SUCCESS;
 }
@@ -165,9 +167,11 @@ NTSTATUS SendScanOrder( _In_ PFLT_FILTER FilterHandle, PUNICODE_STRING FilePath 
 	SCAN_RESULT replyMessage = NONE;
 	PMESSAGE_CONTEXT scanMessage = NULL;
 	LARGE_INTEGER liTimeOut;
-	PLARGE_INTEGER timeOut = NULL;
+	LARGE_INTEGER timeOut = {0};
 	ANSI_STRING AnsiString;
 	ULONG replyLength =0;
+	LONGLONG _1ms = 10000;
+	LONGLONG localScanTimeout = 30000;
 
 
 
@@ -205,8 +209,7 @@ NTSTATUS SendScanOrder( _In_ PFLT_FILTER FilterHandle, PUNICODE_STRING FilePath 
 		}
 		RtlZeroMemory(scanMessage, sizeof(MESSAGE_CONTEXT));
 
-		// Convert unicode string to ansi string for ring 3 process.
-		
+		// Convert unicode string to ansi string for ring 3 process.		
 		ntStatus = RtlUnicodeStringToAnsiString(&AnsiString, (PCUNICODE_STRING)FilePath, TRUE);
 		if(!NT_SUCCESS(ntStatus)){
 			DbgPrint("[-] Error :: UhuruGuard!SendScanOrder :: RtlUnicodeStringToAnsiString() routine failed !! \n");
@@ -220,14 +223,16 @@ NTSTATUS SendScanOrder( _In_ PFLT_FILTER FilterHandle, PUNICODE_STRING FilePath 
 
 
 		// Set timeout (1second).
-		//liTimeOut.QuadPart = -100000000LL;
-		liTimeOut.QuadPart = -10000000LL; // 0.1 sec
-		timeOut = &liTimeOut;
+		liTimeOut.QuadPart = -100000000LL;
+		//liTimeOut.QuadPart = -50000000LL; // 0.1 sec
+		//timeOut = &liTimeOut;
+		timeOut.QuadPart = -(localScanTimeout * _1ms);
 
 
+		//replyLength = sizeof(FILTER_REPLY_HEADER) + sizeof(SCAN_RESULT);
 		replyLength = sizeof(SCAN_RESULT);
 		// Send message to the scan process throught the communication port.
-		ntStatus = FltSendMessage(FilterHandle, &gClientComPort, (PVOID)scanMessage, sizeof(MESSAGE_CONTEXT), (PVOID)replyMessage, &replyLength, timeOut);
+		ntStatus = FltSendMessage(FilterHandle, &gClientComPort, (PVOID)scanMessage, sizeof(MESSAGE_CONTEXT), (PVOID)&replyMessage, &replyLength, &timeOut);
 		if (!NT_SUCCESS(ntStatus)) {
 			DbgPrint("[-] Error :: UhuruGuard!SendScanOrder :: FltSendMessage() routine failed !! \n");
 			__leave;
@@ -238,11 +243,15 @@ NTSTATUS SendScanOrder( _In_ PFLT_FILTER FilterHandle, PUNICODE_STRING FilePath 
 			DbgPrint("[-] Warning :: UhuruGuard!SendScanOrder :: FltSendMessage() returned with timeout status !! \n");
 		}
 		else {
-			DbgPrint("[+] Debug :: UhuruGuard!SendScanOrder :: FltSendMessage() executed successfully !! :: Scan Result = [TODO] \n");
 
+			//DbgPrint("[+] Debug :: UhuruGuard!SendScanOrder :: FltSendMessage() executed successfully !! :: Scan Result = [TODO] \n");
+			if (replyMessage == DBG_FLAG) {
+				DbgPrint("[+] DEBUG :: UhuruGuard!SendScanOrder :: Reply message received successfully from the scan service :: Scan Result = [DBG_FLAG] \n");
+			}
+			else {
+				DbgPrint("[+] WARNING :: UhuruGuard!SendScanOrder :: Reply message not received completly...\n");
+			}
 		}
-		
-
 		
 	}
 	__finally {

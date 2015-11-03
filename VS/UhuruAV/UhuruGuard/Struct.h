@@ -9,6 +9,7 @@ typedef enum _SCAN_RESULT
 	CLEAN,			//	clean file
 	MALWARE,		// detected as malware.
 	TIMEOUT,		// scan not finished due to timeout.
+	DBG_FLAG,
 	ERROR
 
 }SCAN_RESULT, *PSCAN_RESULT;
