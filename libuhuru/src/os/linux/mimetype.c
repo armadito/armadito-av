@@ -4,6 +4,7 @@
 
 #include <glib.h>
 #include <magic.h>
+#include <string.h>
 
 /* Unfortunately, libmagic is not thread-safe. */
 /* We create a new magic_t for each thread, and keep it  */
@@ -50,7 +51,7 @@ const char *os_mime_type_guess(const char *path)
 
   mime_type = magic_file(m, path);
 
-  return mime_type;
+  return strdup(mime_type);
 }
 
 #ifdef USE_FILE_DESCRIPTORS
@@ -63,6 +64,6 @@ const char *os_mime_type_guess_fd(int fd)
 
   mime_type = magic_descriptor(m, fd);
 
-  return mime_type;
+  return strdup(mime_type);
 }
 #endif

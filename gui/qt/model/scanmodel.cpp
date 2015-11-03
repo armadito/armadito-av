@@ -1,11 +1,8 @@
 #include "scanmodel.h"
 #include "utils/ipc.h"
 
-#include <QDirIterator>
 #include <iostream>
 #include <QDebug>
-
-#define DEFAULT_SOCKET_PATH "@/tmp/.uhuru/daemon"
 
 static void ipc_handler_scan_file(struct ipc_manager *manager, void *data)
 {
@@ -85,38 +82,3 @@ void ScanModel::callback(const char *path, const char *status, const char *mod_n
     _cleanCount.increment();
   }
 }
-
-#if 0
-void ScanModel::callback(enum uhuru_file_status status, const char *path, const char *report)
-{
-
-  qDebug() << "DEBUG: ScanMode::callback - file path : " << path;
-
-  emit scanning(QString(path));
-
-  _scannedCount.increment();
-
-  switch(status) {
-  case UHURU_MALWARE:
-    _malwareCount.increment();
-    _reportModel.append(QString("Malicieux"), QString("aucune"), QString(path), QString(report));
-    break;
-  case UHURU_SUSPICIOUS:
-    _suspiciousCount.increment();
-    _reportModel.append(QString("Suspect"), QString("aucune"), QString(path), QString(report));
-    break;
-  case UHURU_EINVAL:
-  case UHURU_IERROR:
-  case UHURU_UNKNOWN_FILE_TYPE:
-  case UHURU_UNDECIDED:
-    _unhandledCount.increment();
-    _reportModel.append(tr("Not processed"), QString("aucune"), QString(path), "");
-    break;
-  case UHURU_WHITE_LISTED:
-  case UHURU_CLEAN:
-    _cleanCount.increment();
-    break;
-  }
-}
-
-#endif
