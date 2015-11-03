@@ -2,6 +2,7 @@ LIBRARY libuhuru_core
 EXPORTS
 uhuru_open
 uhuru_close
+uhuru_scan_simple
 uhuru_scan_new
 uhuru_scan_add_callback
 uhuru_scan_run
