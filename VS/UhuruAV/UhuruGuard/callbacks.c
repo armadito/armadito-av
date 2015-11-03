@@ -46,7 +46,6 @@ SCAN_RESULT LaunchFileAnalysis(_In_ PFLT_CALLBACK_DATA Data, _In_ PCFLT_RELATED_
 
 		//-----------------------------------------
 		// Send scan order to the scan service.
-
 		ntStatus = SendScanOrder(FltObjects->Filter, &FileNameInformation->Name, &answer);
 		if (!NT_SUCCESS(ntStatus)) {			
 			DbgPrint("[-] Error :: UhuruGuard!LaunchFileAnalysis :: SendScanOrder() failed :: 0x%x \n", ntStatus);
