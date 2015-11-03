@@ -6,6 +6,11 @@
 #include <fltUser.h>
 #include <string.h>
 
+/*Libuhuru*/
+#include <libuhuru-config.h>
+#include <libuhuru/core.h>
+
+
 #define SCAN_PORT_NAME L"\\UhuruPortScanFilter"
 #define USER_SCAN_THREAD_COUNT 3
 #define MAX_PATH_SIZE 512

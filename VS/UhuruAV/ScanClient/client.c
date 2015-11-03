@@ -583,7 +583,7 @@ char * ConvertDeviceNameToMsDosName(LPSTR DeviceFileName) {
 	return deviceDosFilename;
 }
 
-
+/*
 int main(int argc, char ** argv) {
 
 	HRESULT hres = S_OK;			
@@ -611,4 +611,67 @@ int main(int argc, char ** argv) {
 
 	return EXIT_SUCCESS;
 }
+*/
 
+int main(int argc, char * argv) {
+
+	uhuru_error *err = NULL;
+	struct uhuru * uhuru;
+	enum uhuru_file_status scan_result = UHURU_IERROR;
+	//const char * filepath = "C:\\Users\\david\\Desktop\\to_analyze\\note.txt";
+	const char * filepath = "D:\\Reverse\\Malware\\peMalware\\10009b9e47ddd691ccc9ae04cd9cc0bb";
+
+	uhuru = uhuru_open(&err);
+	if (uhuru == NULL){
+		printf("uhuru_open() error - %s \n", err->error_message );
+		return -1;
+	}
+
+	printf("[+] Debug :: uhuru struct initialized successfully!\n");
+
+	
+	
+	// launch a simple file scan
+	scan_result = uhuru_scan_simple(uhuru,filepath);
+
+	switch (scan_result) {
+
+		case UHURU_UNDECIDED:
+			printf("[+] Debug :: Scan_result :: UHURU_UNDECIDED\n");
+			break;
+		case UHURU_CLEAN:
+			printf("[+] Debug :: Scan_result :: UHURU_CLEAN\n");
+			break;
+		case UHURU_UNKNOWN_FILE_TYPE:
+			printf("[+] Debug :: Scan_result :: UHURU_UNKNOWN_FILE_TYPE\n");
+			break;
+		case UHURU_EINVAL:
+			printf("[+] Debug :: Scan_result :: UHURU_EINVAL\n");
+			break;
+		case UHURU_IERROR:
+			printf("[+] Debug :: Scan_result :: UHURU_IERROR\n");
+			break;
+		case UHURU_SUSPICIOUS:
+			printf("[+] Debug :: Scan_result :: UHURU_SUSPICIOUS\n");
+			break;
+		case UHURU_WHITE_LISTED:
+			printf("[+] Debug :: Scan_result :: UHURU_WHITE_LISTED\n");
+			break;
+		case UHURU_MALWARE:
+			printf("[+] Debug :: Scan_result :: UHURU_MALWARE\n");
+			break;
+		default:
+			printf("[+] Debug :: Scan_result :: ERROR_DEFAULT \n");
+			break;
+
+	}
+	
+
+
+	err = NULL;
+	uhuru_close(uhuru,&err);
+
+	//system("pause");
+
+	return 0;
+}
