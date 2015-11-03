@@ -42,18 +42,22 @@ function create_IHM_scan_server(){
 		}
 		else
 		{	
-			if(process_scan_report(scan_report) < 0)
+			var res = process_scan_report(scan_report);
+			if( res < 0)
 			{
-				//server_socket.write("{\"scan_results\",\"error\"}");
 				console.error(" process_scan_report error !");
 				server_socket.write("{\"error\",\"process_scan_report error\"}");
-				
 			}
-			else{
-				server_socket.write("{\"scan_results\",\"ok\"}");
+			else if( res == 0 ){
+				server_socket.write("{\"scan_results\" : \"ok\", \"scan_id\": \""+ scan_id +"\"}");
+			}
+			else{ // res = 1 = end of scan
+				console.log("AV scan finished !");
+				server_socket.write("{\"scan_results\" : \"ok-finished\", \"scan_id\": \""+ scan_id +"\"}");
+				shutdown_scan_server();
+				global.new_scan = null;
 			}
 		}
-		 
 		 
 	  });
 	  
@@ -76,6 +80,6 @@ function create_IHM_scan_server(){
 }	
 	
 function shutdown_scan_server(){
-	console.log("shutdown server");
+	console.log("shutdown server : "+ server_path);
 	server.close();
 }

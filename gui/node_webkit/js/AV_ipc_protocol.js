@@ -39,7 +39,17 @@ function process_scan_report( scan_report )
 		return -1;
 	}
 
+	if( scan_report.scan_progress == 100 && scan_report.scan_file_path == "null")
+	{
+		
+		scan_progress_on_change(scan_report.scan_progress);
+		// Step 5 
+		// End of scan
+		return 1;
+	}
+	
 	if( scan_report.scan_progress && scan_report.scan_progress > 0){
+		
 		console.log (" scan_progress = " +  scan_report.scan_progress);
 		scan_progress_on_change(scan_report.scan_progress);
 	}
