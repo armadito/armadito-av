@@ -1,11 +1,8 @@
 #include "scanmodel.h"
 #include "utils/ipc.h"
 
-#include <QDirIterator>
 #include <iostream>
 #include <QDebug>
-
-#define DEFAULT_SOCKET_PATH "@/tmp/.uhuru/daemon"
 
 static void ipc_handler_scan_file(struct ipc_manager *manager, void *data)
 {

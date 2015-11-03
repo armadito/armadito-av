@@ -1,5 +1,5 @@
-#ifndef _SCANMODEL_H_
-#define _SCANMODEL_H_
+#ifndef _MODEL_SCANMODEL_H_
+#define _MODEL_SCANMODEL_H_
 
 #include "value.h"
 #include "scanreportmodel.h"
