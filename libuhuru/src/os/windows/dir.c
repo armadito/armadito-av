@@ -147,10 +147,9 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 		free(entryPath);
 	}
 
-	// FindClose ???
 	free(escapedPath);
 	free(sPath);
-	CloseHandle(fh);
+	FindClose(fh);
 
 	return;
 }
