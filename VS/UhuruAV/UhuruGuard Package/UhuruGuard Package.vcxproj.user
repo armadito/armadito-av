@@ -14,4 +14,17 @@
     <ScriptDeviceQuery />
     <DebugDeployment>False</DebugDeployment>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|Win32'">
+    <EnableDeployment>True</EnableDeployment>
+    <RemoveDriver>True</RemoveDriver>
+    <InstallMode>None</InstallMode>
+    <HardwareIdString>Root\UhuruGuard</HardwareIdString>
+    <CommandLine />
+    <ScriptPath>C:\Program Files (x86)\Windows Kits\8.1\Testing\Tests\Utilities\DefaultDriverPackageInstallationTask.dll</ScriptPath>
+    <DbgengRemoteMachineName>athena-pc</DbgengRemoteMachineName>
+    <DbgengKernelMachineName>athena-pc</DbgengKernelMachineName>
+    <DeployFiles />
+    <ScriptName>Microsoft.DriverKit.DefaultDriverPackageInstallationClass.PerformDefaultDriverPackageInstallation</ScriptName>
+    <ScriptDeviceQuery />
+  </PropertyGroup>
 </Project>
