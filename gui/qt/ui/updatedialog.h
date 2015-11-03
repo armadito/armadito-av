@@ -18,19 +18,17 @@ public:
     ~UpdateDialog();
 
 public slots:
-    void RefreshUpdateInfo();
+    void refreshUpdateInfo();
 
 private slots:
     void fillView();
 
 private:
-    QString getStatusQString(int status);
-#if 0
-    void AddModuleItem(struct uhuru_module_info **m, QListWidget *pListWidget);
-#endif
-    void SetupRefreshButton();
+    QString getStatusQString(enum UpdateStatus status);
+    void addModuleItem(const ModuleInfo &moduleInfo, QListWidget *pListWidget);
     QIcon *getIcon();
-    Ui::UpdateDialog *ui;
+
+    Ui::UpdateDialog *_ui;
     InfoModel *_model;
 };
 
