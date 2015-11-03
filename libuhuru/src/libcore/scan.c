@@ -200,6 +200,7 @@ static enum uhuru_file_status scan_file(struct uhuru_scan *scan, const char *pat
 
   /* find the mime type using OS specific function (magic_* on linux, FindMimeFromData on windows */
   mime_type = os_mime_type_guess(path);
+
   /* ask uhuru handle for the array of modules */
   modules = uhuru_get_applicable_modules(scan->uhuru, mime_type);
 
@@ -222,6 +223,8 @@ static enum uhuru_file_status scan_file(struct uhuru_scan *scan, const char *pat
 
   /* and free the report (it may contain a strdup'ed string) */
   uhuru_report_destroy(&report);
+
+  free(mime_type);
 
   return status;
 }
@@ -393,6 +396,7 @@ enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path)
 {
   struct uhuru_module **modules;
   const char *mime_type;
+  enum uhuru_file_status status;
 
   /* find the mime type, as in scan_file fun */
   mime_type = os_mime_type_guess(path);
@@ -401,5 +405,9 @@ enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path)
   if (modules == NULL)
     return UHURU_UNKNOWN_FILE_TYPE;
 
-  return scan_apply_modules(path, mime_type, modules, NULL);
+  status = scan_apply_modules(path, mime_type, modules, NULL);
+
+  free(mime_type);
+
+  return status;
 }

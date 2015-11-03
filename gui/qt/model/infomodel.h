@@ -35,7 +35,8 @@ public:
 
   const QString &name() { return _name; }
   enum UpdateStatus status() { return _status; }
-  
+  QList<BaseInfo> &baseInfos() { return _baseInfos; }
+
 private:
   QString _name;
   enum UpdateStatus _status;
@@ -50,6 +51,8 @@ class InfoModel : public QObject {
 public:
   explicit InfoModel(enum UpdateStatus globalStatus);
   ~InfoModel() {}
+
+  QList<ModuleInfo> &moduleInfos() { return _moduleInfos; }
 
 private:
   enum UpdateStatus _globalStatus;
