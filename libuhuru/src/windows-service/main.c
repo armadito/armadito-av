@@ -3,7 +3,6 @@
 #include "named_pipe_server.h"
 #include <libuhuru-config.h>
 #include <libuhuru/core.h>
-#include <libuhuru/ipc.h>
 
 int main(int argc, const char **argv)
 {

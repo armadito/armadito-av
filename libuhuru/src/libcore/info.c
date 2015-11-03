@@ -11,6 +11,21 @@
 #include <string.h>
 #include <stdlib.h>
 
+const char *uhuru_update_status_str(enum uhuru_update_status status)
+{
+  switch(status) {
+#undef M
+#define M(S) case S: return #S
+    M(UHURU_UPDATE_OK);
+    M(UHURU_UPDATE_LATE);
+    M(UHURU_UPDATE_CRITICAL);
+    M(UHURU_UPDATE_NON_AVAILABLE);
+  }
+
+  return "UHURU_UPDATE_UNKNOWN";
+}
+
+
 static int update_status_compare(enum uhuru_update_status s1, enum uhuru_update_status s2)
 {
   if (s1 == s2)

@@ -3,6 +3,10 @@
 
 #include "libuhuru-config.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined(HAVE_STRDUP)
 #define os_strdup strdup
 #elif defined(HAVE__STRDUP)
@@ -13,6 +17,10 @@
 #define os_strerror strerror
 #else
 char *os_strerror(int errnum);
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

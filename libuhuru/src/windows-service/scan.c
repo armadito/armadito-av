@@ -4,7 +4,6 @@
 #include <conio.h>
 #include <libuhuru-config.h>
 #include <libuhuru/core.h>
-#include <libuhuru/ipc.h>
 #include "utils/json.h"
 
 #include "named_pipe_client.h"

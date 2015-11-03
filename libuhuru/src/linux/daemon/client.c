@@ -1,7 +1,7 @@
 #include <libuhuru-config.h>
 
 #include <libuhuru/core.h>
-#include <libuhuru/ipc.h>
+#include "ipc.h"
 #include <os/io.h>
 
 #include "client.h"
@@ -36,10 +36,11 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
   ipc_manager_msg_send(cl->manager, 
 		       IPC_MSG_ID_SCAN_FILE, 
 		       IPC_STRING_T, report->path, 
-		       IPC_INT32_T, report->status,
+		       IPC_STRING_T, uhuru_file_status_str(report->status),
 		       IPC_STRING_T, report->mod_name,
 		       IPC_STRING_T, report->mod_report,
-		       IPC_INT32_T, report->action,
+		       IPC_STRING_T, uhuru_action_pretty_str(report->action),
+		       IPC_INT32_T, report->progress,
 		       IPC_NONE_T);
 }
 
@@ -84,7 +85,7 @@ static void info_send(struct ipc_manager *manager, struct uhuru_info *info)
     ipc_manager_msg_begin(manager, IPC_MSG_ID_INFO_MODULE);
     ipc_manager_msg_add(manager, 
 			IPC_STRING_T, (*m)->name, 
-			IPC_INT32_T, (*m)->mod_status, 
+			IPC_STRING_T, uhuru_update_status_str((*m)->mod_status), 
 			IPC_STRING_T, (*m)->update_date, 
 			IPC_NONE_T);
 
@@ -106,7 +107,7 @@ static void info_send(struct ipc_manager *manager, struct uhuru_info *info)
 
   ipc_manager_msg_send(manager, 
 		       IPC_MSG_ID_INFO_END, 
-		       IPC_INT32_T, info->global_status, 
+		       IPC_STRING_T, uhuru_update_status_str(info->global_status), 
 		       IPC_NONE_T);
 }
 

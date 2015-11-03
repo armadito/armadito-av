@@ -1,6 +1,4 @@
 
-
-
 function ask_for_new_scan( new_scan, scan_id )
 {
 
@@ -63,8 +61,6 @@ function process_scan_report( scan_report )
 	
 	return 0;
 }
-
-
 
 
 

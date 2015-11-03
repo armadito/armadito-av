@@ -1,14 +1,14 @@
-#ifndef _MODEL_COUNTER_H_
-#define _MODEL_COUNTER_H_
+#ifndef _MODEL_VALUE_H_
+#define _MODEL_VALUE_H_
 
 #include <QObject>
 
-class Counter : public QObject
+class Value : public QObject
 {
   Q_OBJECT
 
  public:
-  Counter() : _value(0) {}
+  Value() : _value(0) {}
   
   int value() const { return _value; }
 

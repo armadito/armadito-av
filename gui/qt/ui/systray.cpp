@@ -1,7 +1,7 @@
 #include "systray.h"
 #include "utils/stdpaths.h"
 #include "model/scanmodel.h"
-#include "model/updateinfomodel.h"
+#include "model/infomodel.h"
 #include "scanwindow.h"
 #include "aboutdialog.h"
 #include "updatedialog.h"
@@ -37,29 +37,7 @@ void Systray::createActions()
 
 QIcon *Systray::getIcon()
 {
-
-#if 0
-  QSvgRenderer renderer(QString(":/icons/uhuru_white.svg"));
-
-  QPixmap pixmap(24, 24);
-  //  pixmap.fill(0xaaA08080);  // partly transparent red-ish background
-
-  // Get QPainter that paints to the image
-  QPainter painter(&pixmap);
-  painter.setPen(Qt::white);
-  renderer.render(&painter);
-
-  //  QIcon icon(":/icons/uhuru.svg");
-  // QGraphicsSvgItem *red = new QGraphicsSvgItem();
-  // QGraphicsColorizeEffect *effect = new QGraphicsColorizeEffect();
-  // red.setGraphicsEffect(effect);
-
-  return new QIcon(pixmap);
-#endif
-
-#if 1
   return new QIcon(":/icons/uhuru_white.svg");
-#endif
 }
 
 void Systray::createTrayIcon()
@@ -100,7 +78,6 @@ void Systray::scan(const QString &path)
 {
   std::cerr << "scanning " << path.toStdString().c_str() << "\n";
 
-  	
   ScanModel *model = new ScanModel(path);
   ScanWindow *w = new ScanWindow(model);
   w->show();
@@ -116,30 +93,7 @@ void Systray::scan()
 {
   QString fileName = "";
 
-#if 0
-  QFileDialog *fileDialog = new QFileDialog(0);
-
-  fileDialog->setFileMode(QFileDialog::DirectoryOnly);
-  fileDialog->setOption(QFileDialog::DontUseNativeDialog, false);
-  fileDialog->setLabelText(QFileDialog::Accept, "&Choisir");
-  fileDialog->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-  fileDialog->setDirectory(StdPaths::desktopLocation());
-
-  if (fileDialog->exec() == QDialog::Accepted) {
-    QStringList list = fileDialog->selectedFiles();
-    if(list.size() > 0)
-      fileName = list[0];
-  }
-#endif
-#if 0
-  fileName = QFileDialog::getOpenFileName(0, tr("Scan File"), StdPaths::desktopLocation(), "", 0, QFileDialog::ShowDirsOnly);
-#endif
-#if 0
-  fileName = QFileDialog::getExistingDirectory(0, tr("Scan Directory"), "", QFileDialog::ShowDirsOnly);
-#endif
-#if 1
   fileName = QFileDialog::getExistingDirectory(0, tr("Scan Directory"), "", 0);
-#endif
 
   if(!fileName.isNull())
     scan(fileName);
@@ -147,12 +101,19 @@ void Systray::scan()
 
 void Systray::update()
 {
+  InfoModel *model = new InfoModel();
+  UpdateDialog *d = new UpdateDialog(model);
+
+  d->show();
+  d->raise();
+  d->activateWindow();
+
   // Init model => this model will be re-used each time user click on refresh button
-  UpdateInfoModel *model = new UpdateInfoModel();
+  //UpdateInfoModel *model = new UpdateInfoModel();
 
   // Init UpdateDialog ui, set first values and init connexions
-  UpdateDialog *update = new UpdateDialog(model);
-  update->show();
+  //UpdateDialog *update = new UpdateDialog(model);
+  //update->show();
 }
 
 

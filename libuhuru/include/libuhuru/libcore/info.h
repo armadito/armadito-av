@@ -15,6 +15,8 @@ enum uhuru_update_status {
   UHURU_UPDATE_NON_AVAILABLE,
 };
 
+const char *uhuru_update_status_str(enum uhuru_update_status status);
+
 struct uhuru_base_info {
   const char *name;
   /* UTC and ISO 8601 date */

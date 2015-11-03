@@ -1,5 +1,6 @@
 #include "callbacks.h"
 #include "Struct.h"
+#include "communication.h"
 
 
 // This function launch a Scan with the analysis process.
@@ -10,6 +11,8 @@ SCAN_RESULT LaunchFileAnalysis(_In_ PFLT_CALLBACK_DATA Data, _In_ PCFLT_RELATED_
 	SCAN_RESULT res = NONE;
 	PFLT_FILE_NAME_INFORMATION FileNameInformation = NULL;	
 	UNICODE_STRING malName;
+	SCAN_RESULT answer = NONE;
+	
 	
 	UNREFERENCED_PARAMETER( FltObjects );
 
@@ -40,6 +43,17 @@ SCAN_RESULT LaunchFileAnalysis(_In_ PFLT_CALLBACK_DATA Data, _In_ PCFLT_RELATED_
 			//FileNameInformation = NULL;
 			//return FLT_POSTOP_FINISHED_PROCESSING;
 		}
+
+		//-----------------------------------------
+		// Send scan order to the scan service.
+		ntStatus = SendScanOrder(FltObjects->Filter, &FileNameInformation->Name, &answer);
+		if (!NT_SUCCESS(ntStatus)) {			
+			DbgPrint("[-] Error :: UhuruGuard!LaunchFileAnalysis :: SendScanOrder() failed :: 0x%x \n", ntStatus);
+			res = ERROR;
+			__leave;			
+		}
+
+		//-----------------------------------------
 
 		if ( RtlEqualUnicodeString(&FileNameInformation->FinalComponent,&malName,FALSE) == TRUE ) {	
 			res = MALWARE;		
@@ -73,9 +87,6 @@ SCAN_RESULT LaunchFileAnalysis(_In_ PFLT_CALLBACK_DATA Data, _In_ PCFLT_RELATED_
 /*************************************************************************
     MiniFilter callback routines.
 *************************************************************************/
-
-
-
 
 
 FLT_PREOP_CALLBACK_STATUS
@@ -118,11 +129,46 @@ Return Value:
 
 	// If the caller thread is a system thread, do not call the post operation callback.
 	if (PsIsSystemThread(Data->Thread) == TRUE) {
-		DbgPrint("[i] Debug :: UhuruGuard!PreOperationIrpCreate :: System thread caller\n");
+		//DbgPrint("[i] Debug :: UhuruGuard!PreOperationIrpCreate :: System thread caller\n");
 		return FLT_PREOP_SUCCESS_NO_CALLBACK ;
 	}
     
-    //DbgPrint("UhuruGuard!UhuruGuardPreOperation: Entered\n");
+    
+	//
+    //  Directory opens don't need to be scanned.
+    //
+
+    if (FlagOn( Data->Iopb->Parameters.Create.Options, FILE_DIRECTORY_FILE )) {
+        
+        return FLT_PREOP_SUCCESS_NO_CALLBACK;
+    }
+
+    //
+    //  Skip pre-rename operations which always open a directory.
+    //
+
+    if ( FlagOn( Data->Iopb->OperationFlags, SL_OPEN_TARGET_DIRECTORY )) {
+        
+        return FLT_PREOP_SUCCESS_NO_CALLBACK;
+    }
+    
+    //
+    //  Skip paging files.
+    //
+
+    if (FlagOn( Data->Iopb->OperationFlags, SL_OPEN_PAGING_FILE )) {
+       
+        return FLT_PREOP_SUCCESS_NO_CALLBACK;
+    }
+
+    //
+    //  Skip scanning DASD opens 
+    //
+    
+    if (FlagOn( FltObjects->FileObject->Flags, FO_VOLUME_OPEN )) {
+
+        return FLT_PREOP_SUCCESS_NO_CALLBACK;      
+    } 
 
 
     // returns FLT_PREOP_SUCCESS_WITH_CALLBACK.
@@ -193,10 +239,8 @@ Return Value:
    
 		// Ignore Volume Requests.
 		if (FlagOn(FltObjects->FileObject->Flags, FO_VOLUME_OPEN)) {
-			DbgPrint("[-] Warning :: UhuruGuard!PostOperationIrpCreate :: Ignore VOLUME_OPEN requests.\n");
-			//bleave = TRUE;
-			__leave;
-			//return FLT_POSTOP_FINISHED_PROCESSING;
+			DbgPrint("[-] Warning :: UhuruGuard!PostOperationIrpCreate :: Ignore VOLUME_OPEN requests.\n");			
+			__leave;			
 		}
 
 		// Ignore Directory Open Creation.
@@ -210,6 +254,27 @@ Return Value:
 			//DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCreate :: Ignoring Directory file operation \n");
 			__leave;
 		}
+
+#if 0
+		// Skip encrypted files :: source avscan project.
+		if (!(FlagOn(desiredAccess, FILE_WRITE_DATA)) && 
+        !(FlagOn(desiredAccess, FILE_READ_DATA)) ) {
+        
+			BOOLEAN encrypted = FALSE;
+			status = AvGetFileEncrypted( FltObjects->Instance,
+										 FltObjects->FileObject,
+										 &encrypted );
+			if (!NT_SUCCESS( status )) {
+
+				AV_DBG_PRINT( AVDBG_TRACE_ROUTINES,
+					  ("[AV] AvPostCreate: AvGetFileEncrypted FAILED!! \n0x%x\n", status) );
+			}
+			if (encrypted) {
+        
+				return FLT_POSTOP_FINISHED_PROCESSING;
+			}
+		}
+#endif
 
 		// 
 		//Data->Iopb->Parameters.Create.SecurityContext->DesiredAccess == GENERIC_READ;
@@ -293,8 +358,10 @@ Return Value:
 	
 		}
 
-	
-		//FltReleaseContext((PFLT_CONTEXT)FileContext);
+		if (FileContext != NULL) {
+			FltReleaseContext((PFLT_CONTEXT)FileContext);
+			FileContext = NULL;
+		}
 		//btry = TRUE;
 
 
@@ -346,6 +413,7 @@ Return Value:
 	//HANDLE fhdle = NULL;
 	//int flag = 0;
 	PFILE_CONTEXT FileContext = NULL;
+	BOOLEAN bIsDir = FALSE;
 
 	//UNREFERENCED_PARAMETER( Data );
 	UNREFERENCED_PARAMETER( Flags );
@@ -356,6 +424,18 @@ Return Value:
 
 		// If the size the content to write is NULL, then leave.
 		if (Data->Iopb->Parameters.Write.Length == 0) {
+			__leave;
+		}
+
+		// Ignore Directory Open Creation.
+		ntStatus = FltIsDirectory(FltObjects->FileObject, FltObjects->Instance, &bIsDir);
+		if (!NT_SUCCESS(Data->IoStatus.Status)) {
+			DbgPrint("[-] Error :: UhuruGuard!PostOperationIrpWrite :: FltIsDirectory() routine failed !! 0x%x \n",ntStatus);
+			__leave;
+		}
+
+		if (bIsDir == TRUE) {
+			//DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCreate :: Ignoring Directory file operation \n");
 			__leave;
 		}
 
@@ -415,8 +495,11 @@ Return Value:
 	}
 	__finally {
 
-		if (FileContext != NULL)
+		if (FileContext != NULL) {
+			//DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpWrite :: Freeing context in Write callback :: %wZ\n",FltObjects->FileObject->FileName);
 			FltReleaseContext((PFLT_CONTEXT)FileContext);
+			FileContext = NULL;
+		}
 
 	}
 
@@ -458,10 +541,11 @@ Return Value:
 {
     NTSTATUS ntStatus, retstatus  = FLT_POSTOP_FINISHED_PROCESSING;	
 	PFILE_CONTEXT FileContext = NULL;
-	SCAN_RESULT scanRes = NONE;
+	//SCAN_RESULT scanRes = NONE;
 	
 
-	UNREFERENCED_PARAMETER( Flags );    
+	UNREFERENCED_PARAMETER( Flags );  
+	UNREFERENCED_PARAMETER( FltObjects ); 
     UNREFERENCED_PARAMETER( CompletionContext );
 
 	__try {
@@ -474,6 +558,7 @@ Return Value:
 		}
 		
 		// In this case the file has not been analyzed.
+		/*
 		if (FileContext->scanResult == NONE) {
 			
 			//DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCleanup :: Context realeased for new file :: %wZ\n",FltObjects->FileObject->FileName);			
@@ -485,6 +570,7 @@ Return Value:
 			}
 			
 		}
+		*/
 		
 		FltReleaseContext((PFLT_CONTEXT)FileContext);
 		//DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCleanup :: ::Context realeased for file %wZ\n",FltObjects->FileObject->FileName);
