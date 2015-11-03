@@ -4,7 +4,7 @@
 #include <QListWidgetItem>
 #include <QList>
 
-UpdateDialog::UpdateDialog(UpdateInfoModel *model, QWidget *parent) :
+UpdateDialog::UpdateDialog(InfoModel *model, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::UpdateDialog)
 {
@@ -12,33 +12,16 @@ UpdateDialog::UpdateDialog(UpdateInfoModel *model, QWidget *parent) :
 	
     _model = model;
 
-    fillView(model);
+    QObject::connect(_model, SIGNAL(updated()), this, SLOT(fillView()));
+
+    _model->doUpdate();
+
     SetupRefreshButton();
 }
 
 QIcon *UpdateDialog::getIcon()
 {
-#if 0
-  QSvgRenderer renderer(QString(":/icons/uhuru_grey.svg"));
-
-  QPixmap pixmap(24, 24);
-  //  pixmap.fill(0xaaA08080);  // partly transparent red-ish background
-
-  // Get QPainter that paints to the image
-  QPainter painter(&pixmap);
-  painter.setPen(Qt::white);
-  renderer.render(&painter);
-
-  //  QIcon icon(":/icons/uhuru.svg");
-  // QGraphicsSvgItem *red = new QGraphicsSvgItem();
-  // QGraphicsColorizeEffect *effect = new QGraphicsColorizeEffect();
-  // red.setGraphicsEffect(effect);
-
-  return new QIcon(pixmap);
-#endif
-#if 1
   return new QIcon(":/icons/uhuru_grey.svg");
-#endif
 }
 
 void UpdateDialog::SetupRefreshButton()
@@ -51,11 +34,12 @@ void UpdateDialog::SetupRefreshButton()
 
 void UpdateDialog::RefreshUpdateInfo()
 {
-    fillView(_model);
+  //    fillView(_model);
 }
 
-void UpdateDialog::fillView(UpdateInfoModel *model)
+void UpdateDialog::fillView()
 {
+  _model->debug();
 
 #if 0
     struct uhuru_info * info = NULL;

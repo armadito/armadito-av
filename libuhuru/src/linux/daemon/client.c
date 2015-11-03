@@ -85,7 +85,7 @@ static void info_send(struct ipc_manager *manager, struct uhuru_info *info)
     ipc_manager_msg_begin(manager, IPC_MSG_ID_INFO_MODULE);
     ipc_manager_msg_add(manager, 
 			IPC_STRING_T, (*m)->name, 
-			IPC_INT32_T, (*m)->mod_status, 
+			IPC_STRING_T, uhuru_update_status_str((*m)->mod_status), 
 			IPC_STRING_T, (*m)->update_date, 
 			IPC_NONE_T);
 
@@ -107,7 +107,7 @@ static void info_send(struct ipc_manager *manager, struct uhuru_info *info)
 
   ipc_manager_msg_send(manager, 
 		       IPC_MSG_ID_INFO_END, 
-		       IPC_INT32_T, info->global_status, 
+		       IPC_STRING_T, uhuru_update_status_str(info->global_status), 
 		       IPC_NONE_T);
 }
 
