@@ -1,6 +1,13 @@
 #ifndef _LIBUHURU_OS_MIMETYPE_H_
 #define _LIBUHURU_OS_MIMETYPE_H_
 
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 /**
  *      \fn void os_mime_type_init(void);
  *      \brief Initializes mime type detection
@@ -36,6 +43,10 @@ so we give up for now using file descriptors
  *      \return the mime type as a string, NULL if not guessable
  */
 const char *os_mime_type_guess_fd(int fd);
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif
