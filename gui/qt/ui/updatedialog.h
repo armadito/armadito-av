@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include <QListWidget>
-#include "model/updateinfomodel.h"
+#include "model/infomodel.h"
 
 namespace Ui {
 class UpdateDialog;
@@ -14,22 +14,24 @@ class UpdateDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit UpdateDialog(UpdateInfoModel *model = NULL, QWidget *parent = 0);
+    explicit UpdateDialog(InfoModel *model = NULL, QWidget *parent = 0);
     ~UpdateDialog();
 
 public slots:
     void RefreshUpdateInfo();
+
+private slots:
+    void fillView();
 
 private:
     QString getStatusQString(int status);
 #if 0
     void AddModuleItem(struct uhuru_module_info **m, QListWidget *pListWidget);
 #endif
-    void fillView(UpdateInfoModel *model);
     void SetupRefreshButton();
     QIcon *getIcon();
     Ui::UpdateDialog *ui;
-    UpdateInfoModel *_model;
+    InfoModel *_model;
 };
 
 #endif // UPDATEDIALOG_H

@@ -4,19 +4,18 @@
 #include <iostream>
 #include <QDebug>
 
-BaseInfo::BaseInfo(const QString &name, const QString &date, const QString &version, unsigned int signatureCount, const QString &fullPath)
-  : _name(name), _date(date), _version(version), _signatureCount(signatureCount), _fullPath(fullPath)
+void InfoModel::doUpdate()
 {
+  InfoModelThread *infoThread = new InfoModelThread(this);
+
+  QObject::connect(infoThread, SIGNAL(finished()), this, SLOT(infoThreadFinished()));
+
+  infoThread->start();
 }
 
-ModuleInfo::ModuleInfo(const QString &name, enum UpdateStatus status, const QString &updateDate)
-  : _name(name), _status(status), _updateDate(updateDate)
+void InfoModel::infoThreadFinished()
 {
-}
-
-InfoModel::InfoModel(enum UpdateStatus globalStatus)
-  : _globalStatus(globalStatus)
-{
+  emit updated();
 }
 
 static enum UpdateStatus statusFromStr(const char *status)
@@ -30,7 +29,7 @@ static enum UpdateStatus statusFromStr(const char *status)
   if (!strcmp(status, "UHURU_UPDATE_NON_AVAILABLE"))
     return UPDATE_NON_AVAILABLE;
 
-  return static_cast<enum UpdateStatus>(-42);
+  return UPDATE_UNKNOWN;
 }
 
 static void ipc_handler_info_module(struct ipc_manager *manager, void *data)
@@ -55,6 +54,7 @@ static void ipc_handler_info_module(struct ipc_manager *manager, void *data)
     ipc_manager_get_arg_at(manager, argc+4, IPC_STRING_T, &fullPath);
 
     BaseInfo baseInfo(name, date, version, signatureCount, fullPath);
+
     modInfo.baseInfos().append(baseInfo);
   }
 
@@ -64,6 +64,11 @@ static void ipc_handler_info_module(struct ipc_manager *manager, void *data)
 static void ipc_handler_info_end(struct ipc_manager *manager, void *data)
 {
   InfoModel *model = static_cast<InfoModel *>(data);
+  char *globalStatus;
+
+  ipc_manager_get_arg_at(manager, 0, IPC_STRING_T, &globalStatus);
+
+  model->globalStatus() = statusFromStr(globalStatus);
 }
 
 void InfoModelThread::run()
@@ -79,5 +84,27 @@ void InfoModelThread::run()
     ;
 
   ipc_manager_free(manager);
+}
+
+void InfoModel::debug()
+{
+  qDebug() << "DEBUG: InfoModel :";
+  qDebug() << "  globalStatus: " << _globalStatus;
+  for (int i = 0; i < _moduleInfos.size(); ++i) {
+    const ModuleInfo &mod = _moduleInfos.at(i);
+
+    qDebug() << "  module: " << mod.name();
+    qDebug() << "    status: " << mod.status();
+    qDebug() << "    update date: " << mod.updateDate();
+    for (int b = 0; b < mod.baseInfos().size(); b++) {
+      const BaseInfo &base = mod.baseInfos().at(b);
+
+      qDebug() << "      base: " << base.name();
+      qDebug() << "      date: " << base.date();
+      qDebug() << "      version: " << base.version();
+      qDebug() << "      signatures: " << base.signatureCount();
+      qDebug() << "      fullPath: " << base.fullPath();
+    }
+ }
 }
 
