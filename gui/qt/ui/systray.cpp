@@ -1,7 +1,7 @@
 #include "systray.h"
 #include "utils/stdpaths.h"
 #include "model/scanmodel.h"
-#include "model/updateinfomodel.h"
+#include "model/infomodel.h"
 #include "scanwindow.h"
 #include "aboutdialog.h"
 #include "updatedialog.h"
@@ -78,7 +78,6 @@ void Systray::scan(const QString &path)
 {
   std::cerr << "scanning " << path.toStdString().c_str() << "\n";
 
-  	
   ScanModel *model = new ScanModel(path);
   ScanWindow *w = new ScanWindow(model);
   w->show();
@@ -102,12 +101,19 @@ void Systray::scan()
 
 void Systray::update()
 {
+  InfoModel *model = new InfoModel();
+  UpdateDialog *d = new UpdateDialog(model);
+
+  d->show();
+  d->raise();
+  d->activateWindow();
+
   // Init model => this model will be re-used each time user click on refresh button
-  UpdateInfoModel *model = new UpdateInfoModel();
+  //UpdateInfoModel *model = new UpdateInfoModel();
 
   // Init UpdateDialog ui, set first values and init connexions
-  UpdateDialog *update = new UpdateDialog(model);
-  update->show();
+  //UpdateDialog *update = new UpdateDialog(model);
+  //update->show();
 }
 
 

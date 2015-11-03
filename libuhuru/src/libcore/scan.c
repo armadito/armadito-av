@@ -226,7 +226,7 @@ static enum uhuru_file_status scan_file(struct uhuru_scan *scan, const char *pat
   uhuru_report_destroy(&report);
 
   if (mime_type != NULL)
-    free(mime_type);
+    free((void *)mime_type);
 
   return status;
 }
@@ -411,7 +411,7 @@ enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path)
 
   status = scan_apply_modules(path, mime_type, modules, NULL);
 
-  free(mime_type);
+  free((void *)mime_type);
 
   return status;
 }
