@@ -14,10 +14,12 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-static enum dir_entry_flag dirent_flags(DWORD fileAttributes)
+// cpp
+#include <string>
+
+static enum os_file_flag dirent_flags(DWORD fileAttributes)
 {
 	switch(fileAttributes) {
-
 		case FILE_ATTRIBUTE_DIRECTORY:
 			return FILE_FLAG_IS_DIRECTORY;	  
 		case FILE_ATTRIBUTE_DEVICE:
@@ -30,10 +32,7 @@ static enum dir_entry_flag dirent_flags(DWORD fileAttributes)
 			return FILE_FLAG_IS_PLAIN_FILE;
 		default:
 			return FILE_FLAG_IS_UNKNOWN;
-
 	}
-
-  return FILE_FLAG_IS_UNKNOWN;
 }
 
 BOOL DirectoryExists(LPCTSTR szPath)
@@ -44,10 +43,42 @@ BOOL DirectoryExists(LPCTSTR szPath)
 		(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
+void replaceAll(std::string& str, const std::string& from, const std::string& to) {
+	if (from.empty())
+		return;
+	size_t start_pos = 0;
+	while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+		str.replace(start_pos, from.length(), to);
+		start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+	}
+}
+
+// We want escape ? and * characters 
+char *cpp_escape_str(const char * str_in){
+
+	char * str_out = NULL;
+	std::string str(str_in);
+
+	std::string c1("?");
+	std::string c2("*");
+	std::string c3("\\");
+	std::string c1_("\\?");
+	std::string c2_("\\*");
+	std::string c3_("\\\\");
+
+	replaceAll(str, c3, c3_);
+	replaceAll(str, c1, c1_);
+	replaceAll(str, c2, c2_);
+
+	return _strdup(str.c_str());
+}
+
 
 void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data ) {
 
 	char * sPath = NULL, *entryPath= NULL;
+	char * escapedPath = NULL;
+
 	HANDLE fh = NULL;
 	int size = 0;
 	WIN32_FIND_DATAA fdata ;
@@ -60,22 +91,29 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 		return;
 	}
 	
+	printf(" path -- %s \n", path);
+	// We escape ? and * characters
+	escapedPath = cpp_escape_str(path);
+
+	printf("escaped_path -- %s \n", escapedPath);
+
 	// Check if it is a directory
 	if (!(GetFileAttributesA(path) & FILE_ATTRIBUTE_DIRECTORY)) {
 		g_log(NULL, G_LOG_LEVEL_WARNING, "Warning :: os_dir_map() :: (%s) is not a directory. ", path);
 		return;
 	}
 
-	size = strlen(path) + 3;
+	size = strlen(escapedPath) + 3;
 	sPath = (char*)calloc(size + 1, sizeof(char));
 	sPath[size] = '\0';
-	sprintf_s(sPath, size, "%s\\*", path);
+	sprintf_s(sPath, size, "%s\\*", escapedPath);
 
-	// g_log(NULL, G_LOG_LEVEL_WARNING, "os_dir_map() :: (%s)", sPath);
+	//g_log(NULL, G_LOG_LEVEL_WARNING, "os_dir_map() :: (%s)", sPath);
 
+	// First file scanned ??
 	fh = FindFirstFileA(sPath, &fdata);
 	if (fh == INVALID_HANDLE_VALUE) {
-		g_log(NULL, G_LOG_LEVEL_WARNING, "warning :: os_dir_map() :: FindFirstFileA() failed ::  (%s) ",os_strerror(errno));
+		g_log(NULL, G_LOG_LEVEL_WARNING, "warning :: FindFirstFileA() failed for %s (%s) ", sPath, os_strerror(errno));
 		return;
 	}
 
@@ -89,26 +127,24 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 
 		// build the entry complete path.
 		size = strlen(path)+strlen(tmp.cFileName)+2;
-		free(entryPath);
 		entryPath = (char*)calloc(size + 1, sizeof(char));
 		entryPath[size] = '\0';
 		sprintf_s(entryPath, size,"%s\\%s", path, tmp.cFileName);
-
 
 		// If it is a directory and we do recursive scan
 		if ((GetFileAttributesA(entryPath) & FILE_ATTRIBUTE_DIRECTORY) && recurse >= 1) {
 			os_dir_map(entryPath, recurse, dirent_cb, data);
 		}
 		else {
-			// Add file to scan
-			// g_log(NULL, G_LOG_LEVEL_WARNING, "Scanning file !: %s", entryPath);
-
 			flags = dirent_flags(tmp.dwFileAttributes);
 			(*dirent_cb)(entryPath, flags, 0, data);
 		}
+
+		free(entryPath);
 	}
 
-	free(entryPath);
+	// FindClose ???
+	free(escapedPath);
 	free(sPath);
 	CloseHandle(fh);
 

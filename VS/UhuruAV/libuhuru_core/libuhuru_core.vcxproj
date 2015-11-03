@@ -106,7 +106,9 @@
     <ClCompile Include="..\..\..\libuhuru\src\libcore\scan.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\status.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\uhuru.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\os\windows\dir.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\os\windows\dir.c">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
+    </ClCompile>
     <ClCompile Include="..\..\..\libuhuru\src\os\windows\file.c" />
     <ClCompile Include="..\..\..\libuhuru\src\os\windows\mimetype.c">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
