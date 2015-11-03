@@ -88,6 +88,11 @@
     <ClInclude Include="..\..\..\libuhuru\src\libcore\reportp.h" />
     <ClInclude Include="..\..\..\libuhuru\src\libcore\statusp.h" />
     <ClInclude Include="..\..\..\libuhuru\src\libcore\uhurup.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\os\dir.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\os\file.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\os\io.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\os\mimetype.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\os\string.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\libuhuru\src\libcore\action.c" />
@@ -103,7 +108,9 @@
     <ClCompile Include="..\..\..\libuhuru\src\libcore\uhuru.c" />
     <ClCompile Include="..\..\..\libuhuru\src\os\windows\dir.c" />
     <ClCompile Include="..\..\..\libuhuru\src\os\windows\file.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\os\windows\mimetype.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\os\windows\mimetype.c">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
+    </ClCompile>
     <ClCompile Include="..\..\..\libuhuru\src\os\windows\string.c" />
   </ItemGroup>
   <ItemGroup>
