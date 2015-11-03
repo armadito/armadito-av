@@ -20,6 +20,7 @@
 static enum os_file_flag dirent_flags(DWORD fileAttributes)
 {
 	switch(fileAttributes) {
+
 		case FILE_ATTRIBUTE_DIRECTORY:
 			return FILE_FLAG_IS_DIRECTORY;	  
 		case FILE_ATTRIBUTE_DEVICE:
@@ -73,7 +74,6 @@ char *cpp_escape_str(const char * str_in){
 	return _strdup(str.c_str());
 }
 
-
 void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data ) {
 
 	char * sPath = NULL, *entryPath= NULL;
@@ -91,6 +91,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 		return;
 	}
 	
+
 	printf(" path -- %s \n", path);
 	// We escape ? and * characters
 	escapedPath = cpp_escape_str(path);
@@ -127,15 +128,18 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 
 		// build the entry complete path.
 		size = strlen(path)+strlen(tmp.cFileName)+2;
+
 		entryPath = (char*)calloc(size + 1, sizeof(char));
 		entryPath[size] = '\0';
 		sprintf_s(entryPath, size,"%s\\%s", path, tmp.cFileName);
+
 
 		// If it is a directory and we do recursive scan
 		if ((GetFileAttributesA(entryPath) & FILE_ATTRIBUTE_DIRECTORY) && recurse >= 1) {
 			os_dir_map(entryPath, recurse, dirent_cb, data);
 		}
 		else {
+			
 			flags = dirent_flags(tmp.dwFileAttributes);
 			(*dirent_cb)(entryPath, flags, 0, data);
 		}

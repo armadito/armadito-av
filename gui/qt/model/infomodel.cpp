@@ -30,48 +30,35 @@ static enum UpdateStatus statusFromStr(const char *status)
   if (!strcmp(status, "UHURU_UPDATE_NON_AVAILABLE"))
     return UPDATE_NON_AVAILABLE;
 
-  return -42;
+  return static_cast<enum UpdateStatus>(-42);
 }
 
 static void ipc_handler_info_module(struct ipc_manager *manager, void *data)
 {
   InfoModel *model = static_cast<InfoModel *>(data);
+  char *modName, *modStatus, *updateDate;
 
-  struct ipc_handler_info_data *handler_data = (struct ipc_handler_info_data *)data;
-  struct uhuru_module_info *mod_info = g_new0(struct uhuru_module_info, 1);
-  int n_bases, i, argc;
-  char *mod_name, *mod_status, *update_date;
+  ipc_manager_get_arg_at(manager, 0, IPC_STRING_T, &modName);
+  ipc_manager_get_arg_at(manager, 1, IPC_STRING_T, &modStatus);
+  ipc_manager_get_arg_at(manager, 2, IPC_STRING_T, &updateDate);
 
-  ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &mod_name);
-  ipc_manager_get_arg_at(m, 1, IPC_STRING_T, &mod_status);
-  ipc_manager_get_arg_at(m, 2, IPC_STRING_T, &update_date);
+  ModuleInfo modInfo(modName, statusFromStr(modStatus), updateDate);
 
+  for (int argc = 3; argc < ipc_manager_get_argc(manager); argc += 5) {
+    char *name, *date, *version, *fullPath;
+    unsigned int signatureCount;
 
+    ipc_manager_get_arg_at(manager, argc+0, IPC_STRING_T, &name);
+    ipc_manager_get_arg_at(manager, argc+1, IPC_STRING_T, &date);
+    ipc_manager_get_arg_at(manager, argc+2, IPC_STRING_T, &version);
+    ipc_manager_get_arg_at(manager, argc+3, IPC_INT32_T, &signatureCount);
+    ipc_manager_get_arg_at(manager, argc+4, IPC_STRING_T, &fullPath);
 
-  n_bases = (ipc_manager_get_argc(m) - 3) / 5;
-
-  mod_info->base_infos = g_new0(struct uhuru_base_info *, n_bases + 1);
-
-  argc = 3;
-
-  for (i = 0; i < n_bases; i++, argc += 5) {
-    struct uhuru_base_info *base_info = g_new(struct uhuru_base_info, 1);
-    char *name, *date, *version, *full_path;
-
-    ipc_manager_get_arg_at(m, argc+0, IPC_STRING_T, &name);
-    base_info->name = os_strdup(name);
-    ipc_manager_get_arg_at(m, argc+1, IPC_STRING_T, &date);
-    base_info->date = os_strdup(date);
-    ipc_manager_get_arg_at(m, argc+2, IPC_STRING_T, &version);
-    base_info->version = os_strdup(version);
-    ipc_manager_get_arg_at(m, argc+3, IPC_INT32_T, &base_info->signature_count);
-    ipc_manager_get_arg_at(m, argc+4, IPC_STRING_T, &full_path);
-    base_info->full_path = os_strdup(full_path);
-
-    mod_info->base_infos[i] = base_info;
+    BaseInfo baseInfo(name, date, version, signatureCount, fullPath);
+    modInfo.baseInfos().append(baseInfo);
   }
 
-  g_array_append_val(handler_data->g_module_infos, mod_info);
+  model->moduleInfos().append(modInfo);
 }
 
 static void ipc_handler_info_end(struct ipc_manager *manager, void *data)
