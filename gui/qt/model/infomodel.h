@@ -2,7 +2,7 @@
 #define _MODEL_INFOMODEL_H_
 
 #include <QObject>
-#include <QList>
+#include <QVector>
 #include <QThread>
 
 enum UpdateStatus {
@@ -15,6 +15,7 @@ enum UpdateStatus {
 class BaseInfo {
 
 public:
+  BaseInfo() : _name(""), _date(""), _version(""), _signatureCount(0), _fullPath("") {} 
   BaseInfo(const QString &name, const QString &date, const QString &version, unsigned int signatureCount, const QString &fullPath); 
   ~BaseInfo() {}
 
@@ -28,21 +29,21 @@ private:
 };
 
 class ModuleInfo {
-
 public:
+  ModuleInfo() : _name(""), _status(UPDATE_OK), _updateDate("") {}
   ModuleInfo(const QString &name, enum UpdateStatus status, const QString &updateDate);
   ~ModuleInfo() {}
 
   const QString &name() { return _name; }
   enum UpdateStatus status() { return _status; }
-  QList<BaseInfo> &baseInfos() { return _baseInfos; }
+  QVector<BaseInfo> &baseInfos() { return _baseInfos; }
 
 private:
   QString _name;
   enum UpdateStatus _status;
   /* UTC and ISO 8601 date time */
   QString _updateDate;
-  QList<BaseInfo> _baseInfos;
+  QVector<BaseInfo> _baseInfos;
 };
 
 class InfoModel : public QObject {
@@ -52,11 +53,11 @@ public:
   explicit InfoModel(enum UpdateStatus globalStatus);
   ~InfoModel() {}
 
-  QList<ModuleInfo> &moduleInfos() { return _moduleInfos; }
+  QVector<ModuleInfo> &moduleInfos() { return _moduleInfos; }
 
 private:
   enum UpdateStatus _globalStatus;
-  QList<ModuleInfo> _moduleInfos;
+  QVector<ModuleInfo> _moduleInfos;
 };
 
 class InfoModelThread: public QThread {
