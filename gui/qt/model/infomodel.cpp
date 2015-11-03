@@ -10,6 +10,9 @@ void InfoModel::doUpdate()
 
   QObject::connect(infoThread, SIGNAL(finished()), this, SLOT(infoThreadFinished()));
 
+  _globalStatus = UPDATE_UNKNOWN;
+  _moduleInfos.clear();
+
   infoThread->start();
 }
 
@@ -100,10 +103,10 @@ void InfoModel::debug()
       const BaseInfo &base = mod.baseInfos().at(b);
 
       qDebug() << "      base: " << base.name();
-      qDebug() << "      date: " << base.date();
-      qDebug() << "      version: " << base.version();
-      qDebug() << "      signatures: " << base.signatureCount();
-      qDebug() << "      fullPath: " << base.fullPath();
+      qDebug() << "        date: " << base.date();
+      qDebug() << "        version: " << base.version();
+      qDebug() << "        signatures: " << base.signatureCount();
+      qDebug() << "        fullPath: " << base.fullPath();
     }
  }
 }
