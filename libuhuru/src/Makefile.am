@@ -1,4 +1,4 @@
-SUBDIRS= libcore libipc linux-daemon tools 
+SUBDIRS= libcore linux
 DIST_SUBDIRS=$(SUBDIRS) os
 
 

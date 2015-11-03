@@ -49,6 +49,10 @@ struct uhuru *uhuru_open(uhuru_error **error)
 {
   struct uhuru *u;
 
+#ifdef HAVE_GTHREAD_INIT
+  g_thread_init(NULL);
+#endif
+
   os_mime_type_init();
 
   u = uhuru_new();

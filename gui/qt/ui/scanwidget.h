@@ -30,7 +30,7 @@ class ScanWidget : public QWidget
 
  private:
   void doConnect(ScanModel *model);
-  void connectLineEdit(const char *lineEditName, Counter *counter);
+  void connectLineEdit(const char *lineEditName, Value *value);
 
   Ui::ScanWidget *ui;
   ScanModel *model;

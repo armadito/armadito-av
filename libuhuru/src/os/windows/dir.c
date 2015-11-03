@@ -14,7 +14,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-static enum dir_entry_flag dirent_flags(DWORD fileAttributes)
+// cpp
+#include <string>
+
+static enum os_file_flag dirent_flags(DWORD fileAttributes)
 {
 	switch(fileAttributes) {
 
@@ -30,16 +33,57 @@ static enum dir_entry_flag dirent_flags(DWORD fileAttributes)
 			return FILE_FLAG_IS_PLAIN_FILE;
 		default:
 			return FILE_FLAG_IS_UNKNOWN;
-
 	}
-
-  return FILE_FLAG_IS_UNKNOWN;
 }
+
+BOOL DirectoryExists(LPCTSTR szPath)
+{
+	DWORD dwAttrib = GetFileAttributes(szPath);
+
+	return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
+		(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
+
+/*
+  -- Note : Escaping not used anymore. But we need to be able to scan Chinese encoded name files
+
+void replaceAll(std::string& str, const std::string& from, const std::string& to) {
+	if (from.empty())
+		return;
+	size_t start_pos = 0;
+	while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+		str.replace(start_pos, from.length(), to);
+		start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+	}
+}
+
+// We want escape ? and * characters 
+char *cpp_escape_str(const char * str_in){
+
+	char * str_out = NULL;
+	std::string str(str_in);
+
+	std::string c1("?");
+	std::string c2("*");
+	std::string c3("\\");
+	std::string c1_("\\?");
+	std::string c2_("\\*");
+	std::string c3_("\\\\");
+
+	replaceAll(str, c3, c3_);
+	replaceAll(str, c1, c1_);
+	replaceAll(str, c2, c2_);
+
+	return _strdup(str.c_str());
+}
+*/
 
 
 void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data ) {
 
 	char * sPath = NULL, *entryPath= NULL;
+	char * escapedPath = NULL;
+
 	HANDLE fh = NULL;
 	int size = 0;
 	WIN32_FIND_DATAA fdata ;
@@ -51,10 +95,13 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 		g_log(NULL, G_LOG_LEVEL_WARNING, "error :: NULL parameter in function os_dir_map()");
 		return;
 	}
+	
+	// We escape ? and * characters
+	// escapedPath = cpp_escape_str(path);
 
-	// Check if it's a directory path
-	if (GetFileAttributesA(path) != FILE_ATTRIBUTE_DIRECTORY) {
-		g_log(NULL, G_LOG_LEVEL_WARNING, "warning :: os_dir_map() :: (%s) is not a directory",path);
+	// Check if it is a directory
+	if (!(GetFileAttributesA(path) & FILE_ATTRIBUTE_DIRECTORY)) {
+		g_log(NULL, G_LOG_LEVEL_WARNING, "Warning :: os_dir_map() :: (%s) is not a directory. ", path);
 		return;
 	}
 
@@ -63,41 +110,51 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 	sPath[size] = '\0';
 	sprintf_s(sPath, size, "%s\\*", path);
 
+	//g_log(NULL, G_LOG_LEVEL_WARNING, "os_dir_map() :: (%s)", sPath);
+
+	/*
+	FindFirstFile note
+	Be aware that some other thread or process could create or delete a file with this name between the time you query for the result and the time you act on the information. If this is a potential concern for your application, one possible solution is to use the CreateFile function with CREATE_NEW (which fails if the file exists) or OPEN_EXISTING (which fails if the file does not exist).
+	*/
+
 
 	fh = FindFirstFileA(sPath, &fdata);
-	
 	if (fh == INVALID_HANDLE_VALUE) {
-		g_log(NULL, G_LOG_LEVEL_WARNING, "warning :: os_dir_map() :: FindFirstFileA() failed ::  (%s) ",os_strerror(errno));		
+		g_log(NULL, G_LOG_LEVEL_WARNING, "warning :: FindFirstFileA() failed for %s (%s) ", sPath, os_strerror(errno));
 		return;
 	}
 
 	while (FindNextFileA(fh, &tmp) != FALSE) {
 
 		// exclude paths "." and ".."
-		if (strncmp(tmp.cFileName,".",strlen(tmp.cFileName)) == 0 || strncmp(tmp.cFileName,"..",strlen(tmp.cFileName)) == 0) {
+		if (strncmp(tmp.cFileName,".",strlen(tmp.cFileName)) == 0 || strncmp(tmp.cFileName,"..",strlen(tmp.cFileName)) == 0)
+		{
 			continue;
 		}
 
 		// build the entry complete path.
 		size = strlen(path)+strlen(tmp.cFileName)+2;
-		free(entryPath);
+
 		entryPath = (char*)calloc(size + 1, sizeof(char));
 		entryPath[size] = '\0';
 		sprintf_s(entryPath, size,"%s\\%s", path, tmp.cFileName);
 
-		if (tmp.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY  && recurse == 1) {
-			os_dir_map(entryPath, recurse, dirent_cb, NULL);
+
+		// If it is a directory and we do recursive scan
+		if ((GetFileAttributesA(entryPath) & FILE_ATTRIBUTE_DIRECTORY) && recurse >= 1) {
+			os_dir_map(entryPath, recurse, dirent_cb, data);
 		}
 		else {
+			
 			flags = dirent_flags(tmp.dwFileAttributes);
 			(*dirent_cb)(entryPath, flags, 0, data);
 		}
 
+		free(entryPath);
 	}
 
-	free(entryPath);
 	free(sPath);
-	//CloseHandle(fh);
+	FindClose(fh);
 
 	return;
 }

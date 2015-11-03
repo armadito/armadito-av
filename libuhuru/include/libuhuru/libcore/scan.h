@@ -38,7 +38,7 @@ extern "C" {
  *
  */
 
-#define REPORT_PROGRESS_UNKNOW (-1)
+#define REPORT_PROGRESS_UNKNOWN (-1)
 
 struct uhuru_report {
   int scan_id;                          /*!< the id of the scan this report belongs to                          */

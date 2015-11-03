@@ -2,7 +2,6 @@
 #include "named_pipe_client.h"
 #include <libuhuru-config.h>
 #include <libuhuru/core.h>
-#include <libuhuru/ipc.h>
 #include <windows.h> 
 #include <stdio.h> 
 #include <tchar.h>
@@ -175,6 +174,9 @@ DWORD WINAPI InstanceThread(LPVOID lpvParam)
 
 		scan = (struct new_scan*)malloc(sizeof(struct new_scan));
 
+		// To avoid random data on buffer after data read
+		pchRequest[cbBytesRead] = '\0';
+
 		// Process the incoming message.
 		GetAnswerToRequest(pchRequest, pchReply, &cbReplyBytes, scan);
 
@@ -229,6 +231,7 @@ VOID GetAnswerToRequest(LPTSTR pchRequest,
 
 	void json_parse_and_print(json_object * jobj); /* Forward declaration */
 	const char* json_parse_and_process(json_object * jobj, struct new_scan* scan);  /* Forward declaration */
+
 
 	// We parse on-demand scan requests from IHM
 	json_object * jobj = json_tokener_parse(pchRequest);

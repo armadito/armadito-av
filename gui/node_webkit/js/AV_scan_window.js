@@ -64,5 +64,4 @@ function chooseFile(name) {
 	chooser.click();  
 }
 
-// We add the listener when loading the page
 chooseFile('#fileDialog');

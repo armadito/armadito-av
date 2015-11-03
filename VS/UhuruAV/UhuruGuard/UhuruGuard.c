@@ -19,11 +19,13 @@ Environment:
 #include <suppress.h>
 #include "callbacks.h"
 #include "Struct.h"
+#include "communication.h"
 
 #pragma prefast(disable:__WARNING_ENCODE_MEMBER_FUNCTION_POINTER, "Not valid for kernel mode drivers")
 
 
 PFLT_FILTER gFilterHandle;
+PFLT_PORT gFilterComPort = NULL;
 ULONG_PTR OperationStatusCtx = 1;
 
 #define PTDBG_TRACE_ROUTINES            0x00000001
@@ -477,7 +479,7 @@ Return Value:
     PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
                   ("UhuruGuard!UhuruGuardInstanceSetup: Entered\n") );
 
-	DbgPrint("[i] Debug :: UhuruGuard!UhuruGuardInstanceSetup :: New Volume mounted\n");
+	//DbgPrint("[i] Debug :: UhuruGuard!UhuruGuardInstanceSetup :: New Volume mounted\n");
 
     return STATUS_SUCCESS;
 }
@@ -593,6 +595,11 @@ Return Value:
 }
 
 
+
+
+
+
+
 /*************************************************************************
     MiniFilter initialization and unload routines.
 *************************************************************************/
@@ -633,7 +640,6 @@ Return Value:
     //
     //  Register with FltMgr to tell it our callback routines
     //
-
     status = FltRegisterFilter( DriverObject,
                                 &FilterRegistration,
                                 &gFilterHandle );
@@ -642,17 +648,35 @@ Return Value:
 
     if (NT_SUCCESS( status )) {
 
+		// Init communication
+		status = InitCommunicationPort(gFilterHandle, &gFilterComPort);
+
+		if (!NT_SUCCESS(status)) {
+			FltUnregisterFilter( gFilterHandle );
+			return status;
+		}
+
         //
         //  Start filtering i/o
         //
-		DbgPrint("[+] Debug : FltRegisterFilter succeeded !\n");
+		DbgPrint("[+] Debug :: UhuruGuard!DriverEntry :: FltRegisterFilter succeeded !\n");
         status = FltStartFiltering( gFilterHandle );
 
         if (!NT_SUCCESS( status )) {
-            FltUnregisterFilter( gFilterHandle );
-		} else 
-			DbgPrint("[+] Debug : FltStartFiltering succeeded \n");
+			DbgPrint("[-] Error :: UhuruGuard!DriverEntry :: FltStartFiltering() failed!\n");
 
+			if (gFilterComPort != NULL) {
+				 FltCloseCommunicationPort( gFilterComPort );
+			}
+
+            FltUnregisterFilter( gFilterHandle );
+		
+		} else 
+			DbgPrint("[+] Debug :: UhuruGuard!DriverEntry :: FltStartFiltering succeeded \n");
+
+		/*if (gFilterComPort != NULL) {
+			 FltCloseCommunicationPort( gFilterComPort );
+		}*/
     }
 
     return status;
@@ -688,9 +712,14 @@ Return Value:
     //PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
      //             ("UhuruGuard!UhuruGuardUnload: Entered\n") );
 
+	if (gFilterComPort != NULL) {
+		 FltCloseCommunicationPort( gFilterComPort );
+	}
+	DbgPrint("[+] Debug :: UhuruGuard!UhuruGuardUnload :: communication port closed successfully !\n");
+
     FltUnregisterFilter( gFilterHandle );
 
-	DbgPrint("[+] Debug : UhuruGuard Driver unloaded successfully !\n");
+	DbgPrint("[+] Debug :: UhuruGuard!UhuruGuardUnload :: Driver unloaded successfully !\n");
 
 
     return STATUS_SUCCESS;
