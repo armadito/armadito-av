@@ -11,17 +11,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{9C04AEB7-E235-4FC9-A5A0-C210F0C3EE71}</ProjectGuid>
+    <ProjectGuid>{7452772C-0C0A-403F-9D78-927B46F67992}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>scand</RootNamespace>
-    <ProjectName>windows_service</ProjectName>
+    <RootNamespace>ScanClient</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
-    <CharacterSet>NotSet</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -42,8 +41,6 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)..\glib\win32\glib_2.28.8\lib\glib-2.0\include;$(SolutionDir)\..\glib\win32\glib_2.28.8\include\glib-2.0;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>$(SolutionDir)\$(Configuration);$(SolutionDir)..\glib\win32\glib_2.28.8\lib;$(SolutionDir)..\glib\win21\glib_2.28.8\bin;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -55,15 +52,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\libuhuru\include;$(SolutionDir)..\..\libuhuru\src;$(SolutionDir)..\..\libuhuru\include\config;$(SolutionDir)..\json-c\json-c</AdditionalIncludeDirectories>
-      <CompileAs>CompileAsCpp</CompileAs>
+      <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>json-c.lib;libuhuru_core.lib;glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;gio-2.0.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\toto\projects\uhuru\git\uhuru-av\VS\UhuruAV\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>FltLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -85,19 +79,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\libuhuru\src\utils\getopt.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\utils\json.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\windows-service\main.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\windows-service\named_pipe_client.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\windows-service\named_pipe_server.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\windows-service\scan.c" />
+    <ClCompile Include="client.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\libuhuru\src\utils\getopt.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\utils\json.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\windows-service\named_pipe_client.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\windows-service\named_pipe_server.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\windows-service\scan.h" />
+    <ClInclude Include="client.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
