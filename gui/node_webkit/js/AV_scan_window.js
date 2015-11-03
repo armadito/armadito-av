@@ -5,6 +5,7 @@ var param2 = "";
 
 var gui = require('nw.gui');
 
+
 // Function who asks libuhuru for a scan
 function new_ondemand_scan(){
 
