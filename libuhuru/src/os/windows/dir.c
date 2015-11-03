@@ -111,7 +111,12 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 
 	//g_log(NULL, G_LOG_LEVEL_WARNING, "os_dir_map() :: (%s)", sPath);
 
-	// First file scanned ??
+	/*
+	FindFirstFile note
+	Be aware that some other thread or process could create or delete a file with this name between the time you query for the result and the time you act on the information. If this is a potential concern for your application, one possible solution is to use the CreateFile function with CREATE_NEW (which fails if the file exists) or OPEN_EXISTING (which fails if the file does not exist).
+	*/
+
+
 	fh = FindFirstFileA(sPath, &fdata);
 	if (fh == INVALID_HANDLE_VALUE) {
 		g_log(NULL, G_LOG_LEVEL_WARNING, "warning :: FindFirstFileA() failed for %s (%s) ", sPath, os_strerror(errno));
