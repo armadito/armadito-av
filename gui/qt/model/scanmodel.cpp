@@ -1,31 +1,40 @@
 #include "scanmodel.h"
+#include "utils/ipc.h"
 
-#include <QDirIterator>
 #include <iostream>
 #include <QDebug>
 
-static void scanmodel_callback(struct uhuru_report *report, void *callback_data);
+static void ipc_handler_scan_file(struct ipc_manager *manager, void *data)
+{
+  ScanModel *s = static_cast<ScanModel *>(data);
+  char *path, *status, *mod_name, *mod_report, *action;
+  int progress;
+
+  ipc_manager_get_arg_at(manager, 0, IPC_STRING_T, &path);
+  ipc_manager_get_arg_at(manager, 1, IPC_STRING_T, &status);
+  ipc_manager_get_arg_at(manager, 2, IPC_STRING_T, &mod_name);
+  ipc_manager_get_arg_at(manager, 3, IPC_STRING_T, &mod_report);
+  ipc_manager_get_arg_at(manager, 4, IPC_STRING_T, &action);
+  ipc_manager_get_arg_at(manager, 5, IPC_INT32_T, &progress);
+
+  s->callback(path, status, mod_name, mod_report, action, progress);
+}
 
 void ScanModelThread::run()
 {
-  _model->countFiles();
-
   QByteArray ba = _model->path().toLocal8Bit();
   const char *c_path = ba.data();
-  //  enum uhuru_scan_flags flags = static_cast<enum uhuru_scan_flags>(0);
-  //enum uhuru_scan_flags flags = static_cast<enum uhuru_scan_flags>(UHURU_SCAN_RECURSE | UHURU_SCAN_THREADED);
-  enum uhuru_scan_flags flags = static_cast<enum uhuru_scan_flags>(UHURU_SCAN_RECURSE);
 
-  struct uhuru_scan *scan = uhuru_scan_new(UHURU::instance(), c_path, flags);
+  struct ipc_manager *manager = ipc_manager_new(DEFAULT_SOCKET_PATH);
 
-  uhuru_scan_add_callback(scan, scanmodel_callback, _model);
+  ipc_manager_add_handler(manager, IPC_MSG_ID_SCAN_FILE, ipc_handler_scan_file, _model);
 
-  uhuru_scan_start(scan);
+  ipc_manager_msg_send(manager, IPC_MSG_ID_SCAN, IPC_STRING_T, c_path, IPC_NONE_T);
 
-  while(uhuru_scan_run(scan) == UHURU_SCAN_CONTINUE)
+  while (ipc_manager_receive(manager) > 0)
     ;
 
-  uhuru_scan_free(scan);
+  ipc_manager_free(manager);
 }
 
 void ScanModel::scan()
@@ -43,19 +52,12 @@ void ScanModel::scanThreadFinished()
   _completed = true;
 }
 
-void ScanModel::countFiles()
+void ScanModel::callback(const char *path, const char *status, const char *mod_name, const char *mod_report, const char *action, int progress)
 {
-  QDirIterator iter(_path, QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks, QDirIterator::Subdirectories);
-  int count = 0;
+  _progress.set(progress);
 
-  for( ; iter.hasNext(); iter.next())
-    count++;
-
-  _totalCount.set(count);
-}
-
-void ScanModel::callback(enum uhuru_file_status status, const char *path, const char *report)
-{
+  if (!*path)
+    return;
 
   qDebug() << "DEBUG: ScanMode::callback - file path : " << path;
 
@@ -63,33 +65,20 @@ void ScanModel::callback(enum uhuru_file_status status, const char *path, const 
 
   _scannedCount.increment();
 
-  switch(status) {
-  case UHURU_MALWARE:
+  if (!strcmp(status, "UHURU_MALWARE")) {
     _malwareCount.increment();
-    _reportModel.append(QString("Malicieux"), QString("aucune"), QString(path), QString(report));
-    break;
-  case UHURU_SUSPICIOUS:
+    _reportModel.append(QString("Malicieux"), QString("aucune"), QString(path), QString(mod_report));
+  } else if (!strcmp(status, "UHURU_SUSPICIOUS")) {
     _suspiciousCount.increment();
-    _reportModel.append(QString("Suspect"), QString("aucune"), QString(path), QString(report));
-    break;
-  case UHURU_EINVAL:
-  case UHURU_IERROR:
-  case UHURU_UNKNOWN_FILE_TYPE:
-  case UHURU_UNDECIDED:
+    _reportModel.append(QString("Suspect"), QString("aucune"), QString(path), QString(mod_report));
+  } else if (!strcmp(status, "UHURU_EINVAL") 
+	     || !strcmp(status, "UHURU_IERROR")
+	     || !strcmp(status, "UHURU_UNKNOWN_FILE_TYPE")
+	     || !strcmp(status, "UHURU_UNDECIDED")) {
     _unhandledCount.increment();
     _reportModel.append(tr("Not processed"), QString("aucune"), QString(path), "");
-    break;
-  case UHURU_WHITE_LISTED:
-  case UHURU_CLEAN:
+  } else if (!strcmp(status, "UHURU_WHITE_LISTED")
+	     || !strcmp(status, "UHURU_CLEAN")) {
     _cleanCount.increment();
-    break;
   }
 }
-
-static void scanmodel_callback(struct uhuru_report *report, void *callback_data)
-{
-  ScanModel *s = static_cast<ScanModel *>(callback_data);
-
-  s->callback(report->status, report->path, report->mod_report);
-}
-

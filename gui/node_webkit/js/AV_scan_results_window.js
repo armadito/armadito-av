@@ -30,10 +30,7 @@ else{
 	// Waiting for connexions on scan_server
 }
 
-
-
-
-// --- Update HTML with DOM functions ---
+// --- Update HTML with DOM ---
 
 function update_scan_progress_bar() {
   var progress = document.getElementById("scan_progress");

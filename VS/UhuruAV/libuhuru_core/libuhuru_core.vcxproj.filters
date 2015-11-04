@@ -72,6 +72,21 @@
     <ClInclude Include="..\..\..\libuhuru\src\libcore\builtin-modules\mimetypemod.h">
       <Filter>Source Files\libcore</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\os\mimetype.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\os\dir.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\os\file.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\os\io.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\os\string.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\libuhuru\src\libcore\action.c">

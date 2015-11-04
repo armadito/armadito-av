@@ -31,11 +31,16 @@
 #define MAXPATHLEN _MAX_PATH
 
 /* misc */
-#define LIBUHURU_CONF_DIR "Path/to/conf/dir"
-#define LIBUHURU_MODULES_PATH "Path/to/module"
+#define LIBUHURU_CONF_DIR "C:\\Users\\toto\\projects\\uhuru\\git\\uhuru-av\\libuhuru\\conf"
+#define LIBUHURU_MODULES_PATH "C:\\Users\\toto\\bases_AV\\DB"
 
 /* modules */
 #undef HAVE_ALERT_MODULE
 #undef HAVE_QUARANTINE_MODULE
+
+/* glib (current version of glib on windows is 2.28.8, which had g_thread_create) */
+#undef HAVE_GTHREAD_NEW
+#define HAVE_GTHREAD_CREATE
+#define HAVE_GTHREAD_INIT
 
 #endif

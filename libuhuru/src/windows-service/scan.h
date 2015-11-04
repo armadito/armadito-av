@@ -3,7 +3,6 @@
 
 #include <libuhuru-config.h>
 #include <libuhuru/core.h>
-#include <libuhuru/ipc.h>
 
 struct new_scan{
 	int scan_id;

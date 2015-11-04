@@ -189,7 +189,7 @@ static int compute_progress(struct uhuru_scan *scan)
 static enum uhuru_file_status scan_file(struct uhuru_scan *scan, const char *path)
 {
   struct uhuru_report report;
-  struct uhuru_module **modules;
+  struct uhuru_module **modules = NULL;
   const char *mime_type;
   enum uhuru_file_status status;
 
@@ -200,11 +200,13 @@ static enum uhuru_file_status scan_file(struct uhuru_scan *scan, const char *pat
 
   /* find the mime type using OS specific function (magic_* on linux, FindMimeFromData on windows */
   mime_type = os_mime_type_guess(path);
+
   /* ask uhuru handle for the array of modules */
-  modules = uhuru_get_applicable_modules(scan->uhuru, mime_type);
+  if (mime_type != NULL)
+    modules = uhuru_get_applicable_modules(scan->uhuru, mime_type);
 
   /* if no modules apply, then file is not handled */
-  if (modules == NULL) {
+  if (modules == NULL || mime_type == NULL) {
     status = UHURU_UNKNOWN_FILE_TYPE;
     uhuru_report_change(&report, status, NULL, NULL);
   } else
@@ -222,6 +224,9 @@ static enum uhuru_file_status scan_file(struct uhuru_scan *scan, const char *pat
 
   /* and free the report (it may contain a strdup'ed string) */
   uhuru_report_destroy(&report);
+
+  if (mime_type != NULL)
+    free((void *)mime_type);
 
   return status;
 }
@@ -309,7 +314,11 @@ static gpointer to_scan_count_thread_fun(gpointer data)
 
 static void to_scan_count(struct uhuru_scan *scan)
 {
+#if defined(HAVE_GTHREAD_NEW)
   scan->to_scan_count_thread = g_thread_new("to_scan_count_thread", to_scan_count_thread_fun, scan);
+#elif defined(HAVE_GTHREAD_CREATE)
+  scan->to_scan_count_thread = g_thread_create(to_scan_count_thread_fun, scan, TRUE, NULL);
+#endif
 }
 
 /* this function is called at the end of a scan, to send the 100% progress */
@@ -387,15 +396,22 @@ void uhuru_scan_free(struct uhuru_scan *scan)
 /* no threads */
 enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path)
 {
-  struct uhuru_module **modules;
+  struct uhuru_module **modules = NULL;
   const char *mime_type;
+  enum uhuru_file_status status;
 
   /* find the mime type, as in scan_file fun */
   mime_type = os_mime_type_guess(path);
-  modules = uhuru_get_applicable_modules(uhuru, mime_type);
 
-  if (modules == NULL)
+  if (mime_type != NULL)
+    modules = uhuru_get_applicable_modules(uhuru, mime_type);
+  
+  if (modules == NULL || mime_type == NULL)
     return UHURU_UNKNOWN_FILE_TYPE;
 
-  return scan_apply_modules(path, mime_type, modules, NULL);
+  status = scan_apply_modules(path, mime_type, modules, NULL);
+
+  free((void *)mime_type);
+
+  return status;
 }
