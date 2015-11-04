@@ -53,6 +53,7 @@
   <ItemGroup>
     <ResourceCompile Include="UhuruGuard.rc" />
     <ClCompile Include="callbacks.c" />
+    <ClCompile Include="communication.c" />
     <ClCompile Include="UhuruGuard.c" />
     <Inf Include="UhuruGuard.inf" />
   </ItemGroup>
@@ -260,6 +261,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="callbacks.h" />
+    <ClInclude Include="communication.h" />
     <ClInclude Include="Struct.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

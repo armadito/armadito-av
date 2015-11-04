@@ -1,8 +1,4 @@
-#include "libuhuru-config.h"
-
-#include <libuhuru/ipc.h>
-#include "os/io.h"
-#include "os/string.h"
+#include "ipc.h"
 
 #include <assert.h>
 #include <glib.h>
@@ -10,7 +6,11 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 
 enum ipc_manager_state {
   EXPECTING_MSG_ID = 1,
@@ -42,11 +42,54 @@ struct ipc_manager {
   struct ipc_handler_entry *handlers;
 };
 
-struct ipc_manager *ipc_manager_new(int io_fd)
+#define UNIX_PATH_MAX	108  /* sic... taken from /usr/include/linux/un.h */
+
+static int unix_client_connect(const char *socket_path, int max_retry)
+{
+  int fd, r, retry_count = 0;
+  struct sockaddr_un connect_addr;
+  socklen_t addrlen;
+  size_t path_len;
+
+  path_len = strlen(socket_path);
+  assert(path_len < UNIX_PATH_MAX);
+
+  fd = socket( AF_UNIX, SOCK_STREAM, 0);
+  if (fd < 0) {
+    perror("socket() failed");
+    return -1;
+  }
+
+  if (max_retry <= 0)
+    max_retry = 1;
+
+  memset(&connect_addr, 0, sizeof(connect_addr));
+  connect_addr.sun_family = AF_UNIX;
+  strncpy(connect_addr.sun_path, socket_path, path_len);
+
+  if (socket_path[0] == '@')
+    connect_addr.sun_path[0] = '\0';
+
+  addrlen = offsetof(struct sockaddr_un, sun_path) + path_len + 1;
+
+  do {
+    r = connect(fd, (struct sockaddr *)&connect_addr, addrlen);
+    retry_count++;
+  } while (r < 0 && retry_count <= max_retry);
+
+  if (r < 0) {
+    perror("connect() failed");
+    return -1;
+  }
+
+  return fd;
+}
+
+struct ipc_manager *ipc_manager_new(const char *socket_path)
 {
   struct ipc_manager *m = g_new(struct ipc_manager, 1);
 
-  m->io_fd = io_fd;
+  m->io_fd = unix_client_connect(socket_path, 10);
   
   m->input_buffer_size = DEFAULT_INPUT_BUFFER_SIZE;
   m->input_buffer = (char *)malloc(m->input_buffer_size);
@@ -144,7 +187,7 @@ static void ipc_manager_add_str_arg(struct ipc_manager *m)
   struct ipc_value v;
 
   v.type = IPC_STRING_T;
-  v.value.v_str = os_strdup(m->str_arg->str);
+  v.value.v_str = strdup(m->str_arg->str);
 
   g_array_append_val(m->argv, v);
 }
@@ -264,10 +307,10 @@ int ipc_manager_receive(struct ipc_manager *manager)
 {
   int n_read, i;
 
-  n_read = os_read(manager->io_fd, manager->input_buffer, manager->input_buffer_size);
+  n_read = read(manager->io_fd, manager->input_buffer, manager->input_buffer_size);
 
   if (n_read == -1) {
-    g_log(NULL, G_LOG_LEVEL_ERROR, "error in ipc_manager_receive: %s", os_strerror(errno));
+    g_log(NULL, G_LOG_LEVEL_ERROR, "error in ipc_manager_receive: %s", strerror(errno));
   }
 
   if (n_read < 0)
@@ -288,10 +331,10 @@ static size_t ipc_manager_write(struct ipc_manager *manager, char *buffer, size_
   assert(len > 0);
 
   while (to_write > 0) {
-    int w = os_write(manager->io_fd, buffer, to_write);
+    int w = write(manager->io_fd, buffer, to_write);
 
     if (w < 0) {
-      g_log(NULL, G_LOG_LEVEL_ERROR, "error in ipc_manager_write_buffer: %s", os_strerror(errno));
+      g_log(NULL, G_LOG_LEVEL_ERROR, "error in ipc_manager_write_buffer: %s", strerror(errno));
       return -1;
     }
 

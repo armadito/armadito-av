@@ -10,6 +10,9 @@ AC_ARG_ENABLE([debug],
 # configuration header
 AM_CONFIG_HEADER(uhuru-qt-config.h)
 
+# This is needed when the first PKG_CHECK_MODULES call is inside a conditional (not the case here, but who knows)
+PKG_PROG_PKG_CONFIG
+
 CFLAGS=-g
 
 # check for debug
@@ -25,12 +28,6 @@ fi
 # Checks for programs.
 AC_PROG_INSTALL
 AC_PROG_CC
-
-# check for libuhuru
-PKG_CHECK_MODULES(LIBUHURU, libuhuru, [HAVE_LIBUHURU=yes], [HAVE_LIBUHURU=no])
-if test "$HAVE_LIBUHURU" = "no"; then
-   AC_MSG_ERROR("cannot find UHURU library")
-fi
 
 # phasing out GTK
 #PKG_CHECK_MODULES(GTK, gtk+-2.0, HAVE_GTK2="yes", HAVE_GTK2="no")
@@ -76,6 +73,10 @@ if test "$HAVE_QT" = "yes" ; then
    if test "x$MOC" = "xno" -o "x$UIC" = "xno" -o "x$RCC" = "xno"  -o "x$LUPDATE" = "xno"  -o "x$LRELEASE" = "xno" ; then
       AC_MSG_WARN([cannot find 'moc', 'uic', 'rcc', 'lupdate' or 'lrelease', please install the Qt development tools package.])
       HAVE_QT="no"
+   fi
+
+   if test "$HAVE_QT" = "yes" ; then
+      PKG_CHECK_MODULES(GLIB2, glib-2.0 gio-2.0 gio-unix-2.0)
    fi
 fi
 AM_CONDITIONAL(COND_QT_GUI, test x"$HAVE_QT" = "xyes")

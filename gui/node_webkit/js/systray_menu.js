@@ -6,14 +6,6 @@ var gui = require('nw.gui');
 
 // Create systray icon
 function initSystray(){
- 
-	console.log("Init systray !\n");
-
-	var ffi = require("ffi");
-	/*var libm = new ffi.Library("libm", { "ceil": [ "double", [ "double" ] ] });
-	libm.ceil(1.5); // 2
-
-	console.log(" libm ceil(1.5) = "+ libm);*/
 
 	// Create a tray icon
 	tray = new gui.Tray({ title: 'Uhuru-AV', icon: 'img/uhuru_systray.png' });
@@ -69,5 +61,4 @@ function closeSystray(){
 
 // automatically init systray icon at start
 initSystray();
-
 
