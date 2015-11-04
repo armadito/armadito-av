@@ -5,9 +5,11 @@ function hideWindow(){
 
 function closeWindow(){
 	
+	console.log(" close window ");
+
 	// Close systray 
-	tray.remove();
-    tray = null;
+	//tray.remove();
+        //tray = null;
 	
 	// Close Window
 	var win = gui.Window.get();
