@@ -1,6 +1,10 @@
-#include <libuhuru/info.h>
+#include "utils/getopt.h"
+#include "daemon/ipc.h"
+#include "daemon/tcpsock.h"
+#include "daemon/unixsock.h"
 
-#include <getopt.h>
+#include <assert.h>
+#include <errno.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xmlsave.h>
@@ -11,15 +15,49 @@
 #include <unistd.h>
 
 struct info_options {
+  enum {
+    TCP_SOCKET,
+    UNIX_SOCKET,
+  } socket_type;
+  const char *unix_path;
+  unsigned short port_number;
   int output_xml;
-  int use_daemon;
 };
 
-static struct option long_options[] = {
-  {"help",         no_argument,       0, 'h'},
-  {"local",        no_argument,       0, 'l'},
-  {"xml",          no_argument,       0, 'x'},
-  {0, 0, 0, 0}
+struct base_info {
+  const char *name;
+  /* UTC and ISO 8601 date */
+  const char *date;
+  const char *version;
+  unsigned int signature_count;
+  const char *full_path;
+};
+
+struct module_info {
+  const char *name;
+  const char *mod_status;
+  /* UTC and ISO 8601 date time */
+  const char *update_date;
+  /* NULL terminated array of pointers to struct base_info */
+  struct base_info **base_infos;
+};
+
+struct info {
+  const char *global_status;
+  /* NULL terminated array of pointers to struct uhuru_module_info */
+  struct module_info **module_infos;
+  int n_modules;
+  int alloc_modules;
+};
+
+static struct opt info_opt_defs[] = {
+  { .long_form = "help", .short_form = 'h', .need_arg = 0, .is_set = 0, .value = NULL},
+  { .long_form = "xml", .short_form = 'x', .need_arg = 0, .is_set = 0, .value = NULL},
+  { .long_form = "tcp", .short_form = 't', .need_arg = 0, .is_set = 0, .value = NULL},
+  { .long_form = "port", .short_form = 'p', .need_arg = 1, .is_set = 0, .value = NULL},
+  { .long_form = "unix", .short_form = 'u', .need_arg = 0, .is_set = 0, .value = NULL},
+  { .long_form = "path", .short_form = 'a', .need_arg = 1, .is_set = 0, .value = NULL},
+  { .long_form = NULL, .short_form = 0, .need_arg = 0, .is_set = 0, .value = NULL},
 };
 
 static void usage(void)
@@ -29,43 +67,72 @@ static void usage(void)
   fprintf(stderr, "Uhuru antivirus information\n");
   fprintf(stderr, "\n");
   fprintf(stderr, "Options:\n");
-  fprintf(stderr, "  --help   -h              print help and quit\n");
-  fprintf(stderr, "  --local  -l              do not use the scan daemon\n");
-  fprintf(stderr, "  --xml    -x              output information as XML\n");
+  fprintf(stderr, "  --help  -h               print help and quit\n");
+  fprintf(stderr, "  --tcp -t | --unix -u     use TCP (--tcp) or unix (--unix) socket (default is unix)\n");
+  fprintf(stderr, "  --port=PORT | -p PORT    TCP port number\n");
+  fprintf(stderr, "  --path=PATH | -a PATH    unix socket path\n");
+  fprintf(stderr, "  --xml -x                 output information as XML\n");
   fprintf(stderr, "\n");
 
   exit(1);
 }
 
-static void parse_options(int argc, char *argv[], struct info_options *opts)
+static void parse_options(int argc, const char *argv[], struct info_options *opts)
 {
-  int c;
+  int r = opt_parse(info_opt_defs, argc, argv);
+  const char *s_port;
 
-  opts->output_xml = 0;
-  opts->use_daemon = 1;
+  if (r < 0|| r > argc)
+    usage();
 
-  while (1) {
-    int option_index = 0;
-
-    c = getopt_long(argc, argv, "hlx", long_options, &option_index);
-
-    if (c == -1)
-      break;
-
-    switch (c) {
-    case 'h':
+  if (opt_is_set(info_opt_defs, "help"))
       usage();
-      break;
-    case 'l':
-      opts->use_daemon = 0;
-      break;
-    case 'x':
-      opts->output_xml = 1;
-      break;
-    default:
-      usage();
-    }
+
+  if (opt_is_set(info_opt_defs, "tcp") && opt_is_set(info_opt_defs, "unix"))
+    usage();
+
+  opts->socket_type = UNIX_SOCKET;
+  if (opt_is_set(info_opt_defs, "tcp"))
+    opts->socket_type = TCP_SOCKET;
+
+  s_port = opt_value(info_opt_defs, "port", DEFAULT_TCP_PORT);
+  opts->port_number = (unsigned short)atoi(s_port);
+
+  opts->unix_path = opt_value(info_opt_defs, "path", DEFAULT_SOCKET_PATH);
+
+  opts->output_xml = opt_is_set(info_opt_defs, "xml");
+}
+
+static struct info *info_new(void)
+{
+  struct info *info = malloc(sizeof(struct info));
+
+  info->global_status = NULL;
+
+  info->n_modules = 0;
+  info->alloc_modules = 1;
+  info->module_infos = malloc(sizeof(struct module_info) * info->alloc_modules);
+  info->module_infos[info->n_modules] = NULL;
+
+  return info;
+}
+
+static void info_append_module(struct info *info, struct module_info *mod_inf)
+{
+  if (info->n_modules >= info->alloc_modules - 1) {
+    info->alloc_modules *= 2;
+    info->module_infos = realloc(info->module_infos, sizeof(struct module_info) * info->alloc_modules);
   }
+
+  info->module_infos[info->n_modules] = mod_inf;
+  info->n_modules++;
+  info->module_infos[info->n_modules] = NULL;
+}
+
+static void info_free(struct info *info)
+{
+  /* FIXME: free all the fields */
+  free(info);
 }
 
 static xmlDocPtr info_doc_new(void)
@@ -87,26 +154,24 @@ static xmlDocPtr info_doc_new(void)
   return doc;
 }
 
-static const char *update_status_str(enum uhuru_update_status status)
+static const char *update_status_str(const char *status)
 {
-  switch(status) {
-  case UHURU_UPDATE_NON_AVAILABLE:
-    return "non available";
-  case UHURU_UPDATE_OK:
+  if (!strcmp(status, "UHURU_UPDATE_OK"))
     return "ok";
-  case UHURU_UPDATE_LATE:
+  if (!strcmp(status, "UHURU_UPDATE_LATE"))
     return "late";
-  case UHURU_UPDATE_CRITICAL:
+  if (!strcmp(status, "UHURU_UPDATE_CRITICAL"))
     return "critical";
-  }
+  if (!strcmp(status, "UHURU_UPDATE_NON_AVAILABLE"))
+    return "non available";
 
   return "non available";
 }
 
-static void info_doc_add_module(xmlDocPtr doc, struct uhuru_module_info *info)
+static void info_doc_add_module(xmlDocPtr doc, struct module_info *info)
 {
   xmlNodePtr root_node, module_node, base_node, date_node;
-  struct uhuru_base_info **pinfo;
+  struct base_info **pinfo;
   char buffer[64];
 
   root_node = xmlDocGetRootElement(doc);
@@ -114,7 +179,7 @@ static void info_doc_add_module(xmlDocPtr doc, struct uhuru_module_info *info)
   module_node = xmlNewChild(root_node, NULL, "module", NULL);
   xmlNewProp(module_node, "name", info->name);
 
-  xmlNewChild(module_node, NULL, "update-status", update_status_str(info->mod_status));
+  xmlNewChild(module_node, NULL, "update-status", info->mod_status);
 
   date_node = xmlNewChild(module_node, NULL, "update-date", info->update_date);
   xmlNewProp(date_node, "type", "xs:dateTime");
@@ -133,11 +198,11 @@ static void info_doc_add_module(xmlDocPtr doc, struct uhuru_module_info *info)
   }
 }
 
-static void info_doc_add_global(xmlDocPtr doc, enum uhuru_update_status global_update_status)
+static void info_doc_add_global(xmlDocPtr doc, const char *global_update_status)
 {
   xmlNodePtr root_node = xmlDocGetRootElement(doc);
 
-  xmlNewChild(root_node, NULL, "update-status", update_status_str(global_update_status));
+  xmlNewChild(root_node, NULL, "update-status", global_update_status);
 }
 
 static void info_doc_save_to_fd(xmlDocPtr doc, int fd)
@@ -155,47 +220,140 @@ static void info_doc_free(xmlDocPtr doc)
   xmlFreeDoc(doc);
 }
 
-static void info_save_to_xml(struct uhuru_info *info)
+static void info_save_to_xml(struct info *info)
 {
   xmlDocPtr doc = info_doc_new();
-  struct uhuru_module_info **m;
 
   info_doc_add_global(doc, info->global_status);
 
   if (info->module_infos != NULL) {
-  for(m = info->module_infos; *m != NULL; m++)
-    info_doc_add_module(doc, *m);
+    struct module_info **m;
+
+    for(m = info->module_infos; *m != NULL; m++)
+      info_doc_add_module(doc, *m);
   }
 
   info_doc_save_to_fd(doc, STDOUT_FILENO);
   info_doc_free(doc);
 }
 
-static void do_info(struct info_options *opts)
+static void info_save_to_stdout(struct info *info)
 {
-  struct uhuru *u;
-  struct uhuru_info *info;
+  struct module_info **m;
+  struct base_info **b;
+
+  printf( "--- tatou_info --- \n");
+  /* printf( "Update global status : %d\n", info->global_status); */
+  if (info->module_infos != NULL) {
+    for(m = info->module_infos; *m != NULL; m++){
+      printf( "Module %s \n", (*m)->name );
+      printf( "- Update status : %s\n", (*m)->mod_status);
+      printf( "- Update date : %s \n", (*m)->update_date );
+
+      if ((*m)->base_infos != NULL) {
+	for(b = (*m)->base_infos; *b != NULL; b++){
+	  printf( "-- Base %s \n", (*b)->name );
+	  printf( "--- Update date : %s \n", (*b)->date );
+	  printf( "--- Version : %s \n", (*b)->version );
+	  printf( "--- Signature count : %d \n", (*b)->signature_count );
+	  printf( "--- Full path : %s \n", (*b)->full_path );
+	}
+      }
+    }
+  }
+}
+
+static void ipc_handler_info_module(struct ipc_manager *m, void *data)
+{
+  struct info *info = (struct info *)data;
+  struct module_info *mod_info = malloc(sizeof(struct module_info));
+  int n, n_bases, argc;
+  char *mod_name, *mod_status, *update_date;
+
+  ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &mod_name);
+  mod_info->name = strdup(mod_name);
+  ipc_manager_get_arg_at(m, 1, IPC_STRING_T, &mod_status);
+  mod_info->mod_status = update_status_str(mod_status);
+  ipc_manager_get_arg_at(m, 2, IPC_STRING_T, &update_date);
+  mod_info->update_date = strdup(update_date);
+
+  n_bases = (ipc_manager_get_argc(m) - 3) / 5;
+
+  mod_info->base_infos = malloc((n_bases + 1) * sizeof(struct uhuru_base_info *));
+  mod_info->base_infos[n_bases] = NULL;
+
+  for (argc = 3, n = 0; argc < ipc_manager_get_argc(m); argc += 5, n++) {
+    struct base_info *base_info = malloc(sizeof(struct base_info));
+    char *name, *date, *version, *full_path;
+
+    ipc_manager_get_arg_at(m, argc+0, IPC_STRING_T, &name);
+    base_info->name = strdup(name);
+    ipc_manager_get_arg_at(m, argc+1, IPC_STRING_T, &date);
+    base_info->date = strdup(date);
+    ipc_manager_get_arg_at(m, argc+2, IPC_STRING_T, &version);
+    base_info->version = strdup(version);
+    ipc_manager_get_arg_at(m, argc+3, IPC_INT32_T, &base_info->signature_count);
+    ipc_manager_get_arg_at(m, argc+4, IPC_STRING_T, &full_path);
+    base_info->full_path = strdup(full_path);
+
+    mod_info->base_infos[n] = base_info;
+  }
+
+  info_append_module(info, mod_info);
+}
+
+static void ipc_handler_info_end(struct ipc_manager *m, void *data)
+{
+  struct info *info = (struct info *)data;
+  char *global_status;
+
+  ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &global_status);
+  info->global_status = update_status_str(global_status);
+}
+
+static void do_info(struct info_options *opts, int client_sock)
+{
+  struct info *info = info_new();
+  struct ipc_manager *manager;
   
-  u = uhuru_open(opts->use_daemon);
-  info = uhuru_info_new(u);
+  manager = ipc_manager_new(client_sock);
+
+  ipc_manager_add_handler(manager, IPC_MSG_ID_INFO_MODULE, ipc_handler_info_module, info);
+  ipc_manager_add_handler(manager, IPC_MSG_ID_INFO_END, ipc_handler_info_end, info);
+
+  ipc_manager_msg_send(manager, IPC_MSG_ID_INFO, IPC_NONE_T);
+
+  while (ipc_manager_receive(manager) > 0)
+    ;
+
+  ipc_manager_free(manager);
 
   if (opts->output_xml)
     info_save_to_xml(info);
   else
-    info_to_stdout(info);
+    info_save_to_stdout(info);
 
-  uhuru_info_free(info);
-
-  uhuru_close(u);
+  info_free(info);
 }
 
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
   struct info_options *opts = (struct info_options *)malloc(sizeof(struct info_options));
+  int client_sock;
 
   parse_options(argc, argv, opts);
 
-  do_info(opts);
+  if (opts->socket_type == TCP_SOCKET)
+    client_sock = tcp_client_connect("127.0.0.1", opts->port_number, 10);
+  else
+    client_sock = unix_client_connect(opts->unix_path, 10);
+
+  if (client_sock < 0) {
+    fprintf(stderr, "cannot open client socket (errno %d)\n", errno);
+    return 1;
+  }
+
+  do_info(opts, client_sock);
 
   return 0;
 }

@@ -1,20 +1,13 @@
-#include <libuhuru/core.h>
-
 #include "utils/getopt.h"
-#ifdef linux
-#include <daemon/ipc.h>
+#include "daemon/ipc.h"
 #include "daemon/tcpsock.h"
 #include "daemon/unixsock.h"
-#endif
 
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#define DEFAULT_TCP_PORT "14444"
-#define DEFAULT_SOCKET_PATH "@/tmp/.uhuru/daemon"
 
 struct scan_summary {
   int scanned;
@@ -35,15 +28,15 @@ struct scan_options {
     UNIX_SOCKET,
   } socket_type;
   const char *unix_path;
+  unsigned short port_number;
   int recursive;
   int threaded;
   int no_summary;
   int print_clean;
-  unsigned short port_number;
   const char *path;
 };
 
-struct opt scan_opt_defs[] = {
+static struct opt scan_opt_defs[] = {
   { "help", 'h', 0, 0, NULL},
   { "recursive", 'r', 0, 0, NULL},
   { "threaded", 't', 0, 0, NULL},
@@ -53,6 +46,7 @@ struct opt scan_opt_defs[] = {
   { .long_form = "port", .short_form = 'p', .need_arg = 1, .is_set = 0, .value = NULL},
   { .long_form = "unix", .short_form = 'u', .need_arg = 0, .is_set = 0, .value = NULL},
   { .long_form = "path", .short_form = 'a', .need_arg = 1, .is_set = 0, .value = NULL},
+  { .long_form = NULL, .short_form = 0, .need_arg = 0, .is_set = 0, .value = NULL},
 };
 
 static void usage(void)
@@ -68,8 +62,8 @@ static void usage(void)
   fprintf(stderr, "  --no-summary -n          disable summary at end of scanning\n");
   fprintf(stderr, "  --print-clean -c         print also clean files as they are scanned\n");
   fprintf(stderr, "  --tcp -t | --unix -u     use TCP (--tcp) or unix (--unix) socket (default is unix)\n");
-  fprintf(stderr, "  --port=PORT -p PORT      TCP port number\n");
-  fprintf(stderr, "  --path=PATH -a PATH      unix socket path\n");
+  fprintf(stderr, "  --port=PORT | -p PORT    TCP port number\n");
+  fprintf(stderr, "  --path=PATH | -a PATH    unix socket path\n");
   fprintf(stderr, "\n");
 
   exit(1);
@@ -214,6 +208,8 @@ static void do_scan(struct scan_options *opts, int client_sock)
     print_summary(scan->summary);
     free(scan->summary);
   }
+
+  ipc_manager_free(manager);
 }
 
 int main(int argc, const char **argv)
