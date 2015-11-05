@@ -1,11 +1,11 @@
 AUTOMAKE_OPTIONS=subdir-objects
 
-bin_PROGRAMS=uhuru-scan # uhuru-info later
+bin_PROGRAMS=uhuru-scan uhuru-info
 
-uhuru_scan_CFLAGS=-I$(top_srcdir)/include -I$(top_srcdir)/src -I$(top_srcdir)/src/linux @GLIB2_CFLAGS@
-uhuru_scan_LDADD=@GLIB2_LIBS@
-uhuru_scan_SOURCES=\
-uhuru-scan.c \
+AM_CFLAGS=-I$(top_srcdir)/include -I$(top_srcdir)/src -I$(top_srcdir)/src/linux @GLIB2_CFLAGS@
+LIBS=@GLIB2_LIBS@
+
+COMMON_SOURCES=\
 ../../utils/getopt.c \
 ../../utils/getopt.h \
 ../daemon/ipc.c \
@@ -15,6 +15,9 @@ uhuru-scan.c \
 ../daemon/unixsock.c \
 ../daemon/unixsock.h
 
-#uhuru_info_CFLAGS=-I$(top_srcdir)/include -I$(top_srcdir)/src @GLIB2_CFLAGS@ @LIBXML2_CFLAGS@
-#uhuru_info_LDADD=$(top_builddir)/src/lib/libuhuru.la @GLIB2_LIBS@ @LIBXML2_LIBS@
-#uhuru_info_SOURCES=uhuru-info.c
+uhuru_scan_SOURCES=uhuru-scan.c $(COMMON_SOURCES)
+
+uhuru_info_SOURCES=uhuru-info.c $(COMMON_SOURCES)
+
+uhuru_info_CFLAGS=$(AM_CFLAGS) @LIBXML2_CFLAGS@
+uhuru_info_LDADD=$(LIBS) @LIBXML2_LIBS@
