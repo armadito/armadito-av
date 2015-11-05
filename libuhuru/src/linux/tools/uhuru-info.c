@@ -24,7 +24,28 @@ struct info_options {
   int output_xml;
 };
 
+struct base_info {
+  const char *name;
+  /* UTC and ISO 8601 date */
+  const char *date;
+  const char *version;
+  unsigned int signature_count;
+  const char *full_path;
+};
+
+struct module_info {
+  const char *name;
+  const char *mod_status;
+  /* UTC and ISO 8601 date time */
+  const char *update_date;
+  /* NULL terminated array of pointers to struct base_info */
+  struct base_info **base_infos;
+};
+
 struct info {
+  const char *global_status;
+  /* NULL terminated array of pointers to struct uhuru_module_info */
+  struct module_info **module_infos;
 };
 
 static struct opt info_opt_defs[] = {
@@ -134,11 +155,12 @@ static const char *update_status_str(enum uhuru_update_status status)
 
   return "non available";
 }
+#endif
 
-static void info_doc_add_module(xmlDocPtr doc, struct uhuru_module_info *info)
+static void info_doc_add_module(xmlDocPtr doc, struct module_info *info)
 {
   xmlNodePtr root_node, module_node, base_node, date_node;
-  struct uhuru_base_info **pinfo;
+  struct base_info **pinfo;
   char buffer[64];
 
   root_node = xmlDocGetRootElement(doc);
@@ -146,7 +168,7 @@ static void info_doc_add_module(xmlDocPtr doc, struct uhuru_module_info *info)
   module_node = xmlNewChild(root_node, NULL, "module", NULL);
   xmlNewProp(module_node, "name", info->name);
 
-  xmlNewChild(module_node, NULL, "update-status", update_status_str(info->mod_status));
+  xmlNewChild(module_node, NULL, "update-status", info->mod_status);
 
   date_node = xmlNewChild(module_node, NULL, "update-date", info->update_date);
   xmlNewProp(date_node, "type", "xs:dateTime");
@@ -165,13 +187,12 @@ static void info_doc_add_module(xmlDocPtr doc, struct uhuru_module_info *info)
   }
 }
 
-static void info_doc_add_global(xmlDocPtr doc, enum uhuru_update_status global_update_status)
+static void info_doc_add_global(xmlDocPtr doc, const char *global_update_status)
 {
   xmlNodePtr root_node = xmlDocGetRootElement(doc);
 
-  xmlNewChild(root_node, NULL, "update-status", update_status_str(global_update_status));
+  xmlNewChild(root_node, NULL, "update-status", global_update_status);
 }
-#endif
 
 static void info_doc_save_to_fd(xmlDocPtr doc, int fd)
 {
@@ -192,16 +213,14 @@ static void info_save_to_xml(struct info *info)
 {
   xmlDocPtr doc = info_doc_new();
 
-#if 0
   info_doc_add_global(doc, info->global_status);
 
   if (info->module_infos != NULL) {
-    struct uhuru_module_info **m;
+    struct module_info **m;
 
     for(m = info->module_infos; *m != NULL; m++)
       info_doc_add_module(doc, *m);
   }
-#endif
 
   info_doc_save_to_fd(doc, STDOUT_FILENO);
   info_doc_free(doc);
@@ -209,41 +228,41 @@ static void info_save_to_xml(struct info *info)
 
 static void ipc_handler_info_module(struct ipc_manager *m, void *data)
 {
-#if 0
-  struct ipc_handler_info_data *handler_data = (struct ipc_handler_info_data *)data;
-  struct uhuru_module_info *mod_info = g_new0(struct uhuru_module_info, 1);
-  int n_base, argc;
-  char *mod_name, *update_date;
+  /* struct ipc_handler_info_data *handler_data = (struct ipc_handler_info_data *)data; */
+  struct module_info *mod_info = malloc(sizeof(struct module_info));
+  int n, n_bases, argc;
+  char *mod_name, *mod_status, *update_date;
 
   ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &mod_name);
-  mod_info->name = os_strdup(mod_name);
-  ipc_manager_get_arg_at(m, 1, IPC_INT32_T, &mod_info->mod_status);
+  mod_info->name = strdup(mod_name);
+  ipc_manager_get_arg_at(m, 1, IPC_STRING_T, &mod_status);
+  mod_info->mod_status = strdup(mod_status);
   ipc_manager_get_arg_at(m, 2, IPC_STRING_T, &update_date);
-  mod_info->update_date = os_strdup(update_date);
+  mod_info->update_date = strdup(update_date);
 
   n_bases = (ipc_manager_get_argc(m) - 3) / 5;
 
-  mod_info->base_infos = g_new0(struct uhuru_base_info *, n_bases + 1);
+  mod_info->base_infos = malloc((n_bases + 1) * sizeof(struct uhuru_base_info *));
+  mod_info->base_infos[n_bases] = NULL;
 
-  for (argc = 3, n_base = 0; argc < ipc_manager_get_argc(m); argc += 5, n_base++) {
-    struct uhuru_base_info *base_info = g_new(struct uhuru_base_info, 1);
+  for (argc = 3, n = 0; argc < ipc_manager_get_argc(m); argc += 5, n++) {
+    struct base_info *base_info = malloc(sizeof(struct base_info));
     char *name, *date, *version, *full_path;
 
     ipc_manager_get_arg_at(m, argc+0, IPC_STRING_T, &name);
-    base_info->name = os_strdup(name);
+    base_info->name = strdup(name);
     ipc_manager_get_arg_at(m, argc+1, IPC_STRING_T, &date);
-    base_info->date = os_strdup(date);
+    base_info->date = strdup(date);
     ipc_manager_get_arg_at(m, argc+2, IPC_STRING_T, &version);
-    base_info->version = os_strdup(version);
+    base_info->version = strdup(version);
     ipc_manager_get_arg_at(m, argc+3, IPC_INT32_T, &base_info->signature_count);
     ipc_manager_get_arg_at(m, argc+4, IPC_STRING_T, &full_path);
-    base_info->full_path = os_strdup(full_path);
+    base_info->full_path = strdup(full_path);
 
-    mod_info->base_infos[n_base] = base_info;
+    mod_info->base_infos[n] = base_info;
   }
 
-  g_array_append_val(handler_data->g_module_infos, mod_info);
-#endif
+  /* g_array_append_val(handler_data->g_module_infos, mod_info); */
 }
 
 static void ipc_handler_info_end(struct ipc_manager *m, void *data)
