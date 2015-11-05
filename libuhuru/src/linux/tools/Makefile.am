@@ -3,7 +3,7 @@ AUTOMAKE_OPTIONS=subdir-objects
 bin_PROGRAMS=uhuru-scan uhuru-info
 
 AM_CFLAGS=-I$(top_srcdir)/include -I$(top_srcdir)/src -I$(top_srcdir)/src/linux @GLIB2_CFLAGS@
-LIBS=@GLIB2_LIBS@
+LIBS= @GLIB2_LIBS@
 
 COMMON_SOURCES=\
 ../../utils/getopt.c \
