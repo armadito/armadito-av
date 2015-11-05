@@ -1,7 +1,10 @@
-#ifndef _LIBUHURU_LIBIPC_IPC_H_
-#define _LIBUHURU_LIBIPC_IPC_H_
+#ifndef _IPC_H_
+#define _IPC_H_
 
 #include <glib.h>
+
+#define DEFAULT_TCP_PORT "14444"
+#define DEFAULT_SOCKET_PATH "@/tmp/.uhuru/daemon"
 
 typedef guchar ipc_type_t;
 
