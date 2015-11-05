@@ -44,6 +44,9 @@ BOOL DirectoryExists(LPCTSTR szPath)
 		(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
+/*
+  -- Note : Escaping not used anymore. But we need to be able to scan Chinese encoded name files
+
 void replaceAll(std::string& str, const std::string& from, const std::string& to) {
 	if (from.empty())
 		return;
@@ -73,6 +76,8 @@ char *cpp_escape_str(const char * str_in){
 
 	return _strdup(str.c_str());
 }
+*/
+
 
 void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data ) {
 
@@ -91,12 +96,8 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 		return;
 	}
 	
-
-	printf(" path -- %s \n", path);
 	// We escape ? and * characters
-	escapedPath = cpp_escape_str(path);
-
-	printf("escaped_path -- %s \n", escapedPath);
+	// escapedPath = cpp_escape_str(path);
 
 	// Check if it is a directory
 	if (!(GetFileAttributesA(path) & FILE_ATTRIBUTE_DIRECTORY)) {
@@ -104,14 +105,19 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 		return;
 	}
 
-	size = strlen(escapedPath) + 3;
+	size = strlen(path) + 3;
 	sPath = (char*)calloc(size + 1, sizeof(char));
 	sPath[size] = '\0';
-	sprintf_s(sPath, size, "%s\\*", escapedPath);
+	sprintf_s(sPath, size, "%s\\*", path);
 
 	//g_log(NULL, G_LOG_LEVEL_WARNING, "os_dir_map() :: (%s)", sPath);
 
-	// First file scanned ??
+	/*
+	FindFirstFile note
+	Be aware that some other thread or process could create or delete a file with this name between the time you query for the result and the time you act on the information. If this is a potential concern for your application, one possible solution is to use the CreateFile function with CREATE_NEW (which fails if the file exists) or OPEN_EXISTING (which fails if the file does not exist).
+	*/
+
+
 	fh = FindFirstFileA(sPath, &fdata);
 	if (fh == INVALID_HANDLE_VALUE) {
 		g_log(NULL, G_LOG_LEVEL_WARNING, "warning :: FindFirstFileA() failed for %s (%s) ", sPath, os_strerror(errno));
@@ -147,7 +153,6 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 		free(entryPath);
 	}
 
-	free(escapedPath);
 	free(sPath);
 	FindClose(fh);
 
