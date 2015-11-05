@@ -46,6 +46,8 @@ struct info {
   const char *global_status;
   /* NULL terminated array of pointers to struct uhuru_module_info */
   struct module_info **module_infos;
+  int n_modules;
+  int alloc_modules;
 };
 
 static struct opt info_opt_defs[] = {
@@ -80,13 +82,7 @@ static void parse_options(int argc, const char *argv[], struct info_options *opt
   int r = opt_parse(info_opt_defs, argc, argv);
   const char *s_port;
 
-  if (r < 0|| r >= argc)
-    usage();
-
-  if (opt_is_set(info_opt_defs, "help"))
-      usage();
-
-  if (opt_is_set(info_opt_defs, "tcp") && opt_is_set(info_opt_defs, "unix"))
+  if (r < 0|| r > argc)
     usage();
 
   if (opt_is_set(info_opt_defs, "help"))
@@ -109,16 +105,35 @@ static void parse_options(int argc, const char *argv[], struct info_options *opt
 
 static struct info *info_new(void)
 {
+  struct info *info = malloc(sizeof(struct info));
+
+  info->global_status = NULL;
+
+  info->n_modules = 0;
+  info->alloc_modules = 1;
+  info->module_infos = malloc(sizeof(struct module_info) * info->alloc_modules);
+  info->module_infos[info->n_modules] = NULL;
+
+  return info;
 }
 
-static void info_save_to_stdout(struct info *info)
+static void info_append_module(struct info *info, struct module_info *mod_inf)
 {
+  if (info->n_modules >= info->alloc_modules - 1) {
+    info->alloc_modules *= 2;
+    info->module_infos = realloc(info->module_infos, sizeof(struct module_info) * info->alloc_modules);
+  }
+
+  info->module_infos[info->n_modules] = mod_inf;
+  info->n_modules++;
+  info->module_infos[info->n_modules] = NULL;
 }
 
 static void info_free(struct info *info)
 {
+  /* FIXME: free all the fields */
+  free(info);
 }
-
 
 static xmlDocPtr info_doc_new(void)
 {
@@ -139,23 +154,19 @@ static xmlDocPtr info_doc_new(void)
   return doc;
 }
 
-#if 0
-static const char *update_status_str(enum uhuru_update_status status)
+static const char *update_status_str(const char *status)
 {
-  switch(status) {
-  case UHURU_UPDATE_NON_AVAILABLE:
-    return "non available";
-  case UHURU_UPDATE_OK:
+  if (!strcmp(status, "UHURU_UPDATE_OK"))
     return "ok";
-  case UHURU_UPDATE_LATE:
+  if (!strcmp(status, "UHURU_UPDATE_LATE"))
     return "late";
-  case UHURU_UPDATE_CRITICAL:
+  if (!strcmp(status, "UHURU_UPDATE_CRITICAL"))
     return "critical";
-  }
+  if (!strcmp(status, "UHURU_UPDATE_NON_AVAILABLE"))
+    return "non available";
 
   return "non available";
 }
-#endif
 
 static void info_doc_add_module(xmlDocPtr doc, struct module_info *info)
 {
@@ -226,9 +237,35 @@ static void info_save_to_xml(struct info *info)
   info_doc_free(doc);
 }
 
+static void info_save_to_stdout(struct info *info)
+{
+  struct module_info **m;
+  struct base_info **b;
+
+  printf( "--- tatou_info --- \n");
+  /* printf( "Update global status : %d\n", info->global_status); */
+  if (info->module_infos != NULL) {
+    for(m = info->module_infos; *m != NULL; m++){
+      printf( "Module %s \n", (*m)->name );
+      printf( "- Update status : %s\n", (*m)->mod_status);
+      printf( "- Update date : %s \n", (*m)->update_date );
+
+      if ((*m)->base_infos != NULL) {
+	for(b = (*m)->base_infos; *b != NULL; b++){
+	  printf( "-- Base %s \n", (*b)->name );
+	  printf( "--- Update date : %s \n", (*b)->date );
+	  printf( "--- Version : %s \n", (*b)->version );
+	  printf( "--- Signature count : %d \n", (*b)->signature_count );
+	  printf( "--- Full path : %s \n", (*b)->full_path );
+	}
+      }
+    }
+  }
+}
+
 static void ipc_handler_info_module(struct ipc_manager *m, void *data)
 {
-  /* struct ipc_handler_info_data *handler_data = (struct ipc_handler_info_data *)data; */
+  struct info *info = (struct info *)data;
   struct module_info *mod_info = malloc(sizeof(struct module_info));
   int n, n_bases, argc;
   char *mod_name, *mod_status, *update_date;
@@ -236,7 +273,7 @@ static void ipc_handler_info_module(struct ipc_manager *m, void *data)
   ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &mod_name);
   mod_info->name = strdup(mod_name);
   ipc_manager_get_arg_at(m, 1, IPC_STRING_T, &mod_status);
-  mod_info->mod_status = strdup(mod_status);
+  mod_info->mod_status = update_status_str(mod_status);
   ipc_manager_get_arg_at(m, 2, IPC_STRING_T, &update_date);
   mod_info->update_date = strdup(update_date);
 
@@ -262,21 +299,16 @@ static void ipc_handler_info_module(struct ipc_manager *m, void *data)
     mod_info->base_infos[n] = base_info;
   }
 
-  /* g_array_append_val(handler_data->g_module_infos, mod_info); */
+  info_append_module(info, mod_info);
 }
 
 static void ipc_handler_info_end(struct ipc_manager *m, void *data)
 {
-#if 0
-  struct ipc_handler_info_data *handler_data = (struct ipc_handler_info_data *)data;
-  struct uhuru_info *info = handler_data->info;
-  GArray *g_module_infos = handler_data->g_module_infos;
+  struct info *info = (struct info *)data;
+  char *global_status;
 
-  info->module_infos = (struct uhuru_module_info **)g_module_infos->data;
-  g_array_free(g_module_infos, FALSE);
-
-  ipc_manager_get_arg_at(m, 0, IPC_INT32_T, &info->global_status);
-#endif
+  ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &global_status);
+  info->global_status = update_status_str(global_status);
 }
 
 static void do_info(struct info_options *opts, int client_sock)
