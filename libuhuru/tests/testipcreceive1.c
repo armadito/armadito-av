@@ -1,4 +1,4 @@
-#include "lib/ipc.h"
+#include "linux/daemon/ipc.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -29,7 +29,7 @@ static void debug_args(struct ipc_manager *m)
 static void handler1(struct ipc_manager *manager, void *data)
 {
   char *ps;
-  gint32 i;
+  ipc_int32_t i;
 
   fprintf(stderr, "handler 1: ");
   debug_args(manager);
@@ -51,7 +51,7 @@ int main(int argc, char **argv)
 {
   struct ipc_manager *ipc;
 
-  ipc = ipc_manager_new(0, 1);
+  ipc = ipc_manager_new(0);
 
   ipc_manager_add_handler(ipc, IPC_MSG_ID_SCAN, handler1, NULL);
   ipc_manager_add_handler(ipc, IPC_MSG_ID_SCAN_FILE, handler2, NULL);
