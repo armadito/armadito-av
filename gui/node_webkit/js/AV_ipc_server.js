@@ -17,19 +17,19 @@ if(os.platform() == "win32")
 function create_IHM_scan_server(){
 	
 	server = net.createServer(function(server_socket) { //'connection' listener
-	  console.log('client connected');
+	  //console.log('client connected');
 	  
 	  // Normalement global.scan_in_progress = true;
 	  // We receive here the scan_progress value from AV
 	  // What if we receive nothing ??? ( if AV_Scan crashed ?)
 	  
 	  server_socket.on('end', function() {
-		console.log('client disconnected');
+		//console.log('client disconnected');
 	  });
 	  
 	  server_socket.on('data', function(data) {
-		 console.log("data received on server " );
-		 console.log("data received on server : " + data);
+		// console.log("data received on server " );
+		// console.log("data received on server : " + data);
 		 
 		 // Parsing here
 		//var buff = new Buffer( data, data_encoding );
