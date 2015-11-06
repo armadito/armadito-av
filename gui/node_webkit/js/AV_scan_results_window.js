@@ -30,6 +30,19 @@ else{
 	// Waiting for connexions on scan_server
 }
 
+function ask_to_cancel_scan(){
+	
+	// We connect to AV 
+	connect_to_AV();
+	
+	// We send cancel msg
+	if( cancel_scan(scan_id) < 0 ){
+		client_socket.destroy();
+	}
+	
+	
+}
+
 // --- Update HTML with DOM ---
 
 function update_scan_progress_bar() {
