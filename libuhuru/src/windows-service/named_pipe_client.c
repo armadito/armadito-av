@@ -60,10 +60,7 @@ int start_named_pipe_client(char* path, HANDLE * hPipe)
 	}
 
 	// The pipe connected; change to message-read mode. 
-	printf("SetNamedPipeHandleState : -%s- ", lpszPipename);
-	
 	// This is needed to change from byte-mode to readmode client. 
-	// Maybe it doesn't works because it's already in READMODE_MESSAGE
 
 	//dwMode = PIPE_READMODE_MESSAGE;
 	dwMode = NULL;
@@ -101,10 +98,10 @@ int send_message_to_IHM(HANDLE * hPipe, char * message, char** server_response)
 		return -1;
 	}
 
-	// TODO: Checker le message avant envoi
+	// TODO: Checker le message avant envoi ?
 	lpvMessage = message;
 	cbToWrite = (lstrlen(lpvMessage))*sizeof(TCHAR);
-	_tprintf(TEXT("Sending %d byte message: \"%s\"\n"), cbToWrite, lpvMessage);
+	//_tprintf(TEXT("Sending %d byte message: \"%s\"\n"), cbToWrite, lpvMessage);
 
 	fSuccess = WriteFile(
 		*hPipe,                  // pipe handle 
@@ -118,8 +115,6 @@ int send_message_to_IHM(HANDLE * hPipe, char * message, char** server_response)
 		_tprintf(TEXT("WriteFile to pipe failed. GLE=%d\n"), GetLastError());
 		return -1;
 	}
-
-	printf("\nMessage sent to server, receiving reply as follows:\n");
 
 	do
 	{
@@ -135,15 +130,9 @@ int send_message_to_IHM(HANDLE * hPipe, char * message, char** server_response)
 		if (!fSuccess && GetLastError() != ERROR_MORE_DATA)
 			break;
 
-		printf(" %d bytes read \n", cbRead);
 		chBuf[cbRead] = '\0';
-
-		printf(" Server response : %s \n", chBuf);
+		//printf(" Server response : %s \n", chBuf);
 		*server_response = chBuf;
-
-		printf(" After assign response \n");
-
-		//_tprintf(TEXT("\"%s\"\n"), chBuf);
 
 	} while (!fSuccess);  // repeat loop if ERROR_MORE_DATA 
 
