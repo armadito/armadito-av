@@ -1,6 +1,6 @@
-#include <libuhuru/scan.h>
+#include <libuhuru/core.h>
 
 int main(int argc, char **argv)
 {
-  uhuru_open(1);
+  uhuru_open(NULL);
 }
