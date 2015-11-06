@@ -118,13 +118,13 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 	*/
 
 
-	fh = FindFirstFileA(sPath, &fdata);
+	fh = FindFirstFile(sPath, &fdata);
 	if (fh == INVALID_HANDLE_VALUE) {
 		g_log(NULL, G_LOG_LEVEL_WARNING, "warning :: FindFirstFileA() failed for %s (%s) ", sPath, os_strerror(errno));
 		return;
 	}
 
-	while (FindNextFileA(fh, &tmp) != FALSE) {
+	while (FindNextFile(fh, &tmp) != FALSE) {
 
 		// exclude paths "." and ".."
 		if (strncmp(tmp.cFileName,".",strlen(tmp.cFileName)) == 0 || strncmp(tmp.cFileName,"..",strlen(tmp.cFileName)) == 0)
