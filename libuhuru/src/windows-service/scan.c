@@ -51,7 +51,13 @@ int test_connection(int scan_id, HANDLE* hPipe){
 	return 0;
 }
 
-int start_new_scan(struct new_scan* scan, uhuru* uhuru)
+int cancel_current_scan(struct new_scan_action* scan, uhuru* uhuru)
+{
+	printf("######## CANCEL CURRENT SCAN ########\n", scan->scan_id);
+	return 0;
+}
+
+int start_new_scan(struct new_scan_action* scan, uhuru* uhuru)
 {
 	HANDLE hPipe = INVALID_HANDLE_VALUE;
 	

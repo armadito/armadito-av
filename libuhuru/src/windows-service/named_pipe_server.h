@@ -14,6 +14,6 @@ struct thread_parameters {
 
 int start_named_pipe_server(uhuru* uhuru);
 DWORD WINAPI InstanceThread(LPVOID);
-VOID GetAnswerToRequest(LPTSTR, LPTSTR, LPDWORD, struct new_scan* scan);
+VOID GetAnswerToRequest(LPTSTR, LPTSTR, LPDWORD, struct new_scan_action* scan);
 
 #endif
