@@ -224,7 +224,7 @@ DWORD WINAPI InstanceThread(LPVOID lpvParam)
 	HeapFree(hHeap, 0, pchReply);
 	if (params != NULL) free(params);
 
-	printf("InstanceThread exitting.\n");
+	printf("InstanceThread exiting.\n");
 	return 1;
 }
 
@@ -263,6 +263,6 @@ VOID GetAnswerToRequest(LPTSTR pchRequest,
 
 	*pchBytes = (lstrlen(pchReply))*sizeof(TCHAR);
 
-	printf("BUFSIZE = %d -- Written = %d bytes\n", BUFSIZE, *pchBytes);
+	//printf("BUFSIZE = %d -- Written = %d bytes\n", BUFSIZE, *pchBytes);
 
 }
