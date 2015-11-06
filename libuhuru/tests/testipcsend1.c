@@ -7,7 +7,7 @@ int main(int argc, char **argv)
 {
   struct ipc_manager *ipc;
 
-  ipc = ipc_manager_new(0, 1);
+  ipc = ipc_manager_new(1);
 
   ipc_manager_msg_send(ipc, IPC_MSG_ID_SCAN, 
 		       IPC_STRING_T, "/var/tmp/foo", 
