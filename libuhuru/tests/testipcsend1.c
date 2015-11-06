@@ -1,4 +1,4 @@
-#include "lib/ipc.h"
+#include "linux/daemon/ipc.h"
 
 #include <assert.h>
 #include <stdio.h>
