@@ -201,7 +201,7 @@ DWORD WINAPI InstanceThread(LPVOID lpvParam)
 		if (strcmp(scan->scan_action, "new_scan") == 0){
 			start_new_scan(scan, params->uhuru);
 		}
-		else if (strcmp(scan->scan_action, "cancel_scan") == 0){
+		else if (strcmp(scan->scan_action, "cancel") == 0){
 			cancel_current_scan(scan, params->uhuru);
 		}
 
