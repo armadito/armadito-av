@@ -35,7 +35,6 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
 
 	// Traiter la réponse ici
 	closeConnection_to_IHM(hPipe);
-	printf("callback report sent to IHM !\n");
 
 }
 
@@ -53,7 +52,7 @@ int test_connection(int scan_id, HANDLE* hPipe){
 
 int cancel_current_scan(struct new_scan_action* scan, uhuru* uhuru)
 {
-	printf("######## CANCEL CURRENT SCAN ########\n", scan->scan_id);
+	printf("\n\n######## CANCEL CURRENT SCAN ########\n\n", scan->scan_id);
 	return 0;
 }
 
@@ -67,7 +66,7 @@ int start_new_scan(struct new_scan_action* scan, uhuru* uhuru)
 
 	if (scan != NULL && scan->scan_id > 0 && scan->scan_path != NULL){
 
-		printf("\n\n #### Start scanning (%d) %s ####\n", scan->scan_id, scan->scan_path);
+		//printf("\n\n #### Start scanning (%d) %s ####\n", scan->scan_id, scan->scan_path);
 
 		// We test connection before starting to scan
 		if (test_connection(scan->scan_id, &hPipe) < 0 ) { return -1; }
