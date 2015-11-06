@@ -70,5 +70,6 @@ OUT PULONG ReturnOutputBufferLength
 
 //NTSTATUS SendScanOrder(_In_ PFLT_FILTER FilterHandle, _In_ PFLT_PORT ClientPort, PUNICODE_STRING FilePath, _Out_ SCAN_RESULT * AnswerMessage);
 NTSTATUS SendScanOrder(_In_ PFLT_FILTER FilterHandle, PUNICODE_STRING FilePath, _Out_ SCAN_RESULT * AnswerMessage);
+NTSTATUS IsFromTheAnalysisProcess(PEPROCESS Process, PBOOLEAN Answer);
 
 #endif

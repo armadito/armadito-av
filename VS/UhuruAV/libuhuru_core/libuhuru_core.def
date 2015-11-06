@@ -12,3 +12,4 @@ uhuru_info_free
 uhuru_info_to_stdout
 uhuru_file_status_pretty_str
 uhuru_action_pretty_str
+uhuru_report_init

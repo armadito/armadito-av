@@ -7,6 +7,39 @@
 
 extern PFLT_FILTER gFilterHandle;
 PFLT_PORT gClientComPort = NULL;
+PEPROCESS gScanProcess = NULL;
+//HANDLE gScanProcessId = NULL;
+
+
+NTSTATUS IsFromTheAnalysisProcess(PEPROCESS Process , PBOOLEAN Answer) {
+
+	NTSTATUS ntStatus = STATUS_SUCCESS;
+
+	//	Check parameters
+	if(Process == NULL){
+		return STATUS_INVALID_PARAMETER_1;
+	}
+	if(Answer == NULL){
+		return STATUS_INVALID_PARAMETER_2;
+	}
+
+	// Initialize the answer.
+	*Answer = FALSE;
+
+	if (gClientComPort == NULL) {
+		ntStatus = STATUS_CONNECTION_ABORTED;
+		return ntStatus;
+	}
+
+	//PsGetProcessId
+
+	// psGetCurrent
+	if (Process == gScanProcess) {
+		*Answer = TRUE;
+	}
+
+	return ntStatus;
+}
 
 
 
@@ -118,6 +151,8 @@ NTSTATUS ConnectNotifyCallback(
 
 	// init global varible for the Client Port handle.
 	gClientComPort = ClientPort;
+	gScanProcess = PsGetCurrentProcess();
+	//gScanProcessId = PsGetCurrentProcessId;
 
 	return STATUS_SUCCESS;
 
@@ -132,7 +167,9 @@ VOID DisconnectNotifyCallback(IN PVOID ConnectionCookie) {
 	if (gClientComPort != NULL && gFilterHandle != NULL) {
 		FltCloseClientPort(gFilterHandle,&gClientComPort);
 		gClientComPort = NULL;
+		gScanProcess = NULL;
 	}
+
 
 	return;
 }
@@ -171,7 +208,7 @@ NTSTATUS SendScanOrder( _In_ PFLT_FILTER FilterHandle, PUNICODE_STRING FilePath 
 	ANSI_STRING AnsiString;
 	ULONG replyLength =0;
 	LONGLONG _1ms = 10000;
-	LONGLONG localScanTimeout = 30000;
+	LONGLONG localScanTimeout = 1000;
 
 
 
@@ -240,16 +277,17 @@ NTSTATUS SendScanOrder( _In_ PFLT_FILTER FilterHandle, PUNICODE_STRING FilePath 
 
 
 		if(ntStatus == STATUS_TIMEOUT){
-			DbgPrint("[-] Warning :: UhuruGuard!SendScanOrder :: FltSendMessage() returned with timeout status !! \n");
+			//DbgPrint("[-] Warning :: UhuruGuard!SendScanOrder :: FltSendMessage() returned with timeout status !! \n");
+			*AnswerMessage = TIMEOUT;
 		}
 		else {
-
+			*AnswerMessage = replyMessage;
 			//DbgPrint("[+] Debug :: UhuruGuard!SendScanOrder :: FltSendMessage() executed successfully !! :: Scan Result = [TODO] \n");
-			if (replyMessage == DBG_FLAG) {
-				DbgPrint("[+] DEBUG :: UhuruGuard!SendScanOrder :: Reply message received successfully from the scan service :: Scan Result = [DBG_FLAG] \n");
+			if (replyMessage != NONE) {
+				;//DbgPrint("[+] DEBUG :: UhuruGuard!SendScanOrder :: Reply message received successfully from the scan service :: Scan Result = [DBG_FLAG] \n");
 			}
 			else {
-				DbgPrint("[+] WARNING :: UhuruGuard!SendScanOrder :: Reply message not received completly...\n");
+				DbgPrint("[+] Warning :: UhuruGuard!SendScanOrder :: Reply message not received completly...\n");
 			}
 		}
 		
