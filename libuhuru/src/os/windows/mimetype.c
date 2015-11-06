@@ -34,7 +34,7 @@ const char *os_mime_type_guess(const char *path)
 
 	fh = CreateFileA(path, GENERIC_READ, 0, NULL,OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL,NULL );
 	if (fh == INVALID_HANDLE_VALUE) {
-		g_log(NULL, G_LOG_LEVEL_WARNING, "error :: os_mime_type_guess() :: CreateFileA() failed ::  (%s) ",os_strerror(errno));
+		g_log(NULL, G_LOG_LEVEL_WARNING, "Error :: os_mime_type_guess() :: CreateFileA() failed :: %s :: err = %d (%s) :: ",path,GetLastError(),os_strerror(GetLastError()));
 		return NULL;
 	}
 
@@ -45,7 +45,7 @@ const char *os_mime_type_guess(const char *path)
 	((char*)buf)[size] = '\0';
 
 	if (ReadFile(fh, buf, size, &read, NULL) == FALSE) {
-		g_log(NULL, G_LOG_LEVEL_WARNING, "error :: os_mime_type_guess() :: ReadFile() failed ::  (%s) ",os_strerror(errno));
+		g_log(NULL, G_LOG_LEVEL_WARNING, "Error :: os_mime_type_guess() :: ReadFile() failed ::  (%s) ",os_strerror(GetLastError()));
 		free(buf);
 		CloseHandle(fh);
 		return NULL; 

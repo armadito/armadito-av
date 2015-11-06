@@ -139,8 +139,8 @@ static enum uhuru_file_status scan_apply_modules(const char *path, const char *m
     enum uhuru_file_status mod_status;
     char *mod_report = NULL;
 
-	// Added by ulrich for debug.
-	//printf("[ii] Debug :: Applying module %s\n",mod->name);
+	// Added by ulrich for debug.	
+	//printf("[ii] Debug :: Applying module %s :: report = %d\n",mod->name,report);
 
     /* if module status is not OK, don't call it */
     if (mod->status != UHURU_MOD_OK)
@@ -397,7 +397,7 @@ void uhuru_scan_free(struct uhuru_scan *scan)
 /* the simple version, for on-access scan: */
 /* no callbacks */
 /* no threads */
-enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path)
+enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path,  struct uhuru_report *report)
 {
   struct uhuru_module **modules = NULL;
   const char *mime_type;
@@ -412,7 +412,7 @@ enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path)
   if (modules == NULL || mime_type == NULL)
     return UHURU_UNKNOWN_FILE_TYPE;
 
-  status = scan_apply_modules(path, mime_type, modules, NULL);
+  status = scan_apply_modules(path, mime_type, modules, report);
 
   free(mime_type);
 

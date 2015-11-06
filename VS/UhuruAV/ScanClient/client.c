@@ -1,5 +1,9 @@
 #include "client.h"
 
+// global
+struct uhuru * uhuru;
+
+
 HRESULT UserScanWorker(_In_  PUSER_SCAN_CONTEXT Context )
 /*
 
@@ -25,11 +29,15 @@ HRESULT UserScanWorker(_In_  PUSER_SCAN_CONTEXT Context )
     ULONG_PTR key;
 	LPOVERLAPPED pOvlp = NULL;
 	char * msDosFilename = NULL;
-	
+	struct uhuru_report report;
+	enum uhuru_file_status scan_result = UHURU_IERROR;
+
+
 	// Get thread context by ID.
 	ThreadId = GetCurrentThreadId( );
 
-	printf("\n[i] In thread worker routine...:: Thread ID : %d :: Context :: %d :: Finalize = %d\n",ThreadId, Context, Context->Finalized);
+	//printf("\n[i] In thread worker routine...:: Thread ID : %d :: Context :: %d :: Finalize = %d\n",ThreadId, Context, Context->Finalized);
+	printf("\n[i] In thread worker routine...:: Thread ID : %d :: Finalize = %d\n",ThreadId, Context->Finalized);
 	for (i = 0; i < USER_SCAN_THREAD_COUNT; i++) {
 
 		if (ThreadId == Context->ScanThreadCtxes[i].ThreadId ) {
@@ -101,7 +109,7 @@ HRESULT UserScanWorker(_In_  PUSER_SCAN_CONTEXT Context )
         message = CONTAINING_RECORD( pOvlp, SCANNER_MESSAGE, Ovlp );
 
 		if (message == NULL) {
-			printf("[-] Warning :: UserScanWorker :: Thread %d :: Get message from driver failed :: hres = 0x%x.\n",ThreadId, hres);
+			printf("[-] Warning :: UserScanWorker :: [%d] :: Get message from driver failed :: hres = 0x%x.\n",ThreadId, hres);
 		}
 		/*
 		else {
@@ -111,7 +119,7 @@ HRESULT UserScanWorker(_In_  PUSER_SCAN_CONTEXT Context )
         if (message->msg.FileName != NULL) {
 
 			
-			printf("\n[+] Debug :: UserScanWorker :: Thread %d Scan order received for file :: %s ::\n",ThreadId, message->msg.FileName);
+			//printf("\n[+] Debug :: UserScanWorker :: Thread %d Scan order received for file :: %s ::\n",ThreadId, message->msg.FileName);
 
 			// init reply struct.
 			//ZeroMemory( &reply, SCANNER_REPLY_MESSAGE_SIZE );
@@ -121,15 +129,31 @@ HRESULT UserScanWorker(_In_  PUSER_SCAN_CONTEXT Context )
 
 			// Get the MS-DOS filename 
 			msDosFilename = ConvertDeviceNameToMsDosName(message->msg.FileName);
-			printf("\n[+] Debug :: UserScanWorker :: Thread %d :: msDosFilename = %s ::\n",ThreadId,msDosFilename);
+			//printf("\n[+] Debug :: UserScanWorker :: Thread %d :: msDosFilename = %s ::\n",ThreadId,msDosFilename);
 
+			// fake scan example
+			if (strstr(msDosFilename,"UH_MALWARE") != NULL) {
+				scan_result = UHURU_MALWARE;
+			}
+			else {
 
-			
+				// Initialize the scan report structure
+				uhuru_report_init(&report, 1, msDosFilename, 0);
+
+				// launch a simple file scan
+				scan_result = uhuru_scan_simple(uhuru, msDosFilename, &report);
+
+			}
+
 			ZeroMemory( &reply, SCANNER_REPLY_MESSAGE_SIZE);
 			reply.ReplyHeader.MessageId = message->MessageHeader.MessageId;
-			reply.scanResult = DBG_FLAG;			
 
-			// Launch analysis to the file.
+			reply.scanResult = scan_result;
+
+
+			//reply.scanResult = DBG_FLAG;			
+
+			
 
 			
 			//printf("[DEBUG].... %d before FilterReplyMessage....\n",ThreadId);
@@ -139,9 +163,44 @@ HRESULT UserScanWorker(_In_  PUSER_SCAN_CONTEXT Context )
 
 			if(hres != S_OK){
 				printf("[-] Error :: UserScanWorker :: Thread %d :: FilterReplyMessage failed :: hres = 0x%x.\n",ThreadId, hres);
+				
 			}
 			else {
-				printf("[+] Debug :: UserScanWorker :: Thread %d  :: Reply sent successfully to the driver\n",ThreadId);
+				//printf("[+] Debug :: UserScanWorker :: [%d  :: Reply sent successfully to the driver\n",ThreadId);
+				switch (scan_result) {
+
+					case 0:
+						printf("[+] Debug :: UserScanWorker :: [%d] :: %s :: NONE\n",ThreadId,msDosFilename);
+						break;
+					case UHURU_UNDECIDED:
+						printf("[+] Debug :: UserScanWorker :: [%d] :: %s :: UHURU_UNDECIDED\n",ThreadId,msDosFilename);					
+						break;
+					case UHURU_CLEAN:
+						printf("[+] Debug :: UserScanWorker :: [%d] :: %s :: UHURU_CLEAN\n",ThreadId,msDosFilename);
+						break;
+					case UHURU_UNKNOWN_FILE_TYPE:
+						printf("[+] Debug :: UserScanWorker :: [%d] :: %s :: UHURU_UNKNOWN_FILE_TYPE\n",ThreadId,msDosFilename);
+						break;
+					case UHURU_EINVAL:
+						printf("[+] Debug :: UserScanWorker :: [%d] :: %s :: UHURU_EINVAL\n",ThreadId,msDosFilename);
+						break;
+					case UHURU_IERROR:
+						printf("[+] Debug :: UserScanWorker :: [%d] :: %s :: UHURU_IERROR\n",ThreadId,msDosFilename);
+						break;
+					case UHURU_SUSPICIOUS:
+						printf("[+] Debug :: UserScanWorker :: [%d] :: %s :: UHURU_SUSPICIOUS\n",ThreadId,msDosFilename);
+						break;
+					case UHURU_WHITE_LISTED:
+						printf("[+] Debug :: UserScanWorker :: [%d] :: %s :: UHURU_WHITE_LISTED\n",ThreadId,msDosFilename);
+						break;
+					case UHURU_MALWARE:
+						printf("[+] Debug :: UserScanWorker :: [%d] :: %s :: UHURU_MALWARE\n",ThreadId,msDosFilename);
+						break;
+					default:
+						printf("[+] Debug :: UserScanWorker :: [%d] :: %s :: ERROR_DEFAULT \n",ThreadId);
+						break;
+
+				}
 			}
 
 
@@ -583,17 +642,23 @@ char * ConvertDeviceNameToMsDosName(LPSTR DeviceFileName) {
 	return deviceDosFilename;
 }
 
-/*
+
 int main(int argc, char ** argv) {
 
 	HRESULT hres = S_OK;			
 	USER_SCAN_CONTEXT userScanCtx = {0};
-	UCHAR c;	
+	UCHAR c;
+	uhuru_error *err = NULL;
 	
-		
+	uhuru = uhuru_open(&err);
+	if (uhuru == NULL){
+		printf("[-] Error :: uhuru_open() error - %s \n", err->error_message );
+		return -1;
+	}
+	printf("[+] Debug :: uhuru struct initialized successfully!\n");
+
 	//  Initialize scan listening threads.
 	hres = UserScanInit(&userScanCtx);
-
 	
 	while(1) {
 		 printf("press 'q' to quit: ");
@@ -609,14 +674,20 @@ int main(int argc, char ** argv) {
 	// Finalize the scan thread contexts.
 	hres = UserScanFinalize(&userScanCtx);
 
+	err = NULL;
+	uhuru_close(uhuru,&err);
+	printf("[+] Debug :: uhuru struct closed successfully!\n");
+
 	return EXIT_SUCCESS;
 }
-*/
 
+
+#if 0
 int main(int argc, char * argv) {
 
 	uhuru_error *err = NULL;
 	struct uhuru * uhuru;
+	struct uhuru_report report;
 	enum uhuru_file_status scan_result = UHURU_IERROR;
 	//const char * filepath = "C:\\Users\\david\\Desktop\\to_analyze\\note.txt";
 	const char * filepath = "D:\\Reverse\\Malware\\peMalware\\10009b9e47ddd691ccc9ae04cd9cc0bb";
@@ -628,11 +699,13 @@ int main(int argc, char * argv) {
 	}
 
 	printf("[+] Debug :: uhuru struct initialized successfully!\n");
+	//printf("uhuru-report %s\n",report.mod_report);
+	uhuru_report_init(&report, 1, filepath, 0);
 
-	
-	
 	// launch a simple file scan
-	scan_result = uhuru_scan_simple(uhuru,filepath);
+	scan_result = uhuru_scan_simple(uhuru,filepath,&report);
+
+	printf("[i] Debug :: modname = %s :: modreport = %s\n",report.mod_name,report);
 
 	switch (scan_result) {
 
@@ -675,3 +748,4 @@ int main(int argc, char * argv) {
 
 	return 0;
 }
+#endif

@@ -157,7 +157,7 @@ void uhuru_scan_free(struct uhuru_scan *scan);
  * \return  the scan status of the file, as defined in file status.h
  *
  */
-enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path);
+enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path, struct uhuru_report * report);
 
 #ifdef __cplusplus
 }

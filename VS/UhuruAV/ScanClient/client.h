@@ -12,7 +12,7 @@
 
 
 #define SCAN_PORT_NAME L"\\UhuruPortScanFilter"
-#define USER_SCAN_THREAD_COUNT 3
+#define USER_SCAN_THREAD_COUNT 6
 #define MAX_PATH_SIZE 512
 #define BUFSIZE 512
 
@@ -86,16 +86,22 @@ typedef struct _USER_SCAN_CONTEXT {
 
 } USER_SCAN_CONTEXT, *PUSER_SCAN_CONTEXT;
 
-typedef enum _SCAN_RESULT
+/*typedef enum _SCAN_RESULT
 {
 	NONE = 0,		//  file not scanned yet.
 	CLEAN,			//	clean file
 	MALWARE,		// detected as malware.
 	TIMEOUT,		// scan not finished due to timeout.
+	UNDECIED,
+	UNSUPPORTED,
 	DBG_FLAG,
 	ERR
 
-}SCAN_RESULT, *PSCAN_RESULT;
+}SCAN_RESULT_OLD, *PSCAN_RESULT_OLD;*/
+
+typedef enum uhuru_file_status  SCAN_RESULT;
+typedef enum uhuru_file_status*  PSCAN_RESULT;
+
 
 typedef struct _COMMUNICATION_PORT_CONTEXT {
 	
