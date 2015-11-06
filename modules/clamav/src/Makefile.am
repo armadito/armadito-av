@@ -1,7 +1,7 @@
 modulesdir=$(libdir)/libuhuru/modules
 modules_LTLIBRARIES=clamav.la
 
-clamav_la_SOURCES=clamav.c
+clamav_la_SOURCES=clamav.c os/osdeps.h
 
 AM_CPPFLAGS= -DMODULE_CLAMAV_DBDIR='"@MODULE_CLAMAV_DBDIR@"'
 clamav_la_LDFLAGS= -module -avoid-version
