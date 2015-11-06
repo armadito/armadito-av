@@ -1,9 +1,9 @@
-#include <libuhuru/scan.h>
+#include <libuhuru/core.h>
 #include <stdio.h>
 
 int main(int argc, char **argv)
 {
-  struct uhuru *u = uhuru_open(0);
+  struct uhuru *u = uhuru_open(NULL);
   int i;
   
   for (i = 1; i < argc; i++) {
@@ -13,5 +13,5 @@ int main(int argc, char **argv)
     printf("%s: %s\n", argv[i], uhuru_file_status_str(status));
   }
 
-  uhuru_close(u);
+  uhuru_close(u, NULL);
 }
