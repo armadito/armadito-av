@@ -5,6 +5,7 @@ var param2 = "";
 
 var gui = require('nw.gui');
 
+
 // Function who asks libuhuru for a scan
 function new_ondemand_scan(){
 
@@ -63,5 +64,4 @@ function chooseFile(name) {
 	chooser.click();  
 }
 
-// We add the listener when loading the page
 chooseFile('#fileDialog');

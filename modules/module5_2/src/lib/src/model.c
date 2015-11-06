@@ -30,7 +30,7 @@ PMODEL modelLoadFromZip(CHAR* zipName){
 
 	status = mz_zip_reader_init_file(&zip_archive, zipName, 0);
 	if (!status){
-		printf("mz_zip_reader_init_file() failed!\n");
+		printf("mz_zip_reader_init_file() failed for file %s ! This file might be empty.\n ", zipName );
 		free(modelArray);
 		return NULL;
 	}
@@ -45,7 +45,7 @@ PMODEL modelLoadFromZip(CHAR* zipName){
 	for (i = 0; i < (DWORD)mz_zip_reader_get_num_files(&zip_archive); i++){
 		mz_zip_archive_file_stat file_stat;
 		if (!mz_zip_reader_file_stat(&zip_archive, i, &file_stat)){
-			printf("mz_zip_reader_file_stat() failed!\n");
+			printf("mz_zip_reader_file_stat() failed for file %s !\n", zipName );
 			mz_zip_reader_end(&zip_archive);
 			for (j = 0; j < i; j++){
 				vectorDelete(modelArray->modelFiles[j]);
@@ -58,7 +58,7 @@ PMODEL modelLoadFromZip(CHAR* zipName){
 			p = mz_zip_reader_extract_file_to_heap(&zip_archive, file_stat.m_filename, &uncomp_size, 0);
 			s = (QWORD*)p;
 			if (!p){
-				printf("mz_zip_reader_extract_file_to_heap() failed!\n");
+				printf("mz_zip_reader_extract_file_to_heap() failed for file %s !\n", zipName );
 				mz_zip_reader_end(&zip_archive);
 				return NULL;
 			}
