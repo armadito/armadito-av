@@ -1,9 +1,17 @@
 
+function cancel_scan()
+{
+	var message = '{"scan_action": "cancel", "scan_id": '+ scan_id +'}';
+	
+	console.log(" New scan_msg to be sent : ("+scan_id+")" + message);
+	return write_to_AV(message);
+}
+
 function ask_for_new_scan( new_scan, scan_id )
 {
 
 	new_scan.scan_path = escape_str(new_scan.scan_path);
-	var message = '{ "new_scan_id" : '+ scan_id +', "scan_path": "'+ new_scan.scan_path +'", "param1": "'+new_scan.param1+'", "param2": "'+new_scan.param2+'" }';
+	var message = '{ "scan_action": "new_scan", "scan_id" : '+ scan_id +', "scan_path": "'+ new_scan.scan_path +'", "param1": "'+new_scan.param1+'", "param2": "'+new_scan.param2+'" }';
 	
 	// Step 2
 	console.log(" New scan_msg to be sent : ("+scan_id+")" + message);
