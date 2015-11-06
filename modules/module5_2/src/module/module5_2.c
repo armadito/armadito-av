@@ -19,6 +19,9 @@ static enum uhuru_mod_status module5_2_init(struct uhuru_module *module)
 
 static enum uhuru_mod_status module5_2_post_init(struct uhuru_module *module)
 {
+ /* FIXME: use g_log ??? */
+  fprintf(stderr, "Loading module 5.2 ELF databases from " MODULE5_2_DBDIR "/linux\n");
+
   if (initDB(MODULE5_2_DBDIR "/linux/database.elfdata", 
 	     MODULE5_2_DBDIR "/linux/db_malicious.zip", 
 	     MODULE5_2_DBDIR "/linux/db_safe.zip",
@@ -27,7 +30,10 @@ static enum uhuru_mod_status module5_2_post_init(struct uhuru_module *module)
     return UHURU_MOD_INIT_ERROR;
 
  /* FIXME: use g_log ??? */
-  fprintf(stderr, "Module 5.2 ELF databases loaded from " MODULE5_2_DBDIR "/linux\n");
+  fprintf(stderr, "Module 5.2 ELF databases loaded\n");
+
+ /* FIXME: use g_log ??? */
+  fprintf(stderr, "Loading module 5.2 PE databases from " MODULE5_2_DBDIR "/windows\n");
 
   if (initDatabases(MODULE5_2_DBDIR "/windows/Database_malsain_2.zip",
 		    MODULE5_2_DBDIR "/windows/Database_malsain_1.zip",
@@ -40,7 +46,7 @@ static enum uhuru_mod_status module5_2_post_init(struct uhuru_module *module)
     return UHURU_MOD_INIT_ERROR;
 
  /* FIXME: use g_log ??? */
-  fprintf(stderr, "Module 5.2 PE databases loaded from " MODULE5_2_DBDIR "/windows\n");
+  fprintf(stderr, "Module 5.2 PE databases loaded\n");
 
   return UHURU_MOD_OK;
 }

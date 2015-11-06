@@ -20,6 +20,7 @@ lib/include/uh_errors.h \
 lib/include/utils.h \
 lib/include/vector.h \
 lib/include/windowsTypes.h \
+lib/include/osdeps.h \
 lib/src/UhuruStatic.c \
 lib/src/databases.c \
 lib/src/distances.c \
@@ -29,6 +30,7 @@ lib/src/kNN.c \
 lib/src/miniz.c \
 lib/src/model.c \
 lib/src/table.c \
+lib/src/linux/osdeps.c \
 lib/src/tfidfDetection.c \
 lib/src/uh_errors.c \
 lib/src/utils.c \

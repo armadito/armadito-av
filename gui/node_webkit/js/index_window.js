@@ -7,7 +7,7 @@ function closeWindow(){
 	
 	// Close systray 
 	tray.remove();
-    tray = null;
+        tray = null;
 	
 	// Close Window
 	var win = gui.Window.get();
