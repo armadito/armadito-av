@@ -103,7 +103,7 @@ DWORD WINAPI InstanceThread(LPVOID lpvParam)
 	BOOL fSuccess = FALSE;
 	//HANDLE* hPipe = NULL;
 
-	struct new_scan* scan; 
+	struct new_scan_action* scan; 
 
 	// Do some extra error checking since the app will keep running even if this
 	// thread fails.
@@ -172,12 +172,12 @@ DWORD WINAPI InstanceThread(LPVOID lpvParam)
 			break;
 		}
 
-		scan = (struct new_scan*)malloc(sizeof(struct new_scan));
+		scan = (struct new_scan_action*)malloc(sizeof(struct new_scan_action));
 
 		// To avoid random data on buffer after data read
 		pchRequest[cbBytesRead] = '\0';
 
-		// Process the incoming message.
+		// Process the incoming message. Json parsing -> fill scan variable
 		GetAnswerToRequest(pchRequest, pchReply, &cbReplyBytes, scan);
 
 		// Write the reply to the pipe. 
@@ -195,9 +195,21 @@ DWORD WINAPI InstanceThread(LPVOID lpvParam)
 			break;
 		}
 
+		// scan_action here
+
 		// Step 4 -- Start Scan here if message already sent
-		start_new_scan(scan, params->uhuru);
-		free(scan);
+		if (strcmp(scan->scan_action, "new_scan") == 0){
+			start_new_scan(scan, params->uhuru);
+		}
+		else if (strcmp(scan->scan_action, "cancel_scan") == 0){
+			cancel_current_scan(scan, params->uhuru);
+		}
+
+		// Free inside struct ?
+		if (scan){
+			free(scan);
+		}
+		
 	}
 
 	// Flush the pipe to allow the client to read the pipe's contents 
@@ -218,7 +230,7 @@ DWORD WINAPI InstanceThread(LPVOID lpvParam)
 
 VOID GetAnswerToRequest(LPTSTR pchRequest,
 	LPTSTR pchReply,
-	LPDWORD pchBytes, struct new_scan* scan)
+	LPDWORD pchBytes, struct new_scan_action* scan)
 	// This routine is a simple function to print the client request to the console
 	// and populate the reply buffer with a default data string. This is where you
 	// would put the actual client request processing code that runs in the context
@@ -230,12 +242,12 @@ VOID GetAnswerToRequest(LPTSTR pchRequest,
 	// _tprintf(TEXT("Client Request String: -%s-\n"), pchRequest);
 
 	void json_parse_and_print(json_object * jobj); /* Forward declaration */
-	const char* json_parse_and_process(json_object * jobj, struct new_scan* scan);  /* Forward declaration */
+	const char* json_parse_and_process(json_object * jobj, struct new_scan_action* scan);  /* Forward declaration */
 
 
 	// We parse on-demand scan requests from IHM
 	json_object * jobj = json_tokener_parse(pchRequest);
-	json_parse_and_print(jobj);
+	//json_parse_and_print(jobj);
 
 	// In this function, a scan demand is made to libuhuru_core
 	const char* response = json_parse_and_process(jobj, scan);
