@@ -69,7 +69,6 @@ function process_scan_report( scan_report )
 	
 	if( scan_report.scan_file_path && scan_report.scan_file_path != "null" ){
 	
-		
 		update_scan_file_path(scan_report.scan_file_path);
 	}
 

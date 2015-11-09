@@ -237,3 +237,17 @@ const char* json_get_report_msg(uhuru_report* report){
 
 	return json_object_to_json_string(jobj);
 }
+
+// uhuru_report* to JSON
+const char* json_get_cancel_msg(int scan_id){
+
+	json_object * jobj = json_object_new_object();
+	json_object *jint = json_object_new_int(scan_id);
+	json_object *jstring1 = json_object_new_string("ok");
+
+	// add order is kept
+	json_object_object_add(jobj, "cancelled", jstring1);
+	json_object_object_add(jobj, "scan_id", jint);
+
+	return json_object_to_json_string(jobj);
+}
