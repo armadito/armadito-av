@@ -1,5 +1,5 @@
 
-function cancel_scan()
+function cancel_scan( scan_id )
 {
 	var message = '{"scan_action": "cancel", "scan_id": '+ scan_id +'}';
 	
@@ -24,6 +24,13 @@ function process_AV_response ( AV_response )
 	if( AV_response.error ){
 		console.error("AV_response sent error msg : "+ AV_response.error );
 		return -1;
+	}
+	
+	// Cancel response
+	if( AV_response.cancel && AV_response.cancel == "ok" )
+	{
+		console.log( AV_response.cancel + " : cancel - " + AV_response.scan_id );
+		return 0;
 	}
 	
 	// Step 3
@@ -62,7 +69,6 @@ function process_scan_report( scan_report )
 	
 	if( scan_report.scan_file_path && scan_report.scan_file_path != "null" ){
 	
-		
 		update_scan_file_path(scan_report.scan_file_path);
 	}
 
