@@ -105,13 +105,13 @@
           <bool>false</bool>
          </property>
          <property name="styleSheet">
-          <string notr="true">image: url(:/images/uhuru_am.png);</string>
+          <string notr="true">image: url(:/icons/uhuru_am.png);</string>
          </property>
          <property name="text">
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap resource="../uhuru.qrc">:/images/uhuru_am.png</pixmap>
+          <pixmap resource="../uhuru.qrc">:/icons/uhuru_am.png</pixmap>
          </property>
          <property name="scaledContents">
           <bool>true</bool>
