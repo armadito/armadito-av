@@ -38,6 +38,34 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
 
 }
 
+static void cancel_callback(struct uhuru_report *report, void *callback_data)
+{
+	// unused currently
+	//struct named_pipe_info *np_info = (struct named_pipe_info *)callback_data;
+
+	char * response;
+	const char * message;
+	HANDLE * hPipe = (HANDLE*)malloc(sizeof(HANDLE));
+
+	if (connect_to_IHM(report->scan_id, hPipe) < 0){
+		printf("Error when trying to connect to \\\\.\\pipe\\IHM_scan_%d \n", report->scan_id);
+		return;
+	}
+
+	message = json_get_cancel_msg(report->scan_id);
+
+	if (send_message_to_IHM(hPipe, (char*)message, &response) < 0){
+		printf("Error when writing callback msg on Pipe");
+		return;
+	}
+
+	// Traiter la réponse ici
+	closeConnection_to_IHM(hPipe);
+
+}
+
+
+
 int test_connection(int scan_id, HANDLE* hPipe){
 	// We test connection to IHM before launching a new scan
 	
@@ -53,6 +81,8 @@ int test_connection(int scan_id, HANDLE* hPipe){
 int cancel_current_scan(struct new_scan_action* scan, uhuru* uhuru)
 {
 	printf("\n\n######## CANCEL CURRENT SCAN ########\n\n", scan->scan_id);
+
+	
 	return 0;
 }
 
