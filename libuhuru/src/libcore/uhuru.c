@@ -79,10 +79,6 @@ struct uhuru *uhuru_open(uhuru_error **error)
   if (module_manager_post_init_all(u->module_manager, error))
     goto error;
 
-#ifdef DEBUG
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "after post_init:\n%s\n", uhuru_debug(u));
-#endif
-
   return u;
 
  error:

@@ -1,6 +1,7 @@
 #include <libuhuru/core.h>
 
 #include "utils/getopt.h"
+#include "log.h"
 #include "server.h"
 #include "daemonize.h"
 #include "tcpsock.h"
@@ -11,6 +12,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define DEFAULT_LOG_LEVEL "critical"
+
 struct uhuru_daemon_options {
   int no_daemon;
   enum {
@@ -19,11 +22,13 @@ struct uhuru_daemon_options {
   } socket_type;
   unsigned short port_number;
   const char *unix_path;
+  const char *s_log_level;
 };
 
 struct opt daemon_opt_defs[] = {
   { .long_form = "help", .short_form = 'h', .need_arg = 0, .is_set = 0, .value = NULL},
   { .long_form = "no-daemon", .short_form = 'n', .need_arg = 0, .is_set = 0, .value = NULL},
+  { .long_form = "log-level", .short_form = 'l', .need_arg = 1, .is_set = 0, .value = NULL},
   { .long_form = "tcp", .short_form = 't', .need_arg = 0, .is_set = 0, .value = NULL},
   { .long_form = "port", .short_form = 'p', .need_arg = 1, .is_set = 0, .value = NULL},
   { .long_form = "unix", .short_form = 'u', .need_arg = 0, .is_set = 0, .value = NULL},
@@ -38,14 +43,30 @@ static void usage(void)
   fprintf(stderr, "Uhuru antivirus scanner daemon\n");
   fprintf(stderr, "\n");
   fprintf(stderr, "Options:\n");
-  fprintf(stderr, "  --help  -h               print help and quit\n");
-  fprintf(stderr, "  --no-daemon -n           do not fork and go to background\n");
-  fprintf(stderr, "  --tcp -t | --unix -u     use TCP (--tcp) or unix (--unix) socket (default is unix)\n");
-  fprintf(stderr, "  --port=PORT -p PORT      TCP port number\n");
-  fprintf(stderr, "  --path=PATH -a PATH      unix socket path\n");
+  fprintf(stderr, "  --help  -h                     print help and quit\n");
+  fprintf(stderr, "  --no-daemon -n                 do not fork and go to background\n");
+  fprintf(stderr, "  --log-level=LEVEL | -l LEVEL   set log level\n");
+  fprintf(stderr, "                                 Log level can be: critical, warning, message, info, debug\n");
+  fprintf(stderr, "                                 Default is : %s\n", DEFAULT_LOG_LEVEL);
+  fprintf(stderr, "  --tcp -t | --unix -u           use TCP (--tcp) or unix (--unix) socket (default is unix)\n");
+  fprintf(stderr, "  --port=PORT | -p PORT          TCP port number\n");
+  fprintf(stderr, "  --path=PATH | -a PATH          unix socket path\n");
   fprintf(stderr, "\n");
 
   exit(1);
+}
+
+static int check_log_level(const char *s_log_level)
+{
+  if (!strcmp(s_log_level,"error")
+      || !strcmp(s_log_level,"critical")
+      || !strcmp(s_log_level,"warning")
+      || !strcmp(s_log_level,"message")
+      || !strcmp(s_log_level,"info")
+      || !strcmp(s_log_level,"debug"))
+    return 0;
+
+  return 1;
 }
 
 static void parse_options(int argc, const char **argv, struct uhuru_daemon_options *opts)
@@ -63,6 +84,10 @@ static void parse_options(int argc, const char **argv, struct uhuru_daemon_optio
     usage();
 
   opts->no_daemon = opt_is_set(daemon_opt_defs, "no-daemon");
+
+  opts->s_log_level = opt_value(daemon_opt_defs, "log-level", DEFAULT_LOG_LEVEL);
+  if (check_log_level(opts->s_log_level))
+    usage();
 
   opts->socket_type = UNIX_SOCKET;
   if (opt_is_set(daemon_opt_defs, "tcp"))
@@ -103,6 +128,10 @@ int main(int argc, const char **argv)
     fprintf(stderr, "cannot open server socket (errno %d)\n", errno);
     return 1;
   }
+
+  log_init(opts.s_log_level, !opts.no_daemon);
+
+  g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "test");
 
   server = server_new(server_sock);
 
