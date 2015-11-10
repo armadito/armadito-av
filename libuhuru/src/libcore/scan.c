@@ -193,7 +193,7 @@ static enum uhuru_file_status scan_file(struct uhuru_scan *scan, const char *pat
   const char *mime_type;
   enum uhuru_file_status status;
 
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "scan_file - %s", path);
+  g_log(G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "scan_file - %s", path);
 
   /* initializes the structure passed to callbacks */
   uhuru_report_init(&report, scan->scan_id, path, REPORT_PROGRESS_UNKNOWN);
@@ -250,7 +250,7 @@ static void process_error(struct uhuru_scan *scan, const char *full_path, int en
 
   uhuru_report_init(&report, scan->scan_id, full_path, REPORT_PROGRESS_UNKNOWN);
 
-  g_log(NULL, G_LOG_LEVEL_WARNING, "local_scan_entry: Error - %s", full_path);
+  g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "local_scan_entry: Error - %s", full_path);
 
   report.status = UHURU_IERROR;
   report.mod_report = os_strdup(os_strerror(entry_errno));

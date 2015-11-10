@@ -114,6 +114,7 @@ src/Makefile
 src/libcore/Makefile
 src/linux/Makefile
 src/linux/daemon/Makefile
+src/linux/service/Makefile
 src/linux/tools/Makefile
 src/os/Makefile
 src/utils/Makefile

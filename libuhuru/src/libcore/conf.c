@@ -35,18 +35,18 @@ static int conf_set(struct uhuru *uhuru, const char *mod_name, const char *direc
 
   mod = uhuru_get_module_by_name(uhuru, mod_name);
   if (mod == NULL) {
-    g_log(NULL, G_LOG_LEVEL_WARNING, "conf_set: no module '%s'", mod_name);
+    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "conf_set: no module '%s'", mod_name);
     return -1;
   }
 
   conf_entry = conf_entry_get(mod, directive);
   if (conf_entry == NULL || conf_entry->conf_fun == NULL) {
-    g_log(NULL, G_LOG_LEVEL_WARNING, "conf_set: no directive '%s' for module '%s'", directive, mod_name);
+    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "conf_set: no directive '%s' for module '%s'", directive, mod_name);
     return -1;
   }
 
   if ((*conf_entry->conf_fun)(mod, directive, argv) != UHURU_MOD_OK) {
-    g_log(NULL, G_LOG_LEVEL_WARNING, "conf_set: cannot assign value to directive '%s' for module '%s'", directive, mod_name);
+    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "conf_set: cannot assign value to directive '%s' for module '%s'", directive, mod_name);
     return -1;
   }
 
