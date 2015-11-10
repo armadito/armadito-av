@@ -1,4 +1,4 @@
-#include "lib/confparser.h"
+#include "libcore/confparser.h"
 
 #include <assert.h>
 #include <stdio.h>

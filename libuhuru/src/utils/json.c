@@ -100,11 +100,12 @@ void json_parse_and_print(json_object * jobj) {
 }
 
 /*Parsing the json object*/
-const char* json_parse_and_process(json_object * jobj, struct new_scan* scan) {
+const char* json_parse_and_process(json_object * jobj, struct new_scan_action* scan) {
 
 	int scan_id = -1;
 	char * server_response = "";
 	const char * scan_path = "";
+	const char * scan_action = "";
 
 	json_object_object_foreach(jobj, key, val) { /*Passing through every array element*/
 
@@ -113,28 +114,34 @@ const char* json_parse_and_process(json_object * jobj, struct new_scan* scan) {
 			continue;
 		}
 
-		if (strcmp(key,"new_scan_id") == 0){
+		if (strcmp(key, "scan_id") == 0){ 
 
 			if (json_object_get_type(val) != json_type_int){
-				// Step 3
-				return json_get_protocol_err_msg("The new_scan_id value must be an integer > 0 && < 100.", 101);
+				return json_get_protocol_err_msg("The scan_id value must be an integer > 0 && < 100.", 101);
 			}
 
 			scan_id = json_object_get_int(val);
 			if (scan_id <= 0 || scan_id >= 100){ // 1 - 99 , for security reasons
-				// Step 3
-				return json_get_protocol_err_msg("The new_scan_id value must be an integer > 0 && < 100.", 101);
+				return json_get_protocol_err_msg("The scan_id value must be an integer > 0 && < 100.", 101);
 			}
-
 		}
 		else if (strcmp(key, "scan_path") == 0 ){
 
 			if (json_object_get_type(val) != json_type_string){
 				// Step 3
-				return json_get_protocol_err_msg("The path value must be a valid json string.", 101);
+				return json_get_protocol_err_msg("The scan_path value must be a valid json string.", 101);
 			}
 
 			scan_path = json_object_get_string(val);
+		}
+		else if (strcmp(key, "scan_action") == 0){
+
+			if (json_object_get_type(val) != json_type_string){
+				// Step 3
+				return json_get_protocol_err_msg("The scan_action value must be a valid json string.", 101);
+			}
+
+			scan_action = json_object_get_string(val);
 		}
 	}
 
@@ -143,26 +150,33 @@ const char* json_parse_and_process(json_object * jobj, struct new_scan* scan) {
 		return json_get_protocol_err_msg("new_scan_id key was not found.", 101);
 	}
 
-	if (strcmp(scan_path, "") == 0){
+	if (strcmp(scan_action, "") == 0){
+		// Step 3
+		return json_get_protocol_err_msg("scan_action was empty or not found.", scan_id);
+	}
+
+	// scan_path = "" if scan_action != new_scan
+	if (strcmp(scan_path, "") == 0 && strcmp(scan_action, "new_scan") == 0){
 		// Step 3
 		return json_get_protocol_err_msg("scan_path was empty or not found.", scan_id);
 	}
 
 	scan->scan_path = scan_path;
 	scan->scan_id = scan_id;
+	scan->scan_action = scan_action;
 
 	// Step 3 : send ok to IHM
-	return json_get_basic_scan_response(scan_id);
+	return json_get_basic_ok_response(scan_id, scan_action);
 }
 
-const char* json_get_basic_scan_response(int scan_id)
+const char* json_get_basic_ok_response(int scan_id, const char* scan_action)
 {
 
 	json_object * jobj = json_object_new_object();
 	json_object *jint = json_object_new_int(scan_id);
 	json_object *jstr = json_object_new_string("ok");
 
-	json_object_object_add(jobj, "new_scan", jstr);
+	json_object_object_add(jobj, scan_action, jstr);
 	json_object_object_add(jobj, "scan_id", jint);
 
 	return json_object_to_json_string(jobj);
@@ -220,6 +234,20 @@ const char* json_get_report_msg(uhuru_report* report){
 	if (report->mod_name == "null"){ report->mod_name = NULL; }
 	if (report->mod_report == "null"){ report->mod_report = NULL; }
 	if (report->path == "null"){ report->path = NULL; }
+
+	return json_object_to_json_string(jobj);
+}
+
+// uhuru_report* to JSON
+const char* json_get_cancel_msg(int scan_id){
+
+	json_object * jobj = json_object_new_object();
+	json_object *jint = json_object_new_int(scan_id);
+	json_object *jstring1 = json_object_new_string("ok");
+
+	// add order is kept
+	json_object_object_add(jobj, "cancelled", jstring1);
+	json_object_object_add(jobj, "scan_id", jint);
 
 	return json_object_to_json_string(jobj);
 }
