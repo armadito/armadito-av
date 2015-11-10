@@ -4,11 +4,13 @@
 #include <libuhuru-config.h>
 #include <libuhuru/core.h>
 
-struct new_scan{
+struct new_scan_action{
 	int scan_id;
 	const char *scan_path;
+	const char *scan_action;
 };
 
-int start_new_scan(struct new_scan* scan, uhuru* uhuru);
+int start_new_scan(struct new_scan_action* scan, uhuru* uhuru);
+int cancel_current_scan(struct new_scan_action* scan, uhuru* uhuru);
 
 #endif

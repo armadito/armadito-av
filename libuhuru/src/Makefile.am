@@ -1,4 +1,4 @@
 SUBDIRS= libcore linux
-DIST_SUBDIRS=$(SUBDIRS) os
+DIST_SUBDIRS=$(SUBDIRS) os utils 
 
 

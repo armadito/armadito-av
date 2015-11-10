@@ -11,7 +11,8 @@ void json_parse_array(json_object *jobj, char *key);
 void json_parse_and_print(json_object * jobj);
 const char* json_parse_and_process(json_object * jobj, struct new_scan* scan);
 const char* json_get_protocol_err_msg(const char* err_msg, int scan_id);
-const char* json_get_basic_scan_response(int scan_id);
+const char* json_get_basic_ok_response(int scan_id, const char* scan_action);
 const char* json_get_report_msg(uhuru_report* report);
+const char* json_get_cancel_msg(int scan_id);
 
 #endif
