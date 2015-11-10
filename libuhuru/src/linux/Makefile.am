@@ -1,1 +1,2 @@
-SUBDIRS=daemon tools
+SUBDIRS=daemon tools service
+

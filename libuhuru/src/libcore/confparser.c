@@ -193,7 +193,7 @@ struct uhuru_conf_parser *uhuru_conf_parser_new(const char *filename, conf_parse
 #endif
 
   if (cp->input == NULL) {
-    g_log(NULL, G_LOG_LEVEL_WARNING, "cannot open conf file %s", filename);
+    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "cannot open conf file %s", filename);
 
     return cp;
   }
@@ -254,7 +254,7 @@ static const char *token_str(enum token_type token)
 
 static void syntax_error(struct uhuru_conf_parser *cp, guint token) 
 {
-  g_log(NULL, G_LOG_LEVEL_WARNING, "syntax error: at line %d position %d expecting '%s' got '%s'\n", 
+  g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "syntax error: at line %d position %d expecting '%s' got '%s'\n", 
 	scanner_cur_line(cp->scanner),
 	scanner_cur_position(cp->scanner),
 	token_str(token), 

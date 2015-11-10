@@ -1,0 +1,47 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          uhuru-scand
+# Required-Start:    $syslog $time $remote_fs
+# Required-Stop:     $syslog $time $remote_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Uhuru antivirus scan daemon
+# Description:       Debian init script for the Uhuru antivirus
+#                    scan daemon
+### END INIT INFO
+#
+# Author:	François Déchelle <francois@dechelle.net>
+#
+
+DAEMON=/usr/sbin/uhuru-scand
+PIDFILE=/var/run/uhuru-scand.pid
+
+test -x $DAEMON || exit 0
+
+. /lib/lsb/init-functions
+
+case "$1" in
+  start)
+	log_daemon_msg "Starting Uhuru antivirus scan daemon" "uhuru-scand"
+	start_daemon -p $PIDFILE $DAEMON
+	log_end_msg $?
+    ;;
+  stop)
+	log_daemon_msg "Stopping Uhuru antivirus scan daemon" "uhuru-scand"
+	killproc -p $PIDFILE $DAEMON
+	log_end_msg $?
+    ;;
+  force-reload|restart)
+    $0 stop
+    $0 start
+    ;;
+  status)
+    status_of_proc -p $PIDFILE $DAEMON uhuru-scand && exit 0 || exit $?
+    ;;
+  *)
+    echo "Usage: /etc/init.d/uhuru-scand {start|stop|restart|force-reload|status}"
+    exit 1
+    ;;
+esac
+
+exit 0
