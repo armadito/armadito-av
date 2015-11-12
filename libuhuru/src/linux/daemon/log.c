@@ -103,11 +103,15 @@ static GLogLevelFlags get_log_level_from_str(const char *s_log_level)
 
 void log_init(const char *s_log_level, int use_syslog)
 {
-  GLogLevelFlags flags = get_log_level_from_str(s_log_level) | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION;
+  GLogLevelFlags flags, fatal_flags;
+  
+  flags = get_log_level_from_str(s_log_level) | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION;
 
   if (use_syslog) {
     openlog("uhuru", LOG_CONS, LOG_USER);
     g_log_set_handler(G_LOG_DOMAIN, flags, syslog_handler, NULL);
   } else
     g_log_set_handler(G_LOG_DOMAIN, flags, stderrout_handler, NULL);
+
+  fatal_flags = g_log_set_fatal_mask(G_LOG_DOMAIN, G_LOG_LEVEL_ERROR);
 }

@@ -3,7 +3,7 @@ modules_LTLIBRARIES=clamav.la
 
 clamav_la_SOURCES=clamav.c os/osdeps.h
 
-AM_CPPFLAGS= -DMODULE_CLAMAV_DBDIR='"@MODULE_CLAMAV_DBDIR@"'
+AM_CPPFLAGS= -DMODULE_CLAMAV_DBDIR='"@MODULE_CLAMAV_DBDIR@"' -DG_LOG_DOMAIN='"uhuru"'
 clamav_la_LDFLAGS= -module -avoid-version
 clamav_la_CFLAGS=
 clamav_la_LIBADD=
