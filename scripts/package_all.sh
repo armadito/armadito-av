@@ -20,5 +20,12 @@ cd $HOME/uhuru-linux-packaging
 ./autogen.sh
 ./scripts/mktarball.sh -r $OUT_DIR
 ./configure --with-tarballdir=$OUT_DIR/sources
+make -C packages/ubuntu/libuhuru package
+
+# Install packages needed for dependances
+sudo dpkg -i --force-all $(find packages/ubuntu/libuhuru/BUILD/ -iname "*.deb")
+
 make -C packages/ubuntu package
 make -C packages/ubuntu upload
+
+

@@ -14,11 +14,6 @@ echo "-------MAKE INSTALL-------"
 make install
 echo "-------OKAY LIBUHURU-------"
 
-# On copie libuhuru.pc afin que pkg-config puisse trouver le paquet LIBUHURU lors de la compilation du module clamav
-## Attention, à tester sur d'autres OS. Le dossier inclus par défaut n'est pas forcément /usr/lib/pkgconfig.
-## Alternative : utiliser PKG_CONFIG_PATH
-sudo cp -fv $OUT_DIR/build/$OS_V/uhuru-av/libuhuru/pkgconfig/*.pc /usr/lib/pkgconfig
-
 cd $OUT_DIR/build/$OS_V/uhuru-av/modules/clamav
 echo "-------MAKE-------"
 make 
@@ -32,6 +27,13 @@ make
 echo "-------MAKE INSTALL-------"
 make install
 echo "-------OKAY MODULE5_2-------"
+
+cd $OUT_DIR/build/$OS_V/uhuru-av/modules/fanotify
+echo "-------MAKE-------"
+make 
+echo "-------MAKE INSTALL-------"
+make install
+echo "-------OKAY FANOTIFY-------"
 
 cd $OUT_DIR/build/$OS_V/uhuru-av/gui
 echo "-------MAKE-------"
