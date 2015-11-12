@@ -131,7 +131,7 @@ int main(int argc, const char **argv)
 
   log_init(opts.s_log_level, !opts.no_daemon);
 
-  g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "test");
+  g_log(G_LOG_DOMAIN, G_LOG_LEVEL_INFO, "starting %s%s", argv[0], opts.no_daemon ? "" : " in daemon mode");
 
   server = server_new(server_sock);
 
