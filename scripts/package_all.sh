@@ -1,6 +1,5 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 OS_V=ubuntu-14.04-64
-PACKAGE_VERSION=1.5.1 
 
 OUT_DIR=$DIR/../out
 SRC_DIR=$DIR/../
@@ -17,18 +16,14 @@ set -e
 
 cd $HOME/uhuru-linux-packaging
 
-FULL_VERSION=$PACKAGE_VERSION-0ubuntu1+trusty1
-
 # Package all
 ./autogen.sh
 ./scripts/mktarball.sh -r $OUT_DIR
 ./configure --with-tarballdir=$OUT_DIR/sources
 make -C packages/ubuntu/libuhuru package
 
-# Install packages needed fcr dependances
-sudo dpkg -i --force-all packages/ubuntu/libuhuru/BUILD/libuhuru_"$FULL_VERSION"_amd64.deb 
-sudo dpkg -i --force-all packages/ubuntu/libuhuru/BUILD/libuhuru-dev_"$FULL_VERSION"_amd64.deb 
-sudo dpkg -i --force-all packages/ubuntu/libuhuru/BUILD/libuhuru-tools_"$FULL_VERSION"_amd64.deb
+# Install packages needed for dependances
+sudo dpkg -i --force-all $(find packages/ubuntu/libuhuru/BUILD/ -iname "*.deb")
 
 make -C packages/ubuntu package
 make -C packages/ubuntu upload
