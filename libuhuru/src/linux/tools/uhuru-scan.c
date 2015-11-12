@@ -156,21 +156,7 @@ static void ipc_handler_scan_end(struct ipc_manager *m, void *data)
 {
   struct uhuru_scan *scan = (struct uhuru_scan *)data;
 
-#ifdef DEBUG
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "remote scan end");
-#endif
-  
-#if 0
-#ifdef DEBUG
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "remote scan end, closing socket %d", scan->remote.connect_fd);
-#endif
-  
-  if (close(scan->remote.connect_fd) < 0) {
-    g_log(NULL, G_LOG_LEVEL_WARNING, "closing socket %d failed (%s)", scan->remote.connect_fd, os_strerror(errno));
-  }
-
-  scan->remote.connect_fd = -1;
-#endif
+  /* ??? */
 }
 
 static void print_summary(struct scan_summary *summary)

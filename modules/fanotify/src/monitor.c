@@ -52,8 +52,11 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
 
   m->fanotify_fd = fanotify_init(FAN_CLASS_CONTENT | FAN_CLOEXEC, O_RDONLY | O_CLOEXEC | O_LARGEFILE | O_NOATIME);
 
-  if (m->fanotify_fd < 0)
-    g_log(NULL, G_LOG_LEVEL_ERROR, "fanotify: init failed (%s)", strerror(errno));
+  if (m->fanotify_fd < 0) {
+    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL, "fanotify: init failed (%s)", strerror(errno));
+    g_free(m);
+    return NULL;
+  }
 
   m->paths = g_ptr_array_new_full(10, path_destroy_notify);
 
@@ -67,7 +70,7 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
   
   m->thread_pool = g_thread_pool_new(scan_file_thread_fun, m, -1, FALSE, NULL);
 
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "fanotify: init ok");
+  g_log(G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "fanotify: init ok");
 
   return m;
 }
@@ -82,14 +85,14 @@ int access_monitor_add(struct access_monitor *m, const char *path)
   const char *tmp = strdup(path);
 
   if (fanotify_mark(m->fanotify_fd, FAN_MARK_ADD | FAN_MARK_MOUNT, FAN_OPEN_PERM, AT_FDCWD, tmp) < 0) {
-    g_log(NULL, G_LOG_LEVEL_ERROR, "fanotify: adding %s failed (%s)", tmp, strerror(errno));
+    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_ERROR, "fanotify: adding %s failed (%s)", tmp, strerror(errno));
 
     return -1;
   }
 
   g_ptr_array_add(m->paths, (gpointer)tmp);
 
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "fanotify: added directory %s", tmp);
+  g_log(G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "fanotify: added directory %s", tmp);
 
   return 0;
 }
@@ -97,14 +100,14 @@ int access_monitor_add(struct access_monitor *m, const char *path)
 int access_monitor_remove(struct access_monitor *m, const char *path)
 {
   if (fanotify_mark(m->fanotify_fd, FAN_MARK_REMOVE, FAN_OPEN_PERM, AT_FDCWD, path) < 0) {
-    g_log(NULL, G_LOG_LEVEL_ERROR, "fanotify: removing %s failed (%s)", path, strerror(errno));
+    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_ERROR, "fanotify: removing %s failed (%s)", path, strerror(errno));
 
     return -1;
   }
 
   g_ptr_array_remove(m->paths, (gpointer)path);
 
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "fanotify: removed directory %s", path);
+  g_log(G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "fanotify: removed directory %s", path);
 
   return 0;
 }
@@ -125,7 +128,7 @@ void access_monitor_free(struct access_monitor *m)
 
   free(m);
 
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "fanotify: free ok");
+  g_log(G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "fanotify: free ok");
 }
 
 
@@ -159,13 +162,20 @@ static __u32 file_status_2_response(enum uhuru_file_status status)
 static int write_response(struct access_monitor *m, int fd, const char *path, __u32 r)
 {
   struct fanotify_response response;
+  GLogLevelFlags log_level = G_LOG_LEVEL_INFO;
+  const char *msg = "ALLOW";
 
   response.fd = fd;
   response.response = r;
 
   write(m->fanotify_fd, &response, sizeof(struct fanotify_response));
   
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "fanotify: fd %d path '%s' -> %s", fd, path ? path : "unknown", (r == FAN_ALLOW) ? "ALLOW": "DENY");
+  if (r == FAN_DENY) {
+    log_level = G_LOG_LEVEL_WARNING;
+    msg = "DENY";
+  }
+
+  g_log(G_LOG_DOMAIN, log_level, "fanotify:  path '%s' -> %s", path ? path : "unknown", msg);
 
   close(fd);
 
@@ -240,7 +250,7 @@ static gboolean access_monitor_cb(GIOChannel *source, GIOCondition condition, gp
       if (event->mask & FAN_OPEN_PERM)
 	perm_event_process(m, event, p);
       else
-	g_log(NULL, G_LOG_LEVEL_WARNING, "fanotify: unprocessed event 0x%llx fd %d path '%s'", event->mask, event->fd, p ? p : "unknown");
+	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "fanotify: unprocessed event 0x%llx fd %d path '%s'", event->mask, event->fd, p ? p : "unknown");
     }
   }
 

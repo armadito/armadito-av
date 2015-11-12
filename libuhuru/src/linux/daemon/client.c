@@ -23,7 +23,7 @@ static void ipc_ping_handler(struct ipc_manager *m, void *data)
   struct client *cl = (struct client *)data;
 
 #ifdef DEBUG
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "ipc_ping_handler");
+  g_log(G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "ipc: ping handler called");
 #endif
 
   ipc_manager_msg_send(cl->manager, IPC_MSG_ID_PONG, IPC_NONE_T);
@@ -51,7 +51,7 @@ static void ipc_scan_handler(struct ipc_manager *m, void *data)
   struct uhuru_scan *scan;
 
 #ifdef DEBUG
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "ipc_scan_handler");
+  g_log(G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "ipc: scan handler called");
 #endif
 
   ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &path);
@@ -68,12 +68,12 @@ static void ipc_scan_handler(struct ipc_manager *m, void *data)
   ipc_manager_msg_send(cl->manager, IPC_MSG_ID_SCAN_END, IPC_NONE_T);
 
   if (os_close(cl->sock) < 0) {
-    g_log(NULL, G_LOG_LEVEL_WARNING, "closing socket %d failed (%d)", cl->sock, errno);
+    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "closing socket %d failed (%d)", cl->sock, errno);
   }
   cl->sock = -1;
 
 #ifdef DEBUG
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "ipc_scan_handler finished");
+  g_log(G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "ipc: scan handler finished");
 #endif
 }
 
@@ -117,7 +117,7 @@ static void ipc_info_handler(struct ipc_manager *manager, void *data)
   struct uhuru_info *info;
 
 #ifdef DEBUG
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "ipc_info_handler");
+  g_log(G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "ipc: info handler called");
 #endif
 
   info = uhuru_info_new(cl->uhuru);
@@ -127,13 +127,13 @@ static void ipc_info_handler(struct ipc_manager *manager, void *data)
   uhuru_info_free(info);
 
   if (os_close(cl->sock) < 0) {
-    g_log(NULL, G_LOG_LEVEL_WARNING, "closing socket %d failed (%d)", cl->sock, errno);
+    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "closing socket %d failed (%d)", cl->sock, errno);
   }
 
   cl->sock = -1;
 
 #ifdef DEBUG
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "ipc_info_handler finished");
+  g_log(G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "ipc: info handler finished");
 #endif
 }
 
