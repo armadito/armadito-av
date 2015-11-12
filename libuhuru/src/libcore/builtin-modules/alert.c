@@ -79,7 +79,7 @@ static void get_ip_addr(char *ip_addr)
 		      (ifa->ifa_addr->sa_family == AF_INET) ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
 		      mask, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
       if (s != 0) {
-	g_log(NULL, G_LOG_LEVEL_ERROR, "getnameinfo() failed: %s", gai_strerror(s));
+	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_ERROR, "getnameinfo() failed: %s", gai_strerror(s));
 	exit(EXIT_FAILURE);
       }
 
@@ -91,7 +91,7 @@ static void get_ip_addr(char *ip_addr)
 		      (ifa->ifa_addr->sa_family == AF_INET) ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
 		      ip_addr, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
       if (s != 0) {
-	g_log(NULL, G_LOG_LEVEL_ERROR, "getnameinfo() failed: %s\n", gai_strerror(s));
+	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_ERROR, "getnameinfo() failed: %s\n", gai_strerror(s));
 	exit(EXIT_FAILURE);
       }
 

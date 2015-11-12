@@ -3,7 +3,7 @@ modules_LTLIBRARIES=fanotify.la
 
 fanotify_la_SOURCES=fanotify.c monitor.c monitor.h
 
-AM_CPPFLAGS= 
+AM_CPPFLAGS=-DG_LOG_DOMAIN='"uhuru"'
 fanotify_la_LDFLAGS= -module -avoid-version
 fanotify_la_CFLAGS=
 fanotify_la_LIBADD=
