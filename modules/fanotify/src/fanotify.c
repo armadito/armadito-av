@@ -12,9 +12,15 @@ static enum uhuru_mod_status mod_fanotify_init(struct uhuru_module *module)
 {
   struct fanotify_data *fa_data = g_new(struct fanotify_data, 1);
 
+  module->data = fa_data;
+
   fa_data->monitor = access_monitor_new(module->uhuru);
 
-  module->data = fa_data;
+  /* if access monitor is NULL, for instance because this process does not */
+  /* have priviledge (i.e. not running as root), we don't return an error because this will make */
+  /* the scan daemon terminates */
+  /* if (fa_data->monitor == NULL) */
+  /*   return UHURU_MOD_INIT_ERROR; */
 
   return UHURU_MOD_OK;
 }
@@ -23,10 +29,12 @@ static enum uhuru_mod_status mod_fanotify_conf_set_watch_dir(struct uhuru_module
 {
   struct fanotify_data *fa_data = (struct fanotify_data *)module->data;
 
-  while (*argv != NULL) {
-    access_monitor_add(fa_data->monitor, *argv);
+  if (fa_data->monitor != NULL) {
+    while (*argv != NULL) {
+      access_monitor_add(fa_data->monitor, *argv);
 
-    argv++;
+      argv++;
+    }
   }
 
   return UHURU_MOD_OK;
@@ -36,7 +44,9 @@ static enum uhuru_mod_status mod_fanotify_conf_set_enable_permission(struct uhur
 {
   struct fanotify_data *fa_data = (struct fanotify_data *)module->data;
 
-  access_monitor_enable_permission(fa_data->monitor, atoi(argv[0]));
+  if (fa_data->monitor != NULL) {
+    access_monitor_enable_permission(fa_data->monitor, atoi(argv[0]));
+  }
 
   return UHURU_MOD_OK;
 }
@@ -52,7 +62,9 @@ static enum uhuru_mod_status mod_fanotify_close(struct uhuru_module *module)
 {
   struct fanotify_data *fa_data = (struct fanotify_data *)module->data;
 
-  access_monitor_free(fa_data->monitor);
+  if (fa_data->monitor != NULL) {
+    access_monitor_free(fa_data->monitor);
+  }
 
   fa_data->monitor = NULL;
 
