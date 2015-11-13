@@ -400,6 +400,10 @@ enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path)
   const char *mime_type;
   enum uhuru_file_status status;
 
+  /* implementation in progress */
+  /* if (os_file_never_scan(path)) */
+  /*   return UHURU_CLEAN; */
+
   /* find the mime type, as in scan_file fun */
   mime_type = os_mime_type_guess(path);
 
