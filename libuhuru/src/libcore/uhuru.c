@@ -9,6 +9,7 @@
 #include "os/string.h"
 #include "os/mimetype.h"
 #include "os/string.h"
+#include "os/dir.h"
 #ifdef HAVE_ALERT_MODULE
 #include "builtin-modules/alert.h"
 #endif
@@ -48,6 +49,11 @@ static void uhuru_free(struct uhuru *u)
 struct uhuru *uhuru_open(uhuru_error **error)
 {
   struct uhuru *u;
+  char * dirpath = NULL;
+  char * confdir = NULL;
+  char * modulesdir = NULL;
+  char * conffile = "\\uhuru.conf";
+  int len = 0;
 
 #ifdef HAVE_GTHREAD_INIT
   g_thread_init(NULL);
@@ -66,15 +72,65 @@ struct uhuru *uhuru_open(uhuru_error **error)
   module_manager_add(u->module_manager, &quarantine_module);
 #endif
 
+#ifdef WIN32
+
+	dirpath = GetBinaryDirectory( );
+	if (dirpath == NULL) {
+		goto error;
+	}
+
+	len = strnlen_s(dirpath, _MAX_PATH) + strnlen_s(LIBUHURU_MODULES_PATH,_MAX_PATH) +1;
+	modulesdir = (char*)calloc(len+1,sizeof(char));
+	modulesdir[len] = '\0';
+
+	memcpy_s(modulesdir,len,dirpath,strnlen_s(dirpath, _MAX_PATH));
+	modulesdir[strnlen_s(dirpath, _MAX_PATH)] = '\\';
+	memcpy_s(modulesdir+strnlen_s(dirpath, _MAX_PATH)+1,len,LIBUHURU_MODULES_PATH,strnlen_s(LIBUHURU_MODULES_PATH, _MAX_PATH));
+
+
+	if (module_manager_load_path(u->module_manager, modulesdir, error))
+		goto error;
+
+	free(modulesdir);
+
+#else
   if (module_manager_load_path(u->module_manager, LIBUHURU_MODULES_PATH, error))
     goto error;
+#endif
+
+  
 
   if (module_manager_init_all(u->module_manager, error))
     goto error;
 
   /* FIXME: error checking */
+#ifdef WIN32
+
+	// build the complete conf directory path.  
+	if (dirpath == NULL) {
+		goto error;
+	}
+
+	len = strnlen_s(dirpath, _MAX_PATH) + strnlen_s(LIBUHURU_CONF_DIR,_MAX_PATH) + strnlen_s(conffile,_MAX_PATH)+1;
+	confdir = (char*)calloc(len+1,sizeof(char));
+	confdir[len] = '\0';
+
+	memcpy_s(confdir,len,dirpath,strnlen_s(dirpath, _MAX_PATH));
+	confdir[strnlen_s(dirpath, _MAX_PATH)] = '\\';
+	memcpy_s(confdir+strnlen_s(dirpath, _MAX_PATH)+1,len,LIBUHURU_CONF_DIR,strnlen_s(LIBUHURU_CONF_DIR, _MAX_PATH));
+	memcpy_s(confdir+strnlen_s(dirpath, _MAX_PATH)+strnlen_s(LIBUHURU_CONF_DIR, _MAX_PATH)+1,len,conffile,strnlen_s(conffile, _MAX_PATH));
+ 
+  
+  conf_load_file(u, confdir);
+  //conf_load_path(u, LIBUHURU_CONF_DIR "/conf.d");
+
+  free(dirpath);
+  free(confdir);
+
+#else
   conf_load_file(u, LIBUHURU_CONF_DIR "/uhuru.conf");
   conf_load_path(u, LIBUHURU_CONF_DIR "/conf.d");
+#endif
 
   if (module_manager_post_init_all(u->module_manager, error))
     goto error;
