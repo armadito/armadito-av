@@ -218,7 +218,7 @@ static int perm_event_process(struct access_monitor *m, struct fanotify_event_me
   if (!S_ISREG(buf.st_mode))
     return write_response(m, event->fd, path, FAN_ALLOW);
 
-  td = (struct access_thread_data *)malloc(sizeof(struct access_thread_data));
+  td = malloc(sizeof(struct access_thread_data));
 
   td->fd = event->fd;
   td->path = strdup(path);
