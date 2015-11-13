@@ -138,3 +138,38 @@ int os_mkdir_p(const char *path)
 	fprintf(stderr, "os_mkdir_p not implemented\n");
 	return -1;
 }
+
+
+char * GetBinaryDirectory( ) {
+
+	char * dirpath = NULL;
+	char filepath[MAX_PATH];
+	char * ptr = NULL;
+	int len = 0;
+
+	if (!GetModuleFileNameA(NULL, &filepath, MAX_PATH)) {		
+		g_log(NULL, G_LOG_LEVEL_WARNING, "[-] Error :: GetBinaryDirectory!GetModuleFileName() failed :: %d\n",GetLastError());
+		return NULL;
+	}	
+
+	// get the file name from the complete file path
+	ptr = strrchr(filepath,'\\');
+	if (ptr == NULL) {		
+		g_log(NULL, G_LOG_LEVEL_WARNING, "[-] Error :: GetBinaryDirectory!strrchr() failed :: backslash not found in the path.\n");
+		return NULL;
+	}
+	
+	// calc the dir buffer length.
+	len = (int)(ptr - filepath);
+	//printf("[+] Debug :: GetBinaryDirectory :: ptr=%d :: filepath =%d :: len = %d :: strlen = %d\n",ptr,filepath,len,strlen(filepath));
+
+	dirpath = (char*)(calloc(len+1,sizeof(char)));
+	dirpath[len] = '\0';
+
+	memcpy_s(dirpath, len, filepath, len);
+
+	//g_log(NULL, G_LOG_LEVEL_WARNING, "[+] Debug :: GetBinaryDirectory :: dirpath = %s\n",dirpath);
+
+	return dirpath;
+}
+

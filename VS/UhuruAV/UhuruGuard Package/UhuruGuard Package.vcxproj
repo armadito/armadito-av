@@ -368,6 +368,10 @@
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="C:\Users\david\Documents\uhuru-av\VS\UhuruAV\Debug\libuhuru.pdb" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="C:\Users\david\Documents\uhuru-av\VS\UhuruAV\Debug\libuhuru_core.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
@@ -407,7 +411,11 @@
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
-    <FilesToPackage Include="C:\Users\david\Documents\Visual Studio 2013\Projects\Bouchons\Release\ClientConnect.exe" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+    <FilesToPackage Include="C:\Users\david\Documents\uhuru-av\VS\UhuruAV\Debug\UhuruSvc.exe" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="C:\Users\david\Documents\uhuru-av\VS\UhuruAV\Debug\UhuruSvc.pdb" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>

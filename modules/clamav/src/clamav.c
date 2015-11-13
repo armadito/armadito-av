@@ -9,6 +9,46 @@
 #include <time.h>
 #include "os/osdeps.h"
 
+#ifdef WIN32
+char * GetDBDirectory( ) {
+
+	char * dirpath = NULL;
+	char filepath[MAX_PATH];
+	char * ptr = NULL;
+	int len = 0;
+	int size = 0;
+
+	if (!GetModuleFileNameA(NULL, &filepath, MAX_PATH)) {		
+		g_log(NULL, G_LOG_LEVEL_WARNING, "[-] Error :: GetBinaryDirectory!GetModuleFileName() failed :: %d\n",GetLastError());
+		return NULL;
+	}	
+
+	// get the file name from the complete file path
+	ptr = strrchr(filepath,'\\');
+	if (ptr == NULL) {		
+		g_log(NULL, G_LOG_LEVEL_WARNING, "[-] Error :: GetBinaryDirectory!strrchr() failed :: backslash not found in the path.\n");
+		return NULL;
+	}
+	
+	// calc the dir buffer length.
+	size = (int)(ptr - filepath);
+	len = size + strnlen_s(MODULE_CLAMAV_DBDIR, MAX_PATH) + 1;
+	//printf("[+] Debug :: GetBinaryDirectory :: ptr=%d :: filepath =%d :: len = %d :: strlen = %d\n",ptr,filepath,len,strlen(filepath));
+
+	dirpath = (char*)(calloc(len+1,sizeof(char)));
+	dirpath[len] = '\0';
+
+	memcpy_s(dirpath, len, filepath, size);
+	dirpath[size] = '\\';
+	memcpy_s(dirpath+size+1,len,MODULE_CLAMAV_DBDIR,strnlen_s(MODULE_CLAMAV_DBDIR, _MAX_PATH));
+
+
+	//g_log(NULL, G_LOG_LEVEL_WARNING, "[+] Debug :: GetBinaryDirectory :: dirpath = %s\n",dirpath);
+
+	return dirpath;
+}
+#endif
+
 struct clamav_data {
   struct cl_engine *clamav_engine;
   const char *db_dir;
@@ -43,7 +83,14 @@ static enum uhuru_mod_status clamav_init(struct uhuru_module *module)
   /* this if you want to use clamav bases from clamav standard directory */
   cl_data->db_dir = cl_retdbdir();
 #endif
+
+#ifdef WIN32
+ 
+  cl_data->db_dir = GetDBDirectory();
+  
+#else
   cl_data->db_dir = os_strdup(MODULE_CLAMAV_DBDIR);
+#endif
 
   cl_data->late_days = DEFAULT_LATE_DAYS;
   cl_data->critical_days = DEFAULT_CRITICAL_DAYS;
@@ -124,7 +171,7 @@ static enum uhuru_file_status clamav_scan(struct uhuru_module *module, const cha
 
   if (cl_scan_status == CL_VIRUS) {
     *pmod_report = os_strdup(virus_name);
-
+	
     return UHURU_MALWARE;
   }
 

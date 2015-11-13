@@ -9,6 +9,7 @@
 
 
 #define MIME_SIZE 100
+#define BUF_SIZE 2048
 
 const char* getHresError(HRESULT hr)
 {
@@ -31,15 +32,28 @@ const char *os_mime_type_guess(const char *path)
 	LPDWORD high = NULL;
 	DWORD read = 0;
 	size_t i = 0;
+	BOOL bres = FALSE;
+	LARGE_INTEGER fileSize;
 
-	fh = CreateFileA(path, GENERIC_READ, 0, NULL,OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL,NULL );
+	fh = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ , NULL,OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL,NULL );
 	if (fh == INVALID_HANDLE_VALUE) {
 		g_log(NULL, G_LOG_LEVEL_WARNING, "Error :: os_mime_type_guess() :: CreateFileA() failed :: %s :: err = %d (%s) :: ",path,GetLastError(),os_strerror(GetLastError()));
 		return NULL;
 	}
 
 	// get file content size in bytes.
-	size = GetFileSize(fh, NULL);
+	bres = GetFileSizeEx(fh, &fileSize);
+	
+	if (bres == FALSE) {
+		g_log(NULL, G_LOG_LEVEL_WARNING, "Error :: os_mime_type_guess() :: GetFileSizeEx() failed :: %s :: err = %d (%s) :: ",path,GetLastError(),os_strerror(GetLastError()));
+		return NULL;
+	}
+
+	size = fileSize.QuadPart;
+	//g_log(NULL, G_LOG_LEVEL_WARNING, "Debug :: os_mime_type_guess() :: (%s) FILE SIZE = %d  \n",path,size);
+	if (size > BUF_SIZE) {		
+		size = BUF_SIZE;
+	}
 
 	buf = (char*)calloc(size + 1, sizeof(char));
 	((char*)buf)[size] = '\0';
@@ -52,8 +66,7 @@ const char *os_mime_type_guess(const char *path)
 	}
 
 	HRESULT res = FindMimeFromData(NULL, NULL, buf, size, NULL, FMFD_DEFAULT, &mt, 0);
-	if ( res != S_OK) {
-	  
+	if ( res != S_OK) {	  
 		printf("Error :: FindMimeFromData failed :: %s \n", getHresError(res));
 		free(buf);
 		CloseHandle(fh);
