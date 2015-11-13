@@ -18,12 +18,20 @@ PIDFILE=/var/run/uhuru-scand.pid
 
 test -x $DAEMON || exit 0
 
+if test -f /etc/default/uhuru-scand-def; then
+    . /etc/default/uhuru-scand-def
+fi
+
 . /lib/lsb/init-functions
+
+set -e
+
+echo "Starting $DEAMON $DAEMON_OPTS..."
 
 case "$1" in
   start)
 	log_daemon_msg "Starting Uhuru antivirus scan daemon" "uhuru-scand"
-	start_daemon -p $PIDFILE $DAEMON
+	start_daemon -p $PIDFILE $DAEMON -- $DAEMON_OPTS
 	log_end_msg $?
     ;;
   stop)
