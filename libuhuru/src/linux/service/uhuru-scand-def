@@ -1,0 +1,3 @@
+# Sourced by /etc/init.d/uhuru-scand 
+
+DAEMON_OPTS='--log-level=debug'
