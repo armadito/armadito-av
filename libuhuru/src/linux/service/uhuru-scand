@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 ### BEGIN INIT INFO
 # Provides:          uhuru-scand
 # Required-Start:    $syslog $time $remote_fs
@@ -12,6 +12,12 @@
 #
 # Author:	François Déchelle <francois@dechelle.net>
 #
+
+if [[ $EUID -ne 0 ]];
+then
+	echo "This script must be executed as root."
+	exit 1;
+fi
 
 DAEMON=/usr/sbin/uhuru-scand
 PIDFILE=/var/run/uhuru-scand.pid
