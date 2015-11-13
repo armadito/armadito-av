@@ -23,6 +23,7 @@ struct uhuru_daemon_options {
   unsigned short port_number;
   const char *unix_path;
   const char *s_log_level;
+  const char *pid_file;
 };
 
 struct opt daemon_opt_defs[] = {
@@ -33,6 +34,7 @@ struct opt daemon_opt_defs[] = {
   { .long_form = "port", .short_form = 'p', .need_arg = 1, .is_set = 0, .value = NULL},
   { .long_form = "unix", .short_form = 'u', .need_arg = 0, .is_set = 0, .value = NULL},
   { .long_form = "path", .short_form = 'a', .need_arg = 1, .is_set = 0, .value = NULL},
+  { .long_form = "pidfile", .short_form = 'i', .need_arg = 1, .is_set = 0, .value = NULL},
   { .long_form = NULL, .short_form = '\0', .need_arg = 0, .is_set = 0, .value = NULL},
 };
 
@@ -51,6 +53,7 @@ static void usage(void)
   fprintf(stderr, "  --tcp -t | --unix -u           use TCP (--tcp) or unix (--unix) socket (default is unix)\n");
   fprintf(stderr, "  --port=PORT | -p PORT          TCP port number\n");
   fprintf(stderr, "  --path=PATH | -a PATH          unix socket path\n");
+  fprintf(stderr, "  --pidfile=PATH | -i PATH       create PID file at specified location\n");
   fprintf(stderr, "\n");
 
   exit(1);
@@ -86,6 +89,8 @@ static void parse_options(int argc, const char **argv, struct uhuru_daemon_optio
   if (opt_is_set(daemon_opt_defs, "tcp") && opt_is_set(daemon_opt_defs, "unix"))
     usage();
 
+  opts->pid_file = NULL;
+
   opts->no_daemon = opt_is_set(daemon_opt_defs, "no-daemon");
 
   opts->s_log_level = opt_value(daemon_opt_defs, "log-level", DEFAULT_LOG_LEVEL);
@@ -100,6 +105,9 @@ static void parse_options(int argc, const char **argv, struct uhuru_daemon_optio
   opts->port_number = (unsigned short)atoi(s_port);
 
   opts->unix_path = opt_value(daemon_opt_defs, "path", "@/tmp/.uhuru/daemon");
+
+  if (opt_is_set(daemon_opt_defs, "pidfile"))
+    opts->pid_file = opt_value(daemon_opt_defs, "pidfile", LOCALSTATEDIR "/run/uhuru-scand.pid");
 }
 
 static void main_loop(void)
@@ -121,6 +129,14 @@ int main(int argc, const char **argv)
 
   if (!opts.no_daemon)
     daemonize();
+
+  if (opts.pid_file != NULL) {
+    int r = create_pid_file(opts.pid_file);
+
+    /* a priori, writing to stderr is meaningless, since stderr would have probably been closed by daemonize() */
+    if (r)
+      exit(r);
+  }
 
   if (opts.socket_type == TCP_SOCKET)
     server_sock = tcp_server_listen(opts.port_number, "127.0.0.1");
