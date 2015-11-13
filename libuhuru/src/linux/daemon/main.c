@@ -77,8 +77,8 @@ static void parse_options(int argc, const char **argv, struct uhuru_daemon_optio
   int r = opt_parse(daemon_opt_defs, argc, argv);
   const char *s_port;
 
-  printf( "ARGV[0] : %s \n", argv[0] );
-  printf( "ARGV[1] : %s \n", argv[1] );
+ // printf( "ARGV[0] : %s \n", argv[0] );
+ // printf( "ARGV[1] : %s \n", argv[1] );
 
   if (r < 0|| r > argc)
     usage();
