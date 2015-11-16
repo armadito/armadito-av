@@ -189,11 +189,6 @@ static enum uhuru_update_status clamav_update_status_eval(GDateTime *curr, int l
   late = g_date_time_add_days(now, -late_days);
   critical = g_date_time_add_days(now, -critical_days);
 
-  fprintf(stderr, "now       %s\n", g_date_time_format(now, "%FT%H:%M:%SZ"));
-  fprintf(stderr, "late      %s\n", g_date_time_format(late, "%FT%H:%M:%SZ"));
-  fprintf(stderr, "critical  %s\n", g_date_time_format(critical, "%FT%H:%M:%SZ"));
-  fprintf(stderr, "current   %s\n", g_date_time_format(curr, "%FT%H:%M:%SZ"));
-
   if (g_date_time_compare(curr, critical) < 0)
     ret = UHURU_UPDATE_CRITICAL;
   else if (g_date_time_compare(curr, late) < 0)
