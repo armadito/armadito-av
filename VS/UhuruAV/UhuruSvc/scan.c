@@ -161,8 +161,12 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 			// Get the MS-DOS filename 
 			msDosFilename = ConvertDeviceNameToMsDosName(message->msg.FileName);
 
-			// fake scan example
-			if (strstr(msDosFilename,"UH_MALWARE") != NULL) {
+			if (msDosFilename == NULL) {
+				uhLog("[-] Error :: UserScanWorker :: Thread %d :: ConvertDeviceNameToMsDosName failed :: \n",ThreadId);
+				scan_result = UHURU_EINVAL;
+			}
+			// fake scan example			
+			else if (strstr(msDosFilename,"UH_MALWARE") != NULL) {
 				scan_result = UHURU_MALWARE;
 			}
 			else {
@@ -553,8 +557,11 @@ char * ConvertDeviceNameToMsDosName(LPSTR DeviceFileName) {
 			return NULL;
 		}
 		//printf("[+] Debug :: DeviceName = %s ==> %s\n",deviceNameQuery,deviceLetter);
+		if (deviceNameQuery == NULL) {
+			uhLog("[-] Error :: ConvertDeviceNameToMsDosName :: QueryDosDeviceA() failed ::  deviceNameQuery is NULL\n",GetLastError());
+		}
 
-		if (strstr(DeviceFileName,deviceNameQuery) != NULL) {
+		if (deviceNameQuery != NULL && strstr(DeviceFileName,deviceNameQuery) != NULL) {
 			//printf("[+] Debug :: FOUND DeviceName = %s ==> %s\n",deviceNameQuery,deviceLetter);
 
 			len2 = strnlen_s(deviceNameQuery, MAX_PATH_SIZE);
