@@ -18,8 +18,6 @@ typedef enum _SCAN_RESULT
 }SCAN_RESULT_OLD, *PSCAN_RESULT_OLD;
 */
 
-
-
 typedef enum uhuru_file_status {
 	NONE = 0,
 	UHURU_UNDECIDED,         /*!< not yet decided by scan                                */

@@ -1,6 +1,7 @@
 #include "callbacks.h"
 #include "Struct.h"
 #include "communication.h"
+#include "UhuruGuard.h"
 
 extern PFLT_PORT gClientComPort;
 //extern PEPROCESS gScanProcess;
@@ -216,7 +217,8 @@ Return Value:
   
 	NTSTATUS status = STATUS_SUCCESS;
 	BOOLEAN bIsScanProcess = FALSE;
-	//UNREFERENCED_PARAMETER( Data );
+	//ULONG ProcessId =0;
+	UNREFERENCED_PARAMETER( Data );
     //UNREFERENCED_PARAMETER( FltObjects );
     UNREFERENCED_PARAMETER( CompletionContext );
 
@@ -224,12 +226,16 @@ Return Value:
 	status = IsFromTheAnalysisProcess(FltGetRequestorProcess(Data),&bIsScanProcess);
 	if (!NT_SUCCESS(status)){
 		//DbgPrint("[i] Error :: UhuruGuard!PreOperationIrpCreate :: IsFromTheAnalysisProcess failed :: status = 0x%x :: %d\n", status,status);
+		return FLT_PREOP_SUCCESS_NO_CALLBACK;
 	}
 
 	if (bIsScanProcess == TRUE) {
-		//DbgPrint("[+] Debug :: UhuruGuard!PreOperationIrpCreate :: !! Ignoring Analysis process request !! :: %wZ\n",FltObjects->FileObject->FileName);
+		//ProcessId = FltGetRequestorProcessId(Data);
+		//DbgPrint("[-] Warning :: UhuruGuard!PreOperationIrpCreate :: [%d] Ignoring Analysis process request !! :: %wZ\n",ProcessId,FltObjects->FileObject->FileName);
 		return FLT_PREOP_SUCCESS_NO_CALLBACK;
 	}
+
+	
 
 
 	// If the caller thread is a system thread, do not call the post operation callback.
@@ -321,8 +327,10 @@ Return Value:
 
 --*/
 {
-    NTSTATUS ntStatus, retStatus  = FLT_POSTOP_FINISHED_PROCESSING;
+    NTSTATUS ntStatus = STATUS_SUCCESS;
+	FLT_POSTOP_CALLBACK_STATUS retStatus = FLT_POSTOP_FINISHED_PROCESSING;
 	BOOLEAN bIsDir = FALSE;
+	//BOOLEAN bIsScanProcess = FALSE;
 	//BOOLEAN bleave = FALSE;
 	PFILE_CONTEXT FileContext = NULL;
 	SCAN_RESULT scanRes;
@@ -337,13 +345,25 @@ Return Value:
 
 	// Ignore Volume Requests.
 	if (FlagOn(FltObjects->FileObject->Flags, FO_VOLUME_OPEN)) {
-		DbgPrint("[-] Warning :: UhuruGuard!PostOperationIrpCreate :: Ignore VOLUME_OPEN requests.\n");			
+		DbgPrint("[-] Warning :: UhuruGuard!PostOperationIrpCreate :: Ignore VOLUME_OPEN requests.\n");
 		return FLT_POSTOP_FINISHED_PROCESSING;			
 	}
 
 
 	__try {
 
+		// Check if the request come from the scan process.
+		/*
+		ntStatus = IsFromTheAnalysisProcess(FltGetRequestorProcess(Data),&bIsScanProcess);
+		if (!NT_SUCCESS(ntStatus)){
+			DbgPrint("[i] Error :: UhuruGuard!PostOperationIrpCreate :: IsFromTheAnalysisProcess failed :: status = 0x%x :: %d\n", ntStatus,ntStatus);
+			__leave;
+		}
+
+		if (bIsScanProcess == TRUE) {
+			DbgPrint("[-] Warning :: UhuruGuard!PosOperationIrpCreate :: !! Ignoring Analysis process request !! :: %wZ\n",FltObjects->FileObject->FileName);
+			__leave;
+		}*/
 
 		// Ignore Directory Open Creation.
 		ntStatus = FltIsDirectory(FltObjects->FileObject, FltObjects->Instance, &bIsDir);
@@ -424,8 +444,8 @@ Return Value:
 
 			// For file creation, scan the file at cleanup.
 			if (FlagOn(Data->IoStatus.Information, FILE_CREATED) ) {
-				DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCreate :: FILE_CREATED flag :: %wZ\n", FltObjects->FileObject->FileName);
-				return FLT_POSTOP_FINISHED_PROCESSING;
+				uhDbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCreate :: FILE_CREATED flag :: %wZ\n", FltObjects->FileObject->FileName);
+				__leave;
 			}
 
 		}
@@ -438,7 +458,7 @@ Return Value:
 			FileContext->scanResult = scanRes;
 			// Print scan result:
 			if (FileContext->scanResult == UHURU_MALWARE || FileContext->scanResult == UHURU_CLEAN)
-				DbgPrint("[i] INFO :: UhuruGuard!PostOperationIrpCreate :: %wZ => %s\n", FltObjects->FileObject->FileName,PrintUhuruScanResult(FileContext->scanResult));
+				uhDbgPrint("[i] INFO :: UhuruGuard!PostOperationIrpCreate ::[%d]:: %wZ => %s\n",FltGetRequestorProcessId(Data), FltObjects->FileObject->FileName,PrintUhuruScanResult(FileContext->scanResult));
 		}
 		
 
@@ -501,6 +521,7 @@ Return Value:
     return retStatus;
 }
 
+
 FLT_POSTOP_CALLBACK_STATUS
 PostOperationIrpWrite(
 _Inout_ PFLT_CALLBACK_DATA Data,
@@ -533,10 +554,9 @@ Return Value:
 --*/
 {
     NTSTATUS ntStatus, retstatus  = FLT_POSTOP_FINISHED_PROCESSING;
-	//HANDLE fhdle = NULL;
-	//int flag = 0;
 	PFILE_CONTEXT FileContext = NULL;
 	BOOLEAN bIsDir = FALSE;
+	BOOLEAN bIsScanProcess = FALSE;
 
 	//UNREFERENCED_PARAMETER( Data );
 	UNREFERENCED_PARAMETER( Flags );
@@ -550,10 +570,28 @@ Return Value:
 			__leave;
 		}
 
+		if (!NT_SUCCESS(Data->IoStatus.Status) ) {
+			if (!FLT_IS_FASTIO_OPERATION(Data))
+				DbgPrint("[-] Error :: UhuruGuard!PostOperationIrpWrite :: WRITE OPERATION failed !! 0x%x :: %wZ \n",Data->IoStatus.Status,FltObjects->FileObject->FileName);
+			__leave;
+		}
+
+		// Test if the requestor process is the analysis service.
+		ntStatus = IsFromTheAnalysisProcess(FltGetRequestorProcess(Data),&bIsScanProcess);
+		if (!NT_SUCCESS(ntStatus)){
+			//DbgPrint("[i] Error :: UhuruGuard!PreOperationIrpCleanup :: IsFromTheAnalysisProcess failed :: status = 0x%x :: %d\n", status,status);
+			__leave;
+		}
+
+		if (bIsScanProcess == TRUE) {
+			//DbgPrint("[+] Debug :: UhuruGuard!PostOperationIrpWrite :: !! Ignoring Analysis process request !! :: %wZ\n",FltObjects->FileObject->FileName);
+			__leave;
+		}
+
 		// Ignore Directory Open Creation.
 		ntStatus = FltIsDirectory(FltObjects->FileObject, FltObjects->Instance, &bIsDir);
-		if (!NT_SUCCESS(Data->IoStatus.Status)) {
-			DbgPrint("[-] Error :: UhuruGuard!PostOperationIrpWrite :: FltIsDirectory() routine failed !! 0x%x \n",ntStatus);
+		if (!NT_SUCCESS(ntStatus)) {
+			DbgPrint("[-] Error :: UhuruGuard!PostOperationIrpWrite :: FltIsDirectory() routine failed !! 0x%x ::\n",ntStatus);
 			__leave;
 		}
 
@@ -590,7 +628,10 @@ Return Value:
 
 		}
 		else if (NT_SUCCESS(ntStatus)) {	// If a context is already set for this file.
-						
+			
+			if (FileContext->scanResult == UHURU_CLEAN)
+				//DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpWrite :: Writing in MARKED file %s :: %wZ\n",PrintUhuruScanResult(FileContext->scanResult),FltObjects->FileObject->FileName);
+			
 			// If the file was no detected as a malware, then rescan it later.
 			if (FileContext->scanResult != UHURU_MALWARE) {
 				FileContext->scanResult = NONE; // Reset the scan result.
@@ -598,7 +639,7 @@ Return Value:
 			else {
 				// Cancel operation. in the postoperation.
 				// TODO;
-				DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpWrite :: Writing in UHURU_MALWARE marked file :: %wZ\n",FltObjects->FileObject->FileName);
+				DbgPrint("[+] Debug :: UhuruGuard!PostOperationIrpWrite :: Writing in UHURU_MALWARE marked file :: %wZ\n",FltObjects->FileObject->FileName);
 				__leave;
 
 			}
@@ -617,8 +658,7 @@ Return Value:
 
 		if (FileContext != NULL) {
 			//DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpWrite :: Freeing context in Write callback :: %wZ\n",FltObjects->FileObject->FileName);
-			FltReleaseContext((PFLT_CONTEXT)FileContext);
-			FileContext = NULL;
+			FltReleaseContext((PFLT_CONTEXT)FileContext);			
 		}
 
 	}
@@ -626,6 +666,108 @@ Return Value:
 
     return retstatus;
 }
+
+
+
+
+FLT_PREOP_CALLBACK_STATUS
+PreOperationIrpCleanup(
+_Inout_ PFLT_CALLBACK_DATA Data,
+_In_ PCFLT_RELATED_OBJECTS FltObjects,
+_Flt_CompletionContext_Outptr_ PVOID *CompletionContext
+) {
+
+	NTSTATUS ntStatus = STATUS_SUCCESS;
+	FLT_PREOP_CALLBACK_STATUS status = FLT_PREOP_SUCCESS_NO_CALLBACK;
+	BOOLEAN bIsScanProcess = FALSE;
+	BOOLEAN bIsDirectory = FALSE;
+	PFILE_CONTEXT FileContext = NULL;
+	SCAN_RESULT scanResult = NONE;
+
+	UNREFERENCED_PARAMETER(Data);
+	UNREFERENCED_PARAMETER(CompletionContext);
+
+	__try {
+
+		
+		// Test if the requestor process is the analysis service.
+		ntStatus = IsFromTheAnalysisProcess(FltGetRequestorProcess(Data),&bIsScanProcess);
+		if (!NT_SUCCESS(ntStatus)){
+			//DbgPrint("[i] Error :: UhuruGuard!PreOperationIrpCleanup :: IsFromTheAnalysisProcess failed :: status = 0x%x :: %d\n", status,status);
+			__leave;
+		}
+
+		if (bIsScanProcess == TRUE) {
+			//DbgPrint("[+] Debug :: UhuruGuard!PreOperationIrpCleanup :: !! Ignoring Analysis process request !! :: %wZ\n",FltObjects->FileObject->FileName);
+			__leave;
+		}
+
+		// Ignore directories
+		ntStatus = FltIsDirectory(FltObjects->FileObject, FltObjects->Instance, &bIsDirectory);
+		if (!NT_SUCCESS(Data->IoStatus.Status)) {
+			DbgPrint("[-] Error :: UhuruGuard!PostOperationIrpCleanup :: FltIsDirectory() routine failed !! \n");
+			__leave;
+		}
+
+		if (bIsDirectory == TRUE)
+			__leave;
+
+		if(FlagOn(FltObjects->FileObject->Flags, FO_VOLUME_OPEN)){
+			__leave;
+		}
+
+				
+
+		
+		//DbgPrint("[+] Debug :: UhuruGuard!PreOperationIrpCleanup :: %wZ\n", FltObjects->FileObject->FileName);
+		// Get the file context.
+		ntStatus = FltGetFileContext(Data->Iopb->TargetInstance, Data->Iopb->TargetFileObject, (PFLT_CONTEXT *)&FileContext);
+		if (!NT_SUCCESS(ntStatus)){			
+			__leave;
+		}
+
+		// Test if the file is marked for deletion; then release and delete the context linked to the file.
+		if (FlagOn(FltObjects->FileObject->Flags,FO_DELETE_ON_CLOSE) || FltObjects->FileObject->DeletePending == TRUE ) {
+			status = FLT_PREOP_SUCCESS_WITH_CALLBACK;
+		}
+
+		// Test if the file has already been scanned.
+		if (FileContext->scanResult != NONE && FileContext->scanResult != TIMEOUT && FileContext->scanResult != UHURU_UNKNOWN_FILE_TYPE ) {
+			//DbgPrint("[+] Debug :: UhuruGuard!PreOperationIrpCleanup :: File Already Scanned  :: %wZ :: %s\n", FltObjects->FileObject->FileName, PrintUhuruScanResult(FileContext->scanResult));
+			__leave;
+		}
+			
+
+		// Scan the file through the analysis service.
+		scanResult = LaunchFileAnalysis(Data,FltObjects);
+		FileContext->scanResult = scanResult;
+
+		//if (FileContext->scanResult == UHURU_MALWARE || FileContext->scanResult == UHURU_CLEAN)
+		uhDbgPrint("[i] INFO :: UhuruGuard!PreOperationIrpCleanup ::[%d]:: %wZ => %s\n",FltGetRequestorProcessId(Data),FltObjects->FileObject->FileName,PrintUhuruScanResult(FileContext->scanResult));
+
+
+		// if the file has been detected has malware...
+		if (FileContext->scanResult == UHURU_MALWARE) {
+			//status = FLT_PREOP_SUCCESS_WITH_CALLBACK;
+		}
+		
+
+	}
+	__finally {
+
+		if(FileContext != NULL){			
+			FltReleaseContext(FileContext);			
+		}
+
+		
+		//status = FLT_PREOP_SUCCESS_WITH_CALLBACK;
+
+	}
+
+
+	return status;
+}
+
 
 // TODO ::  DO not launch the analysis in this Callback. Scan in the preoperation callback ( because of FltGetFilenameInformation).
 FLT_POSTOP_CALLBACK_STATUS
@@ -665,39 +807,29 @@ Return Value:
 	
 
 	UNREFERENCED_PARAMETER( Flags );  
-	UNREFERENCED_PARAMETER( FltObjects ); 
+	//UNREFERENCED_PARAMETER( FltObjects ); 
     UNREFERENCED_PARAMETER( CompletionContext );
 
 	__try {
 
 		ntStatus = FltGetFileContext(Data->Iopb->TargetInstance, Data->Iopb->TargetFileObject, (PFLT_CONTEXT *)&FileContext);
 
-		if (!NT_SUCCESS(ntStatus)) {
-			//DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCreate :: Context already set for the file %wZ\n",FltObjects->FileObject->FileName);
+		if (!NT_SUCCESS(ntStatus)) {			
 			__leave; //return FLT_POSTOP_FINISHED_PROCESSING;
 		}
-		
-		// In this case the file has not been analyzed.
-		/*
-		if (FileContext->scanResult == NONE) {
-			
-			//DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCleanup :: Context realeased for new file :: %wZ\n",FltObjects->FileObject->FileName);			
-			// Scan the file.
-			scanRes = LaunchFileAnalysis(Data, FltObjects);
 
-			if (scanRes == ERROR) {
-				DbgPrint("[-] Error :: UhuruGuard!PostOperationIrpCleanup :: LaunchFileAnalysis failed for file :: %wZ.\n",FltObjects->FileObject->FileName);				
-			}
-			
-		}
-		*/
+		uhDbgPrint("[+] Debug :: UhuruGuard!PostOperationIrpCleanup :: Cleaning File Context :: %wZ => %s\n", FltObjects->FileObject->FileName,PrintUhuruScanResult(FileContext->scanResult));
 		
-		FltReleaseContext((PFLT_CONTEXT)FileContext);
+		
 		//DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCleanup :: ::Context realeased for file %wZ\n",FltObjects->FileObject->FileName);
 
-		// maybe use FltDeleteFileContext( ) instead of FltDeleteContext() ;
-		FltDeleteContext((PFLT_CONTEXT)FileContext);
-		FileContext = NULL;
+		// maybe use FltDeleteFileContext( ) instead of FltDeleteContext();		
+			
+		if (FileContext != NULL && FileContext->scanResult != UHURU_MALWARE ) {
+			FltReleaseContext((PFLT_CONTEXT)FileContext);
+			FltDeleteContext((PFLT_CONTEXT)FileContext);
+			FileContext = NULL;
+		}
 
 	}
 	__finally {

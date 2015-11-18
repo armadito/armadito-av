@@ -30,6 +30,12 @@ NTSTATUS IsFromTheAnalysisProcess(PEPROCESS Process , PBOOLEAN Answer) {
 		ntStatus = STATUS_CONNECTION_ABORTED;
 		return ntStatus;
 	}
+	if (gScanProcess == NULL) {
+		ntStatus = STATUS_CONNECTION_ABORTED;
+		return ntStatus;
+	}
+
+	
 
 	//PsGetProcessId
 
@@ -293,8 +299,7 @@ NTSTATUS SendScanOrder( _In_ PFLT_FILTER FilterHandle, PUNICODE_STRING FilePath 
 		
 	}
 	__finally {
-
-
+		
 		//
 		//	Whatever happens, this buffer is not required anymore after this routine.
 		//
