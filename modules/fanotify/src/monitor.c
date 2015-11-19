@@ -206,10 +206,10 @@ static int perm_event_process(struct access_monitor *m, struct fanotify_event_me
   struct stat buf;
   struct access_thread_data *td;
 
-  if (m->my_pid == event->pid)   /* file was opened by myself, always allow */
+  if (m->enable_permission == 0)  /* permission check is disabled, always allow */
     return write_response(m, event->fd, path, FAN_ALLOW);
 
-  if (m->enable_permission == 0)  /* permission check is disabled, always allow */
+  if (m->my_pid == event->pid)   /* file was opened by myself, always allow */
     return write_response(m, event->fd, path, FAN_ALLOW);
 
   if (fstat(event->fd, &buf) < 0)
