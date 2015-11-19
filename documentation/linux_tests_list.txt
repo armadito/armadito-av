@@ -1,0 +1,34 @@
+Uhuru-AV Linux Tests
+====================
+Valentin HAMON<vhamon@teclib.com>
+v1.0, 2015-11
+
+This document aims to contains an inventory of what have been done and what need to be done about testing UhuruAV on Linux.
+
+On-demand scan tests
+--------------------
+
+Ubuntu 14.04 LTS 64Bit (trusty)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.Samba tests
+[width="60%",options="header"]
+|=================================================
+| Test        	   	 | Status
+| Server Samba 12.04 LTS + Client mount CIFS | OK
+| Server Samba 14.04 LTS + Client mount CIFS | OK
+|=================================================
+
+NOTE: Can't easily test with SMBFS because it is deprecated.
+
+Ubuntu 12.04 LTS 32Bit (precise)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.Samba tests
+[width="60%",options="header"]
+|=================================================
+| Test        	   	 | Status
+| Server Samba 12.04 LTS + Client mount CIFS | TODO
+| Server Samba 14.04 LTS + Client mount CIFS | TODO
+|=================================================
+
