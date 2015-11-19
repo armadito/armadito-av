@@ -1,4 +1,4 @@
-AC_INIT(uhuru-mod-fanotify,1.5.1,francois@dechelle.net)
+AC_INIT(uhuru-mod-fanotify, [1.5.2],francois@dechelle.net)
 AM_INIT_AUTOMAKE
 
 # collect arguments

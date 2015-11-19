@@ -243,7 +243,7 @@ static void info_save_to_stdout(struct info *info)
   struct base_info **b;
 
   printf( "--- Uhuru info --- \n");
-  printf( "Update global status : %d\n", info->global_status);
+  printf( "Update global status : %s\n", info->global_status);
   if (info->module_infos != NULL) {
     for(m = info->module_infos; *m != NULL; m++){
       printf( "Module %s \n", (*m)->name );
