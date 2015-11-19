@@ -25,3 +25,8 @@ void os_file_stat(const char *path, struct os_file_stat *buf, int *pfile_errno)
 
 	return;
 }
+
+int os_file_do_not_scan(const char *path)
+{
+  return 0;
+}

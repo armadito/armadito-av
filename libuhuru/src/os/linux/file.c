@@ -43,3 +43,33 @@ void os_file_stat(const char *path, struct os_file_stat *buf, int *pfile_errno)
 
   return;
 }
+
+static const char *do_not_scan_paths[] = {
+  "/proc",
+  "/run",
+  "/sys",
+  NULL,
+};
+
+static int strprefix(const char *s, const char *prefix)
+{
+  while (*prefix && *s && *prefix++ == *s++)
+    ;
+
+  if (*prefix == '\0')
+    return *s == '\0' || *s == '/';
+
+  return 0;
+}
+
+int os_file_do_not_scan(const char *path)
+{
+  const char **p;
+
+  for(p = do_not_scan_paths; *p != NULL; p++) {
+    if (strprefix(path, *p))
+      return 1;
+  }
+    
+  return 0;
+}

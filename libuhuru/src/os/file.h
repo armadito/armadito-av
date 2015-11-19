@@ -18,4 +18,14 @@ struct os_file_stat {
 
 void os_file_stat(const char *path, struct os_file_stat *buf, int *pfile_errno);
 
+/**
+ *      \fn int os_file_do_not_scan(const char *path);
+ *      \brief Returns true if path must never be scanned (like /proc on linux)
+ *
+ *      \param[in] path the path of the file
+ *
+ *      \return 1 if path must not be scanned, 0 if not
+ */
+int os_file_do_not_scan(const char *path);
+
 #endif
