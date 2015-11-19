@@ -13,13 +13,24 @@ Ubuntu 14.04 LTS 64Bit (trusty)
 
 .Samba tests
 [width="60%",options="header"]
+|==================================================================
+| Test        	   			     | Status | Details
+| Server Samba 12.04 LTS + Client mount CIFS | OK     | sudo mount -t cifs //n5precise32a/share ~/mnt/precise_cifs -o username=uhuru,noexec
+| Server Samba 14.04 LTS + Client mount CIFS | OK     | sudo mount -t cifs //n5samba/samba_shared ~/mnt/trusty_cifs -o username=uhuru,noexec
+| Server Samba 12.04 LTS + Client mount SMBFS | DEPRECATED  | 
+| Server Samba 14.04 LTS + Client mount SMBFS | DEPRECATED  | 
+|==================================================================
+
+.Mounted devices
+[width="60%",options="header"]
 |=================================================
-| Test        	   	 | Status
-| Server Samba 12.04 LTS + Client mount CIFS | OK
-| Server Samba 14.04 LTS + Client mount CIFS | OK
+| Test        	   	 	 | Status | Details
+| USB Key - FAT32	 	 | OK     |
+| USB Key - NTFS	 	 | TODO   |
+| USB Key - EXT4	 	 | TODO   |
+| Android Nexus 4 - MTP Protocol | Not OK | Unable to scan mounted gvfsd-fuse on /run/user/1000/gvfs type fuse.gvfsd-fuse (rw,nosuid,nodev,user=uhuru)
 |=================================================
 
-NOTE: Can't easily test with SMBFS because it is deprecated.
 
 Ubuntu 12.04 LTS 32Bit (precise)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -27,8 +38,10 @@ Ubuntu 12.04 LTS 32Bit (precise)
 .Samba tests
 [width="60%",options="header"]
 |=================================================
-| Test        	   	 | Status
-| Server Samba 12.04 LTS + Client mount CIFS | TODO
-| Server Samba 14.04 LTS + Client mount CIFS | TODO
-|=================================================
+| Test        	   	 		     | Status | Details
+| Server Samba 12.04 LTS + Client mount CIFS | TODO   |
+| Server Samba 14.04 LTS + Client mount CIFS | TODO   |
+| Server Samba 12.04 LTS + Client mount SMBFS | TODO  | 
+| Server Samba 14.04 LTS + Client mount SMBFS | TODO  | 
+|==================================================================
 
