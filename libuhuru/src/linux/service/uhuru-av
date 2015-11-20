@@ -1,0 +1,13 @@
+
+/var/log/uhuru-av.log {
+  	size 50M
+	copytruncate
+        create 700 root root
+        rotate 4
+	compress
+	maxage 100 
+}
+
+## Compression
+## Rotation à partir de 50M
+## Limite le nombre de fichiers de rotations à 4
