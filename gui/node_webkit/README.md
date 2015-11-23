@@ -31,5 +31,8 @@ nw-binary can be "nw.exe" or nw.
 
 ## Packaging
 
+
 Lien symbolique Windows :
 mklink /D C:\cygwin64\home\toto\node_webkit\nwjs-v0.12.3-win-x64\nwjs-v0.12.3-win-x64\uhuru-av C:\Users\toto\projects\uhuru\git\uhuru-av\gui\node_webkit\
+
+// TODO
