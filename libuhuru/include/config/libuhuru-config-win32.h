@@ -31,8 +31,8 @@
 #define MAXPATHLEN _MAX_PATH
 
 /* misc */
-#define LIBUHURU_CONF_DIR "C:\\Users\\toto\\projects\\uhuru\\git\\uhuru-av\\libuhuru\\conf"
-#define LIBUHURU_MODULES_PATH "C:\\Users\\toto\\bases_AV\\DB"
+#define LIBUHURU_CONF_DIR "conf"
+#define LIBUHURU_MODULES_PATH "modules"
 
 /* modules */
 #undef HAVE_ALERT_MODULE

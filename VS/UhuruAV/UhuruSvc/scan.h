@@ -1,12 +1,12 @@
-#ifndef __CLIENT_H__
-#define __CLIENT_H__
+#ifndef __SCAN_H_
+#define __SCAN_H_
 
 #include <stdio.h>
 #include <Windows.h>
 #include <fltUser.h>
 #include <string.h>
 
-/*Libuhuru*/
+// libuhuru 
 #include <libuhuru-config.h>
 #include <libuhuru/core.h>
 
@@ -86,22 +86,8 @@ typedef struct _USER_SCAN_CONTEXT {
 
 } USER_SCAN_CONTEXT, *PUSER_SCAN_CONTEXT;
 
-/*typedef enum _SCAN_RESULT
-{
-	NONE = 0,		//  file not scanned yet.
-	CLEAN,			//	clean file
-	MALWARE,		// detected as malware.
-	TIMEOUT,		// scan not finished due to timeout.
-	UNDECIED,
-	UNSUPPORTED,
-	DBG_FLAG,
-	ERR
-
-}SCAN_RESULT_OLD, *PSCAN_RESULT_OLD;*/
-
 typedef enum uhuru_file_status  SCAN_RESULT;
 typedef enum uhuru_file_status*  PSCAN_RESULT;
-
 
 typedef struct _COMMUNICATION_PORT_CONTEXT {
 	
@@ -161,6 +147,7 @@ typedef struct _SCANNER_MESSAGE {
 } SCANNER_MESSAGE, *PSCANNER_MESSAGE;
 
 
+
 typedef struct _SCANNER_REPLY_MESSAGE {
 
     //
@@ -178,6 +165,12 @@ typedef struct _SCANNER_REPLY_MESSAGE {
 } SCANNER_REPLY_MESSAGE, *PSCANNER_REPLY_MESSAGE;
 
 
+// Functions
+int initializeScanService(struct uhuru ** uhuru);
+int closeScanService(struct uhuru * uhuru );
+HRESULT UserScanWorker(_In_  PUSER_SCAN_CONTEXT Context);
+HRESULT UserScanInit(_Inout_  PUSER_SCAN_CONTEXT Context);
+HRESULT UserScanFinalize(_In_  PUSER_SCAN_CONTEXT Context);
 char * ConvertDeviceNameToMsDosName(LPSTR DeviceFileName);
 
 #endif
