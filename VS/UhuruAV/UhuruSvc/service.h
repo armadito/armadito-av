@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 #define SVCNAME TEXT("UhuruSvc")
 #define SVCDISPLAY TEXT("Uhuru Scan Service")
 
@@ -20,6 +19,10 @@ void WINAPI ServiceMain(int argc, char ** argv);
 BOOLEAN ServiceLaunchAction( );
 void ServiceLaunch( );
 void ServiceStop( );
+
+//
+int initClamavDB( );
+
 
 
 #endif
