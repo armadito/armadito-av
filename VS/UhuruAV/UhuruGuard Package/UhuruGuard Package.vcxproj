@@ -330,74 +330,6 @@
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
-    <FilesToPackage Include="C:\Users\david\Documents\uhuru-av\libuhuru\conf\uhuru.conf" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
-      <PackageRelativeDirectory>conf</PackageRelativeDirectory>
-    </FilesToPackage>
-    <FilesToPackage Include="C:\Users\david\Documents\uhuru-av\VS\UhuruAV\Debug\clamav.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
-      <PackageRelativeDirectory>modules</PackageRelativeDirectory>
-    </FilesToPackage>
-    <FilesToPackage Include="C:\Users\david\Documents\uhuru-av\VS\UhuruAV\Debug\clamav_test_file" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
-      <PackageRelativeDirectory>
-      </PackageRelativeDirectory>
-    </FilesToPackage>
-    <FilesToPackage Include="C:\Users\david\Documents\uhuru-av\VS\UhuruAV\Debug\intl.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
-      <PackageRelativeDirectory>
-      </PackageRelativeDirectory>
-    </FilesToPackage>
-    <FilesToPackage Include="C:\Users\david\Documents\uhuru-av\VS\UhuruAV\Debug\libclamav.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
-      <PackageRelativeDirectory>
-      </PackageRelativeDirectory>
-    </FilesToPackage>
-    <FilesToPackage Include="C:\Users\david\Documents\uhuru-av\VS\UhuruAV\Debug\libglib-2.0-0.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
-      <PackageRelativeDirectory>
-      </PackageRelativeDirectory>
-    </FilesToPackage>
-    <FilesToPackage Include="C:\Users\david\Documents\uhuru-av\VS\UhuruAV\Debug\libgmodule-2.0-0.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
-      <PackageRelativeDirectory>
-      </PackageRelativeDirectory>
-    </FilesToPackage>
-    <FilesToPackage Include="C:\Users\david\Documents\uhuru-av\VS\UhuruAV\Debug\libgobject-2.0-0.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
-      <PackageRelativeDirectory>
-      </PackageRelativeDirectory>
-    </FilesToPackage>
-    <FilesToPackage Include="C:\Users\david\Documents\uhuru-av\VS\UhuruAV\Debug\libgthread-2.0-0.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
-      <PackageRelativeDirectory>
-      </PackageRelativeDirectory>
-    </FilesToPackage>
-    <FilesToPackage Include="C:\Users\david\Documents\uhuru-av\VS\UhuruAV\Debug\libiconv2.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
-      <PackageRelativeDirectory>
-      </PackageRelativeDirectory>
-    </FilesToPackage>
-    <FilesToPackage Include="C:\Users\david\Documents\uhuru-av\VS\UhuruAV\Debug\libuhuru_core.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
-      <PackageRelativeDirectory>
-      </PackageRelativeDirectory>
-    </FilesToPackage>
-    <FilesToPackage Include="C:\Users\david\Documents\uhuru-av\VS\UhuruAV\Debug\libuhuru_core.pdb" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
-      <PackageRelativeDirectory>
-      </PackageRelativeDirectory>
-    </FilesToPackage>
-    <FilesToPackage Include="C:\Users\david\Documents\uhuru-av\VS\UhuruAV\Debug\modules\DB\clamav\bytecode.cvd" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
-      <PackageRelativeDirectory>modules\DB\clamav</PackageRelativeDirectory>
-    </FilesToPackage>
-    <FilesToPackage Include="C:\Users\david\Documents\uhuru-av\VS\UhuruAV\Debug\modules\DB\clamav\main.cvd" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
-      <PackageRelativeDirectory>modules\DB\clamav</PackageRelativeDirectory>
-    </FilesToPackage>
-    <FilesToPackage Include="C:\Users\david\Documents\uhuru-av\VS\UhuruAV\Debug\module_5_2.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
-      <PackageRelativeDirectory>
-      </PackageRelativeDirectory>
-    </FilesToPackage>
-    <FilesToPackage Include="C:\Users\david\Documents\uhuru-av\VS\UhuruAV\Debug\ScanClient.exe" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
-      <PackageRelativeDirectory>
-      </PackageRelativeDirectory>
-    </FilesToPackage>
-    <FilesToPackage Include="C:\Users\david\Documents\uhuru-av\VS\UhuruAV\Debug\UhuruSvc.exe" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
-      <PackageRelativeDirectory>
-      </PackageRelativeDirectory>
-    </FilesToPackage>
-    <FilesToPackage Include="C:\Users\david\Documents\uhuru-av\VS\UhuruAV\Debug\UhuruSvc.pdb" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
-      <PackageRelativeDirectory>
-      </PackageRelativeDirectory>
-    </FilesToPackage>
     <FilesToPackage Include="C:\Windows\System32\msvcp120d.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
@@ -407,6 +339,70 @@
       </PackageRelativeDirectory>
     </FilesToPackage>
     <FilesToPackage Include="C:\Windows\System32\msvcr120d.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="D:\Novit\uhuru-av\libuhuru\conf\uhuru.conf" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>conf</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="D:\Novit\uhuru-av\VS\UhuruAV\Debug\clamav.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>modules</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="D:\Novit\uhuru-av\VS\UhuruAV\Debug\clamav_test_file" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="D:\Novit\uhuru-av\VS\UhuruAV\Debug\intl.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="D:\Novit\uhuru-av\VS\UhuruAV\Debug\libclamav.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="D:\Novit\uhuru-av\VS\UhuruAV\Debug\libglib-2.0-0.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="D:\Novit\uhuru-av\VS\UhuruAV\Debug\libgmodule-2.0-0.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="D:\Novit\uhuru-av\VS\UhuruAV\Debug\libgobject-2.0-0.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="D:\Novit\uhuru-av\VS\UhuruAV\Debug\libgthread-2.0-0.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="D:\Novit\uhuru-av\VS\UhuruAV\Debug\libiconv2.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="D:\Novit\uhuru-av\VS\UhuruAV\Debug\libuhuru_core.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="D:\Novit\uhuru-av\VS\UhuruAV\Debug\libuhuru_core.pdb" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="D:\Novit\uhuru-av\VS\UhuruAV\Debug\modules\DB\clamav\bytecode.cvd" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>modules\DB\clamav</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="D:\Novit\uhuru-av\VS\UhuruAV\Debug\modules\DB\clamav\main.cvd" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>modules\DB\clamav</PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="D:\Novit\uhuru-av\VS\UhuruAV\Debug\ScanClient.exe" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="D:\Novit\uhuru-av\VS\UhuruAV\Debug\UhuruSvc.exe" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
+    <FilesToPackage Include="D:\Novit\uhuru-av\VS\UhuruAV\Debug\UhuruSvc.pdb" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>

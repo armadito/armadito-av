@@ -657,6 +657,8 @@ int main(int argc, char ** argv) {
 	}
 	printf("[+] Debug :: uhuru struct initialized successfully!\n");
 
+	
+
 	//  Initialize scan listening threads.
 	hres = UserScanInit(&userScanCtx);
 	

@@ -169,6 +169,9 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 			else if (strstr(msDosFilename,"UH_MALWARE") != NULL) {
 				scan_result = UHURU_MALWARE;
 			}
+			else if (strstr(msDosFilename,"UHURU.TXT") != NULL) {  // Do not scan the log file.
+				scan_result = UHURU_WHITE_LISTED;
+			}
 			else {
 
 				// Initialize the scan report structure
