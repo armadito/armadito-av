@@ -72,8 +72,7 @@ static void stderrout_handler(const gchar *log_domain, GLogLevelFlags log_level,
   gchar *string;
 
   if (log_domain)
-      g_string_append_printf(gstring, "%s: ", log_domain);
-   // g_string_append_printf(gstring, "%s[%d]: ", log_domain, getpid());
+     g_string_append_printf(gstring, "%s[%d]: ", log_domain, getpid());
 
   if (log_level < (1 << G_LOG_LEVEL_USER_SHIFT))
     g_string_append_printf(gstring, "<%s> ", level_str(log_level));
