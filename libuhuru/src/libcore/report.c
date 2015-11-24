@@ -37,8 +37,8 @@ void uhuru_report_change(struct uhuru_report *report, enum uhuru_file_status sta
 
   if (mod_name != NULL)
     report->mod_name = (char *)mod_name;
-
-  if (mod_report != NULL) {
+  
+  if (mod_report != NULL) {	  
     if (report->mod_report != NULL)
       free(report->mod_report);
 

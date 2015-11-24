@@ -72,7 +72,7 @@ static void stderrout_handler(const gchar *log_domain, GLogLevelFlags log_level,
   gchar *string;
 
   if (log_domain)
-    g_string_append_printf(gstring, "%s[%d]: ", log_domain, getpid());
+     g_string_append_printf(gstring, "%s[%d]: ", log_domain, getpid());
 
   if (log_level < (1 << G_LOG_LEVEL_USER_SHIFT))
     g_string_append_printf(gstring, "<%s> ", level_str(log_level));
@@ -114,7 +114,7 @@ void log_init(const char *s_log_level, int use_syslog)
   flags = get_log_level_from_str(s_log_level) | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION;
 
   if (use_syslog) {
-    openlog("uhuru", LOG_CONS | LOG_PID, LOG_USER);
+    openlog("uhuru-av", LOG_CONS | LOG_PID, LOG_USER);
     g_log_set_handler(G_LOG_DOMAIN, flags, syslog_handler, NULL);
   } else
     g_log_set_handler(G_LOG_DOMAIN, flags, stderrout_handler, NULL);

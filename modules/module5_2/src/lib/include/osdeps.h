@@ -8,7 +8,7 @@ FILE * os_fopen(const char * filename, const char * mode);
 #define os_strncpy strncpy_s
 #define os_strncat strncat_s
 #define os_strdup _strdup
-#define MODULE5_2_DBDIR "path\\to\\module\\5.2\\"
+#define MODULE5_2_DBDIR "modules/DB/module5_2"
 #else
 #define os_fopen fopen
 #define os_strdup strdup

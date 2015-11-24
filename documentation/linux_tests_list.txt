@@ -14,7 +14,7 @@ Ubuntu 14.04 LTS 64Bit (trusty)
 .Samba tests
 [width="60%",options="header"]
 |==================================================================
-| Test        	   			     | Status | Details
+| Test        	   			     | Status | Notes
 | Server Samba 12.04 LTS + Client mount CIFS | OK     | sudo mount -t cifs //n5precise32a/share ~/mnt/precise_cifs -o username=uhuru,noexec
 | Server Samba 14.04 LTS + Client mount CIFS | OK     | sudo mount -t cifs //n5samba/samba_shared ~/mnt/trusty_cifs -o username=uhuru,noexec
 | Server Samba 12.04 LTS + Client mount SMBFS | DEPRECATED  | 
@@ -24,11 +24,12 @@ Ubuntu 14.04 LTS 64Bit (trusty)
 .Mounted devices
 [width="60%",options="header"]
 |=================================================
-| Test        	   	 	 | Status | Details
-| USB Key - FAT32	 	 | OK     |
-| USB Key - NTFS	 	 | TODO   |
-| USB Key - EXT4	 	 | TODO   |
-| Android Nexus 4 - MTP Protocol | Not OK | Unable to scan mounted gvfsd-fuse on /run/user/1000/gvfs type fuse.gvfsd-fuse (rw,nosuid,nodev,user=uhuru)
+| Test        	   	 	      | Status | Notes
+| USB Key - FAT32	 	      | OK     |
+| USB Key - NTFS	 	      | TODO   |
+| USB Key - EXT4	 	      | TODO   |
+| Android Nexus 4 - MTP Protocol      | Not OK | Unable to scan mounted gvfsd-fuse on /run/user/1000/gvfs type fuse.gvfsd-fuse (rw,nosuid,nodev,user=uhuru)
+| Uhuru Mobile Nexus 5 - MTP Protocol | Not OK | Unable to scan mounted gvfsd-fuse on /run/user/1000/gvfs type fuse.gvfsd-fuse (rw,nosuid,nodev,user=uhuru)
 |=================================================
 
 
@@ -38,7 +39,7 @@ Ubuntu 12.04 LTS 32Bit (precise)
 .Samba tests
 [width="60%",options="header"]
 |=================================================
-| Test        	   	 		     | Status | Details
+| Test        	   	 		     | Status | Notes
 | Server Samba 12.04 LTS + Client mount CIFS | TODO   |
 | Server Samba 14.04 LTS + Client mount CIFS | TODO   |
 | Server Samba 12.04 LTS + Client mount SMBFS | TODO  | 
