@@ -1,4 +1,6 @@
 #include "service.h"
+#include "log.h"
+#include "scan.h"
 
 // Msdn documentation: 
 // https://msdn.microsoft.com/en-us/library/windows/desktop/ms685141%28v=vs.85%29.aspx
@@ -7,6 +9,10 @@
 SERVICE_STATUS gSvcStatus;
 SERVICE_STATUS_HANDLE gSvcStatusHandle;
 HANDLE ghSvcStopEvent = NULL;
+
+struct uhuru * uhuru = NULL;
+USER_SCAN_CONTEXT userScanCtx = {0};
+
 
 /*
  int ServiceInstall()
@@ -42,7 +48,7 @@ int ServiceInstall( ) {
 		SVCNAME,					// name of service 
 		SVCDISPLAY,					// service name to display 
 		SERVICE_ALL_ACCESS,			// desired access 
-		SERVICE_WIN32_OWN_PROCESS,	// service type 
+		SERVICE_WIN32_OWN_PROCESS|SERVICE_INTERACTIVE_PROCESS,	// service type 
 		SERVICE_DEMAND_START,		// start type
 		SERVICE_ERROR_NORMAL,		// error control type 
 		binaryPath,					// path to service's binary 
@@ -59,7 +65,8 @@ int ServiceInstall( ) {
 		return -1;
 	}
 	else {
-		printf("[+] Debug :: Service installed successfully!\n");
+		printf("[+] Debug :: Service installed successfully!\n");		
+		uhLog("[+] Debug :: Service installed successfully!\n");
 	}
 
 	CloseServiceHandle(schService);
@@ -171,11 +178,25 @@ VOID ReportSvcStatus(DWORD dwCurrentState,
 	https://msdn.microsoft.com/en-us/library/windows/desktop/ms685149%28v=vs.85%29.aspx
 */
 void WINAPI ServiceCtrlHandler( DWORD dwCtrl ) {
+	uhuru_error * uh_error = NULL;
+	HRESULT hres = S_OK;
 
 	switch (dwCtrl) {
 
 		case SERVICE_CONTROL_STOP:
 			ReportSvcStatus(SERVICE_STOP_PENDING, NO_ERROR, 0);
+
+			// finish all threads and communication port.
+			hres = UserScanFinalize(&userScanCtx);
+
+			// Close uhuru structure.
+			if (uhuru != NULL) {
+				uhuru_close(uhuru, &uh_error);
+				uhLog("[+] Debug :: uhuru struct closed successfully!\n");
+			}
+			else {
+				uhLog("[-] Warning :: uhuru global struct is NULL !\n");
+			}
 
 			 // Signal the service to stop.
 			 SetEvent(ghSvcStopEvent);
@@ -193,14 +214,28 @@ void WINAPI ServiceCtrlHandler( DWORD dwCtrl ) {
 }
 
 
-
 /*
  LaunchServiceAction()
 */
 void LaunchServiceAction( ) {
+	
+	uhuru_error * uh_error = NULL;
+	HRESULT hres = S_OK;			
+	
+	// Initialize uhuru structure.
+	uhuru = uhuru_open(&uh_error);
+	if (uhuru == NULL) {	
+		uhLog("[-] Error :: uhuru_open failed\n");
+		return ;
+	}
+	uhLog("[+] Debug :: uhuru struct initialized successfully\n");
 
-	// Perform service work.
-
+	//  Initialize scan listening threads.
+	hres = UserScanInit(&userScanCtx);
+	if (FAILED(hres)) {
+		hres = UserScanFinalize(&userScanCtx);
+	}
+	
 	return;
 }
 
@@ -233,8 +268,6 @@ void ServiceInit( ) {
     ReportSvcStatus( SERVICE_RUNNING, NO_ERROR, 0 );
 
 
-	LaunchServiceAction( );
-
 	return;
 
 }
@@ -266,7 +299,7 @@ void WINAPI ServiceMain(int argc, char ** argv) {
 	// Calls the SvcInit function to perform the service-specific initialization and begin the work to be performed by the service.
 	ServiceInit( );
 
-	//LaunchServiceAction( );
+	LaunchServiceAction( );
 
 	return;
 }
@@ -486,6 +519,7 @@ void ServiceStop( ) {
 
 	// If the service is running, dependencies must be stopped first. (In our case, there is no dependencies).	
 	// TODO: Unload databases, + modules + others dependencies...
+	//closeScanService(gUhuru);
 
 	// Send a stop code to the service.
 	if (!ControlService(schService,SERVICE_CONTROL_STOP,(LPSERVICE_STATUS)&ssStatus)) {

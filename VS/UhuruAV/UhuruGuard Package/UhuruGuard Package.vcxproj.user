@@ -12,7 +12,8 @@
     <DeployFiles />
     <ScriptName>Microsoft.DriverKit.DefaultDriverPackageInstallationClass.PerformDefaultDriverPackageInstallation</ScriptName>
     <ScriptDeviceQuery />
-    <DebugDeployment>False</DebugDeployment>
+    <DebugDeployment>True</DebugDeployment>
+    <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|Win32'">
     <EnableDeployment>True</EnableDeployment>

@@ -10,7 +10,8 @@ FILE * os_fopen(const char * filename, const char * mode);
 #define os_strncat strncat_s
 #define os_strdup _strdup
 #define os_sscanf sscanf_s
-#define MODULE_CLAMAV_DBDIR "path\\to\\module\\clamav\\db"
+char * GetDBDirectory( );
+#define MODULE_CLAMAV_DBDIR "modules\\DB\\clamav"
 #else
 #include <clamav.h>
 #define os_fopen fopen

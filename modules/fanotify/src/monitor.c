@@ -198,7 +198,7 @@ void scan_file_thread_fun(gpointer data, gpointer user_data)
   struct access_monitor *m = (struct access_monitor *)user_data;
   struct access_thread_data *td = (struct access_thread_data *)data;
 	
-  status = uhuru_scan_simple(m->uhuru, td->path);
+  status = uhuru_scan_simple(m->uhuru, td->path, NULL);
 
   write_response(m, td->fd, td->path, file_status_2_response(status));
 

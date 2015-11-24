@@ -71,14 +71,21 @@ if [[ $PACKAGE == "libuhuru" ]];
 then 
 	rm -r packages/ubuntu/libuhuru/BUILD/ 
 	make -C packages/ubuntu/libuhuru package
-	sudo dpkg -i --force-all $(find packages/ubuntu/libuhuru/BUILD/ -iname "*.deb")
-	increment_version packages/ubuntu/libuhuru
+
+
+	# We need to temporarly install libuhuru packages
+	sudo dpkg -i $(find . -iname libuhuru_*.deb)
+	sudo dpkg -i $(find . -iname libuhuru-dev_*.deb)
+	sudo dpkg -i $(find . -iname libuhuru-tools_*.deb)
+
+	#increment_version packages/ubuntu/libuhuru
 	make -C packages/ubuntu/libuhuru upload
+
 	echo "-------PACKAGING OKAY $PACKAGE-------"
 	exit 0
 else
 	make -C packages/ubuntu/$PACKAGE package
-	increment_version packages/ubuntu/$PACKAGE
+	#increment_version packages/ubuntu/$PACKAGE
 	make -C packages/ubuntu/$PACKAGE upload
 	echo "-------PACKAGING OKAY $PACKAGE-------"
 fi
