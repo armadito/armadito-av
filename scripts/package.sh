@@ -74,9 +74,7 @@ then
 
 
 	# We need to temporarly install libuhuru packages
-
 	sudo dpkg -i $(find . -iname libuhuru_*.deb)
-	sudo dpkg -i $(find . -iname libuhuru-daemon-test_*.deb)
 	sudo dpkg -i $(find . -iname libuhuru-dev_*.deb)
 	sudo dpkg -i $(find . -iname libuhuru-tools_*.deb)
 
