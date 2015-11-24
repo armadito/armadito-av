@@ -77,13 +77,18 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
 
 int access_monitor_enable_permission(struct access_monitor *m, int enable_permission)
 {
-  return m->enable_permission = enable_permission;
+  m->enable_permission = enable_permission;
+
+  g_log(G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "fanotify: %s", (m->enable_permission) ? "enabled" : "disabled");
+
+  return m->enable_permission;
 }
 
 int access_monitor_add(struct access_monitor *m, const char *path)
 {
   const char *tmp = strdup(path);
 
+  /* move this to activation callback */
   if (fanotify_mark(m->fanotify_fd, FAN_MARK_ADD | FAN_MARK_MOUNT, FAN_OPEN_PERM, AT_FDCWD, tmp) < 0) {
     g_log(G_LOG_DOMAIN, G_LOG_LEVEL_ERROR, "fanotify: adding %s failed (%s)", tmp, strerror(errno));
 
