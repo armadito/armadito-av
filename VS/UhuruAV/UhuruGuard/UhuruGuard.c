@@ -20,6 +20,7 @@ Environment:
 #include "callbacks.h"
 #include "Struct.h"
 #include "communication.h"
+#include "UhuruGuard.h"
 
 #pragma prefast(disable:__WARNING_ENCODE_MEMBER_FUNCTION_POINTER, "Not valid for kernel mode drivers")
 
@@ -152,7 +153,7 @@ CONST FLT_OPERATION_REGISTRATION Callbacks[] = {
 
 	{ IRP_MJ_CLEANUP,
       0,
-      NULL,//PreOperationIrpCleanup,
+      PreOperationIrpCleanup,
       PostOperationIrpCleanup },
 
 #if 0 // TODO - List all of the requests to filter.
@@ -479,7 +480,7 @@ Return Value:
     PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
                   ("UhuruGuard!UhuruGuardInstanceSetup: Entered\n") );
 
-	//DbgPrint("[i] Debug :: UhuruGuard!UhuruGuardInstanceSetup :: New Volume mounted\n");
+	DbgPrint("[i] Debug :: UhuruGuard!UhuruGuardInstanceSetup :: New Volume mounted\n");
 
     return STATUS_SUCCESS;
 }
