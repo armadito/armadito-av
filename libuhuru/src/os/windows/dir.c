@@ -191,7 +191,7 @@ char * GetBinaryDirectory( ) {
 	char * ptr = NULL;
 	int len = 0;
 
-	if (!GetModuleFileNameA(NULL, &filepath, MAX_PATH)) {		
+	if (!GetModuleFileNameA(NULL, (LPSTR)&filepath, MAX_PATH)) {		
 		g_log(NULL, G_LOG_LEVEL_WARNING, "[-] Error :: GetBinaryDirectory!GetModuleFileName() failed :: %d\n",GetLastError());
 		return NULL;
 	}	
