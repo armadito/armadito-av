@@ -54,6 +54,8 @@ static enum uhuru_mod_status mod_fanotify_post_init(struct uhuru_module *module)
 {
   struct fanotify_data *fa_data = (struct fanotify_data *)module->data;
 
+  access_monitor_activate(fa_data->monitor);
+
   return UHURU_MOD_OK;
 }
 
