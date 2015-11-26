@@ -279,6 +279,15 @@ static gboolean access_monitor_activate_cb(GIOChannel *source, GIOCondition cond
 {
   struct access_monitor *m = (struct access_monitor *)data;
   int i;
+  char c;
+
+  if (read(m->activation_pipe[0], &c, 1) < 0 || c != 'A') {
+    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_ERROR, "fanotify: read() in activation callback failed (%s)", strerror(errno));
+
+    return FALSE;
+  }
+
+  g_io_channel_shutdown(source, FALSE, NULL);
 
   for(i = 0; i < m->paths->len; i++) {
     const char *path = (const char *)g_ptr_array_index(m->paths, i);
@@ -291,8 +300,6 @@ static gboolean access_monitor_activate_cb(GIOChannel *source, GIOCondition cond
 
     g_log(G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "fanotify: activated directory %s", path);
   }
-
-  g_io_channel_shutdown(source, FALSE, NULL);
 
   return TRUE;
 }
