@@ -9,7 +9,6 @@ QIcon *ScanWindow::getIcon()
   return new QIcon(":/icons/uhuru_grey.svg");
 }
 
-
 void ScanWindow::construct(ScanModel *model)
 {
   _model = model;
@@ -33,9 +32,12 @@ ScanWindow::ScanWindow(ScanModel *model, QWidget *parent) :
   construct(model);
 }
 
+#if 0
+used by the D-bus interface, but not nautilus extension yet
 ScanWindow::ScanWindow(const QString &path, QWidget *parent) :
     QMainWindow(parent)
 {
   construct(new ScanModel(path));
 }
+#endif
 
