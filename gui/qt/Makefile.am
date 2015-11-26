@@ -29,6 +29,8 @@ uhuru_qt_SOURCES= \
 	utils/stdpaths.h \
 	utils/dbus.cpp \
 	utils/dbus.h \
+	utils/daemon.cpp \
+	utils/daemon.h \
 	utils/ipc.c \
 	utils/ipc.h 
 
@@ -46,6 +48,7 @@ nodist_uhuru_qt_SOURCES= \
 	ui/ui_aboutdialog.h \
 	ui/ui_scanwidget.h \
 	ui/ui_updatedialog.h \
+	utils/moc_daemon.cpp \
 	utils/moc_dbus.cpp \
 	qrc_uhuru.cpp
 
@@ -63,6 +66,7 @@ BUILT_SOURCES= \
 	ui/ui_aboutdialog.h \
 	ui/ui_scanwidget.h \
 	ui/ui_updatedialog.h \
+	utils/moc_daemon.cpp \
 	utils/moc_dbus.cpp \
 	qrc_uhuru.cpp
 

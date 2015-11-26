@@ -76,7 +76,7 @@ static void ipc_handler_info_end(struct ipc_manager *manager, void *data)
 
 void InfoModelThread::run()
 {
-  struct ipc_manager *manager = ipc_manager_new(DEFAULT_SOCKET_PATH);
+  struct ipc_manager *manager = ipc_manager_new(_model->daemonFd());
 
   ipc_manager_add_handler(manager, IPC_MSG_ID_INFO_MODULE, ipc_handler_info_module, _model);
   ipc_manager_add_handler(manager, IPC_MSG_ID_INFO_END, ipc_handler_info_end, _model);
