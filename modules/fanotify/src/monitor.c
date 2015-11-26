@@ -31,10 +31,12 @@ struct access_monitor {
   GPtrArray *paths;
   struct uhuru *uhuru;
   pid_t my_pid;
+  int activation_pipe[2];
   GThreadPool *thread_pool;  
 };
 
 static gboolean access_monitor_cb(GIOChannel *source, GIOCondition condition, gpointer data);
+static gboolean access_monitor_activate_cb(GIOChannel *source, GIOCondition condition, gpointer data);
 
 void scan_file_thread_fun(gpointer data, gpointer user_data);
 
@@ -46,23 +48,31 @@ void path_destroy_notify(gpointer data)
 struct access_monitor *access_monitor_new(struct uhuru *u)
 {
   struct access_monitor *m = g_new(struct access_monitor, 1);
-  GIOChannel *channel;
+  GIOChannel *fanotify_channel, *activate_channel;
 
   m->enable_permission = 0;
 
   m->fanotify_fd = fanotify_init(FAN_CLASS_CONTENT | FAN_CLOEXEC, O_RDONLY | O_CLOEXEC | O_LARGEFILE | O_NOATIME);
 
   if (m->fanotify_fd < 0) {
-    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL, "fanotify: init failed (%s)", strerror(errno));
+    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL, "fanotify: fanotify_init failed (%s)", strerror(errno));
+    g_free(m);
+    return NULL;
+  }
+
+  if (pipe(m->activation_pipe) < 0) {
+    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL, "fanotify: pipe failed (%s)", strerror(errno));
     g_free(m);
     return NULL;
   }
 
   m->paths = g_ptr_array_new_full(10, path_destroy_notify);
 
-  channel = g_io_channel_unix_new(m->fanotify_fd);	
+  fanotify_channel = g_io_channel_unix_new(m->fanotify_fd);	
+  g_io_add_watch(fanotify_channel, G_IO_IN, access_monitor_cb, m);
 
-  g_io_add_watch(channel, G_IO_IN, access_monitor_cb, m);
+  activate_channel = g_io_channel_unix_new(m->activation_pipe[0]);	
+  g_io_add_watch(activate_channel, G_IO_IN, access_monitor_activate_cb, m);
 
   m->uhuru = u;
 
@@ -88,16 +98,19 @@ int access_monitor_add(struct access_monitor *m, const char *path)
 {
   const char *tmp = strdup(path);
 
-  /* move this to activation callback */
-  if (fanotify_mark(m->fanotify_fd, FAN_MARK_ADD | FAN_MARK_MOUNT, FAN_OPEN_PERM, AT_FDCWD, tmp) < 0) {
-    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_ERROR, "fanotify: adding %s failed (%s)", tmp, strerror(errno));
-
-    return -1;
-  }
-
   g_ptr_array_add(m->paths, (gpointer)tmp);
 
   g_log(G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "fanotify: added directory %s", tmp);
+
+  return 0;
+}
+
+int access_monitor_activate(struct access_monitor *m)
+{
+  char c = 'A';
+
+  if (write(m->activation_pipe[1], &c, 1) < 0)
+    return -1;
 
   return 0;
 }
@@ -262,3 +275,24 @@ static gboolean access_monitor_cb(GIOChannel *source, GIOCondition condition, gp
   return TRUE;
 }
 
+static gboolean access_monitor_activate_cb(GIOChannel *source, GIOCondition condition, gpointer data)
+{
+  struct access_monitor *m = (struct access_monitor *)data;
+  int i;
+
+  for(i = 0; i < m->paths->len; i++) {
+    const char *path = (const char *)g_ptr_array_index(m->paths, i);
+
+    if (fanotify_mark(m->fanotify_fd, FAN_MARK_ADD | FAN_MARK_MOUNT, FAN_OPEN_PERM, AT_FDCWD, path) < 0) {
+      g_log(G_LOG_DOMAIN, G_LOG_LEVEL_ERROR, "fanotify: activating %s failed (%s)", path, strerror(errno));
+
+      break;
+    }
+
+    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "fanotify: activated directory %s", path);
+  }
+
+  g_io_channel_shutdown(source, FALSE, NULL);
+
+  return TRUE;
+}
