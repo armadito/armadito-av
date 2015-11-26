@@ -25,7 +25,7 @@ void ScanModelThread::run()
   QByteArray ba = _model->path().toLocal8Bit();
   const char *c_path = ba.data();
 
-  struct ipc_manager *manager = ipc_manager_new(DEFAULT_SOCKET_PATH);
+  struct ipc_manager *manager = ipc_manager_new(_model->daemonFd());
 
   ipc_manager_add_handler(manager, IPC_MSG_ID_SCAN_FILE, ipc_handler_scan_file, _model);
 

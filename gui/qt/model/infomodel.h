@@ -61,13 +61,14 @@ class InfoModel : public QObject {
   Q_OBJECT
 
 public:
-  explicit InfoModel(enum UpdateStatus globalStatus)
-    : _globalStatus(globalStatus) {}
-  explicit InfoModel() : _globalStatus(UPDATE_UNKNOWN) {}
+  explicit InfoModel(int daemonFd, enum UpdateStatus globalStatus = UPDATE_UNKNOWN)
+    : _daemonFd(daemonFd), _globalStatus(globalStatus) {}
+
   ~InfoModel() {}
 
   QVector<ModuleInfo> &moduleInfos() { return _moduleInfos; }
   enum UpdateStatus &globalStatus() { return _globalStatus; }
+  int daemonFd() { return _daemonFd; }
 
   void doUpdate();
 
@@ -82,6 +83,7 @@ private slots:
 private:
   enum UpdateStatus _globalStatus;
   QVector<ModuleInfo> _moduleInfos;
+  int _daemonFd;
 };
 
 class InfoModelThread: public QThread {

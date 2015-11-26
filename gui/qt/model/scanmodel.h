@@ -12,9 +12,10 @@ class ScanModel : public QObject {
   Q_OBJECT
 
 public:
-  explicit ScanModel(const QString &path) : _path(path), _startDate(QDateTime::currentDateTime()), _completed(false) {}
+  explicit ScanModel(int daemonFd, const QString &path) : _daemonFd(daemonFd), _path(path), _startDate(QDateTime::currentDateTime()), _completed(false) {}
   ~ScanModel() {}
 
+  int daemonFd() { return _daemonFd; }
   const QString &path() { return _path; }
   const QDateTime &startDate() { return _startDate; }
   const bool completed() { return _completed; }
@@ -52,6 +53,8 @@ private:
   Value _progress;
 
   ScanReportModel _reportModel;
+
+  int _daemonFd;
 };
 
 class ScanModelThread: public QThread {
