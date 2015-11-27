@@ -78,13 +78,13 @@ static void stderrout_handler(const gchar *log_domain, GLogLevelFlags log_level,
     g_string_append_printf(gstring, "<%s> ", level_str(log_level));
 
   g_string_append(gstring, message);
-  g_string_append (gstring, "\n");
+  g_string_append(gstring, "\n");
 
   string = g_string_free(gstring, FALSE);
 
   fputs(string, stream);
 
-  g_free (string);
+  g_free(string);
 }
 
 static GLogLevelFlags get_log_level_from_str(const char *s_log_level)
