@@ -1,5 +1,5 @@
 #include "libuhuru-config.h"
-
+#include "libuhuru\libcore\log.h"
 #include "os/string.h"
 #include "os/dir.h"
 #include "Windows.h"
@@ -212,7 +212,7 @@ char * GetBinaryDirectory( ) {
 
 	memcpy_s(dirpath, len, filepath, len);
 
-	uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_DEBUG, "[+] Debug :: GetBinaryDirectory :: dirpath = %s\n",dirpath);
+	//uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_DEBUG, "[+] Debug :: GetBinaryDirectory :: dirpath = %s\n",dirpath);
 	
 
 	return dirpath;
