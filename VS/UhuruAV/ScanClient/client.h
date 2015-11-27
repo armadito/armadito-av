@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include <fltUser.h>
 #include <string.h>
+#include <glib.h>
 
 /*Libuhuru*/
 #include <libuhuru-config.h>
