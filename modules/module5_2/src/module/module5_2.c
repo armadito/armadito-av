@@ -19,11 +19,9 @@ static enum uhuru_mod_status module5_2_init(struct uhuru_module *module)
 
 static enum uhuru_mod_status module5_2_post_init(struct uhuru_module *module)
 {
-
-
 #ifndef WIN32
-	/* FIXME: use g_log ??? */
-	fprintf(stderr, "Loading module 5.2 ELF databases from " MODULE5_2_DBDIR "/linux\n");
+  /* FIXME: use g_log ??? */
+  fprintf(stderr, "Loading module 5.2 ELF databases from " MODULE5_2_DBDIR "/linux\n");
 
   if (initDB(MODULE5_2_DBDIR "/linux/database.elfdata", 
 	     MODULE5_2_DBDIR "/linux/db_malicious.zip", 
@@ -32,13 +30,12 @@ static enum uhuru_mod_status module5_2_post_init(struct uhuru_module *module)
 	     MODULE5_2_DBDIR "/linux/tfidf_s.dat") != 0)
     return UHURU_MOD_INIT_ERROR;
 
-
  /* FIXME: use g_log ??? */
   fprintf(stderr, "Module 5.2 ELF databases loaded from " MODULE5_2_DBDIR "/linux\n");
 
 #endif
 
-	 /* FIXME: use g_log ??? */
+  /* FIXME: use g_log ??? */
   fprintf(stderr, "Loading module 5.2 PE databases from " MODULE5_2_DBDIR "/windows\n");
   if (initDatabases(MODULE5_2_DBDIR "/windows/Database_malsain_2.zip",
 		    MODULE5_2_DBDIR "/windows/Database_malsain_1.zip",
@@ -118,6 +115,8 @@ static const char *error_code_str(ERROR_CODE e)
 static enum uhuru_file_status module5_2_scan(struct uhuru_module *module, const char *path, const char *mime_type, char **pmod_report)
 {
   ERROR_CODE e = UH_NULL;
+  const char *virus_name = NULL;
+
   //printf("[i] Debug :: module 5_2_scan :: mime-type = %s\n",mime_type);
 
   // TODO change strcmp by strncmp
@@ -125,16 +124,20 @@ static enum uhuru_file_status module5_2_scan(struct uhuru_module *module, const 
       || !strcmp(mime_type, "application/x-object")
       || !strcmp(mime_type, "application/x-executable")) {	  
     e = analyseElfFile((char *)path);
-  } else if (!strcmp(mime_type, "application/x-dosexec") ) {
+    if (e == UH_MALWARE)
+      virus_name = "Linux.Heuristic.Malware.Generic";
+  } else if (!strcmp(mime_type, "application/x-dosexec") 
+	     || !strcmp(mime_type, "application/x-msdownload")) {
     e = fileAnalysis((char *)path);
-  }else if (!strcmp(mime_type, "application/x-msdownload") ) {
-    e = fileAnalysis((char *)path);
+    if (e == UH_MALWARE)
+      virus_name = "Win.Heuristic.Malware.Generic";
   }
 
-  *pmod_report = os_strdup(error_code_str(e));
-  
   switch(e) {
   case UH_MALWARE:
+    /* even if virus_name is a statically allocated string, it must be returned in a dynamically allocated string */
+    /* because it will be free()d by the calling code */
+    *pmod_report = os_strdup(virus_name);
     return UHURU_MALWARE;
   case UH_NOT_MALWARE:
     return UHURU_CLEAN;

@@ -13,9 +13,10 @@
 #include <string.h>
 
 struct client {
+  struct uhuru *uhuru;
   int sock;
   struct ipc_manager *manager;
-  struct uhuru *uhuru;
+  GMutex lock;
 };
 
 static void ipc_ping_handler(struct ipc_manager *m, void *data)
@@ -33,6 +34,7 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
 {
   struct client *cl = (struct client *)callback_data;
 
+  g_mutex_lock(&cl->lock);
   ipc_manager_msg_send(cl->manager, 
 		       IPC_MSG_ID_SCAN_FILE, 
 		       IPC_STRING_T, report->path, 
@@ -42,6 +44,7 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
 		       IPC_STRING_T, uhuru_action_pretty_str(report->action),
 		       IPC_INT32_T, report->progress,
 		       IPC_NONE_T);
+  g_mutex_unlock(&cl->lock);
 }
 
 static void ipc_scan_handler(struct ipc_manager *m, void *data)
@@ -56,8 +59,8 @@ static void ipc_scan_handler(struct ipc_manager *m, void *data)
 
   ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &path);
 
-  /* scan = uhuru_scan_new(cl->uhuru, 0, path, UHURU_SCAN_THREADED | UHURU_SCAN_RECURSE); */
-  scan = uhuru_scan_new(cl->uhuru, 0, path, UHURU_SCAN_RECURSE);
+  scan = uhuru_scan_new(cl->uhuru, 0, path, UHURU_SCAN_THREADED | UHURU_SCAN_RECURSE);
+  /* scan = uhuru_scan_new(cl->uhuru, 0, path, UHURU_SCAN_RECURSE); */
 
   uhuru_scan_add_callback(scan, scan_callback, cl);
 
@@ -141,13 +144,15 @@ struct client *client_new(int client_sock, struct uhuru *uhuru)
 {
   struct client *cl = (struct client *)malloc(sizeof(struct client));
 
+  cl->uhuru = uhuru;
   cl->sock = client_sock;
   cl->manager = ipc_manager_new(cl->sock);
-  cl->uhuru = uhuru;
 
   ipc_manager_add_handler(cl->manager, IPC_MSG_ID_PING, ipc_ping_handler, cl);
   ipc_manager_add_handler(cl->manager, IPC_MSG_ID_SCAN, ipc_scan_handler, cl);
   ipc_manager_add_handler(cl->manager, IPC_MSG_ID_INFO, ipc_info_handler, cl);
+
+  g_mutex_init(&cl->lock);
 
   return cl;
 }
@@ -155,6 +160,8 @@ struct client *client_new(int client_sock, struct uhuru *uhuru)
 void client_free(struct client *cl)
 {
   ipc_manager_free(cl->manager);
+
+  g_mutex_clear(&cl->lock);
 
   free(cl);
 }
