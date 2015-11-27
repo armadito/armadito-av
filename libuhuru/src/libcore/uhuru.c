@@ -10,7 +10,6 @@
 #include "os/mimetype.h"
 #include "os/string.h"
 #include "os/dir.h"
-#include "os/log.h"
 #ifdef HAVE_ALERT_MODULE
 #include "builtin-modules/alert.h"
 #endif
@@ -55,9 +54,6 @@ struct uhuru *uhuru_open(uhuru_error **error)
   char * modulesdir = NULL;
   char * conffile = "\\uhuru.conf";
   int len = 0;
-
-  log_init("LIBUHURU");
-  log_init(G_LOG_DOMAIN);
 
 #ifdef HAVE_GTHREAD_INIT
   g_thread_init(NULL);
