@@ -16,10 +16,8 @@
 
 #define LOG_NAME "uhuru"
 
-static void stdouterr_handler(enum uhuru_log_domain domain, enum uhuru_log_level log_level, const char *message, void *user_data);
-
 static enum uhuru_log_level current_max_level = UHURU_LOG_LEVEL_ERROR;
-static uhuru_log_handler_t current_handler = stdouterr_handler;
+static uhuru_log_handler_t current_handler = uhuru_log_default_handler;
 static void *current_handler_user_data = NULL;
 
 void uhuru_log(enum uhuru_log_domain domain, enum uhuru_log_level level, const char *format, ...)
@@ -52,7 +50,7 @@ void uhuru_log_set_handler(enum uhuru_log_level max_level, uhuru_log_handler_t h
   if (handler != NULL)
     current_handler = handler;
   else
-    current_handler = stdouterr_handler;
+    current_handler = uhuru_log_default_handler;
 
   current_handler_user_data = user_data;
 }
@@ -76,7 +74,7 @@ static const char *domain_str(enum uhuru_log_domain domain)
   return "";
 }
 
-static const char *level_str(enum uhuru_log_level log_level)
+const char *uhuru_log_level_str(enum uhuru_log_level log_level)
 {
   switch (log_level & G_LOG_LEVEL_MASK) {
   case UHURU_LOG_LEVEL_ERROR:
@@ -94,7 +92,7 @@ static const char *level_str(enum uhuru_log_level log_level)
   return "";
 }
 
-static void stdouterr_handler(enum uhuru_log_domain domain, enum uhuru_log_level log_level, const char *message, void *user_data)
+void uhuru_log_default_handler(enum uhuru_log_domain domain, enum uhuru_log_level log_level, const char *message, void *user_data)
 {
   FILE *stream = get_stream(log_level);
   GString *gstring = g_string_new(NULL);
@@ -103,7 +101,7 @@ static void stdouterr_handler(enum uhuru_log_domain domain, enum uhuru_log_level
   g_string_append_printf(gstring, "%s[%d]: ", LOG_NAME, os_getpid());
 
   if (log_level != UHURU_LOG_LEVEL_NONE)
-    g_string_append_printf(gstring, "<%s> ", level_str(log_level));
+    g_string_append_printf(gstring, "<%s> ", uhuru_log_level_str(log_level));
 
   g_string_append(gstring, message);
   g_string_append(gstring, "\n");

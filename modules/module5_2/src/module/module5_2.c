@@ -20,8 +20,7 @@ static enum uhuru_mod_status module5_2_init(struct uhuru_module *module)
 static enum uhuru_mod_status module5_2_post_init(struct uhuru_module *module)
 {
 #ifndef WIN32
-  /* FIXME: use g_log ??? */
-  fprintf(stderr, "Loading module 5.2 ELF databases from " MODULE5_2_DBDIR "/linux\n");
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, "loading module 5.2 ELF databases from " MODULE5_2_DBDIR "/linux");
 
   if (initDB(MODULE5_2_DBDIR "/linux/database.elfdata", 
 	     MODULE5_2_DBDIR "/linux/db_malicious.zip", 
@@ -30,13 +29,10 @@ static enum uhuru_mod_status module5_2_post_init(struct uhuru_module *module)
 	     MODULE5_2_DBDIR "/linux/tfidf_s.dat") != 0)
     return UHURU_MOD_INIT_ERROR;
 
- /* FIXME: use g_log ??? */
-  fprintf(stderr, "Module 5.2 ELF databases loaded from " MODULE5_2_DBDIR "/linux\n");
-
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, "Module 5.2 ELF databases loaded from " MODULE5_2_DBDIR "/linux");
 #endif
 
-  /* FIXME: use g_log ??? */
-  fprintf(stderr, "Loading module 5.2 PE databases from " MODULE5_2_DBDIR "/windows\n");
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, "loading module 5.2 PE databases from " MODULE5_2_DBDIR "/windows");
   if (initDatabases(MODULE5_2_DBDIR "/windows/Database_malsain_2.zip",
 		    MODULE5_2_DBDIR "/windows/Database_malsain_1.zip",
 		    MODULE5_2_DBDIR "/windows/Database_sain_2.zip",
@@ -47,8 +43,7 @@ static enum uhuru_mod_status module5_2_post_init(struct uhuru_module *module)
 		    MODULE5_2_DBDIR "/windows/DBI_sain.dat") != 0)
     return UHURU_MOD_INIT_ERROR;
 
- /* FIXME: use g_log ??? */
-  fprintf(stderr, "Module 5.2 PE databases loaded\n");
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, "module 5.2 PE databases loaded");
 
   return UHURU_MOD_OK;
 }
@@ -120,6 +115,7 @@ static enum uhuru_file_status module5_2_scan(struct uhuru_module *module, const 
   //printf("[i] Debug :: module 5_2_scan :: mime-type = %s\n",mime_type);
 
   // TODO change strcmp by strncmp
+  // (FD) why????
   if (!strcmp(mime_type, "application/x-sharedlib")
       || !strcmp(mime_type, "application/x-object")
       || !strcmp(mime_type, "application/x-executable")) {	  
