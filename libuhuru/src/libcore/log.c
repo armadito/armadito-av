@@ -5,6 +5,17 @@
 #include <glib.h>
 #include <stdarg.h>
 
+/* should not be there, but for now... */
+#ifdef HAVE_GETPID
+#define os_getpid getpid
+#endif
+#ifdef HAVE__GETPID
+#include <process.h>
+#define os_getpid _getpid
+#endif
+
+#define LOG_NAME "uhuru"
+
 static void stdouterr_handler(enum uhuru_log_domain domain, enum uhuru_log_level log_level, const char *message, void *user_data);
 
 static enum uhuru_log_level current_max_level = UHURU_LOG_LEVEL_ERROR;
@@ -28,31 +39,56 @@ void uhuru_log(enum uhuru_log_domain domain, enum uhuru_log_level level, const c
   va_end(args);
 
   /* call the handler with formated message */
-  message = g_string_free(buffer, FALSE);
+  message = g_string_free(buff, FALSE);
 
-  (*current_handler)(level, message, current_handler_user_data);
+  (*current_handler)(domain, level, message, current_handler_user_data);
 
   g_free(message);
 }
 
 void uhuru_log_set_handler(enum uhuru_log_level max_level, uhuru_log_handler_t handler, void *user_data)
 {
+  current_max_level = max_level;
+  if (handler != NULL)
+    current_handler = handler;
+  else
+    current_handler = stdouterr_handler;
+
+  current_handler_user_data = user_data;
 }
 
 static FILE *get_stream(enum uhuru_log_level log_level)
 {
-  return level & (UHURU_LOG_LEVEL_ERROR | UHURU_LOG_LEVEL_WARNING) ? stderr : stdout;
+  return log_level & (UHURU_LOG_LEVEL_ERROR | UHURU_LOG_LEVEL_WARNING) ? stderr : stdout;
 }
 
 static const char *domain_str(enum uhuru_log_domain domain)
 {
   switch(domain) {
   case UHURU_LOG_LIBUHURU:
-    return "_lib";
+    return "lib";
   case UHURU_LOG_MODULE:
-    return "_module";
+    return "module";
   case UHURU_LOG_SERVICE:
-    return "_service";
+    return "service";
+  }
+
+  return "";
+}
+
+static const char *level_str(enum uhuru_log_level log_level)
+{
+  switch (log_level & G_LOG_LEVEL_MASK) {
+  case UHURU_LOG_LEVEL_ERROR:
+    return "error";
+  case UHURU_LOG_LEVEL_WARNING:
+    return "warning";
+  case UHURU_LOG_LEVEL_INFO:
+    return "info";
+  case UHURU_LOG_LEVEL_DEBUG:
+    return "debug";
+  case UHURU_LOG_LEVEL_NONE:
+    return "";
   }
 
   return "";
@@ -64,9 +100,9 @@ static void stdouterr_handler(enum uhuru_log_domain domain, enum uhuru_log_level
   GString *gstring = g_string_new(NULL);
   gchar *string;
 
-  g_string_append_printf(gstring, "%s[%d]: ", domain_str(domain), os_getpid());
+  g_string_append_printf(gstring, "%s[%d]: ", LOG_NAME, os_getpid());
 
-  if (log_level < (1 << G_LOG_LEVEL_USER_SHIFT))
+  if (log_level != UHURU_LOG_LEVEL_NONE)
     g_string_append_printf(gstring, "<%s> ", level_str(log_level));
 
   g_string_append(gstring, message);
