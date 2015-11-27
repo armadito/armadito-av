@@ -649,6 +649,12 @@ int main(int argc, char ** argv) {
 	USER_SCAN_CONTEXT userScanCtx = {0};
 	UCHAR c;
 	uhuru_error *err = NULL;
+	//GLogLevelFlags flags;
+  
+	//flags = G_LOG_LEVEL_ERROR|G_LOG_LEVEL_WARNING|G_LOG_LEVEL_INFO|G_LOG_LEVEL_DEBUG;
+
+	// set log handler
+	//log_init((char*)G_LOG_DOMAIN);
 	
 	uhuru = uhuru_open(&err);
 	if (uhuru == NULL){
