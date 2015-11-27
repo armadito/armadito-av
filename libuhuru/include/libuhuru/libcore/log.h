@@ -75,6 +75,10 @@ typedef void (*uhuru_log_handler_t)(enum uhuru_log_domain domain, enum uhuru_log
  */
 void uhuru_log_set_handler(enum uhuru_log_level max_level, uhuru_log_handler_t handler, void *user_data);
 
+const char *uhuru_log_level_str(enum uhuru_log_level log_level);
+
+void uhuru_log_default_handler(enum uhuru_log_domain domain, enum uhuru_log_level log_level, const char *message, void *user_data);
+
 #ifdef __cplusplus
 }
 #endif
