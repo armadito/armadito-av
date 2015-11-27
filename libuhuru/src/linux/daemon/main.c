@@ -150,8 +150,7 @@ int main(int argc, const char **argv)
 
   log_init(opts.s_log_level, !opts.no_daemon);
 
-  /* this curious log level is used so that the log always appears... */
-  g_log(G_LOG_DOMAIN, (1 << G_LOG_LEVEL_USER_SHIFT), "starting %s%s", argv[0], opts.no_daemon ? "" : " in daemon mode");
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_NONE, "starting %s%s", argv[0], opts.no_daemon ? "" : " in daemon mode");
 
   server = server_new(server_sock);
 

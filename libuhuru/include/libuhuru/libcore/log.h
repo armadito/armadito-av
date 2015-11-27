@@ -39,7 +39,7 @@ enum uhuru_log_level {
  * 
  */
 enum uhuru_log_domain {
-  UHURU_LOG_LIBUHURU,          /*!< messages from the library                     */
+  UHURU_LOG_LIB,               /*!< messages from the library                     */
   UHURU_LOG_MODULE,            /*!< messages from the modules                     */
   UHURU_LOG_SERVICE,           /*!< messages from the service or daemon           */
 };
