@@ -25,7 +25,7 @@ void uhuru_error_set(uhuru_error **error, int error_code, const char *error_mess
 
   /* same check as in glib: if error location is already set, do not overwrite it!!! */
   if (*error != NULL) {
-    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "uhuru_error set over the top of a previous uhuru_error or uninitialized memory.\n\
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "uhuru_error set over the top of a previous uhuru_error or uninitialized memory.\n\
 This indicates a bug in someone's code. You must ensure an error is NULL before it's set.\n\
 The overwriting error message was: %s", error_message);
 

@@ -1,3 +1,5 @@
+#include <libuhuru/core.h>
+
 #include "libuhuru-config.h"
 
 #include "os/dir.h"
@@ -45,7 +47,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
     
   d = opendir(path);
   if (d == NULL) {
-    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "error opening directory %s (%s)", path, strerror(errno));
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "error opening directory %s (%s)", path, strerror(errno));
 
     (*dirent_cb)(path, FILE_FLAG_IS_ERROR, errno, data);
     
@@ -71,7 +73,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 	break;
 
       saved_errno = errno;
-      g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "error reading directory entry in directory %s (error %s)", path, strerror(saved_errno));
+      uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "error reading directory entry in directory %s (error %s)", path, strerror(saved_errno));
      
       (*dirent_cb)(path, FILE_FLAG_IS_ERROR, saved_errno, data);
 

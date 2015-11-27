@@ -63,7 +63,7 @@ static FILE *get_stream(enum uhuru_log_level log_level)
 static const char *domain_str(enum uhuru_log_domain domain)
 {
   switch(domain) {
-  case UHURU_LOG_LIBUHURU:
+  case UHURU_LOG_LIB:
     return "lib";
   case UHURU_LOG_MODULE:
     return "module";
@@ -76,7 +76,7 @@ static const char *domain_str(enum uhuru_log_domain domain)
 
 const char *uhuru_log_level_str(enum uhuru_log_level log_level)
 {
-  switch (log_level & G_LOG_LEVEL_MASK) {
+  switch (log_level) {
   case UHURU_LOG_LEVEL_ERROR:
     return "error";
   case UHURU_LOG_LEVEL_WARNING:
