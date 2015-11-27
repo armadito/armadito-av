@@ -87,6 +87,9 @@
     <ClInclude Include="..\..\..\libuhuru\src\os\string.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\os\log.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\libuhuru\src\libcore\action.c">
@@ -133,6 +136,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\libuhuru\src\libcore\error.c">
       <Filter>Source Files\libcore</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\os\windows\log.c">
+      <Filter>Source Files\os\windows</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
