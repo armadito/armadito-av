@@ -42,11 +42,11 @@ static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpo
   client_sock = accept(server->listen_sock, NULL, NULL);
 
   if (client_sock < 0) {
-    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL, "accept() failed: errno = %d", errno);
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "accept() failed: errno = %d", errno);
     return FALSE;
   }
 
-  g_log(G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "accepted client connection: fd = %d", client_sock);
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "accepted client connection: fd = %d", client_sock);
 
   client = client_new(client_sock, server->uhuru);
 

@@ -112,14 +112,14 @@ int ipc_manager_get_arg_at(struct ipc_manager *manager, int index, ipc_type_id_t
 
   /* check index range */
   if (index >= ipc_manager_get_argc(manager)) {
-    g_log(NULL, G_LOG_LEVEL_ERROR, "IPC: argument index out of range %d >= %d ", index, ipc_manager_get_argc(manager));
+    g_log(NULL, UHURU_LOG_LEVEL_ERROR, "IPC: argument index out of range %d >= %d ", index, ipc_manager_get_argc(manager));
     return -1;
   }
 
   /* check if wanted type matches type at 'index' in current arguments */
   argv = ipc_manager_get_argv(manager);
   if (argv[index].type != type) {
-    g_log(NULL, G_LOG_LEVEL_ERROR, "IPC: invalid argument type %d != %d ", type, argv[index].type);
+    g_log(NULL, UHURU_LOG_LEVEL_ERROR, "IPC: invalid argument type %d != %d ", type, argv[index].type);
     return -1;
   }
 
@@ -141,13 +141,13 @@ int ipc_manager_add_handler(struct ipc_manager *manager, ipc_msg_id_t msg_id, ip
 {
   /* check msg_id in range */
   if (msg_id < IPC_MSG_ID_FIRST || msg_id > IPC_MSG_ID_LAST) {
-    g_log(NULL, G_LOG_LEVEL_ERROR, "IPC: cannot add handler for msg_id %d: out of range %d - %d ", msg_id, IPC_MSG_ID_FIRST, IPC_MSG_ID_LAST);
+    g_log(NULL, UHURU_LOG_LEVEL_ERROR, "IPC: cannot add handler for msg_id %d: out of range %d - %d ", msg_id, IPC_MSG_ID_FIRST, IPC_MSG_ID_LAST);
     return -1;
   }
 
   /* is handler already set for this message id? yes => error */
   if (manager->handlers[msg_id].handler != NULL) {
-    g_log(NULL, G_LOG_LEVEL_ERROR, "IPC: cannot add handler for msg_id %d: handler already set", msg_id);
+    g_log(NULL, UHURU_LOG_LEVEL_ERROR, "IPC: cannot add handler for msg_id %d: handler already set", msg_id);
     return -1;
   }
 
@@ -186,19 +186,19 @@ static void ipc_manager_debug(struct ipc_manager *m)
   int i;
   struct ipc_arg *argv;
 
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "IPC: msg_id %d argc %d", m->msg_id, ipc_manager_get_argc(m));
+  g_log(NULL, UHURU_LOG_LEVEL_DEBUG, "IPC: msg_id %d argc %d", m->msg_id, ipc_manager_get_argc(m));
 
   argv = ipc_manager_get_argv(m);
   for (i = 0; i < ipc_manager_get_argc(m); i++) {
     switch(argv[i].type) {
     case IPC_TYPE_INT32:
-      g_log(NULL, G_LOG_LEVEL_DEBUG, "IPC: arg[%d] = (int32)%d", i, argv[i].value.v_int32);
+      g_log(NULL, UHURU_LOG_LEVEL_DEBUG, "IPC: arg[%d] = (int32)%d", i, argv[i].value.v_int32);
       break;
     case IPC_TYPE_STRING:
-      g_log(NULL, G_LOG_LEVEL_DEBUG, "IPC: arg[%d] = (char *)%s", i, argv[i].value.v_str);
+      g_log(NULL, UHURU_LOG_LEVEL_DEBUG, "IPC: arg[%d] = (char *)%s", i, argv[i].value.v_str);
       break;
     default:
-      g_log(NULL, G_LOG_LEVEL_DEBUG, "IPC: arg[%d] = ???", i);
+      g_log(NULL, UHURU_LOG_LEVEL_DEBUG, "IPC: arg[%d] = ???", i);
       break;
     }
   }
@@ -213,7 +213,7 @@ static void ipc_manager_call_handler(struct ipc_manager *m)
 
   /* check range of message ID; should probably be done inside decoding automaton */
   if (m->msg_id < IPC_MSG_ID_FIRST || m->msg_id > IPC_MSG_ID_LAST) {
-    g_log(NULL, G_LOG_LEVEL_WARNING, "IPC: received msg_id %d out of range %d - %d ", m->msg_id, IPC_MSG_ID_FIRST, IPC_MSG_ID_LAST);
+    g_log(NULL, UHURU_LOG_LEVEL_WARNING, "IPC: received msg_id %d out of range %d - %d ", m->msg_id, IPC_MSG_ID_FIRST, IPC_MSG_ID_LAST);
     return;
   }
 
@@ -289,7 +289,7 @@ static void ipc_manager_input_char(struct ipc_manager *m, unsigned char c)
       m->state = STATE_EXPECTING_MSG_ID;
       break;
     default:
-      g_log(NULL, G_LOG_LEVEL_ERROR, "error in ipc_manager_receive: invalid type msg_id %c %d", c, c);
+      g_log(NULL, UHURU_LOG_LEVEL_ERROR, "error in ipc_manager_receive: invalid type msg_id %c %d", c, c);
       break;
     }
     break;
@@ -320,7 +320,7 @@ int ipc_manager_receive(struct ipc_manager *manager)
   n_read = os_read(manager->io_fd, manager->input_buffer, manager->input_buffer_size);
 
   if (n_read == -1) {
-    g_log(NULL, G_LOG_LEVEL_ERROR, "error in ipc_manager_receive: %s", os_strerror(errno));
+    g_log(NULL, UHURU_LOG_LEVEL_ERROR, "error in ipc_manager_receive: %s", os_strerror(errno));
   }
 
   if (n_read < 0)
@@ -344,7 +344,7 @@ static size_t ipc_manager_write(struct ipc_manager *manager, char *buffer, size_
     int w = os_write(manager->io_fd, buffer, to_write);
 
     if (w < 0) {
-      g_log(NULL, G_LOG_LEVEL_ERROR, "error in ipc_manager_write_buffer: %s", os_strerror(errno));
+      g_log(NULL, UHURU_LOG_LEVEL_ERROR, "error in ipc_manager_write_buffer: %s", os_strerror(errno));
       return -1;
     }
 
