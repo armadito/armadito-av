@@ -92,7 +92,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 
 	// Check parameters
 	if (path == NULL || dirent_cb == NULL) {
-		g_log(NULL, G_LOG_LEVEL_WARNING, "error :: NULL parameter in function os_dir_map()");
+		g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "Error :: NULL parameter in function os_dir_map()");
 		return;
 	}
 	
@@ -101,7 +101,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 
 	// Check if it is a directory
 	if (!(GetFileAttributesA(path) & FILE_ATTRIBUTE_DIRECTORY)) {
-		g_log(NULL, G_LOG_LEVEL_WARNING, "Warning :: os_dir_map() :: (%s) is not a directory. ", path);
+		g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "Warning :: os_dir_map() :: (%s) is not a directory. ", path);
 		return;
 	}
 
@@ -120,7 +120,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 
 	fh = FindFirstFile(sPath, &fdata);
 	if (fh == INVALID_HANDLE_VALUE) {
-		g_log(NULL, G_LOG_LEVEL_WARNING, "warning :: os_dir_map() :: FindFirstFileA() failed ::  (%s) :: [%s]", os_strerror(errno),sPath);
+		g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "Warning :: os_dir_map() :: FindFirstFileA() failed ::  (%s) :: [%s]", os_strerror(errno),sPath);
 		return;
 	}
 
@@ -192,14 +192,14 @@ char * GetBinaryDirectory( ) {
 	int len = 0;
 
 	if (!GetModuleFileNameA(NULL, (LPSTR)&filepath, MAX_PATH)) {		
-		g_log(NULL, G_LOG_LEVEL_WARNING, "[-] Error :: GetBinaryDirectory!GetModuleFileName() failed :: %d\n",GetLastError());
+		g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "[-] Error :: GetBinaryDirectory!GetModuleFileName() failed :: %d\n",GetLastError());
 		return NULL;
 	}	
 
 	// get the file name from the complete file path
 	ptr = strrchr(filepath,'\\');
 	if (ptr == NULL) {		
-		g_log(NULL, G_LOG_LEVEL_WARNING, "[-] Error :: GetBinaryDirectory!strrchr() failed :: backslash not found in the path.\n");
+		g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "[-] Error :: GetBinaryDirectory!strrchr() failed :: backslash not found in the path :: %s.\n",filepath);
 		return NULL;
 	}
 	
@@ -212,7 +212,8 @@ char * GetBinaryDirectory( ) {
 
 	memcpy_s(dirpath, len, filepath, len);
 
-	//g_log(NULL, G_LOG_LEVEL_WARNING, "[+] Debug :: GetBinaryDirectory :: dirpath = %s\n",dirpath);
+	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "[+] Debug :: GetBinaryDirectory :: dirpath = %s\n",dirpath);
+	
 
 	return dirpath;
 }
