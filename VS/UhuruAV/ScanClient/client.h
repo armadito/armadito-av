@@ -10,6 +10,8 @@
 /*Libuhuru*/
 #include <libuhuru-config.h>
 #include <libuhuru/core.h>
+#include "uhEventProvider.h"
+
 
 
 #define SCAN_PORT_NAME L"\\UhuruPortScanFilter"

@@ -8,7 +8,7 @@ SeverityNames=(Success=0x0:STATUS_SEVERITY_SUCCESS
                Warning=0x2:STATUS_SEVERITY_WARNING
                Error=0x3:STATUS_SEVERITY_ERROR
               )
-			  
+
 LanguageNames=(English=0x409:MSG00409)
 
 ; // The following are the categories of events.
