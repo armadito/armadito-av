@@ -1,5 +1,5 @@
 /**
- * \file scan.h
+ * \file error.h
  *
  * \brief definition of error handling
  *

@@ -10,6 +10,7 @@ confparser.c \
 confparser.h \
 error.c \
 info.c \
+log.c \
 module.c \
 modulep.h \
 report.c \
