@@ -8,6 +8,10 @@
 #define SVCNAME TEXT("UhuruSvc")
 #define SVCDISPLAY TEXT("Uhuru Scan Service")
 
+#define ROOT_KEY_PATH "SYSTEM\\CurrentControlSet\\services\\eventlog\\Application"
+#define APPS_KEY_NAME "UhuruAV"
+#define APP_DLL_PATH "\%systemRoot\%\\System32\\uhEventProvider.dll"
+
 
 int ServiceInstall( );
 int ServiceRemove( );
@@ -19,6 +23,9 @@ void WINAPI ServiceMain(int argc, char ** argv);
 BOOLEAN ServiceLaunchAction( );
 void ServiceLaunch( );
 void ServiceStop( );
+
+int RegistryKeysInitialization( );
+int DeleteRegistryKeys( );
 
 //
 int initClamavDB( );
