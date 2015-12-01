@@ -21,6 +21,8 @@
 #define HAVE__CLOSE
 #undef HAVE_LSEEK
 #define HAVE__LSEEK
+#undef HAVE_GETPID
+#define HAVE__GETPID
 /* windows does not have realpath() */
 #undef HAVE_REALPATH
 

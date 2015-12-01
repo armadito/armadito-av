@@ -8,4 +8,5 @@ libcore/error.h \
 libcore/handle.h \
 libcore/info.h \
 libcore/module.h \
-libcore/scan.h 
+libcore/scan.h \
+libcore/log.h 

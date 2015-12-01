@@ -1,17 +1,20 @@
 #include "systray.h"
 #include "utils/stdpaths.h"
+#include "utils/daemon.h"
 #include "model/scanmodel.h"
 #include "model/infomodel.h"
 #include "scanwindow.h"
 #include "aboutdialog.h"
 #include "updatedialog.h"
 
+#include <QObject>
 #include <QtGui>
 #include <QPainter>
 #include <QPixmap>
 #include <QSvgRenderer>
 #include <QGraphicsColorizeEffect>
 #include <QFileDialog>
+#include <QMessageBox>
 #include <iostream>
 #include <stdlib.h>
 
@@ -65,6 +68,15 @@ void Systray::createTrayIcon()
   trayIcon->setIcon(*getIcon());
 }
 
+static void popUpCannotConnectToServer()
+{
+  QMessageBox msgBox;
+
+  msgBox.setText(QObject::tr("Cannot connect to Uhuru scan daemon"));
+  msgBox.setIcon(QMessageBox::Critical);
+  msgBox.exec();
+}
+
 void Systray::addRecentScan(ScanModel *model)
 {
   RecentScanAction *action = new RecentScanAction(model->startDate().toString(Qt::DefaultLocaleShortDate), this, model);
@@ -74,11 +86,26 @@ void Systray::addRecentScan(ScanModel *model)
   connect(action, SIGNAL(triggered()), action, SLOT(showScan()));
 }
 
-void Systray::scan(const QString &path)
+void Systray::scan()
 {
-  std::cerr << "scanning " << path.toStdString().c_str() << "\n";
+  DaemonConnection conn;
+  int ioFd;
 
-  ScanModel *model = new ScanModel(path);
+  ioFd = conn.connect();
+
+  if (ioFd < 0) {
+    popUpCannotConnectToServer();
+    return;
+  }
+
+  QString fileName = "";
+
+  fileName = QFileDialog::getExistingDirectory(0, tr("Scan Directory"), "", 0);
+
+  if(fileName.isNull())
+    return;
+
+  ScanModel *model = new ScanModel(ioFd, fileName);
   ScanWindow *w = new ScanWindow(model);
   w->show();
   w->raise();
@@ -89,19 +116,19 @@ void Systray::scan(const QString &path)
 #endif
 }
 
-void Systray::scan()
-{
-  QString fileName = "";
-
-  fileName = QFileDialog::getExistingDirectory(0, tr("Scan Directory"), "", 0);
-
-  if(!fileName.isNull())
-    scan(fileName);
-}
-
 void Systray::update()
 {
-  InfoModel *model = new InfoModel();
+  DaemonConnection conn;
+  int ioFd;
+
+  ioFd = conn.connect();
+
+  if (ioFd < 0) {
+    popUpCannotConnectToServer();
+    return;
+  }
+
+  InfoModel *model = new InfoModel(ioFd);
   UpdateDialog *d = new UpdateDialog(model);
 
   d->show();

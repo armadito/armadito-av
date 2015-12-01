@@ -44,9 +44,8 @@ static enum uhuru_mod_status mod_fanotify_conf_set_enable_on_access(struct uhuru
 {
   struct fanotify_data *fa_data = (struct fanotify_data *)module->data;
 
-  if (fa_data->monitor != NULL) {
+  if (fa_data->monitor != NULL)
     access_monitor_enable_permission(fa_data->monitor, atoi(argv[0]));
-  }
 
   return UHURU_MOD_OK;
 }
@@ -54,6 +53,8 @@ static enum uhuru_mod_status mod_fanotify_conf_set_enable_on_access(struct uhuru
 static enum uhuru_mod_status mod_fanotify_post_init(struct uhuru_module *module)
 {
   struct fanotify_data *fa_data = (struct fanotify_data *)module->data;
+
+  access_monitor_activate(fa_data->monitor);
 
   return UHURU_MOD_OK;
 }

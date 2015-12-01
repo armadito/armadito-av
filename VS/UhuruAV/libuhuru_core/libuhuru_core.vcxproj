@@ -79,6 +79,7 @@
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\core.h" />
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\handle.h" />
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\info.h" />
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\log.h" />
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\module.h" />
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\scan.h" />
     <ClInclude Include="..\..\..\libuhuru\src\libcore\builtin-modules\mimetypemod.h" />
@@ -101,6 +102,7 @@
     <ClCompile Include="..\..\..\libuhuru\src\libcore\confparser.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\error.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\info.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\log.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\module.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\report.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\scan.c" />

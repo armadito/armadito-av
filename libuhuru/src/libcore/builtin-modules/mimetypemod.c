@@ -14,7 +14,7 @@ static enum uhuru_mod_status mimetype_conf_mime_type(struct uhuru_module *module
   enum uhuru_mod_status ret = UHURU_MOD_OK;
 
   if (argv[0] == NULL || argv[1] == NULL) {
-    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "mime-type: invalid configuration directive, not enough arguments");
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "mime-type: invalid configuration directive, not enough arguments");
     return UHURU_MOD_CONF_ERROR;
   }
 
@@ -24,7 +24,7 @@ static enum uhuru_mod_status mimetype_conf_mime_type(struct uhuru_module *module
     struct uhuru_module *mod = uhuru_get_module_by_name(module->uhuru, *argv);
     
     if (mod == NULL) {
-      g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "mime-type: no module '%s' for MIME type '%s'", *argv, mime_type);
+      uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "mime-type: no module '%s' for MIME type '%s'", *argv, mime_type);
       ret = UHURU_MOD_CONF_ERROR;
       continue;
     }
