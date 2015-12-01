@@ -29,6 +29,7 @@ AC_CHECK_FUNCS(read)
 AC_CHECK_FUNCS(write)
 AC_CHECK_FUNCS(close)
 AC_CHECK_FUNCS(lseek)
+AC_CHECK_FUNCS(getpid)
 AC_CHECK_FUNCS(strerror)
 
 # check for debug

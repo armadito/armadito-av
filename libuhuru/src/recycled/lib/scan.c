@@ -103,7 +103,7 @@ static enum uhuru_file_status local_scan_apply_modules(const char *path, const c
 
 #if 0
 #ifdef DEBUG
-    g_log(NULL, G_LOG_LEVEL_DEBUG, "module %s: scanning %s -> %s", mod->name, path, uhuru_file_status_str(mod_status));
+    uhuru_log(, UHURU_LOG_LEVEL_DEBUG, "module %s: scanning %s -> %s", mod->name, path, uhuru_file_status_str(mod_status));
 #endif
 #endif
 
@@ -127,7 +127,7 @@ static void local_scan_file(struct uhuru_scan *scan, const char *path)
   struct uhuru_module **modules;
   const char *mime_type;
 
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "local_scan_file - %s", path);
+  uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_DEBUG, "local_scan_file - %s", path);
 
   uhuru_report_init(&report, path);
 
@@ -162,7 +162,7 @@ static void local_scan_entry(const char *full_path, enum os_file_flag flags, int
     struct uhuru_report report;
 
     uhuru_report_init(&report, full_path);
-    g_log(NULL, G_LOG_LEVEL_WARNING, "local_scan_entry: Error - %s", full_path);
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "local_scan_entry: Error - %s", full_path);
 
     report.status = UHURU_IERROR;
     report.mod_report = os_strdup(os_strerror(entry_errno));
@@ -263,16 +263,16 @@ static void remote_scan_handler_scan_end(struct ipc_manager *m, void *data)
   struct uhuru_scan *scan = (struct uhuru_scan *)data;
 
 #ifdef DEBUG
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "remote scan end");
+  g_log(NULL, UHURU_LOG_LEVEL_DEBUG, "remote scan end");
 #endif
   
 #if 0
 #ifdef DEBUG
-  g_log(NULL, G_LOG_LEVEL_DEBUG, "remote scan end, closing socket %d", scan->remote.connect_fd);
+  g_log(NULL, UHURU_LOG_LEVEL_DEBUG, "remote scan end, closing socket %d", scan->remote.connect_fd);
 #endif
   
   if (close(scan->remote.connect_fd) < 0) {
-    g_log(NULL, G_LOG_LEVEL_WARNING, "closing socket %d failed (%s)", scan->remote.connect_fd, os_strerror(errno));
+    g_log(NULL, UHURU_LOG_LEVEL_WARNING, "closing socket %d failed (%s)", scan->remote.connect_fd, os_strerror(errno));
   }
 
   scan->remote.connect_fd = -1;
@@ -361,7 +361,7 @@ static void uhuru_scan_call_callbacks(struct uhuru_scan *scan, struct uhuru_repo
 int uhuru_scan_get_poll_fd(struct uhuru_scan *scan)
 {
   if (!scan->is_remote) {
-    g_log(NULL, G_LOG_LEVEL_ERROR, "cannot call uhuru_scan_get_poll_fd() for a local scan");
+    g_log(NULL, UHURU_LOG_LEVEL_ERROR, "cannot call uhuru_scan_get_poll_fd() for a local scan");
     
     return -1;
   }
