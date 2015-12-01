@@ -1,5 +1,5 @@
 #include "libuhuru-config.h"
-
+#include "libuhuru/libcore/log.h"
 #include "os/mimetype.h"
 #include "os/string.h"
 #include <glib.h>
