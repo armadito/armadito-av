@@ -13,3 +13,5 @@ uhuru_info_to_stdout
 uhuru_file_status_pretty_str
 uhuru_action_pretty_str
 uhuru_report_init
+uhuru_log_set_handler
+uhuru_log
