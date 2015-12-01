@@ -345,6 +345,10 @@
     <FilesToPackage Include="D:\Novit\uhuru-av\libuhuru\conf\uhuru.conf" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
       <PackageRelativeDirectory>conf</PackageRelativeDirectory>
     </FilesToPackage>
+    <FilesToPackage Include="D:\Novit\uhuru-av\libuhuru\src\windows\service\MessageText\uhEventProvider.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
+      <PackageRelativeDirectory>
+      </PackageRelativeDirectory>
+    </FilesToPackage>
     <FilesToPackage Include="D:\Novit\uhuru-av\VS\UhuruAV\Debug\clamav.dll" Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
       <PackageRelativeDirectory>modules</PackageRelativeDirectory>
     </FilesToPackage>
