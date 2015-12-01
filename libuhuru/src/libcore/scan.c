@@ -139,8 +139,8 @@ static enum uhuru_file_status scan_apply_modules(const char *path, const char *m
     enum uhuru_file_status mod_status;
     char *mod_report = NULL;
 
-	// Added by ulrich for debug.	
-	//printf("[ii] Debug :: Applying module %s :: report = %d\n",mod->name,report);
+    // Added by ulrich for debug.	
+    //printf("[ii] Debug :: Applying module %s :: report = %d\n",mod->name,report);
 
     /* if module status is not OK, don't call it */
     if (mod->status != UHURU_MOD_OK)
@@ -411,7 +411,7 @@ enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path, 
 
   // Initialize the scan report structure.
   if (report != NULL)
-	  uhuru_report_init(report, 1, path, REPORT_PROGRESS_UNKNOWN);
+    uhuru_report_init(report, 1, path, REPORT_PROGRESS_UNKNOWN);
 
   /* find the mime type, as in scan_file fun */
   mime_type = os_mime_type_guess(path);
