@@ -19,8 +19,8 @@ extern "C" {
  * \brief the log level
  *
  * The log level is used to differentiate logged messages. 
- * A current log level allows to select dynamically which messages are displayed, 
- * from just error messages up to all debug messages.
+ * The log facility maintains a 'current log level', which allows to select dynamically 
+ * which messages are displayed, from just error messages up to all debug messages.
  * A special level, LOG_LEVEL_NONE, is always displayed, independently of the 
  * current log level.
  * 
@@ -64,7 +64,8 @@ typedef void (*uhuru_log_handler_t)(enum uhuru_log_domain domain, enum uhuru_log
  * \fn void uhuru_log_set_handler(enum uhuru_log_level max_level, uhuru_log_handler_t handler, void *user_data);
  * \brief set a log handler
  *
- * Register a log handler for the log levels smaller than max_level, i.e. if max_level is 
+ * Register a log handler and set the current log level. 
+ * Only log levels smaller than max_level will be displayed, for example if max_level is 
  * UHURU_LOG_LEVEL_WARNING, only calls to uhuru_log with a log level of ERROR or WARNING will
  * output a message
  *
