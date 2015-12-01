@@ -85,14 +85,14 @@ static module_load(const char *filename, struct uhuru_module **pmodule, uhuru_er
   if (!g_module_symbol(g_mod, "module", (gpointer *)&mod_loaded)) {
     uhuru_error_set(error, UHURU_ERROR_MODULE_SYMBOL_NOT_FOUND, "symbol 'module' not found in file");
 
-    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "symbol %s not found in file %s", "module", filename);
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "symbol %s not found in file %s", "module", filename);
 
     *pmodule = NULL;
 
     return UHURU_ERROR_MODULE_SYMBOL_NOT_FOUND;
   }
 
-  g_log(G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "module %s loaded from file %s", mod_loaded->name, filename);
+  uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_DEBUG, "module %s loaded from file %s", mod_loaded->name, filename);
 
   *pmodule = mod_loaded;
 
@@ -180,7 +180,7 @@ static int module_init(struct uhuru_module *mod, uhuru_error **error)
   /* everything's ok */
   if (mod->status != UHURU_MOD_OK) {
     /* module init failed, set error and return NULL */
-    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "initialization error for module '%s'", mod->name);
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "initialization error for module '%s'", mod->name);
 
     uhuru_error_set(error, UHURU_ERROR_MODULE_INIT_FAILED, "initialization error for module");
 
@@ -203,7 +203,7 @@ static int module_post_init(struct uhuru_module *mod, uhuru_error **error)
   mod->status = (*mod->post_init_fun)(mod);
 
   if (mod->status != UHURU_MOD_OK) {
-    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "post_init error for module '%s'", mod->name);
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "post_init error for module '%s'", mod->name);
 
     uhuru_error_set(error, UHURU_ERROR_MODULE_POST_INIT_FAILED, "post_init error for module");
 
@@ -229,7 +229,7 @@ static int module_close(struct uhuru_module *mod, uhuru_error **error)
 
   /* if close failed, return an error */
   if (mod->status != UHURU_MOD_OK) {
-    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "close error for module '%s'", mod->name);
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "close error for module '%s'", mod->name);
 
     uhuru_error_set(error, UHURU_ERROR_MODULE_CLOSE_FAILED, "close error for module");
 

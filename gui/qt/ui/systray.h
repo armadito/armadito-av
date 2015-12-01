@@ -19,7 +19,6 @@ public:
   void addRecentScan(ScanModel *model);
 
 public slots:
-  void scan(const QString &path);
   void scan();
   void update();
   void about();

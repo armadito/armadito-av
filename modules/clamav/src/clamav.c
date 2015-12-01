@@ -65,7 +65,7 @@ static enum uhuru_mod_status clamav_init(struct uhuru_module *module)
   int ret;
 
   if ((ret = cl_init(CL_INIT_DEFAULT)) != CL_SUCCESS) {
-    fprintf(stderr, "ClamAV initialization failed: %s\n", cl_strerror(ret));
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "ClamAV initialization failed: %s", cl_strerror(ret));
     return UHURU_MOD_INIT_ERROR;
   }
 
@@ -75,7 +75,7 @@ static enum uhuru_mod_status clamav_init(struct uhuru_module *module)
   cl_data->clamav_engine = NULL;
 
   if(!(cl_data->clamav_engine = cl_engine_new())) {
-    fprintf(stderr, "ClamAV: can't create new engine\n");
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "ClamAV: can't create new engine");
     return UHURU_MOD_INIT_ERROR;
   }
 
@@ -137,22 +137,22 @@ static enum uhuru_mod_status clamav_post_init(struct uhuru_module *module)
   unsigned int signature_count = 0;
 
   if ((ret = cl_load(cl_data->db_dir, cl_data->clamav_engine, &signature_count, CL_DB_STDOPT)) != CL_SUCCESS) {
-    fprintf(stderr, "ClamAV: error loading databases: %s\n", cl_strerror(ret));
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "ClamAV: error loading databases: %s", cl_strerror(ret));
     cl_engine_free(cl_data->clamav_engine);
     cl_data->clamav_engine = NULL;
     return UHURU_MOD_INIT_ERROR;
   }
 
-  fprintf(stderr, "ClamAV database loaded from %s, %d signatures\n", cl_data->db_dir, signature_count);
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, "ClamAV database loaded from %s, %d signatures", cl_data->db_dir, signature_count);
 
   if ((ret = cl_engine_compile(cl_data->clamav_engine)) != CL_SUCCESS) {
-    fprintf(stderr, "ClamAV: engine compilation error: %s\n", cl_strerror(ret));;
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "ClamAV: engine compilation error: %s", cl_strerror(ret));;
     cl_engine_free(cl_data->clamav_engine);
     cl_data->clamav_engine = NULL;
     return UHURU_MOD_INIT_ERROR;
   }
 
-  fprintf(stderr, "ClamAV is initialized\n");
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, "ClamAV is initialized");
 
   return UHURU_MOD_OK;
 }
@@ -184,7 +184,7 @@ static enum uhuru_mod_status clamav_close(struct uhuru_module *module)
   int ret;
 
   if ((ret = cl_engine_free(cl_data->clamav_engine)) != CL_SUCCESS) {
-    fprintf(stderr, "ClamAV: can't free engine\n");
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "ClamAV: can't free engine");
     return UHURU_MOD_CLOSE_ERROR;
   }
 

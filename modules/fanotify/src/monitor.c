@@ -31,10 +31,12 @@ struct access_monitor {
   GPtrArray *paths;
   struct uhuru *uhuru;
   pid_t my_pid;
+  int activation_pipe[2];
   GThreadPool *thread_pool;  
 };
 
 static gboolean access_monitor_cb(GIOChannel *source, GIOCondition condition, gpointer data);
+static gboolean access_monitor_activate_cb(GIOChannel *source, GIOCondition condition, gpointer data);
 
 void scan_file_thread_fun(gpointer data, gpointer user_data);
 
@@ -46,23 +48,31 @@ void path_destroy_notify(gpointer data)
 struct access_monitor *access_monitor_new(struct uhuru *u)
 {
   struct access_monitor *m = g_new(struct access_monitor, 1);
-  GIOChannel *channel;
+  GIOChannel *fanotify_channel, *activate_channel;
 
   m->enable_permission = 0;
 
   m->fanotify_fd = fanotify_init(FAN_CLASS_CONTENT | FAN_CLOEXEC, O_RDONLY | O_CLOEXEC | O_LARGEFILE | O_NOATIME);
 
   if (m->fanotify_fd < 0) {
-    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_CRITICAL, "fanotify: init failed (%s)", strerror(errno));
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "fanotify: fanotify_init failed (%s)", strerror(errno));
+    g_free(m);
+    return NULL;
+  }
+
+  if (pipe(m->activation_pipe) < 0) {
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "fanotify: pipe failed (%s)", strerror(errno));
     g_free(m);
     return NULL;
   }
 
   m->paths = g_ptr_array_new_full(10, path_destroy_notify);
 
-  channel = g_io_channel_unix_new(m->fanotify_fd);	
+  fanotify_channel = g_io_channel_unix_new(m->fanotify_fd);	
+  g_io_add_watch(fanotify_channel, G_IO_IN, access_monitor_cb, m);
 
-  g_io_add_watch(channel, G_IO_IN, access_monitor_cb, m);
+  activate_channel = g_io_channel_unix_new(m->activation_pipe[0]);	
+  g_io_add_watch(activate_channel, G_IO_IN, access_monitor_activate_cb, m);
 
   m->uhuru = u;
 
@@ -70,44 +80,66 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
   
   m->thread_pool = g_thread_pool_new(scan_file_thread_fun, m, -1, FALSE, NULL);
 
-  g_log(G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "fanotify: init ok");
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: init ok");
 
   return m;
 }
 
 int access_monitor_enable_permission(struct access_monitor *m, int enable_permission)
 {
-  return m->enable_permission = enable_permission;
+  if (m == NULL)
+    return 0;
+
+  m->enable_permission = enable_permission;
+
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: %s", (m->enable_permission) ? "enabled" : "disabled");
+
+  return m->enable_permission;
 }
 
 int access_monitor_add(struct access_monitor *m, const char *path)
 {
-  const char *tmp = strdup(path);
+  const char *tmp;
 
-  if (fanotify_mark(m->fanotify_fd, FAN_MARK_ADD | FAN_MARK_MOUNT, FAN_OPEN_PERM, AT_FDCWD, tmp) < 0) {
-    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_ERROR, "fanotify: adding %s failed (%s)", tmp, strerror(errno));
+  if (m == NULL)
+    return 0;
 
-    return -1;
-  }
+  tmp = strdup(path);
 
   g_ptr_array_add(m->paths, (gpointer)tmp);
 
-  g_log(G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "fanotify: added directory %s", tmp);
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: added directory %s", tmp);
+
+  return 0;
+}
+
+int access_monitor_activate(struct access_monitor *m)
+{
+  char c = 'A';
+
+  if (m == NULL)
+    return 0;
+
+  if (write(m->activation_pipe[1], &c, 1) < 0)
+    return -1;
 
   return 0;
 }
 
 int access_monitor_remove(struct access_monitor *m, const char *path)
 {
+  if (m == NULL)
+    return 0;
+
   if (fanotify_mark(m->fanotify_fd, FAN_MARK_REMOVE, FAN_OPEN_PERM, AT_FDCWD, path) < 0) {
-    g_log(G_LOG_DOMAIN, G_LOG_LEVEL_ERROR, "fanotify: removing %s failed (%s)", path, strerror(errno));
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "fanotify: removing %s failed (%s)", path, strerror(errno));
 
     return -1;
   }
 
   g_ptr_array_remove(m->paths, (gpointer)path);
 
-  g_log(G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "fanotify: removed directory %s", path);
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: removed directory %s", path);
 
   return 0;
 }
@@ -115,6 +147,9 @@ int access_monitor_remove(struct access_monitor *m, const char *path)
 void access_monitor_free(struct access_monitor *m)
 {
   int i;
+
+  if (m == NULL)
+    return;
 
   while (m->paths->len > 0) {
     const char *path = (const char *)g_ptr_array_index(m->paths, 0);
@@ -128,7 +163,7 @@ void access_monitor_free(struct access_monitor *m)
 
   free(m);
 
-  g_log(G_LOG_DOMAIN, G_LOG_LEVEL_DEBUG, "fanotify: free ok");
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: free ok");
 }
 
 
@@ -162,7 +197,7 @@ static __u32 file_status_2_response(enum uhuru_file_status status)
 static int write_response(struct access_monitor *m, int fd, const char *path, __u32 r)
 {
   struct fanotify_response response;
-  GLogLevelFlags log_level = G_LOG_LEVEL_INFO;
+  GLogLevelFlags log_level = UHURU_LOG_LEVEL_INFO;
   const char *msg = "ALLOW";
 
   response.fd = fd;
@@ -171,11 +206,11 @@ static int write_response(struct access_monitor *m, int fd, const char *path, __
   write(m->fanotify_fd, &response, sizeof(struct fanotify_response));
   
   if (r == FAN_DENY) {
-    log_level = G_LOG_LEVEL_WARNING;
+    log_level = UHURU_LOG_LEVEL_WARNING;
     msg = "DENY";
   }
 
-  g_log(G_LOG_DOMAIN, log_level, "fanotify:  path '%s' -> %s", path ? path : "unknown", msg);
+  uhuru_log(UHURU_LOG_MODULE, log_level, "fanotify:  path '%s' -> %s", path ? path : "unknown", msg);
 
   close(fd);
 
@@ -250,10 +285,38 @@ static gboolean access_monitor_cb(GIOChannel *source, GIOCondition condition, gp
       if (event->mask & FAN_OPEN_PERM)
 	perm_event_process(m, event, p);
       else
-	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_WARNING, "fanotify: unprocessed event 0x%llx fd %d path '%s'", event->mask, event->fd, p ? p : "unknown");
+	uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "fanotify: unprocessed event 0x%llx fd %d path '%s'", event->mask, event->fd, p ? p : "unknown");
     }
   }
 
   return TRUE;
 }
 
+static gboolean access_monitor_activate_cb(GIOChannel *source, GIOCondition condition, gpointer data)
+{
+  struct access_monitor *m = (struct access_monitor *)data;
+  int i;
+  char c;
+
+  if (read(m->activation_pipe[0], &c, 1) < 0 || c != 'A') {
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "fanotify: read() in activation callback failed (%s)", strerror(errno));
+
+    return FALSE;
+  }
+
+  g_io_channel_shutdown(source, FALSE, NULL);
+
+  for(i = 0; i < m->paths->len; i++) {
+    const char *path = (const char *)g_ptr_array_index(m->paths, i);
+
+    if (fanotify_mark(m->fanotify_fd, FAN_MARK_ADD | FAN_MARK_MOUNT, FAN_OPEN_PERM, AT_FDCWD, path) < 0) {
+      uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "fanotify: activating %s failed (%s)", path, strerror(errno));
+
+      break;
+    }
+
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: activated directory %s", path);
+  }
+
+  return TRUE;
+}

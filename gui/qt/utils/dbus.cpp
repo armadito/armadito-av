@@ -11,8 +11,10 @@ void UhuruDBusService::scan(const QString &arg)
 {
   std::cerr << "UhuruDBusService::scan(\"" << arg.toStdString().c_str() << "\")\n";
 
+#if 0
   ScanWindow *w = new ScanWindow(arg);
   w->show();
   w->activateWindow();
   w->raise();
+#endif
 }
