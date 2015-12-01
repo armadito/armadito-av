@@ -79,6 +79,7 @@
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\core.h" />
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\handle.h" />
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\info.h" />
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\log.h" />
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\module.h" />
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\scan.h" />
     <ClInclude Include="..\..\..\libuhuru\src\libcore\builtin-modules\mimetypemod.h" />
@@ -91,7 +92,6 @@
     <ClInclude Include="..\..\..\libuhuru\src\os\dir.h" />
     <ClInclude Include="..\..\..\libuhuru\src\os\file.h" />
     <ClInclude Include="..\..\..\libuhuru\src\os\io.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\os\log.h" />
     <ClInclude Include="..\..\..\libuhuru\src\os\mimetype.h" />
     <ClInclude Include="..\..\..\libuhuru\src\os\string.h" />
   </ItemGroup>
@@ -102,6 +102,7 @@
     <ClCompile Include="..\..\..\libuhuru\src\libcore\confparser.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\error.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\info.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\log.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\module.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\report.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\scan.c" />
@@ -111,7 +112,6 @@
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
     </ClCompile>
     <ClCompile Include="..\..\..\libuhuru\src\os\windows\file.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\os\windows\log.c" />
     <ClCompile Include="..\..\..\libuhuru\src\os\windows\mimetype.c">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
     </ClCompile>
