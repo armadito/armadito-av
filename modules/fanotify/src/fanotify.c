@@ -3,6 +3,9 @@
 #include "monitor.h"
 
 #include <glib.h>
+#ifdef HAVE_LIBNOTIFY
+#include <libnotify/notify.h>
+#endif
 
 struct fanotify_data {
   struct access_monitor *monitor;
@@ -21,6 +24,10 @@ static enum uhuru_mod_status mod_fanotify_init(struct uhuru_module *module)
   /* the scan daemon terminates */
   /* if (fa_data->monitor == NULL) */
   /*   return UHURU_MOD_INIT_ERROR; */
+
+#ifdef HAVE_LIBNOTIFY
+  notify_init ("TatouAV");
+#endif
 
   return UHURU_MOD_OK;
 }
@@ -68,6 +75,10 @@ static enum uhuru_mod_status mod_fanotify_close(struct uhuru_module *module)
   }
 
   fa_data->monitor = NULL;
+
+#ifdef HAVE_LIBNOTIFY
+  notify_uninit();
+#endif
 
   return UHURU_MOD_OK;
 }

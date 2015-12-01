@@ -183,17 +183,6 @@ static char *get_file_path_from_fd(int fd, char *buffer, size_t buffer_size)
   return buffer;
 }
 
-static __u32 file_status_2_response(enum uhuru_file_status status)
-{
-  switch(status) {
-  case UHURU_SUSPICIOUS:
-  case UHURU_MALWARE:
-    return FAN_DENY;
-  }
-
-  return FAN_ALLOW;
-}
-
 static int write_response(struct access_monitor *m, int fd, const char *path, __u32 r)
 {
   struct fanotify_response response;
@@ -222,6 +211,17 @@ struct access_thread_data {
   const char *path;
 };
 
+static __u32 file_status_2_response(enum uhuru_file_status status)
+{
+  switch(status) {
+  case UHURU_SUSPICIOUS:
+  case UHURU_MALWARE:
+    return FAN_DENY;
+  }
+
+  return FAN_ALLOW;
+}
+
 void scan_file_thread_fun(gpointer data, gpointer user_data)
 {
   enum uhuru_file_status status;
@@ -232,6 +232,8 @@ void scan_file_thread_fun(gpointer data, gpointer user_data)
 
   write_response(m, td->fd, td->path, file_status_2_response(status));
 
+  /* send notification if malware */
+  
   free((void *)td->path);
   free((void *)td);
 }

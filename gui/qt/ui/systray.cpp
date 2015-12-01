@@ -23,7 +23,7 @@ Systray::Systray()
   createActions();
   createTrayIcon();
 
-  trayIcon->show();
+  _trayIcon->show();
 }
 
 void Systray::createActions()
@@ -57,15 +57,15 @@ void Systray::createTrayIcon()
   trayIconMenu->addSeparator();
   trayIconMenu->addAction(aboutAction);
 
-  trayIcon = new QSystemTrayIcon(this);
+  _trayIcon = new QSystemTrayIcon(this);
 
   QByteArray category = qgetenv("SNI_CATEGORY");
   if (!category.isEmpty()) {
-    trayIcon->setProperty("_qt_sni_category", QString::fromLocal8Bit(category));
+    _trayIcon->setProperty("_qt_sni_category", QString::fromLocal8Bit(category));
   }
 
-  trayIcon->setContextMenu(trayIconMenu);
-  trayIcon->setIcon(*getIcon());
+  _trayIcon->setContextMenu(trayIconMenu);
+  _trayIcon->setIcon(*getIcon());
 }
 
 static void popUpCannotConnectToServer()
@@ -141,6 +141,12 @@ void Systray::update()
   // Init UpdateDialog ui, set first values and init connexions
   //UpdateDialog *update = new UpdateDialog(model);
   //update->show();
+}
+
+
+void Systray::notify(const QString & title, const QString & message, QSystemTrayIcon::MessageIcon icon)
+{
+  _trayIcon->showMessage(title, message, icon);
 }
 
 
