@@ -6,6 +6,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <errno.h>
+#include <glib.h>
+#include <stdlib.h>
+#include <limits.h>
 
 void os_file_stat(const char *path, struct os_file_stat *buf, int *pfile_errno)
 {
@@ -51,7 +54,7 @@ static const char *do_not_scan_paths[] = {
   NULL,
 };
 
-static int strprefix(const char *s, const char *prefix)
+static int strprefix(char *s, const char *prefix)
 {
   while (*prefix && *s && *prefix++ == *s++)
     ;
@@ -65,11 +68,21 @@ static int strprefix(const char *s, const char *prefix)
 int os_file_do_not_scan(const char *path)
 {
   const char **p;
+  char * real_path;
+
+  real_path =  realpath(path, NULL);  
+  if( real_path == NULL){
+	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_ERROR, "realpath of %s failed : %s.", path, strerror(errno));
+	return 1;
+  }
 
   for(p = do_not_scan_paths; *p != NULL; p++) {
-    if (strprefix(path, *p))
+    if (strprefix(real_path, *p)){
+      free(real_path);
       return 1;
-  }
-    
+    } 
+ }
+  
+  free(real_path); 
   return 0;
 }

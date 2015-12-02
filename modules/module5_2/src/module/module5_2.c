@@ -107,7 +107,8 @@ static const char *error_code_str(ERROR_CODE e)
   return "UNKNOWN ERROR";
 }
 
-static enum uhuru_file_status module5_2_scan(struct uhuru_module *module, const char *path, const char *mime_type, char **pmod_report)
+// We receive a file descriptor
+static enum uhuru_file_status module5_2_scan(struct uhuru_module *module, int fd, const char *path, const char *mime_type, char **pmod_report)
 {
   ERROR_CODE e = UH_NULL;
   const char *virus_name = NULL;
@@ -119,12 +120,12 @@ static enum uhuru_file_status module5_2_scan(struct uhuru_module *module, const 
   if (!strcmp(mime_type, "application/x-sharedlib")
       || !strcmp(mime_type, "application/x-object")
       || !strcmp(mime_type, "application/x-executable")) {	  
-    e = analyseElfFile((char *)path);
+    e = analyseElfFile(fd, (char *)path);
     if (e == UH_MALWARE)
       virus_name = "Linux.Heuristic.Malware.Generic";
   } else if (!strcmp(mime_type, "application/x-dosexec") 
 	     || !strcmp(mime_type, "application/x-msdownload")) {
-    e = fileAnalysis((char *)path);
+    e = fileAnalysis(fd, (char *)path);
     if (e == UH_MALWARE)
       virus_name = "Win.Heuristic.Malware.Generic";
   }
