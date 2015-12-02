@@ -2,6 +2,7 @@
 #include <libuhuru/core.h>
 
 #include "os/string.h"
+#include "uhurup.h"
 
 #include <glib.h>
 #include <stdlib.h>
@@ -82,10 +83,16 @@ int uhuru_scan_conf_is_white_listed(struct uhuru_scan_conf *c, const char *path)
   return 0;
 }
 
-void uhuru_scan_conf_add_mime_type(struct uhuru_scan_conf *c, const char *mime_type, struct uhuru_module *module)
+void uhuru_scan_conf_add_mime_type(struct uhuru_scan_conf *c, const char *mime_type, const char *module_name, struct uhuru *u)
 {
   /* a GArray and not a GPtrArray because GArray can be automatically NULL terminated */
   GArray *modules;
+  struct uhuru_module *mod = uhuru_get_module_by_name(u, module_name);
+    
+  if (mod == NULL) {
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "fanotify: no module '%s' for MIME type '%s'", module_name, mime_type);
+    return;
+  }
     
   modules = (GArray *)g_hash_table_lookup(c->mime_type_table, mime_type);
 
@@ -95,7 +102,7 @@ void uhuru_scan_conf_add_mime_type(struct uhuru_scan_conf *c, const char *mime_t
     g_hash_table_insert(c->mime_type_table, (gpointer)(os_strdup(mime_type)), modules);
   }
 
-  g_array_append_val(modules, module);
+  g_array_append_val(modules, mod);
 }
 
 struct uhuru_module **uhuru_scan_conf_get_applicable_modules(struct uhuru_scan_conf *c, const char *mime_type)
@@ -115,7 +122,7 @@ struct uhuru_module **uhuru_scan_conf_get_applicable_modules(struct uhuru_scan_c
   return NULL;
 }
 
-void uhuru_scan_conf_file_size(struct uhuru_scan_conf *c, int max_file_size)
+void uhuru_scan_conf_max_file_size(struct uhuru_scan_conf *c, int max_file_size)
 {
   c->max_file_size = max_file_size;
 }
