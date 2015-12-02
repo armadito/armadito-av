@@ -41,10 +41,13 @@ DWORD TotalSizeElfDataBaseTFIDFInf = 0, elfNbDocsTFIDFInf = 0, TotalSizeElfDataB
 
 /**
  * this function is for testing a file and deciding if it is a malicious file, a benign file, or something else
- * @param  fileName the file name
+ * @param  	    fd the file descriptor, fileName the realpath of the file
  * @return          an ERROR_CODE value between : UH_NOT_DECIDED, E_CALLOC_ERROR, UH_MALWARE and UH_NOT_MALWARE.
  */
-ERROR_CODE fileAnalysis(CHAR* fileName){
+ERROR_CODE fileAnalysis(int fd, char *fileName){
+
+	// DBG_PRNT(" 5_2 DOS analysis : %s \n", fileName);
+	
 	/*variable initialization*/
 	PVECTOR testFileEat = NULL, testFileIat = NULL;
 	/* ERROR_CODE array for tests return values */
@@ -52,7 +55,8 @@ ERROR_CODE fileAnalysis(CHAR* fileName){
 	PORTABLE_EXECUTABLE Pe;
 
 	/* initialization of the Pe structure */
-	infosArray[0] = PeInit(&Pe, fileName);
+	infosArray[0] = PeInit(&Pe, fd, fileName);
+
 	/* if errors happened before the calloc */
 	if (infosArray[0] == E_FILE_NOT_FOUND || infosArray[0] == E_FILE_EMPTY || infosArray[0] == E_INVALID_FILE_SIZE){
 		//DBG_PRNT("> %s\ninfosArray[0] == E_FILE_NOT_FOUND || infosArray[0] == E_FILE_EMPTY || infosArray[0] == E_INVALID_FILE_SIZE\n", fileName);
@@ -521,13 +525,17 @@ void freeDB(void){
 *                  E_NOT_MALWARE if not malware
 *                  E_NOT_DECIDED if the function can't decide
 */
-ERROR_CODE analyseElfFile(char* fileName){
+ERROR_CODE analyseElfFile(int fd, char* fileName){
+
+	// We take the file_path correspondinf to fd
+	//DBG_PRNT(" 5_2 analysisELF : %s \n", fileName);
+
 	ELF_CONTAINER elfOfFile;
 	ERROR_CODE retvalue;
 	PVECTOR symbolVector = NULL;
 
 	/* reading of the content of the file into an ELF_CONTAINER variable */
-	retvalue = ElfInit(fileName, &elfOfFile);
+	retvalue = ElfInit(fd, fileName, &elfOfFile);
 	if (retvalue == E_BAD_FORMAT){
 		DBG_PRNT("> %s\nElfInit == E_BAD_FORMAT\n", fileName);
 		return UH_MALWARE;
