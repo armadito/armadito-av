@@ -152,7 +152,7 @@ typedef struct _ELF_CONTAINER{
  *                      E_BAD_FORMAT       if the file contains errors,
  *                      E_SUCCESS          if no errors occurs
  */
-ERROR_CODE ElfInit(CHAR* filename, PELF_CONTAINER elfOfFile);
+ERROR_CODE ElfInit(int fd,  CHAR* filename, PELF_CONTAINER elfOfFile);
 
 /**
  * read all the symbols imported by an elf file, and store them into a PVECTOR

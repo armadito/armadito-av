@@ -155,7 +155,7 @@ BOOLEAN PeIsValidAddress(PPORTABLE_EXECUTABLE Pe, ULONG_PTR address){
 	return !(address > (Pe->FileSize + Pe->BaseAddress) || address < Pe->BaseAddress);
 }
 
-ERROR_CODE PeInit(PPORTABLE_EXECUTABLE Pe, CHAR *filename){
+ERROR_CODE PeInit(PPORTABLE_EXECUTABLE Pe, int fd, CHAR* filename){
 	DWORD MagicWord = 0;
 	ULONG_PTR Offset = 0;
 	FILE *fileHandle;
@@ -163,7 +163,7 @@ ERROR_CODE PeInit(PPORTABLE_EXECUTABLE Pe, CHAR *filename){
 	Pe->ImagesSectionHeader = NULL;
 
 	/* file opening */
-	fileHandle = os_fopen(filename, "rb");
+	fileHandle = os_fdopen(fd, "r");
 	if (fileHandle == NULL){
 		return E_FILE_NOT_FOUND;
 	}
@@ -174,6 +174,7 @@ ERROR_CODE PeInit(PPORTABLE_EXECUTABLE Pe, CHAR *filename){
 		fclose(fileHandle);
 		return E_FILE_EMPTY;
 	}
+
 	if (Pe->FileSize < sizeof(PIMAGE_DOS_HEADER)){
 		fclose(fileHandle);
 		return E_INVALID_FILE_SIZE;

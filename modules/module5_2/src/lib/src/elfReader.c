@@ -24,12 +24,12 @@ BYTE ElfIsAValidOffset(PELF_CONTAINER elfOfFile, QWORD offset){
 	}
 }
 
-ERROR_CODE ElfInit(CHAR* filename, PELF_CONTAINER elfOfFile){
+ERROR_CODE ElfInit(int fd, CHAR* filename, PELF_CONTAINER elfOfFile){
 	FILE* fileHandle = NULL;
 	WORD i = 0;
 	DWORD signature = 0;
 
-	fileHandle = os_fopen(filename, "rb");
+	fileHandle = os_fdopen(fd, "r");
 	if (fileHandle == NULL){
 		return E_FILE_NOT_FOUND;
 	}
