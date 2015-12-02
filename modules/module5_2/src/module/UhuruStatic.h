@@ -1,4 +1,4 @@
-short fileAnalysis(char* fileName);
+short fileAnalysis(int fd, char *fileName);
 
 short initDatabases(
 	char* modelMalwareEat, 
@@ -21,4 +21,5 @@ int initDB(char* dbName,
 
 void freeDB(void);
 
-short analyseElfFile(char* fileName);
+short analyseElfFile(int fd, char *fileName);
+
