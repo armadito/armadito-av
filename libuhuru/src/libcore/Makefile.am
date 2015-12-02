@@ -9,6 +9,7 @@ conf.h \
 confparser.c \
 confparser.h \
 error.c \
+filectx.c \
 info.c \
 log.c \
 module.c \
