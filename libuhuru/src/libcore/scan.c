@@ -374,6 +374,7 @@ void uhuru_scan_run(struct uhuru_scan *scan)
       g_thread_pool_push(scan->thread_pool, (gpointer)os_strdup(scan->path), NULL);
     else
       scan_file(scan, scan->path);
+
   } else if (stat_buf.flags & FILE_FLAG_IS_DIRECTORY) {
     int recurse = scan->flags & UHURU_SCAN_RECURSE;
 

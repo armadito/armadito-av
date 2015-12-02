@@ -49,6 +49,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
   if (d == NULL) {
     uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "error opening directory %s (%s)", path, strerror(errno));
 
+    // Call to scan_entry()
     (*dirent_cb)(path, FILE_FLAG_IS_ERROR, errno, data);
     
 #if 0
@@ -75,6 +76,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
       saved_errno = errno;
       uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "error reading directory entry in directory %s (error %s)", path, strerror(saved_errno));
      
+      // Call to scan_entry()
       (*dirent_cb)(path, FILE_FLAG_IS_ERROR, saved_errno, data);
 
       goto cleanup;
@@ -89,6 +91,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
     if (entry->d_type == DT_DIR && recurse)
       os_dir_map(entry_path, recurse, dirent_cb, data);
 
+    // Call to scan_entry()
     (*dirent_cb)(entry_path, dirent_flags(entry), 0, data);
 
     free(entry_path);
