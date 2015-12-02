@@ -1,3 +1,4 @@
+#include <libuhuru/core.h>
 #include "libuhuru-config.h"
 
 #include "os/file.h"
@@ -8,6 +9,7 @@
 #include <errno.h>
 #include <glib.h>
 #include <stdlib.h>
+#include <string.h>
 #include <limits.h>
 
 void os_file_stat(const char *path, struct os_file_stat *buf, int *pfile_errno)
@@ -72,8 +74,8 @@ int os_file_do_not_scan(const char *path)
 
   real_path =  realpath(path, NULL);  
   if( real_path == NULL){
-	g_log(G_LOG_DOMAIN, G_LOG_LEVEL_ERROR, "realpath of %s failed : %s.", path, strerror(errno));
-	return 1;
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_ERROR, "realpath of %s failed : %s.", path, strerror(errno));
+    return 1;
   }
 
   for(p = do_not_scan_paths; *p != NULL; p++) {
