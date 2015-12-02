@@ -32,7 +32,11 @@ struct uhuru_module {
 
   enum uhuru_mod_status (*post_init_fun)(struct uhuru_module *module);
 
+#ifdef USE_FILE_DESCRIPTORS
+  enum uhuru_file_status (*scan_fun)(struct uhuru_module *module, int fd, const char *path, const char *mime_type, char **pmod_report);
+#else
   enum uhuru_file_status (*scan_fun)(struct uhuru_module *module, const char *path, const char *mime_type, char **pmod_report);
+#endif
 
   enum uhuru_mod_status (*close_fun)(struct uhuru_module *module);
 

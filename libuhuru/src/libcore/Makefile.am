@@ -16,6 +16,7 @@ modulep.h \
 report.c \
 reportp.h \
 scan.c \
+scanconf.c \
 status.c \
 statusp.h \
 uhuru.c \
@@ -30,7 +31,7 @@ builtin-modules/quarantine.h \
 ../os/linux/file.c \
 ../os/linux/mimetype.c 
 
-AM_CPPFLAGS= -DLIBUHURU_MODULES_PATH='"$(pkglibdir)/modules"' -DLIBUHURU_CONF_DIR='"$(sysconfdir)/uhuru"' -DG_LOG_DOMAIN='"uhuru"'
+AM_CPPFLAGS=-DUSE_FILE_DESCRIPTORS -DLIBUHURU_MODULES_PATH='"$(pkglibdir)/modules"' -DLIBUHURU_CONF_DIR='"$(sysconfdir)/uhuru"' -DG_LOG_DOMAIN='"uhuru"'
 libuhuru_core_la_CFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/include/config -I$(top_srcdir)/src
 #libuhuru_core_la_LIBADD= $(top_builddir)/src/os/linux/dir.$(OBJEXT) $(top_builddir)/src/os/linux/file.$(OBJEXT) $(top_builddir)/src/os/linux/mimetype.$(OBJEXT)
 libuhuru_core_la_LIBADD= 
