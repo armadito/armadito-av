@@ -129,7 +129,7 @@ static void uhuru_scan_call_callbacks(struct uhuru_scan *scan, struct uhuru_repo
 /* apply the modules contained in 'modules' in order to compute the scan status of 'path' */
 /* 'modules' is a NULL-terminated array of pointers to struct uhuru_module */
 /* 'mime_type' is the mime-type of the file */
-static enum uhuru_file_status scan_apply_modules(const char *path, const char *mime_type, struct uhuru_module **modules,  struct uhuru_report *report)
+static enum uhuru_file_status scan_apply_modules(int fd, const char *path, const char *mime_type, struct uhuru_module **modules,  struct uhuru_report *report)
 {
   enum uhuru_file_status current_status = UHURU_UNDECIDED;
 
@@ -147,7 +147,13 @@ static enum uhuru_file_status scan_apply_modules(const char *path, const char *m
       continue;
 
     /* call the scan function of the module */
-    mod_status = (*mod->scan_fun)(mod, path, mime_type, &mod_report);
+    /* but, after rewinding the file !!! */
+    if (lseek(fd, 0, SEEK_SET) < 0)  {
+      uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "cannot seek on file %s (error %s)", path, os_strerror(errno));
+      return UHURU_IERROR;
+    }
+
+    mod_status = (*mod->scan_fun)(mod, fd, path, mime_type, &mod_report);
 
     /* then compare the status that was returned by the module with current status */
     /* if current status is 'less than' (see status.c for comparison meaning) */
@@ -195,6 +201,7 @@ static enum uhuru_file_status scan_file(struct uhuru_scan *scan, const char *pat
   struct uhuru_module **modules = NULL;
   const char *mime_type;
   enum uhuru_file_status status;
+  int fd = -1; /* ??? */
 
   uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_DEBUG, "scan_file - %s", path);
 
@@ -205,7 +212,7 @@ static enum uhuru_file_status scan_file(struct uhuru_scan *scan, const char *pat
   uhuru_report_init(&report, scan->scan_id, path, REPORT_PROGRESS_UNKNOWN);
 
   /* find the mime type using OS specific function (magic_* on linux, FindMimeFromData on windows */
-  mime_type = os_mime_type_guess(path);
+  mime_type = os_mime_type_guess_fd(fd);
 
   /* ask uhuru handle for the array of modules */
   if (mime_type != NULL)
@@ -217,7 +224,7 @@ static enum uhuru_file_status scan_file(struct uhuru_scan *scan, const char *pat
     uhuru_report_change(&report, status, NULL, NULL);
   } else
     /* otherwise we scan it by applying the modules */
-    status = scan_apply_modules(path, mime_type, modules, &report);
+    status = scan_apply_modules(fd, path, mime_type, modules, &report);
 
   /* update the progress */
   /* may be not thread safe, but who cares about precise values? */
@@ -405,6 +412,7 @@ enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path, 
   struct uhuru_module **modules = NULL;
   const char *mime_type;
   enum uhuru_file_status status;
+  int fd = -1; /* ??? */
 
   if (os_file_do_not_scan(path))
     return UHURU_CLEAN;
@@ -422,7 +430,7 @@ enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path, 
   if (modules == NULL || mime_type == NULL)
     return UHURU_UNKNOWN_FILE_TYPE;
 
-  status = scan_apply_modules(path, mime_type, modules, report);
+  status = scan_apply_modules(fd, path, mime_type, modules, report);
 
   free((void *)mime_type);
 

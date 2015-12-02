@@ -29,11 +29,7 @@ void os_mime_type_init(void);
 const char *os_mime_type_guess(const char *path);
 
 #ifdef USE_FILE_DESCRIPTORS
-ideally, using a file descriptor is much faster and does not need to
-open() and close() the file path several times;
-unfortunately, libmagic does not know how to guess a file descriptor
-mime type without closing it... 
-so we give up for now using file descriptors
+
 /**
  *      \fn const char *os_mime_type_guess_fd(intfd);
  *      \brief Returns the mime type of a file given by a file descriptor
@@ -43,6 +39,7 @@ so we give up for now using file descriptors
  *      \return the mime type as a string, NULL if not guessable
  */
 const char *os_mime_type_guess_fd(int fd);
+
 #endif
 
 #ifdef __cplusplus

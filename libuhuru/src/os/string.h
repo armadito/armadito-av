@@ -8,12 +8,14 @@ extern "C" {
 #endif
 
 #if defined(HAVE_STRDUP)
+#include <string.h>
 #define os_strdup strdup
 #elif defined(HAVE__STRDUP)
 #define os_strdup _strdup
 #endif
 
 #ifdef HAVE_STRERROR
+#include <string.h>
 #define os_strerror strerror
 #else
 char *os_strerror(int errnum);
