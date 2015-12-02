@@ -86,7 +86,7 @@ void uhuru_scan_conf_add_mime_type(struct uhuru_scan_conf *c, const char *mime_t
 {
   /* a GArray and not a GPtrArray because GArray can be automatically NULL terminated */
   GArray *modules;
-
+    
   modules = (GArray *)g_hash_table_lookup(c->mime_type_table, mime_type);
 
   if (modules == NULL) {
@@ -120,11 +120,3 @@ void uhuru_scan_conf_file_size(struct uhuru_scan_conf *c, int max_file_size)
   c->max_file_size = max_file_size;
 }
 
-#if 0
-1) file name (directories white list)
-[2) cache]
-open file if no fd given
-3) file size (=> fstat)
-4) file type using mime_type_guess (returns applicable modules)
-
-#endif
