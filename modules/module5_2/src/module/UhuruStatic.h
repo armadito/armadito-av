@@ -1,4 +1,9 @@
-short fileAnalysis(char* fileName);
+#ifndef __UHURU_STATIC__
+#define __UHURU_STATIC__
+
+#include "uh_errors.h"
+
+ERROR_CODE fileAnalysis(int fd, char *fileName);
 
 short initDatabases(
 	char* modelMalwareEat, 
@@ -21,4 +26,6 @@ int initDB(char* dbName,
 
 void freeDB(void);
 
-short analyseElfFile(char* fileName);
+ERROR_CODE analyseElfFile(int fd, char *fileName);
+
+#endif
