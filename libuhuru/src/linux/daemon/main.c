@@ -123,7 +123,9 @@ int main(int argc, const char **argv)
   int server_sock;
   struct server *server;
 
+#ifdef HAVE_GTHREAD_INIT
   g_thread_init(NULL);
+#endif
 
   parse_options(argc, argv, &opts);
 

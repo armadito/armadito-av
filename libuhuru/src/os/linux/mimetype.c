@@ -1,3 +1,4 @@
+#include <libuhuru/core.h>
 #include "libuhuru-config.h"
 
 #include "os/mimetype.h"
@@ -55,15 +56,26 @@ const char *os_mime_type_guess(const char *path)
 }
 
 #ifdef USE_FILE_DESCRIPTORS
+
+#define BUFFER_SIZE 1024
+
 const char *os_mime_type_guess_fd(int fd)
 {
   magic_t m;
   const char *mime_type;
+  char *buffer[BUFFER_SIZE];
+  int n_read;
 
   m = get_private_magic();
 
-  mime_type = magic_descriptor(m, fd);
+  if ((n_read = read(fd, buffer, BUFFER_SIZE)) < 0) {
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "cannot read %d bytes from file descriptor %s", BUFFER_SIZE, fd);
+    return NULL;
+  }
+
+  mime_type = magic_buffer(m, buffer, n_read);
 
   return strdup(mime_type);
 }
+
 #endif

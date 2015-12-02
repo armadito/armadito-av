@@ -50,9 +50,6 @@ struct uhuru_report {
   char *mod_report;                     /*!< the report of this module, usually a malware name                  */
 };
 
-/* this function is no longer implemented anywhere */
-/* void uhuru_report_print(struct uhuru_report *report, FILE *out); */
-
 /**
  * \struct struct uhuru_scan
  * \brief an opaque structure for file or directory scanning
