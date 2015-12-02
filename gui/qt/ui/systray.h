@@ -18,7 +18,9 @@ public:
 
   void addRecentScan(ScanModel *model);
 
-public slots:
+  void notify(const QString & title, const QString & message, QSystemTrayIcon::MessageIcon icon = QSystemTrayIcon::Information);
+
+private slots:
   void scan();
   void update();
   void about();
@@ -32,8 +34,9 @@ private:
   QAction *scanAction;
   QAction *updateAction;
   QAction *aboutAction;
-  QSystemTrayIcon *trayIcon;
   QMenu *recentScanMenu;
+
+  QSystemTrayIcon *_trayIcon;
 };
 
 class RecentScanAction: public QAction {
