@@ -186,7 +186,7 @@ static char *get_file_path_from_fd(int fd, char *buffer, size_t buffer_size)
   return buffer;
 }
 
-static int write_response(struct access_monitor *m, int fd, const char *path, __u32 r)
+static int write_response(struct access_monitor *m, int fd, __u32 r, const char *path, const char *reason)
 {
   struct fanotify_response response;
   GLogLevelFlags log_level = UHURU_LOG_LEVEL_INFO;
@@ -230,10 +230,9 @@ void scan_file_thread_fun(gpointer data, gpointer user_data)
   struct access_monitor *m = (struct access_monitor *)user_data;
   enum uhuru_file_status status;
 	
-  /* status = uhuru_scan_simple(m->uhuru, td->path, NULL); */
+  status = uhuru_scan_context(file_context, NULL);
 
-  /* write_response(m, td->fd, td->path, file_status_2_response(status)); */
-  write_response(m, file_context->fd, file_context->path, FAN_ALLOW);
+  write_response(m, file_context->fd, file_status_2_response(status), file_context->path, NULL);
 
   /* send notification if malware */
   
@@ -242,28 +241,28 @@ void scan_file_thread_fun(gpointer data, gpointer user_data)
 
 static int perm_event_process(struct access_monitor *m, struct fanotify_event_metadata *event, const char *path)
 {
-  struct os_file_stat buf;
+  struct stat buf;
   struct access_thread_data *td;
   struct uhuru_file_context file_context;
   enum uhuru_file_context_status context_status;
 
   if (m->enable_permission == 0)  /* permission check is disabled, always allow */
-    return write_response(m, event->fd, path, FAN_ALLOW);
+    return write_response(m, event->fd, FAN_ALLOW, path, NULL);
 
   if (m->my_pid == event->pid)   /* file was opened by myself, always allow */
-    return write_response(m, event->fd, path, FAN_ALLOW);
+    return write_response(m, event->fd, FAN_ALLOW, path, NULL);
 
   if (fstat(event->fd, &buf) < 0)
-    return write_response(m, event->fd, path, FAN_ALLOW);
+    return write_response(m, event->fd, FAN_ALLOW, path, NULL);
 
   if (!S_ISREG(buf.st_mode))
-    return write_response(m, event->fd, path, FAN_ALLOW);
+    return write_response(m, event->fd, FAN_ALLOW, path, NULL);
 
   /* get file scan context */
   context_status = uhuru_file_context_get(&file_context, event->fd, path, m->scan_conf);
 
   if (context_status)    /* means file must not be scanned */
-    return write_response(m, event->fd, path, FAN_ALLOW);
+    return write_response(m, event->fd, FAN_ALLOW, path, NULL);
 
   g_thread_pool_push(m->thread_pool, uhuru_file_context_clone(&file_context), NULL);
 
