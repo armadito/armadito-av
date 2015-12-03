@@ -14,6 +14,7 @@ info.c \
 log.c \
 module.c \
 modulep.h \
+ondemand.c \
 report.c \
 reportp.h \
 scan.c \
