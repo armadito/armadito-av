@@ -538,7 +538,7 @@ ERROR_CODE analyseElfFile(int fd, char* fileName){
 	retvalue = ElfInit(fd, fileName, &elfOfFile);
 	if (retvalue == E_BAD_FORMAT){
 		DBG_PRNT("> %s\nElfInit == E_BAD_FORMAT\n", fileName);
-		return UH_MALWARE;
+		return UH_NOT_DECIDED;
 	}
 	
 	// TOFIX: Logger plus clairement le type d'erreur pour ce qui est considéré comme "NOT_DECIDED"
@@ -552,7 +552,7 @@ ERROR_CODE analyseElfFile(int fd, char* fileName){
 	if (retvalue == E_BAD_FORMAT || retvalue == E_SYMBOL_TABLE_EMPTY){
 		DBG_PRNT("> %s\nElfSymbolTable == E_BAD_FORMAT || ElfSymbolTable == E_SYMBOL_TABLE_EMPTY\n", fileName);
 		ElfDestroy(&elfOfFile);
-		return UH_MALWARE;
+		return UH_NOT_DECIDED;
 	}
 	if (retvalue == E_NO_KNOWN_SYMBOLS){
 		DBG_PRNT("> %s\nElfSymbolTable == E_NO_KNOWN_SYMBOLS\n", fileName);
