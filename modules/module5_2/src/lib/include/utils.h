@@ -14,7 +14,7 @@
 // this part is used to define tools for debugging
 //
 
-//#define IN_DEBUG_MODE
+// #define IN_DEBUG_MODE
 
 /* definition of a debug macro, only working when IN_DEBUG_MODE is defined */
 
@@ -66,8 +66,8 @@ Message : "Etiam nisl nibh, porta a."
 		if (DBG_MACRO_ENABLED) {\
 			fprintf(\
 				stdout, \
-				DBG_FUNC_INFO "Message : " fmt , \
-				__FUNCTION__, __VA_ARGS__\
+				fmt , \
+				 __VA_ARGS__\
 			); \
 					}\
 			} \

@@ -122,7 +122,8 @@ ERROR_CODE ElfInit(int fd, CHAR* filename, PELF_CONTAINER elfOfFile){
 			}
 		}
 	}
-	else{ // Neither 64 or 32 Bit valid ELF
+	else{ // We check only IntelX86 and AMD64
+		DBG_PRNT(" BAD_ARCH : %d ", elfOfFile->machine);
 		free((ULONG_PTR*)elfOfFile->buffer);
 		elfOfFile->buffer = 0;
 		return E_BAD_ARCHITECTURE;
