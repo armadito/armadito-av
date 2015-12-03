@@ -48,7 +48,9 @@ ERROR_CODE ElfInit(int fd, CHAR* filename, PELF_CONTAINER elfOfFile){
 		return E_CALLOC_ERROR;
 	}
 
-	/* file reading into *elf */
+	/* file reading into *elf 
+		We read the whole file.
+	*/
 	if (fread((PVOID)elfOfFile->buffer, elfOfFile->fileSize, 1, fileHandle) != 1){
 		fclose(fileHandle);
 		free((ULONG_PTR*)elfOfFile->buffer);
@@ -65,14 +67,19 @@ ERROR_CODE ElfInit(int fd, CHAR* filename, PELF_CONTAINER elfOfFile){
 		elfOfFile->buffer = 0;
 		return E_NOT_ELF;
 	}
-
+ 
+	// we parse e_machine value in header
 	if (ElfIsAValidOffset(elfOfFile, EI_NIDENT * sizeof(UCHAR) + sizeof(WORD)) == TRUE){
 		elfOfFile->machine = *(WORD*)((PVOID)(elfOfFile->buffer + EI_NIDENT * sizeof(UCHAR) + sizeof(WORD)));
 	}
 	else{
+		free((ULONG_PTR*)elfOfFile->buffer);
+		elfOfFile->buffer = 0;
 		return E_BAD_FORMAT;
 	}
 
+
+	// ELF-64bit
 	if (0 != elfOfFile->machine && EM_AMD64 == elfOfFile->machine){
 		elfOfFile->PElfN_Ehdr.ehdr64 = (PElf64_Ehdr)((PVOID)(elfOfFile->buffer));
 		elfOfFile->PElfN_Shdr.shdr64 = (PElf64_Shdr)calloc(elfOfFile->PElfN_Ehdr.ehdr64->e_shnum, sizeof(Elf64_Shdr));
@@ -81,16 +88,21 @@ ERROR_CODE ElfInit(int fd, CHAR* filename, PELF_CONTAINER elfOfFile){
 			elfOfFile->buffer = 0;
 			return E_CALLOC_ERROR;
 		}
+
+		// We parse all section headers
 		for (i = 0; i < elfOfFile->PElfN_Ehdr.ehdr64->e_shnum; i++) {
+
 			if (ElfIsAValidOffset(elfOfFile, elfOfFile->PElfN_Ehdr.ehdr64->e_shoff + elfOfFile->PElfN_Ehdr.ehdr64->e_shentsize*i) == TRUE){
 				elfOfFile->PElfN_Shdr.shdr64[i] = *(Elf64_Shdr*)((PVOID)(elfOfFile->buffer + elfOfFile->PElfN_Ehdr.ehdr64->e_shoff + elfOfFile->PElfN_Ehdr.ehdr64->e_shentsize*i));
 			}
 			else{
+				ElfDestroy(elfOfFile);
 				return E_BAD_FORMAT;
 			}
 		}
-	}
-	else if (0 != elfOfFile->machine && EM_386 == elfOfFile->machine){
+
+	}  // ELF-32Bit
+	else if (0 != elfOfFile->machine && EM_386 == elfOfFile->machine){ 
 		elfOfFile->PElfN_Ehdr.ehdr32 = (PElf32_Ehdr)((PVOID)(elfOfFile->buffer));
 		elfOfFile->PElfN_Shdr.shdr32 = (PElf32_Shdr)calloc(elfOfFile->PElfN_Ehdr.ehdr32->e_shnum, sizeof(Elf32_Shdr));
 		if (elfOfFile->PElfN_Shdr.shdr32 == NULL){
@@ -98,16 +110,19 @@ ERROR_CODE ElfInit(int fd, CHAR* filename, PELF_CONTAINER elfOfFile){
 			elfOfFile->buffer = 0;
 			return E_CALLOC_ERROR;
 		}
+
+		// We parse all section headers
 		for (i = 0; i < elfOfFile->PElfN_Ehdr.ehdr32->e_shnum; i++) {
 			if (ElfIsAValidOffset(elfOfFile, elfOfFile->PElfN_Ehdr.ehdr32->e_shoff + elfOfFile->PElfN_Ehdr.ehdr32->e_shentsize*i) == TRUE){
 				elfOfFile->PElfN_Shdr.shdr32[i] = *(Elf32_Shdr*)((PVOID)(elfOfFile->buffer + elfOfFile->PElfN_Ehdr.ehdr32->e_shoff + elfOfFile->PElfN_Ehdr.ehdr32->e_shentsize*i));
 			}
 			else{
+				ElfDestroy(elfOfFile);
 				return E_BAD_FORMAT;
 			}
 		}
 	}
-	else{
+	else{ // Neither 64 or 32 Bit valid ELF
 		free((ULONG_PTR*)elfOfFile->buffer);
 		elfOfFile->buffer = 0;
 		return E_BAD_ARCHITECTURE;
