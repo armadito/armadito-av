@@ -539,7 +539,7 @@ ERROR_CODE analyseElfFile(int fd, char* fileName){
 
 	// TOFIX: Logger plus clairement le type d'erreur pour ce qui est considéré comme "NOT_DECIDED"
 	if (retvalue != UH_SUCCESS){
-		DBG_PRNT("> %s\nElfSymbolTable (%d) : %s\n", fileName, retvalue, GetErrorCodeMsg(retvalue));
+		DBG_PRNT("> %s", error_code_str(retvalue));
 		return retvalue;
 	}
 
@@ -548,7 +548,7 @@ ERROR_CODE analyseElfFile(int fd, char* fileName){
 
 
 	if (retvalue != UH_SUCCESS){
-		DBG_PRNT("> %s\nElfSymbolTable (%d) : %s\n", fileName, retvalue, GetErrorCodeMsg(retvalue));
+		DBG_PRNT("> %s", error_code_str(retvalue));
 		ElfDestroy(&elfOfFile);
 		return retvalue;
 	}

@@ -123,7 +123,7 @@ ERROR_CODE ElfInit(int fd, CHAR* filename, PELF_CONTAINER elfOfFile){
 		}
 	}
 	else{ // We check only IntelX86 and AMD64
-		DBG_PRNT(" BAD_ARCH : %d ", elfOfFile->machine);
+		DBG_PRNT("> BAD_ARCH : %d ", elfOfFile->machine);
 		free((ULONG_PTR*)elfOfFile->buffer);
 		elfOfFile->buffer = 0;
 		return E_BAD_ARCHITECTURE;
@@ -397,6 +397,7 @@ ERROR_CODE ElfSymbolTable(PELF_CONTAINER elfOfFile, PVECTOR *symbolVector, PDATA
 	*symbolVector = VectorCreateFromArray(pqwSymbols, (DWORD)(currentPqwSymbolsIndex & 0xffffffff));
 
 	if (*symbolVector == NULL){
+		// free(pqwSymbols); ???
 		return E_CALLOC_ERROR;
 	}
 
