@@ -205,6 +205,8 @@ ERROR_CODE hasMalwareIAT(PVECTOR testFile, PMODEL modelArrayMalware, PMODEL mode
 		//return (nbMalwareElements >= (NUMBER_OF_N_N / 2) + 1 ? UH_MALWARE : UH_NOT_MALWARE);
 
 		// if the iat are not enough relevant to take a decision.
+		DBG_PRNT("> IAT_UNDECIDED (%d)", score);  
+
 		return UH_NOT_DECIDED;
 	}
 	else {
