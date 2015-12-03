@@ -33,6 +33,7 @@ struct access_monitor {
   pid_t my_pid;
   int activation_pipe[2];
   GThreadPool *thread_pool;  
+  struct uhuru_scan_conf *scan_conf;
 };
 
 static gboolean access_monitor_cb(GIOChannel *source, GIOCondition condition, gpointer data);
@@ -79,6 +80,8 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
   m->my_pid = getpid();
   
   m->thread_pool = g_thread_pool_new(scan_file_thread_fun, m, -1, FALSE, NULL);
+
+  m->scan_conf = uhuru_scan_conf_on_access();
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: init ok");
 
@@ -206,11 +209,6 @@ static int write_response(struct access_monitor *m, int fd, const char *path, __
   return r;
 }
 
-struct access_thread_data {
-  int fd;
-  const char *path;
-};
-
 static __u32 file_status_2_response(enum uhuru_file_status status)
 {
   switch(status) {
@@ -222,26 +220,32 @@ static __u32 file_status_2_response(enum uhuru_file_status status)
   return FAN_ALLOW;
 }
 
+struct access_thread_data {
+  struct access_monitor *monitor;
+};
+
 void scan_file_thread_fun(gpointer data, gpointer user_data)
 {
-  enum uhuru_file_status status;
+  struct uhuru_file_context *file_context = (struct uhuru_file_context *)data;
   struct access_monitor *m = (struct access_monitor *)user_data;
-  struct access_thread_data *td = (struct access_thread_data *)data;
+  enum uhuru_file_status status;
 	
-  status = uhuru_scan_simple(m->uhuru, td->path, NULL);
+  /* status = uhuru_scan_simple(m->uhuru, td->path, NULL); */
 
-  write_response(m, td->fd, td->path, file_status_2_response(status));
+  /* write_response(m, td->fd, td->path, file_status_2_response(status)); */
+  write_response(m, file_context->fd, file_context->path, FAN_ALLOW);
 
   /* send notification if malware */
   
-  free((void *)td->path);
-  free((void *)td);
+  uhuru_file_context_free(file_context);
 }
 
 static int perm_event_process(struct access_monitor *m, struct fanotify_event_metadata *event, const char *path)
 {
-  struct stat buf;
+  struct os_file_stat buf;
   struct access_thread_data *td;
+  struct uhuru_file_context file_context;
+  enum uhuru_file_context_status context_status;
 
   if (m->enable_permission == 0)  /* permission check is disabled, always allow */
     return write_response(m, event->fd, path, FAN_ALLOW);
@@ -255,12 +259,13 @@ static int perm_event_process(struct access_monitor *m, struct fanotify_event_me
   if (!S_ISREG(buf.st_mode))
     return write_response(m, event->fd, path, FAN_ALLOW);
 
-  td = malloc(sizeof(struct access_thread_data));
+  /* get file scan context */
+  context_status = uhuru_file_context_get(&file_context, event->fd, path, m->scan_conf);
 
-  td->fd = event->fd;
-  td->path = strdup(path);
+  if (context_status)    /* means file must not be scanned */
+    return write_response(m, event->fd, path, FAN_ALLOW);
 
-  g_thread_pool_push(m->thread_pool, (gpointer)td, NULL);
+  g_thread_pool_push(m->thread_pool, uhuru_file_context_clone(&file_context), NULL);
 
   return 0;
 }

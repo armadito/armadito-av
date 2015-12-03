@@ -1,6 +1,8 @@
 #ifndef _LIBUHURU_OS_FILE_H_
 #define _LIBUHURU_OS_FILE_H_
 
+#include <stddef.h>
+
 enum os_file_flag {
   FILE_FLAG_IS_ERROR       = 1 << 0,  /* entry is an error, error is given in file_errno */
   FILE_FLAG_IS_DIRECTORY   = 1 << 1,  /* entry is a directory */
@@ -13,10 +15,12 @@ enum os_file_flag {
 
 struct os_file_stat {
   enum os_file_flag flags;
-  /* will may be contain more info, like size */
+  size_t file_size;
 };
 
-void os_file_stat(const char *path, struct os_file_stat *buf, int *pfile_errno);
+int os_file_stat(const char *path, struct os_file_stat *buf, int *pfile_errno);
+
+int os_file_stat_fd(int fd, struct os_file_stat *buf, int *pfile_errno);
 
 /**
  *      \fn int os_file_do_not_scan(const char *path);
