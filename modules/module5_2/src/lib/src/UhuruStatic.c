@@ -536,34 +536,21 @@ ERROR_CODE analyseElfFile(int fd, char* fileName){
 
 	/* reading of the content of the file into an ELF_CONTAINER variable */
 	retvalue = ElfInit(fd, fileName, &elfOfFile);
-	if (retvalue == E_BAD_FORMAT){
-		DBG_PRNT("> %s\nElfInit == E_BAD_FORMAT\n", fileName);
-		return UH_NOT_DECIDED;
-	}
-	
+
 	// TOFIX: Logger plus clairement le type d'erreur pour ce qui est considéré comme "NOT_DECIDED"
 	if (retvalue != UH_SUCCESS){
-		DBG_PRNT("> %s\nElfInit != UH_SUCCESS\n", fileName);
-		return UH_NOT_DECIDED;
+		DBG_PRNT("> %s\nElfSymbolTable (%d) : %s\n", fileName, retvalue, GetErrorCodeMsg(retvalue));
+		return retvalue;
 	}
 
 	/* extraction of the symbol table into a PVECTOR variable */
 	retvalue = ElfSymbolTable(&elfOfFile, &symbolVector, db, db_size);
-	if (retvalue == E_BAD_FORMAT || retvalue == E_SYMBOL_TABLE_EMPTY){
-		DBG_PRNT("> %s\nElfSymbolTable == E_BAD_FORMAT || ElfSymbolTable == E_SYMBOL_TABLE_EMPTY\n", fileName);
-		ElfDestroy(&elfOfFile);
-		return UH_NOT_DECIDED;
-	}
-	if (retvalue == E_NO_KNOWN_SYMBOLS){
-		DBG_PRNT("> %s\nElfSymbolTable == E_NO_KNOWN_SYMBOLS\n", fileName);
-		ElfDestroy(&elfOfFile);
-		return UH_NOT_DECIDED;
-	}
+
 
 	if (retvalue != UH_SUCCESS){
-		DBG_PRNT("> %s\nElfSymbolTable != UH_SUCCESS\n", fileName);
+		DBG_PRNT("> %s\nElfSymbolTable (%d) : %s\n", fileName, retvalue, GetErrorCodeMsg(retvalue));
 		ElfDestroy(&elfOfFile);
-		return UH_NOT_DECIDED;
+		return retvalue;
 	}
 
 	/* file testing using the hasMalwareIAT function with 7 nearest neighbours */

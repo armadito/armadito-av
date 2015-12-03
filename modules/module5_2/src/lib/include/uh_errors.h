@@ -74,5 +74,6 @@ typedef enum _ERROR_CODE{
 VOID SetCurrentError(ERROR_CODE error);
 ERROR_CODE GetCurrentError();
 CHAR* GetErrorCodeMsg(ERROR_CODE error);
+const char *error_code_str(ERROR_CODE e);
 
 #endif /* ERRORS_H */
