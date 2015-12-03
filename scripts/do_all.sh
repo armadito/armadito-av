@@ -17,6 +17,7 @@ then
 	sudo dpkg --purge uhuru-mod-module5-2
 	sudo dpkg --purge uhuru-mod-clamav
 	sudo dpkg --purge uhuru-mod-fanotify-test
+	sudo dpkg --purge uhuru-mod-fanotify
 	sudo dpkg --purge libuhuru-dev
 	sudo dpkg --purge libuhuru-tools
 	sudo dpkg --purge libuhuru-daemon
