@@ -5,6 +5,7 @@ nobase_pkginclude_HEADERS= \
 common/action.h \
 common/status.h \
 libcore/error.h \
+libcore/filectx.h \
 libcore/handle.h \
 libcore/info.h \
 libcore/module.h \

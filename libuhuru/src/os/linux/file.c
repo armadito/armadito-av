@@ -12,18 +12,9 @@
 #include <string.h>
 #include <limits.h>
 
-void os_file_stat(const char *path, struct os_file_stat *buf, int *pfile_errno)
+static void fill_stat(struct os_file_stat *buf, struct stat *sb)
 {
-  struct stat sb;
-
-  if (stat(path, &sb) == -1) {
-    *pfile_errno = errno;
-    buf->flags = FILE_FLAG_IS_ERROR;
-
-    return;
-  }
-
-  switch (sb.st_mode & S_IFMT) {
+  switch (sb->st_mode & S_IFMT) {
   case S_IFBLK:
   case S_IFCHR:
     buf->flags = FILE_FLAG_IS_DEVICE;
@@ -46,7 +37,39 @@ void os_file_stat(const char *path, struct os_file_stat *buf, int *pfile_errno)
     break;
   }
 
-  return;
+  buf->file_size = sb->st_size;
+}
+
+int os_file_stat(const char *path, struct os_file_stat *buf, int *pfile_errno)
+{
+  struct stat sb;
+
+  if (stat(path, &sb) == -1) {
+    *pfile_errno = errno;
+    buf->flags = FILE_FLAG_IS_ERROR;
+
+    return -1;
+  }
+
+  fill_stat(buf, &sb);
+
+  return 0;
+}
+
+int os_file_stat_fd(int fd, struct os_file_stat *buf, int *pfile_errno)
+{
+  struct stat sb;
+
+  if (fstat(fd, &sb) == -1) {
+    *pfile_errno = errno;
+    buf->flags = FILE_FLAG_IS_ERROR;
+
+    return -1;
+  }
+
+  fill_stat(buf, &sb);
+
+  return 0;
 }
 
 static const char *do_not_scan_paths[] = {
