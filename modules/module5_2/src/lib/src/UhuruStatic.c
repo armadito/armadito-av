@@ -540,7 +540,8 @@ ERROR_CODE analyseElfFile(int fd, char* fileName){
 		DBG_PRNT("> %s\nElfInit == E_BAD_FORMAT\n", fileName);
 		return UH_MALWARE;
 	}
-
+	
+	// TOFIX: Logger plus clairement le type d'erreur pour ce qui est considéré comme "NOT_DECIDED"
 	if (retvalue != UH_SUCCESS){
 		DBG_PRNT("> %s\nElfInit != UH_SUCCESS\n", fileName);
 		return UH_NOT_DECIDED;
