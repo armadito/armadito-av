@@ -437,3 +437,15 @@ enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path, 
 
   return status;
 }
+
+enum uhuru_file_status uhuru_scan_context(struct uhuru_file_context *ctx,  struct uhuru_report *report)
+{
+  enum uhuru_file_status status;
+
+  if (ctx->applicable_modules == NULL)
+    return UHURU_UNKNOWN_FILE_TYPE;
+
+  status = scan_apply_modules(ctx->fd, ctx->path, ctx->mime_type, ctx->applicable_modules, NULL);
+
+  return status;
+}
