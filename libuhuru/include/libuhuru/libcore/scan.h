@@ -24,6 +24,7 @@
 
 #include <libuhuru/common/status.h>
 #include <libuhuru/libcore/handle.h>
+#include <libuhuru/libcore/filectx.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -155,6 +156,8 @@ void uhuru_scan_free(struct uhuru_scan *scan);
  *
  */
 enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path, struct uhuru_report * report);
+
+enum uhuru_file_status uhuru_scan_context(struct uhuru_file_context *ctx,  struct uhuru_report *report);
 
 #ifdef __cplusplus
 }
