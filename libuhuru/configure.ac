@@ -35,6 +35,8 @@ AC_CHECK_FUNCS(strerror)
 # check for headers
 AC_CHECK_HEADERS([sys/types.h])
 AC_CHECK_HEADERS([unistd.h])
+AC_CHECK_HEADERS([fcntl.h])
+AC_CHECK_HEADERS([sys/stat.h])
 
 # check for debug
 AC_MSG_CHECKING(for debug)

@@ -29,10 +29,10 @@ struct access_monitor {
   int enable_permission;
   int fanotify_fd;
   GPtrArray *paths;
-  struct uhuru *uhuru;
   pid_t my_pid;
   int activation_pipe[2];
   GThreadPool *thread_pool;  
+  struct uhuru *uhuru;
   struct uhuru_scan_conf *scan_conf;
 };
 
@@ -228,15 +228,18 @@ void scan_file_thread_fun(gpointer data, gpointer user_data)
 {
   struct uhuru_file_context *file_context = (struct uhuru_file_context *)data;
   struct access_monitor *m = (struct access_monitor *)user_data;
+  struct uhuru_scan *scan = uhuru_scan_new(m->uhuru, -1);
   enum uhuru_file_status status;
 	
-  status = uhuru_scan_context(file_context, NULL);
+  status = uhuru_scan_context(scan, file_context);
 
   write_response(m, file_context->fd, file_status_2_response(status), file_context->path, NULL);
 
   /* send notification if malware */
   
   uhuru_file_context_free(file_context);
+
+  uhuru_scan_free(scan);
 }
 
 static int perm_event_process(struct access_monitor *m, struct fanotify_event_metadata *event, const char *path)

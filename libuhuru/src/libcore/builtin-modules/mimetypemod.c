@@ -29,7 +29,9 @@ static enum uhuru_mod_status mimetype_conf_mime_type(struct uhuru_module *module
       continue;
     }
 
+#if 0
     uhuru_add_mime_type(module->uhuru, mime_type, mod);
+#endif
   }
 
   return UHURU_MOD_OK;

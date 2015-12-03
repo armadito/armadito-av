@@ -51,7 +51,7 @@ static void ipc_scan_handler(struct ipc_manager *m, void *data)
 {
   struct client *cl = (struct client *)data;
   char *path;
-  struct uhuru_scan *scan;
+  struct uhuru_on_demand *on_demand;
 
 #ifdef DEBUG
   uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_DEBUG, "ipc: scan handler called");
@@ -59,14 +59,14 @@ static void ipc_scan_handler(struct ipc_manager *m, void *data)
 
   ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &path);
 
-  scan = uhuru_scan_new(cl->uhuru, 0, path, UHURU_SCAN_THREADED | UHURU_SCAN_RECURSE);
+  on_demand = uhuru_on_demand_new(cl->uhuru, 0, path, UHURU_SCAN_THREADED | UHURU_SCAN_RECURSE);
   /* scan = uhuru_scan_new(cl->uhuru, 0, path, UHURU_SCAN_RECURSE); */
 
-  uhuru_scan_add_callback(scan, scan_callback, cl);
+  uhuru_scan_add_callback(uhuru_on_demand_get_scan(on_demand), scan_callback, cl);
 
-  uhuru_scan_run(scan);
+  uhuru_on_demand_run(on_demand);
 
-  uhuru_scan_free(scan);
+  uhuru_on_demand_free(on_demand);
 
   ipc_manager_msg_send(cl->manager, IPC_MSG_ID_SCAN_END, IPC_NONE_T);
 

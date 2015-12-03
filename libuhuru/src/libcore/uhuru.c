@@ -158,39 +158,6 @@ struct uhuru_module *uhuru_get_module_by_name(struct uhuru *u, const char *modul
   return NULL;
 }
 
-void uhuru_add_mime_type(struct uhuru *u, const char *mime_type, struct uhuru_module *module)
-{
-  /* a GArray and not a GPtrArray because GArray can be automatically NULL terminated */
-  GArray *modules;
-
-  modules = (GArray *)g_hash_table_lookup(u->mime_type_table, mime_type);
-
-  if (modules == NULL) {
-    modules = g_array_new(TRUE, TRUE, sizeof(struct uhuru_module *));
-
-    g_hash_table_insert(u->mime_type_table, (gpointer)(os_strdup(mime_type)), modules);
-  }
-
-  g_array_append_val(modules, module);
-}
-
-struct uhuru_module **uhuru_get_applicable_modules(struct uhuru *u, const char *mime_type)
-{
-  GArray *modules;
-
-  modules = (GArray *)g_hash_table_lookup(u->mime_type_table, mime_type);
-
-  if (modules != NULL)
-    return (struct uhuru_module **)modules->data;
-
-  modules = (GArray *)g_hash_table_lookup(u->mime_type_table, "*");
-
-  if (modules != NULL)
-    return (struct uhuru_module **)modules->data;
-
-  return NULL;
-}
-
 int uhuru_close(struct uhuru *u, uhuru_error **error)
 {
   return module_manager_close_all(u->module_manager, error);
