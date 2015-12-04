@@ -9,12 +9,12 @@
 //
 // Return:
 //		the size of the file in a QWORD.
-QWORD SizeOfFile(char *szPathFileName)
+QWORD SizeOfFile(int fd)
 {
 	struct stat st;
 	QWORD size = 0;
 
-	stat(szPathFileName, &st);
+	fstat(fd, &st);
 	size = st.st_size;
 	return size;
 }

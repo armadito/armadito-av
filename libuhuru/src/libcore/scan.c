@@ -109,7 +109,7 @@ static enum uhuru_file_status scan_apply_modules(int fd, const char *path, const
     /* call the scan function of the module */
     /* but, after rewinding the file !!! */
     if (lseek(fd, 0, SEEK_SET) < 0)  {
-      uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "cannot seek on file %s (error %s)", path, os_strerror(errno));
+      uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "cannot seek on file %s (error %s)", path, os_strerror(errno) );
       return UHURU_IERROR;
     }
 
