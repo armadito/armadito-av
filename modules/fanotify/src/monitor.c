@@ -264,8 +264,10 @@ static int perm_event_process(struct access_monitor *m, struct fanotify_event_me
   /* get file scan context */
   context_status = uhuru_file_context_get(&file_context, event->fd, path, m->scan_conf);
 
-  if (context_status)    /* means file must not be scanned */
+  if (context_status) {   /* means file must not be scanned */
+    uhuru_file_context_close(&file_context);
     return write_response(m, event->fd, FAN_ALLOW, path, NULL);
+  }
 
   g_thread_pool_push(m->thread_pool, uhuru_file_context_clone(&file_context), NULL);
 
