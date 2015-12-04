@@ -2,6 +2,7 @@
 #include <libuhuru/core.h>
 
 #include "os/string.h"
+#include "os/io.h"
 #include "os/mimetype.h"
 
 #include <stdlib.h>
@@ -29,34 +30,44 @@ enum uhuru_file_context_status uhuru_file_context_get(struct uhuru_file_context 
   const char *mime_type;
 
   ctx->status = UHURU_FC_MUST_SCAN;
+  ctx->fd = fd;
+  ctx->path = NULL;
+  ctx->mime_type = NULL;
+  ctx->applicable_modules = NULL;
+
   /* 1) check file name vs. directories white list */
   if (uhuru_scan_conf_is_white_listed(conf, path)) {
     ctx->status = UHURU_FC_WHITE_LISTED_DIRECTORY;
     return ctx->status;
   }
   
-  /* 2) cache */
+  /* 2) cache => NOT YET */
 
   /* open file if no fd given */
-  if (fd == -1) {
+  if (ctx->fd == -1) {
+    /* open the file */
+    ctx->fd = os_open(path, O_RDONLY);
+    if (ctx->fd < 0) {
+      ctx->status = UHURU_FC_FILE_OPEN_ERROR;
+      return ctx->status;
+    }
   }
 
   /* 3) fstat file descriptor and get file size */
   /* not yet */
 
   /* 4) file type using mime_type_guess and applicable modules from configuration */
-  mime_type = os_mime_type_guess_fd(fd);
+  mime_type = os_mime_type_guess_fd(ctx->fd);
   applicable_modules = uhuru_scan_conf_get_applicable_modules(conf, mime_type);
 
   if (applicable_modules == NULL) {
     free((void *)mime_type);
-
+    
     ctx->status = UHURU_FC_FILE_TYPE_NOT_SCANNED;
     return ctx->status;
   }
 
   ctx->status = UHURU_FC_MUST_SCAN;
-  ctx->fd = fd;
   ctx->path = os_strdup(path);
   ctx->mime_type = mime_type;
   ctx->applicable_modules = applicable_modules;
@@ -77,10 +88,20 @@ struct uhuru_file_context *uhuru_file_context_clone(struct uhuru_file_context *c
   return clone_ctx;
 }
 
+void uhuru_file_context_close(struct uhuru_file_context *ctx)
+{
+  if (ctx->fd > 0)
+    os_close(ctx->fd);
+}
+
 void uhuru_file_context_free(struct uhuru_file_context *ctx)
 {
-  free((void *)ctx->path);
-  free((void *)ctx->mime_type);
+  uhuru_file_context_close(ctx);
+
+  if (ctx->path != NULL)
+    free((void *)ctx->path);
+  if (ctx->mime_type != NULL)
+    free((void *)ctx->mime_type);
 
   free(ctx);
 }

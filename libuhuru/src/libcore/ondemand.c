@@ -54,9 +54,6 @@ static void scan_entry_thread_fun(gpointer data, gpointer user_data)
 	
   status = uhuru_scan_context(scan, file_context);
 
-  /* FIXME: may be in context_close? */
-  os_close(file_context->fd);
-
   uhuru_file_context_free(file_context);
 }
 
@@ -67,7 +64,7 @@ static void process_error(struct uhuru_scan *scan, const char *full_path, int en
 
   uhuru_report_init(&report, scan->scan_id, full_path, REPORT_PROGRESS_UNKNOWN);
 
-  uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "local_scan_entry: Error - %s", full_path);
+  uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "error processing %s (error %s)", full_path, os_strerror(entry_errno));
 
   report.status = UHURU_IERROR;
   report.mod_report = os_strdup(os_strerror(entry_errno));
@@ -84,7 +81,6 @@ static void scan_entry(const char *full_path, enum os_file_flag flags, int entry
   struct uhuru_on_demand *on_demand = (struct uhuru_on_demand *)data;
   struct uhuru_file_context file_context;
   enum uhuru_file_context_status context_status;
-  int fd;
 
   if (flags & FILE_FLAG_IS_ERROR) {
     process_error(on_demand->scan, full_path, entry_errno);
@@ -94,20 +90,16 @@ static void scan_entry(const char *full_path, enum os_file_flag flags, int entry
   if (!(flags & FILE_FLAG_IS_PLAIN_FILE))
     return;
 
-  /* open the file */
-  fd = os_open(full_path, O_RDONLY);
-  if (fd < 0) {
-    process_error(on_demand->scan, full_path, errno);
-    return;
-  }
-
   /* get file scan context */
-  context_status = uhuru_file_context_get(&file_context, fd, full_path, on_demand->scan_conf);
+  /* passing -1 as file descriptor means uhuru_file_context_get will open() the file if needed */
+  context_status = uhuru_file_context_get(&file_context, -1, full_path, on_demand->scan_conf);
 
-  if (context_status)    /* means file must not be scanned */
-    return;
+  if (context_status == UHURU_FC_MUST_SCAN) /* means file must not be scanned */
+    g_thread_pool_push(on_demand->thread_pool, uhuru_file_context_clone(&file_context), NULL);
+  else if (context_status == UHURU_FC_FILE_OPEN_ERROR)
+    process_error(on_demand->scan, full_path, errno);
 
-  g_thread_pool_push(on_demand->thread_pool, uhuru_file_context_clone(&file_context), NULL);
+  uhuru_file_context_close(&file_context);
 }
 
 /* dummy function, should use platform (# of cores) or configuration data */

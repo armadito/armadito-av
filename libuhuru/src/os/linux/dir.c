@@ -61,7 +61,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
   }
 
   while(1) {
-    char *entry_path;
+    char *entry_path, *real_entry_path;
     struct dirent *entry;
     int saved_errno;
 
@@ -92,9 +92,11 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
       os_dir_map(entry_path, recurse, dirent_cb, data);
 
     // Call to scan_entry()
-    (*dirent_cb)(entry_path, dirent_flags(entry), 0, data);
+    real_entry_path = realpath(entry_path, NULL);
+    (*dirent_cb)(real_entry_path, dirent_flags(entry), 0, data);
 
     free(entry_path);
+    free(real_entry_path);
   }
 
  cleanup:
