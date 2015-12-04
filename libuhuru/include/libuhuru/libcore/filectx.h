@@ -26,6 +26,8 @@ struct uhuru_file_context *uhuru_file_context_clone(struct uhuru_file_context *c
 
 void uhuru_file_context_close(struct uhuru_file_context *ctx);
 
+void uhuru_file_context_destroy(struct uhuru_file_context *ctx);
+
 void uhuru_file_context_free(struct uhuru_file_context *ctx);
 
 #endif

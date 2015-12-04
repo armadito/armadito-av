@@ -100,8 +100,7 @@ static enum uhuru_file_status scan_apply_modules(int fd, const char *path, const
     enum uhuru_file_status mod_status;
     char *mod_report = NULL;
 
-    // Added by ulrich for debug.	
-    //printf("[ii] Debug :: Applying module %s :: report = %d\n",mod->name,report);
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_DEBUG, "scanning fd %d path %s with module %s", fd, path, mod->name);
 
     /* if module status is not OK, don't call it */
     if (mod->status != UHURU_MOD_OK)
