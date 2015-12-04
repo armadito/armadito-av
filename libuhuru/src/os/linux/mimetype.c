@@ -55,8 +55,6 @@ const char *os_mime_type_guess(const char *path)
   return strdup(mime_type);
 }
 
-#ifdef USE_FILE_DESCRIPTORS
-
 #define BUFFER_SIZE 1024
 
 const char *os_mime_type_guess_fd(int fd)
@@ -77,5 +75,3 @@ const char *os_mime_type_guess_fd(int fd)
 
   return strdup(mime_type);
 }
-
-#endif
