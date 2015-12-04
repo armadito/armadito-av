@@ -451,7 +451,7 @@ void uhuru_conf_parser_free(struct uhuru_conf_parser *cp)
     g_ptr_array_free(cp->current_args, TRUE);
   }
 
-  free(cp->filename);
+  free((void *)cp->filename);
 
   g_free(cp);
 }

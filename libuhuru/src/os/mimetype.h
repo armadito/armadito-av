@@ -28,8 +28,6 @@ void os_mime_type_init(void);
  */
 const char *os_mime_type_guess(const char *path);
 
-#ifdef USE_FILE_DESCRIPTORS
-
 /**
  *      \fn const char *os_mime_type_guess_fd(intfd);
  *      \brief Returns the mime type of a file given by a file descriptor
@@ -39,8 +37,6 @@ const char *os_mime_type_guess(const char *path);
  *      \return the mime type as a string, NULL if not guessable
  */
 const char *os_mime_type_guess_fd(int fd);
-
-#endif
 
 #ifdef __cplusplus
 }
