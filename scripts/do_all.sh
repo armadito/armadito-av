@@ -26,6 +26,8 @@ then
 	sudo dpkg --purge uhuru-qt
 fi
 
+set -e
+
 if [[ $PACKAGE == "libuhuru" || $PACKAGE == "" ]];
 then
 	./configure.sh -p libuhuru -d trusty
