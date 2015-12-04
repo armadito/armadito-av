@@ -51,6 +51,9 @@ static void ipc_scan_handler(struct ipc_manager *m, void *data)
 {
   struct client *cl = (struct client *)data;
   char *path;
+  int threaded;
+  int recurse;
+  enum uhuru_scan_flags flags = 0;
   struct uhuru_on_demand *on_demand;
 
 #ifdef DEBUG
@@ -58,9 +61,16 @@ static void ipc_scan_handler(struct ipc_manager *m, void *data)
 #endif
 
   ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &path);
+  ipc_manager_get_arg_at(m, 1, IPC_INT32_T, &threaded);
+  ipc_manager_get_arg_at(m, 2, IPC_INT32_T, &recurse);
 
-  on_demand = uhuru_on_demand_new(cl->uhuru, 0, path, UHURU_SCAN_THREADED | UHURU_SCAN_RECURSE);
-  /* scan = uhuru_scan_new(cl->uhuru, 0, path, UHURU_SCAN_RECURSE); */
+  if (threaded)
+    flags |= UHURU_SCAN_THREADED;
+
+  if (recurse)
+    flags |= UHURU_SCAN_RECURSE;
+
+  on_demand = uhuru_on_demand_new(cl->uhuru, 0, path, flags);
 
   uhuru_scan_add_callback(uhuru_on_demand_get_scan(on_demand), scan_callback, cl);
 
