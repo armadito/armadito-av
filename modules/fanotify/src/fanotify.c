@@ -26,7 +26,7 @@ static enum uhuru_mod_status mod_fanotify_init(struct uhuru_module *module)
   /*   return UHURU_MOD_INIT_ERROR; */
 
 #ifdef HAVE_LIBNOTIFY
-  notify_init ("TatouAV");
+  notify_init("TatouAV");
 #endif
 
   return UHURU_MOD_OK;

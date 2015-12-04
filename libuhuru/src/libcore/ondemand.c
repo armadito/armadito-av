@@ -54,6 +54,9 @@ static void scan_entry_thread_fun(gpointer data, gpointer user_data)
 	
   status = uhuru_scan_context(scan, file_context);
 
+  /* FIXME: may be in context_close? */
+  os_close(file_context->fd);
+
   uhuru_file_context_free(file_context);
 }
 
@@ -110,7 +113,7 @@ static void scan_entry(const char *full_path, enum os_file_flag flags, int entry
 /* dummy function, should use platform (# of cores) or configuration data */
 static int get_max_threads(void)
 {
-  return 8;
+  return 4;
 }
 
 static void count_entry(const char *full_path, enum os_file_flag flags, int entry_errno, void *data)

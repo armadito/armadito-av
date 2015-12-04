@@ -16,7 +16,7 @@
 #ifdef HAVE_QUARANTINE_MODULE
 #include "builtin-modules/quarantine.h"
 #endif
-#include "builtin-modules/mimetypemod.h"
+#include "builtin-modules/ondemandmod.h"
 
 #include <glib.h>
 #include <stdlib.h>
@@ -63,7 +63,7 @@ struct uhuru *uhuru_open(uhuru_error **error)
 
   u = uhuru_new();
 
-  module_manager_add(u->module_manager, &mimetype_module);
+  module_manager_add(u->module_manager, &on_demand_module);
 
 #ifdef HAVE_ALERT_MODULE
   module_manager_add(u->module_manager, &alert_module);
