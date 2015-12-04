@@ -113,6 +113,6 @@ Message : "Etiam nisl nibh, porta a."
 
 #include "windowsTypes.h"
 
-QWORD SizeOfFile(char *szPathFileName);
+QWORD SizeOfFile(int fd);
 
 #endif /* UTILS_H */
