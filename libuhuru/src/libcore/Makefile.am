@@ -15,9 +15,11 @@ log.c \
 module.c \
 modulep.h \
 ondemand.c \
+ondemandp.h \
 report.c \
 reportp.h \
 scan.c \
+scanp.h \
 scanconf.c \
 status.c \
 statusp.h \
