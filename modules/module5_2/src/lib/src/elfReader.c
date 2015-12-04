@@ -29,36 +29,27 @@ ERROR_CODE ElfInit(int fd, CHAR* filename, PELF_CONTAINER elfOfFile){
 	WORD i = 0;
 	DWORD signature = 0;
 
-	fileHandle = os_fdopen(fd, "r");
-	if (fileHandle == NULL){
-		return E_FILE_NOT_FOUND;
-	}
-
 	/* computation of the file size */
-	elfOfFile->fileSize = SizeOfFile(filename);
+	elfOfFile->fileSize = SizeOfFile(fd);
 	if (elfOfFile->fileSize == 0){
-		fclose(fileHandle);
 		return E_FILE_EMPTY;
 	}
 
 	/* creation of the ULONG_PTR used to store the file */
 	elfOfFile->buffer = (ULONG_PTR)calloc(elfOfFile->fileSize + 1, sizeof(UCHAR));
 	if (elfOfFile->buffer == 0){
-		fclose(fileHandle);
 		return E_CALLOC_ERROR;
 	}
 
 	/* file reading into *elf 
 		We read the whole file.
 	*/
-	if (fread((PVOID)elfOfFile->buffer, elfOfFile->fileSize, 1, fileHandle) != 1){
-		fclose(fileHandle);
+	if (read(fd, (PVOID)elfOfFile->buffer, elfOfFile->fileSize) == -1){
+
 		free((ULONG_PTR*)elfOfFile->buffer);
 		elfOfFile->buffer = 0;
 		return E_READING_ERROR;
 	}
-
-	fclose(fileHandle);
 
 	signature = *(DWORD*)((PVOID)(elfOfFile->buffer));
 
@@ -77,7 +68,6 @@ ERROR_CODE ElfInit(int fd, CHAR* filename, PELF_CONTAINER elfOfFile){
 		elfOfFile->buffer = 0;
 		return E_BAD_FORMAT;
 	}
-
 
 	// ELF-64bit
 	if (0 != elfOfFile->machine && EM_AMD64 == elfOfFile->machine){

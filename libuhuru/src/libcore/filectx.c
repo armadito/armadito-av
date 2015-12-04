@@ -45,6 +45,7 @@ enum uhuru_file_context_status uhuru_file_context_get(struct uhuru_file_context 
 
   /* open file if no fd given */
   if (ctx->fd == -1) {
+	
     /* open the file */
     ctx->fd = os_open(path, O_RDONLY);
     if (ctx->fd < 0) {
