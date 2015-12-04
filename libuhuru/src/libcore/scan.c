@@ -165,6 +165,8 @@ enum uhuru_file_status uhuru_scan_context(struct uhuru_scan *scan, struct uhuru_
   enum uhuru_file_status status;
   struct uhuru_report report;
 
+  uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_DEBUG, "scanning file %s", ctx->path);
+
   /* initializes the structure passed to callbacks */
   uhuru_report_init(&report, scan->scan_id, ctx->path, REPORT_PROGRESS_UNKNOWN);
 

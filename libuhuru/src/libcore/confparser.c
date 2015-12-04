@@ -173,6 +173,7 @@ static void scanner_free(struct scanner *s)
  */
 
 struct uhuru_conf_parser {
+  const char *filename;
   FILE *input;
   struct scanner *scanner;
   enum token_type lookahead_token;
@@ -187,6 +188,8 @@ struct uhuru_conf_parser {
 struct uhuru_conf_parser *uhuru_conf_parser_new(const char *filename, conf_parser_callback_t callback, void *user_data)
 {
   struct uhuru_conf_parser *cp = g_new0(struct uhuru_conf_parser, 1);
+
+  cp->filename = os_strdup(filename);
 
 #ifdef WIN32
   fopen_s(&cp->input,filename, "r");
@@ -256,11 +259,12 @@ static const char *token_str(enum token_type token)
 
 static void syntax_error(struct uhuru_conf_parser *cp, guint token) 
 {
-  uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "syntax error: at line %d position %d expecting '%s' got '%s'\n", 
-	scanner_cur_line(cp->scanner),
-	scanner_cur_position(cp->scanner),
-	token_str(token), 
-	token_str(cp->lookahead_token));
+  uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "syntax error: file %s line %d position %d expecting '%s' got '%s'\n", 
+	    cp->filename,
+	    scanner_cur_line(cp->scanner),
+	    scanner_cur_position(cp->scanner),
+	    token_str(token), 
+	    token_str(cp->lookahead_token));
 
   longjmp(cp->env, 1);
 }
@@ -446,6 +450,8 @@ void uhuru_conf_parser_free(struct uhuru_conf_parser *cp)
 
     g_ptr_array_free(cp->current_args, TRUE);
   }
+
+  free(cp->filename);
 
   g_free(cp);
 }

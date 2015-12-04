@@ -25,8 +25,8 @@ uhuru.c \
 uhurup.h \
 builtin-modules/alert.c \
 builtin-modules/alert.h \
-builtin-modules/mimetypemod.c \
-builtin-modules/mimetypemod.h \
+builtin-modules/ondemandmod.c \
+builtin-modules/ondemandmod.h \
 builtin-modules/quarantine.c \
 builtin-modules/quarantine.h \
 ../os/linux/dir.c \
