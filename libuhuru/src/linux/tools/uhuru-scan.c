@@ -185,7 +185,12 @@ static void do_scan(struct scan_options *opts, int client_sock)
   ipc_manager_add_handler(manager, IPC_MSG_ID_SCAN_FILE, ipc_handler_scan_file, scan);
   ipc_manager_add_handler(manager, IPC_MSG_ID_SCAN_END, ipc_handler_scan_end, scan);
 
-  ipc_manager_msg_send(manager, IPC_MSG_ID_SCAN, IPC_STRING_T, opts->path, IPC_NONE_T);
+  ipc_manager_msg_send(manager, 
+		       IPC_MSG_ID_SCAN, 
+		       IPC_STRING_T, opts->path, 
+		       IPC_INT32_T, opts->threaded, 
+		       IPC_INT32_T, opts->recursive, 
+		       IPC_NONE_T);
 
   while (ipc_manager_receive(manager) > 0)
     ;

@@ -94,7 +94,7 @@ void uhuru_file_context_close(struct uhuru_file_context *ctx)
     os_close(ctx->fd);
 }
 
-void uhuru_file_context_free(struct uhuru_file_context *ctx)
+void uhuru_file_context_destroy(struct uhuru_file_context *ctx)
 {
   uhuru_file_context_close(ctx);
 
@@ -102,6 +102,11 @@ void uhuru_file_context_free(struct uhuru_file_context *ctx)
     free((void *)ctx->path);
   if (ctx->mime_type != NULL)
     free((void *)ctx->mime_type);
+}
+
+void uhuru_file_context_free(struct uhuru_file_context *ctx)
+{
+  uhuru_file_context_destroy(ctx);
 
   free(ctx);
 }
