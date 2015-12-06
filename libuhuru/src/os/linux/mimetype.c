@@ -19,14 +19,6 @@ static void magic_destroy_notify(gpointer data)
   magic_close((magic_t)data);
 }
 
-void os_mime_type_init(void)
-{
-  if (!init_done) {
-    private_key = g_private_new(magic_destroy_notify);
-    init_done = 1;
-  }
-}
-
 static magic_t get_private_magic(void)
 {
   magic_t m;
@@ -41,6 +33,19 @@ static magic_t get_private_magic(void)
   }
 
   return m;
+}
+
+void os_mime_type_init(void)
+{
+  if (!init_done) {
+    private_key = g_private_new(magic_destroy_notify);
+
+    // this is to pre-load the magic file for the current thread
+    // to avoid a dead-lock for the first scanned file
+    get_private_magic();
+
+    init_done = 1;
+  }
 }
 
 const char *os_mime_type_guess(const char *path)
