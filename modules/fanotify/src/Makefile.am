@@ -1,9 +1,8 @@
 modulesdir=$(libdir)/libuhuru/modules
 modules_LTLIBRARIES=fanotify.la
 
-fanotify_la_SOURCES=fanotify.c monitor.c monitor.h
+fanotify_la_SOURCES=fanotify.c #monitor.c monitor.h
 
-AM_CPPFLAGS=-DG_LOG_DOMAIN='"uhuru"'
 fanotify_la_LDFLAGS= -module -avoid-version
 fanotify_la_CFLAGS=
 fanotify_la_LIBADD=
@@ -11,8 +10,8 @@ fanotify_la_CFLAGS+= @LIBUHURU_CFLAGS@
 fanotify_la_LIBADD+= @LIBUHURU_LIBS@ -luhuru_core
 fanotify_la_CFLAGS+= @GLIB2_CFLAGS@
 fanotify_la_LIBADD+= @GLIB2_LIBS@
-fanotify_la_CFLAGS+= @LIBNOTIFY_CFLAGS@
-fanotify_la_LIBADD+= @LIBNOTIFY_LIBS@
+#fanotify_la_CFLAGS+= @LIBNOTIFY_CFLAGS@
+#fanotify_la_LIBADD+= @LIBNOTIFY_LIBS@
 
 install-exec-hook:
 	-rm -f "$(DESTDIR)$(modulesdir)"/fanotify.la "$(DESTDIR)$(modulesdir)"/fanotify.a

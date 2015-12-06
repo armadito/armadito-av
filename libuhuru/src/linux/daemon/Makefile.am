@@ -18,6 +18,10 @@ server.c \
 server.h \
 daemonize.c \
 daemonize.h \
+monitor.c \
+monitor.h \
+pollset.c \
+pollset.h \
 unixsock.c \
 unixsock.h \
 tcpsock.c \

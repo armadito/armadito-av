@@ -55,20 +55,12 @@ static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpo
   return TRUE;
 }
 
-struct server *server_new(int server_sock)
+struct server *server_new(struct uhuru *uhuru, int server_sock)
 {
-  struct server *server;
-  uhuru_error *error = NULL;
-
-  server = (struct server *)malloc(sizeof(struct server));
+  struct server *server = (struct server *)malloc(sizeof(struct server));
   assert(server != NULL);
 
-  server->uhuru = uhuru_open(&error);
-  if (server->uhuru == NULL) {
-    uhuru_error_print(error, stderr);
-    exit(1);
-  }
-
+  server->uhuru = uhuru;
   server->listen_sock = server_sock;
 
   server->channel = g_io_channel_unix_new(server->listen_sock);

@@ -4,6 +4,8 @@
 #include "log.h"
 #include "server.h"
 #include "daemonize.h"
+#include "monitor.h"
+#include "pollset.h"
 #include "tcpsock.h"
 #include "unixsock.h"
 
@@ -110,18 +112,26 @@ static void parse_options(int argc, const char **argv, struct uhuru_daemon_optio
     opts->pid_file = opt_value(daemon_opt_defs, "pidfile", LOCALSTATEDIR "/run/uhuru-scand.pid");
 }
 
-static void main_loop(void)
+static int main_loop(struct server *server, struct access_monitor *monitor)
 {
-  GMainLoop *loop = g_main_loop_new(NULL, FALSE);
+  struct poll_set *ps = poll_set_new();
 
-  g_main_loop_run(loop);
+  poll_set_add_fd(ps, access_monitor_get_poll_fd(monitor), access_monitor_cb, monitor);
+
+  access_monitor_activate(monitor);
+  access_monitor_enable_permission(monitor, 1);
+
+  return poll_set_loop(ps);
 }
 
 int main(int argc, const char **argv)
 {
   struct uhuru_daemon_options opts;
   int server_sock;
+  struct uhuru *uhuru;
   struct server *server;
+  struct access_monitor *monitor;
+  uhuru_error *error = NULL;
 
 #ifdef HAVE_GTHREAD_INIT
   g_thread_init(NULL);
@@ -152,11 +162,22 @@ int main(int argc, const char **argv)
 
   log_init(opts.s_log_level, !opts.no_daemon);
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_NONE, "starting %s%s", argv[0], opts.no_daemon ? "" : " in daemon mode");
+  uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_NONE, "starting %s%s", argv[0], opts.no_daemon ? "" : " in daemon mode");
 
-  server = server_new(server_sock);
+  uhuru = uhuru_open(&error);
+  if (uhuru == NULL) {
+    uhuru_error_print(error, stderr);
+    exit(1);
+  }
 
-  main_loop();
+  uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_INFO, "uhuru init done");
+
+  server = server_new(uhuru, server_sock);
+
+  monitor = access_monitor_new(uhuru);
+  access_monitor_add(monitor, "/home");
+
+  main_loop(server, monitor);
 
   return 0;
 }

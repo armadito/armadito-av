@@ -1,15 +1,22 @@
 #include <libuhuru/core.h>
 
-#include "monitor.h"
-
 #include <glib.h>
+#include <stdlib.h>
+#include <string.h>
+
 #ifdef HAVE_LIBNOTIFY
 #include <libnotify/notify.h>
 #endif
 
 struct fanotify_data {
-  struct access_monitor *monitor;
+  GPtrArray *paths;
+  int enable_permission;
 };
+
+void path_destroy_notify(gpointer data)
+{
+  free(data);
+}
 
 static enum uhuru_mod_status mod_fanotify_init(struct uhuru_module *module)
 {
@@ -17,7 +24,8 @@ static enum uhuru_mod_status mod_fanotify_init(struct uhuru_module *module)
 
   module->data = fa_data;
 
-  fa_data->monitor = access_monitor_new(module->uhuru);
+  fa_data->paths = g_ptr_array_new_full(10, path_destroy_notify);
+  fa_data->enable_permission = 0;
 
   /* if access monitor is NULL, for instance because this process does not */
   /* have priviledge (i.e. not running as root), we don't return an error because this will make */
@@ -36,12 +44,12 @@ static enum uhuru_mod_status mod_fanotify_conf_set_watch_dir(struct uhuru_module
 {
   struct fanotify_data *fa_data = (struct fanotify_data *)module->data;
 
-  if (fa_data->monitor != NULL) {
-    while (*argv != NULL) {
-      access_monitor_add(fa_data->monitor, *argv);
+  while (*argv != NULL) {
+    g_ptr_array_add(fa_data->paths, strdup(*argv));
 
-      argv++;
-    }
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify_mod: added %s", *argv);
+
+    argv++;
   }
 
   return UHURU_MOD_OK;
@@ -51,19 +59,19 @@ static enum uhuru_mod_status mod_fanotify_conf_set_enable_on_access(struct uhuru
 {
   struct fanotify_data *fa_data = (struct fanotify_data *)module->data;
 
-  if (fa_data->monitor != NULL)
-    access_monitor_enable_permission(fa_data->monitor, atoi(argv[0]));
+  fa_data->enable_permission = atoi(argv[0]);
 
   return UHURU_MOD_OK;
 }
 
 static enum uhuru_mod_status mod_fanotify_conf_white_list_dir(struct uhuru_module *module, const char *directive, const char **argv)
 {
-  struct fanotify_data *fa_data = (struct fanotify_data *)module->data;
   struct uhuru_scan_conf *on_access_conf = uhuru_scan_conf_on_access();
 
   while (*argv != NULL) {
     uhuru_scan_conf_white_list_directory(on_access_conf, *argv);
+
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify_mod: white list %s", *argv);
 
     argv++;
   }
@@ -73,7 +81,6 @@ static enum uhuru_mod_status mod_fanotify_conf_white_list_dir(struct uhuru_modul
 
 static enum uhuru_mod_status mod_fanotify_conf_mime_type(struct uhuru_module *module, const char *directive, const char **argv)
 {
-  struct fanotify_data *fa_data = (struct fanotify_data *)module->data;
   const char *mime_type;
   struct uhuru_scan_conf *on_access_conf = uhuru_scan_conf_on_access();
 
@@ -92,11 +99,10 @@ static enum uhuru_mod_status mod_fanotify_conf_mime_type(struct uhuru_module *mo
 
 static enum uhuru_mod_status mod_fanotify_conf_max_size(struct uhuru_module *module, const char *directive, const char **argv)
 {
-  struct fanotify_data *fa_data = (struct fanotify_data *)module->data;
   struct uhuru_scan_conf *on_access_conf = uhuru_scan_conf_on_access();
 
   uhuru_scan_conf_max_file_size(on_access_conf, atoi(argv[0]));
-  
+
   return UHURU_MOD_OK;
 }
 
@@ -104,20 +110,12 @@ static enum uhuru_mod_status mod_fanotify_post_init(struct uhuru_module *module)
 {
   struct fanotify_data *fa_data = (struct fanotify_data *)module->data;
 
-  access_monitor_activate(fa_data->monitor);
-
   return UHURU_MOD_OK;
 }
 
 static enum uhuru_mod_status mod_fanotify_close(struct uhuru_module *module)
 {
   struct fanotify_data *fa_data = (struct fanotify_data *)module->data;
-
-  if (fa_data->monitor != NULL) {
-    access_monitor_free(fa_data->monitor);
-  }
-
-  fa_data->monitor = NULL;
 
 #ifdef HAVE_LIBNOTIFY
   notify_uninit();
