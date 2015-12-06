@@ -3,6 +3,6 @@
 
 struct server;
 
-struct server *server_new(int server_sock);
+struct server *server_new(struct uhuru *uhuru, int server_sock);
 
 #endif
