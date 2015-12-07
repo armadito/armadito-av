@@ -43,17 +43,9 @@ if test "$HAVE_GIO2" = "no"; then
 fi
 
 # check for fanotify
-#AC_CHECK_FUNCS(fanotify_init, [HAVE_FANOTIFY_INIT=1], [HAVE_FANOTIFY_INIT=0])
-#if test "$HAVE_FANOTIFY_INIT" = "0" ; then
-#   AC_MSG_ERROR("fanotify is not availble on this Linux distribution")
-#fi
-
-# check for desktop notifications
-PKG_CHECK_MODULES(LIBNOTIFY, libnotify, [HAVE_LIBNOTIFY=yes], [HAVE_LIBNOTIFY=no])
-if test "$HAVE_LIBNOTIFY" = "yes"; then
-   AC_DEFINE(HAVE_LIBNOTIFY,1,[Define to 1 if you libnotify library is available])
-else
-   AC_MSG_WARN("cannot find libnotify library, desktop notifications will not be available")
+AC_CHECK_FUNCS(fanotify_init, [HAVE_FANOTIFY_INIT=1], [HAVE_FANOTIFY_INIT=0])
+if test "$HAVE_FANOTIFY_INIT" = "0" ; then
+   AC_MSG_ERROR("fanotify is not availble on this Linux distribution")
 fi
 
 # Output files

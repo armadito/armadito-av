@@ -20,7 +20,10 @@ UpdateDialog::UpdateDialog(InfoModel *model, QWidget *parent) :
   QPushButton *refreshButton =  findChild<QPushButton*>("RefreshButton");
 
   // Create connexion onClick() -> refreshUpdateInfo
-  connect(refreshButton, SIGNAL(clicked()), this, SLOT(refreshUpdateInfo()));
+  //FIXME: button causes crash (does not use DaemonConnection as in systray)
+  // for now, button is just disabled
+  refreshButton->setEnabled(false);
+  //connect(refreshButton, SIGNAL(clicked()), this, SLOT(refreshUpdateInfo()));
 }
 
 QIcon *UpdateDialog::getIcon()

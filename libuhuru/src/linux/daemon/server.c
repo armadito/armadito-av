@@ -18,7 +18,6 @@
 
 struct server {
   int listen_sock;
-  GIOChannel *channel;
   GThreadPool *thread_pool;  
   struct uhuru *uhuru;
 };
@@ -33,9 +32,14 @@ static void client_thread(gpointer data, gpointer user_data)
   client_free(client);
 }
 
-static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpointer data)
+int server_get_poll_fd(struct server *s)
 {
-  struct server *server = (struct server *)data;
+  return s->listen_sock;
+}
+
+void server_cb(void *user_data)
+{
+  struct server *server = (struct server *)user_data;
   struct client *client;
   int client_sock;
 
@@ -43,7 +47,7 @@ static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpo
 
   if (client_sock < 0) {
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "accept() failed: errno = %d", errno);
-    return FALSE;
+    return;
   }
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "accepted client connection: fd = %d", client_sock);
@@ -51,8 +55,6 @@ static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpo
   client = client_new(client_sock, server->uhuru);
 
   g_thread_pool_push(server->thread_pool, (gpointer)client, NULL);
-
-  return TRUE;
 }
 
 struct server *server_new(struct uhuru *uhuru, int server_sock)
@@ -62,9 +64,6 @@ struct server *server_new(struct uhuru *uhuru, int server_sock)
 
   server->uhuru = uhuru;
   server->listen_sock = server_sock;
-
-  server->channel = g_io_channel_unix_new(server->listen_sock);
-  g_io_add_watch(server->channel, G_IO_IN, server_listen_cb, server);
 
   server->thread_pool = g_thread_pool_new(client_thread, server, -1, FALSE, NULL);
 
