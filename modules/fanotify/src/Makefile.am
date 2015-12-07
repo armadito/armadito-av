@@ -10,8 +10,6 @@ fanotify_la_CFLAGS+= @LIBUHURU_CFLAGS@
 fanotify_la_LIBADD+= @LIBUHURU_LIBS@ -luhuru_core
 fanotify_la_CFLAGS+= @GLIB2_CFLAGS@
 fanotify_la_LIBADD+= @GLIB2_LIBS@
-#fanotify_la_CFLAGS+= @LIBNOTIFY_CFLAGS@
-#fanotify_la_LIBADD+= @LIBNOTIFY_LIBS@
 
 install-exec-hook:
 	-rm -f "$(DESTDIR)$(modulesdir)"/fanotify.la "$(DESTDIR)$(modulesdir)"/fanotify.a
