@@ -210,6 +210,8 @@ void scan_file_thread_fun(gpointer data, gpointer user_data)
   struct uhuru_scan *scan = uhuru_scan_new(m->uhuru, -1);
   enum uhuru_file_status status;
 	
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify thread: must scan %s", file_context->path);
+
   status = uhuru_scan_context(scan, file_context);
 
   write_response(m, file_context->fd, file_status_2_response(status), file_context->path, "file was scanned");
@@ -247,10 +249,14 @@ static int perm_event_process(struct access_monitor *m, struct fanotify_event_me
   /* get file scan context */
   context_status = uhuru_file_context_get(&file_context, event->fd, p, m->scan_conf);
 
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: getting context for %s", p);
+
   if (context_status) {   /* means file must not be scanned */
     uhuru_file_context_close(&file_context);
     return write_response(m, event->fd, FAN_ALLOW, p, uhuru_file_context_status_str(context_status));
   }
+
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: pushing %s to thread", p);
 
   g_thread_pool_push(m->thread_pool, uhuru_file_context_clone(&file_context), NULL);
 
