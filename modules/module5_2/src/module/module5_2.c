@@ -29,7 +29,7 @@ static enum uhuru_mod_status module5_2_post_init(struct uhuru_module *module)
 	     MODULE5_2_DBDIR "/linux/tfidf_s.dat") != 0)
     return UHURU_MOD_INIT_ERROR;
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, "Module 5.2 ELF databases loaded from " MODULE5_2_DBDIR "/linux");
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, "module 5.2 ELF databases loaded from " MODULE5_2_DBDIR "/linux");
 #endif
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, "loading module 5.2 PE databases from " MODULE5_2_DBDIR "/windows");
@@ -43,7 +43,7 @@ static enum uhuru_mod_status module5_2_post_init(struct uhuru_module *module)
 		    MODULE5_2_DBDIR "/windows/DBI_sain.dat") != 0)
     return UHURU_MOD_INIT_ERROR;
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, "module 5.2 PE databases loaded");
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, "module 5.2 PE databases loaded from " MODULE5_2_DBDIR "/windows");
 
   return UHURU_MOD_OK;
 }

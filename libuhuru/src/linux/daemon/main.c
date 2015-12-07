@@ -116,10 +116,17 @@ static int main_loop(struct server *server, struct access_monitor *monitor)
 {
   struct poll_set *ps = poll_set_new();
 
-  poll_set_add_fd(ps, access_monitor_get_poll_fd(monitor), access_monitor_cb, monitor);
+  poll_set_add_fd(ps, server_get_poll_fd(server), server_cb, server);
 
-  access_monitor_activate(monitor);
-  access_monitor_enable_permission(monitor, 1);
+  if (monitor != NULL)
+    poll_set_add_fd(ps, access_monitor_get_poll_fd(monitor), access_monitor_cb, monitor);
+
+  if (monitor != NULL)
+    access_monitor_activate(monitor);
+
+  /* FIXME: must use configuration */
+  if (monitor != NULL)
+    access_monitor_enable_permission(monitor, 1);
 
   return poll_set_loop(ps);
 }
@@ -175,7 +182,9 @@ int main(int argc, const char **argv)
   server = server_new(uhuru, server_sock);
 
   monitor = access_monitor_new(uhuru);
-  access_monitor_add(monitor, "/home");
+  /* FIXME: must use configuration */
+  if (monitor != NULL)
+    access_monitor_add(monitor, "/home");
 
   main_loop(server, monitor);
 

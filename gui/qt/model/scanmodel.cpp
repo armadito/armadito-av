@@ -24,12 +24,18 @@ void ScanModelThread::run()
 {
   QByteArray ba = _model->path().toLocal8Bit();
   const char *c_path = ba.data();
+  int threaded = 1;
+  int recursive = 1;
 
   struct ipc_manager *manager = ipc_manager_new(_model->daemonFd());
 
   ipc_manager_add_handler(manager, IPC_MSG_ID_SCAN_FILE, ipc_handler_scan_file, _model);
 
-  ipc_manager_msg_send(manager, IPC_MSG_ID_SCAN, IPC_STRING_T, c_path, IPC_NONE_T);
+  ipc_manager_msg_send(manager, IPC_MSG_ID_SCAN, 
+		       IPC_STRING_T, c_path, 
+		       IPC_INT32_T, threaded, 
+		       IPC_INT32_T, recursive, 
+		       IPC_NONE_T);
 
   while (ipc_manager_receive(manager) > 0)
     ;

@@ -1,5 +1,6 @@
 #include "osdeps.h"
 #include <stdio.h>
+#include <string.h>
 
 char * os_strncpy(char * dest, size_t sizeDest, char * src, size_t count) {
 

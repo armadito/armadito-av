@@ -72,6 +72,9 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
 
 int access_monitor_get_poll_fd(struct access_monitor *m)
 {
+  if (m == NULL)
+    return -1;
+
   return m->fanotify_fd;
 }
 
@@ -90,6 +93,9 @@ int access_monitor_enable_permission(struct access_monitor *m, int enable_permis
 int access_monitor_add(struct access_monitor *m, const char *path)
 {
   const char *tmp;
+
+  if (m == NULL)
+    return -1;
 
   tmp = strdup(path);
 
@@ -276,6 +282,9 @@ void access_monitor_cb(void *user_data)
 int access_monitor_activate(struct access_monitor *m)
 {
   int i;
+
+  if (m == NULL)
+    return 0;
 
   for(i = 0; i < m->paths->len; i++) {
     const char *path = (const char *)g_ptr_array_index(m->paths, i);
