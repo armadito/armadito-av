@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef HAVE_LIBNOTIFY
-#include <libnotify/notify.h>
-#endif
+/* #ifdef HAVE_LIBNOTIFY */
+/* #include <libnotify/notify.h> */
+/* #endif */
 
 struct fanotify_data {
   GPtrArray *paths;
