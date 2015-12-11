@@ -27,7 +27,7 @@ This script does everything, even rerepro update on the apt repository.
 
 If you want to prepare a single package :
 - cd scripts/
-- ./do_all.sh <PACKAGE_NAME>
+- ./do_all.sh PACKAGE_NAME
 
 PACKAGE_NAME could be one of the following : 
 - desktop (uhuru-desktop)
