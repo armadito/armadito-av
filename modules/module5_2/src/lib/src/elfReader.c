@@ -25,7 +25,6 @@ BYTE ElfIsAValidOffset(PELF_CONTAINER elfOfFile, QWORD offset){
 }
 
 ERROR_CODE ElfInit(int fd, CHAR* filename, PELF_CONTAINER elfOfFile){
-	FILE* fileHandle = NULL;
 	WORD i = 0;
 	DWORD signature = 0;
 

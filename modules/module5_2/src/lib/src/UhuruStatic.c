@@ -46,8 +46,8 @@ DWORD TotalSizeElfDataBaseTFIDFInf = 0, elfNbDocsTFIDFInf = 0, TotalSizeElfDataB
  */
 ERROR_CODE fileAnalysis(int fd, char *fileName){
 
-	DBG_PRNT(" 5_2 DOS analysis : %s \n", fileName);
-	
+	//DBG_PRNT(" 5_2 DOS analysis : %s \n", fileName);
+
 	/*variable initialization*/
 	PVECTOR testFileEat = NULL, testFileIat = NULL;
 	/* ERROR_CODE array for tests return values */
@@ -57,25 +57,13 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 	/* initialization of the Pe structure */
 	infosArray[0] = PeInit(&Pe, fd, fileName);
 
-	/* if errors happened before the calloc */
-	if (infosArray[0] == E_FILE_NOT_FOUND || infosArray[0] == E_FILE_EMPTY || infosArray[0] == E_INVALID_FILE_SIZE){
-		//DBG_PRNT("> %s\ninfosArray[0] == E_FILE_NOT_FOUND || infosArray[0] == E_FILE_EMPTY || infosArray[0] == E_INVALID_FILE_SIZE\n", fileName);
-		return UH_UNSUPPORTED_FILE;
-	}
 	if (infosArray[0] == E_CALLOC_ERROR){
 		return E_CALLOC_ERROR;
 	}
 
-	/* if the file is not a MZ file, the test won't respond UH_NOT_DECIDED, since this is only for
-	MZ file that can't be classified, so the test return UH_NOT_MALWARE*/
-	if (infosArray[0] == E_NOT_MZ){
-		PeDestroy(&Pe);
-		return UH_UNSUPPORTED_FILE; // returns UH_UNSUPPPORTED_FILE instead of UH_NOT_MALWARE
-	}
 	if (infosArray[0] != UH_SUCCESS){
 		PeDestroy(&Pe);
-		//DBG_PRNT("> %s\ninfosArray[0] != UH_SUCCESS\n", fileName);
-		return UH_UNSUPPORTED_FILE;
+		return infosArray[0];
 	}
 
 	/////////////////////////////////////////////////////////////////
@@ -97,7 +85,7 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 	infosArray[3] = PeHasEntryPoint(&Pe);
 	if (infosArray[3] == E_INVALID_ENTRY_POINT){
 		PeDestroy(&Pe);
-		DBG_PRNT("> %s\ninfosArray[3] == E_INVALID_ENTRY_POINT\n", fileName);
+		DBG_PRNT("> %s",error_code_str(infosArray[3]));
 		return UH_MALWARE;
 	}
 
@@ -105,7 +93,7 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 	if (infosArray[1] == E_NO_ENTRY && infosArray[2] == E_NO_ENTRY){
 		PeDestroy(&Pe);
 		if (infosArray[3] == UH_SUCCESS){
-			DBG_PRNT("> %s\ninfosArray[1] == E_NO_ENTRY && infosArray[2] == E_NO_ENTRY && infosArray[3] == UH_SUCCESS\n", fileName);
+			DBG_PRNT("> %s", error_code_str(infosArray[3]));
 			return UH_MALWARE;
 		}
 		else{
@@ -115,7 +103,7 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 	}
 
 	if (PeHasValidStructure(&Pe) == E_INVALID_STRUCTURE){
-		DBG_PRNT("> %s\nPeHasValidStructure(&Pe) == E_INVALID_STRUCTURE : %s\n", fileName, GetErrorCodeMsg(GetCurrentError()));
+		DBG_PRNT("> %s", error_code_str(E_INVALID_STRUCTURE));
 		PeDestroy(&Pe);
 		return UH_MALWARE;
 	}
@@ -144,7 +132,7 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 			if (infosArray[2] == E_NO_ENTRY){
 				PeDestroy(&Pe);
 				if (infosArray[3] == UH_SUCCESS){
-					DBG_PRNT("> %s\ninfosArray[2] == E_NO_ENTRY && infosArray[3] == UH_SUCCESS\n", fileName);
+					DBG_PRNT("> %s", error_code_str(infosArray[3]));
 					return UH_MALWARE;
 				}
 				else{
@@ -153,7 +141,8 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 			}
 		}
 		else if (infosArray[4] != UH_SUCCESS){
-			DBG_PRNT("> %s\ninfosArray[4] != UH_SUCCESS : %s\n", fileName, GetErrorCodeMsg(infosArray[4]));
+			PeDestroy(&Pe);
+			DBG_PRNT("> %s",  error_code_str(infosArray[4]));
 			return UH_MALWARE;
 		}
 		else { /*tests on the EAT*/
@@ -164,7 +153,7 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 
 			if (infosArray[6] == UH_MALWARE){
 				PeDestroy(&Pe);
-				DBG_PRNT("> %s\ninfosArray[6] == UH_MALWARE\n", fileName);
+				DBG_PRNT("> %s", error_code_str(infosArray[6]));
 				return UH_MALWARE;
 			}
 			if (infosArray[2] == E_NO_ENTRY && infosArray[6] == UH_NOT_MALWARE){
