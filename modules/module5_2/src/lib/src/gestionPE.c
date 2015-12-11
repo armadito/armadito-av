@@ -158,43 +158,29 @@ BOOLEAN PeIsValidAddress(PPORTABLE_EXECUTABLE Pe, ULONG_PTR address){
 ERROR_CODE PeInit(PPORTABLE_EXECUTABLE Pe, int fd, CHAR* filename){
 	DWORD MagicWord = 0;
 	ULONG_PTR Offset = 0;
-	FILE *fileHandle;
 
 	Pe->ImagesSectionHeader = NULL;
 
-	/* file opening */
-	fileHandle = os_fdopen(fd, "r");
-	if (fileHandle == NULL){
-		return E_FILE_NOT_FOUND;
-	}
-
 	/* computation of the file size */
-	Pe->FileSize = (DWORD)SizeOfFile(filename);
+	Pe->FileSize = (DWORD)SizeOfFile(fd);
 	if (Pe->FileSize == 0){
-		fclose(fileHandle);
 		return E_FILE_EMPTY;
 	}
 
 	if (Pe->FileSize < sizeof(PIMAGE_DOS_HEADER)){
-		fclose(fileHandle);
 		return E_INVALID_FILE_SIZE;
 	}
 
 	/* creation of the ULONG_PTR used to store the file */
 	Pe->BaseAddress = (ULONG_PTR)calloc(Pe->FileSize + 1, sizeof(UCHAR));
 	if (Pe->BaseAddress == 0){
-		fclose(fileHandle);
 		return E_CALLOC_ERROR;
 	}
 
 	/* file reading into Pe->BaseAddress */
-	if (fread((PVOID)Pe->BaseAddress, Pe->FileSize, 1, fileHandle) != 1){
-		fclose(fileHandle);
+	if (read(fd, (PVOID)Pe->BaseAddress, Pe->FileSize) == -1){
 		return E_READING_ERROR;
 	}
-
-	/* file closing */
-	fclose(fileHandle);
 
 	/* reading of the DOS header and test if e_magic is set to the MZ signature */
 	Pe->ImageDosHeader = *(PIMAGE_DOS_HEADER)((PVOID)(Pe->BaseAddress));
@@ -206,6 +192,7 @@ ERROR_CODE PeInit(PPORTABLE_EXECUTABLE Pe, int fd, CHAR* filename){
 	if (!PeIsValidAddress(Pe, Pe->BaseAddress + Pe->ImageDosHeader.e_lfanew)){
 		return E_HEADER_NOT_GOOD;
 	}
+
 	MagicWord = *(PDWORD)((PVOID)(Pe->BaseAddress + Pe->ImageDosHeader.e_lfanew));
 	if (MagicWord != IMAGE_NT_SIGNATURE) {
 		return E_NOT_PE;
