@@ -99,6 +99,8 @@ void json_parse_and_print(json_object * jobj) {
 	}
 }
 
+// TODO: json_get_int_by_key(), json_get_string_by_key()
+
 /*Parsing the json object*/
 const char* json_parse_and_process(json_object * jobj, struct new_scan_action* scan) {
 
