@@ -91,7 +91,7 @@ int start_new_scan(struct new_scan_action* scan, uhuru* uhuru)
 	HANDLE hPipe = INVALID_HANDLE_VALUE;
 	
 	struct named_pipe_info *np_info;
-	struct uhuru_scan *u_scan;
+	struct uhuru_on_demand *on_demand;
 
 
 	if (scan != NULL && scan->scan_id > 0 && scan->scan_path != NULL){
@@ -104,20 +104,19 @@ int start_new_scan(struct new_scan_action* scan, uhuru* uhuru)
 		// Not really used currently
 		np_info = (struct named_pipe_info*)malloc(sizeof(struct named_pipe_info));
 		np_info->hPipe = &hPipe;
-	
-		printf("--- uhuru_scan_new() ---\n");
-		u_scan = uhuru_scan_new(uhuru, scan->scan_id, scan->scan_path, UHURU_SCAN_RECURSE);
+
+
+		printf("--- uhuru_on_demand_new() ---\n");
+		on_demand = uhuru_on_demand_new(uhuru, scan->scan_id, scan->scan_path, UHURU_SCAN_RECURSE);
 
 		printf("--- uhuru_scan_add_callback() ---\n");
-		uhuru_scan_add_callback(u_scan, scan_callback, np_info);
+		uhuru_scan_add_callback(uhuru_on_demand_get_scan(on_demand), scan_callback, np_info);
 
-		printf("--- uhuru_scan_run() ---\n");
-		uhuru_scan_run(u_scan);
+		printf("--- uhuru_on_demand_run() ---\n");
+		uhuru_on_demand_run(on_demand);
 
-		printf("--- uhuru_scan_free() ---\n");
-
-		// free and close all
-		uhuru_scan_free(u_scan);
+		printf("--- uhuru_on_demand_free() ---\n");
+		uhuru_on_demand_free(on_demand);
 		free(np_info);
 	} 
 

@@ -5,8 +5,12 @@ uhuru_close
 uhuru_scan_simple
 uhuru_scan_new
 uhuru_scan_add_callback
-uhuru_scan_run
 uhuru_scan_free
+uhuru_scan_context
+uhuru_on_demand_run
+uhuru_on_demand_free
+uhuru_on_demand_new
+uhuru_on_demand_get_scan
 uhuru_info_new
 uhuru_info_free
 uhuru_info_to_stdout

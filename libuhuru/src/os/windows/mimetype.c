@@ -2,6 +2,7 @@
 #include "libuhuru/libcore/log.h"
 #include "os/mimetype.h"
 #include "os/string.h"
+#include "os/io.h"
 #include <glib.h>
 #include <windows.h>
 #include <stdio.h>
@@ -9,7 +10,7 @@
 
 
 #define MIME_SIZE 100
-#define BUF_SIZE 2048
+#define BUF_SIZE 1024
 
 const char* getHresError(HRESULT hr)
 {
@@ -21,6 +22,42 @@ const char* getHresError(HRESULT hr)
 		default: return "UNKNOWN_ERROR";
 	}
 }
+
+const char *os_mime_type_guess_fd(int fd)
+{
+	char *mime_type;
+	LPWSTR mt = 0;
+	size_t i = 0;
+	int n_read = 0;
+	char *buf[BUF_SIZE];
+
+	if (fd < 0){
+		printf("Invalid file descriptor %s",  fd);
+		return NULL;
+	}
+
+	if ((n_read = _read(fd, buf, BUF_SIZE)) < 0) {
+		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "Cannot read %d bytes from file descriptor %s", BUF_SIZE, fd);
+		printf("Cannot read %d bytes from file descriptor %s", BUF_SIZE, fd);
+		return NULL;
+	}
+
+	HRESULT res = FindMimeFromData(NULL, NULL, buf, BUF_SIZE, NULL, FMFD_DEFAULT, &mt, 0);
+	if (res != S_OK) {
+		printf("Error :: FindMimeFromData failed :: %s \n", getHresError(res));
+		return NULL;
+	}
+
+	// convert wchar * to char * 
+	mime_type = (char*)calloc(MIME_SIZE + 1, sizeof(char));
+	mime_type[MIME_SIZE] = '\0';
+	wcstombs_s(&i, mime_type, MIME_SIZE, (wchar_t*)mt, MIME_SIZE);
+
+	printf("mime_type = %s \n", mime_type);
+
+	return mime_type;
+}
+
 
 const char *os_mime_type_guess(const char *path)
 {

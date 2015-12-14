@@ -55,7 +55,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\json-c\json-c;$(SolutionDir)..\..\libuhuru\include;$(SolutionDir)..\..\libuhuru\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\json-c\json-c;$(SolutionDir)..\..\libuhuru\include;C:\Users\toto\projects\uhuru\git\uhuru-av\libuhuru\src\linux;$(SolutionDir)..\..\libuhuru\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAs>CompileAsCpp</CompileAs>
     </ClCompile>
     <Link>
@@ -85,7 +85,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\libuhuru\src\tools\uhuru-scan.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\linux\tools\uhuru-scan.c" />
     <ClCompile Include="..\..\..\libuhuru\src\utils\getopt.c" />
   </ItemGroup>
   <ItemGroup>
