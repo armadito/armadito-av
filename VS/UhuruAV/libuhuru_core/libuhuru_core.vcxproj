@@ -46,7 +46,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)..\..\libuhuru\src\libcore;$(SolutionDir)..\..\libuhuru\src;$(SolutionDir)..\..\libuhuru\include\config;$(SolutionDir)..\..\libuhuru\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -77,16 +77,22 @@
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\common\action.h" />
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\common\status.h" />
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\core.h" />
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\error.h" />
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\filectx.h" />
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\handle.h" />
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\info.h" />
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\log.h" />
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\module.h" />
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\ondemand.h" />
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\scan.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\libcore\builtin-modules\mimetypemod.h" />
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\scanconf.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\libcore\builtin-modules\ondemandmod.h" />
     <ClInclude Include="..\..\..\libuhuru\src\libcore\conf.h" />
     <ClInclude Include="..\..\..\libuhuru\src\libcore\confparser.h" />
     <ClInclude Include="..\..\..\libuhuru\src\libcore\modulep.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\libcore\ondemandp.h" />
     <ClInclude Include="..\..\..\libuhuru\src\libcore\reportp.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\libcore\scanp.h" />
     <ClInclude Include="..\..\..\libuhuru\src\libcore\statusp.h" />
     <ClInclude Include="..\..\..\libuhuru\src\libcore\uhurup.h" />
     <ClInclude Include="..\..\..\libuhuru\src\os\dir.h" />
@@ -97,15 +103,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\libuhuru\src\libcore\action.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\libcore\builtin-modules\mimetypemod.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\builtin-modules\ondemandmod.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\conf.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\confparser.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\error.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\filectx.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\info.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\log.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\module.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\ondemand.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\report.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\scan.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\scanconf.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\status.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\uhuru.c" />
     <ClCompile Include="..\..\..\libuhuru\src\os\windows\dir.c">

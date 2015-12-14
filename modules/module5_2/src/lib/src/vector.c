@@ -2,9 +2,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <dirent.h>
 #include <string.h>
 #include "osdeps.h"
+
+#ifdef WIN32
+#include "dirent.h"
+#else
+#include <dirent.h>
+#endif
+
 
 PVECTOR vectorNew(DWORD n){
 	PVECTOR x = NULL;
