@@ -106,6 +106,7 @@ void uhuru_log_default_handler(enum uhuru_log_domain domain, enum uhuru_log_leve
   g_string_append(gstring, message);
   g_string_append(gstring, "\n");
 
+
   string = g_string_free(gstring, FALSE);
 
   fputs(string, stream);

@@ -43,7 +43,7 @@ static void uhuru_free(struct uhuru *u)
 {
   module_manager_free(u->module_manager);
   g_hash_table_destroy(u->mime_type_table);
-  free(u);
+  g_free(u);
 }
 
 struct uhuru *uhuru_open(uhuru_error **error)
@@ -98,8 +98,6 @@ struct uhuru *uhuru_open(uhuru_error **error)
     goto error;
 #endif
 
-  
-
   if (module_manager_init_all(u->module_manager, error))
     goto error;
 
@@ -120,7 +118,7 @@ struct uhuru *uhuru_open(uhuru_error **error)
 	memcpy_s(confdir+strnlen_s(dirpath, _MAX_PATH)+1,len,LIBUHURU_CONF_DIR,strnlen_s(LIBUHURU_CONF_DIR, _MAX_PATH));
 	memcpy_s(confdir+strnlen_s(dirpath, _MAX_PATH)+strnlen_s(LIBUHURU_CONF_DIR, _MAX_PATH)+1,len,conffile,strnlen_s(conffile, _MAX_PATH));
  
-  
+  printf("Conf_file = %s ", confdir);
   conf_load_file(u, confdir);
   //conf_load_path(u, LIBUHURU_CONF_DIR "/conf.d");
 
@@ -133,7 +131,7 @@ struct uhuru *uhuru_open(uhuru_error **error)
 #endif
 
   if (module_manager_post_init_all(u->module_manager, error))
-    goto error;
+	  goto error;
 
   return u;
 
