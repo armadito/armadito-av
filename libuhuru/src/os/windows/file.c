@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-void os_file_stat(const char *path, struct os_file_stat *buf, int *pfile_errno)
+int os_file_stat(const char *path, struct os_file_stat *buf, int *pfile_errno)
 {
 	struct stat sb;
 
@@ -13,7 +13,7 @@ void os_file_stat(const char *path, struct os_file_stat *buf, int *pfile_errno)
 		*pfile_errno = errno;
 		buf->flags = FILE_FLAG_IS_ERROR;
 
-		return;
+		return -1;
 	}
 
 	if (sb.st_mode & S_IFDIR)
@@ -23,7 +23,7 @@ void os_file_stat(const char *path, struct os_file_stat *buf, int *pfile_errno)
 	else
 		buf->flags = FILE_FLAG_IS_UNKNOWN;
 
-	return;
+	return 0;
 }
 
 int os_file_do_not_scan(const char *path)

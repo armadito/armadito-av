@@ -7,6 +7,7 @@
 /* headers */
 #undef HAVE_UNISTD_H
 #define HAVE_IO_H
+#define HAVE_FCNTL_H
 
 /* mapping posix names to win32 names */
 #undef HAVE_STRDUP
