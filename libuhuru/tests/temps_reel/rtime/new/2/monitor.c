@@ -4,9 +4,8 @@
 
 #define _GNU_SOURCE
 
-#include <libuhuru/core.h>
-
 #include "monitor.h"
+#include "mimetype.h"
 
 #include <assert.h>
 #include <glib.h>
@@ -27,12 +26,11 @@
 
 struct access_monitor {
   int enable_permission;
+  enum access_monitor_flags flags;
   int fanotify_fd;
   GPtrArray *paths;
   pid_t my_pid;
   GThreadPool *thread_pool;  
-  struct uhuru *uhuru;
-  struct uhuru_scan_conf *scan_conf;
 };
 
 void scan_file_thread_fun(gpointer data, gpointer user_data);
@@ -42,19 +40,17 @@ void path_destroy_notify(gpointer data)
   free(data);
 }
 
-struct access_monitor *access_monitor_new(struct uhuru *u)
+struct access_monitor *access_monitor_new(enum access_monitor_flags flags)
 {
   struct access_monitor *m = g_new(struct access_monitor, 1);
 
   m->enable_permission = 0;
-
-  m->uhuru = u;
-  m->scan_conf = uhuru_scan_conf_on_access();
+  m->flags = flags;
 
   m->fanotify_fd = fanotify_init(FAN_CLASS_CONTENT | FAN_CLOEXEC, O_RDONLY | O_CLOEXEC | O_LARGEFILE | O_NOATIME);
 
   if (m->fanotify_fd < 0) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "fanotify: fanotify_init failed (%s)", strerror(errno));
+    fprintf(stderr, "fanotify: fanotify_init failed (%s)\n", strerror(errno));
     g_free(m);
     return NULL;
   }
@@ -63,9 +59,7 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
 
   m->my_pid = getpid();
   
-  m->thread_pool = g_thread_pool_new(scan_file_thread_fun, m, -1, TRUE, NULL);
-
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: init ok");
+  m->thread_pool = g_thread_pool_new(scan_file_thread_fun, m, 8, TRUE, NULL);
 
   return m;
 }
@@ -85,7 +79,7 @@ int access_monitor_enable_permission(struct access_monitor *m, int enable_permis
 
   m->enable_permission = enable_permission;
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: %s", (m->enable_permission) ? "enabled" : "disabled");
+  fprintf(stderr, "fanotify: %s\n", (m->enable_permission) ? "enabled" : "disabled");
 
   return m->enable_permission;
 }
@@ -101,7 +95,7 @@ int access_monitor_add(struct access_monitor *m, const char *path)
 
   g_ptr_array_add(m->paths, (gpointer)tmp);
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: added directory %s", tmp);
+  fprintf(stderr, "fanotify: added directory %s\n", tmp);
 
   return 0;
 }
@@ -112,14 +106,14 @@ int access_monitor_remove(struct access_monitor *m, const char *path)
     return 0;
 
   if (fanotify_mark(m->fanotify_fd, FAN_MARK_REMOVE, FAN_OPEN_PERM, AT_FDCWD, path) < 0) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "fanotify: removing %s failed (%s)", path, strerror(errno));
+    fprintf(stderr, "fanotify: removing %s failed (%s)\n", path, strerror(errno));
 
     return -1;
   }
 
   g_ptr_array_remove(m->paths, (gpointer)path);
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: removed directory %s", path);
+  fprintf(stderr, "fanotify: removed directory %s\n", path);
 
   return 0;
 }
@@ -143,9 +137,8 @@ void access_monitor_free(struct access_monitor *m)
 
   free(m);
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: free ok");
+  fprintf(stderr, "fanotify: free ok");
 }
-
 
 static char *get_file_path_from_fd(int fd, char *buffer, size_t buffer_size)
 {
@@ -154,7 +147,7 @@ static char *get_file_path_from_fd(int fd, char *buffer, size_t buffer_size)
   if (fd <= 0)
     return NULL;
 
-  sprintf (buffer, "/proc/self/fd/%d", fd);
+  sprintf(buffer, "/proc/self/fd/%d", fd);
   if ((len = readlink(buffer, buffer, buffer_size - 1)) < 0)
     return NULL;
 
@@ -166,7 +159,6 @@ static char *get_file_path_from_fd(int fd, char *buffer, size_t buffer_size)
 static int write_response(struct access_monitor *m, int fd, __u32 r, const char *path, const char *reason)
 {
   struct fanotify_response response;
-  GLogLevelFlags log_level = UHURU_LOG_LEVEL_INFO;
   const char *auth = "ALLOW";
 
   response.fd = fd;
@@ -176,51 +168,18 @@ static int write_response(struct access_monitor *m, int fd, __u32 r, const char 
   
   close(fd);
 
-  if (r == FAN_DENY) {
-    log_level = UHURU_LOG_LEVEL_WARNING;
-    auth = "DENY";
+  if (m->flags & MONITOR_LOG_EVENT) {
+    if (path == NULL)
+      fprintf(stderr, "fanotify: fd %d %s (%s)\n", fd, auth, reason != NULL ? reason : "unknown");
+    else
+      fprintf(stderr, "fanotify: path %s %s (%s)\n", path, auth, reason != NULL ? reason : "unknown");
   }
-
-  if (path == NULL)
-    uhuru_log(UHURU_LOG_MODULE, log_level, "fanotify: fd %d %s (%s)", fd, auth, reason != NULL ? reason : "unknown");
-  else
-    uhuru_log(UHURU_LOG_MODULE, log_level, "fanotify: path %s %s (%s)", path, auth, reason != NULL ? reason : "unknown");
-
+    
   return r;
 }
 
-static __u32 file_status_2_response(enum uhuru_file_status status)
-{
-  switch(status) {
-  case UHURU_MALWARE:
-    return FAN_DENY;
-  }
-
-  return FAN_ALLOW;
-}
-
-struct access_thread_data {
-  struct access_monitor *monitor;
-};
-
 void scan_file_thread_fun(gpointer data, gpointer user_data)
 {
-  struct uhuru_file_context *file_context = (struct uhuru_file_context *)data;
-  struct access_monitor *m = (struct access_monitor *)user_data;
-  struct uhuru_scan *scan = uhuru_scan_new(m->uhuru, -1);
-  enum uhuru_file_status status;
-	
-  /* uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify thread: must scan %s", file_context->path); */
-
-  status = uhuru_scan_context(scan, file_context);
-
-  write_response(m, file_context->fd, file_status_2_response(status), file_context->path, "file was scanned");
-
-  /* send notification if malware */
-  
-  uhuru_file_context_free(file_context);
-
-  uhuru_scan_free(scan);
 }
 
 static int perm_event_process(struct access_monitor *m, struct fanotify_event_metadata *event)
@@ -228,12 +187,13 @@ static int perm_event_process(struct access_monitor *m, struct fanotify_event_me
   char file_path[PATH_MAX + 1];
   char *p;
   struct stat buf;
-  struct access_thread_data *td;
-  struct uhuru_file_context file_context;
-  enum uhuru_file_context_status context_status;
+  const char *mime_type;
 
   if (m->enable_permission == 0)  /* permission check is disabled, always allow */
     return write_response(m, event->fd, FAN_ALLOW, NULL, "permission is not activated");
+
+  if (m->my_pid == event->pid)   /* file was opened by myself, always allow */
+    return write_response(m, event->fd, FAN_ALLOW, NULL, "event PID is myself");
 
   if (fstat(event->fd, &buf) < 0)
     return write_response(m, event->fd, FAN_ALLOW, NULL, "stat failed");
@@ -241,24 +201,16 @@ static int perm_event_process(struct access_monitor *m, struct fanotify_event_me
   if (!S_ISREG(buf.st_mode))
     return write_response(m, event->fd, FAN_ALLOW, NULL, "fd is not a file");
 
-  p = get_file_path_from_fd(event->fd, file_path, PATH_MAX);
+  if (!m->flags & MONITOR_CHECK_TYPE)
+    return write_response(m, event->fd, FAN_ALLOW, NULL, "no check on MIME type");
 
-  if (m->my_pid == event->pid)   /* file was opened by myself, always allow */
-    return write_response(m, event->fd, FAN_ALLOW, p, "event PID is myself");
+  mime_type = mime_type_guess_fd(event->fd);
 
-  /* get file scan context */
-  context_status = uhuru_file_context_get(&file_context, event->fd, p, m->scan_conf);
+  write_response(m, event->fd, FAN_ALLOW, NULL, "checked MIME type");
 
-  /* uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: getting context for %s", p); */
+  /* p = get_file_path_from_fd(event->fd, file_path, PATH_MAX); */
 
-  if (context_status) {   /* means file must not be scanned */
-    uhuru_file_context_close(&file_context);
-    return write_response(m, event->fd, FAN_ALLOW, p, uhuru_file_context_status_str(context_status));
-  }
-
-  /* uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: pushing %s to thread", p); */
-
-  g_thread_pool_push(m->thread_pool, uhuru_file_context_clone(&file_context), NULL);
+  /* g_thread_pool_push(m->thread_pool, uhuru_file_context_clone(&file_context), NULL); */
 
   return 0;
 }
@@ -280,7 +232,7 @@ void access_monitor_cb(void *user_data)
       if (event->mask & FAN_OPEN_PERM)
 	perm_event_process(m, event);
       else
-	uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "fanotify: unprocessed event 0x%llx fd %d", event->mask, event->fd);
+	fprintf(stderr, "fanotify: unprocessed event 0x%llx fd %d\n", event->mask, event->fd);
     }
   }
 }
@@ -288,20 +240,24 @@ void access_monitor_cb(void *user_data)
 int access_monitor_activate(struct access_monitor *m)
 {
   int i;
+  unsigned int mark_flags = FAN_MARK_ADD;
 
   if (m == NULL)
     return 0;
 
+  if (m->flags & MONITOR_MOUNT)
+    mark_flags |= FAN_MARK_MOUNT;
+
   for(i = 0; i < m->paths->len; i++) {
     const char *path = (const char *)g_ptr_array_index(m->paths, i);
 
-    if (fanotify_mark(m->fanotify_fd, FAN_MARK_ADD | FAN_MARK_MOUNT, FAN_OPEN_PERM, AT_FDCWD, path) < 0) {
-      uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "fanotify: activating %s failed (%s)", path, strerror(errno));
+    if (fanotify_mark(m->fanotify_fd, mark_flags, FAN_OPEN_PERM, AT_FDCWD, path) < 0) {
+      fprintf(stderr, "fanotify: activating %s failed (%s)\n", path, strerror(errno));
 
       return -1;
     }
 
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: activated directory %s", path);
+    fprintf(stderr, "fanotify: activated directory %s\n", path);
   }
 
   return 0;
