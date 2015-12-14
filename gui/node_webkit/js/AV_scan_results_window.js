@@ -39,8 +39,6 @@ function ask_to_cancel_scan(){
 	if( cancel_scan(scan_id) < 0 ){
 		client_socket.destroy();
 	}
-	
-	
 }
 
 // --- Update HTML with DOM ---

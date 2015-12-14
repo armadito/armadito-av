@@ -28,6 +28,12 @@
     <Filter Include="Source Files\os\windows">
       <UniqueIdentifier>{ff62ffda-90de-4e0e-b8c5-115cc8835090}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\libcore\builtin-modules">
+      <UniqueIdentifier>{15e2b3e3-a8d4-416e-ab48-329e358f92f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\os">
+      <UniqueIdentifier>{66fa929d-bc5e-4ed0-ada7-61b0b8bf332e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\common\action.h">
@@ -69,25 +75,43 @@
     <ClInclude Include="..\..\..\libuhuru\src\libcore\uhurup.h">
       <Filter>Source Files\libcore</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\libuhuru\src\libcore\builtin-modules\mimetypemod.h">
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\log.h">
+      <Filter>Header Files\libcore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\libcore\ondemandp.h">
       <Filter>Source Files\libcore</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\libuhuru\src\os\mimetype.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\..\..\libuhuru\src\libcore\scanp.h">
+      <Filter>Source Files\libcore</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\libuhuru\src\os\dir.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\libuhuru\src\os\file.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\..\..\libuhuru\src\libcore\builtin-modules\ondemandmod.h">
+      <Filter>Source Files\libcore\builtin-modules</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\libuhuru\src\os\io.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\os</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\os\dir.h">
+      <Filter>Header Files\os</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\os\file.h">
+      <Filter>Header Files\os</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\os\mimetype.h">
+      <Filter>Header Files\os</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\libuhuru\src\os\string.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\os</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\log.h">
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\filectx.h">
+      <Filter>Header Files\libcore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\error.h">
+      <Filter>Header Files\libcore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\ondemand.h">
+      <Filter>Header Files\libcore</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\scanconf.h">
       <Filter>Header Files\libcore</Filter>
     </ClInclude>
   </ItemGroup>
@@ -119,9 +143,6 @@
     <ClCompile Include="..\..\..\libuhuru\src\libcore\uhuru.c">
       <Filter>Source Files\libcore</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\libuhuru\src\libcore\builtin-modules\mimetypemod.c">
-      <Filter>Source Files\libcore</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\libuhuru\src\os\windows\dir.c">
       <Filter>Source Files\os\windows</Filter>
     </ClCompile>
@@ -139,6 +160,18 @@
     </ClCompile>
     <ClCompile Include="..\..\..\libuhuru\src\libcore\log.c">
       <Filter>Source Files\libcore</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\ondemand.c">
+      <Filter>Source Files\libcore</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\filectx.c">
+      <Filter>Source Files\libcore</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\scanconf.c">
+      <Filter>Source Files\libcore</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\builtin-modules\ondemandmod.c">
+      <Filter>Source Files\libcore\builtin-modules</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
