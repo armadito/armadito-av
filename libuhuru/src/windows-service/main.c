@@ -6,6 +6,9 @@
 
 int main(int argc, const char **argv)
 {
+	// Set log
+	uhuru_log_set_handler(UHURU_LOG_LEVEL_NONE, NULL, NULL);
+
 	// load modules db etc.
 	uhuru_error *err = NULL;
 	uhuru * uhuru = uhuru_open(&err);
