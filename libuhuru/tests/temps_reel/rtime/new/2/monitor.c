@@ -44,8 +44,10 @@ struct access_monitor *access_monitor_new(enum access_monitor_flags flags)
 
   m->flags = flags;
 
-  m->fanotify_fd = fanotify_init(FAN_CLASS_CONTENT | FAN_CLOEXEC, O_RDONLY | O_CLOEXEC | O_LARGEFILE | O_NOATIME);
-
+  /* clamav: onas_fan_fd = fanotify_init(FAN_CLASS_CONTENT | FAN_UNLIMITED_QUEUE | FAN_UNLIMITED_MARKS, O_LARGEFILE | O_RDONLY); */
+  /* m->fanotify_fd = fanotify_init(FAN_CLASS_CONTENT | FAN_CLOEXEC, O_RDONLY | O_CLOEXEC | O_LARGEFILE | O_NOATIME); */
+  m->fanotify_fd = fanotify_init(FAN_CLASS_CONTENT | FAN_UNLIMITED_QUEUE | FAN_UNLIMITED_MARKS, O_LARGEFILE | O_RDONLY);
+    
   if (m->fanotify_fd < 0) {
     fprintf(stderr, "fanotify: fanotify_init failed (%s)\n", strerror(errno));
     g_free(m);
@@ -69,13 +71,26 @@ int access_monitor_get_poll_fd(struct access_monitor *m)
 
 int access_monitor_add(struct access_monitor *m, const char *path, unsigned int flags)
 {
-  if (fanotify_mark(m->fanotify_fd, FAN_MARK_ADD | flags, FAN_OPEN_PERM, AT_FDCWD, path) < 0) {
-    fprintf(stderr, "fanotify: activating %s failed (%s)\n", path, strerror(errno));
+  /* from clamav */
+  /* uint64_t fan_mask = FAN_EVENT_ON_CHILD | FAN_CLOSE; */
+  uint64_t fan_mask = 0;
+
+  if (!(flags & FAN_MARK_MOUNT))
+    fan_mask |= FAN_EVENT_ON_CHILD;
+
+  if (m->flags & MONITOR_ENABLE_PERM)
+    /* fan_mask |= FAN_ACCESS_PERM | FAN_OPEN_PERM; */
+    fan_mask |= FAN_OPEN_PERM;
+  else
+    fan_mask |= FAN_CLOSE;
+
+  if (fanotify_mark(m->fanotify_fd, FAN_MARK_ADD | flags, fan_mask, AT_FDCWD, path) < 0) {
+    fprintf(stderr, "fanotify: marking %s failed (%s)\n", path, strerror(errno));
 
     return -1;
   }
 
-  fprintf(stderr, "fanotify: added directory %s\n", path);
+  fprintf(stderr, "fanotify: marked directory %s\n", path);
 
   return 0;
 }
@@ -179,6 +194,17 @@ static int perm_event_process(struct access_monitor *m, struct fanotify_event_me
   return 0;
 }
 
+static void notify_event_process(struct access_monitor *m, struct fanotify_event_metadata *event)
+{
+  char file_path[PATH_MAX + 1];
+  char *p;
+
+  p = get_file_path_from_fd(event->fd, file_path, PATH_MAX);
+
+  if (m->flags & MONITOR_LOG_EVENT)
+    fprintf(stderr, "fanotify: path %s\n", p);
+}
+
 /* Size of buffer to use when reading fanotify events */
 /* 8192 is recommended by fanotify man page */
 #define FANOTIFY_BUFFER_SIZE 8192
@@ -193,10 +219,11 @@ void access_monitor_cb(void *user_data)
     struct fanotify_event_metadata *event;
 
     for(event = (struct fanotify_event_metadata *)buf; FAN_EVENT_OK(event, len); event = FAN_EVENT_NEXT(event, len)) {
-      if (event->mask & FAN_OPEN_PERM)
+      /* if ((event->mask & FAN_OPEN_PERM) || (event->mask & FAN_ACCESS_PERM)) */
+      if ((event->mask & FAN_OPEN_PERM))
 	perm_event_process(m, event);
       else
-	fprintf(stderr, "fanotify: unprocessed event 0x%llx fd %d\n", event->mask, event->fd);
+	notify_event_process(m, event);
     }
   }
 }
