@@ -1,4 +1,5 @@
 VS/glib/*
+VS/clamav/*
 VS/UhuruAV/libuhuru_core/Debug/*
 VS/UhuruAV/libuhuru_ipc/Debug/*
 VS/UhuruAV/uhuru_scan/Debug/*
