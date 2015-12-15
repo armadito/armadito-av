@@ -26,6 +26,8 @@ int RegistryKeysInitialization( ) {
 	DWORD dwValue = 3;
 	DWORD dwTypes = 7;
 	LPSTR dllpath = APP_DLL_PATH;
+	LPSTR dumpfolder = DUMP_FOLDER;
+	DWORD dwDumpType = DUMP_TYPE;
 	DWORD size = 0;
 
 	__try {
@@ -78,7 +80,8 @@ int RegistryKeysInitialization( ) {
 			printf("[-] Error :: RegSetKeyValueA failed with error :: %d :: %d\n", GetLastError(),res );
 			__leave;
 		}
-		printf("[+] Debug :: initRegistrykeys :: key values created successfully\n" );
+
+		printf("[+] Debug :: initRegistrykeys :: UhuruAV event log keys values created successfully\n" );
 		ret = 0;
 
 	}
@@ -96,7 +99,90 @@ int RegistryKeysInitialization( ) {
 
 	}
 
-	//lRetValue = RegSetKeyValue(hkCurrentModule, NULL, MODULE_G_KEY_DIRECTORY_PATH, REG_SZ, ModulePathString->Buffer, (DWORD)(ModulePathString->SizeOfString & 0xffffffff));
+	// Crash report configuration registry key.
+	__try {
+
+		ret = -1;
+
+		// Open the main service key
+		res = RegOpenKeyA(HKEY_LOCAL_MACHINE, ROOT_CRASH_KEY_PATH_LOCAL_DUMPS, &hRootkey);
+		if (res != ERROR_SUCCESS) {
+			
+			if (res == ERROR_FILE_NOT_FOUND) { // if the LocalDumps key is not created, then create it.
+
+				// 
+				res = RegOpenKeyA(HKEY_LOCAL_MACHINE, ROOT_CRASH_KEY_PATH, &hRootkey);
+				if (res != ERROR_SUCCESS) {
+					printf("[-] Error :: RegOpenKeyA failed with error :: %d :: %d\n", GetLastError( ), res);
+					__leave;
+				}
+
+				res = RegCreateKeyA(hRootkey,"LocalDumps",&hkey);
+				if (res != ERROR_SUCCESS) {
+					printf("[-] Error :: RegCreateKeyA failed with error :: %d :: %d\n", GetLastError( ), res);					
+					__leave;
+				}
+
+				if (hRootkey != NULL) {
+					RegCloseKey(hRootkey);
+					hRootkey = NULL;
+				}
+
+				if (hkey != NULL) {
+					RegCloseKey(hkey);
+					hkey = NULL;
+				}
+
+				res = RegOpenKeyA(HKEY_LOCAL_MACHINE, ROOT_CRASH_KEY_PATH_LOCAL_DUMPS, &hRootkey);
+				if (res != ERROR_SUCCESS) {
+					__leave;
+				}
+
+			}
+			else {
+				printf("[-] Error :: RegOpenKeyA failed with error :: %d :: %d\n", GetLastError( ), res);
+				__leave;
+			}
+			
+		}		
+
+
+		res = RegCreateKeyA(hRootkey,SVC_KEY_NAME,&hkey);
+		if (res != ERROR_SUCCESS) {
+			printf("[-] Error :: RegCreateKeyA failed with error :: %d :: %d\n", GetLastError( ), res);			
+			__leave;
+		}
+
+		// Set dump folder
+		size = strnlen(dumpfolder, MAX_PATH) +1;
+		res = RegSetKeyValueA(hkey,NULL,"DumpFolder",REG_EXPAND_SZ,DUMP_FOLDER,size);
+		if (res != ERROR_SUCCESS) {
+			printf("[-] Error :: RegSetKeyValueA failed with error :: %d :: %d\n", GetLastError(),res );
+			__leave;
+		}
+
+		res = RegSetKeyValueA(hkey,NULL,"DumpType",REG_DWORD,&dwDumpType,sizeof(DWORD));
+		if (res != ERROR_SUCCESS) {
+			printf("[-] Error :: RegSetKeyValueA failed with error :: %d :: %d\n", GetLastError(),res );
+			__leave;
+		}
+
+		ret = 0;
+
+	}
+	__finally {
+
+		if (hRootkey != NULL) {
+			RegCloseKey(hRootkey);
+			hRootkey = NULL;
+		}
+
+		if (hkey != NULL) {
+			RegCloseKey(hkey);
+			hkey = NULL;
+		}
+
+	}
 
 	return ret;
 }
@@ -118,7 +204,7 @@ int DeleteRegistryKeys( ) {
 			printf("[-] Error :: RegOpenKeyA failed with error :: %d :: %d\n", GetLastError( ), res);
 			__leave;
 		}
-		printf("[+] Debug :: initRegistrykeys :: root key %s opened successfully\n", ROOT_KEY_PATH);
+		printf("[+] Debug :: DeleteRegistrykeys :: root key %s opened successfully\n", ROOT_KEY_PATH);
 
 		// Delete the existing key
 		res = RegDeleteKeyA(hRootkey, APPS_KEY_NAME);
@@ -127,7 +213,37 @@ int DeleteRegistryKeys( ) {
 			__leave;
 		}
 		
-		printf("[+] Debug :: initRegistrykeys :: key %s\\%s deleted successfully\n", ROOT_KEY_PATH,APPS_KEY_NAME);
+		printf("[+] Debug :: DeleteRegistrykeys :: key %s\\%s deleted successfully\n", ROOT_KEY_PATH,APPS_KEY_NAME);
+
+
+	}
+	__finally {
+
+		if (hRootkey != NULL) {
+			RegCloseKey(hRootkey);
+			hRootkey = NULL;
+		}
+
+	}
+
+	__try {
+
+		// Open the main service key
+		res = RegOpenKeyA(HKEY_LOCAL_MACHINE, ROOT_CRASH_KEY_PATH_LOCAL_DUMPS, &hRootkey);
+		if (res != ERROR_SUCCESS) {
+			printf("[-] Error :: RegOpenKeyA failed with error :: %d :: %d\n", GetLastError( ), res);
+			__leave;
+		}
+		printf("[+] Debug :: DeleteRegistrykeys :: root key %s opened successfully\n", ROOT_CRASH_KEY_PATH_LOCAL_DUMPS);
+
+		// Delete the existing key
+		res = RegDeleteKeyA(hRootkey, SVC_KEY_NAME);
+		if (res != ERROR_SUCCESS) {
+			printf("[-] Error :: RegDeleteKeyA failed with error :: %d :: %d\n", GetLastError(),res );			
+			__leave;
+		}
+		
+		printf("[+] Debug :: DeleteRegistrykeys :: key %s\\%s deleted successfully\n", ROOT_CRASH_KEY_PATH_LOCAL_DUMPS,SVC_KEY_NAME);
 
 
 	}

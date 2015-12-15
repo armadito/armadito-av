@@ -12,6 +12,14 @@
 #define APPS_KEY_NAME "UhuruAV"
 #define APP_DLL_PATH "\%systemRoot\%\\System32\\uhEventProvider.dll"
 
+#define ROOT_CRASH_KEY_PATH "SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting"
+#define ROOT_CRASH_KEY_PATH_LOCAL_DUMPS "SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting\\LocalDumps"
+#define SVC_KEY_NAME "UhuruSvc.exe"
+// c:\Users\[username]\AppData\Local
+#define DUMP_FOLDER "\%LOCALAPPDATA\%\\CrashDumps\\UhuruSvc"
+// 0: Custom Dump - 1: Mini dump - 2: Full dump.
+#define DUMP_TYPE 1 
+
 
 int ServiceInstall( );
 int ServiceRemove( );

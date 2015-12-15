@@ -154,16 +154,9 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 		if (message == NULL) {
 			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: [%d] :: Get message from driver failed :: hres = 0x%x.\n",ThreadId, hres);
 			//uhLog("[-] Warning :: UserScanWorker :: [%d] :: Get message from driver failed :: hres = 0x%x.\n",ThreadId, hres);
-		}
-		/*
-		else {
-			printf("[+] Debug :: UserScanWorker :: Thread %d :: Message received successfully !!.\n",ThreadId);
-		}*/
+		}		
         
-        if (message->msg.FileName != NULL) {
-
-			
-			//printf("\n[+] Debug :: UserScanWorker :: Thread %d Scan order received for file :: %s ::\n",ThreadId, message->msg.FileName);
+        if (message != NULL && message->msg.FileName != NULL) {			
 
 			// Get the MS-DOS filename 
 			msDosFilename = ConvertDeviceNameToMsDosName(message->msg.FileName);
@@ -207,6 +200,12 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 				uhLog("[+] Debug :: UserScanWorker :: [%d] :: %s :: %s\n",ThreadId,msDosFilename,PrintUhuruScanResult(scan_result));
 			}
 
+
+			if (msDosFilename != NULL) {
+				free(msDosFilename);
+				msDosFilename = NULL;
+			}
+
                 
         }
         		
@@ -242,6 +241,11 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 	} // End of while
 
 
+	if (msDosFilename != NULL) {
+		free(msDosFilename);
+		msDosFilename = NULL;
+	}
+
 	if (message != NULL) {
 
         //
@@ -269,7 +273,6 @@ HRESULT UserScanInit(_Inout_  PUSER_SCAN_CONTEXT Context) {
 		hRes = E_INVALIDARG;
 		return hRes;
 	}
-
 
 	__try {
 
@@ -478,25 +481,20 @@ HRESULT UserScanFinalize(_In_  PUSER_SCAN_CONTEXT Context) {
 	
 	uhLog("[DEBUG1]...\n");
 	for (i = 0; i < USER_SCAN_THREAD_COUNT; i++) {
-		printf("Thread id : %d\n", Context->ScanThreadCtxes[i].ThreadId);		
-		Context->ScanThreadCtxes[i].Aborted = TRUE;
-			 
-	}
-	//printf("[DEBUG2]...\n");
+		//printf("Thread id : %d\n", Context->ScanThreadCtxes[i].ThreadId);		
+		Context->ScanThreadCtxes[i].Aborted = TRUE;			 
+	}	
 
 	// Wake up the listeing thread if it is waiting for messag via GetQueuedCompletionStatus()
-	CancelIoEx(Context->ConnectionPort, NULL);
-
-	//printf("[DEBUG3]...\n");
+	CancelIoEx(Context->ConnectionPort, NULL);	
 	
 	// Wait for all scan threads to complete cancellation, so we will able to close the connection port.
 	for (i = 0; i < USER_SCAN_THREAD_COUNT; i++) {
 		if (Context->ScanThreadCtxes[i].Handle == INVALID_HANDLE_VALUE || Context->ScanThreadCtxes[i].Handle == NULL ) {
-			printf("[Error] :: UserScanFinalize :: NULL Thread Handle\n");
+			uhLog("[Error] :: UserScanFinalize :: NULL Thread Handle\n");
 		}
 		hScanThreads[i] = Context->ScanThreadCtxes[i].Handle;
 	}
-	uhLog("[DEBUG4]...\n");
 
 	WaitForMultipleObjects(USER_SCAN_THREAD_COUNT,hScanThreads,TRUE,INFINITE );
 
@@ -628,7 +626,6 @@ int closeScanService(struct uhuru * uhuru) {
 	else {
 		uhLog("[-] Warning :: uhuru global struct is NULL !\n");
 	}
-	
 
 	return 0;
 
