@@ -42,7 +42,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(SolutionDir)..\..\libuhuru\include;$(SolutionDir)..\glib\win32\glib_2.28.8\lib\glib-2.0\include;$(SolutionDir)..\glib\win32\glib_2.28.8\include\glib-2.0;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\toto\projects\uhuru\git\uhuru-av\VS\UhuruAV\Debug;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(SolutionDir)Debug</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -55,13 +55,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\toto\projects\uhuru\git\uhuru-av\VS\clamav\clamav-0.98.7\libclamav;C:\Users\toto\projects\uhuru\git\uhuru-av\VS\clamav\clamdeps\win32\openssl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\clamav\clamav-0.98.7\libclamav;C:\Users\david\Desktop\clamav-0.98.7\libclamav;$(SolutionDir)..\clamav\clamdeps\win32\openssl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;libclamav.lib;glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;libuhuru_core.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\toto\projects\uhuru\git\uhuru-av\VS\clamav\clamav-0.98.7\win32\Win32\Debug;C:\Users\toto\projects\uhuru\git\uhuru-av\VS\UhuruAV\Debug;C:\Users\toto\projects\uhuru\git\uhuru-av\VS\glib\win32\glib_2.28.8\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)..\clamav\clamav-0.98.7\win32\Win32\Debug;$(SolutionDir)..\glib\win32\glib_2.28.8\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>clamav.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
