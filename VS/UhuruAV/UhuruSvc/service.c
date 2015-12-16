@@ -81,8 +81,8 @@ int RegistryKeysInitialization( ) {
 			__leave;
 		}
 
-		printf("[+] Debug :: initRegistrykeys :: UhuruAV event log keys values created successfully\n" );
-		ret = 0;
+		
+		//ret = 0;
 
 	}
 	__finally {
@@ -135,6 +135,7 @@ int RegistryKeysInitialization( ) {
 
 				res = RegOpenKeyA(HKEY_LOCAL_MACHINE, ROOT_CRASH_KEY_PATH_LOCAL_DUMPS, &hRootkey);
 				if (res != ERROR_SUCCESS) {
+					printf("[-] Error :: RegistryKeysInitialization :: RegOpenKeyA() failed with error :: %d :: %d\n", GetLastError( ), res);
 					__leave;
 				}
 
@@ -167,6 +168,7 @@ int RegistryKeysInitialization( ) {
 			__leave;
 		}
 
+		printf("[+] Debug :: RegistryKeysInitialization :: UhuruAV event log keys values created successfully\n" );
 		ret = 0;
 
 	}
@@ -195,6 +197,7 @@ int DeleteRegistryKeys( ) {
 	DWORD dwTypes = 7;
 	LPSTR dllpath = APP_DLL_PATH;
 	DWORD size = 0;
+	int ret = 0;
 
 	__try {
 
@@ -202,6 +205,7 @@ int DeleteRegistryKeys( ) {
 		res = RegOpenKeyA(HKEY_LOCAL_MACHINE, ROOT_KEY_PATH, &hRootkey);
 		if (res != ERROR_SUCCESS) {
 			printf("[-] Error :: RegOpenKeyA failed with error :: %d :: %d\n", GetLastError( ), res);
+			ret = -1;
 			__leave;
 		}
 		printf("[+] Debug :: DeleteRegistrykeys :: root key %s opened successfully\n", ROOT_KEY_PATH);
@@ -209,7 +213,8 @@ int DeleteRegistryKeys( ) {
 		// Delete the existing key
 		res = RegDeleteKeyA(hRootkey, APPS_KEY_NAME);
 		if (res != ERROR_SUCCESS) {
-			printf("[-] Error :: RegDeleteKeyA failed with error :: %d :: %d\n", GetLastError(),res );			
+			printf("[-] Error :: RegDeleteKeyA failed with error :: %d :: %d\n", GetLastError(),res );
+			ret = -1;
 			__leave;
 		}
 		
@@ -232,6 +237,7 @@ int DeleteRegistryKeys( ) {
 		res = RegOpenKeyA(HKEY_LOCAL_MACHINE, ROOT_CRASH_KEY_PATH_LOCAL_DUMPS, &hRootkey);
 		if (res != ERROR_SUCCESS) {
 			printf("[-] Error :: RegOpenKeyA failed with error :: %d :: %d\n", GetLastError( ), res);
+			ret = -1;
 			__leave;
 		}
 		printf("[+] Debug :: DeleteRegistrykeys :: root key %s opened successfully\n", ROOT_CRASH_KEY_PATH_LOCAL_DUMPS);
@@ -239,7 +245,8 @@ int DeleteRegistryKeys( ) {
 		// Delete the existing key
 		res = RegDeleteKeyA(hRootkey, SVC_KEY_NAME);
 		if (res != ERROR_SUCCESS) {
-			printf("[-] Error :: RegDeleteKeyA failed with error :: %d :: %d\n", GetLastError(),res );			
+			printf("[-] Error :: RegDeleteKeyA failed with error :: %d :: %d\n", GetLastError(),res );
+			ret = -1;
 			__leave;
 		}
 		
