@@ -7,7 +7,7 @@ enum uhuru_file_context_status {
   UHURU_FC_FILE_TOO_BIG,                      /* !< file size is >= maximum file size                 */
   UHURU_FC_FILE_CACHED,                       /* !< file path is in path cache                        */
   UHURU_FC_FILE_TYPE_NOT_SCANNED,             /* !< file mime type has no associated scan modules     */
-  UHURU_FC_FILE_OPEN_ERROR,                   /* !< error when opening the file                      */
+  UHURU_FC_FILE_OPEN_ERROR                   /* !< error when opening the file                      */
 };
 
 const char *uhuru_file_context_status_str(enum uhuru_file_context_status status);

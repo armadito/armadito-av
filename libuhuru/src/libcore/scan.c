@@ -14,6 +14,10 @@
 #include "os/string.h"
 #include "os/mimetype.h"
 
+#ifdef HAVE_ON_ACCESS_WINDOWS_MODULE
+#include "builtin-modules/onaccess_windows.h"
+#endif
+
 #include <errno.h>
 #include <glib.h>
 #include <stdlib.h>
@@ -44,6 +48,7 @@ static void uhuru_scan_add_builtin_callbacks(struct uhuru_scan *scan, struct uhu
   quarantine_module = uhuru_get_module_by_name(uhuru, "quarantine");
   uhuru_scan_add_callback(scan, quarantine_callback, quarantine_module->data);
 #endif
+
 }
 
 struct uhuru_scan *uhuru_scan_new(struct uhuru *uhuru, int scan_id)
@@ -100,7 +105,7 @@ static enum uhuru_file_status scan_apply_modules(int fd, const char *path, const
     enum uhuru_file_status mod_status;
     char *mod_report = NULL;
 
-    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_DEBUG, "scanning fd %d path %s with module %s", fd, path, mod->name);
+    //uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_DEBUG, "scanning fd %d path %s with module %s", fd, path, mod->name);
 
     /* if module status is not OK, don't call it */
     if (mod->status != UHURU_MOD_OK)
@@ -108,6 +113,7 @@ static enum uhuru_file_status scan_apply_modules(int fd, const char *path, const
 
     /* call the scan function of the module */
     /* but, after rewinding the file !!! */
+	
     if (lseek(fd, 0, SEEK_SET) < 0)  {
       uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "cannot seek on file %s (error %s)", path, os_strerror(errno) );
       return UHURU_IERROR;
@@ -164,7 +170,7 @@ enum uhuru_file_status uhuru_scan_context(struct uhuru_scan *scan, struct uhuru_
   enum uhuru_file_status status;
   struct uhuru_report report;
 
-  uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_DEBUG, "scanning file %s", ctx->path);
+  //uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_DEBUG, "scanning file %s", ctx->path);
 
   /* initializes the structure passed to callbacks */
   uhuru_report_init(&report, scan->scan_id, ctx->path, REPORT_PROGRESS_UNKNOWN);
@@ -211,7 +217,7 @@ void uhuru_scan_free(struct uhuru_scan *scan)
 /* the simple version, for on-access scan: */
 /* no callbacks */
 /* no threads */
-enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path, struct uhuru_report *report)
+enum uhuru_file_status uhuru_scan_simple_old(struct uhuru *uhuru, const char *path, struct uhuru_report *report)
 {
   struct uhuru_module **modules = NULL;
   const char *mime_type;
@@ -239,6 +245,52 @@ enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path, 
   status = scan_apply_modules(fd, path, mime_type, modules, report);
 
   free((void *)mime_type);
+
+  return status;
+}
+
+enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path, struct uhuru_report *report)
+{
+
+	int fd = -1;
+	struct uhuru_file_context file_context;
+	struct uhuru_scan * scan;
+	enum uhuru_file_context_status context_status;
+	enum uhuru_file_status status;
+	
+
+	context_status = uhuru_file_context_get(&file_context, fd, path, uhuru_scan_conf_on_access());
+	//
+	//context_status = uhuru_file_context_get(&file_context, fd, path, uhuru_scan_conf_on_demand());
+	
+	if (context_status == UHURU_FC_WHITE_LISTED_DIRECTORY)
+		return UHURU_WHITE_LISTED;
+
+	if (context_status != UHURU_FC_MUST_SCAN ) {
+
+		/*if (context_status == UHURU_FC_MIME_TYPE_NOT_FOUND)
+			status = UHURU_UNKNOWN_FILE_TYPE;
+		else if (context_status == UHURU_FC_FILE_OPEN_ERROR)
+			status = UHURU_IERROR; // rename this error :: the file could not be opened.
+		else
+			status = UHURU_IERROR;
+		*/
+		//uhuru_log( );
+		//uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "path = %s  :: context_status = %d", path ,context_status);
+		status = UHURU_IERROR;
+		uhuru_file_context_destroy(&file_context);
+		return status;
+	}
+
+	scan = uhuru_scan_new(uhuru, -1);
+
+	status = uhuru_scan_context(scan, &file_context);
+
+	//uhuru_file_context_free(&file_context);
+	uhuru_file_context_destroy(&file_context);
+
+
+	uhuru_scan_free(scan);
 
   return status;
 }

@@ -30,6 +30,7 @@ const char *os_mime_type_guess_fd(int fd)
 	size_t i = 0;
 	int n_read = 0;
 	char *buf[BUF_SIZE];
+	LPCWSTR defaultMime = L"*";
 
 	if (fd < 0){
 		printf("Invalid file descriptor %s",  fd);
