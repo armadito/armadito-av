@@ -61,7 +61,6 @@ PKG_CHECK_MODULES(GTHREAD2, gthread-2.0, [HAVE_GTHREAD2=yes], [HAVE_GTHREAD2=no]
 if test "$HAVE_GTHREAD2" = "no"; then
    AC_MSG_ERROR("cannot find gthread2 library")
 fi
-# still needed?
 PKG_CHECK_MODULES(GIO2, gio-2.0 gio-unix-2.0, [HAVE_GIO2=yes], [HAVE_GIO2=no])
 if test "$HAVE_GIO2" = "no"; then
    AC_MSG_ERROR("cannot find glib gio library")
@@ -100,6 +99,12 @@ if test "$HAVE_MAGIC_H" = "no"; then
    AC_MSG_ERROR("cannot find magic.h")
 fi
 
+# check for fanotify
+AC_CHECK_FUNCS(fanotify_init, [HAVE_FANOTIFY_INIT=1], [HAVE_FANOTIFY_INIT=0])
+if test "$HAVE_FANOTIFY_INIT" = "0" ; then
+   AC_MSG_ERROR("fanotify is not availble on this Linux distribution")
+fi
+
 # documentation
 # check for asciidoc and a2x
 AC_PATH_PROG(ASCIIDOC, asciidoc)
@@ -121,6 +126,10 @@ src/Makefile
 src/libcore/Makefile
 src/linux/Makefile
 src/linux/daemon/Makefile
+src/linux/modules/Makefile
+src/linux/modules/on-access-linux/Makefile
+src/linux/modules/on-access-linux/conf/Makefile
+src/linux/modules/on-access-linux/src/Makefile
 src/linux/service/Makefile
 src/linux/tools/Makefile
 src/os/Makefile
