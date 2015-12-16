@@ -17,11 +17,16 @@
 #include "builtin-modules/quarantine.h"
 #endif
 #include "builtin-modules/ondemandmod.h"
+#ifdef HAVE_ON_ACCESS_WINDOWS_MODULE
+#include "builtin-modules/onaccess_windows.h"
+#endif
 
 #include <glib.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+
+extern struct uhuru_module on_access_module;
 
 struct uhuru {
   struct module_manager *module_manager;
@@ -64,6 +69,9 @@ struct uhuru *uhuru_open(uhuru_error **error)
   u = uhuru_new();
 
   module_manager_add(u->module_manager, &on_demand_module);
+#ifdef HAVE_ON_ACCESS_WINDOWS_MODULE
+  module_manager_add(u->module_manager, &on_access_win_module);
+#endif
 
 #ifdef HAVE_ALERT_MODULE
   module_manager_add(u->module_manager, &alert_module);
