@@ -5,102 +5,140 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <linux/fanotify.h>
+
+struct fanotify_entry {
+  const char *path;
+  unsigned int flags;
+};
 
 struct fanotify_options {
   int enable_permission;
-  int mark_mount;
-  int check_type;
+  int type_check;
   int log_event;
+  struct fanotify_entry *entries;
+  int n_entries;
 };
 
 static void usage(void)
 {
-  fprintf(stderr, "usage: fanotify-test DIR...\n");
-  fprintf(stderr, "fanotify() test\n");
+  fprintf(stderr, "usage: fanotify-test OPTIONS...\n");
+  fprintf(stderr, "linux fanotify test\n");
   fprintf(stderr, "\n");
   fprintf(stderr, "Options:\n");
   fprintf(stderr, "  -h                             print help and quit\n");
-  fprintf(stderr, "  -a                             enable permission\n");
-  fprintf(stderr, "  -m                             mark the mount points of DIR... (does not work without)\n");
+  fprintf(stderr, "  -e                             enable permission\n");
   fprintf(stderr, "  -t                             check file mime type before ALLOWing\n");
   fprintf(stderr, "  -l                             log every fanotify event\n");
+  fprintf(stderr, "  -M DIR                         add DIR to the fanotify mark mask with flag FAN_MARK_MOUNT\n");
+  fprintf(stderr, "  -m DIR                         add DIR to the fanotify mark mask\n");
+  fprintf(stderr, "  -i DIR                         add DIR to the fanotify ignore mask\n");
   fprintf(stderr, "\n");
 
   exit(1);
 }
 
-static int process_options(int argc, const char **argv, struct fanotify_options *opts)
+static void opts_init(struct fanotify_options *opts, int argc, const char **argv)
 {
-  int argp = 1;
+  int i;
+
+  opts->enable_permission = 0;
+  opts->type_check = 0;
+  opts->log_event = 0;
+
+  /* fat allocation ;-) */
+  opts->entries = malloc((argc - 1) * sizeof(struct fanotify_entry));
+  for (i = 0; i < argc - 1; i++) {
+    opts->entries[i].path = NULL;
+    opts->entries[i].flags = 0;
+  }
+
+  opts->n_entries = 0;
+}
+
+static void opts_add_entry(struct fanotify_options *opts, const char *path, unsigned int flags)
+{
+  opts->entries[opts->n_entries].path = strdup(path);
+  opts->entries[opts->n_entries].flags = flags;
+
+  opts->n_entries++;
+}
+
+static void opts_process(struct fanotify_options *opts, int argc, const char **argv)
+{
+  int opt;
 
   if (argc < 2)
     usage();
 
-  opts->enable_permission = 0;
-  opts->mark_mount = 0;
-  opts->check_type = 0;
-  opts->log_event = 0;
+  opts_init(opts, argc, argv);
 
-  while(argp < argc) {
-    if (!strcmp(argv[argp], "-h"))
+  while ((opt = getopt(argc, (char * const *)argv, "hetlM:m:i:")) != -1) {
+    switch (opt) {
+    case 'h':
       usage();
-    else if (!strcmp(argv[argp], "-a")) {
-      opts->enable_permission = 1;
-      argp++;
-    } else if (!strcmp(argv[argp], "-m")) {
-      opts->mark_mount = 1;
-      argp++;
-    } else if (!strcmp(argv[argp], "-t")) {
-      opts->check_type = 1;
-      argp++;
-    } else if (!strcmp(argv[argp], "-l")) {
-      opts->log_event = 1;
-      argp++;
-    } else
       break;
+    case 'e':
+      opts->enable_permission = 1;
+      break;
+    case 't':
+      opts->type_check = 1;
+      break;
+    case 'l':
+      opts->log_event = 1;
+      break;
+    case 'M':
+      opts_add_entry(opts, optarg, FAN_MARK_MOUNT);
+      break;
+    case 'i':
+      opts_add_entry(opts, optarg, FAN_MARK_IGNORED_MASK);
+      break;
+    case 'm':
+      opts_add_entry(opts, optarg, 0);
+      break;
+    default:
+      usage();
+    }
   }
 
-  return argp;
+  if (optind < argc)
+    usage();
 }
 
 int main(int argc, const char **argv)
 {
-  struct poll_set *ps;
   struct fanotify_options opts;
-  struct access_monitor *monitor;
   enum access_monitor_flags flags = 0;
-  int argp;
+  struct access_monitor *monitor;
+  struct poll_set *ps;
+  int i;
 
-  argp = process_options(argc, argv, &opts);
+  opts_process(&opts, argc, argv);
 
   mime_type_init();
 
-  if (opts.mark_mount)
-    flags |= MONITOR_MOUNT;
-
-  if (opts.check_type)
-    flags |= MONITOR_CHECK_TYPE;
+  if (opts.type_check)
+    flags |= MONITOR_TYPE_CHECK;
 
   if (opts.log_event)
     flags |= MONITOR_LOG_EVENT;
+
+  if (opts.enable_permission)
+    flags |= MONITOR_ENABLE_PERM;
 
   monitor = access_monitor_new(flags);
 
   if (monitor == NULL)
     return 2;
 
-  access_monitor_enable_permission(monitor, opts.enable_permission);
-
-  while(argp < argc) {
-    access_monitor_add(monitor, argv[argp]);
-    argp++;
-  }
-
   ps = poll_set_new();
 
   poll_set_add_fd(ps, access_monitor_get_poll_fd(monitor), access_monitor_cb, monitor);
 
-  access_monitor_activate(monitor);
+  for (i = 0; i < opts.n_entries; i++)
+    access_monitor_add(monitor, opts.entries[i].path, opts.entries[i].flags);
 
   return poll_set_loop(ps);
 }

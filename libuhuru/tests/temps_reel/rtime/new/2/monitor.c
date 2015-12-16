@@ -25,10 +25,8 @@
 #include <unistd.h>
 
 struct access_monitor {
-  int enable_permission;
   enum access_monitor_flags flags;
   int fanotify_fd;
-  GPtrArray *paths;
   pid_t my_pid;
   GThreadPool *thread_pool;  
 };
@@ -42,20 +40,19 @@ void path_destroy_notify(gpointer data)
 
 struct access_monitor *access_monitor_new(enum access_monitor_flags flags)
 {
-  struct access_monitor *m = g_new(struct access_monitor, 1);
+  struct access_monitor *m = malloc(sizeof(struct access_monitor));
 
-  m->enable_permission = 0;
   m->flags = flags;
 
-  m->fanotify_fd = fanotify_init(FAN_CLASS_CONTENT | FAN_CLOEXEC, O_RDONLY | O_CLOEXEC | O_LARGEFILE | O_NOATIME);
-
+  /* clamav: onas_fan_fd = fanotify_init(FAN_CLASS_CONTENT | FAN_UNLIMITED_QUEUE | FAN_UNLIMITED_MARKS, O_LARGEFILE | O_RDONLY); */
+  /* m->fanotify_fd = fanotify_init(FAN_CLASS_CONTENT | FAN_CLOEXEC, O_RDONLY | O_CLOEXEC | O_LARGEFILE | O_NOATIME); */
+  m->fanotify_fd = fanotify_init(FAN_CLASS_CONTENT | FAN_UNLIMITED_QUEUE | FAN_UNLIMITED_MARKS, O_LARGEFILE | O_RDONLY);
+    
   if (m->fanotify_fd < 0) {
     fprintf(stderr, "fanotify: fanotify_init failed (%s)\n", strerror(errno));
     g_free(m);
     return NULL;
   }
-
-  m->paths = g_ptr_array_new_full(10, path_destroy_notify);
 
   m->my_pid = getpid();
   
@@ -72,67 +69,49 @@ int access_monitor_get_poll_fd(struct access_monitor *m)
   return m->fanotify_fd;
 }
 
-int access_monitor_enable_permission(struct access_monitor *m, int enable_permission)
+int access_monitor_add(struct access_monitor *m, const char *path, unsigned int flags)
 {
-  if (m == NULL)
-    return 0;
+  /* from clamav */
+  /* uint64_t fan_mask = FAN_EVENT_ON_CHILD | FAN_CLOSE; */
+  uint64_t fan_mask = 0;
 
-  m->enable_permission = enable_permission;
+  if (!(flags & FAN_MARK_MOUNT))
+    fan_mask |= FAN_EVENT_ON_CHILD;
 
-  fprintf(stderr, "fanotify: %s\n", (m->enable_permission) ? "enabled" : "disabled");
+  if (m->flags & MONITOR_ENABLE_PERM)
+    /* fan_mask |= FAN_ACCESS_PERM | FAN_OPEN_PERM; */
+    fan_mask |= FAN_OPEN_PERM;
+  else
+    fan_mask |= FAN_CLOSE;
 
-  return m->enable_permission;
-}
+  if (fanotify_mark(m->fanotify_fd, FAN_MARK_ADD | flags, fan_mask, AT_FDCWD, path) < 0) {
+    fprintf(stderr, "fanotify: marking %s failed (%s)\n", path, strerror(errno));
 
-int access_monitor_add(struct access_monitor *m, const char *path)
-{
-  const char *tmp;
-
-  if (m == NULL)
     return -1;
+  }
 
-  tmp = strdup(path);
-
-  g_ptr_array_add(m->paths, (gpointer)tmp);
-
-  fprintf(stderr, "fanotify: added directory %s\n", tmp);
+  fprintf(stderr, "fanotify: marked directory %s\n", path);
 
   return 0;
 }
 
+#if 0
 int access_monitor_remove(struct access_monitor *m, const char *path)
 {
-  if (m == NULL)
-    return 0;
-
   if (fanotify_mark(m->fanotify_fd, FAN_MARK_REMOVE, FAN_OPEN_PERM, AT_FDCWD, path) < 0) {
     fprintf(stderr, "fanotify: removing %s failed (%s)\n", path, strerror(errno));
 
     return -1;
   }
 
-  g_ptr_array_remove(m->paths, (gpointer)path);
-
   fprintf(stderr, "fanotify: removed directory %s\n", path);
 
   return 0;
 }
+#endif
 
 void access_monitor_free(struct access_monitor *m)
 {
-  int i;
-
-  if (m == NULL)
-    return;
-
-  while (m->paths->len > 0) {
-    const char *path = (const char *)g_ptr_array_index(m->paths, 0);
-
-    access_monitor_remove(m, path);
-  }
-
-  g_ptr_array_free(m->paths, TRUE);
-
   close(m->fanotify_fd);
 
   free(m);
@@ -189,7 +168,7 @@ static int perm_event_process(struct access_monitor *m, struct fanotify_event_me
   struct stat buf;
   const char *mime_type;
 
-  if (m->enable_permission == 0)  /* permission check is disabled, always allow */
+  if (!(m->flags & MONITOR_ENABLE_PERM))  /* permission check is disabled, always allow */
     return write_response(m, event->fd, FAN_ALLOW, NULL, "permission is not activated");
 
   if (m->my_pid == event->pid)   /* file was opened by myself, always allow */
@@ -201,18 +180,29 @@ static int perm_event_process(struct access_monitor *m, struct fanotify_event_me
   if (!S_ISREG(buf.st_mode))
     return write_response(m, event->fd, FAN_ALLOW, NULL, "fd is not a file");
 
-  if (!m->flags & MONITOR_CHECK_TYPE)
-    return write_response(m, event->fd, FAN_ALLOW, NULL, "no check on MIME type");
+  p = get_file_path_from_fd(event->fd, file_path, PATH_MAX);
+
+  if (!(m->flags & MONITOR_TYPE_CHECK))
+    return write_response(m, event->fd, FAN_ALLOW, p, "no check on MIME type");
 
   mime_type = mime_type_guess_fd(event->fd);
 
-  write_response(m, event->fd, FAN_ALLOW, NULL, "checked MIME type");
-
-  /* p = get_file_path_from_fd(event->fd, file_path, PATH_MAX); */
+  write_response(m, event->fd, FAN_ALLOW, p, "checked MIME type");
 
   /* g_thread_pool_push(m->thread_pool, uhuru_file_context_clone(&file_context), NULL); */
 
   return 0;
+}
+
+static void notify_event_process(struct access_monitor *m, struct fanotify_event_metadata *event)
+{
+  char file_path[PATH_MAX + 1];
+  char *p;
+
+  p = get_file_path_from_fd(event->fd, file_path, PATH_MAX);
+
+  if (m->flags & MONITOR_LOG_EVENT)
+    fprintf(stderr, "fanotify: path %s\n", p);
 }
 
 /* Size of buffer to use when reading fanotify events */
@@ -229,14 +219,16 @@ void access_monitor_cb(void *user_data)
     struct fanotify_event_metadata *event;
 
     for(event = (struct fanotify_event_metadata *)buf; FAN_EVENT_OK(event, len); event = FAN_EVENT_NEXT(event, len)) {
-      if (event->mask & FAN_OPEN_PERM)
+      /* if ((event->mask & FAN_OPEN_PERM) || (event->mask & FAN_ACCESS_PERM)) */
+      if ((event->mask & FAN_OPEN_PERM))
 	perm_event_process(m, event);
       else
-	fprintf(stderr, "fanotify: unprocessed event 0x%llx fd %d\n", event->mask, event->fd);
+	notify_event_process(m, event);
     }
   }
 }
 
+#if 0
 int access_monitor_activate(struct access_monitor *m)
 {
   int i;
@@ -262,3 +254,4 @@ int access_monitor_activate(struct access_monitor *m)
 
   return 0;
 }
+#endif
