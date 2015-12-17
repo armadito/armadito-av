@@ -63,8 +63,8 @@ enum uhuru_file_context_status uhuru_file_context_get(struct uhuru_file_context 
 
   if (applicable_modules == NULL) {
     free((void *)mime_type);
-    
-    ctx->status = UHURU_FC_FILE_TYPE_NOT_SCANNED;
+	ctx->status = UHURU_FC_FILE_TYPE_NOT_SCANNED;
+
     return ctx->status;
   }
 

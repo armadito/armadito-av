@@ -90,7 +90,7 @@ void uhuru_scan_conf_add_mime_type(struct uhuru_scan_conf *c, const char *mime_t
   struct uhuru_module *mod = uhuru_get_module_by_name(u, module_name);
     
   if (mod == NULL) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "fanotify: no module '%s' for MIME type '%s'", module_name, mime_type);
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "conf :: no module '%s' for MIME type '%s'", module_name, mime_type);
     return;
   }
     
