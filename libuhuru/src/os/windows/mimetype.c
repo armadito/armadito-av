@@ -30,6 +30,7 @@ const char *os_mime_type_guess_fd(int fd)
 	size_t i = 0;
 	int n_read = 0;
 	char *buf[BUF_SIZE];
+	LPCWSTR defaultMime = L"*";
 
 	if (fd < 0){
 		printf("Invalid file descriptor %s",  fd);
@@ -74,7 +75,7 @@ const char *os_mime_type_guess(const char *path)
 
 	fh = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ , NULL,OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL,NULL );
 	if (fh == INVALID_HANDLE_VALUE) {
-		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "Error :: os_mime_type_guess() :: CreateFileA() failed :: %s :: err = %d (%s) :: ",path,GetLastError(),os_strerror(GetLastError()));
+		//uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "Error :: os_mime_type_guess() :: CreateFileA() failed :: %s :: err = %d (%s) :: ",path,GetLastError(),os_strerror(GetLastError()));
 		return NULL;
 	}
 

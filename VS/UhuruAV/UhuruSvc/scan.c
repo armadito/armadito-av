@@ -74,7 +74,10 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 	ThreadId = GetCurrentThreadId( );
 
 	//printf("\n[i] In thread worker routine...:: Thread ID : %d :: Context :: %d :: Finalize = %d\n",ThreadId, Context, Context->Finalized);
+	
+	uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_DEBUG, " [i] In thread worker routine...:: Thread ID : %d :: Finalize = %d\n",ThreadId, Context->Finalized);
 	uhLog("\n[i] In thread worker routine...:: Thread ID : %d :: Finalize = %d\n",ThreadId, Context->Finalized);
+	
 	for (i = 0; i < USER_SCAN_THREAD_COUNT; i++) {
 
 		if (ThreadId == Context->ScanThreadCtxes[i].ThreadId ) {
@@ -84,7 +87,8 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 	}
 
 	if (threadCtx == NULL) {
-		uhLog("[-] Error :: UserScanWorker :: Thread Not found\n");
+		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " UhuruSvc!UserScanWorker :: NULL Thread context\n");
+		//uhLog("[-] Error :: UserScanWorker :: Thread Not found\n");
 		return S_FALSE;
 	}	
 
@@ -123,11 +127,13 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
             
             if (hres == E_HANDLE) {
             
-                uhLog("[-] Error :: UserScanWorker :: Completion port becomes unavailable.\n");
+                //uhLog("[-] Error :: UserScanWorker :: Completion port becomes unavailable.\n");
+				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " UhuruSvc!UserScanWorker :: Completion port becomes unavailable.\n");
                 hres = S_OK;
                 
             } else if (hres == HRESULT_FROM_WIN32(ERROR_ABANDONED_WAIT_0)) {
-            
+				
+				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " UhuruSvc!UserScanWorker :: Completion port closed unexpectedly.\n");
 				uhLog("[-] Error :: UserScanWorker :: Completion port was closed.\n");
                 hres = S_OK;
             }
@@ -146,36 +152,29 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
         message = CONTAINING_RECORD( pOvlp, SCANNER_MESSAGE, Ovlp );
 
 		if (message == NULL) {
-			uhLog("[-] Warning :: UserScanWorker :: [%d] :: Get message from driver failed :: hres = 0x%x.\n",ThreadId, hres);
-		}
-		/*
-		else {
-			printf("[+] Debug :: UserScanWorker :: Thread %d :: Message received successfully !!.\n",ThreadId);
-		}*/
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: [%d] :: Get message from driver failed :: hres = 0x%x.\n",ThreadId, hres);
+			//uhLog("[-] Warning :: UserScanWorker :: [%d] :: Get message from driver failed :: hres = 0x%x.\n",ThreadId, hres);
+		}		
         
-        if (message->msg.FileName != NULL) {
-
-			
-			//printf("\n[+] Debug :: UserScanWorker :: Thread %d Scan order received for file :: %s ::\n",ThreadId, message->msg.FileName);
+        if (message != NULL && message->msg.FileName != NULL) {			
 
 			// Get the MS-DOS filename 
 			msDosFilename = ConvertDeviceNameToMsDosName(message->msg.FileName);
 
+
 			if (msDosFilename == NULL) {
-				uhLog("[-] Error :: UserScanWorker :: Thread %d :: ConvertDeviceNameToMsDosName failed :: \n",ThreadId);
+				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: [%d] :: ConvertDeviceNameToMsDosName failed :: \n",ThreadId);
+				uhLog("[-] Error :: UserScanWorker :: [%d] :: ConvertDeviceNameToMsDosName failed :: \n",ThreadId);
 				scan_result = UHURU_EINVAL;
 			}
 			// fake scan example			
-			else if (strstr(msDosFilename,"UH_MALWARE") != NULL) {
+			else if (strstr(msDosFilename,"UH_MALWARE") != NULL) {				
 				scan_result = UHURU_MALWARE;
 			}
 			else if (strstr(msDosFilename,"UHURU.TXT") != NULL) {  // Do not scan the log file.
 				scan_result = UHURU_WHITE_LISTED;
 			}
 			else {
-
-				// Initialize the scan report structure
-				//uhuru_report_init(&report, 1, msDosFilename, 0);
 
 				// launch a simple file scan
 				scan_result = uhuru_scan_simple(uhuru, msDosFilename, &report);
@@ -191,18 +190,28 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 			hres = FilterReplyMessage(Context->ConnectionPort,&reply.ReplyHeader,SCANNER_REPLY_MESSAGE_SIZE);			
 
 			if(FAILED(hres)){
-				uhLog("[-] Error :: UserScanWorker :: Thread %d :: FilterReplyMessage failed :: hres = 0x%x.\n",ThreadId, hres);
-				
+				//uhLog("[-] Error :: UserScanWorker :: Thread %d :: FilterReplyMessage failed :: hres = 0x%x.\n",ThreadId, hres);
+				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: [%d] :: FilterReplyMessage failed :: hres = 0x%x.\n",ThreadId, hres);
 			}
-			else {								
+			else {
+				if (scan_result == UHURU_MALWARE)
+					uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: Malware found !! \n file: [%s] ",msDosFilename);
+				
 				uhLog("[+] Debug :: UserScanWorker :: [%d] :: %s :: %s\n",ThreadId,msDosFilename,PrintUhuruScanResult(scan_result));
 			}
+
+
+			if (msDosFilename != NULL) {
+				free(msDosFilename);
+				msDosFilename = NULL;
+			}
+
                 
         }
         		
 
 		// If the finalized flag is set from the main thread.		
-		if (Context->Finalized == 1) { 
+		if (Context->Finalized == 1) {			
 			uhLog("\n[i] Debug  :: UserScanWorker :: Finalized flag set in the main thread !\n");
             break;
         }
@@ -214,11 +223,14 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
         hres = FilterGetMessage( Context->ConnectionPort, &message->MessageHeader, FIELD_OFFSET(SCANNER_MESSAGE, Ovlp ), &message->Ovlp );
 
         if (hres == HRESULT_FROM_WIN32(ERROR_OPERATION_ABORTED)) {
-            
+            			
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " UhuruSvc!UserScanWorker :: FilterGetMessage aborted unexpectedly");
             uhLog("[-] Warning :: UserScanWorker :: FilterGetMessage aborted.\n");
             break;
             
         } else if (hres != HRESULT_FROM_WIN32( ERROR_IO_PENDING )) {
+			
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: [%d] :: FilterGetMessage failed :: hres = 0x%x.\n",ThreadId, hres);
 			uhLog("[-] Warning :: UserScanWorker :: Thread %d :: FilterGetMessage failed :: hres = 0x%x.\n",ThreadId, hres);                       
             break;
         }
@@ -229,6 +241,11 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 	} // End of while
 
 
+	if (msDosFilename != NULL) {
+		free(msDosFilename);
+		msDosFilename = NULL;
+	}
+
 	if (message != NULL) {
 
         //
@@ -236,6 +253,7 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
         //        
         HeapFree(GetProcessHeap(), 0, message);
     }
+
 	uhLog("\n[i] Debug  :: UserScanWorker :: Thread id %d exiting\n",ThreadId);
 
 	return hres;
@@ -250,11 +268,11 @@ HRESULT UserScanInit(_Inout_  PUSER_SCAN_CONTEXT Context) {
 
 	// Check parameter.
 	if (Context == NULL) {
-		uhLog("[-] Error :: UserScanInit :: NULL parameter Context\n" );
+		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " UserScanInit :: NULL context parameter\n");
+		//uhLog("[-] Error :: UserScanInit :: NULL parameter Context\n" );
 		hRes = E_INVALIDARG;
 		return hRes;
 	}
-
 
 	__try {
 
@@ -284,7 +302,8 @@ HRESULT UserScanInit(_Inout_  PUSER_SCAN_CONTEXT Context) {
 
 			if (scanThreadCtxes[i].Handle == NULL) {				
 				hRes = HRESULT_FROM_WIN32(GetLastError());
-				uhLog("[-] Error :: CreateThread() failed :: errcode = 0x%x\n",hRes);
+				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " UserScanInit :: CreateThread() failed :: errcode = 0x%x\n",hRes);
+				//uhLog("[-] Error :: CreateThread() failed :: errcode = 0x%x\n",hRes);
 				__leave;		
 			}
 			InitializeCriticalSection(&(scanThreadCtxes[i].Lock));
@@ -305,7 +324,8 @@ HRESULT UserScanInit(_Inout_  PUSER_SCAN_CONTEXT Context) {
 			uhLog("[-] Error :: FilterConnectCommunicationPort() failed :: errcode = 0x%x\n",hRes);
 			__leave;
 		}
-		uhLog("[+] Debug :: UserScanInit :: Client connected to the driver communication port !!\n");
+		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_INFO, " Service connected to the driver communication port\n");
+		//uhLog("[+] Debug :: UserScanInit :: Client connected to the driver communication port !!\n");
 
 		
 		//  Create the IO completion port for asynchronous message passing. // Why ?? // try to remove this line to see cons
@@ -333,7 +353,8 @@ HRESULT UserScanInit(_Inout_  PUSER_SCAN_CONTEXT Context) {
 
 			if ( ResumeThread( scanThreadCtxes[i].Handle ) == -1) {         							
 				hRes = HRESULT_FROM_WIN32(GetLastError());
-				uhLog("[-] Error :: UserScanInit :: ResumeThread() failed on thread No%d:: errcode = 0x%x\n",i,hRes);
+				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " UserScanInit :: ResumeThread() failed on thread [%d] :: errcode = 0x%x\n",i,hRes);
+				//uhLog("[-] Error :: UserScanInit :: ResumeThread() failed on thread [%d] :: errcode = 0x%x\n",i,hRes);
 				__leave;
 			 }
 
@@ -360,7 +381,8 @@ HRESULT UserScanInit(_Inout_  PUSER_SCAN_CONTEXT Context) {
             
 			} else {
         
-				uhLog("[-] Error :: UhuruSvc!UserScanInit :: FilterGetMessage failed :: GLE=%03d. \n",GetLastError());			
+				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " UserScanInit :: FilterGetMessage failed :: GLE=%03d. \n",GetLastError());
+				//uhLog("[-] Error :: UhuruSvc!UserScanInit :: FilterGetMessage failed :: GLE=%03d. \n",GetLastError());			
 				HeapFree(GetProcessHeap(), 0, msg );
 				__leave;
 			}
@@ -371,21 +393,22 @@ HRESULT UserScanInit(_Inout_  PUSER_SCAN_CONTEXT Context) {
 	__finally{
 
 		// In case of failure.
-		if (hRes != S_OK) {
-
-			//printf("[DEBUG] :: finally section...\n");
+		if (hRes != S_OK) {			
 
 			// Close completion handle.
-			if (Context->Completion && CloseHandle(Context->Completion) == FALSE) {    			
-				uhLog("[-] Error :: UhuruSvc!UserScanInit :: CloseHandle for completion port failed :: GLE=%03d. \n",GetLastError());			
+			if (Context->Completion && CloseHandle(Context->Completion) == FALSE) {
+				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, "  UhuruSvc!UserScanInit :: CloseHandle for completion port failed :: GLE=%03d. \n",GetLastError());
+				//uhLog("[-] Error :: UhuruSvc!UserScanInit :: CloseHandle for completion port failed :: GLE=%03d. \n",GetLastError());			
 			}
 
 			// Close communication port.
 			if ((Context->ConnectionPort != INVALID_HANDLE_VALUE && Context->ConnectionPort != NULL ) && !CloseHandle(Context->ConnectionPort)) {
-				uhLog("[-] Error :: UhuruSvc!UserScanInit :: CloseHandle for communication port has failed :: GLE=%03d. \n",GetLastError());			
+				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, "  UhuruSvc!UserScanInit :: CloseHandle for communication port has failed :: GLE=%03d. \n",GetLastError());
+				//uhLog("[-] Error :: UhuruSvc!UserScanInit :: CloseHandle for communication port has failed :: GLE=%03d. \n",GetLastError());			
 			}
 			else {
-				uhLog("[+] Debug :: UhuruSvc!UserScanInit :: Communication port closed Successfully \n");			
+				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_INFO, "  UhuruSvc!UserScanInit :: Communication port closed Successfully");
+				//uhLog("[+] Debug :: UhuruSvc!UserScanInit :: Communication port closed Successfully \n");			
 			}
 
 
@@ -395,7 +418,8 @@ HRESULT UserScanInit(_Inout_  PUSER_SCAN_CONTEXT Context) {
 				for (i = 0; i < USER_SCAN_THREAD_COUNT; i++) {
 
 					if (scanThreadCtxes[i].Handle && CloseHandle(scanThreadCtxes[i].Handle) == FALSE ) {
-						uhLog("[-] Error :: UhuruSvc!UserScanInit :: CloseHandle failed for thread %d :: GLE=%03d. \n",i,GetLastError());
+						uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, "  UhuruSvc!UserScanInit :: CloseHandle failed for thread %d :: GLE=%03d. \n",i,GetLastError());
+						//uhLog("[-] Error :: UhuruSvc!UserScanInit :: CloseHandle failed for thread %d :: GLE=%03d. \n",i,GetLastError());
 						DeleteCriticalSection(&(scanThreadCtxes[i].Lock));
 					}
 
@@ -457,25 +481,20 @@ HRESULT UserScanFinalize(_In_  PUSER_SCAN_CONTEXT Context) {
 	
 	uhLog("[DEBUG1]...\n");
 	for (i = 0; i < USER_SCAN_THREAD_COUNT; i++) {
-		printf("Thread id : %d\n", Context->ScanThreadCtxes[i].ThreadId);		
-		Context->ScanThreadCtxes[i].Aborted = TRUE;
-			 
-	}
-	//printf("[DEBUG2]...\n");
+		//printf("Thread id : %d\n", Context->ScanThreadCtxes[i].ThreadId);		
+		Context->ScanThreadCtxes[i].Aborted = TRUE;			 
+	}	
 
 	// Wake up the listeing thread if it is waiting for messag via GetQueuedCompletionStatus()
-	CancelIoEx(Context->ConnectionPort, NULL);
-
-	//printf("[DEBUG3]...\n");
+	CancelIoEx(Context->ConnectionPort, NULL);	
 	
 	// Wait for all scan threads to complete cancellation, so we will able to close the connection port.
 	for (i = 0; i < USER_SCAN_THREAD_COUNT; i++) {
 		if (Context->ScanThreadCtxes[i].Handle == INVALID_HANDLE_VALUE || Context->ScanThreadCtxes[i].Handle == NULL ) {
-			printf("[Error] :: UserScanFinalize :: NULL Thread Handle\n");
+			uhLog("[Error] :: UserScanFinalize :: NULL Thread Handle\n");
 		}
 		hScanThreads[i] = Context->ScanThreadCtxes[i].Handle;
 	}
-	uhLog("[DEBUG4]...\n");
 
 	WaitForMultipleObjects(USER_SCAN_THREAD_COUNT,hScanThreads,TRUE,INFINITE );
 
@@ -607,7 +626,6 @@ int closeScanService(struct uhuru * uhuru) {
 	else {
 		uhLog("[-] Warning :: uhuru global struct is NULL !\n");
 	}
-	
 
 	return 0;
 
