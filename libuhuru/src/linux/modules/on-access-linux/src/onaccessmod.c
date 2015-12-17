@@ -1,27 +1,22 @@
 #include <libuhuru/core.h>
 
+#include "monitor.h"
+
 #include <glib.h>
 #include <stdlib.h>
 #include <string.h>
 
 struct on_access_linux_data {
-  GPtrArray *paths;
-  int enable_permission;
+  struct access_monitor *monitor;
 };
-
-void path_destroy_notify(gpointer data)
-{
-  free(data);
-}
 
 static enum uhuru_mod_status mod_on_access_linux_init(struct uhuru_module *module)
 {
-  struct on_access_linux_data *fa_data = g_new(struct on_access_linux_data, 1);
+  struct on_access_linux_data *data = malloc(sizeof(struct on_access_linux_data));
 
-  module->data = fa_data;
+  module->data = data;
 
-  fa_data->paths = g_ptr_array_new_full(10, path_destroy_notify);
-  fa_data->enable_permission = 0;
+  data->monitor = access_monitor_new(module->uhuru);
 
   /* if access monitor is NULL, for instance because this process does not */
   /* have priviledge (i.e. not running as root), we don't return an error because this will make */
@@ -32,6 +27,7 @@ static enum uhuru_mod_status mod_on_access_linux_init(struct uhuru_module *modul
   return UHURU_MOD_OK;
 }
 
+#if 0
 static enum uhuru_mod_status mod_on_access_linux_conf_set_watch_dir(struct uhuru_module *module, const char *directive, const char **argv)
 {
   struct on_access_linux_data *fa_data = (struct on_access_linux_data *)module->data;
@@ -46,7 +42,9 @@ static enum uhuru_mod_status mod_on_access_linux_conf_set_watch_dir(struct uhuru
 
   return UHURU_MOD_OK;
 }
+#endif
 
+#if 0
 static enum uhuru_mod_status mod_on_access_linux_conf_set_enable_on_access(struct uhuru_module *module, const char *directive, const char **argv)
 {
   struct on_access_linux_data *fa_data = (struct on_access_linux_data *)module->data;
@@ -55,6 +53,7 @@ static enum uhuru_mod_status mod_on_access_linux_conf_set_enable_on_access(struc
 
   return UHURU_MOD_OK;
 }
+#endif
 
 static enum uhuru_mod_status mod_on_access_linux_conf_white_list_dir(struct uhuru_module *module, const char *directive, const char **argv)
 {
@@ -100,7 +99,9 @@ static enum uhuru_mod_status mod_on_access_linux_conf_max_size(struct uhuru_modu
 
 static enum uhuru_mod_status mod_on_access_linux_post_init(struct uhuru_module *module)
 {
-  struct on_access_linux_data *fa_data = (struct on_access_linux_data *)module->data;
+  struct on_access_linux_data *data = (struct on_access_linux_data *)module->data;
+
+  access_monitor_start(data->monitor);
 
   return UHURU_MOD_OK;
 }
@@ -109,16 +110,14 @@ static enum uhuru_mod_status mod_on_access_linux_close(struct uhuru_module *modu
 {
   struct on_access_linux_data *fa_data = (struct on_access_linux_data *)module->data;
 
-#ifdef HAVE_LIBNOTIFY
-  notify_uninit();
-#endif
-
   return UHURU_MOD_OK;
 }
 
 struct uhuru_conf_entry mod_on_access_linux_conf_table[] = {
+#if 0
   { "watch-dir", mod_on_access_linux_conf_set_watch_dir},
   { "enable-on-access", mod_on_access_linux_conf_set_enable_on_access},
+#endif
   { "white-list-dir", mod_on_access_linux_conf_white_list_dir},
   { "mime-type", mod_on_access_linux_conf_mime_type},
   { "max-size", mod_on_access_linux_conf_max_size},
