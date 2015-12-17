@@ -3,7 +3,12 @@ AUTOMAKE_OPTIONS=subdir-objects
 modulesdir=$(libdir)/libuhuru/modules
 modules_LTLIBRARIES=on-access-linux.la
 
-on_access_linux_la_SOURCES=onaccessmod.c mount.c mount.h #monitor.c monitor.h
+on_access_linux_la_SOURCES= \
+onaccessmod.c \
+monitor.c \
+monitor.h \
+mount.c \
+mount.h 
 
 on_access_linux_la_LDFLAGS= -module -avoid-version
 on_access_linux_la_LIBADD= -luhuru_core @GLIB2_LIBS@

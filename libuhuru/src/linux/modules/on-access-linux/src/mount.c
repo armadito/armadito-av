@@ -31,6 +31,10 @@ static void mount_cb(GDBusConnection *conn,
   struct mount_monitor *m = (struct mount_monitor *)user_data;
   enum mount_event_type ev_type = !strcmp(signal_name, "MountAdded") ? EVENT_MOUNT : EVENT_UMOUNT;
 
+#ifdef DEBUG
+  printf("g_thread_self() returns %p\n", g_thread_self());
+  printf("g_main_context_get_thread_default() returns %p\n", g_main_context_get_thread_default());
+#endif
 
 #ifdef DEBUG
   printf("mount_cb sender_name %s object_path %s interface_name %s signal_name %s\n", sender_name, object_path, interface_name, signal_name);
@@ -115,6 +119,11 @@ struct mount_monitor *mount_monitor_new(mount_cb_t cb, void *user_data)
 
 void mount_monitor_free(struct mount_monitor *m)
 {
+  mount_monitor_unsubscribe_signals(m);
+
+  g_dbus_connection_close_sync(m->conn, NULL, NULL);
+
+  free(m);
 }
 
 
