@@ -6,13 +6,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct on_access_linux_data {
+struct mod_oal_data {
   struct access_monitor *monitor;
 };
 
-static enum uhuru_mod_status mod_on_access_linux_init(struct uhuru_module *module)
+static enum uhuru_mod_status mod_oal_init(struct uhuru_module *module)
 {
-  struct on_access_linux_data *data = malloc(sizeof(struct on_access_linux_data));
+  struct mod_oal_data *data = malloc(sizeof(struct mod_oal_data));
 
   module->data = data;
 
@@ -27,42 +27,60 @@ static enum uhuru_mod_status mod_on_access_linux_init(struct uhuru_module *modul
   return UHURU_MOD_OK;
 }
 
-#if 0
-static enum uhuru_mod_status mod_on_access_linux_conf_set_watch_dir(struct uhuru_module *module, const char *directive, const char **argv)
+static enum uhuru_mod_status mod_oal_conf_enable(struct uhuru_module *module, const char *directive, const char **argv)
 {
-  struct on_access_linux_data *fa_data = (struct on_access_linux_data *)module->data;
+  struct mod_oal_data *data = (struct mod_oal_data *)module->data;
 
-  while (*argv != NULL) {
-    g_ptr_array_add(fa_data->paths, strdup(*argv));
-
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "on_access_linux_mod: added %s", *argv);
-
-    argv++;
-  }
+  access_monitor_enable(data->monitor, atoi(argv[0]));
 
   return UHURU_MOD_OK;
 }
-#endif
 
-#if 0
-static enum uhuru_mod_status mod_on_access_linux_conf_set_enable_on_access(struct uhuru_module *module, const char *directive, const char **argv)
+static enum uhuru_mod_status mod_oal_conf_enable_permission(struct uhuru_module *module, const char *directive, const char **argv)
 {
-  struct on_access_linux_data *fa_data = (struct on_access_linux_data *)module->data;
+  struct mod_oal_data *data = (struct mod_oal_data *)module->data;
 
-  fa_data->enable_permission = atoi(argv[0]);
+  access_monitor_enable_permission(data->monitor, atoi(argv[0]));
 
   return UHURU_MOD_OK;
 }
-#endif
 
-static enum uhuru_mod_status mod_on_access_linux_conf_white_list_dir(struct uhuru_module *module, const char *directive, const char **argv)
+static enum uhuru_mod_status mod_oal_conf_enable_removable_media(struct uhuru_module *module, const char *directive, const char **argv)
+{
+  struct mod_oal_data *data = (struct mod_oal_data *)module->data;
+
+  access_monitor_enable_removable_media(data->monitor, atoi(argv[0]));
+
+  return UHURU_MOD_OK;
+}
+
+static enum uhuru_mod_status mod_oal_conf_mount(struct uhuru_module *module, const char *directive, const char **argv)
+{
+  struct mod_oal_data *data = (struct mod_oal_data *)module->data;
+
+  for(; *argv != NULL; argv++)
+    access_monitor_add_mount(data->monitor, *argv);
+
+  return UHURU_MOD_OK;
+}
+static enum uhuru_mod_status mod_oal_conf_directory(struct uhuru_module *module, const char *directive, const char **argv)
+{
+  struct mod_oal_data *data = (struct mod_oal_data *)module->data;
+
+  for(; *argv != NULL; argv++)
+    access_monitor_add_directory(data->monitor, *argv);
+
+  return UHURU_MOD_OK;
+}
+
+static enum uhuru_mod_status mod_oal_conf_white_list_dir(struct uhuru_module *module, const char *directive, const char **argv)
 {
   struct uhuru_scan_conf *on_access_conf = uhuru_scan_conf_on_access();
 
   while (*argv != NULL) {
     uhuru_scan_conf_white_list_directory(on_access_conf, *argv);
 
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "on_access_linux_mod: white list %s", *argv);
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "oal_mod: white list %s", *argv);
 
     argv++;
   }
@@ -70,13 +88,13 @@ static enum uhuru_mod_status mod_on_access_linux_conf_white_list_dir(struct uhur
   return UHURU_MOD_OK;
 }
 
-static enum uhuru_mod_status mod_on_access_linux_conf_mime_type(struct uhuru_module *module, const char *directive, const char **argv)
+static enum uhuru_mod_status mod_oal_conf_mime_type(struct uhuru_module *module, const char *directive, const char **argv)
 {
   const char *mime_type;
   struct uhuru_scan_conf *on_access_conf = uhuru_scan_conf_on_access();
 
   if (argv[0] == NULL || argv[1] == NULL) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "on_access_linux: invalid configuration directive, not enough arguments");
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "oal: invalid configuration directive, not enough arguments");
     return UHURU_MOD_CONF_ERROR;
   }
 
@@ -88,7 +106,7 @@ static enum uhuru_mod_status mod_on_access_linux_conf_mime_type(struct uhuru_mod
   return UHURU_MOD_OK;
 }
 
-static enum uhuru_mod_status mod_on_access_linux_conf_max_size(struct uhuru_module *module, const char *directive, const char **argv)
+static enum uhuru_mod_status mod_oal_conf_max_size(struct uhuru_module *module, const char *directive, const char **argv)
 {
   struct uhuru_scan_conf *on_access_conf = uhuru_scan_conf_on_access();
 
@@ -97,40 +115,41 @@ static enum uhuru_mod_status mod_on_access_linux_conf_max_size(struct uhuru_modu
   return UHURU_MOD_OK;
 }
 
-static enum uhuru_mod_status mod_on_access_linux_post_init(struct uhuru_module *module)
+static enum uhuru_mod_status mod_oal_post_init(struct uhuru_module *module)
 {
-  struct on_access_linux_data *data = (struct on_access_linux_data *)module->data;
+  struct mod_oal_data *data = (struct mod_oal_data *)module->data;
 
   access_monitor_start(data->monitor);
 
   return UHURU_MOD_OK;
 }
 
-static enum uhuru_mod_status mod_on_access_linux_close(struct uhuru_module *module)
+static enum uhuru_mod_status mod_oal_close(struct uhuru_module *module)
 {
-  struct on_access_linux_data *fa_data = (struct on_access_linux_data *)module->data;
+  struct mod_oal_data *data = (struct mod_oal_data *)module->data;
 
   return UHURU_MOD_OK;
 }
 
-struct uhuru_conf_entry mod_on_access_linux_conf_table[] = {
-#if 0
-  { "watch-dir", mod_on_access_linux_conf_set_watch_dir},
-  { "enable-on-access", mod_on_access_linux_conf_set_enable_on_access},
-#endif
-  { "white-list-dir", mod_on_access_linux_conf_white_list_dir},
-  { "mime-type", mod_on_access_linux_conf_mime_type},
-  { "max-size", mod_on_access_linux_conf_max_size},
+struct uhuru_conf_entry mod_oal_conf_table[] = {
+  { "enable", mod_oal_conf_enable},
+  { "enable-permission", mod_oal_conf_enable_permission},
+  { "enable-removable_media", mod_oal_conf_enable_removable_media},
+  { "mount", mod_oal_conf_mount},
+  { "directory", mod_oal_conf_directory},
+  { "white-list-dir", mod_oal_conf_white_list_dir},
+  { "mime-type", mod_oal_conf_mime_type},
+  { "max-size", mod_oal_conf_max_size},
   { NULL, NULL},
 };
 
 struct uhuru_module module = {
-  .init_fun = mod_on_access_linux_init,
-  .conf_table = mod_on_access_linux_conf_table,
-  .post_init_fun = mod_on_access_linux_post_init,
+  .init_fun = mod_oal_init,
+  .conf_table = mod_oal_conf_table,
+  .post_init_fun = mod_oal_post_init,
   .scan_fun = NULL,
-  .close_fun = mod_on_access_linux_close,
+  .close_fun = mod_oal_close,
   .info_fun = NULL,
   .name = "on-access-linux",
-  .size = sizeof(struct on_access_linux_data),
+  .size = sizeof(struct mod_oal_data),
 };
