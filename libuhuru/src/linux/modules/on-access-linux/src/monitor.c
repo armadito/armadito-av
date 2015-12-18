@@ -145,10 +145,12 @@ static void access_monitor_add_entry(struct access_monitor *m, const char *path,
 
 void access_monitor_add_mount(struct access_monitor *m, const char *mount_point)
 {
+  /* FIXME: check that mount_point is not in the same partition as / */
+
   access_monitor_add_entry(m, mount_point, ENTRY_MOUNT);
 }
 
-void access_monitor_add_path(struct access_monitor *m, const char *path)
+void access_monitor_add_directory(struct access_monitor *m, const char *path)
 {
   access_monitor_add_entry(m, path, ENTRY_DIR);
 }
@@ -186,31 +188,25 @@ static gboolean access_monitor_start_cb(GIOChannel *source, GIOCondition conditi
   return TRUE;
 }
 
-static int access_monitor_add(struct access_monitor *m, const char *path, unsigned int flags)
+static void access_monitor_mark_entries(struct access_monitor *m)
 {
-  /* from clamav */
-  /* uint64_t fan_mask = FAN_EVENT_ON_CHILD | FAN_CLOSE; */
-  uint64_t fan_mask = 0;
+  int i;
 
-#if 0
-  if (!(flags & FAN_MARK_MOUNT))
-    fan_mask |= FAN_EVENT_ON_CHILD;
+  for(i = 0; i < m->entries->len; i++) {
+    struct monitor_entry *e = (struct monitor_entry *)g_ptr_array_index(m->entries, i);
+    uint64_t fan_mask = m->enable_permission ? FAN_OPEN_PERM : FAN_CLOSE_WRITE;
+    unsigned int flags = FAN_MARK_ADD;
 
-  if (m->flags & MONITOR_ENABLE_PERM)
-    fan_mask |= FAN_OPEN_PERM;
-  else
-    fan_mask |= FAN_CLOSE;
-#endif
+    if (e->flag == ENTRY_DIR)
+      fan_mask |= FAN_EVENT_ON_CHILD;
+    else
+      flags |= FAN_MARK_MOUNT;
 
-  if (fanotify_mark(m->fanotify_fd, FAN_MARK_ADD | flags, fan_mask, AT_FDCWD, path) < 0) {
-    fprintf(stderr, "fanotify: marking %s failed (%s)\n", path, strerror(errno));
-
-    return -1;
+    if (fanotify_mark(m->fanotify_fd, FAN_MARK_ADD | flags, fan_mask, AT_FDCWD, e->path) < 0)
+      uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "fanotify: marking %s failed (%s)\n", e->path, strerror(errno));
+    else
+      uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: marked %s %s\n", e->flag == ENTRY_DIR ? "directory" : "mount point", e->path);
   }
-
-  fprintf(stderr, "fanotify: marked directory %s\n", path);
-
-  return 0;
 }
 
 static gpointer access_monitor_thread_fun(gpointer data)
