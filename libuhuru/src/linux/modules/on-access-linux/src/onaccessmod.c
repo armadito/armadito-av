@@ -134,7 +134,7 @@ static enum uhuru_mod_status mod_oal_close(struct uhuru_module *module)
 struct uhuru_conf_entry mod_oal_conf_table[] = {
   { "enable", mod_oal_conf_enable},
   { "enable-permission", mod_oal_conf_enable_permission},
-  { "enable-removable_media", mod_oal_conf_enable_removable_media},
+  { "enable-removable-media", mod_oal_conf_enable_removable_media},
   { "mount", mod_oal_conf_mount},
   { "directory", mod_oal_conf_directory},
   { "white-list-dir", mod_oal_conf_white_list_dir},
