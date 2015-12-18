@@ -1,0 +1,6 @@
+/node_modules
+/dist
+/.tmp
+/.sass-cache
+/bower_components
+/nwjs-v0.12.3-linux-x64

@@ -1,0 +1,140 @@
+<div class="row">
+  <div class="col-xs-4 col-sm-4 col-md-4">
+  	<div class="panel panel-primary panel-option-scan">
+	  <div class="panel-heading">Scan</div>
+	  <div class="panel-body">
+	    <form class="form-horizontal">
+		  <fieldset>
+		    <div class="form-group">
+		      <div class="col-lg-10">
+		        <div class="radio">
+		          <label>
+		            <input type="radio" name="optionsRadios" id="optionsRadios1" value="option1" checked="">
+		            Rapide
+		          </label>
+		        </div>
+		        <div class="radio">
+		          <label>
+		            <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2">
+		            Complet
+		          </label>
+		        </div>
+		        <div class="radio">
+		          <label>
+		            <input type="radio" name="optionsRadios" id="optionsRadios3" value="option3">
+		            Personnalisé
+		          </label>
+		        </div>
+		      </div>
+		    </div>
+		    <div class="panel panel-success panel-advanced-option-scan">
+			  <div class="panel-heading">Avancées</div>
+			  <div class="panel-body">
+			    <div class="form-group">
+			      <div class="col-lg-10">
+			        <div class="checkbox">
+			          <label>
+			            <input type="checkbox"> Mode heuristique
+			          </label>
+			        </div>
+			      </div>
+			      <div class="col-lg-10">
+			        <div class="checkbox">
+			          <label>
+			            <input type="checkbox"> Scan archives
+			          </label>
+			        </div>
+			      </div>
+			      <div class="col-lg-10">
+			        <div class="checkbox">
+			          <label>
+			            <input type="checkbox"> Exclude folders/files
+			          </label>
+			        </div>
+			      </div>
+			    </div>
+			  </div>
+			</div>
+		    <div class="form-group">
+		      <div class="col-xs-2 col-sm-4 col-lg-4 col-xs-offset-4 col-sm-offset-2 col-lg-offset-4">
+		        <button type="submit" ng-click="startMe()" class="btn btn-primary">Start scan</button>
+		      </div>
+		    </div>
+		  </fieldset>
+		</form>
+	  </div>
+    </div>
+  </div>
+  <div class="col-xs-8 col-sm-8 col-md-8">
+  	<div class="panel panel-primary panel-scanProgression">
+	  <div class="panel-body">
+	    <div class="row">
+    	  	<div class="col-xs-6 col-sm-6 col-md-6">
+	    	  	<!-- Progress bar-->
+	    	  	<label class="control-label">Scan progression</label>
+			    <uib-progressbar max="max" value="pdata.scan_progress"><span style="color:black; white-space:nowrap;">{{pdata.scan_progress}}%</span>
+		    	</uib-progressbar>   
+    	  	</div>
+    	  	<div class="col-xs-6 col-sm-6 col-md-6">
+			  	<label class="control-label" for="disabledInput">Object courant</label>
+			  	<input class="form-control input-sm" ng-model="pdata.scan_file_path" id="disabledInput" type="text" disabled="">
+    	  	</div>
+	    </div>	  	
+	  	<hr>
+	    <div >
+			  <!--[{"file_path":"/path/to/file","scan_status":"malware","scan_action":"alert+quarantine","mod_name":"clamav","mod_report":"Trojan.Mal32-77"}]-->
+	    	<div class="list-group">
+	    	  <div class="row">
+	    	  	<div class="col-xs-6 col-sm-6 col-md-6">
+    	  	      <a href="#" class="list-group-item">
+				    <h6 class="list-group-item-heading"><i class="fa fa-file-o pull-right"></i> Fichiers traités </h6>
+				    <p class="list-group-item-text">123</p>
+				  </a>
+	    	  	</div>
+	    	  	<div class="col-xs-6 col-sm-6 col-md-6">
+    	  		  <a href="#" class="list-group-item">
+				    <h6 class="list-group-item-heading"><i class="fa fa-clock-o pull-right"></i> Temps écoulé </h6>
+				    <p class="list-group-item-text">12 : 05 min</p>
+				    <br/>
+				  </a>
+	    	  	</div>
+	    	  </div>
+			</div>
+			<div class="panel panel-danger" ng-show="displayedCollection.length > 0">
+			  <div class="panel-heading">
+			  	<b> Menaces trouvées : {{displayedCollection.length}}</b>
+			  </div>
+			  <div class="panel-body">
+			  	<div class="OverflowTableThreats">
+			  		<table st-table="displayedCollection" st-safe-src="rowCollection" class="table table-striped">
+						<thead>
+						<tr>
+							<th st-sort="Etat">Etat</th>
+							<th st-sort="Detail">Detail</th>
+							<th st-sort="Chemin">Chemin</th>
+						</tr>
+						</thead>
+						<tbody>
+						<tr ng-repeat="row in displayedCollection">
+							<td>{{row.Etat}}</td>
+							<td>{{row.Detail}}</td>
+							<td>{{row.Chemin}}</td>
+							<td>
+							<button type="button" ng-click="removeItem(row)" class="btn btn-sm btn-danger">
+								<i class="glyphicon glyphicon-remove-circle">
+								</i>
+							</button>
+							</td>
+						</tr>
+						</tbody>
+					</table>
+			  	</div>
+			  </div>
+			</div>
+	    </div>
+	  </div>
+	</div>
+  </div>
+</div>
+
+
