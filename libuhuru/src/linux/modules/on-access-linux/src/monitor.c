@@ -21,6 +21,16 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+enum entry_flag {
+  ENTRY_MOUNT = 1,
+  ENTRY_DIR,
+};
+
+struct monitor_entry {
+  const char *path;
+  enum entry_flag flag;
+};
+
 struct access_monitor {
   struct uhuru *uhuru;
   struct uhuru_scan_conf *scan_conf;
@@ -56,7 +66,10 @@ static void path_destroy_notify(gpointer data)
 
 static void entry_destroy_notify(gpointer data)
 {
-  free(data);
+  struct monitor_entry *e = (struct monitor_entry *)data;
+
+  free((void *)e->path);
+  free(e);
 }
 
 struct access_monitor *access_monitor_new(struct uhuru *u)
@@ -76,7 +89,8 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
   m->my_pid = getpid();
   
   /* this pipe will be used to trigger creation of the monitor thread when entering main thread loop, */
-  /* so that the monitor thread does not start before all modules are initialized and the daemon main loop is entered */
+  /* so that the monitor thread does not start before all modules are initialized  */
+  /* and the daemon main loop is entered */
   if (pipe(m->start_pipe) < 0) {
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "fanotify: pipe failed (%s)", strerror(errno));
     g_free(m);
@@ -96,6 +110,47 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: init ok");
 
   return m;
+}
+
+int access_monitor_enable(struct access_monitor *m, int enable)
+{
+  m->enable = enable;
+
+  return enable;
+}
+
+int access_monitor_enable_permission(struct access_monitor *m, int enable_permission)
+{
+  m->enable_permission = enable_permission;
+
+  return enable_permission;
+}
+
+int access_monitor_enable_removable_media(struct access_monitor *m, int enable_removable_media)
+{
+  m->enable_removable_media = enable_removable_media;
+
+  return enable_removable_media;
+}
+
+static void access_monitor_add_entry(struct access_monitor *m, const char *path, enum entry_flag flag)
+{
+  struct monitor_entry *e = malloc(sizeof(struct monitor_entry));
+
+  e->path = strdup(path);
+  e->flag = flag;
+
+  g_ptr_array_add(m->entries, e);
+}
+
+void access_monitor_add_mount(struct access_monitor *m, const char *mount_point)
+{
+  access_monitor_add_entry(m, mount_point, ENTRY_MOUNT);
+}
+
+void access_monitor_add_path(struct access_monitor *m, const char *path)
+{
+  access_monitor_add_entry(m, path, ENTRY_DIR);
 }
 
 int access_monitor_start(struct access_monitor *m)
@@ -131,10 +186,38 @@ static gboolean access_monitor_start_cb(GIOChannel *source, GIOCondition conditi
   return TRUE;
 }
 
+static int access_monitor_add(struct access_monitor *m, const char *path, unsigned int flags)
+{
+  /* from clamav */
+  /* uint64_t fan_mask = FAN_EVENT_ON_CHILD | FAN_CLOSE; */
+  uint64_t fan_mask = 0;
+
+#if 0
+  if (!(flags & FAN_MARK_MOUNT))
+    fan_mask |= FAN_EVENT_ON_CHILD;
+
+  if (m->flags & MONITOR_ENABLE_PERM)
+    fan_mask |= FAN_OPEN_PERM;
+  else
+    fan_mask |= FAN_CLOSE;
+#endif
+
+  if (fanotify_mark(m->fanotify_fd, FAN_MARK_ADD | flags, fan_mask, AT_FDCWD, path) < 0) {
+    fprintf(stderr, "fanotify: marking %s failed (%s)\n", path, strerror(errno));
+
+    return -1;
+  }
+
+  fprintf(stderr, "fanotify: marked directory %s\n", path);
+
+  return 0;
+}
+
 static gpointer access_monitor_thread_fun(gpointer data)
 {
   struct access_monitor *m = (struct access_monitor *)data;
   GMainLoop *loop;
+  GIOChannel *fanotify_channel;
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: started thread");
 
@@ -142,10 +225,19 @@ static gpointer access_monitor_thread_fun(gpointer data)
   g_io_add_watch(m->command_channel, G_IO_IN, access_monitor_command_cb, m);
 
   /* add the fanotify file desc to the thread loop */
+  m->fanotify_fd = fanotify_init(FAN_CLASS_CONTENT | FAN_UNLIMITED_QUEUE | FAN_UNLIMITED_MARKS, O_LARGEFILE | O_RDONLY);
+  if (m->fanotify_fd < 0) {
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "fanotify: fanotify_init failed (%s)", strerror(errno));
+    return NULL;
+  }
+
+  fanotify_channel = g_io_channel_unix_new(m->fanotify_fd);	
+  g_io_add_watch(fanotify_channel, G_IO_IN, access_monitor_fanotify_cb, m);
 
   /* if configured, add the mount monitor */
 
   /* init all fanotify mark */
+  access_monitor_add_marks(m);
 
   loop = g_main_loop_new(NULL, FALSE);
 
