@@ -163,6 +163,8 @@ static void start_daemon(const char *progname, struct uhuru_daemon_options *opts
   if (opts->pid_file != NULL)
     create_pid_file(opts->pid_file);
 
+  uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_NONE, "starting %s%s", progname, opts->no_daemon ? "" : " in daemon mode");
+
   server_sock = create_server_socket(opts);
 
   uhuru = uhuru_open(&error);
@@ -173,8 +175,6 @@ static void start_daemon(const char *progname, struct uhuru_daemon_options *opts
   }
 
   server = server_new(uhuru, server_sock);
-
-  uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_NONE, "starting %s%s", progname, opts->no_daemon ? "" : " in daemon mode");
 
   loop = g_main_loop_new(NULL, FALSE);
 
