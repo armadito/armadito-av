@@ -122,4 +122,7 @@
     .OverflowTableQuarantaine {
       max-height: 220px;
       overflow: auto;
-    }     
+    }
+    .borderless th, .borderless td { 
+     border-top: none !important; 
+ }

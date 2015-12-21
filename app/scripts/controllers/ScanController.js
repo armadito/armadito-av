@@ -30,6 +30,21 @@ angular.module('tatouApp')
                   $scope.$apply(function () {                  
                     var threats;
                     if(data){
+                      $scope.tableScan = [
+                        {
+                          title : "Object courant",
+                          data : $scope.pdata.scan_file_path
+                        },
+                        {
+                          title : "Fichiers traités",
+                          data : $scope.pdata.scan_progress + 37
+                        },
+                        {
+                          title : "Temps écoulé",
+                          data : "12 : 05 min"
+                        }
+                      ];
+
                       $scope.pdata =  data;
                         threats = [
                           { 
@@ -91,7 +106,7 @@ angular.module('tatouApp')
                   scan_id: 77
                 });
               };
-
+              
             /* Antivirus scan*/
 
   }]);

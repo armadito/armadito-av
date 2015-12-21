@@ -39,12 +39,13 @@
   "window": {
     "title": "Armadito",
     "toolbar": false,
-    "frame": true,
+    "frame": false,
     "width": 800,
-    "height": 520,
+    "height": 500,
     "position": "center",
-    "min_width": 400,
-    "min_height": 200,
-    "resizable": false
+    "min_width": 800,
+    "min_height": 500,
+    "max_width": 800,
+    "max_height": 500
   }
 }
