@@ -112,7 +112,7 @@ struct uhuru *uhuru_open(uhuru_error **error)
   /* FIXME: error checking */
 #ifdef WIN32
 
-	// build the complete conf directory path.  
+	// build the complete conf directory path.
 	if (dirpath == NULL) {
 		goto error;
 	}

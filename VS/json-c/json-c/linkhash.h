@@ -301,7 +301,8 @@ void lh_table_resize(struct lh_table *t, int new_size);
  * @param k a pointer to the key to lookup
  * @return the key's hash
  */
-static inline unsigned long lh_get_hash(const struct lh_table *t, const void *k)
+// Modif Ulrich :: 17/12/2015 :: changes inline by __inline
+static __inline unsigned long lh_get_hash(const struct lh_table *t, const void *k)
 {
 	return t->hash_fn(k);
 }
