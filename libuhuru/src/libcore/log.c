@@ -27,7 +27,7 @@ void uhuru_log(enum uhuru_log_domain domain, enum uhuru_log_level level, const c
   gchar *message;
 
   /* anything to do? */
-  if (level > current_max_level)
+  if (level > current_max_level && level != UHURU_LOG_LEVEL_NONE)
     return;
 
   /* format message */

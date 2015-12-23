@@ -72,7 +72,7 @@ const char *os_mime_type_guess_fd(int fd)
   m = get_private_magic();
 
   if ((n_read = read(fd, buffer, BUFFER_SIZE)) < 0) {
-    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "cannot read %d bytes from file descriptor %s", BUFFER_SIZE, fd);
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "cannot read %d bytes from file descriptor %d", BUFFER_SIZE, fd);
     return NULL;
   }
 
