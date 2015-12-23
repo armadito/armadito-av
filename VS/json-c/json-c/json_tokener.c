@@ -263,7 +263,7 @@ struct json_object* json_tokener_parse_ex(struct json_tokener *tok,
 
     case json_tokener_state_eatws:
       /* Advance until we change state */
-      while (isspace((int)c)) {
+      while (c>= 0 && isspace((int)c)) { // Ulrich modif :: 18/12/2015 :: add c>=0
 	if ((!ADVANCE_CHAR(str, tok)) || (!PEEK_CHAR(c, tok)))
 	  goto out;
       }

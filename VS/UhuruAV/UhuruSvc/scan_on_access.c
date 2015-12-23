@@ -1,4 +1,4 @@
-#include "scan.h"
+#include "scan_on_access.h"
 #include "log.h"
 
 extern struct uhuru * uhuru;
@@ -469,7 +469,7 @@ HRESULT UserScanFinalize(_In_  PUSER_SCAN_CONTEXT Context) {
 	int i = 0;
 	
 	if (Context->ScanThreadCtxes == NULL) {
-		uhLog("[-] Error :: UserScanFinalize :: NULL Scan Thread Contexts\n");
+		uhLog("[-] Warning :: UserScanFinalize :: NULL Scan Thread Contexts\n");
 		//hres = E_POINTER;
 		return hres;
 	}
@@ -496,12 +496,8 @@ HRESULT UserScanFinalize(_In_  PUSER_SCAN_CONTEXT Context) {
 		hScanThreads[i] = Context->ScanThreadCtxes[i].Handle;
 	}
 
-	WaitForMultipleObjects(USER_SCAN_THREAD_COUNT,hScanThreads,TRUE,INFINITE );
-
-	uhLog("[DEBUG5]...\n");
-		
+	WaitForMultipleObjects(USER_SCAN_THREAD_COUNT,hScanThreads,TRUE,INFINITE );	
 	
-
 	uhLog("[+] Debug :: UserScanFinalize :: Closing connection port.\n");
 
 
