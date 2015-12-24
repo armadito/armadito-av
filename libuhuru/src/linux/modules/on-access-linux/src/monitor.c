@@ -181,13 +181,13 @@ static gboolean access_monitor_start_cb(GIOChannel *source, GIOCondition conditi
   }
 
   if (c != 'A') {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "fanotify: unexpected character ('%c' != 'A')", c);
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "fanotify: unexpected character ('%c' (0x%x) != 'A')", c, c);
     return FALSE;
   }
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: started");
 
-  g_io_channel_shutdown(source, FALSE, NULL);
+  /* g_io_channel_shutdown(source, FALSE, NULL); */
 
   m->monitor_thread = g_thread_new("access monitor thread", access_monitor_thread_fun, m);
 
