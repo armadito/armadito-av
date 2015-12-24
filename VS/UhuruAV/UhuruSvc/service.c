@@ -1,6 +1,6 @@
 #include "service.h"
 #include "log.h"
-#include "scan.h"
+#include "scan_on_access.h"
 
 // Msdn documentation: 
 // https://msdn.microsoft.com/en-us/library/windows/desktop/ms685141%28v=vs.85%29.aspx
@@ -12,6 +12,104 @@ HANDLE ghSvcStopEvent = NULL;
 
 struct uhuru * uhuru = NULL;
 USER_SCAN_CONTEXT userScanCtx = {0};
+ONDEMAND_SCAN_CONTEXT onDemandCtx = {0};
+
+/*------------------------------------------------
+	Service Load and unload procedures functions
+--------------------------------------------------*/
+
+int ServiceLoadProcedure( ) {
+
+	int ret = 0;
+	uhuru_error * uh_error = NULL;
+	HRESULT hres = S_OK;
+
+	__try {
+
+		// Init uhuru structure
+		uhuru = uhuru_open(&uh_error);
+		if (uhuru == NULL) {
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " uhuru_open() struct initialization failed!\n");
+			ret = -1;
+			__leave;
+		}
+
+		//  Initialize scan listening threads. and Connect to the driver communication port. (Only if real time is enabled)
+		if (REAL_TIME_ENABLED) {
+			hres = UserScanInit(&userScanCtx);
+			if (FAILED(hres)) {
+				//hres = UserScanFinalize(&userScanCtx);
+				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Scan Thread initialization failed!\n");
+				ret = -2;
+				__leave;
+			}
+		}
+		
+
+		// Create Named Pipe for IHM
+		// Notes : If you intend to use a named pipe locally only, deny access to NT AUTHORITY\NETWORK or switch to local RPC.
+		if (start_named_pipe_server(uhuru) < 0){
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," named_pipe_server - error \n");
+			ret = -3;
+			__leave;
+		}
+
+
+
+
+	}
+	__finally {
+
+		// if failed
+		if (ret < 0) {			
+
+			// Finalyze listening threads and Close communication port.
+			if (ret < -1 && REAL_TIME_ENABLED)
+				hres = UserScanFinalize(&userScanCtx);
+
+			// Close Named Pipe
+			if (ret < -2) {
+				; // TODO.
+			}
+
+			//close uhuru structure
+			if (uhuru != NULL) {
+				uhuru_close(uhuru,&uh_error);
+				uhuru = NULL;
+			}
+			
+		}
+
+	}
+
+	return ret;
+}
+
+int ServiceUnloadProcedure( ) {
+
+	HRESULT hres = S_OK;
+	uhuru_error * uh_error = NULL;
+	int ret = 0;
+
+	// Finish all scan threads and close communication port with driver.
+	if (REAL_TIME_ENABLED) {
+		hres = UserScanFinalize(&userScanCtx);
+		if (FAILED(hres)) {
+			 ret = -1;
+		}
+	}
+	
+	// Finish all thread and Close the pipe.
+	// TODO;
+
+	// Close Uhuru structure
+	if (uhuru != NULL) {
+		uhuru_close(uhuru, &uh_error);
+		uhuru = NULL;
+	}			
+
+	return ret;
+}
 
 
 // RegistryInitialization()
@@ -185,6 +283,39 @@ int RegistryKeysInitialization( ) {
 		}
 
 	}
+
+	// Driver Registry keys for crash dumps (verification only)
+	/*
+	__try {
+
+		ret = -1;
+
+		// Open the main service key
+		res = RegOpenKeyA(HKEY_LOCAL_MACHINE, ROOT_DRIVER_CRASH_KEY_PATH, &hRootkey);
+		if (res != ERROR_SUCCESS) {
+			__leave;
+		}
+
+		// TODO...
+
+		ret = 0;
+
+	}
+	__finally {
+
+		if (hRootkey != NULL) {
+			RegCloseKey(hRootkey);
+			hRootkey = NULL;
+		}
+
+		if (hkey != NULL) {
+			RegCloseKey(hkey);
+			hkey = NULL;
+		}
+
+	}
+	*/
+
 
 	return ret;
 }
@@ -446,31 +577,31 @@ VOID ReportSvcStatus(DWORD dwCurrentState,
 }
 
 
+
+
+
 /*
 	ServiceCtrlHandler()
 	https://msdn.microsoft.com/en-us/library/windows/desktop/ms687413%28v=vs.85%29.aspx
 	https://msdn.microsoft.com/en-us/library/windows/desktop/ms685149%28v=vs.85%29.aspx
 */
 void WINAPI ServiceCtrlHandler( DWORD dwCtrl ) {
+
 	uhuru_error * uh_error = NULL;
 	HRESULT hres = S_OK;
+	int ret = 0;
 
 	switch (dwCtrl) {
 
 		case SERVICE_CONTROL_STOP:
+
 			ReportSvcStatus(SERVICE_STOP_PENDING, NO_ERROR, 0);
 
-			// finish all threads and communication port.
-			hres = UserScanFinalize(&userScanCtx);
-
-			// Close uhuru structure.
-			if (uhuru != NULL) {
-				uhuru_close(uhuru, &uh_error);
-				uhLog("[+] Debug :: uhuru struct closed successfully!\n");
-			}
-			else {
-				uhLog("[-] Warning :: uhuru global struct is NULL !\n");
-			}
+			ret = ServiceUnloadProcedure( );
+			if (ret != 0) {
+				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service unloaded with errors\n");
+				uhLog("[-] Error :: Service unloaded with errors\n");
+			}			
 
 			 // Signal the service to stop.
 			 SetEvent(ghSvcStopEvent);
@@ -479,7 +610,7 @@ void WINAPI ServiceCtrlHandler( DWORD dwCtrl ) {
 			return;
 		case SERVICE_CONTROL_INTERROGATE:
 			break;
-
+		//TODO ::  add case SERVICE_CONTROL_PRESHUTDOWN
 		default:
 			break;
 	}
@@ -491,27 +622,23 @@ void WINAPI ServiceCtrlHandler( DWORD dwCtrl ) {
 /*
  LaunchServiceAction()
 */
-void LaunchServiceAction( ) {
+void PerformServiceAction( ) {
 	
 	uhuru_error * uh_error = NULL;
 	HRESULT hres = S_OK;
+	int ret = 0;
 
-	// set log handler (windows log event)
+	// set log handler (windows log event) // move this statement to a better place.
 	uhuru_log_set_handler(UHURU_LOG_LEVEL_NONE, winEventHandler,NULL);
-	
-	// Initialize uhuru structure.
-	uhuru = uhuru_open(&uh_error);
-	if (uhuru == NULL) {
-		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " uhuru_open() struct initialization failed!\n");
-		//uhLog("[-] Error :: uhuru_open failed\n");
-		return ;
-	}
-	uhLog("[+] Debug :: uhuru struct initialized successfully\n");
 
-	//  Initialize scan listening threads.
-	hres = UserScanInit(&userScanCtx);
-	if (FAILED(hres)) {
-		hres = UserScanFinalize(&userScanCtx);
+	ret = ServiceLoadProcedure( );
+	if (ret < 0) {
+		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service Initialization failed \n");
+		uhLog("[+] Error :: Service Initialization failed\n");
+	}
+	else {
+		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_INFO, " Service Initializaed successfully!\n");
+		uhLog("[+] Debug :: uhuru struct initialized successfully\n");
 	}
 	
 	return;
@@ -566,7 +693,6 @@ void WINAPI ServiceMain(int argc, char ** argv) {
 		return;
 	}
 
-
 	gSvcStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
 	gSvcStatus.dwServiceSpecificExitCode = 0;
 
@@ -577,7 +703,7 @@ void WINAPI ServiceMain(int argc, char ** argv) {
 	// Calls the SvcInit function to perform the service-specific initialization and begin the work to be performed by the service.
 	ServiceInit( );
 
-	LaunchServiceAction( );
+	PerformServiceAction( );
 
 	return;
 }
@@ -838,6 +964,44 @@ void ServiceStop( ) {
 }
 
 
+int LaunchCmdLineServiceTest( ) {
+
+	int ret = 0;
+	unsigned char c;
+	uhuru_error * uh_error = NULL;
+	HRESULT hres = S_OK;
+	
+	// Init uhuru structure
+	uhuru = uhuru_open(&uh_error);
+	if (uhuru == NULL) {
+		printf("[-] Error :: uhuru_open() struct initialization failed!\n");
+		return -1;
+	}
+
+	ret = Start_IHM_Connection(uhuru,&onDemandCtx);
+
+	while(1) {
+		 printf("press 'q' to quit: ");
+        c = (unsigned char) getchar();
+        if (c == 'q') {
+        
+            break;
+        }
+	}
+
+	ret = Close_IHM_Connection(&onDemandCtx);
+
+	if (uhuru != NULL) {
+		uh_error = NULL;
+		uhuru_close(uhuru,&uh_error);
+		uhuru = NULL;
+	}
+
+	return ret;
+
+}
+
+
 int main(int argc, char ** argv) {
 
 	int ret = 0;
@@ -845,6 +1009,18 @@ int main(int argc, char ** argv) {
 	printf("------------------------------\n");
 	printf("----- Uhuru Scan service -----\n");
 	printf("------------------------------\n");
+
+	// Only for test purposes (command line)
+	if ( argc >=2 && strncmp(argv[1],"--test",6) == 0 ){
+
+		ret = LaunchCmdLineServiceTest( );
+		if (ret < 0) {
+			return EXIT_FAILURE;
+		}
+		return EXIT_SUCCESS;
+
+	}
+
 
 	
 	// command line parameter "--install", install the service.

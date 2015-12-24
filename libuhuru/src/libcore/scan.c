@@ -257,7 +257,6 @@ enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path, 
 	enum uhuru_file_context_status context_status;
 	enum uhuru_file_status status;
 	
-
 	context_status = uhuru_file_context_get(&file_context, fd, path, uhuru_scan_conf_on_access());
 	//
 	//context_status = uhuru_file_context_get(&file_context, fd, path, uhuru_scan_conf_on_demand());
