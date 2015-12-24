@@ -3,6 +3,7 @@
 #include <libuhuru/core.h>
 
 #include "monitor.h"
+#include "mount.h"
 
 #include <assert.h>
 #include <glib.h>
@@ -57,6 +58,7 @@ struct access_monitor {
 static gboolean access_monitor_start_cb(GIOChannel *source, GIOCondition condition, gpointer data);
 static gboolean access_monitor_command_cb(GIOChannel *source, GIOCondition condition, gpointer data);
 static gboolean access_monitor_fanotify_cb(GIOChannel *source, GIOCondition condition, gpointer data);
+
 static gpointer access_monitor_thread_fun(gpointer data);
 static void scan_file_thread_fun(gpointer data, gpointer user_data);
 
@@ -187,6 +189,8 @@ static gboolean access_monitor_start_cb(GIOChannel *source, GIOCondition conditi
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: started");
 
+  /* commented out: closing the pipe leaded to an obscure race condition with other threads, resulting in a reuse */
+  /* of the pipe input file descriptor (namely, for one associated with a client connection) and in IPC errors */
   /* g_io_channel_shutdown(source, FALSE, NULL); */
 
   m->monitor_thread = g_thread_new("access monitor thread", access_monitor_thread_fun, m);
