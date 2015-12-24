@@ -192,12 +192,10 @@ void uhuru_on_demand_run(struct uhuru_on_demand *on_demand)
   if (stat_buf.flags & FILE_FLAG_IS_PLAIN_FILE) {
     on_demand->scan->to_scan_count = 1;
 
-    /* core dump, not yet implemented */
-    *(char *)0 = 1;
-    /* if (on_demand->flags & UHURU_SCAN_THREADED) */
-    /*   g_thread_pool_push(on_demand->thread_pool, (gpointer)os_strdup(on_demand->root_path), NULL); */
-    /* else */
-    /*   ; */
+    if (on_demand->flags & UHURU_SCAN_THREADED)
+      g_thread_pool_push(on_demand->thread_pool, (gpointer)os_strdup(on_demand->root_path), NULL);
+    else
+      scan_file(on_demand, on_demand->root_path);
   } else if (stat_buf.flags & FILE_FLAG_IS_DIRECTORY) {
     int recurse = on_demand->flags & UHURU_SCAN_RECURSE;
 
