@@ -1,3 +1,6 @@
+/* compile with: */
+/* gcc $(pkg-config --cflags glib-2.0) inotify-test.c -o inotify-test $(pkg-config --libs glib-2.0) */
+
 /* #include <libuhuru/scan.h> */
 
 #include <assert.h>
