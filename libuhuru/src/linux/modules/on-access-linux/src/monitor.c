@@ -146,9 +146,37 @@ static void access_monitor_add_entry(struct access_monitor *m, const char *path,
   g_ptr_array_add(m->entries, e);
 }
 
+static dev_t get_dev_id(const char *path)
+{
+  struct stat buf;
+
+  if (stat(path, &buf) < 0)
+    return -1;
+
+  return buf.st_dev;
+}
+
 void access_monitor_add_mount(struct access_monitor *m, const char *mount_point)
 {
-  /* FIXME: check that mount_point is not in the same partition as / */
+  dev_t mount_dev_id, slash_dev_id;
+
+  /* check that mount_point is not in the same partition as / */
+  slash_dev_id = get_dev_id("/");
+  if (slash_dev_id < 0) {
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "fanotify: cannot get device id for / (%s)", strerror(errno));
+    return;
+  }
+
+  mount_dev_id = get_dev_id(mount_point);
+  if (mount_dev_id < 0) {
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "fanotify: cannot get device id for %s (%s)", mount_point, strerror(errno));
+    return;
+  }
+
+  if (mount_dev_id == slash_dev_id) {
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "fanotify: \"%s\" is in same partition as \"/\"; adding \"/\" as monitored mount point is not supported", mount_point);
+    return;
+  }
 
   access_monitor_add_entry(m, mount_point, ENTRY_MOUNT);
 }
