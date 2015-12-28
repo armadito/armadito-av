@@ -196,6 +196,7 @@ const char *uhuru_debug(struct uhuru *u)
   struct uhuru_module **modv;
   GString *s = g_string_new("");
   const char *ret;
+
   g_string_append_printf(s, "Uhuru:\n");
 
   for (modv = module_manager_get_modules(u->module_manager); *modv != NULL; modv++)

@@ -2,23 +2,25 @@
 
 #include <libuhuru/core.h>
 
+#include "config/libuhuru-config.h"
+
 #include "monitor.h"
 #include "mount.h"
 
 #include <assert.h>
-#include <glib.h>
-#include <stdio.h>
-#include <signal.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdlib.h>
+#include <dirent.h>
 #include <errno.h>
-#include <limits.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/signalfd.h>
 #include <fcntl.h>
+#include <glib.h>
+#include <limits.h>
 #include <linux/fanotify.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/inotify.h>
+#include <sys/signalfd.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -49,7 +51,9 @@ struct access_monitor {
   GIOChannel *command_channel;
 
   int fanotify_fd;
-  GIOChannel *notify_channel;
+
+  int inotify_fd;
+  GHashTable *watch_table;
 
   GThread *monitor_thread;
   GThreadPool *thread_pool;  
@@ -58,6 +62,7 @@ struct access_monitor {
 static gboolean access_monitor_start_cb(GIOChannel *source, GIOCondition condition, gpointer data);
 static gboolean access_monitor_command_cb(GIOChannel *source, GIOCondition condition, gpointer data);
 static gboolean access_monitor_fanotify_cb(GIOChannel *source, GIOCondition condition, gpointer data);
+static gboolean access_monitor_inotify_cb(GIOChannel *source, GIOCondition condition, gpointer data);
 
 static gpointer access_monitor_thread_fun(gpointer data);
 static void scan_file_thread_fun(gpointer data, gpointer user_data);
@@ -109,6 +114,8 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
 
   start_channel = g_io_channel_unix_new(m->start_pipe[0]);	
   g_io_add_watch(start_channel, G_IO_IN, access_monitor_start_cb, m);
+
+  m->watch_table = g_hash_table_new(g_direct_hash, g_direct_equal);
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: init ok");
 
@@ -226,24 +233,72 @@ static gboolean access_monitor_start_cb(GIOChannel *source, GIOCondition conditi
   return TRUE;
 }
 
+static void access_monitor_mark_directory(struct access_monitor *m, const char *path)
+{
+  int wd;
+  DIR *dir;
+  struct dirent *entry;
+  GString *entry_path;
+  uint64_t fan_mask;
+
+  wd = inotify_add_watch(m->inotify_fd, path, IN_ONLYDIR | IN_MOVE | IN_DELETE | IN_CREATE);
+  if (wd == -1) {
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "fanotify: watching %s failed (%s)", path, strerror(errno));
+    return;
+  }
+
+  g_hash_table_insert(m->watch_table, GINT_TO_POINTER(wd), (gpointer)strdup(path));
+
+  fan_mask = (m->enable_permission ? FAN_OPEN_PERM : FAN_CLOSE_WRITE) | FAN_EVENT_ON_CHILD;
+  if (fanotify_mark(m->fanotify_fd, FAN_MARK_ADD, fan_mask, AT_FDCWD, path) < 0) {
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "fanotify: marking %s failed (%s)", path, strerror(errno));
+    return;
+  } else
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: marked directory %s", path);
+
+  if ((dir = opendir(path)) == NULL) {
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "fanotify: error opening directory %s (%s)", path, strerror(errno));
+    return;
+  }
+
+  entry_path = g_string_new("");
+
+  while((entry = readdir(dir)) != NULL) {
+    if (entry->d_type != DT_DIR || !strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
+      continue;
+      
+    g_string_printf(entry_path, "%s/%s", path, entry->d_name);
+
+    access_monitor_mark_directory(m, entry_path->str);
+  }
+
+  g_string_free(entry_path, TRUE);
+
+  if (closedir(dir) < 0)
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "fanotify: error closing directory %s (%s)", path, strerror(errno));
+}
+
+static void access_monitor_mark_mount_point(struct access_monitor *m, const char *path)
+{
+  uint64_t fan_mask = m->enable_permission ? FAN_OPEN_PERM : FAN_CLOSE_WRITE;
+
+  if (fanotify_mark(m->fanotify_fd, FAN_MARK_ADD | FAN_MARK_MOUNT, fan_mask, AT_FDCWD, path) < 0)
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "fanotify: marking %s failed (%s)", path, strerror(errno));
+  else
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: marked mount point %s", path);
+}
+
 static void access_monitor_mark_entries(struct access_monitor *m)
 {
   int i;
 
   for(i = 0; i < m->entries->len; i++) {
     struct monitor_entry *e = (struct monitor_entry *)g_ptr_array_index(m->entries, i);
-    uint64_t fan_mask = m->enable_permission ? FAN_OPEN_PERM : FAN_CLOSE_WRITE;
-    unsigned int flags = FAN_MARK_ADD;
 
     if (e->flag == ENTRY_DIR)
-      fan_mask |= FAN_EVENT_ON_CHILD;
+      access_monitor_mark_directory(m, e->path);
     else
-      flags |= FAN_MARK_MOUNT;
-
-    if (fanotify_mark(m->fanotify_fd, FAN_MARK_ADD | flags, fan_mask, AT_FDCWD, e->path) < 0)
-      uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "fanotify: marking %s failed (%s)", e->path, strerror(errno));
-    else
-      uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: marked %s %s", e->flag == ENTRY_DIR ? "directory" : "mount point", e->path);
+      access_monitor_mark_mount_point(m, e->path);
   }
 }
 
@@ -251,7 +306,7 @@ static gpointer access_monitor_thread_fun(gpointer data)
 {
   struct access_monitor *m = (struct access_monitor *)data;
   GMainLoop *loop;
-  GIOChannel *fanotify_channel;
+  GIOChannel *fanotify_channel, *inotify_channel;
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: started thread");
 
@@ -269,6 +324,15 @@ static gpointer access_monitor_thread_fun(gpointer data)
 
   fanotify_channel = g_io_channel_unix_new(m->fanotify_fd);	
   g_io_add_watch(fanotify_channel, G_IO_IN, access_monitor_fanotify_cb, m);
+
+  m->inotify_fd = inotify_init();
+  if (m->inotify_fd == -1) {
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "fanotify: inotify_init failed (%s)", strerror(errno));
+    return NULL;
+  }
+
+  inotify_channel = g_io_channel_unix_new(m->inotify_fd);	
+  g_io_add_watch(inotify_channel, G_IO_IN, access_monitor_inotify_cb, m);
 
   /* if configured, add the mount monitor */
 
@@ -465,3 +529,121 @@ static gboolean access_monitor_fanotify_cb(GIOChannel *source, GIOCondition cond
   return TRUE;
 }
 
+static void inotify_event_log(const struct inotify_event *e)
+{
+  GString *s = g_string_new("");
+
+  g_string_append_printf(s, "inotify event: wd=%2d ", e->wd);
+
+  if (e->cookie > 0)
+    g_string_append_printf(s, "cookie=%4d ", e->cookie);
+
+  g_string_append_printf(s, "mask=");
+
+#define M(_mask, _mask_bit) do { if ((_mask) & (_mask_bit)) g_string_append_printf(s, #_mask_bit " "); } while(0)
+
+  M(e->mask, IN_ACCESS);
+  M(e->mask, IN_ATTRIB);
+  M(e->mask, IN_CLOSE_NOWRITE);
+  M(e->mask, IN_CLOSE_WRITE);
+  M(e->mask, IN_CREATE);
+  M(e->mask, IN_DELETE);
+  M(e->mask, IN_DELETE_SELF);
+  M(e->mask, IN_IGNORED);
+  M(e->mask, IN_ISDIR);
+  M(e->mask, IN_MODIFY);
+  M(e->mask, IN_MOVE_SELF);
+  M(e->mask, IN_MOVED_FROM);
+  M(e->mask, IN_MOVED_TO);
+  M(e->mask, IN_OPEN);
+  M(e->mask, IN_Q_OVERFLOW);
+  M(e->mask, IN_UNMOUNT);
+
+  if (e->len > 0)
+    g_string_append_printf(s, "name=%s", e->name);
+
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: %s", s->str);
+
+  g_string_free(s, TRUE);
+}
+
+static char *inotify_event_full_path(struct access_monitor *m, struct inotify_event *event)
+{
+  char *dir, *full_path;
+
+  dir = (char *)g_hash_table_lookup(m->watch_table, GINT_TO_POINTER(event->wd));
+
+  if (dir == NULL) {
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "fanotify: cannot lookup directory for watch point %d", event->wd);
+    return;
+  }
+
+  if (event->len) {
+    GString *tmp = g_string_new("");
+
+    g_string_printf(tmp, "%s/%s", dir, event->name);
+
+    full_path = tmp->str;
+
+    g_string_free(tmp, FALSE);
+  } else {
+    full_path = strdup(dir);
+  }
+
+  return full_path;
+}
+
+static void inotify_process_dir_event(struct access_monitor *m, struct inotify_event *event, const char *what)
+{
+  char *full_path = inotify_event_full_path(m, event);
+
+  fprintf(stderr, "processing dir event %s path = %s\n", what, full_path);
+
+  free(full_path);
+}
+
+static void inotify_event_process(struct access_monitor *m, struct inotify_event *event)
+{
+  if (!(event->mask & IN_ISDIR))
+    return;
+
+#ifdef DEBUG
+  inotify_event_log(event);
+#endif
+
+  if (event->mask & IN_CREATE && event->mask & IN_ISDIR)
+    inotify_process_dir_event(m, event, "create");
+  if (event->mask & IN_DELETE && event->mask & IN_ISDIR)
+    inotify_process_dir_event(m, event, "delete");
+  if (event->mask & IN_MOVE_SELF && event->mask & IN_ISDIR)
+    inotify_process_dir_event(m, event, "move self");
+  if (event->mask & IN_MOVED_FROM && event->mask & IN_ISDIR)
+    inotify_process_dir_event(m, event, "moved from");
+  if (event->mask & IN_MOVED_TO && event->mask & IN_ISDIR)
+    inotify_process_dir_event(m, event, "move to");
+}
+
+/* Size of buffer to use when reading inotify events */
+#define INOTIFY_BUFFER_SIZE 8192
+
+static gboolean access_monitor_inotify_cb(GIOChannel *source, GIOCondition condition, gpointer data)
+{
+  struct access_monitor *m = (struct access_monitor *)data;
+  char event_buffer[INOTIFY_BUFFER_SIZE];
+  ssize_t len;
+
+  if ((len = read (m->inotify_fd, event_buffer, INOTIFY_BUFFER_SIZE)) > 0)  {
+    char *p;
+
+    p = event_buffer;
+    while (p < event_buffer + len) {
+      struct inotify_event *event = (struct inotify_event *) p;
+
+      inotify_event_process(m, event);
+
+      p += sizeof(struct inotify_event) + event->len;
+    }
+  }
+
+  return TRUE;
+}
