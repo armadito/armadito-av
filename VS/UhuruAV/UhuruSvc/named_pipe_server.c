@@ -108,14 +108,11 @@ int WINAPI ScanThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
 	}
 
 	if (threadCtx == NULL) {
+		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " ScanThreadWork :: Thread context not found!\n");
 		printf("[-] Error :: ScanThreadWork :: Thread Context not found\n");
 		return -2;
 	}
 
-	if (Context->Finalized || count > 10) {
-		printf("[+] Debug :: ScanThreadWork :: [%d] :: Finalizing thread execution...\n",threadCtx->ThreadId);
-		//__leave;
-	}
 
 	__try {
 
@@ -126,6 +123,7 @@ int WINAPI ScanThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
 		}
 		
 		if (threadCtx->hPipeInst == NULL) {
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " ScanThreadWork :: Thread pipe instance is invalid (NULL) !\n");
 			printf("[-] Error :: ScanThreadWork :: Thread pipe instance is NULL\n");
 			ret = -3;
 			__leave;
@@ -133,6 +131,7 @@ int WINAPI ScanThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
 
 		pchRequest = (TCHAR*)HeapAlloc(hHeap, 0, BUFSIZE*sizeof(TCHAR));
 		if (pchRequest == NULL) {
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " ScanThreadWork :: Request Buffer Allocation failed! :: GLE= %d \n",GetLastError());
 			printf("[-] Error :: ScanThreadWork :: Request buffer Allocation failed with error :: %d \n",GetLastError());
 			ret = -4;
 			__leave;
@@ -140,6 +139,7 @@ int WINAPI ScanThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
 
 		pchReply = (TCHAR*)HeapAlloc(hHeap, 0, BUFSIZE*sizeof(TCHAR));
 		if (pchReply == NULL){
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " ScanThreadWork :: Reply Buffer Allocation failed! :: GLE= %d \n",GetLastError());
 			printf("[-] Error :: ScanThreadWork :: Reply buffer Allocation failed with error :: %d \n",GetLastError());
 			ret = -5;
 			__leave;
@@ -219,11 +219,7 @@ int WINAPI ScanThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
 		if (scan != NULL) {
 			free(scan);
 			scan = NULL;
-		}
-			
-
-		// Disconnect client.
-		//DisconnectNamedPipe(Context->PipeHandle);
+		}		
 
 		// Close the pipe instance.
 		if (!CloseHandle(threadCtx->hPipeInst)) {
@@ -256,6 +252,7 @@ int WINAPI MainThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
 
 	if (Context == NULL) {
 		printf("[-] Error :: ScanThreadWork :: NULL Context\n" );
+		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Request Buffer Allocation failed! :: GLE= %d \n",GetLastError());
 		return -1;
 	}	
 
@@ -300,7 +297,8 @@ int WINAPI MainThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
 				0,                        // client time-out
 				NULL);                    // default security attribute
 
-			if (hPipe == INVALID_HANDLE_VALUE) {			
+			if (hPipe == INVALID_HANDLE_VALUE) {
+				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " MainThreadWork :: Pipe creation failed! :: GLE= %d \n",GetLastError());
 				printf("[-] Error :: MainThreadWork :: CreateNamedPipeA failed :: %d\n",GetLastError());
 				ret = -3;
 				__leave;
@@ -312,6 +310,7 @@ int WINAPI MainThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
 			TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
 
 			if (!bConnected) {
+				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " MainThreadWork :: Pipe connection failed! :: GLE= %d \n",GetLastError());
 				printf("[-] Error :: MainThreadWork :: ConnectNamedPipe failed :: %d\n",GetLastError());
 				ret = -4;
 				__leave;
@@ -339,12 +338,14 @@ int WINAPI MainThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
 					&Context->ScanThreadCtx[index].ThreadId);      // returns thread ID
 
 			if (Context->ScanThreadCtx[index].Handle == NULL) {
-					printf("[-] Error :: MainThreadWork :: CreateThread failed :: %d\n",GetLastError());
-					ret = -5;
-					__leave;
+				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " MainThreadWork :: Scan Thread creation failed! :: GLE= %d \n",GetLastError());
+				printf("[-] Error :: MainThreadWork :: CreateThread failed :: %d\n",GetLastError());
+				ret = -5;
+				__leave;
 			}
 
 			if (ResumeThread(Context->ScanThreadCtx[index].Handle) == -1) {
+				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " MainThreadWork :: Resume Scan thread failed! :: GLE= %d \n",GetLastError());
 				printf("[-] Error :: MainThreadWork :: ResumeThread failed :: %d\n",GetLastError());
 				ret = -6;
 
@@ -418,7 +419,8 @@ int Start_IHM_Connection(struct uhuru * uhuru, _Inout_ PONDEMAND_SCAN_CONTEXT Co
 
 		// Create and Initialize main thread contexts. (containing threadID, handle to the thread, 
 		mainThreadCtx = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(ONDEMAND_THREAD_CONTEXT) * 1);
-		if (mainThreadCtx == NULL) {    
+		if (mainThreadCtx == NULL) {
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Main Thread heap allocation failed! :: GLE= %d \n",GetLastError());
 			printf("[-] Error :: Start_IHM_Connection :: HeapAlloc failed! with errror :: %d\n", GetLastError());
 			ret = -2;			
 			__leave;
@@ -433,10 +435,11 @@ int Start_IHM_Connection(struct uhuru * uhuru, _Inout_ PONDEMAND_SCAN_CONTEXT Co
 				CREATE_SUSPENDED,  // not suspended 
 				&dwThreadId);      // returns thread ID
 
-		if (mainThreadCtx->Handle == NULL) {
-				printf("[-] Error :: start_IHM_Connection :: CreateThread failed :: %d\n",GetLastError());
-				ret = -3;
-				__leave;
+		if (mainThreadCtx->Handle == INVALID_HANDLE_VALUE) {
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Main thread creation failed! :: GLE= %d \n",GetLastError());
+			printf("[-] Error :: start_IHM_Connection :: CreateThread failed :: %d\n",GetLastError());
+			ret = -3;
+			__leave;
 		}
 				
 		mainThreadCtx->ThreadId = dwThreadId;
@@ -447,6 +450,7 @@ int Start_IHM_Connection(struct uhuru * uhuru, _Inout_ PONDEMAND_SCAN_CONTEXT Co
 
 		// Resuming the main thread.
 		if (ResumeThread(Context->MainThreadCtx->Handle) == -1) {
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Resuming main thread failed! :: GLE= %d \n",GetLastError());
 			printf("[-] Error :: start_IHM_Connection :: ResumeThread failed :: %d\n",GetLastError());
 			ret = -4;
 			__leave;
@@ -915,7 +919,7 @@ VOID GetAnswerToRequest(LPTSTR pchRequest,
 	struct json_object * jobj  = NULL;
 	const char* response = NULL;
 
-	printf("Client Request String: %s\n", pchRequest);
+	printf("Client Request String: %ls\n", pchRequest);
 	// _tprintf(TEXT("Client Request String: -%s-\n"), pchRequest);
 
 	//void json_parse_and_print(json_object * jobj); /* Forward declaration */
