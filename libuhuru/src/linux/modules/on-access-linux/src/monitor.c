@@ -53,7 +53,8 @@ struct access_monitor {
   int fanotify_fd;
 
   int inotify_fd;
-  GHashTable *watch_table;
+  GHashTable *wd2path_table;
+  GHashTable *path2wd_table;
 
   GThread *monitor_thread;
   GThreadPool *thread_pool;  
@@ -115,7 +116,8 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
   start_channel = g_io_channel_unix_new(m->start_pipe[0]);	
   g_io_add_watch(start_channel, G_IO_IN, access_monitor_start_cb, m);
 
-  m->watch_table = g_hash_table_new(g_direct_hash, g_direct_equal);
+  m->wd2path_table = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, path_destroy_notify);
+  m->path2wd_table = g_hash_table_new_full(g_str_hash, g_str_equal, path_destroy_notify, NULL);
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "fanotify: init ok");
 
@@ -247,7 +249,8 @@ static void access_monitor_mark_directory(struct access_monitor *m, const char *
     return;
   }
 
-  g_hash_table_insert(m->watch_table, GINT_TO_POINTER(wd), (gpointer)strdup(path));
+  g_hash_table_insert(m->wd2path_table, GINT_TO_POINTER(wd), (gpointer)strdup(path));
+  g_hash_table_insert(m->path2wd_table, (gpointer)strdup(path), GINT_TO_POINTER(wd));
 
   fan_mask = (m->enable_permission ? FAN_OPEN_PERM : FAN_CLOSE_WRITE) | FAN_EVENT_ON_CHILD;
   if (fanotify_mark(m->fanotify_fd, FAN_MARK_ADD, fan_mask, AT_FDCWD, path) < 0) {
@@ -571,7 +574,7 @@ static char *inotify_event_full_path(struct access_monitor *m, struct inotify_ev
 {
   char *dir, *full_path;
 
-  dir = (char *)g_hash_table_lookup(m->watch_table, GINT_TO_POINTER(event->wd));
+  dir = (char *)g_hash_table_lookup(m->wd2path_table, GINT_TO_POINTER(event->wd));
 
   if (dir == NULL) {
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "fanotify: cannot lookup directory for watch point %d", event->wd);
