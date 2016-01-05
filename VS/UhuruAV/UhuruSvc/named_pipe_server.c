@@ -1,18 +1,69 @@
 #include "named_pipe_server.h"
 #include "named_pipe_client.h"
-#include <libuhuru-config.h>
-#include <libuhuru/core.h>
-#include <windows.h> 
-#include <stdio.h> 
-#include <tchar.h>
-#include <strsafe.h>
-#include "utils/json.h"
-#include "scan_on_demand.h"
-#include "json_tokener.h"
-#include "log.h"
+
 
 #define BUFSIZE 512
 
+int CreatePipeSecurityAttributes(SECURITY_ATTRIBUTES * pSa) {
+
+	int ret = 0;
+	ULONG sdSize = 0;
+	PSECURITY_DESCRIPTOR pSd = NULL;
+
+
+	// Define the SDDL (Security Descriptor Definition Language) for the DACL.
+
+	// Security Descriptor String Format.
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/aa379567%28v=vs.85%29.aspx
+	
+
+	// ACE strings :: D:dacl_flags(string_ace1)(string_ace2)... (string_acen)
+	// ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;(resource_attribute)
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/aa374928%28v=vs.85%29.aspx
+
+	// SID strings :: for account sid.
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/aa379602%28v=vs.85%29.aspx
+
+	/*// This code set the following access:
+	LPCWSTR szSDDL = L"D:"       // Discretionary ACL
+		L"(A;OICI;GRGW;;;AU)"   // Allow read/write to authenticated users
+		L"(D;OICI;GA;;;AN)"		// Deny access for non-authenticated users (Anonymous logon)
+		L"(A;OICI;GA;;;BA)";    // Allow full control to administrators
+	*/
+	LPCSTR szSDDL = "D:"       // Discretionary ACL
+		"(A;OICI;GRGW;;;AU)"   // Allow read/write to authenticated users
+		"(D;OICI;GA;;;AN)"		// Deny access for non-authenticated users (Anonymous logon)
+		"(A;OICI;GA;;;BA)";    // Allow full control to administrators
+		
+
+	if (pSa == NULL) {
+		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," CreatePipeSecurityAttributes :: NUll pointer for SecurityAttributes !\n" );
+		return -1;
+	}
+
+	__try {
+
+		// Convert a String security Descriptor  to a valid functional security desciptor.
+		if (ConvertStringSecurityDescriptorToSecurityDescriptorA(szSDDL, SDDL_REVISION_1, &pSd, &sdSize) == FALSE) {
+			printf("\n[-] Error ::  CreatePipeSecurityAttributes :: ConvertStringSecurityDescriptorToSecurityDescriptor failed :: GLE=%d\n", GetLastError( ));
+			//uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," CreatePipeSecurityAttributes :: ConvertStringSecurityDescriptorToSecurityDescriptor failed :: GLE=%d\n", GetLastError( ));
+			ret = -2;
+			__leave;
+		}
+		
+		pSa->lpSecurityDescriptor = pSd;
+		pSa->nLength = sizeof(SECURITY_ATTRIBUTES);
+		pSa->bInheritHandle = FALSE;
+
+
+	}
+	__finally{		
+
+	}
+
+
+	return ret;
+}
 
 /*
 	function :: TerminateAllThreads(PONDEMAND_SCAN_CONTEXT Context)
@@ -248,6 +299,7 @@ int WINAPI MainThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
 	BOOL bConnected = FALSE;
 	HANDLE hPipe = NULL;
 	ONDEMAND_THREAD_CONTEXT threadCtx = {0};
+	SECURITY_ATTRIBUTES securityAttributes = {0};
 	int i = 0, index = 0;
 
 	if (Context == NULL) {
@@ -269,6 +321,14 @@ int WINAPI MainThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
 		/*for (i = 0; i < USER_SCAN_THREAD_COUNT; i ++) {
 			printf("[+] Debug :: MainThreadWork :: ThreadId = %d - ThreadHandle  = %d\n", Context->ScanThreadCtx[i].ThreadId, Context->ScanThreadCtx[i].Handle );
 		}*/
+		
+		// Create and Initialize security descriptor
+		if (CreatePipeSecurityAttributes(&securityAttributes) < 0) {
+			printf("[-] Error :: MainThreadWork :: CreateSecurityAttributtes() failed!\n");
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," MainThreadWork :: CreateSecurityAttributtes() failed!\n");
+			ret = -2;
+			__leave;
+		}
 
 		while (TRUE) {
 
@@ -295,7 +355,7 @@ int WINAPI MainThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
 				BUFSIZE,                  // output buffer size 
 				BUFSIZE,                  // input buffer size 
 				0,                        // client time-out
-				NULL);                    // default security attribute
+				&securityAttributes);                    // default security attribute
 
 			if (hPipe == INVALID_HANDLE_VALUE) {
 				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " MainThreadWork :: Pipe creation failed! :: GLE= %d \n",GetLastError());
@@ -383,6 +443,7 @@ int WINAPI MainThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
 					printf("[-] Error :: MainThreadWork :: HeapFree failed with error :: %d\n",GetLastError());
 				}
 			}
+			Context->MainThreadCtx = NULL;
 
 		}
 	}	
@@ -518,12 +579,13 @@ int Close_IHM_Connection(_In_ PONDEMAND_SCAN_CONTEXT Context ) {
 			}
 			printf("[+] Debug :: close_IHM_Connection :: Terminating Main thread...[OK]\n");
 
-			if (CloseHandle(Context->MainThreadCtx->Handle)) {
+			/*if (CloseHandle(Context->MainThreadCtx->Handle)) {
 				printf("[+] Debug :: close_IHM_Connection :: Pipe closed successfully!\n");
 				Context->PipeHandle = NULL;
 			}
 			else
 				printf("[-] Error :: close_IHM_Connection :: CloseHandle failed with error :: %d\n",GetLastError());
+				*/
 		}
 		printf("[+] Debug :: close_IHM_Connection :: Main thread...[OK]\n");
 

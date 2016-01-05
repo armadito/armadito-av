@@ -1,7 +1,7 @@
 #ifndef _NAMED_PIPE_CLIENT_
 #define _NAMED_PIPE_CLIENT_
 
-#include <windows.h>
+#include <Windows.h>
 
 int start_named_pipe_client(char* path, HANDLE * hPipe);
 int send_message_to_IHM(HANDLE * hPipe, char * message, char** server_response);

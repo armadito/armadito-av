@@ -980,7 +980,7 @@ int LaunchCmdLineServiceTest( ) {
 	ret = Start_IHM_Connection(uhuru,&onDemandCtx);
 
 	while(1) {
-		 printf("press 'q' to quit: ");
+		 printf("press 'q' to quit: \n");
         c = (unsigned char) getchar();
         if (c == 'q') {
         
