@@ -1,11 +1,17 @@
 #ifndef _NAMED_PIPE_SERVER_
 #define _NAMED_PIPE_SERVER_
 
-#include <windows.h> 
+#include <Windows.h> 
+#include <sddl.h>
+#include <stdio.h>
+#include <tchar.h>
+#include <strsafe.h>
 #include <libuhuru-config.h>
 #include <libuhuru/core.h>
 #include "utils/json.h"
 #include "scan_on_demand.h"
+#include "json_tokener.h"
+#include "log.h"
 
 #define PIPE_NAME "\\\\.\\pipe\\uhuruAV_ondemand"
 #define SCAN_THREAD_COUNT 3
@@ -68,6 +74,7 @@ struct thread_parameters {
 	struct uhuru* uhuru;
 };
 
+int CreatePipeSecurityAttributes(SECURITY_ATTRIBUTES * pSa);
 int TerminateAllScanThreads(PONDEMAND_SCAN_CONTEXT Context);
 int Start_IHM_Connection(struct uhuru * uhuru, _Inout_ PONDEMAND_SCAN_CONTEXT Context);
 int Close_IHM_Connection(_In_ PONDEMAND_SCAN_CONTEXT Context);

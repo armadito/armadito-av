@@ -130,6 +130,7 @@ src/linux/modules/Makefile
 src/linux/modules/on-access-linux/Makefile
 src/linux/modules/on-access-linux/conf/Makefile
 src/linux/modules/on-access-linux/src/Makefile
+src/linux/modules/on-access-linux/tests/Makefile
 src/linux/service/Makefile
 src/linux/tools/Makefile
 src/os/Makefile
