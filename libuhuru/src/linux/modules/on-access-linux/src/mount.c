@@ -1,3 +1,7 @@
+#include <libuhuru/core.h>
+
+#include "config/libuhuru-config.h"
+
 #include "mount.h"
 
 #include <gio/gio.h>
@@ -30,11 +34,6 @@ static void mount_cb(GDBusConnection *conn,
   const gchar *mount_dir;
   struct mount_monitor *m = (struct mount_monitor *)user_data;
   enum mount_event_type ev_type = !strcmp(signal_name, "MountAdded") ? EVENT_MOUNT : EVENT_UMOUNT;
-
-#ifdef DEBUG
-  printf("g_thread_self() returns %p\n", g_thread_self());
-  printf("g_main_context_get_thread_default() returns %p\n", g_main_context_get_thread_default());
-#endif
 
 #ifdef DEBUG
   printf("mount_cb sender_name %s object_path %s interface_name %s signal_name %s\n", sender_name, object_path, interface_name, signal_name);
@@ -87,6 +86,9 @@ static void mount_monitor_subscribe_signals(struct mount_monitor *m)
 {
   m->sub_add_id = g_dbus_connection_signal_subscribe(m->conn, NULL, MOUNT_INTERFACE, MOUNT_ADD_MEMBER, NULL, NULL, 0, mount_cb, m, NULL);
   m->sub_remove_id = g_dbus_connection_signal_subscribe(m->conn, NULL, MOUNT_INTERFACE, MOUNT_REMOVE_MEMBER, NULL, NULL, 0, mount_cb, m, NULL);
+
+  fprintf(stderr, "D-Bus connections %d %d", m->sub_add_id, m->sub_remove_id);
+  /* uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, "D-Bus connections %d %d", m->sub_add_id, m->sub_remove_id); */
 }
 
 static void mount_monitor_unsubscribe_signals(struct mount_monitor *m)
@@ -124,14 +126,4 @@ void mount_monitor_free(struct mount_monitor *m)
   g_dbus_connection_close_sync(m->conn, NULL, NULL);
 
   free(m);
-}
-
-
-static void monitor_loop(void)
-{
-  GMainLoop *loop;
-
-
-  loop = g_main_loop_new(NULL, FALSE);
-  g_main_loop_run(loop);
 }

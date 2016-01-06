@@ -1,1 +1,1 @@
-SUBDIRS=src conf
+SUBDIRS=src conf tests
