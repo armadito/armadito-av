@@ -18,6 +18,7 @@ ONDEMAND_SCAN_CONTEXT onDemandCtx = {0};
 	Service Load and unload procedures functions
 --------------------------------------------------*/
 
+
 int ServiceLoadProcedure( ) {
 
 	int ret = 0;
@@ -48,13 +49,11 @@ int ServiceLoadProcedure( ) {
 
 		// Create Named Pipe for IHM
 		// Notes : If you intend to use a named pipe locally only, deny access to NT AUTHORITY\NETWORK or switch to local RPC.
-		if (start_named_pipe_server(uhuru) < 0){
-			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," named_pipe_server - error \n");
+		if (Start_IHM_Connection(uhuru, &onDemandCtx) < 0) {
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," Start IHM connection failed :: %d\n",ret);
 			ret = -3;
 			__leave;
-		}
-
-
+		}	
 
 
 	}
@@ -69,7 +68,7 @@ int ServiceLoadProcedure( ) {
 
 			// Close Named Pipe
 			if (ret < -2) {
-				; // TODO.
+				ret = Close_IHM_Connection(&onDemandCtx);
 			}
 
 			//close uhuru structure
@@ -100,7 +99,7 @@ int ServiceUnloadProcedure( ) {
 	}
 	
 	// Finish all thread and Close the pipe.
-	// TODO;
+	ret = Close_IHM_Connection(&onDemandCtx);
 
 	// Close Uhuru structure
 	if (uhuru != NULL) {
@@ -981,7 +980,7 @@ int LaunchCmdLineServiceTest( ) {
 	ret = Start_IHM_Connection(uhuru,&onDemandCtx);
 
 	while(1) {
-		 printf("press 'q' to quit: ");
+		 printf("press 'q' to quit: \n");
         c = (unsigned char) getchar();
         if (c == 'q') {
         
