@@ -365,8 +365,10 @@ static void mount_cb(enum mount_event_type ev_type, const char *path, void *user
 
   if (ev_type == EVENT_MOUNT)
     mark_mount_point(m, path);
-  else
-    unmark_mount_point(m, path);
+
+  /* if ev_type is EVENT_UMOUNT, nothing to be done, the kernel has already removed the fanotify mark */
+  /* and anyway, path is NULL, so... */
+  /* unmark_mount_point(m, path); */
 }
 
 static gpointer notify_thread_fun(gpointer data)
