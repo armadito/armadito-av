@@ -9,16 +9,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef SESSION_BUS
-#define MON_DBUS_TYPE          G_BUS_TYPE_SESSION
-#define MOUNT_INTERFACE        "org.gtk.Private.RemoteVolumeMonitor"
-#define MOUNT_ADD_MEMBER       "MountAdded"
-#define MOUNT_REMOVE_MEMBER    "MountRemoved"
-#else
+#undef DEBUG_DBUS_MESSAGE
+
 #define MON_DBUS_TYPE          G_BUS_TYPE_SYSTEM
 #define MON_DBUS_INTERFACE     "org.freedesktop.DBus.Properties"
 #define MON_DBUS_MEMBER        "PropertiesChanged"
-#endif
 
 struct mount_monitor {
   GDBusConnection *conn;
@@ -27,6 +22,7 @@ struct mount_monitor {
   void *user_data;
 };
 
+#ifdef DEBUG_DBUS_MESSAGE
 static void debug_variant(GVariant *parameters, const char *msg)
 {
   int argc;
@@ -41,6 +37,7 @@ static void debug_variant(GVariant *parameters, const char *msg)
     g_variant_unref(argv);
   }
 }
+#endif
 
 static int get_mount_event(GVariant *parameters, enum mount_event_type *pev_type, const char **pmount_point)
 {
@@ -69,7 +66,7 @@ static int get_mount_event(GVariant *parameters, enum mount_event_type *pev_type
   if (val == NULL)
     return 0;
 
-#ifdef DEBUG
+#ifdef DEBUG_DBUS_MESSAGE
   debug_variant(val, "key value");
 #endif
 
@@ -99,7 +96,7 @@ static void mount_cb(GDBusConnection *conn,
   enum mount_event_type ev_type = EVENT_UNKNOWN;
   const char *mount_point = NULL;
 
-#ifdef DEBUG
+#ifdef DEBUG_DBUS_MESSAGE
   fprintf(stderr, "mount_cb: sender_name %s object_path %s interface_name %s signal_name %s\n", sender_name, object_path, interface_name, signal_name);
 #endif
 
@@ -108,7 +105,7 @@ static void mount_cb(GDBusConnection *conn,
     return;
   }
 
-#ifdef DEBUG
+#ifdef DEBUG_DBUS_MESSAGE
   debug_variant(parameters, "parameters");
 #endif
 
@@ -122,8 +119,9 @@ static void mount_monitor_subscribe_signals(struct mount_monitor *m)
 {
   m->signal_sub_id = g_dbus_connection_signal_subscribe(m->conn, NULL, MON_DBUS_INTERFACE, MON_DBUS_MEMBER, NULL, NULL, 0, mount_cb, m, NULL);
 
+#ifdef DEBUG_DBUS_MESSAGE
   fprintf(stderr, "subscribed to D-Bus signal interface %s id=%d\n", MON_DBUS_INTERFACE, m->signal_sub_id);
-  /* uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, "D-Bus connections %d %d", m->sub_add_id, m->sub_remove_id); */
+#endif
 }
 
 static void mount_monitor_unsubscribe_signals(struct mount_monitor *m)
@@ -139,8 +137,7 @@ struct mount_monitor *mount_monitor_new(mount_cb_t cb, void *user_data)
   m->conn = g_bus_get_sync(MON_DBUS_TYPE, NULL, &error);
 
   if (m->conn == NULL) {
-    /* uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "error getting connection to D-Bus (%s)", error->message); */
-    fprintf(stderr, "error getting connection to D-Bus (%s)", error->message);
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "error getting connection to D-Bus (%s)", error->message);
     free(m);
 
     return NULL;
