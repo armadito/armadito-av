@@ -334,6 +334,9 @@ static void unmark_mount_point(struct access_monitor *m, const char *path)
 {
   uint64_t fan_mask = m->enable_permission ? FAN_OPEN_PERM : FAN_CLOSE_WRITE;
 
+  if (path == NULL)
+    return;
+
   if (fanotify_mark(m->fanotify_fd, FAN_MARK_REMOVE | FAN_MARK_MOUNT, fan_mask, AT_FDCWD, path) < 0)
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "fanotify: unmarking %s failed (%s)", path, strerror(errno));
   else
@@ -360,10 +363,10 @@ static void mount_cb(enum mount_event_type ev_type, const char *path, void *user
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, "fanotify: mount notification %s (%s)", path, ev_type == EVENT_MOUNT ? "mount" : "umount");
 
-  /* if (ev_type == EVENT_MOUNT) */
-  /*   mark_mount_point(m, path); */
-  /* else */
-  /*   unmark_mount_point(m, path); */
+  if (ev_type == EVENT_MOUNT)
+    mark_mount_point(m, path);
+  else
+    unmark_mount_point(m, path);
 }
 
 static gpointer notify_thread_fun(gpointer data)
