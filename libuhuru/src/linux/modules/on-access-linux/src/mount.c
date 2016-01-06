@@ -69,7 +69,9 @@ static int get_mount_event(GVariant *parameters, enum mount_event_type *pev_type
   if (val == NULL)
     return 0;
 
+#ifdef DEBUG
   debug_variant(val, "key value");
+#endif
 
   mount_points = g_variant_get_bytestring_array(val, &n_mount_points);
 
