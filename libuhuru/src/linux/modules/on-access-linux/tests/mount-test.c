@@ -6,9 +6,20 @@ gcc $(pkg-config --cflags glib-2.0 gio-2.0 gio-unix-2.0) t.c mount.c -o mount-te
 #include <stdio.h>
 #include <gio/gio.h>
 
+static const char *event_type_str(enum mount_event_type ev_type)
+{
+  switch(ev_type) {
+  case EVENT_MOUNT: return "MOUNT";
+  case EVENT_UMOUNT: return "UNMOUNT";
+  default: return "UNKNOWN";
+  }
+
+  return "ZOB";
+}
+
 static void test_cb(enum mount_event_type ev_type, const char *path, void *user_data)
 {
-  fprintf(stderr, "test_cb: event type %s path %s\n", ev_type == EVENT_MOUNT ? "mount" : "umount", path);
+  printf("test_cb: event type %s path %s\n", event_type_str(ev_type), path);
 }
 
 static gpointer dbus_thread_fun(gpointer data)

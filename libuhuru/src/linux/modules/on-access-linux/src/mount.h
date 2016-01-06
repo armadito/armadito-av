@@ -6,6 +6,7 @@ struct mount_monitor;
 enum mount_event_type {
   EVENT_MOUNT,
   EVENT_UMOUNT,
+  EVENT_UNKNOWN,
 };
 
 typedef void (*mount_cb_t)(enum mount_event_type ev_type, const char *path, void *user_data);
