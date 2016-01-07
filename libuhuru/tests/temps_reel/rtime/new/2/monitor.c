@@ -69,13 +69,14 @@ int access_monitor_get_poll_fd(struct access_monitor *m)
 
 int access_monitor_add(struct access_monitor *m, const char *path, unsigned int flags)
 {
+	
   if (fanotify_mark(m->fanotify_fd, FAN_MARK_ADD | flags, FAN_OPEN_PERM, AT_FDCWD, path) < 0) {
     fprintf(stderr, "fanotify: activating %s failed (%s)\n", path, strerror(errno));
 
     return -1;
   }
 
-  fprintf(stderr, "fanotify: added directory %s\n", path);
+  fprintf(stderr, "fanotify: OPEN_PERM -- added directory %s with flag %d \n", path, flags);
 
   return 0;
 }
