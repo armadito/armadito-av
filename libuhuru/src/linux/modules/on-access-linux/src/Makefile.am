@@ -5,6 +5,7 @@ modules_LTLIBRARIES=on-access-linux.la
 
 on_access_linux_la_SOURCES= \
 onaccessmod.c \
+onaccessmod.h \
 monitor.c \
 monitor.h \
 mount.c \
