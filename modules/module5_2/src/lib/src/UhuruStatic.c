@@ -6,7 +6,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef FUCK
 #include <dirent.h>
+#endif
 
 #include "osdeps.h"
 #include "uh_errors.h"

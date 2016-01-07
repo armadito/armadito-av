@@ -748,8 +748,6 @@ int main(int argc, char ** argv) {
 
 	// set log handler (windows log event)
 	uhuru_log_set_handler(UHURU_LOG_LEVEL_NONE, winEventHandler,NULL);
-
-	
 	
 	uhuru = uhuru_open(&err);
 	if (uhuru == NULL){
