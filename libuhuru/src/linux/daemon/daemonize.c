@@ -102,18 +102,3 @@ int other_daemonize(char* name, char* path, char* outfile, char* errfile, char* 
   return(0);
 }
 
-int create_pid_file(const char *pidfile)
-{
-  FILE *f = fopen(pidfile, "w");
-
-  if (f == NULL)
-    return 1;
-
-  if (fprintf(f, "%d\n", getpid()) < 0)
-    return 2;
-
-  if (fclose(f) != 0)
-    return 3;
-
-  return 0;
-}

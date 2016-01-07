@@ -1,6 +1,6 @@
 #include "service.h"
 #include "log.h"
-#include "scan.h"
+#include "scan_on_access.h"
 
 // Msdn documentation: 
 // https://msdn.microsoft.com/en-us/library/windows/desktop/ms685141%28v=vs.85%29.aspx
@@ -12,6 +12,390 @@ HANDLE ghSvcStopEvent = NULL;
 
 struct uhuru * uhuru = NULL;
 USER_SCAN_CONTEXT userScanCtx = {0};
+ONDEMAND_SCAN_CONTEXT onDemandCtx = {0};
+
+/*------------------------------------------------
+	Service Load and unload procedures functions
+--------------------------------------------------*/
+
+
+int ServiceLoadProcedure( ) {
+
+	int ret = 0;
+	uhuru_error * uh_error = NULL;
+	HRESULT hres = S_OK;
+
+	__try {
+
+		// Init uhuru structure
+		uhuru = uhuru_open(&uh_error);
+		if (uhuru == NULL) {
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " uhuru_open() struct initialization failed!\n");
+			ret = -1;
+			__leave;
+		}
+
+		//  Initialize scan listening threads. and Connect to the driver communication port. (Only if real time is enabled)
+		if (REAL_TIME_ENABLED) {
+			hres = UserScanInit(&userScanCtx);
+			if (FAILED(hres)) {
+				//hres = UserScanFinalize(&userScanCtx);
+				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Scan Thread initialization failed!\n");
+				ret = -2;
+				__leave;
+			}
+		}
+		
+
+		// Create Named Pipe for IHM
+		// Notes : If you intend to use a named pipe locally only, deny access to NT AUTHORITY\NETWORK or switch to local RPC.
+		if (Start_IHM_Connection(uhuru, &onDemandCtx) < 0) {
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," Start IHM connection failed :: %d\n",ret);
+			ret = -3;
+			__leave;
+		}	
+
+
+	}
+	__finally {
+
+		// if failed
+		if (ret < 0) {			
+
+			// Finalyze listening threads and Close communication port.
+			if (ret < -1 && REAL_TIME_ENABLED)
+				hres = UserScanFinalize(&userScanCtx);
+
+			// Close Named Pipe
+			if (ret < -2) {
+				ret = Close_IHM_Connection(&onDemandCtx);
+			}
+
+			//close uhuru structure
+			if (uhuru != NULL) {
+				uhuru_close(uhuru,&uh_error);
+				uhuru = NULL;
+			}
+			
+		}
+
+	}
+
+	return ret;
+}
+
+int ServiceUnloadProcedure( ) {
+
+	HRESULT hres = S_OK;
+	uhuru_error * uh_error = NULL;
+	int ret = 0;
+
+	// Finish all scan threads and close communication port with driver.
+	if (REAL_TIME_ENABLED) {
+		hres = UserScanFinalize(&userScanCtx);
+		if (FAILED(hres)) {
+			 ret = -1;
+		}
+	}
+	
+	// Finish all thread and Close the pipe.
+	ret = Close_IHM_Connection(&onDemandCtx);
+
+	// Close Uhuru structure
+	if (uhuru != NULL) {
+		uhuru_close(uhuru, &uh_error);
+		uhuru = NULL;
+	}			
+
+	return ret;
+}
+
+
+// RegistryInitialization()
+int RegistryKeysInitialization( ) {
+
+	//char * subkey = "SYSTEM\\CurrentControlSet\\services\\eventlog\\Application\\Tatou";
+	
+	LONG res = 0;
+	INT ret = -1;
+	HKEY hRootkey = NULL;
+	HKEY hkey = NULL;
+	DWORD dwValue = 3;
+	DWORD dwTypes = 7;
+	LPSTR dllpath = APP_DLL_PATH;
+	LPSTR dumpfolder = DUMP_FOLDER;
+	DWORD dwDumpType = DUMP_TYPE;
+	DWORD size = 0;
+
+	__try {
+
+		// Open the main service key
+		res = RegOpenKeyA(HKEY_LOCAL_MACHINE, ROOT_KEY_PATH, &hRootkey);
+		if (res != ERROR_SUCCESS) {
+			printf("[-] Error :: RegOpenKeyA failed with error :: %d :: %d\n", GetLastError( ), res);
+			__leave;
+		}
+		//printf("[+] Debug :: initRegistrykeys :: root key %s opened successfully\n", ROOT_KEY_PATH);
+
+		res = RegCreateKeyA(hRootkey,APPS_KEY_NAME,&hkey);
+		if (res != ERROR_SUCCESS) {
+			printf("[-] Error :: RegCreateKeyA failed with error :: %d :: %d\n", GetLastError( ), res);
+			// TODO :: if the key is already created.
+			__leave;
+		}
+		//printf("[+] Debug :: initRegistrykeys :: key %s\\%s created successfully\n",ROOT_KEY_PATH,APPS_KEY_NAME);
+
+		// Set keys values (CategoryCount - CategoryMessageFile - EventMessageFile - )
+		res = RegSetKeyValueA(hkey,NULL,"CategoryCount",REG_DWORD,&dwValue,sizeof(DWORD));
+		if (res != ERROR_SUCCESS) {
+			printf("[-] Error :: RegSetKeyValueA failed with error :: %d :: %d\n", GetLastError(),res );
+			__leave;
+		}
+
+		size = strnlen(dllpath, MAX_PATH) +1;
+		
+		res = RegSetKeyValueA(hkey,NULL,"CategoryMessageFile",REG_EXPAND_SZ,dllpath,size);
+		if (res != ERROR_SUCCESS) {
+			printf("[-] Error :: RegSetKeyValueA failed with error :: %d :: %d\n", GetLastError(),res );
+			__leave;
+		}
+
+		res = RegSetKeyValueA(hkey,NULL,"EventMessageFile",REG_EXPAND_SZ,dllpath,size);
+		if (res != ERROR_SUCCESS) {
+			printf("[-] Error :: RegSetKeyValueA failed with error :: %d :: %d\n", GetLastError(),res);
+			__leave;
+		}
+
+		res = RegSetKeyValueA(hkey,NULL,"ParameterMessageFile",REG_EXPAND_SZ,dllpath,size);
+		if (res != ERROR_SUCCESS) {
+			printf("[-] Error :: RegSetKeyValueA failed with error :: %d :: %d\n", GetLastError(),res );
+			__leave;
+		}
+
+		res = RegSetKeyValueA(hkey,NULL,"TypesSupported",REG_DWORD,&dwTypes,sizeof(DWORD));
+		if (res != ERROR_SUCCESS) {
+			printf("[-] Error :: RegSetKeyValueA failed with error :: %d :: %d\n", GetLastError(),res );
+			__leave;
+		}
+
+		
+		//ret = 0;
+
+	}
+	__finally {
+
+		if (hRootkey != NULL) {
+			RegCloseKey(hRootkey);
+			hRootkey = NULL;
+		}
+
+		if (hkey != NULL) {
+			RegCloseKey(hkey);
+			hkey = NULL;
+		}
+
+	}
+
+	// Crash report configuration registry key.
+	__try {
+
+		ret = -1;
+
+		// Open the main service key
+		res = RegOpenKeyA(HKEY_LOCAL_MACHINE, ROOT_CRASH_KEY_PATH_LOCAL_DUMPS, &hRootkey);
+		if (res != ERROR_SUCCESS) {
+			
+			if (res == ERROR_FILE_NOT_FOUND) { // if the LocalDumps key is not created, then create it.
+
+				// 
+				res = RegOpenKeyA(HKEY_LOCAL_MACHINE, ROOT_CRASH_KEY_PATH, &hRootkey);
+				if (res != ERROR_SUCCESS) {
+					printf("[-] Error :: RegOpenKeyA failed with error :: %d :: %d\n", GetLastError( ), res);
+					__leave;
+				}
+
+				res = RegCreateKeyA(hRootkey,"LocalDumps",&hkey);
+				if (res != ERROR_SUCCESS) {
+					printf("[-] Error :: RegCreateKeyA failed with error :: %d :: %d\n", GetLastError( ), res);					
+					__leave;
+				}
+
+				if (hRootkey != NULL) {
+					RegCloseKey(hRootkey);
+					hRootkey = NULL;
+				}
+
+				if (hkey != NULL) {
+					RegCloseKey(hkey);
+					hkey = NULL;
+				}
+
+				res = RegOpenKeyA(HKEY_LOCAL_MACHINE, ROOT_CRASH_KEY_PATH_LOCAL_DUMPS, &hRootkey);
+				if (res != ERROR_SUCCESS) {
+					printf("[-] Error :: RegistryKeysInitialization :: RegOpenKeyA() failed with error :: %d :: %d\n", GetLastError( ), res);
+					__leave;
+				}
+
+			}
+			else {
+				printf("[-] Error :: RegOpenKeyA failed with error :: %d :: %d\n", GetLastError( ), res);
+				__leave;
+			}
+			
+		}		
+
+
+		res = RegCreateKeyA(hRootkey,SVC_KEY_NAME,&hkey);
+		if (res != ERROR_SUCCESS) {
+			printf("[-] Error :: RegCreateKeyA failed with error :: %d :: %d\n", GetLastError( ), res);			
+			__leave;
+		}
+
+		// Set dump folder
+		size = strnlen(dumpfolder, MAX_PATH) +1;
+		res = RegSetKeyValueA(hkey,NULL,"DumpFolder",REG_EXPAND_SZ,DUMP_FOLDER,size);
+		if (res != ERROR_SUCCESS) {
+			printf("[-] Error :: RegSetKeyValueA failed with error :: %d :: %d\n", GetLastError(),res );
+			__leave;
+		}
+
+		res = RegSetKeyValueA(hkey,NULL,"DumpType",REG_DWORD,&dwDumpType,sizeof(DWORD));
+		if (res != ERROR_SUCCESS) {
+			printf("[-] Error :: RegSetKeyValueA failed with error :: %d :: %d\n", GetLastError(),res );
+			__leave;
+		}
+
+		printf("[+] Debug :: RegistryKeysInitialization :: UhuruAV event log keys values created successfully\n" );
+		ret = 0;
+
+	}
+	__finally {
+
+		if (hRootkey != NULL) {
+			RegCloseKey(hRootkey);
+			hRootkey = NULL;
+		}
+
+		if (hkey != NULL) {
+			RegCloseKey(hkey);
+			hkey = NULL;
+		}
+
+	}
+
+	// Driver Registry keys for crash dumps (verification only)
+	/*
+	__try {
+
+		ret = -1;
+
+		// Open the main service key
+		res = RegOpenKeyA(HKEY_LOCAL_MACHINE, ROOT_DRIVER_CRASH_KEY_PATH, &hRootkey);
+		if (res != ERROR_SUCCESS) {
+			__leave;
+		}
+
+		// TODO...
+
+		ret = 0;
+
+	}
+	__finally {
+
+		if (hRootkey != NULL) {
+			RegCloseKey(hRootkey);
+			hRootkey = NULL;
+		}
+
+		if (hkey != NULL) {
+			RegCloseKey(hkey);
+			hkey = NULL;
+		}
+
+	}
+	*/
+
+
+	return ret;
+}
+
+int DeleteRegistryKeys( ) {
+
+	LONG res = 0;
+	HKEY hRootkey = NULL;	
+	DWORD dwValue = 3;
+	DWORD dwTypes = 7;
+	LPSTR dllpath = APP_DLL_PATH;
+	DWORD size = 0;
+	int ret = 0;
+
+	__try {
+
+		// Open the main service key
+		res = RegOpenKeyA(HKEY_LOCAL_MACHINE, ROOT_KEY_PATH, &hRootkey);
+		if (res != ERROR_SUCCESS) {
+			printf("[-] Error :: RegOpenKeyA failed with error :: %d :: %d\n", GetLastError( ), res);
+			ret = -1;
+			__leave;
+		}
+		printf("[+] Debug :: DeleteRegistrykeys :: root key %s opened successfully\n", ROOT_KEY_PATH);
+
+		// Delete the existing key
+		res = RegDeleteKeyA(hRootkey, APPS_KEY_NAME);
+		if (res != ERROR_SUCCESS) {
+			printf("[-] Error :: RegDeleteKeyA failed with error :: %d :: %d\n", GetLastError(),res );
+			ret = -1;
+			__leave;
+		}
+		
+		printf("[+] Debug :: DeleteRegistrykeys :: key %s\\%s deleted successfully\n", ROOT_KEY_PATH,APPS_KEY_NAME);
+
+
+	}
+	__finally {
+
+		if (hRootkey != NULL) {
+			RegCloseKey(hRootkey);
+			hRootkey = NULL;
+		}
+
+	}
+
+	__try {
+
+		// Open the main service key
+		res = RegOpenKeyA(HKEY_LOCAL_MACHINE, ROOT_CRASH_KEY_PATH_LOCAL_DUMPS, &hRootkey);
+		if (res != ERROR_SUCCESS) {
+			printf("[-] Error :: RegOpenKeyA failed with error :: %d :: %d\n", GetLastError( ), res);
+			ret = -1;
+			__leave;
+		}
+		printf("[+] Debug :: DeleteRegistrykeys :: root key %s opened successfully\n", ROOT_CRASH_KEY_PATH_LOCAL_DUMPS);
+
+		// Delete the existing key
+		res = RegDeleteKeyA(hRootkey, SVC_KEY_NAME);
+		if (res != ERROR_SUCCESS) {
+			printf("[-] Error :: RegDeleteKeyA failed with error :: %d :: %d\n", GetLastError(),res );
+			ret = -1;
+			__leave;
+		}
+		
+		printf("[+] Debug :: DeleteRegistrykeys :: key %s\\%s deleted successfully\n", ROOT_CRASH_KEY_PATH_LOCAL_DUMPS,SVC_KEY_NAME);
+
+
+	}
+	__finally {
+
+		if (hRootkey != NULL) {
+			RegCloseKey(hRootkey);
+			hRootkey = NULL;
+		}
+
+	}
+
+
+	return 0;
+}
 
 
 /*
@@ -24,55 +408,72 @@ int ServiceInstall( ) {
 	SC_HANDLE schSCManager;
 	SC_HANDLE schService;
 	char binaryPath[MAX_PATH] = {'\0'};
+	int ret = -1;
 
-	// Get the path of the current binary
-	if (!GetModuleFileName(NULL, binaryPath, MAX_PATH)) {
-		printf("[-] Error :: ServiceInstall!GetModuleFileName() failed :: exit_code %d\n",GetLastError());
-		return -1;
+
+	__try {
+
+		// Get the path of the current binary
+		if (!GetModuleFileName(NULL, binaryPath, MAX_PATH)) {
+			printf("[-] Error :: ServiceInstall!GetModuleFileName() failed :: exit_code %d\n",GetLastError());
+			__leave;
+		}
+
+		// Get a handle to the SCM database.
+		schSCManager = OpenSCManager(NULL,						// Local computer.
+									 NULL,						// ServicesActive database.
+									 SC_MANAGER_ALL_ACCESS) ;	// full access rights.
+
+		if (schSCManager == NULL) {
+			printf("[-] Error :: ServiceInstall!OpenSCManager() failed :: exit_code = %d\n",GetLastError());
+			__leave;
+		}
+
+		// Create the service.
+		schService = CreateService( 
+			schSCManager,				// SCM database 
+			SVCNAME,					// name of service 
+			SVCDISPLAY,					// service name to display 
+			SERVICE_ALL_ACCESS,			// desired access 
+			SERVICE_WIN32_OWN_PROCESS|SERVICE_INTERACTIVE_PROCESS,	// service type 
+			SERVICE_DEMAND_START,		// start type
+			SERVICE_ERROR_NORMAL,		// error control type 
+			binaryPath,					// path to service's binary 
+			NULL,						// no load ordering group 
+			NULL,						// no tag identifier 
+			NULL,						// no dependencies 
+			NULL,						// LocalSystem account 
+			NULL);						// no password 
+
+		if (schService == NULL) {
+			printf("[-] Error :: ServiceInstall!CreateService() failed :: exit_code = %d\n",GetLastError());			
+			__leave;
+		}
+
+		if (RegistryKeysInitialization( ) < 0) {
+			printf("[-] Warning :: Service Registry key creation failed!\n");		
+			__leave;
+		}
+		
+
+		ret = 0;
+		printf("[+] Debug :: Service installed successfully!\n");
+		uhLog("[+] Debug :: Service installed successfully!\n");		
+
+	}
+	__finally {
+
+		if (schSCManager != NULL) {
+			CloseServiceHandle(schSCManager);
+		}
+
+		if (schService != NULL) {			
+			CloseServiceHandle(schService);
+		}
+
 	}
 
-	// Get a handle to the SCM database.
-	schSCManager = OpenSCManager(NULL,						// Local computer.
-								 NULL,						// ServicesActive database.
-								 SC_MANAGER_ALL_ACCESS) ;	// full access rights.
-
-	if (schSCManager == NULL) {
-		printf("[-] Error :: ServiceInstall!OpenSCManager() failed :: exit_code = %d\n",GetLastError());
-		return -1;
-	}
-
-
-	// Create the service.
-	schService = CreateService( 
-		schSCManager,				// SCM database 
-		SVCNAME,					// name of service 
-		SVCDISPLAY,					// service name to display 
-		SERVICE_ALL_ACCESS,			// desired access 
-		SERVICE_WIN32_OWN_PROCESS|SERVICE_INTERACTIVE_PROCESS,	// service type 
-		SERVICE_DEMAND_START,		// start type
-		SERVICE_ERROR_NORMAL,		// error control type 
-		binaryPath,					// path to service's binary 
-		NULL,						// no load ordering group 
-		NULL,						// no tag identifier 
-		NULL,						// no dependencies 
-		NULL,						// LocalSystem account 
-		NULL);						// no password 
-
-
-	if (schService == NULL) {
-		printf("[-] Error :: ServiceInstall!CreateService() failed :: exit_code = %d\n",GetLastError());
-		CloseServiceHandle(schSCManager);
-		return -1;
-	}
-	else {
-		printf("[+] Debug :: Service installed successfully!\n");		
-		uhLog("[+] Debug :: Service installed successfully!\n");
-	}
-
-	CloseServiceHandle(schService);
-	CloseServiceHandle(schSCManager);
-
-	return 0;
+	return ret;
 }
 
 
@@ -126,6 +527,9 @@ int ServiceRemove( ) {
 		CloseServiceHandle(schSCManager);
 		return -1;
 	}
+	
+	// Delete Registry keys
+	DeleteRegistryKeys( );
 
 	printf("[+] Debug :: Service deleted sucessfully !\n");
 
@@ -172,31 +576,31 @@ VOID ReportSvcStatus(DWORD dwCurrentState,
 }
 
 
+
+
+
 /*
 	ServiceCtrlHandler()
 	https://msdn.microsoft.com/en-us/library/windows/desktop/ms687413%28v=vs.85%29.aspx
 	https://msdn.microsoft.com/en-us/library/windows/desktop/ms685149%28v=vs.85%29.aspx
 */
 void WINAPI ServiceCtrlHandler( DWORD dwCtrl ) {
+
 	uhuru_error * uh_error = NULL;
 	HRESULT hres = S_OK;
+	int ret = 0;
 
 	switch (dwCtrl) {
 
 		case SERVICE_CONTROL_STOP:
+
 			ReportSvcStatus(SERVICE_STOP_PENDING, NO_ERROR, 0);
 
-			// finish all threads and communication port.
-			hres = UserScanFinalize(&userScanCtx);
-
-			// Close uhuru structure.
-			if (uhuru != NULL) {
-				uhuru_close(uhuru, &uh_error);
-				uhLog("[+] Debug :: uhuru struct closed successfully!\n");
-			}
-			else {
-				uhLog("[-] Warning :: uhuru global struct is NULL !\n");
-			}
+			ret = ServiceUnloadProcedure( );
+			if (ret != 0) {
+				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service unloaded with errors\n");
+				uhLog("[-] Error :: Service unloaded with errors\n");
+			}			
 
 			 // Signal the service to stop.
 			 SetEvent(ghSvcStopEvent);
@@ -205,7 +609,7 @@ void WINAPI ServiceCtrlHandler( DWORD dwCtrl ) {
 			return;
 		case SERVICE_CONTROL_INTERROGATE:
 			break;
-
+		//TODO ::  add case SERVICE_CONTROL_PRESHUTDOWN
 		default:
 			break;
 	}
@@ -217,23 +621,23 @@ void WINAPI ServiceCtrlHandler( DWORD dwCtrl ) {
 /*
  LaunchServiceAction()
 */
-void LaunchServiceAction( ) {
+void PerformServiceAction( ) {
 	
 	uhuru_error * uh_error = NULL;
-	HRESULT hres = S_OK;			
-	
-	// Initialize uhuru structure.
-	uhuru = uhuru_open(&uh_error);
-	if (uhuru == NULL) {	
-		uhLog("[-] Error :: uhuru_open failed\n");
-		return ;
-	}
-	uhLog("[+] Debug :: uhuru struct initialized successfully\n");
+	HRESULT hres = S_OK;
+	int ret = 0;
 
-	//  Initialize scan listening threads.
-	hres = UserScanInit(&userScanCtx);
-	if (FAILED(hres)) {
-		hres = UserScanFinalize(&userScanCtx);
+	// set log handler (windows log event) // move this statement to a better place.
+	uhuru_log_set_handler(UHURU_LOG_LEVEL_NONE, winEventHandler,NULL);
+
+	ret = ServiceLoadProcedure( );
+	if (ret < 0) {
+		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service Initialization failed \n");
+		uhLog("[+] Error :: Service Initialization failed\n");
+	}
+	else {
+		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_INFO, " Service Initializaed successfully!\n");
+		uhLog("[+] Debug :: uhuru struct initialized successfully\n");
 	}
 	
 	return;
@@ -288,7 +692,6 @@ void WINAPI ServiceMain(int argc, char ** argv) {
 		return;
 	}
 
-
 	gSvcStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
 	gSvcStatus.dwServiceSpecificExitCode = 0;
 
@@ -299,7 +702,7 @@ void WINAPI ServiceMain(int argc, char ** argv) {
 	// Calls the SvcInit function to perform the service-specific initialization and begin the work to be performed by the service.
 	ServiceInit( );
 
-	LaunchServiceAction( );
+	PerformServiceAction( );
 
 	return;
 }
@@ -560,6 +963,44 @@ void ServiceStop( ) {
 }
 
 
+int LaunchCmdLineServiceTest( ) {
+
+	int ret = 0;
+	unsigned char c;
+	uhuru_error * uh_error = NULL;
+	HRESULT hres = S_OK;
+	
+	// Init uhuru structure
+	uhuru = uhuru_open(&uh_error);
+	if (uhuru == NULL) {
+		printf("[-] Error :: uhuru_open() struct initialization failed!\n");
+		return -1;
+	}
+
+	ret = Start_IHM_Connection(uhuru,&onDemandCtx);
+
+	while(1) {
+		 printf("press 'q' to quit: \n");
+        c = (unsigned char) getchar();
+        if (c == 'q') {
+        
+            break;
+        }
+	}
+
+	ret = Close_IHM_Connection(&onDemandCtx);
+
+	if (uhuru != NULL) {
+		uh_error = NULL;
+		uhuru_close(uhuru,&uh_error);
+		uhuru = NULL;
+	}
+
+	return ret;
+
+}
+
+
 int main(int argc, char ** argv) {
 
 	int ret = 0;
@@ -568,6 +1009,19 @@ int main(int argc, char ** argv) {
 	printf("----- Uhuru Scan service -----\n");
 	printf("------------------------------\n");
 
+	// Only for test purposes (command line)
+	if ( argc >=2 && strncmp(argv[1],"--test",6) == 0 ){
+
+		ret = LaunchCmdLineServiceTest( );
+		if (ret < 0) {
+			return EXIT_FAILURE;
+		}
+		return EXIT_SUCCESS;
+
+	}
+
+
+	
 	// command line parameter "--install", install the service.
 	if ( argc >=2 && strncmp(argv[1],"--install",9) == 0 ){
 

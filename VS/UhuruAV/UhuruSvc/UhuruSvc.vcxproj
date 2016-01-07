@@ -20,7 +20,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -42,7 +42,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(SolutionDir)..\..\libuhuru\include\config;$(SolutionDir)..\..\libuhuru\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)Debug;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)Debug;D:\Novit\uhuru-av\VS\json-c\json-c\Debug;$(LibraryPath)</LibraryPath>
+    <SourcePath>$(SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -55,12 +56,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>D:\Novit\uhuru-av\libuhuru\src\windows\service\MessageText;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Novit\uhuru-av\libuhuru\src\windows\service\MessageText;D:\Novit\uhuru-av\libuhuru\src;D:\Novit\uhuru-av\VS\json-c\json-c;D:\Novit\uhuru-av\VS\UhuruAV\UhuruSvc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>FltLib.lib;libuhuru_core.lib;Wtsapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>FltLib.lib;libuhuru_core.lib;Wtsapi32.lib;json-c.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -82,13 +83,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\libuhuru\src\utils\getopt.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\utils\json.c" />
     <ClCompile Include="log.c" />
-    <ClCompile Include="scan.c" />
+    <ClCompile Include="named_pipe_client.c" />
+    <ClCompile Include="named_pipe_server.c" />
+    <ClCompile Include="scan_on_access.c" />
+    <ClCompile Include="scan_on_demand.c" />
     <ClCompile Include="service.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\libuhuru\src\utils\getopt.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\utils\json.h" />
     <ClInclude Include="log.h" />
-    <ClInclude Include="scan.h" />
+    <ClInclude Include="named_pipe_client.h" />
+    <ClInclude Include="named_pipe_server.h" />
+    <ClInclude Include="scan_on_access.h" />
+    <ClInclude Include="scan_on_demand.h" />
     <ClInclude Include="service.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

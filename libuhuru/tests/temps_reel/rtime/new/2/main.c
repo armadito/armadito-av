@@ -32,7 +32,7 @@ static void usage(void)
   fprintf(stderr, "  -e                             enable permission\n");
   fprintf(stderr, "  -t                             check file mime type before ALLOWing\n");
   fprintf(stderr, "  -l                             log every fanotify event\n");
-  fprintf(stderr, "  -M DIR                         add DIR to the fanotify mark mask with flag FAN_MARK_MOUNT (does not work without)\n");
+  fprintf(stderr, "  -M DIR                         add DIR to the fanotify mark mask with flag FAN_MARK_MOUNT\n");
   fprintf(stderr, "  -m DIR                         add DIR to the fanotify mark mask\n");
   fprintf(stderr, "  -i DIR                         add DIR to the fanotify ignore mask\n");
   fprintf(stderr, "\n");

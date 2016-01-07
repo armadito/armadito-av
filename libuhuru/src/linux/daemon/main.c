@@ -112,37 +112,78 @@ static void parse_options(int argc, const char **argv, struct uhuru_daemon_optio
     opts->pid_file = opt_value(daemon_opt_defs, "pidfile", LOCALSTATEDIR "/run/uhuru-scand.pid");
 }
 
-static int main_loop(struct server *server, struct access_monitor *monitor)
+static void create_pid_file(const char *pidfile)
 {
-  struct poll_set *ps = poll_set_new();
+  FILE *f = fopen(pidfile, "w");
 
-  poll_set_add_fd(ps, server_get_poll_fd(server), server_cb, server);
+  if (f == NULL)
+    goto err;
 
-  if (monitor != NULL)
-    poll_set_add_fd(ps, access_monitor_get_poll_fd(monitor), access_monitor_cb, monitor);
+  if (fprintf(f, "%d\n", getpid()) < 0)
+    goto err;
 
-  /* FIXME: must use configuration */
-  if (monitor != NULL)
-    access_monitor_add(monitor, "/home");
+  if (fclose(f) != 0)
+    goto err;
 
-  /* FIXME: must use configuration */
-  if (monitor != NULL)
-    access_monitor_enable_permission(monitor, 1);
+ err:
+  uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_ERROR, "cannot create PID file (errno %d)", errno);
+  exit(EXIT_FAILURE);
+}
 
-  if (monitor != NULL)
-    access_monitor_activate(monitor);
+static int create_server_socket(struct uhuru_daemon_options *opts)
+{
+  int server_sock = -1;
 
-  return poll_set_loop(ps);
+  if (opts->socket_type == TCP_SOCKET)
+    server_sock = tcp_server_listen(opts->port_number, "127.0.0.1");
+  else
+    server_sock = unix_server_listen(opts->unix_path);
+
+  if (server_sock < 0) {
+    uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_ERROR, "cannot open server socket (errno %d)", errno);
+    exit(EXIT_FAILURE);
+  }
+
+  return server_sock;
+}
+
+static void start_daemon(const char *progname, struct uhuru_daemon_options *opts)
+{
+  struct uhuru *uhuru;
+  int server_sock;
+  struct server *server;
+  uhuru_error *error = NULL;
+  GMainLoop *loop;
+
+  log_init(opts->s_log_level, !opts->no_daemon);
+
+  if (!opts->no_daemon)
+    daemonize();
+
+  if (opts->pid_file != NULL)
+    create_pid_file(opts->pid_file);
+
+  uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_NONE, "starting %s%s", progname, opts->no_daemon ? "" : " in daemon mode");
+
+  server_sock = create_server_socket(opts);
+
+  uhuru = uhuru_open(&error);
+  if (uhuru == NULL) {
+    uhuru_error_print(error, stderr);
+    close(server_sock);
+    exit(EXIT_FAILURE);
+  }
+
+  server = server_new(uhuru, server_sock);
+
+  loop = g_main_loop_new(NULL, FALSE);
+
+  g_main_loop_run(loop);
 }
 
 int main(int argc, const char **argv)
 {
   struct uhuru_daemon_options opts;
-  int server_sock;
-  struct uhuru *uhuru;
-  struct server *server;
-  struct access_monitor *monitor;
-  uhuru_error *error = NULL;
 
 #ifdef HAVE_GTHREAD_INIT
   g_thread_init(NULL);
@@ -150,44 +191,7 @@ int main(int argc, const char **argv)
 
   parse_options(argc, argv, &opts);
 
-  if (!opts.no_daemon)
-    daemonize();
-
-  if (opts.pid_file != NULL) {
-    int r = create_pid_file(opts.pid_file);
-
-    /* a priori, writing to stderr is meaningless, since stderr would have probably been closed by daemonize() */
-    if (r)
-      exit(r);
-  }
-
-  if (opts.socket_type == TCP_SOCKET)
-    server_sock = tcp_server_listen(opts.port_number, "127.0.0.1");
-  else
-    server_sock = unix_server_listen(opts.unix_path);
-
-  if (server_sock < 0) {
-    fprintf(stderr, "cannot open server socket (errno %d)\n", errno);
-    return 1;
-  }
-
-  log_init(opts.s_log_level, !opts.no_daemon);
-
-  uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_NONE, "starting %s%s", argv[0], opts.no_daemon ? "" : " in daemon mode");
-
-  uhuru = uhuru_open(&error);
-  if (uhuru == NULL) {
-    uhuru_error_print(error, stderr);
-    exit(1);
-  }
-
-  uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_INFO, "uhuru init done");
-
-  server = server_new(uhuru, server_sock);
-
-  monitor = access_monitor_new(uhuru);
-
-  main_loop(server, monitor);
+  start_daemon(argv[0], &opts);
 
   return 0;
 }
