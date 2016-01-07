@@ -59,12 +59,17 @@ enum uhuru_file_context_status uhuru_file_context_get(struct uhuru_file_context 
 
   /* 4) file type using mime_type_guess and applicable modules from configuration */
   mime_type = os_mime_type_guess_fd(ctx->fd);
+  if (mime_type == NULL) {
+    ctx->status = UHURU_FC_FILE_TYPE_NOT_SCANNED;
+    return ctx->status;
+  }
+
   applicable_modules = uhuru_scan_conf_get_applicable_modules(conf, mime_type);
 
   if (applicable_modules == NULL) {
     free((void *)mime_type);
-    
     ctx->status = UHURU_FC_FILE_TYPE_NOT_SCANNED;
+
     return ctx->status;
   }
 

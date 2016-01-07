@@ -1,4 +1,5 @@
 VS/glib/*
+VS/clamav/*
 VS/UhuruAV/libuhuru_core/Debug/*
 VS/UhuruAV/libuhuru_ipc/Debug/*
 VS/UhuruAV/uhuru_scan/Debug/*
@@ -21,5 +22,8 @@ VS/UhuruAV/ScanClient/Debug/*
 VS/UhuruAV/ScanClient/x64/*
 VS/UhuruAV/UhuruGuard Package/Win7Debug/*
 VS/UhuruAV/Win7Debug/*
+VS/json-c/json-c/json-c.v12.suo
+VS/UhuruAV/UhuruAV_setup/Debug/*
 out/
 documentation/specs-ihm/tatou-ihm/~$$tatouIHM.~vsdx
+

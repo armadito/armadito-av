@@ -2,9 +2,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <tchar.h>
+#include <string.h>
 
 #include "json.h"
-#include "windows-service/scan.h"
+//#include "windows-service/scan.h"
+#include "scan_on_demand.h"
 
 /*printing the value corresponding to boolean, double, integer and strings*/
 void print_json_value(json_object *jobj){
@@ -66,8 +68,17 @@ void json_parse_and_print(json_object * jobj) {
 	json_object * jfound;
 	enum json_type type;
 
+	char *key = NULL;
+	struct json_object *val = NULL;
+	struct lh_entry *entrykey = NULL;
+	struct lh_entry *entry_nextkey = NULL;
 
-	json_object_object_foreach(jobj, key, val) { /*Passing through every array element*/
+	for(entrykey = json_object_get_object(jobj)->head;		
+			(entrykey ? ( key = (char*)entrykey->k, val = (struct json_object*)entrykey->v, entry_nextkey = entrykey->next, entrykey) : 0); 
+			entrykey = entry_nextkey) {
+
+
+	//json_object_object_foreach(jobj, key, val) { /*Passing through every array element*/
 
 		if (key == NULL){
 			printf("Error: uninitialized key char*\n");
@@ -109,7 +120,16 @@ const char* json_parse_and_process(json_object * jobj, struct new_scan_action* s
 	const char * scan_path = "";
 	const char * scan_action = "";
 
-	json_object_object_foreach(jobj, key, val) { /*Passing through every array element*/
+	char *key = NULL;
+	struct json_object *val = NULL;
+	struct lh_entry *entrykey = NULL;
+	struct lh_entry *entry_nextkey = NULL;
+
+	for(entrykey = json_object_get_object(jobj)->head;		
+			(entrykey ? ( key = (char*)entrykey->k, val = (struct json_object*)entrykey->v, entry_nextkey = entrykey->next, entrykey) : 0); 
+			entrykey = entry_nextkey) {
+
+	//json_object_object_foreach(jobj, key, val) { /*Passing through every array element*/
 
 		if (key == NULL){
 			printf("Error: uninitialized key char*\n");
@@ -201,7 +221,7 @@ const char* json_get_protocol_err_msg( const char* err_msg, int scan_id )
 }
 
 // uhuru_report* to JSON
-const char* json_get_report_msg(uhuru_report* report){
+const char* json_get_report_msg(struct uhuru_report* report){
 
 	const char* report_status;
 	const char* report_action;
