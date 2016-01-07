@@ -1,4 +1,4 @@
-AC_INIT(uhuru-mod-module5-2, [1.5.1], francois@dechelle.net)
+AC_INIT(uhuru-mod-module5-2, [1.5.3], francois@dechelle.net)
 AM_INIT_AUTOMAKE
 
 # collect arguments
