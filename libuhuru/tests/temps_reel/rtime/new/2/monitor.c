@@ -86,7 +86,6 @@ int access_monitor_add(struct access_monitor *m, const char *path, unsigned int 
 
   if (fanotify_mark(m->fanotify_fd, FAN_MARK_ADD | flags, fan_mask, AT_FDCWD, path) < 0) {
     fprintf(stderr, "fanotify: marking %s failed (%s)\n", path, strerror(errno));
-
     return -1;
   }
 
