@@ -1,4 +1,4 @@
-AC_INIT(libuhuru,1.5.2,francois@dechelle.net)
+AC_INIT(libuhuru,1.5.3,francois@dechelle.net)
 AM_INIT_AUTOMAKE
 
 # collect arguments
@@ -130,6 +130,7 @@ src/linux/modules/Makefile
 src/linux/modules/on-access-linux/Makefile
 src/linux/modules/on-access-linux/conf/Makefile
 src/linux/modules/on-access-linux/src/Makefile
+src/linux/modules/on-access-linux/tests/Makefile
 src/linux/service/Makefile
 src/linux/tools/Makefile
 src/os/Makefile

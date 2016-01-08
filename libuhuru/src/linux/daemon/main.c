@@ -125,8 +125,10 @@ static void create_pid_file(const char *pidfile)
   if (fclose(f) != 0)
     goto err;
 
+  return;
+
  err:
-  uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_ERROR, "cannot create PID file (errno %d)", errno);
+  uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_ERROR, "cannot create PID file %s (errno %d)", pidfile, errno);
   exit(EXIT_FAILURE);
 }
 
