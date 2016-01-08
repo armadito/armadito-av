@@ -11,12 +11,14 @@
 [Version]
 Signature   = "$Windows NT$"
 ; TODO - Change the Class and ClassGuid to match the Load Order Group value, see http://msdn.microsoft.com/en-us/windows/hardware/gg462963
-Class       = "ActivityMonitor"                         ;This is determined by the work this filter driver does
-ClassGuid   = {b86dff51-a31e-4bac-b3cf-e8cfe75c9fc2}    ;This value is determined by the Load Order Group value
+;Class       = "ActivityMonitor"                         ;This is determined by the work this filter driver does
+;ClassGuid   = {b86dff51-a31e-4bac-b3cf-e8cfe75c9fc2}    ;This value is determined by the Load Order Group value
+Class = "AntiVirus"
+ClassGuid = {b1d1a169-c54f-4379-81db-bee7d88d7454}
 ;Class = "_TODO_Change_Class_appropriately_"
 ;ClassGuid = {_TODO_Change_ClassGuid_appropriately_}
 Provider    = %ManufacturerName%
-DriverVer   = 10/14/2015,1.0.0.1
+DriverVer   = 07/01/2016,1.0.0.0
 CatalogFile = UhuruGuard.cat
 
 [DestinationDirs]
