@@ -4,8 +4,6 @@
 #include "log.h"
 #include "server.h"
 #include "daemonize.h"
-#include "monitor.h"
-#include "pollset.h"
 #include "tcpsock.h"
 #include "unixsock.h"
 
