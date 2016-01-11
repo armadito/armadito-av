@@ -90,7 +90,7 @@ int ServiceUnloadProcedure( ) {
 	uhuru_error * uh_error = NULL;
 	int ret = 0;
 
-	// Finish all scan threads and close communication port with driver.
+	// Finish all scan threads and close communication port with driver.	
 	if (REAL_TIME_ENABLED) {
 		hres = UserScanFinalize(&userScanCtx);
 		if (FAILED(hres)) {
@@ -105,7 +105,7 @@ int ServiceUnloadProcedure( ) {
 	if (uhuru != NULL) {
 		uhuru_close(uhuru, &uh_error);
 		uhuru = NULL;
-	}			
+	}		
 
 	return ret;
 }
@@ -634,6 +634,9 @@ void PerformServiceAction( ) {
 	if (ret < 0) {
 		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service Initialization failed \n");
 		uhLog("[+] Error :: Service Initialization failed\n");
+		// Stop the service on error.
+		ServiceStop( );
+
 	}
 	else {
 		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_INFO, " Service Initializaed successfully!\n");
@@ -689,6 +692,8 @@ void WINAPI ServiceMain(int argc, char ** argv) {
 	if (gSvcStatusHandle == NULL) {		
 		//SvcReportEvent(TEXT("RegisterServiceCtrl"));
 		// Write in a log file
+		// Stop the service on error.
+		ServiceStop( );
 		return;
 	}
 
@@ -862,6 +867,7 @@ void ServiceStop( ) {
 	DWORD dwStartTime = GetTickCount( );
 	DWORD dwTimeout = 10000;
 	DWORD exitCode = 0;
+	int ret = 0;
 
 
 	// Get a handle to the SCM database. 
@@ -922,7 +928,11 @@ void ServiceStop( ) {
 
 	// If the service is running, dependencies must be stopped first. (In our case, there is no dependencies).	
 	// TODO: Unload databases, + modules + others dependencies...
-	//closeScanService(gUhuru);
+	ret = ServiceUnloadProcedure( );
+	if (ret != 0) {
+		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service unloaded with errors\n");
+		uhLog("[-] Error :: Service unloaded with errors\n");
+	}	
 
 	// Send a stop code to the service.
 	if (!ControlService(schService,SERVICE_CONTROL_STOP,(LPSERVICE_STATUS)&ssStatus)) {
