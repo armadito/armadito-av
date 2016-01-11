@@ -4,6 +4,7 @@
 
 #include <glib.h>
 #include <stdarg.h>
+#include <stdlib.h>
 
 /* should not be there, but for now... */
 #ifdef HAVE_GETPID
@@ -42,11 +43,15 @@ void uhuru_log(enum uhuru_log_domain domain, enum uhuru_log_level level, const c
   (*current_handler)(domain, level, message, current_handler_user_data);
 
   g_free(message);
+
+  if (level & UHURU_LOG_LEVEL_ERROR)
+    abort();
 }
 
 void uhuru_log_set_handler(enum uhuru_log_level max_level, uhuru_log_handler_t handler, void *user_data)
 {
   current_max_level = max_level;
+
   if (handler != NULL)
     current_handler = handler;
   else
@@ -105,7 +110,6 @@ void uhuru_log_default_handler(enum uhuru_log_domain domain, enum uhuru_log_leve
 
   g_string_append(gstring, message);
   g_string_append(gstring, "\n");
-
 
   string = g_string_free(gstring, FALSE);
 
