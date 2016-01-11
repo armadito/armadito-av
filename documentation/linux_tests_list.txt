@@ -1,9 +1,36 @@
 Uhuru-AV Linux Tests
 ====================
 Valentin HAMON<vhamon@teclib.com>
-v1.0, 2015-11
+v1.1, 2016-01
 
-This document aims to contains an inventory of what have been done and what need to be done about testing UhuruAV on Linux.
+Armadito Linux Tests Checklist.
+
+On-access scan tests
+--------------------
+
+Ubuntu 14.04 LTS 64Bit (trusty) / et /home séparé
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+./media tests
+[width="60%",options="header"]
+|=================================================
+| Test        	   	 		          | Status | Notes
+| Add dir mark on new  USB Key | TODO  |
+| Add dir mark on existing USB Key | TODO  |
+| Rm dir mark on existing USB Key | TODO  |
+|==================================================================
+
+Ubuntu 14.04 LTS 64Bit (trusty) / et /home non séparé
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+./media tests
+[width="60%",options="header"]
+|=================================================
+| Test        	   	 		          | Status | Notes
+| Add dir mark on new  USB Key | TODO  |
+| Add dir mark on existing USB Key | TODO  |
+| Rm dir mark on existing USB Key | TODO  |
+|==================================================================
 
 On-demand scan tests
 --------------------
