@@ -3,4 +3,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Release|x64'">
+    <SignMode>ProductionSign</SignMode>
+    <ProductionCertificate>CN=NOV'IT, OU=Digital ID Class 3 - Microsoft Software Validation v2, O=NOV'IT, L=BOURGNEUF EN RETZ, S=FRANCE, C=FR | F00747E9C822B8D8D402B5CC96146D63523D4B79</ProductionCertificate>
+  </PropertyGroup>
 </Project>
