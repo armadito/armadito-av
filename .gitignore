@@ -14,6 +14,7 @@ VS/UhuruAV/UhuruAV.opensdf
 VS/UhuruAV/UhuruAV.sdf
 VS/UhuruAV/UhuruAV.v12.suo
 VS/UhuruAV/UhuruGuard Package/x64/Win7Debug/*
+VS/UhuruAV/UhuruGuard Package/x64/Win7Release/*
 VS/UhuruAV/UhuruGuard/x64/*
 VS/UhuruAV/x64/*
 VS/UhuruAV/UhuruSvc/Debug/*
@@ -24,6 +25,7 @@ VS/UhuruAV/UhuruGuard Package/Win7Debug/*
 VS/UhuruAV/Win7Debug/*
 VS/json-c/json-c/json-c.v12.suo
 VS/UhuruAV/UhuruAV_setup/Debug/*
+VS/UhuruAV/UhuruGuardSetup/Debug/*
 out/
 documentation/specs-ihm/tatou-ihm/~$$tatouIHM.~vsdx
 

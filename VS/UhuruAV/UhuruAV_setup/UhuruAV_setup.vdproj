@@ -111,6 +111,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_057616E99DBB4FEDBA20C46B356496EC"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_05883F1925FF4C3A88AEE88C76965053"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -603,6 +609,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_2603A6ADCEDD42CA98FDEC967CAF8CF7"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_26439778D9EB494C9613854C1C4DF212"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -790,6 +802,12 @@
         "Entry"
         {
         "MsmKey" = "8:_3144FAFBAEBF49AB9F9BF8DA27F4040A"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_314F60E6E8D24A2285DD3DB62C0170BD"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -2295,6 +2313,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_8ABA4C9599BB4DC198146F31EA3B1792"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_8AC059D2760C4DB5BCD800A9F8D27946"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -3063,6 +3087,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_BD12DDD46AE244548E66142176B650F9"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_BD2105359EFD4A1A9E4BE2CF677DA1E0"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -3783,6 +3813,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_E4D444B4D8324BF392C63B63B80292A9"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_E4FE326987B54996A6F18983ABD22259"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -4198,6 +4234,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.5"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.5 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.5"
+                    }
+                }
             }
         }
     }
@@ -4205,6 +4249,76 @@
     {
         "CustomAction"
         {
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_7CA7485BFF5448C7B746C15A4861227D"
+            {
+            "Name" = "8:Sortie principale from UhuruSvc (Active)"
+            "Condition" = "8:"
+            "Object" = "8:_86662C37329146A5939D0481DC590FC3"
+            "FileType" = "3:2"
+            "InstallAction" = "3:1"
+            "Arguments" = "8:--install"
+            "EntryPoint" = "8:"
+            "Sequence" = "3:2"
+            "Identifier" = "8:_5FF1F87E_F799_49CA_AAC2_A2BA59091F51"
+            "InstallerClass" = "11:FALSE"
+            "CustomActionData" = "8:"
+            }
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_7E5C171246BC443FA28239E3D2BE8AD9"
+            {
+            "Name" = "8:Sortie principale from UhuruGuardSetup (Active)"
+            "Condition" = "8:"
+            "Object" = "8:_2603A6ADCEDD42CA98FDEC967CAF8CF7"
+            "FileType" = "3:2"
+            "InstallAction" = "3:4"
+            "Arguments" = "8:--uninstall"
+            "EntryPoint" = "8:"
+            "Sequence" = "3:3"
+            "Identifier" = "8:_1AC4E203_7426_42A6_ADA0_1794F0752D33"
+            "InstallerClass" = "11:FALSE"
+            "CustomActionData" = "8:"
+            }
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_9C5438E16D9F44D48165824E96DE1FDF"
+            {
+            "Name" = "8:Sortie principale from UhuruGuardSetup (Active)"
+            "Condition" = "8:"
+            "Object" = "8:_2603A6ADCEDD42CA98FDEC967CAF8CF7"
+            "FileType" = "3:2"
+            "InstallAction" = "3:1"
+            "Arguments" = "8:--install"
+            "EntryPoint" = "8:"
+            "Sequence" = "3:1"
+            "Identifier" = "8:_EFF4D645_5727_4ABF_9BDB_D308B55AAA77"
+            "InstallerClass" = "11:FALSE"
+            "CustomActionData" = "8:"
+            }
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_9E6CE82273924F119EF45D2189082422"
+            {
+            "Name" = "8:Sortie principale from UhuruGuardSetup (Active)"
+            "Condition" = "8:"
+            "Object" = "8:_2603A6ADCEDD42CA98FDEC967CAF8CF7"
+            "FileType" = "3:2"
+            "InstallAction" = "3:4"
+            "Arguments" = "8:--stop"
+            "EntryPoint" = "8:"
+            "Sequence" = "3:2"
+            "Identifier" = "8:_7F78F731_2129_4FCB_9DC4_30AD1F2AD9FB"
+            "InstallerClass" = "11:FALSE"
+            "CustomActionData" = "8:"
+            }
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_C6DC6C890C0147988DF427F3ED57DC38"
+            {
+            "Name" = "8:Sortie principale from UhuruSvc (Active)"
+            "Condition" = "8:"
+            "Object" = "8:_86662C37329146A5939D0481DC590FC3"
+            "FileType" = "3:2"
+            "InstallAction" = "3:4"
+            "Arguments" = "8:--uninstall"
+            "EntryPoint" = "8:"
+            "Sequence" = "3:1"
+            "Identifier" = "8:_A69B3E98_64C0_49BF_9CB4_1B02C4AE049B"
+            "InstallerClass" = "11:FALSE"
+            "CustomActionData" = "8:"
+            }
         }
         "DefaultFeature"
         {
@@ -4526,6 +4640,26 @@
             "TargetName" = "8:pt-br.js"
             "Tag" = "8:"
             "Folder" = "8:_5C1BC2DA75E74CB8B34D30BADB26574B"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_057616E99DBB4FEDBA20C46B356496EC"
+            {
+            "SourcePath" = "8:..\\x64\\Win7Release\\UhuruGuard Package\\UhuruGuard.sys"
+            "TargetName" = "8:UhuruGuard.sys"
+            "Tag" = "8:"
+            "Folder" = "8:_45349E98B4B548F68EADFC742F0C7FF8"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -6806,6 +6940,26 @@
             "TargetName" = "8:glyphicons-halflings-regular.woff2"
             "Tag" = "8:"
             "Folder" = "8:_6542BCBB8A1D4B23A5CD26B8FD27D16E"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_314F60E6E8D24A2285DD3DB62C0170BD"
+            {
+            "SourcePath" = "8:..\\x64\\Win7Release\\UhuruGuard Package\\uhuruguard.cat"
+            "TargetName" = "8:uhuruguard.cat"
+            "Tag" = "8:"
+            "Folder" = "8:_45349E98B4B548F68EADFC742F0C7FF8"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -11800,6 +11954,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_8ABA4C9599BB4DC198146F31EA3B1792"
+            {
+            "SourcePath" = "8:C:\\Users\\david\\Desktop\\uhuru.js"
+            "TargetName" = "8:uhuru.js"
+            "Tag" = "8:"
+            "Folder" = "8:_45349E98B4B548F68EADFC742F0C7FF8"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:TRUE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_8AC059D2760C4DB5BCD800A9F8D27946"
             {
             "SourcePath" = "8:..\\..\\..\\..\\ng-armadito\\bower_components\\jquery\\src\\sizzle\\dist\\sizzle.min.map"
@@ -14320,6 +14494,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_BD12DDD46AE244548E66142176B650F9"
+            {
+            "SourcePath" = "8:..\\x64\\Win7Release\\UhuruGuard Package\\UhuruGuard.inf"
+            "TargetName" = "8:UhuruGuard.inf"
+            "Tag" = "8:"
+            "Folder" = "8:_45349E98B4B548F68EADFC742F0C7FF8"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_BD2105359EFD4A1A9E4BE2CF677DA1E0"
             {
             "SourcePath" = "8:..\\..\\..\\..\\ng-armadito\\bower_components\\font-awesome\\less\\icons.less"
@@ -16720,6 +16914,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_E4D444B4D8324BF392C63B63B80292A9"
+            {
+            "SourcePath" = "8:..\\..\\..\\scripts\\uhuruAV.cmd"
+            "TargetName" = "8:uhuruAV.cmd"
+            "Tag" = "8:"
+            "Folder" = "8:_45349E98B4B548F68EADFC742F0C7FF8"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:TRUE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_E4FE326987B54996A6F18983ABD22259"
             {
             "SourcePath" = "8:..\\..\\..\\libuhuru\\conf\\uhuru.conf"
@@ -18002,6 +18216,17 @@
                             }
                         }
                     }
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_45349E98B4B548F68EADFC742F0C7FF8"
+                    {
+                    "Name" = "8:driver"
+                    "AlwaysCreate" = "11:FALSE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_A59BCD818CF54EE2A17036484F630F7C"
+                        "Folders"
+                        {
+                        }
+                    }
                     "{9EF0B969-E518-4E46-987F-47570745A589}:_EB94A0A9907445C2AF4D8921FF4E815D"
                     {
                     "Name" = "8:conf"
@@ -19143,7 +19368,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:UhuruAV"
         "ProductCode" = "8:{70412A2F-6E38-4D6C-9263-EF31FABFB532}"
-        "PackageCode" = "8:{4E3299FD-43A3-4BCF-9046-DA7B8C7D2711}"
+        "PackageCode" = "8:{B866D975-1651-45E7-BDB7-69365FFE760B}"
         "UpgradeCode" = "8:{6A98A805-02D9-440C-999D-94173E15F10A}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -19690,6 +19915,34 @@
         }
         "ProjectOutput"
         {
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_2603A6ADCEDD42CA98FDEC967CAF8CF7"
+            {
+            "SourcePath" = "8:..\\Debug\\UhuruGuardSetup.exe"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_45349E98B4B548F68EADFC742F0C7FF8"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            "ProjectOutputGroupRegister" = "3:1"
+            "OutputConfiguration" = "8:"
+            "OutputGroupCanonicalName" = "8:Built"
+            "OutputProjectGuid" = "8:{41997F55-6424-4BC4-B7B7-A073305876BC}"
+            "ShowKeyOutput" = "11:TRUE"
+                "ExcludeFilters"
+                {
+                }
+            }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_86662C37329146A5939D0481DC590FC3"
             {
             "SourcePath" = "8:..\\Debug\\UhuruSvc.exe"
