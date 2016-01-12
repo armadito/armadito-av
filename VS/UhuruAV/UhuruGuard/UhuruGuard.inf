@@ -19,7 +19,7 @@ ClassGuid = {b1d1a169-c54f-4379-81db-bee7d88d7454}
 ;ClassGuid = {_TODO_Change_ClassGuid_appropriately_}
 Provider    = %ManufacturerName%
 DriverVer   = 07/01/2016,1.0.0.0
-CatalogFile = UhuruGuard.cat
+CatalogFile = uhuruguard.cat
 
 [DestinationDirs]
 DefaultDestDir          = 12
@@ -81,11 +81,13 @@ HKR,"Instances\"%Instance1.Name%,"Flags",0x00010001,%Instance1.Flags%
 [MiniFilter.DriverFiles]
 %DriverName%.sys
 
+[SourceDisksNames]
+1 = %DiskId1%,,,
+
 [SourceDisksFiles]
 UhuruGuard.sys = 1,,
 
-[SourceDisksNames]
-1 = %DiskId1%,,,
+
 
 ;;
 ;; String Section

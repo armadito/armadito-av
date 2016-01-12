@@ -88,6 +88,7 @@
     <ClCompile Include="log.c" />
     <ClCompile Include="named_pipe_client.c" />
     <ClCompile Include="named_pipe_server.c" />
+    <ClCompile Include="quarantine.c" />
     <ClCompile Include="scan_on_access.c" />
     <ClCompile Include="scan_on_demand.c" />
     <ClCompile Include="service.c" />
@@ -98,6 +99,7 @@
     <ClInclude Include="log.h" />
     <ClInclude Include="named_pipe_client.h" />
     <ClInclude Include="named_pipe_server.h" />
+    <ClInclude Include="quarantine.h" />
     <ClInclude Include="scan_on_access.h" />
     <ClInclude Include="scan_on_demand.h" />
     <ClInclude Include="service.h" />
