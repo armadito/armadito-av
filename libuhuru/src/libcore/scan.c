@@ -105,7 +105,7 @@ static enum uhuru_file_status scan_apply_modules(int fd, const char *path, const
     enum uhuru_file_status mod_status;
     char *mod_report = NULL;
 
-    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_DEBUG, "scanning fd %d path %s with module %s", fd, path, mod->name);
+    //uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_DEBUG, "scanning fd %d path %s with module %s", fd, path, mod->name);
 
     /* if module status is not OK, don't call it */
     if (mod->status != UHURU_MOD_OK)
@@ -169,7 +169,7 @@ enum uhuru_file_status uhuru_scan_context(struct uhuru_scan *scan, struct uhuru_
   enum uhuru_file_status status;
   struct uhuru_report report;
 
-  uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_DEBUG, "scanning file %s", ctx->path);
+  //uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_DEBUG, "scanning file %s", ctx->path);
 
   /* initializes the structure passed to callbacks */
   uhuru_report_init(&report, scan->scan_id, ctx->path, REPORT_PROGRESS_UNKNOWN);

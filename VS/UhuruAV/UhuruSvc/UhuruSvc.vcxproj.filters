@@ -45,6 +45,9 @@
     <ClCompile Include="..\..\..\libuhuru\src\utils\json.c">
       <Filter>Fichiers sources\utils</Filter>
     </ClCompile>
+    <ClCompile Include="quarantine.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="service.h">
@@ -70,6 +73,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\libuhuru\src\utils\json.h">
       <Filter>Fichiers d%27en-tête\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="quarantine.h">
+      <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
