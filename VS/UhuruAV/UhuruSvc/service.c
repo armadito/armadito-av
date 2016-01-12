@@ -1030,6 +1030,18 @@ int main(int argc, char ** argv) {
 
 	}
 
+	// Only for test purposes (command line)
+	if ( argc >=3 && strncmp(argv[1],"--quarantine",11) == 0 ){
+
+		ret = MoveFileInQuarantine(argv[2]);
+		if (ret < 0) {
+			return EXIT_FAILURE;
+		}
+		return EXIT_SUCCESS;
+
+	}
+
+
 
 	
 	// command line parameter "--install", install the service.

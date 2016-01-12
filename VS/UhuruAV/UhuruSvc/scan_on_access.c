@@ -57,7 +57,7 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 	HRESULT hres = S_OK;
 	PSCANNER_THREAD_CONTEXT threadCtx = NULL;
 	DWORD ThreadId =0;
-	int i = 0;
+	int i = 0, ret = 0;
 	PSCANNER_MESSAGE message = NULL;
 	SCANNER_REPLY_MESSAGE reply;
 	//PSCANNER_MESSAGE msg = NULL;
@@ -199,6 +199,14 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 				
 				uhLog("[+] Debug :: UserScanWorker :: [%d] :: %s :: %s\n",ThreadId,msDosFilename,PrintUhuruScanResult(scan_result));
 			}
+
+			// If the file is detected as malicious, move it to the quarantine folder
+			if (scan_result == UHURU_MALWARE) {
+				if (MoveFileInQuarantine(msDosFilename) < 0) {					
+					uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: Failed to move file in quarantine!! \n file: [%s] ",msDosFilename);
+				}
+			}
+				
 
 
 			if (msDosFilename != NULL) {
