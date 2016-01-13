@@ -22,14 +22,11 @@ struct uhuru_daemon_options {
   const char *unix_path;
   const char *s_log_level;
   const char *pid_file;
-  enum {
-    IPC_CLIENT,
-    JSON_CLIENT,
-  } client_type;
+  enum ipc_type ipc_type;
 };
 
 #define DEFAULT_LOG_LEVEL "error"
-#define DEFAULT_CLIENT_TYPE "ipc"
+#define DEFAULT_IPC_TYPE "old"
 
 struct opt daemon_opt_defs[] = {
   { .long_form = "help", .short_form = 'h', .need_arg = 0, .is_set = 0, .value = NULL},
@@ -40,7 +37,7 @@ struct opt daemon_opt_defs[] = {
   { .long_form = "unix", .short_form = 'u', .need_arg = 0, .is_set = 0, .value = NULL},
   { .long_form = "path", .short_form = 'a', .need_arg = 1, .is_set = 0, .value = NULL},
   { .long_form = "pidfile", .short_form = 'i', .need_arg = 1, .is_set = 0, .value = NULL},
-  { .long_form = "client", .short_form = 'c', .need_arg = 1, .is_set = 0, .value = NULL},
+  { .long_form = "ipc", .short_form = 'c', .need_arg = 1, .is_set = 0, .value = NULL},
   { .long_form = NULL, .short_form = '\0', .need_arg = 0, .is_set = 0, .value = NULL},
 };
 
@@ -60,9 +57,9 @@ static void usage(void)
   fprintf(stderr, "  --port=PORT | -p PORT              TCP port number\n");
   fprintf(stderr, "  --path=PATH | -a PATH              unix socket path\n");
   fprintf(stderr, "  --pidfile=PATH | -i PATH           create PID file at specified location\n");
-  fprintf(stderr, "  --client=ipc|json | -c ipc|json    select client style for communication with the user interface\n");
+  fprintf(stderr, "  --ipc=old|json | -c old|json       select IPC type for communication with the user interface\n");
   fprintf(stderr, "                                     json: for new web interface\n");
-  fprintf(stderr, "                                     ipc: for old Qt interface\n");
+  fprintf(stderr, "                                     old: for old Qt interface\n");
   fprintf(stderr, "\n");
 
   exit(1);
@@ -76,15 +73,15 @@ static int check_log_level(const char *s_log_level)
     && strcmp(s_log_level,"debug");
 }
 
-static int check_client_type(const char *s_client_type)
+static int check_ipc_type(const char *s_ipc_type)
 {
-  return strcmp(s_client_type, "ipc") && strcmp(s_client_type, "json");
+  return strcmp(s_ipc_type, "old") && strcmp(s_ipc_type, "json");
 }
 
 static void parse_options(int argc, const char **argv, struct uhuru_daemon_options *opts)
 {
   int r = opt_parse(daemon_opt_defs, argc, argv);
-  const char *s_port, *s_client_type;
+  const char *s_port, *s_ipc_type;
 
  // printf( "ARGV[0] : %s \n", argv[0] );
  // printf( "ARGV[1] : %s \n", argv[1] );
@@ -113,15 +110,16 @@ static void parse_options(int argc, const char **argv, struct uhuru_daemon_optio
   s_port = opt_value(daemon_opt_defs, "port", "14444");
   opts->port_number = (unsigned short)atoi(s_port);
 
-  opts->unix_path = opt_value(daemon_opt_defs, "path", "@/tmp/.uhuru/daemon");
+  opts->unix_path = opt_value(daemon_opt_defs, "path", "/tmp/.uhuru-daemon");
+  /* opts->unix_path = opt_value(daemon_opt_defs, "path", "@/tmp/.uhuru/daemon"); */
 
   if (opt_is_set(daemon_opt_defs, "pidfile"))
     opts->pid_file = opt_value(daemon_opt_defs, "pidfile", LOCALSTATEDIR "/run/uhuru-scand.pid");
 
-  s_client_type = opt_value(daemon_opt_defs, "client", DEFAULT_CLIENT_TYPE);
-  if (check_client_type(s_client_type))
+  s_ipc_type = opt_value(daemon_opt_defs, "ipc", DEFAULT_IPC_TYPE);
+  if (check_ipc_type(s_ipc_type))
     usage();
-  opts->client_type = (!strcmp(s_client_type, "ipc")) ? IPC_CLIENT : JSON_CLIENT;
+  opts->ipc_type = (!strcmp(s_ipc_type, "old")) ? OLD_IPC : JSON_IPC;
 }
 
 static void create_pid_file(const char *pidfile)
@@ -188,7 +186,7 @@ static void start_daemon(const char *progname, struct uhuru_daemon_options *opts
     exit(EXIT_FAILURE);
   }
 
-  server = server_new(uhuru, server_sock);
+  server = server_new(uhuru, server_sock, opts->ipc_type);
 
   loop = g_main_loop_new(NULL, FALSE);
 
