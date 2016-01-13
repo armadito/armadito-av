@@ -8,13 +8,13 @@
 
 static enum uhuru_log_level get_uhuru_log_level_from_str(const char *s_log_level)
 {
-  if (!strcmp(s_log_level,"error") || !strcmp(s_log_level,"critical"))
+  if (!strcmp(s_log_level,"error"))
     return UHURU_LOG_LEVEL_ERROR;
 
   if (!strcmp(s_log_level,"warning"))
     return UHURU_LOG_LEVEL_WARNING;
 
-  if (!strcmp(s_log_level,"message") || !strcmp(s_log_level,"info"))
+  if (!strcmp(s_log_level,"info"))
     return UHURU_LOG_LEVEL_INFO;
 
   if (!strcmp(s_log_level,"debug"))
