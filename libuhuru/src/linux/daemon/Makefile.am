@@ -8,10 +8,12 @@ uhuru_scand_LDADD=$(top_builddir)/src/libcore/libuhuru_core.la @GLIB2_LIBS@ @GIO
 
 uhuru_scand_SOURCES= \
 main.c \
-client.c \
-client.h \
 ipc.c \
 ipc.h \
+ipcclient.c \
+ipcclient.h \
+jsonclient.c \
+jsonclient.h \
 log.c \
 log.h \
 server.c \
