@@ -45,12 +45,12 @@ static int buffer_length(struct buffer *b)
   return b->first_free;
 }
 
-static void *buffer_data(struct buffer *b)
+static char *buffer_data(struct buffer *b)
 {
   return b->p;
 }
 
-static void *buffer_end(struct buffer *b)
+static char *buffer_end(struct buffer *b)
 {
   return b->p + b->first_free;
 }
@@ -101,7 +101,7 @@ int json_client_process(struct json_client *cl)
     return -1;
   }
 
-  *((char *)buffer_end(&cl->input_buffer)) = '\0';
+  *buffer_end(&cl->input_buffer) = '\0';
 
   fprintf(stderr, "json_client: received %s\n", buffer_data(&cl->input_buffer));
 
