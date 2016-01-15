@@ -4,7 +4,11 @@ lib_LTLIBRARIES=libuhuru_json.la
 
 libuhuru_json_la_SOURCES= \
 uhurujson.c \
-uhurujson.h 
+uhurujson.h \
+print.c \
+print.h \
+state.c \
+state.h 
 
 AM_CPPFLAGS=-DG_LOG_DOMAIN='"uhuru"'
 libuhuru_json_la_CFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/include/config -I$(top_srcdir)/src
