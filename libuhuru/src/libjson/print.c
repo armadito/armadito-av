@@ -1,36 +1,8 @@
 #include "print.h"
 
-static void json_print_obj(struct json_object *obj, FILE *out, int level);
+static void json_print_object(struct json_object *obj, FILE *out, int level);
 static void json_print_array(struct json_object *obj, FILE *out, int level);
 static void json_print_value(struct json_object *obj, FILE *out, int level);
-
-static void json_print_value(struct json_object *obj, FILE *out, int level)
-{
-  int i;
-
-  switch(json_object_get_type(obj)) {
-  case json_type_null:
-    fprintf(out, "(null)");
-    break;
-  case json_type_boolean:
-    fprintf(out, "%s", json_object_get_boolean(obj) ? "true" : "false");
-    break;
-  case json_type_double:
-    fprintf(out, "%f", json_object_get_double(obj));
-    break;
-  case json_type_int:
-    fprintf(out, "%d", json_object_get_int(obj));
-    break;
-  case json_type_string:
-    fprintf(out, "\"%s\"", json_object_get_string(obj));
-    break;
-  case json_type_object:
-    json_print_obj(obj, out, level);
-    break;
-  case json_type_array:
-    json_print_array(obj, out, level);
-  }
-}
 
 static void space(FILE *out, int level)
 {
@@ -40,7 +12,7 @@ static void space(FILE *out, int level)
     fprintf(out, " ");
 }
 
-static void json_print_obj(struct json_object *obj, FILE *out, int level)
+static void json_print_object(struct json_object *obj, FILE *out, int level)
 {
   int first = 1;
 
@@ -94,7 +66,36 @@ static void json_print_array(struct json_object *obj, FILE *out, int level)
   fprintf(out, "]");
 }
 
+static void json_print_value(struct json_object *obj, FILE *out, int level)
+{
+  int i;
+
+  switch(json_object_get_type(obj)) {
+  case json_type_null:
+    fprintf(out, "(null)");
+    break;
+  case json_type_boolean:
+    fprintf(out, "%s", json_object_get_boolean(obj) ? "true" : "false");
+    break;
+  case json_type_double:
+    fprintf(out, "%f", json_object_get_double(obj));
+    break;
+  case json_type_int:
+    fprintf(out, "%d", json_object_get_int(obj));
+    break;
+  case json_type_string:
+    fprintf(out, "\"%s\"", json_object_get_string(obj));
+    break;
+  case json_type_object:
+    json_print_object(obj, out, level);
+    break;
+  case json_type_array:
+    json_print_array(obj, out, level);
+  }
+}
+
 void uhuru_json_print(struct json_object *obj, FILE *out)
 {
   json_print_value(obj, out, 0);
+  fprintf(out, "\n");
 }
