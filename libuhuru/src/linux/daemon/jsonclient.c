@@ -5,6 +5,7 @@
 
 #include "jsonclient.h"
 
+#include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -86,6 +87,31 @@ void json_client_free(struct json_client *cl)
   free(cl);
 }
 
+static ssize_t write_n(int fd, char *buffer, size_t len)
+{
+  size_t to_write = len;
+
+  assert(len > 0);
+
+  while (to_write > 0) {
+    int w = write(fd, buffer, to_write);
+
+    if (w < 0) {
+      uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "error writing response in JSON receive: %s", strerror(errno));
+
+      return w;
+    }
+
+    if (w == 0)
+      return 0;
+
+    buffer += w;
+    to_write -= w;
+  }
+
+  return len;
+}
+
 int json_client_process(struct json_client *cl)
 {
   int n_read, i, response_len;
@@ -111,6 +137,12 @@ int json_client_process(struct json_client *cl)
   fprintf(stderr, "json_client: received %s\n", buffer_data(&cl->input_buffer));
 
   uhuru_json_handler_process_request(cl->json_handler, buffer_data(&cl->input_buffer), buffer_length(&cl->input_buffer), cl->uhuru, &response, &response_len);
+  
+  write_n(cl->sock, response, response_len);
+  write_n(cl->sock, "\r\n\r\n", 4);
+
+  /* FIXME: check return value */
+  close(cl->sock);
 
   return 0;
 }

@@ -78,12 +78,12 @@ static struct json_object *state_json(struct uhuru_info *info)
   return j_state;
 }
 
-enum uhuru_json_status state_request(const char *request, int id, struct json_object *params, struct uhuru *uhuru, struct json_object **p_info, const char **p_error_message)
+enum uhuru_json_status state_request_cb(const char *request, int id, struct json_object *params, struct uhuru *uhuru, struct json_object **p_info, const char **p_error_message)
 {
   struct uhuru_info *info;
 
 #ifdef DEBUG
-  uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_DEBUG, "ipc: info handler called");
+  uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_DEBUG, "JSON: state cb called");
 #endif
 
   info = uhuru_info_new(uhuru);

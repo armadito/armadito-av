@@ -65,11 +65,6 @@ static enum uhuru_json_status parse_request(struct uhuru_json_handler *jh, const
   return JSON_OK;
 }
 
-/* mandatory keys:  */
-/* "av_request" -> string */
-/* "id" -> int */
-/* "params": -> object */
-
 static enum uhuru_json_status extract_request(struct json_object *j_request, struct uhuru_json_av_request *av_request)
 {
   struct json_object *j_av_request, *j_id, *j_params;
@@ -78,17 +73,21 @@ static enum uhuru_json_status extract_request(struct json_object *j_request, str
   av_request->id = 0;
   av_request->params = NULL;
 
+  /* check if request is truly a JSON object, not a primitive value ? */
   if (!json_object_is_type(j_request, json_type_object))
     return JSON_INVALID_REQUEST;
 
+  /* check if object contains key "av_request" with a string value */
   if (!json_object_object_get_ex(j_request, "av_request", &j_av_request)
       || !json_object_is_type(j_av_request, json_type_string))
     return JSON_INVALID_REQUEST;
 
+  /* check if object contains key "id" with a int value */
   if (!json_object_object_get_ex(j_request, "id", &j_id)
       || !json_object_is_type(j_id, json_type_int))
     return JSON_INVALID_REQUEST;
 
+  /* check if object contains key "params" with an object value */
   if (!json_object_object_get_ex(j_request, "params", &j_params)
       || !json_object_is_type(j_params, json_type_object))
     return JSON_INVALID_REQUEST;
@@ -100,10 +99,55 @@ static enum uhuru_json_status extract_request(struct json_object *j_request, str
   return JSON_OK;
 }
 
+static struct {
+  const char *request;
+  request_cb_t cb;
+} request_dispatch[] = {
+  { "state", state_request_cb},
+  { NULL, NULL},
+};
+
 enum uhuru_json_status call_request_handler(struct uhuru *uhuru, struct uhuru_json_av_request *av_request, struct uhuru_json_av_response *av_response)
 {
+  int i;
+  struct json_object *j_info;
+  enum uhuru_json_status status;
+
+  i = 0;
+  while (request_dispatch[i].request != NULL && strcmp(request_dispatch[i].request, av_request->request))
+    i++;
+
+  if (request_dispatch[i].request != NULL)
+    status = (*request_dispatch[i].cb)(av_request->request, av_request->id, av_request->params, uhuru, &j_info, NULL);
+
+  uhuru_json_print(j_info, stderr);
+
+  av_response->response = strdup(av_request->request);
+  av_response->id = av_request->id;
+  av_response->info = j_info;
+  av_response->status = status;
+  av_response->error_message = NULL;
+
+  return status;
+}
+
+static enum uhuru_json_status fill_response(struct uhuru_json_av_response *av_response, char **p_resp, int *p_resp_len)
+{
+  struct json_object *j_response;
+
+  j_response = json_object_new_object();
+
+  json_object_object_add(j_response, "av_response", json_object_new_string(av_response->response));
+  json_object_object_add(j_response, "id", json_object_new_int(av_response->id));
+  json_object_object_add(j_response, "status", json_object_new_int(av_response->status));
+  json_object_object_add(j_response, "info", av_response->info);
+
+  *p_resp = strdup(json_object_to_json_string(j_response));
+  *p_resp_len = strlen(*p_resp);
+
   return JSON_OK;
 }
+
 
 enum uhuru_json_status uhuru_json_handler_process_request(struct uhuru_json_handler *jh, const char *req, int req_len, struct uhuru *uhuru, char **p_resp, int *p_resp_len)
 {
@@ -122,8 +166,6 @@ enum uhuru_json_status uhuru_json_handler_process_request(struct uhuru_json_hand
     
   uhuru_json_print(j_request, stderr);
 
-  return status;
-
   status = extract_request(j_request, &av_request);
 
   if (status) {
@@ -133,9 +175,7 @@ enum uhuru_json_status uhuru_json_handler_process_request(struct uhuru_json_hand
 
   status = call_request_handler(uhuru, &av_request, &av_response);
 
-  /* fill_response(p_resp, p_resp_len); */
-
-	/* return json_object_to_json_string(jobj); */
+  fill_response(&av_response, p_resp, p_resp_len);
 
   return status;
 }

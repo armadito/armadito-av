@@ -46,8 +46,6 @@ static void json_print_array(struct json_object *obj, FILE *out, int level)
   fprintf(out, "[\n");
 
   for(i = 0; i < json_object_array_length(obj); i++) {
-    int i;
-
     if (!first) {
       fprintf(out, ",\n");
     } else
