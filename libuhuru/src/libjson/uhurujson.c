@@ -124,10 +124,9 @@ enum uhuru_json_status uhuru_json_handler_process_request(struct uhuru_json_hand
 
   return status;
 
-#if 0
   status = extract_request(j_request, &av_request);
 
-  if (!status) {
+  if (status) {
     /* fill_error_response_1(); */
     return status;
   }
@@ -136,6 +135,7 @@ enum uhuru_json_status uhuru_json_handler_process_request(struct uhuru_json_hand
 
   /* fill_response(p_resp, p_resp_len); */
 
+	/* return json_object_to_json_string(jobj); */
+
   return status;
-#endif
 }
