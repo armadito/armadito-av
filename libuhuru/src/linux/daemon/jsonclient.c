@@ -1,6 +1,7 @@
 #include <libuhuru-config.h>
 
 #include <libuhuru/core.h>
+#include "uhurujson.h"
 
 #include "jsonclient.h"
 
@@ -61,6 +62,7 @@ struct json_client {
   struct uhuru *uhuru;
   int sock;
   struct buffer input_buffer;
+  struct uhuru_json_handler *json_handler;
 };
 
 struct json_client *json_client_new(int sock, struct uhuru *uhuru)
@@ -71,6 +73,8 @@ struct json_client *json_client_new(int sock, struct uhuru *uhuru)
   cl->uhuru = uhuru;
 
   buffer_init(&cl->input_buffer, 3 * INPUT_READ_SIZE);
+
+  cl->json_handler = uhuru_json_handler_new();
 
   return cl;
 }
@@ -84,7 +88,8 @@ void json_client_free(struct json_client *cl)
 
 int json_client_process(struct json_client *cl)
 {
-  int n_read, i;
+  int n_read, i, response_len;
+  char *response;
 
   do {
     /* + 1 for ending null byte */
@@ -104,6 +109,8 @@ int json_client_process(struct json_client *cl)
   *buffer_end(&cl->input_buffer) = '\0';
 
   fprintf(stderr, "json_client: received %s\n", buffer_data(&cl->input_buffer));
+
+  uhuru_json_handler_process_request(cl->json_handler, buffer_data(&cl->input_buffer), buffer_length(&cl->input_buffer), cl->uhuru, &response, &response_len);
 
   return 0;
 }
