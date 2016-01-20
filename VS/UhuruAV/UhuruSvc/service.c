@@ -435,7 +435,7 @@ int ServiceInstall( ) {
 			SVCNAME,					// name of service 
 			SVCDISPLAY,					// service name to display 
 			SERVICE_ALL_ACCESS,			// desired access 
-			SERVICE_WIN32_OWN_PROCESS|SERVICE_INTERACTIVE_PROCESS,	// service type 
+			SERVICE_WIN32_OWN_PROCESS,	// service type 
 			SERVICE_DEMAND_START,		// start type
 			SERVICE_ERROR_NORMAL,		// error control type 
 			binaryPath,					// path to service's binary 
@@ -561,7 +561,7 @@ VOID ReportSvcStatus(DWORD dwCurrentState,
 		gSvcStatus.dwControlsAccepted = 0;
 	}
 	else
-		gSvcStatus.dwControlsAccepted = SERVICE_ACCEPT_STOP;
+		gSvcStatus.dwControlsAccepted = SERVICE_ACCEPT_STOP|SERVICE_ACCEPT_PAUSE_CONTINUE;
 
 	if (dwCurrentState == SERVICE_RUNNING || dwCurrentState == SERVICE_STOPPED)
 		gSvcStatus.dwCheckPoint = 0;
@@ -591,6 +591,33 @@ void WINAPI ServiceCtrlHandler( DWORD dwCtrl ) {
 	int ret = 0;
 
 	switch (dwCtrl) {
+
+		case SERVICE_CONTROL_PAUSE:
+
+			ReportSvcStatus(SERVICE_PAUSE_PENDING, NO_ERROR, 0);
+
+			// Unload service.
+			ret = ServiceUnloadProcedure( );
+			if (ret != 0) {
+				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service unloaded with errors during pause.\n");
+				uhLog("[-] Error :: Service unloaded with errors\n");
+			}
+
+			ReportSvcStatus(SERVICE_PAUSED, NO_ERROR, 0);
+			break;
+
+		case SERVICE_CONTROL_CONTINUE:
+
+			ReportSvcStatus(SERVICE_START_PENDING, NO_ERROR, 0);
+			ReportSvcStatus(SERVICE_RUNNING, NO_ERROR, 0);
+			/*ret = ServiceLoadProcedure( );
+			if (ret < 0) {
+				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service Initialization failed during continue \n");
+				uhLog("[+] Error :: Service Initialization failed\n");
+				// Stop the service on error.
+				ServiceStop( );
+			}*/
+			break;
 
 		case SERVICE_CONTROL_STOP:
 
@@ -697,6 +724,7 @@ void WINAPI ServiceMain(int argc, char ** argv) {
 		return;
 	}
 
+	//gSvcStatus.dwControlsAccepted = p
 	gSvcStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
 	gSvcStatus.dwServiceSpecificExitCode = 0;
 
@@ -708,6 +736,8 @@ void WINAPI ServiceMain(int argc, char ** argv) {
 	ServiceInit( );
 
 	PerformServiceAction( );
+
+
 
 	return;
 }
@@ -992,10 +1022,34 @@ int LaunchCmdLineServiceTest( ) {
 	while(1) {
 		 printf("press 'q' to quit: \n");
         c = (unsigned char) getchar();
-        if (c == 'q') {
-        
+        if (c == 'q') {        
             break;
-        }
+		}
+		else if (c == 'p') {
+
+			// pause.
+			ret = ServiceUnloadProcedure( );
+			if (ret != 0) {
+				//uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service unloaded with errors during pause.\n");
+				//uhLog("[-] Error :: Service unloaded with errors\n");
+				printf("[-] Error :: Service Unload Procedure failed! :: %d\n", ret);
+				break;
+			}
+			
+
+		}
+		else if (c == 'c') {
+
+			// continue.
+			ret = ServiceLoadProcedure( );
+			if (ret < 0) {
+				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service Initialization failed during continue \n");
+				uhLog("[+] Error :: Service Initialization failed\n");
+				printf("[-] Error :: Service Load Procedure failed! :: %d\n", ret);
+			}
+
+		}
+
 	}
 
 	ret = Close_IHM_Connection(&onDemandCtx);
@@ -1041,6 +1095,16 @@ int main(int argc, char ** argv) {
 
 	}
 
+
+	if ( argc >=2 && strncmp(argv[1],"--updatedb",10) == 0 ){
+
+		ret = UpdateModulesDB(1);
+		if (ret < 0) {
+			return EXIT_FAILURE;
+		}
+		return EXIT_SUCCESS;
+
+	}
 
 
 	
