@@ -18189,6 +18189,17 @@
                         {
                         }
                     }
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_B34EF7297BDE478AAEB344398FFC0B79"
+                    {
+                    "Name" = "8:Quarantine"
+                    "AlwaysCreate" = "11:TRUE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_98D22F88073545A9ABD1B57A4D7274DC"
+                        "Folders"
+                        {
+                        }
+                    }
                     "{9EF0B969-E518-4E46-987F-47570745A589}:_EB94A0A9907445C2AF4D8921FF4E815D"
                     {
                     "Name" = "8:conf"
