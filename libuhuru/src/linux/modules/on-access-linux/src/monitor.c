@@ -592,11 +592,6 @@ static gboolean fanotify_cb(GIOChannel *source, GIOCondition condition, gpointer
     struct fanotify_event_metadata *event;
 
     for(event = (struct fanotify_event_metadata *)buf; FAN_EVENT_OK(event, len); event = FAN_EVENT_NEXT(event, len)) {
-      char file_path[PATH_MAX + 1];
-      char *p;
-
-      p = get_file_path_from_fd(event->fd, file_path, PATH_MAX);
-
       if ((event->mask & FAN_OPEN_PERM))
 	fanotify_perm_event_process(m, event);
       else

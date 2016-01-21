@@ -5,6 +5,7 @@
 #include "uhurujson.h"
 #include "print.h"
 #include "state.h"
+#include "scan.h"
 
 #include <assert.h>
 #include <json.h>
@@ -104,31 +105,35 @@ static struct {
   request_cb_t cb;
 } request_dispatch[] = {
   { "state", state_request_cb},
+  { "scan", scan_request_cb},
   { NULL, NULL},
 };
 
 enum uhuru_json_status call_request_handler(struct uhuru *uhuru, struct uhuru_json_av_request *av_request, struct uhuru_json_av_response *av_response)
 {
   int i;
-  struct json_object *j_info;
-  enum uhuru_json_status status;
+
+  av_response->response = strdup(av_request->request);
+  av_response->id = av_request->id;
+  av_response->info = NULL;
+  av_response->status = JSON_INVALID_REQUEST;
 
   i = 0;
   while (request_dispatch[i].request != NULL && strcmp(request_dispatch[i].request, av_request->request))
     i++;
 
-  if (request_dispatch[i].request != NULL)
-    status = (*request_dispatch[i].cb)(av_request->request, av_request->id, av_request->params, uhuru, &j_info, NULL);
+  if (request_dispatch[i].request != NULL) {
+    request_cb_t cb = request_dispatch[i].cb;
 
-  uhuru_json_print(j_info, stderr);
+    av_response->status = (*cb)(av_request->request, av_request->id, av_request->params, uhuru, &av_response->info, NULL);
 
-  av_response->response = strdup(av_request->request);
-  av_response->id = av_request->id;
-  av_response->info = j_info;
-  av_response->status = status;
+    uhuru_json_print(av_response->info, stderr);
+  }
+
+  /* FIXME */
   av_response->error_message = NULL;
 
-  return status;
+  return av_response->status;
 }
 
 static enum uhuru_json_status fill_response(struct uhuru_json_av_response *av_response, char **p_resp, int *p_resp_len)
@@ -140,7 +145,10 @@ static enum uhuru_json_status fill_response(struct uhuru_json_av_response *av_re
   json_object_object_add(j_response, "av_response", json_object_new_string(av_response->response));
   json_object_object_add(j_response, "id", json_object_new_int(av_response->id));
   json_object_object_add(j_response, "status", json_object_new_int(av_response->status));
-  json_object_object_add(j_response, "info", av_response->info);
+  if (av_response->info != NULL)
+    json_object_object_add(j_response, "info", av_response->info);
+  else
+    json_object_object_add(j_response, "info", json_object_new_object());
 
   *p_resp = strdup(json_object_to_json_string(j_response));
   *p_resp_len = strlen(*p_resp);
