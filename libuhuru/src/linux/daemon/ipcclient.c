@@ -4,7 +4,7 @@
 #include "ipc.h"
 #include <os/io.h>
 
-#include "client.h"
+#include "ipcclient.h"
 
 #include <stdio.h>
 #include <errno.h>
@@ -12,7 +12,7 @@
 #include <glib.h>
 #include <string.h>
 
-struct client {
+struct ipc_client {
   struct uhuru *uhuru;
   int sock;
   struct ipc_manager *manager;
@@ -21,7 +21,7 @@ struct client {
 
 static void ipc_ping_handler(struct ipc_manager *m, void *data)
 {
-  struct client *cl = (struct client *)data;
+  struct ipc_client *cl = (struct ipc_client *)data;
 
 #ifdef DEBUG
   uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_DEBUG, "ipc: ping handler called");
@@ -32,7 +32,7 @@ static void ipc_ping_handler(struct ipc_manager *m, void *data)
 
 static void scan_callback(struct uhuru_report *report, void *callback_data)
 {
-  struct client *cl = (struct client *)callback_data;
+  struct ipc_client *cl = (struct ipc_client *)callback_data;
 
   g_mutex_lock(&cl->lock);
   ipc_manager_msg_send(cl->manager, 
@@ -49,7 +49,7 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
 
 static void ipc_scan_handler(struct ipc_manager *m, void *data)
 {
-  struct client *cl = (struct client *)data;
+  struct ipc_client *cl = (struct ipc_client *)data;
   char *path;
   int threaded;
   int recurse;
@@ -126,7 +126,7 @@ static void info_send(struct ipc_manager *manager, struct uhuru_info *info)
 
 static void ipc_info_handler(struct ipc_manager *manager, void *data)
 {
-  struct client *cl = (struct client *)data;
+  struct ipc_client *cl = (struct ipc_client *)data;
   struct uhuru_info *info;
 
 #ifdef DEBUG
@@ -150,12 +150,12 @@ static void ipc_info_handler(struct ipc_manager *manager, void *data)
 #endif
 }
 
-struct client *client_new(int client_sock, struct uhuru *uhuru)
+struct ipc_client *ipc_client_new(int sock, struct uhuru *uhuru)
 {
-  struct client *cl = (struct client *)malloc(sizeof(struct client));
+  struct ipc_client *cl = (struct ipc_client *)malloc(sizeof(struct ipc_client));
 
   cl->uhuru = uhuru;
-  cl->sock = client_sock;
+  cl->sock = sock;
   cl->manager = ipc_manager_new(cl->sock);
 
   ipc_manager_add_handler(cl->manager, IPC_MSG_ID_PING, ipc_ping_handler, cl);
@@ -167,7 +167,7 @@ struct client *client_new(int client_sock, struct uhuru *uhuru)
   return cl;
 }
 
-void client_free(struct client *cl)
+void ipc_client_free(struct ipc_client *cl)
 {
   ipc_manager_free(cl->manager);
 
@@ -176,7 +176,7 @@ void client_free(struct client *cl)
   free(cl);
 }
 
-int client_process(struct client *cl)
+int ipc_client_process(struct ipc_client *cl)
 {
   int ret;
 
