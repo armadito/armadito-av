@@ -15,18 +15,24 @@ static struct queue_entry *queue_entry_new(int fd, struct timespec *timestamp)
   return e;
 }
 
-void queue_init(struct queue *q)
+struct queue *queue_new(void)
 {
+  struct queue *q = malloc(sizeof(struct queue));
+
   q->head = NULL;
   q->tail = NULL;
 
   pthread_mutex_init(&q->queue_lock, NULL);
+
+  return q;
 }
 
-void queue_destroy(struct queue *q)
+void queue_free(struct queue *q)
 {
   /* FIXME: empty the queue */
   pthread_mutex_destroy(&q->queue_lock);
+
+  free(q);
 }
 
 static inline void queue_lock(struct queue *q)

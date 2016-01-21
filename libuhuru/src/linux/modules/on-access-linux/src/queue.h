@@ -15,9 +15,9 @@ struct queue {
   pthread_mutex_t queue_lock;
 };
 
-void queue_init(struct queue *q);
+struct queue *queue_new(void);
 
-void queue_destroy(struct queue *q);
+void queue_free(struct queue *q);
 
 /**
    Atomically enqueue a file descriptor in the queue
