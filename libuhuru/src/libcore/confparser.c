@@ -17,8 +17,9 @@
  * the lexical analyzer
  */
 struct scanner {
-  int cur_line;
-  int cur_position;
+  int current_line;
+  int current_column;
+  int previous_column;
   FILE *input;
   GString *token_text;
 };
@@ -39,22 +40,23 @@ static struct scanner *scanner_new(FILE *input)
   struct scanner *s = g_new(struct scanner, 1);
 
   s->input = input;
-  s->cur_line = 1;
-  s->cur_position = 1;
+  s->current_line = 1;
+  s->current_column = 1;
+  s->previous_column = 1;
 
   s->token_text = g_string_new("");
 
   return s;
 }
 
-static int scanner_cur_line(struct scanner *s)
+static int scanner_current_line(struct scanner *s)
 {
-  return s->cur_line;
+  return s->current_line;
 }
 
-static int scanner_cur_position(struct scanner *s)
+static int scanner_current_column(struct scanner *s)
 {
-  return s->cur_position;
+  return s->current_column;
 }
 
 static char *scanner_token_text(struct scanner *s)
@@ -70,6 +72,34 @@ static int is_first_identifier(int c)
 static int is_identifier(int c)
 {
   return isalnum(c) || c == '-'  || c == '_';
+}
+
+static int scanner_getc(struct scanner *s)
+{
+  int c;
+
+  c = getc(s->input);
+
+  if (c == '\n') {
+    s->current_line++;
+    s->previous_column = s->current_column;
+    s->current_column = 1;
+  } else
+    s->current_column++;
+
+  return c;
+}
+
+static int scanner_ungetc(struct scanner *s, int c)
+{
+  if (c == '\n') {
+    s->current_line--;
+    s->current_column = s->previous_column;
+  }
+  else
+    s->current_column--;
+
+  return ungetc(c, s->input);
 }
 
 int scanner_get_next_token(struct scanner *s)
@@ -88,11 +118,7 @@ int scanner_get_next_token(struct scanner *s)
   g_string_set_size(s->token_text, 0);
 
   while(1) {
-    c = getc(s->input);
-
-    s->cur_position++;
-    if (c == '\n')
-      s->cur_line++;
+    c = scanner_getc(s);
 
     if (c == EOF)
       return TOKEN_EOF;
@@ -120,7 +146,7 @@ int scanner_get_next_token(struct scanner *s)
 
     case S_SPACE:
       if (!isspace(c)) {
-	ungetc(c, s->input);
+	scanner_ungetc(s, c);
 	state = S_INITIAL;
       }
       break;
@@ -141,7 +167,7 @@ int scanner_get_next_token(struct scanner *s)
       if (is_identifier(c))
 	g_string_append_c(s->token_text, c);
       else {
-	ungetc(c, s->input);
+	scanner_ungetc(s, c);
 	return TOKEN_STRING;
       }
       break;
@@ -150,7 +176,7 @@ int scanner_get_next_token(struct scanner *s)
       if (isdigit(c))
 	g_string_append_c(s->token_text, c);
       else {
-	ungetc(c, s->input);
+	scanner_ungetc(s, c);
 	return TOKEN_STRING;
       }
       break;
@@ -244,6 +270,8 @@ static const char *token_str(enum token_type token)
 {
   if (token == TOKEN_STRING) 
     return "string";
+  else if (token == TOKEN_EOF)
+    return "end of file";
   else if (token < TOKEN_NONE) {
     /* memory leak, I know, I know, but this function is called only in case of syntax error... */
     char *tmp = (char *)malloc(2);
@@ -259,10 +287,10 @@ static const char *token_str(enum token_type token)
 
 static void syntax_error(struct uhuru_conf_parser *cp, guint token) 
 {
-  uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "syntax error: file %s line %d position %d expecting '%s' got '%s'\n", 
+  uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_ERROR, "syntax error: file %s line %d column %d expecting '%s' got '%s'\n", 
 	    cp->filename,
-	    scanner_cur_line(cp->scanner),
-	    scanner_cur_position(cp->scanner),
+	    scanner_current_line(cp->scanner),
+	    scanner_current_column(cp->scanner),
 	    token_str(token), 
 	    token_str(cp->lookahead_token));
 
