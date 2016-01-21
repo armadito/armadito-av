@@ -193,9 +193,9 @@ Global
 		{7B898B7D-F7B6-4316-82C7-2A82FCF69AB3}.Win7 Debug|Mixed Platforms.Build.0 = Win7 Debug|Win32
 		{7B898B7D-F7B6-4316-82C7-2A82FCF69AB3}.Win7 Debug|Win32.ActiveCfg = Win7 Debug|Win32
 		{7B898B7D-F7B6-4316-82C7-2A82FCF69AB3}.Win7 Debug|Win32.Build.0 = Win7 Debug|Win32
-		{7B898B7D-F7B6-4316-82C7-2A82FCF69AB3}.Win7 Debug|x64.ActiveCfg = Win7 Release|x64
-		{7B898B7D-F7B6-4316-82C7-2A82FCF69AB3}.Win7 Debug|x64.Build.0 = Win7 Release|x64
-		{7B898B7D-F7B6-4316-82C7-2A82FCF69AB3}.Win7 Debug|x64.Deploy.0 = Win7 Release|x64
+		{7B898B7D-F7B6-4316-82C7-2A82FCF69AB3}.Win7 Debug|x64.ActiveCfg = Win7 Debug|x64
+		{7B898B7D-F7B6-4316-82C7-2A82FCF69AB3}.Win7 Debug|x64.Build.0 = Win7 Debug|x64
+		{7B898B7D-F7B6-4316-82C7-2A82FCF69AB3}.Win7 Debug|x64.Deploy.0 = Win7 Debug|x64
 		{7B898B7D-F7B6-4316-82C7-2A82FCF69AB3}.Win7 Release|Any CPU.ActiveCfg = Win7 Release|Win32
 		{7B898B7D-F7B6-4316-82C7-2A82FCF69AB3}.Win7 Release|Mixed Platforms.ActiveCfg = Win7 Release|Win32
 		{7B898B7D-F7B6-4316-82C7-2A82FCF69AB3}.Win7 Release|Mixed Platforms.Build.0 = Win7 Release|Win32
@@ -258,9 +258,9 @@ Global
 		{805556BE-53AA-486A-AE57-A67165633ECD}.Win7 Debug|Mixed Platforms.Build.0 = Win7 Debug|Win32
 		{805556BE-53AA-486A-AE57-A67165633ECD}.Win7 Debug|Win32.ActiveCfg = Win7 Debug|Win32
 		{805556BE-53AA-486A-AE57-A67165633ECD}.Win7 Debug|Win32.Build.0 = Win7 Debug|Win32
-		{805556BE-53AA-486A-AE57-A67165633ECD}.Win7 Debug|x64.ActiveCfg = Win7 Release|x64
-		{805556BE-53AA-486A-AE57-A67165633ECD}.Win7 Debug|x64.Build.0 = Win7 Release|x64
-		{805556BE-53AA-486A-AE57-A67165633ECD}.Win7 Debug|x64.Deploy.0 = Win7 Release|x64
+		{805556BE-53AA-486A-AE57-A67165633ECD}.Win7 Debug|x64.ActiveCfg = Win7 Debug|x64
+		{805556BE-53AA-486A-AE57-A67165633ECD}.Win7 Debug|x64.Build.0 = Win7 Debug|x64
+		{805556BE-53AA-486A-AE57-A67165633ECD}.Win7 Debug|x64.Deploy.0 = Win7 Debug|x64
 		{805556BE-53AA-486A-AE57-A67165633ECD}.Win7 Release|Any CPU.ActiveCfg = Win7 Release|Win32
 		{805556BE-53AA-486A-AE57-A67165633ECD}.Win7 Release|Mixed Platforms.ActiveCfg = Win7 Release|Win32
 		{805556BE-53AA-486A-AE57-A67165633ECD}.Win7 Release|Mixed Platforms.Build.0 = Win7 Release|Win32

@@ -56,10 +56,10 @@ char * BuildInfCmd(char * pre_command ) {
 		if (binpath == NULL) {
 			__leave;
 		}
-		printf("[+] Debug :: binpath = %s\n", binpath);
+		//printf("[+] Debug :: binpath = %s\n", binpath);
 
 		binpath_len = strnlen_s(binpath,MAX_PATH);
-		printf("[+] Debug :: binpath len = %d\n", binpath_len);
+		//printf("[+] Debug :: binpath len = %d\n", binpath_len);
 
 		// DefaultInstall 132 D:\Novit\uhuru-av\VS\UhuruAV\Debug\UhuruGuard.inf
 		
@@ -68,7 +68,7 @@ char * BuildInfCmd(char * pre_command ) {
 		pre_len = strnlen_s(pre_command,MAX_PATH);
 		post_len = 15; // "\\UhuruGuard.inf"
 		cmd_len = pre_len + binpath_len + post_len +1 ;
-		printf("[+] Debug :: binpath len = %d\n", len);
+		//printf("[+] Debug :: binpath len = %d\n", len);
 		cmd = (char*)calloc(cmd_len+1,sizeof(char));
 		cmd[cmd_len] = '\0';		
 		strncat_s(cmd,cmd_len,pre_command,pre_len);
@@ -99,6 +99,7 @@ int install( ) {
 	LPCWSTR w_cmd = NULL;
 	size_t count = 0;
 	char * cmd= NULL;
+	PVOID OldValue = NULL;
 
 	cmd = BuildInfCmd("DefaultInstall 132 ");
 
@@ -106,10 +107,24 @@ int install( ) {
 	w_cmd = (WCHAR*)calloc(MAX_PATH,sizeof(WCHAR));
 	mbstowcs_s(&count, w_cmd,MAX_PATH, cmd,MAX_PATH);
 
+	//wprintf(L"[i] Debug :: install ::  wide string =  %ls\n",w_cmd);
 
-	printf("[i] Debug :: install :: Uninstalling the driver...\n" );
+	// https://msdn.microsoft.com/en-us/library/aa384187.aspx
+	// https://msdn.microsoft.com/en-us/library/aa365743.aspx
+	// Disables file system redirection for the calling thread.
+	if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {
+		return -1;
+	}
+
+	printf("[i] Debug :: install :: installing the driver...\n" );
 	InstallHinfSectionW(NULL, NULL, w_cmd,0);
 	printf("[i] Debug :: install :: InstallHinfSection executed!\n" );
+
+	if (Wow64RevertWow64FsRedirection(OldValue) == FALSE ){
+        //  Failure to re-enable redirection should be considered
+        //  a criticial failure and execution aborted.
+        return -2;
+    }
 
 	free(cmd);
 
@@ -122,14 +137,28 @@ int uninstall( ) {
 	char * cmd = NULL;
 	LPCWSTR w_cmd = NULL;
 	size_t count = 0;
+	PVOID OldValue = NULL;
 
 	cmd = BuildInfCmd("DefaultUnInstall 132 ");
 
-	printf("[i] Debug :: uninstall :: Uninstalling the driver...\n" );
+	printf(L"[i] Debug :: uninstall :: Uninstalling the driver...\n" );
 
 	w_cmd = (WCHAR*)calloc(MAX_PATH,sizeof(WCHAR));
 	mbstowcs_s(&count, w_cmd,MAX_PATH, cmd,MAX_PATH);
+
+	wprintf(L"[i] Debug :: install ::  wide string =  %ls\n",w_cmd);
+
+	if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {
+		return -1;
+	}
+
 	InstallHinfSectionW(NULL, NULL, w_cmd,0);
+
+	if (Wow64RevertWow64FsRedirection(OldValue) == FALSE ){
+        //  Failure to re-enable redirection should be considered
+        //  a criticial failure and execution aborted.
+        return -2;
+    }
 
 	printf("[i] Debug :: uninstall :: InstallHinfSection executed!\n" );
 

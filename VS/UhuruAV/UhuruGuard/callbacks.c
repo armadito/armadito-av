@@ -58,6 +58,7 @@ SCAN_RESULT LaunchFileAnalysis(_In_ PFLT_CALLBACK_DATA Data, _In_ PCFLT_RELATED_
 	//SCAN_RESULT res = NONE;
 	PFLT_FILE_NAME_INFORMATION FileNameInformation = NULL;	
 	//UNICODE_STRING malName;
+	UNICODE_STRING quarantineDir;
 	SCAN_RESULT answer = NONE;
 	
 	
@@ -95,6 +96,13 @@ SCAN_RESULT LaunchFileAnalysis(_In_ PFLT_CALLBACK_DATA Data, _In_ PCFLT_RELATED_
 			//return FLT_POSTOP_FINISHED_PROCESSING;
 		}
 
+		// Deny access to Quarantine folder		
+		RtlInitUnicodeString(&quarantineDir,QUARANTINE_DIR); // Free unicode string.
+		if (RtlEqualUnicodeString(&FileNameInformation->ParentDir, &quarantineDir, FALSE) == TRUE) {
+			answer = UHURU_MALWARE;
+			__leave;
+		}
+
 		//-----------------------------------------
 		// Send scan order to the scan service.
 		ntStatus = SendScanOrder(FltObjects->Filter, &FileNameInformation->Name, &answer);
@@ -104,49 +112,7 @@ SCAN_RESULT LaunchFileAnalysis(_In_ PFLT_CALLBACK_DATA Data, _In_ PCFLT_RELATED_
 			__leave;			
 		}
 
-		// MALWARE detected by the scan.
-		//if (answer == UHURU_MALWARE)
-		//	DbgPrint("[i] WARNING :: UhuruGuard!LaunchFileAnalysis :: MALWARE DETECTED :: %wZ.\n",FltObjects->FileObject->FileName);
-
-		/*switch (answer) {
-
-			case NONE:
-				DbgPrint("[+] Debug :: UhuruGuard!LaunchFileAnalysis :: %wZ :: [NONE]\n",FltObjects->FileObject->FileName);
-				break;
-			case UHURU_UNDECIDED:
-				DbgPrint("[+] Debug :: UhuruGuard!LaunchFileAnalysis :: %wZ :: [UHURU_UNDECIDED]\n",FltObjects->FileObject->FileName);					
-				break;
-			case UHURU_CLEAN:
-				DbgPrint("[+] Debug :: UhuruGuard!LaunchFileAnalysis :: %wZ :: [UHURU_CLEAN]\n",FltObjects->FileObject->FileName);
-				break;
-			case UHURU_UNKNOWN_FILE_TYPE:
-				DbgPrint("[+] Debug :: UhuruGuard!LaunchFileAnalysis :: %wZ :: [UHURU_UNKNOWN_FILE_TYPE]\n",FltObjects->FileObject->FileName);
-				break;
-			case UHURU_EINVAL:
-				DbgPrint("[+] Debug :: UhuruGuard!LaunchFileAnalysis :: %wZ :: [UHURU_EINVAL]\n",FltObjects->FileObject->FileName);
-				break;
-			case UHURU_IERROR:
-				DbgPrint("[+] Debug :: UhuruGuard!LaunchFileAnalysis :: %wZ :: [UHURU_IERROR]\n",FltObjects->FileObject->FileName);
-				break;
-			case UHURU_SUSPICIOUS:
-				DbgPrint("[+] Debug :: UhuruGuard!LaunchFileAnalysis :: %wZ :: [UHURU_SUSPICIOUS]\n",FltObjects->FileObject->FileName);
-				break;
-			case UHURU_WHITE_LISTED:
-				DbgPrint("[+] Debug :: UhuruGuard!LaunchFileAnalysis :: %wZ :: [UHURU_WHITE_LISTED]\n",FltObjects->FileObject->FileName);
-				break;
-			case UHURU_MALWARE:
-				DbgPrint("[+] WARNING :: UhuruGuard!LaunchFileAnalysis :: %wZ :: [UHURU_MALWARE]\n",FltObjects->FileObject->FileName);
-				break;
-			case TIMEOUT:
-				DbgPrint("[+] Debug :: UhuruGuard!LaunchFileAnalysis :: %wZ :: [TIMEOUT]\n",FltObjects->FileObject->FileName);
-				break;
-			default:
-				DbgPrint("[+] Debug :: UhuruGuard!LaunchFileAnalysis :: %wZ :: [ERROR_DEFAULT] \n",FltObjects->FileObject->FileName);
-				break;
-
-		}*/
-		//DbgPrint("[-] Warning :: UhuruGuard!LaunchFileAnalysis :: FltSendMessage() returned with timeout status !! \n");
-
+		
 		//-----------------------------------------
 		/* fake scan.
 		if ( RtlEqualUnicodeString(&FileNameInformation->FinalComponent,&malName,FALSE) == TRUE ) {	
@@ -165,8 +131,9 @@ SCAN_RESULT LaunchFileAnalysis(_In_ PFLT_CALLBACK_DATA Data, _In_ PCFLT_RELATED_
 			FileNameInformation = NULL;
 		}
 		
-		/*if (&malName != NULL) {
-			RtlFreeUnicodeString(&malName);
+
+		/*if (&quarantineDir != NULL) {
+			RtlFreeUnicodeString(&quarantineDir);
 		}*/
 
 	}
@@ -444,7 +411,7 @@ Return Value:
 
 			// For file creation, scan the file at cleanup.
 			if (FlagOn(Data->IoStatus.Information, FILE_CREATED) ) {
-				uhDbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCreate :: FILE_CREATED flag :: %wZ\n", FltObjects->FileObject->FileName);
+				uhDbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCreate :: [%d] :: FILE_CREATED flag :: %wZ\n", FltGetRequestorProcessId(Data),FltObjects->FileObject->FileName);
 				__leave;
 			}
 
@@ -481,7 +448,7 @@ Return Value:
 		// If the file is detected as a malware, cancel file operation.
 		if (FileContext->scanResult == UHURU_MALWARE ) {
 
-			DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCreate :: MALWARE DETECTED :: %wZ.\n",FltObjects->FileObject->FileName);	
+			DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCreate :: [%d] :: MALWARE DETECTED :: %wZ.\n",FltGetRequestorProcessId(Data),FltObjects->FileObject->FileName);	
 		
 			// Cancel file operation.
 			// https://msdn.microsoft.com/en-us/library/windows/hardware/ff540223%28v=vs.85%29.aspx

@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "named_pipe_server.h"
+#include "quarantine.h"
 
 #define SVCNAME TEXT("UhuruSvc")
 #define SVCDISPLAY TEXT("Uhuru Scan Service")
@@ -38,6 +39,8 @@ BOOLEAN ServiceLaunchAction( );
 void ServiceLaunch( );
 
 void ServiceStop( );
+int ServicePause( );
+int ServiceContinue();
 
 
 int ServiceLoadProcedure( );
@@ -48,8 +51,6 @@ int ServiceUnloadProcedure( );
 int RegistryKeysInitialization( );
 int DeleteRegistryKeys( );
 
-//
-int initClamavDB( );
 
 
 
