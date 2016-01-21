@@ -39,6 +39,8 @@ BOOLEAN ServiceLaunchAction( );
 void ServiceLaunch( );
 
 void ServiceStop( );
+int ServicePause( );
+int ServiceContinue();
 
 
 int ServiceLoadProcedure( );

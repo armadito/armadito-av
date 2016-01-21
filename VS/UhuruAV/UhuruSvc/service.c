@@ -595,7 +595,7 @@ void WINAPI ServiceCtrlHandler( DWORD dwCtrl ) {
 		case SERVICE_CONTROL_PAUSE:
 
 			ReportSvcStatus(SERVICE_PAUSE_PENDING, NO_ERROR, 0);
-
+			
 			// Unload service.
 			ret = ServiceUnloadProcedure( );
 			if (ret != 0) {
@@ -604,19 +604,21 @@ void WINAPI ServiceCtrlHandler( DWORD dwCtrl ) {
 			}
 
 			ReportSvcStatus(SERVICE_PAUSED, NO_ERROR, 0);
+			uhLog("[i] DEBUG :: SERVICE PAUSE !!!\n");
 			break;
 
 		case SERVICE_CONTROL_CONTINUE:
 
 			ReportSvcStatus(SERVICE_START_PENDING, NO_ERROR, 0);
 			ReportSvcStatus(SERVICE_RUNNING, NO_ERROR, 0);
-			/*ret = ServiceLoadProcedure( );
+			ret = ServiceLoadProcedure( );
 			if (ret < 0) {
 				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service Initialization failed during continue \n");
 				uhLog("[+] Error :: Service Initialization failed\n");
 				// Stop the service on error.
 				ServiceStop( );
-			}*/
+			}
+			uhLog("[i] DEBUG :: SERVICE CONTINUE !!!\n");
 			break;
 
 		case SERVICE_CONTROL_STOP:
@@ -1002,6 +1004,195 @@ void ServiceStop( ) {
 	return;
 }
 
+/*Pause the service*/
+int ServicePause( ) {
+
+	int ret = 0;
+	SERVICE_STATUS_PROCESS ssStatus;
+	SC_HANDLE schSCManager = NULL;
+	SC_HANDLE schService = NULL;
+	DWORD dwBytesNeeded;
+	DWORD dwStartTime = GetTickCount( );
+	DWORD dwTimeout = 10000;
+
+	__try {
+
+		// Get a handle to the SCM database. 
+		schSCManager = OpenSCManager( NULL, NULL, SC_MANAGER_ALL_ACCESS);
+		if (schSCManager == NULL) {
+			printf("[-] Error :: ServicePause :: OpenSCManager() failed :: GLE = %d\n",GetLastError());
+			ret = -1;
+			__leave;			
+		}
+
+		// Get a handle to the Service.
+		schService = OpenService(schSCManager, SVCNAME, SERVICE_PAUSE_CONTINUE|SERVICE_QUERY_STATUS|SERVICE_ENUMERATE_DEPENDENTS);
+		if (schService == NULL) {
+			printf("[-] Error :: ServicePause :: Open Service failed :: GLE = %d\n",GetLastError());
+			ret = -2;
+			__leave;			
+		}
+
+		// Make sure the service is running.
+		if (!QueryServiceStatusEx(schService, SC_STATUS_PROCESS_INFO, (LPBYTE)&ssStatus, sizeof(SERVICE_STATUS_PROCESS), &dwBytesNeeded)) {
+			printf("[-] Error :: ServicePause :: Query Service Status failed :: GLE = %d\n",GetLastError());
+			ret = -3;
+			__leave;
+		}
+
+		if (ssStatus.dwCurrentState != SERVICE_RUNNING) {
+			printf("[-] Error :: ServicePause :: The service is not running!\n");
+			ret = -4;
+			__leave;
+		}
+
+		// Send a pause code to the service.
+		if (!ControlService(schService,SERVICE_CONTROL_PAUSE,(LPSERVICE_STATUS)&ssStatus)) {
+			printf("[-] Error :: ServicePause :: Control Service failed :: GLE = %d\n",GetLastError());
+			ret = -5;
+			__leave;
+		}
+
+		// Wait for the service to stop.
+		while (ssStatus.dwCurrentState != SERVICE_STOPPED) {
+
+			Sleep(ssStatus.dwWaitHint);
+
+			if (!QueryServiceStatusEx(schService, SC_STATUS_PROCESS_INFO, (LPBYTE)&ssStatus, sizeof(SERVICE_STATUS_PROCESS), &dwBytesNeeded)) {
+				printf("[-] Error :: ServicePause :: Query Service Status failed :: GLE = %d\n",GetLastError());
+				ret = -6;
+				__leave;
+			}
+
+			if (ssStatus.dwCurrentState == SERVICE_PAUSED) {			
+				break;
+			}
+
+			if (GetTickCount( ) - dwStartTime > dwTimeout) {
+				printf("[-] Error :: ServiceStop :: Service Pause failed :: Pause Wait timeout !\n");
+				ret = -7;
+				__leave;
+			}
+
+		}
+
+		printf("[+] Debug :: ServicePause :: Service paused successfully!\n");
+
+
+	}
+	__finally {
+
+		if (schSCManager != NULL) {
+			CloseServiceHandle(schSCManager);
+			schService = NULL;
+		}
+
+		if (schService != NULL) {
+			CloseServiceHandle(schService);
+			schService = NULL;
+		}
+
+	}
+
+	
+
+	return ret;
+}
+
+/*Resume the service*/
+int ServiceContinue( ) {
+
+	int ret = 0;
+	SERVICE_STATUS_PROCESS ssStatus;
+	SC_HANDLE schSCManager = NULL;
+	SC_HANDLE schService = NULL;
+	DWORD dwBytesNeeded;
+	DWORD dwStartTime = GetTickCount( );
+	DWORD dwTimeout = 10000;
+
+	__try {
+
+		// Get a handle to the SCM database. 
+		schSCManager = OpenSCManager( NULL, NULL, SC_MANAGER_ALL_ACCESS);
+		if (schSCManager == NULL) {
+			printf("[-] Error :: ServiceContinue :: OpenSCManager() failed :: GLE = %d\n",GetLastError());
+			ret = -1;
+			__leave;			
+		}
+
+		// Get a handle to the Service.
+		schService = OpenService(schSCManager, SVCNAME, SERVICE_PAUSE_CONTINUE|SERVICE_QUERY_STATUS|SERVICE_ENUMERATE_DEPENDENTS);
+		if (schService == NULL) {
+			printf("[-] Error :: ServiceContinue :: Open Service failed :: GLE = %d\n",GetLastError());
+			ret = -2;
+			__leave;			
+		}
+
+		// Make sure the service is running.
+		if (!QueryServiceStatusEx(schService, SC_STATUS_PROCESS_INFO, (LPBYTE)&ssStatus, sizeof(SERVICE_STATUS_PROCESS), &dwBytesNeeded)) {
+			printf("[-] Error :: ServiceContinue :: Query Service Status failed :: GLE = %d\n",GetLastError());
+			ret = -3;
+			__leave;
+		}
+
+		if (ssStatus.dwCurrentState != SERVICE_PAUSED) {
+			printf("[-] Error :: ServiceContinue :: The service is not paused!\n");
+			ret = -4;
+			__leave;
+		}
+
+		// Send a pause code to the service.
+		if (!ControlService(schService,SERVICE_CONTROL_CONTINUE,(LPSERVICE_STATUS)&ssStatus)) {
+			printf("[-] Error :: ServiceContinue :: Control Service failed :: GLE = %d\n",GetLastError());
+			ret = -5;
+			__leave;
+		}
+
+		// Wait for the service to stop.
+		while (ssStatus.dwCurrentState != SERVICE_RUNNING) {
+
+			Sleep(ssStatus.dwWaitHint);
+
+			if (!QueryServiceStatusEx(schService, SC_STATUS_PROCESS_INFO, (LPBYTE)&ssStatus, sizeof(SERVICE_STATUS_PROCESS), &dwBytesNeeded)) {
+				printf("[-] Error :: ServiceContinue :: Query Service Status failed :: GLE = %d\n",GetLastError());
+				ret = -6;
+				__leave;
+			}
+
+			if (ssStatus.dwCurrentState == SERVICE_RUNNING) {			
+				break;
+			}
+
+			if (GetTickCount( ) - dwStartTime > dwTimeout) {
+				printf("[-] Error :: ServiceContinue :: Service Continue failed :: Continue Wait timeout !\n");
+				ret = -7;
+				__leave;
+			}
+
+		}
+
+		printf("[+] Debug :: ServiceContinue :: Service resumed successfully!\n");
+
+
+	}
+	__finally {
+
+		if (schSCManager != NULL) {
+			CloseServiceHandle(schSCManager);
+			schService = NULL;
+		}
+
+		if (schService != NULL) {
+			CloseServiceHandle(schService);
+			schService = NULL;
+		}
+
+	}
+
+	
+
+	return ret;
+}
 
 int LaunchCmdLineServiceTest( ) {
 
@@ -1041,6 +1232,7 @@ int LaunchCmdLineServiceTest( ) {
 		else if (c == 'c') {
 
 			// continue.
+			
 			ret = ServiceLoadProcedure( );
 			if (ret < 0) {
 				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service Initialization failed during continue \n");
@@ -1103,7 +1295,6 @@ int main(int argc, char ** argv) {
 			return EXIT_FAILURE;
 		}
 		return EXIT_SUCCESS;
-
 	}
 
 
@@ -1115,6 +1306,13 @@ int main(int argc, char ** argv) {
 		if (ret < 0) {
 			return EXIT_FAILURE;
 		}
+		return EXIT_SUCCESS;
+
+	}
+
+	if ( argc >=2 && strncmp(argv[1],"--installboot",13) == 0 ){
+
+		printf("[TODO] :: InstallBoot not implemented yet!\n" );
 		return EXIT_SUCCESS;
 
 	}
@@ -1134,6 +1332,15 @@ int main(int argc, char ** argv) {
 
 	if ( argc >=2 && strncmp(argv[1],"--start",7) == 0 ){
 		ServiceLaunch( );
+		return EXIT_SUCCESS;
+	}
+
+	if ( argc >=2 && strncmp(argv[1],"--pause",7) == 0 ){
+		ServicePause( );
+		return EXIT_SUCCESS;
+	}
+	if ( argc >=2 && strncmp(argv[1],"--continue",10) == 0 ){
+		ServiceContinue( );
 		return EXIT_SUCCESS;
 	}
 

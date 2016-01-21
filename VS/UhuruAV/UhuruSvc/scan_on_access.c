@@ -527,11 +527,12 @@ HRESULT UserScanFinalize(_In_  PUSER_SCAN_CONTEXT Context) {
 	//  Clean up scan thread contexts
 	for (i = 0; i < USER_SCAN_THREAD_COUNT; i++) {
 
-		if (Context->ScanThreadCtxes[i].Handle && CloseHandle(Context->ScanThreadCtxes[i].Handle) == FALSE ) {
+		if (Context->ScanThreadCtxes[i].Handle != INVALID_HANDLE_VALUE && Context->ScanThreadCtxes[i].Handle != NULL && CloseHandle(Context->ScanThreadCtxes[i].Handle) == FALSE ) {
 			uhLog("[-] Error :: UhuruSvc!UserScanFinalize :: CloseHandle failed for thread %d :: GLE=%03d. \n",i,GetLastError());
 			DeleteCriticalSection(&(Context->ScanThreadCtxes[i].Lock));
+			Context->ScanThreadCtxes[i].Handle = NULL;
 		}
-
+		
 	}
 
 	// Fre the allocated contexts.
