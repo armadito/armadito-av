@@ -505,6 +505,7 @@ int Start_IHM_Connection(struct uhuru * uhuru, _Inout_ PONDEMAND_SCAN_CONTEXT Co
 				
 		mainThreadCtx->ThreadId = dwThreadId;
 		Context->MainThreadCtx = mainThreadCtx;
+		Context->Finalized = FALSE;
 		Context->Scan_thread_count = 0;
 		
 		printf("[+] Debug :: start_IHM_Connection :: Main Thread [%d] created successfully!\n",mainThreadCtx->ThreadId);
@@ -595,6 +596,7 @@ int Close_IHM_Connection(_In_ PONDEMAND_SCAN_CONTEXT Context ) {
 			if (!(HeapFree(GetProcessHeap( ), 0, Context->MainThreadCtx)) ) {
 				printf("[-] Error :: start_IHM_Connection :: HeapFree failed with error :: %d\n",GetLastError());
 			}
+			Context->MainThreadCtx = NULL;
 		}
 
 

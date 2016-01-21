@@ -1,4 +1,5 @@
 #include "update.h"
+#include "service.h"
 
 //struct packageStruct ** pkgList = NULL;
 Package ** pkgList = NULL;
@@ -1028,15 +1029,17 @@ int UpdateModulesDB(int cmdLineMode) {
 
 	int ret = 0, res = 0;
 	HRESULT hres = S_OK;
-	char * url = "http://172.24.200.80/current/uhurudbvirus.xml";
-	char * filename = "uhurudbvirus.xml";
+	//char * url = "http://172.24.200.80/current/uhurudbvirus.xml";
+	char * url = "http://172.24.200.80/current/uhurudbvirus.json";
+	//char * filename = "uhurudbvirus.xml";
+	char * filename = "uhurudbvirus.json";
 	char * testFilename = "C:\\Users\\david\\Desktop\\uhurudbvirus.json" ;
 	unsigned char * hash = NULL;
 	HANDLE hFile = NULL, hTestFile = NULL;
 	char * desc = NULL;
 	char * test = NULL;
 	int len = 0, size = 0, read = 0;
-	LARGE_INTEGER fileSize = {0};	
+	LARGE_INTEGER fileSize = {0};
 
 
 	__try {
@@ -1097,8 +1100,8 @@ int UpdateModulesDB(int cmdLineMode) {
 			__leave;
 		}
 
-#if 1
-		// -----------------------------------------------------------------
+#if 0
+
 		// -----------------------------------------------------------------
 		hTestFile = CreateFileA(testFilename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
 		if (hTestFile == INVALID_HANDLE_VALUE) {
@@ -1143,7 +1146,7 @@ int UpdateModulesDB(int cmdLineMode) {
 		}
 
 		// Download files from server and relaunch Service.
-		if (ParseDescriptionFile(test) < 0) {
+		if (ParseDescriptionFile(desc) < 0) {
 			printf("[-] Error :: UpdateModulesDB :: Parsing Description file failed!\n");
 			res = -7;
 			__leave;
@@ -1159,15 +1162,13 @@ int UpdateModulesDB(int cmdLineMode) {
 		PrintPackageList(pkgList, nbPackages);
 
 
-		// Unload the service (unloadProcedure).
-		// TODO...
-		// command line mode : stop the service.
-		if (cmdLineMode == 1) {
-			
-		}
-		else {
+		// Unload the service (unloadProcedure).		
 
-		}
+		if (ServicePause( ) < 0) {
+			printf("[-] Error :: UpdateModulesDB :: Pausing the service failed!\n");
+			ret = -8;
+			__leave;
+		}		
 
 		printf("\n\n");
 		// Copy databases files to the right places.
@@ -1179,7 +1180,11 @@ int UpdateModulesDB(int cmdLineMode) {
 
 
 		// Reload the service (LoadProcedure).
-		// TODO...
+		if (ServiceContinue( ) < 0) {
+			printf("[-] Error :: UpdateModulesDB :: Resuming the service failed!\n");
+			ret = -10;
+			__leave;
+		}
 
 		// Save hash in cache file.
 		res = SaveHashInCacheFile(hash);

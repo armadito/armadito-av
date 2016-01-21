@@ -84,7 +84,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\libuhuru\src\utils\getopt.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\utils\json.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\utils\uh_json.c" />
     <ClCompile Include="log.c" />
     <ClCompile Include="named_pipe_client.c" />
     <ClCompile Include="named_pipe_server.c" />
@@ -96,7 +96,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\libuhuru\src\utils\getopt.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\utils\json.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\utils\uh_json.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="named_pipe_client.h" />
     <ClInclude Include="named_pipe_server.h" />
