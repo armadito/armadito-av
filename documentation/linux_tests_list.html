@@ -735,13 +735,234 @@ asciidoc.install();
 <div id="header">
 <h1>Uhuru-AV Linux Tests</h1>
 <span id="author">Valentin HAMON&lt;vhamon@teclib.com&gt;</span><br />
-<span id="revnumber">version 1.0,</span>
-<span id="revdate">2015-11</span>
+<span id="revnumber">version 1.1,</span>
+<span id="revdate">2016-01</span>
 </div>
 <div id="content">
 <div id="preamble">
 <div class="sectionbody">
-<div class="paragraph"><p>This document aims to contains an inventory of what have been done and what need to be done about testing UhuruAV on Linux.</p></div>
+<div class="paragraph"><p>Armadito Linux Tests Checklist.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_on_access_scan_tests">On-access scan tests</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_ubuntu_14_04_lts_64bit_trusty_et_home_séparé">Ubuntu 14.04 LTS 64Bit (trusty) / et /home séparé</h3>
+<div class="tableblock">
+<table rules="all"
+width="60%"
+frame="border"
+cellspacing="0" cellpadding="4">
+<caption class="title">Table 1. /media tests</caption>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+<thead>
+<tr>
+<th align="left" valign="top"> Test                                            </th>
+<th align="left" valign="top"> Status </th>
+<th align="left" valign="top"> Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p class="table">Add mount mark on new  USB Key</p></td>
+<td align="left" valign="top"><p class="table">OK</p></td>
+<td align="left" valign="top"><p class="table">&lt;warning&gt; on-access-linux: path /media/uhuru/A179-EE7E/ELF_D5AD9865DEB15395843FDAD562C8CB13 DENY (file was scanned)</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">Add mount mark on existing USB Key</p></td>
+<td align="left" valign="top"><p class="table">Not OK</p></td>
+<td align="left" valign="top"><p class="table">USB Key existing before launching daemon</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">cat /USBKEY/ELF_malwares* (12)</p></td>
+<td align="left" valign="top"><p class="table">OK</p></td>
+<td align="left" valign="top"><p class="table"></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">cat /USBKEY/ELF_malwares* (100)</p></td>
+<td align="left" valign="top"><p class="table">OK</p></td>
+<td align="left" valign="top"><p class="table"></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="tableblock">
+<table rules="all"
+width="60%"
+frame="border"
+cellspacing="0" cellpadding="4">
+<caption class="title">Table 2. configured directories tests</caption>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+<thead>
+<tr>
+<th align="left" valign="top"> Test                                            </th>
+<th align="left" valign="top"> Status </th>
+<th align="left" valign="top"> Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p class="table">Added recursively conf directory /tmp - cp unmarked_dir to marked_dir (ELF_malwares*) (12) /tmp</p></td>
+<td align="left" valign="top"><p class="table">Not OK</p></td>
+<td align="left" valign="top"><p class="table">/tmp/ELF_D5AD9865DEB15395843FDAD562C8CB13 ALLOW (file type is not scanned).</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">Added recursively conf directory /tmp - cp marked_dir to marked_dir (ELF_malwares*) (12) /tmp</p></td>
+<td align="left" valign="top"><p class="table">OK</p></td>
+<td align="left" valign="top"><p class="table">/tmp/ELF_D5AD9865DEB15395843FDAD562C8CB13 DENY (file was scanned)</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">Added recursively conf directory /tmp - cat /tmp/ELF_malwares* (12)</p></td>
+<td align="left" valign="top"><p class="table">OK</p></td>
+<td align="left" valign="top"><p class="table">no freeze - &lt;warning&gt; on-access-linux: path /tmp/ELF_D5AD9865DEB15395843FDAD562C8CB13 DENY (file was scanned)</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">Added recursively conf directory /tmp - cp marked_dir to market_dir (ELF_malwares*) (100) /tmp</p></td>
+<td align="left" valign="top"><p class="table">OK</p></td>
+<td align="left" valign="top"><p class="table">no freeze - /media/uhuru/A179-EE7E/MALWARE_ELF_LINUX_100_files/ELF_D5AD9865DEB15395843FDAD562C8CB13 DENY (file was scanned)</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">Added recursively conf directory /tmp - cp unmarked_dir to market_dir (ELF_malwares*) (100) /tmp</p></td>
+<td align="left" valign="top"><p class="table">Not OK</p></td>
+<td align="left" valign="top"><p class="table">/tmp/ELF_D5AD9865DEB15395843FDAD562C8CB13 ALLOW (file type is not scanned)</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">Added recursively conf directory /tmp - cp marked_dir to unmarket_dir (ELF_malwares*) (100) /tmp</p></td>
+<td align="left" valign="top"><p class="table">OK</p></td>
+<td align="left" valign="top"><p class="table">/tmp/ELF_D5AD9865DEB15395843FDAD562C8CB13 DENY (file was scanned)</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">Added recursively conf directory /tmp - cat /tmp/ELF_no_malwares* (83)</p></td>
+<td align="left" valign="top"><p class="table">OK</p></td>
+<td align="left" valign="top"><p class="table">exécution instantanée</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">Added recursively conf directory /tmp - cat /tmp/ELF_malwares* (100)</p></td>
+<td align="left" valign="top"><p class="table">OK</p></td>
+<td align="left" valign="top"><p class="table">quasi instantanée</p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">Added subdirectory in already marked dir</p></td>
+<td align="left" valign="top"><p class="table">OK</p></td>
+<td align="left" valign="top"><p class="table"></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">Rm subdirectory in already marked dir</p></td>
+<td align="left" valign="top"><p class="table">OK</p></td>
+<td align="left" valign="top"><p class="table"></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ubuntu_14_04_lts_64bit_trusty_et_home_non_séparé_pc_chiffré">Ubuntu 14.04 LTS 64Bit (trusty) / et /home non séparé + PC Chiffré</h3>
+<div class="tableblock">
+<table rules="all"
+width="60%"
+frame="border"
+cellspacing="0" cellpadding="4">
+<caption class="title">Table 3. /media tests</caption>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+<thead>
+<tr>
+<th align="left" valign="top"> Test                                            </th>
+<th align="left" valign="top"> Status </th>
+<th align="left" valign="top"> Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p class="table">Add dir mark on new  USB Key</p></td>
+<td align="left" valign="top"><p class="table">TODO</p></td>
+<td align="left" valign="top"><p class="table"></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">Add dir mark on existing USB Key</p></td>
+<td align="left" valign="top"><p class="table">TODO</p></td>
+<td align="left" valign="top"><p class="table"></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="tableblock">
+<table rules="all"
+width="60%"
+frame="border"
+cellspacing="0" cellpadding="4">
+<caption class="title">Table 4. configured directories tests</caption>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+<thead>
+<tr>
+<th align="left" valign="top"> Test                                            </th>
+<th align="left" valign="top"> Status </th>
+<th align="left" valign="top"> Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left" valign="top"><p class="table">Added recursively conf directory /tmp - cp unmarked_dir to marked_dir (ELF_malwares*) (12) /tmp</p></td>
+<td align="left" valign="top"><p class="table">TODO</p></td>
+<td align="left" valign="top"><p class="table"></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">Added recursively conf directory /tmp - cp marked_dir to marked_dir (ELF_malwares*) (12) /tmp</p></td>
+<td align="left" valign="top"><p class="table">TODO</p></td>
+<td align="left" valign="top"><p class="table"></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">Added recursively conf directory /tmp - cat /tmp/ELF_malwares* (12)</p></td>
+<td align="left" valign="top"><p class="table">TODO</p></td>
+<td align="left" valign="top"><p class="table"></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">Added recursively conf directory /tmp - cp marked_dir to market_dir (ELF_malwares*) (100) /tmp</p></td>
+<td align="left" valign="top"><p class="table">TODO</p></td>
+<td align="left" valign="top"><p class="table"></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">Added recursively conf directory /tmp - cp unmarked_dir to market_dir (ELF_malwares*) (100) /tmp</p></td>
+<td align="left" valign="top"><p class="table">TODO</p></td>
+<td align="left" valign="top"><p class="table"></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">Added recursively conf directory /tmp - cp marked_dir to unmarket_dir (ELF_malwares*) (100) /tmp</p></td>
+<td align="left" valign="top"><p class="table">TODO</p></td>
+<td align="left" valign="top"><p class="table"></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">Added recursively conf directory /tmp - cat /tmp/ELF_no_malwares* (83)</p></td>
+<td align="left" valign="top"><p class="table">TODO</p></td>
+<td align="left" valign="top"><p class="table"></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">Added recursively conf directory /tmp - cat /tmp/ELF_malwares* (100)</p></td>
+<td align="left" valign="top"><p class="table">TODO</p></td>
+<td align="left" valign="top"><p class="table"></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">Added subdirectory in already marked dir</p></td>
+<td align="left" valign="top"><p class="table">TODO</p></td>
+<td align="left" valign="top"><p class="table"></p></td>
+</tr>
+<tr>
+<td align="left" valign="top"><p class="table">Rm subdirectory in already marked dir</p></td>
+<td align="left" valign="top"><p class="table">TODO</p></td>
+<td align="left" valign="top"><p class="table"></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -754,7 +975,7 @@ asciidoc.install();
 width="60%"
 frame="border"
 cellspacing="0" cellpadding="4">
-<caption class="title">Table 1. Samba tests</caption>
+<caption class="title">Table 5. Samba tests</caption>
 <col width="33%" />
 <col width="33%" />
 <col width="33%" />
@@ -794,7 +1015,7 @@ cellspacing="0" cellpadding="4">
 width="60%"
 frame="border"
 cellspacing="0" cellpadding="4">
-<caption class="title">Table 2. Mounted devices</caption>
+<caption class="title">Table 6. Mounted devices</caption>
 <col width="33%" />
 <col width="33%" />
 <col width="33%" />
@@ -842,7 +1063,7 @@ cellspacing="0" cellpadding="4">
 width="60%"
 frame="border"
 cellspacing="0" cellpadding="4">
-<caption class="title">Table 3. Samba tests</caption>
+<caption class="title">Table 7. Samba tests</caption>
 <col width="33%" />
 <col width="33%" />
 <col width="33%" />
@@ -884,8 +1105,8 @@ cellspacing="0" cellpadding="4">
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Version 1.0<br />
-Last updated 2015-11-19 12:27:20 CET
+Version 1.1<br />
+Last updated 2016-01-11 14:02:49 CET
 </div>
 </div>
 </body>

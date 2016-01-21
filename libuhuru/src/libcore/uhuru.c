@@ -139,7 +139,7 @@ struct uhuru *uhuru_open(uhuru_error **error)
 #endif
 
   if (module_manager_post_init_all(u->module_manager, error))
-	  goto error;
+    goto error;
 
   return u;
 
