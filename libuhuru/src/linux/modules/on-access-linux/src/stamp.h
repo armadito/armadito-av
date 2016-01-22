@@ -3,9 +3,16 @@
 
 #include <time.h>
 
+/* for nanosleep */
+/* all times are in nanoseconds */
+#define ONE_NANOSECOND  (1L)
+#define ONE_MICROSECOND (1000L * ONE_NANOSECOND)
+#define ONE_MILLISECOND (1000L * ONE_MICROSECOND)
+#define ONE_SECOND      (1000L * ONE_MILLISECOND)
+
 static inline void stamp_now(struct timespec *s)
 {
-  clock_gettime(CLOCK_REALTIME_COARSE, s);
+  clock_gettime(CLOCK_MONOTONIC_COARSE, s);
 }
 
 static inline int stamp_cmp(struct timespec *s1, struct timespec *s2)
@@ -32,8 +39,8 @@ static inline void stamp_add(struct timespec *dst, const struct timespec *src)
 {
   dst->tv_nsec += src->tv_nsec;
 
-  if (dst->tv_nsec >= 1000000000L) {
-    dst->tv_nsec -= 1000000000L;
+  if (dst->tv_nsec >= ONE_SECOND) {
+    dst->tv_nsec -= ONE_SECOND;
     dst->tv_sec++;
   }
 
@@ -45,7 +52,7 @@ static inline void stamp_sub(struct timespec *dst, const struct timespec *src)
   dst->tv_nsec -= src->tv_nsec;
 
   if (dst->tv_nsec < 0) {
-    dst->tv_nsec += 1000000000L;
+    dst->tv_nsec += ONE_SECOND;
     dst->tv_sec--;
   }
 

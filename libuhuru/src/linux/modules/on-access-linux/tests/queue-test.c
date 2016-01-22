@@ -103,8 +103,9 @@ static void *push_thread_fun(void *arg)
   }
 
   for(i = 0; i < PUSH_COUNT; i++) {
-    int fd = 42;
+    int fd, r;
     struct timespec now;
+    struct timespec sleep_duration;
 
     printf("=== push iteration %d\n", i);
     stamp_now(&now);
@@ -113,18 +114,47 @@ static void *push_thread_fun(void *arg)
     fd %= 128;
 
     queue_push(q, fd, &now);
+    
+    random_r(&buf, &r);
+    sleep_duration.tv_sec = 0;
+    sleep_duration.tv_nsec = (r % 3 + 1) * ONE_MILLISECOND;
 
-    queue_test_print(q);
+    nanosleep(&sleep_duration, NULL);
   }
+
+  queue_test_print(q);
 
   printf("push thread terminated\n");
 
   return NULL;
 }
 
+#define TIMEOUT_COUNT 500
+#define N_FD 100
+
 static void *timeout_thread_fun(void *arg)
 {
   struct queue *q = (struct queue *)arg;
+  struct timespec timeout = { 0, 200 * ONE_MICROSECOND};
+  struct timespec sleep_duration = { 0, 100 * ONE_MICROSECOND};
+  int i, n_fd;
+  struct timespec before;
+  long msec;
+  int fds[N_FD];
+
+  for(i = 0; i < TIMEOUT_COUNT; i++) {
+    stamp_now(&before);
+    stamp_sub(&before, &timeout);
+
+    n_fd = queue_pop_timeout(q, &before, fds, N_FD);
+
+    if (n_fd)
+      printf("got %d fd in timeout\n", n_fd);
+
+    nanosleep(&sleep_duration, NULL);
+  }
+
+  printf("timeout thread terminated\n");
 
   return NULL;
 }
