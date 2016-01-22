@@ -5,7 +5,8 @@
 extern "C" {
 #endif
 
-#define DEFAULT_SOCKET_PATH "@/tmp/.uhuru/daemon"
+/* #define DEFAULT_SOCKET_PATH   "/tmp/.uhuru-daemon" */
+/* #define DEFAULT_SOCKET_PATH   "@/tmp/.uhuru/daemon"  /* for abstract sockets (see man 7 unix) */
 
 typedef int ipc_int32_t;
 

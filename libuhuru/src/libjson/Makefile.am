@@ -7,6 +7,8 @@ uhurujson.c \
 uhurujson.h \
 print.c \
 print.h \
+scan.c \
+scan.h \
 state.c \
 state.h 
 

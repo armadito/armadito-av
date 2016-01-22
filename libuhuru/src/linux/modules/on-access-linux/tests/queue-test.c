@@ -84,20 +84,26 @@ static void queue_test_1(void)
   queue_free(q);
 }
 
-#define PUSH_COUNT 5
-#define STATEBUFSZ 32
+#define PUSH_COUNT 50
+#define STATEBUFSZ 256
 
 static void *push_thread_fun(void *arg)
 {
   struct queue *q = (struct queue *)arg;
   int i;
-  char *statebuf = malloc(STATEBUFSZ);
+  char statebuf[STATEBUFSZ];
   struct random_data buf;
 
-  initstate_r(0xdeadbeef, statebuf, STATEBUFSZ, &buf);
+  memset(statebuf, 0, STATEBUFSZ);
+  memset(&buf, 0, sizeof(buf));
+	
+  if (initstate_r(0xdeadbeef, statebuf, STATEBUFSZ, &buf)) {
+    fprintf(stderr, "initstate_r failed (%s)\n", strerror(errno));
+    exit(EXIT_FAILURE);
+  }
 
   for(i = 0; i < PUSH_COUNT; i++) {
-    int fd;
+    int fd = 42;
     struct timespec now;
 
     printf("=== push iteration %d\n", i);
@@ -111,20 +117,22 @@ static void *push_thread_fun(void *arg)
     queue_test_print(q);
   }
 
-  sleep(1);
-
   printf("push thread terminated\n");
 
   return NULL;
 }
 
-static pthread_t push_thread, timeout_thread;
+static void *timeout_thread_fun(void *arg)
+{
+  struct queue *q = (struct queue *)arg;
+
+  return NULL;
+}
 
 static void queue_test_2(void)
 {
   struct queue *q;
-  /* pthread_t push_thread, timeout_thread; */
-  void *retval;
+  pthread_t push_thread, timeout_thread;
 
   q = queue_new();
 
@@ -133,11 +141,18 @@ static void queue_test_2(void)
     exit(EXIT_FAILURE);
   }
 
+  if (pthread_create(&timeout_thread, NULL, timeout_thread_fun, q)) {
+    fprintf(stderr, "pthread_create failed (%s)\n", strerror(errno));
+    exit(EXIT_FAILURE);
+  }
+
   printf("joining push thread\n");
-
-  pthread_join(push_thread, &retval);
-
+  pthread_join(push_thread, NULL);
   printf("push thread joined\n");
+
+  printf("joining timeout thread\n");
+  pthread_join(timeout_thread, NULL);
+  printf("timeout thread joined\n");
 
   queue_free(q);
 }
