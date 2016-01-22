@@ -36,7 +36,7 @@ In order to compile libuhuru, you need the following tools:
 
 To install the needed headers:
 
-- Ubuntu: `apt-get install libglib2.0-dev libmagic-dev libxml2-dev`
+- Ubuntu: `apt-get install automake autoconf libtool libglib2.0-dev libmagic-dev libxml2-dev libjson-c-dev`
 - CentOS: ...
 
 If you want to build documentation, you will need the following additional tools:
