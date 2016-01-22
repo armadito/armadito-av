@@ -383,20 +383,18 @@ static gpointer notify_thread_fun(gpointer data)
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_NAME ": " "started thread");
 
-  m->command_channel = g_io_channel_unix_new(m->command_pipe[0]);	
-  g_io_add_watch(m->command_channel, G_IO_IN, command_cb, m);
-
-  m->thread_pool = g_thread_pool_new(scan_file_thread_fun, m, -1, FALSE, NULL);
-
   /* add the fanotify file desc to the thread loop */
   m->fanotify_fd = fanotify_init(FAN_CLASS_CONTENT | FAN_UNLIMITED_QUEUE | FAN_UNLIMITED_MARKS, O_LARGEFILE | O_RDONLY);
   if (m->fanotify_fd < 0) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_NAME ": " "fanotify_init failed (%s)", strerror(errno));
+    if (errno == EPERM)
+      uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, MODULE_NAME ": " "you must be root or have CAP_SYS_ADMIN capability to enable on-access protection");
+    else if (errno == ENOSYS)
+      uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, MODULE_NAME ": " "this kernel does not implement fanotify_init(). The fanotify API is available only if the kernel was configured with CONFIG_FANOTIFY");
+    else
+      uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, MODULE_NAME ": " "fanotify_init failed (%s)", strerror(errno));
+
     return NULL;
   }
-
-  fanotify_channel = g_io_channel_unix_new(m->fanotify_fd);	
-  g_io_add_watch(fanotify_channel, G_IO_IN, fanotify_cb, m);
 
   m->inotify_fd = inotify_init();
   if (m->inotify_fd == -1) {
@@ -404,17 +402,25 @@ static gpointer notify_thread_fun(gpointer data)
     return NULL;
   }
 
-  inotify_channel = g_io_channel_unix_new(m->inotify_fd);	
-  g_io_add_watch(inotify_channel, G_IO_IN, inotify_cb, m);
-
-  /* init all fanotify mark */
-  mark_entries(m);
-
   /* if configured, add the mount monitor */
   if (m->enable_removable_media) {
     m->mount_monitor = mount_monitor_new(mount_cb, m);
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_NAME ": " "added removable media monitor");
   }
+
+  /* init all fanotify mark */
+  mark_entries(m);
+
+  m->thread_pool = g_thread_pool_new(scan_file_thread_fun, m, -1, FALSE, NULL);
+
+  m->command_channel = g_io_channel_unix_new(m->command_pipe[0]);	
+  g_io_add_watch(m->command_channel, G_IO_IN, command_cb, m);
+
+  fanotify_channel = g_io_channel_unix_new(m->fanotify_fd);	
+  g_io_add_watch(fanotify_channel, G_IO_IN, fanotify_cb, m);
+
+  inotify_channel = g_io_channel_unix_new(m->inotify_fd);	
+  g_io_add_watch(inotify_channel, G_IO_IN, inotify_cb, m);
 
   loop = g_main_loop_new(NULL, FALSE);
 
