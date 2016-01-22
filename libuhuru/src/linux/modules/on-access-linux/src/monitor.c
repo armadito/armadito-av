@@ -1,3 +1,13 @@
+/*
+  TODO:
+  - enqueue file descriptor in monitor fanotify callback
+  - add a timeout thread: if file descriptor is timeout'ed, ALLOW it
+    thread loop: 500 micro second?
+    timeout: 1 millisecond?
+  - add path in queue?
+  - implement fanotify non-perm event
+*/
+
 #define _GNU_SOURCE
 
 #include <libuhuru/core.h>
