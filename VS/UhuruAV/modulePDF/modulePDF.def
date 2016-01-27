@@ -1,0 +1,4 @@
+LIBRARY modulePDF.dll
+
+EXPORTS
+module
