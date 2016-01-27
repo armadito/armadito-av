@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
+#include <unistd.h>
 
 #define UNIX_PATH_MAX	108  /* sic... taken from /usr/include/linux/un.h */
 
@@ -33,8 +34,11 @@ int unix_server_listen(const char *socket_path)
   listening_addr.sun_family = AF_UNIX;
   strncpy(listening_addr.sun_path, socket_path, path_len);
 
+  /* is socket_path abstract? (see man 7 unix) */
   if (socket_path[0] == '@')
     listening_addr.sun_path[0] = '\0';
+  else
+    unlink(socket_path);
 
   addrlen = offsetof(struct sockaddr_un, sun_path) + path_len + 1;
 
