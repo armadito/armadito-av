@@ -10,10 +10,10 @@ COMMON_SOURCES=\
 ../../utils/getopt.h \
 ../daemon/ipc.c \
 ../daemon/ipc.h \
-../daemon/tcpsock.c \
-../daemon/tcpsock.h \
-../daemon/unixsock.c \
-../daemon/unixsock.h
+../net/tcpsockclient.c \
+../net/tcpsockclient.h \
+../net/unixsockclient.c \
+../net/unixsockclient.h
 
 uhuru_scan_SOURCES=uhuru-scan.c $(COMMON_SOURCES)
 
