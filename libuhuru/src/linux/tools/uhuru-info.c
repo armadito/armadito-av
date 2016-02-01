@@ -1,7 +1,7 @@
 #include "utils/getopt.h"
 #include "daemon/ipc.h"
-#include "daemon/tcpsock.h"
-#include "daemon/unixsock.h"
+#include "net/tcpsockclient.h"
+#include "net/unixsockclient.h"
 
 #include <assert.h>
 #include <errno.h>

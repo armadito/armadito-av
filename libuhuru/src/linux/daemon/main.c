@@ -4,8 +4,8 @@
 #include "log.h"
 #include "server.h"
 #include "daemonize.h"
-#include "tcpsock.h"
-#include "unixsock.h"
+#include "tcpsockserver.h"
+#include "unixsockserver.h"
 
 #include <glib.h>
 #include <errno.h>
