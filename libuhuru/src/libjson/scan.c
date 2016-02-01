@@ -27,9 +27,24 @@ struct scan_data {
   int last_send_progress;
 };
 
+#ifdef linux
+static time_t get_milliseconds(void)
+{
+  struct timeval now;
+
+  if (gettimeofday(&now, NULL) < 0) {
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "error getting time IHM (%s)", strerror(errno));
+    return 0;
+  }
+
+  return now.tv_sec * 1000 + now.tv_usec / 1000;
+}
+#endif
+
+#ifdef WIN32
+#error must implement get_milliseconds on windows
 #if 0
 Note: gettimeofday on windows:
-#ifdef WIN32
 #include <time.h>
 #include <sys/timeb.h>
 int gettimeofday (struct timeval *tp, void *tz)
@@ -42,19 +57,6 @@ return 0;
 }
 #endif
 #endif
-
-static time_t get_milliseconds(void)
-{
-  struct timeval now;
-
-  if (gettimeofday(&now, NULL) < 0) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "error getting time IHM (%s)", strerror(errno));
-    return 0;
-  }
-
-  return now.tv_sec * 1000 + now.tv_usec / 1000;
-}
-
 /*
   JSON object fields examples:
 
@@ -102,7 +104,7 @@ static struct json_object *report_json(struct uhuru_report *report)
 }
 */
 
-#define SEND_PERIOD 1000  /* milliseconds */
+#define SEND_PERIOD 200  /* milliseconds */
 
 static void scan_callback(struct uhuru_report *report, void *callback_data)
 {
@@ -202,10 +204,15 @@ enum uhuru_json_status scan_request_cb(const char *request, int id, struct json_
   scan_data->last_send_time = 0L;
   scan_data->last_send_progress = REPORT_PROGRESS_UNKNOWN;
 
+#ifdef linux
   if (pthread_create(&scan_thread, NULL, scan_thread_fun, scan_data)) {
     uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_ERROR, "JSON: cannot create scan thread (%s)", strerror(errno));
     return JSON_REQUEST_FAILED;
   }
+#endif
+#ifdef WIN32
+#error must add thread creation
+#endif
 
   return JSON_OK;
 }
