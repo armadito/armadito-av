@@ -3,20 +3,21 @@
 #include <json.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #define BUFFSIZE (64*1024)
 
-static struct json_object *json_read(FILE *in)
+static struct json_object *json_read(int fd)
 {
   struct json_tokener *tokener = json_tokener_new();
   char buff[BUFFSIZE];
   size_t len;
   struct json_object *obj;
 
-  len = fread(buff, 1, BUFFSIZE, in);
+  len = read(fd, buff, BUFFSIZE);
 
   if (!len) {
-    perror("fread");
+    perror("read");
     exit(EXIT_FAILURE);
   }
 
@@ -36,7 +37,7 @@ int main(int argc, char **argv)
 {
   struct json_object *obj;
 
-  obj = json_read(stdin);
+  obj = json_read(STDIN_FILENO);
   uhuru_json_print(obj, stdout);
 
   return 0;

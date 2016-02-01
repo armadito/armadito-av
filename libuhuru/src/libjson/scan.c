@@ -4,16 +4,56 @@
 
 #include "uhurujson.h"
 #include "scan.h"
+
 #ifdef linux
 #include "net/unixsockclient.h"
+#define DEFAULT_SOCKET_PATH   "/tmp/.uhuru-ihm"
 #endif
 
 #include <json.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef linux
+#include <pthread.h>
+#include <sys/time.h>
+#endif
 
-#define DEFAULT_SOCKET_PATH   "/tmp/.uhuru-ihm"
+struct scan_data {
+  struct uhuru *uhuru;
+  const char *path;
+  int scan_id;
+  time_t last_send_time;
+  int last_send_progress;
+};
+
+#if 0
+Note: gettimeofday on windows:
+#ifdef WIN32
+#include <time.h>
+#include <sys/timeb.h>
+int gettimeofday (struct timeval *tp, void *tz)
+{
+struct _timeb timebuffer;
+_ftime (&timebuffer);
+tp->tv_sec = timebuffer.time;
+tp->tv_usec = timebuffer.millitm * 1000;
+return 0;
+}
+#endif
+#endif
+
+static time_t get_milliseconds(void)
+{
+  struct timeval now;
+
+  if (gettimeofday(&now, NULL) < 0) {
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "error getting time IHM (%s)", strerror(errno));
+    return 0;
+  }
+
+  return now.tv_sec * 1000 + now.tv_usec / 1000;
+}
 
 /*
   JSON object fields examples:
@@ -62,14 +102,25 @@ static struct json_object *report_json(struct uhuru_report *report)
 }
 */
 
+#define SEND_PERIOD 1000  /* milliseconds */
+
 static void scan_callback(struct uhuru_report *report, void *callback_data)
 {
   int fd;
   struct json_object *j_request;
+  struct scan_data *scan_data = (struct scan_data *)callback_data;
   const char *req;
   size_t req_len;
+  time_t now;
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "scan_callback");
+  now = get_milliseconds();
+  if (report->status == UHURU_CLEAN
+      && report->progress != 100
+      && scan_data->last_send_progress != REPORT_PROGRESS_UNKNOWN
+      && scan_data->last_send_progress == report->progress
+      && scan_data->last_send_time != 0
+      && (now - scan_data->last_send_time) < SEND_PERIOD)
+    return;
 
   fd = unix_client_connect(DEFAULT_SOCKET_PATH, 10);
 
@@ -78,8 +129,6 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
     return;
   }
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "scan_callback: fd = %d", fd);
-
   j_request = json_object_new_object();
   json_object_object_add(j_request, "ihm_request", json_object_new_string("scan"));
   json_object_object_add(j_request, "id", json_object_new_int(report->scan_id));
@@ -87,19 +136,45 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
 
   req = json_object_to_json_string(j_request);
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "scan_callback: req = %s", req);
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "scan_callback: sending req = %s", req);
 
   if (write(fd, req, strlen(req)) < 0)
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "error writing JSON response (%s)", strerror(errno));
 
+  if (write(fd, "\r\n\r\n", 4) < 0)
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "error writing JSON response (%s)", strerror(errno));
+
+  scan_data->last_send_time = now;
+  scan_data->last_send_progress = report->progress;
+
   close(fd);
 }
+
+static void *scan_thread_fun(void *arg)
+{
+  struct scan_data *scan_data = (struct scan_data *)arg;
+  struct uhuru_on_demand *on_demand;
+
+  on_demand = uhuru_on_demand_new(scan_data->uhuru, scan_data->scan_id, scan_data->path, UHURU_SCAN_RECURSE | UHURU_SCAN_THREADED);
+
+  uhuru_scan_add_callback(uhuru_on_demand_get_scan(on_demand), scan_callback, scan_data);
+
+  uhuru_on_demand_run(on_demand);
+
+  free(arg);
+
+  uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_DEBUG, "JSON: scan thread terminated");
+
+  return NULL;
+}
+
 
 enum uhuru_json_status scan_request_cb(const char *request, int id, struct json_object *params, struct uhuru *uhuru, struct json_object **p_info, const char **p_error_message)
 {
   struct json_object *j_path;
   const char *path;
-  struct uhuru_on_demand *on_demand;
+  struct scan_data *scan_data;
+  pthread_t scan_thread;
 
 #ifdef DEBUG
   uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_DEBUG, "JSON: scan cb called");
@@ -120,11 +195,17 @@ enum uhuru_json_status scan_request_cb(const char *request, int id, struct json_
 
   uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_DEBUG, "JSON: scan path = %s", path);
 
-  on_demand = uhuru_on_demand_new(uhuru, id, path, UHURU_SCAN_RECURSE);
+  scan_data = malloc(sizeof(struct scan_data));
+  scan_data->uhuru = uhuru;
+  scan_data->scan_id = id;
+  scan_data->path = path;
+  scan_data->last_send_time = 0L;
+  scan_data->last_send_progress = REPORT_PROGRESS_UNKNOWN;
 
-  uhuru_scan_add_callback(uhuru_on_demand_get_scan(on_demand), scan_callback, NULL);
-
-  uhuru_on_demand_run(on_demand);
+  if (pthread_create(&scan_thread, NULL, scan_thread_fun, scan_data)) {
+    uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_ERROR, "JSON: cannot create scan thread (%s)", strerror(errno));
+    return JSON_REQUEST_FAILED;
+  }
 
   return JSON_OK;
 }
