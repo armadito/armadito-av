@@ -1,14 +1,9 @@
-#include "tcpsock.h"
+#include "tcpsockclient.h"
 
-#if defined(linux)
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#elif defined(WIN32)
-#include <winsock.h>
-typedef unsigned long in_addr_t;
-#endif
 
 #include <assert.h>
 #include <stdio.h>
@@ -71,43 +66,3 @@ int tcp_client_connect(char *hostname, short port_number, int max_retry)
   return fd;
 }
 
-int tcp_server_listen(short port_number, const char *dotted)
-{
-  int sock, optval;
-  struct sockaddr_in listening_addr;
-  in_addr_t bind_addr = htonl(INADDR_ANY);
-  int r;
-
-  sock = socket(AF_INET, SOCK_STREAM, 0);
-  if (sock < 0) {
-    perror("socket() failed");
-    return -1;
-  }
-
-  optval = 1;
-  if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&optval, sizeof(optval)) < 0) {
-    perror("setsockopt()");
-    return -1;
-  }
-
-  if (dotted != NULL)
-    bind_addr = inet_addr(dotted);
-
-  listening_addr.sin_family = AF_INET;
-  listening_addr.sin_port = htons(port_number);
-  listening_addr.sin_addr.s_addr = bind_addr;
-
-  r = bind(sock, (struct sockaddr *)&listening_addr, sizeof(listening_addr));
-  if (r < 0) {
-    perror("bind() failed");
-    return -1;
-  }
-  
-  r = listen(sock, 5);
-  if (r < 0) {
-    perror("listen() failed");
-    return -1;
-  }
-
-  return sock;
-}

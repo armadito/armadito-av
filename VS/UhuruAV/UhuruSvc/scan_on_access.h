@@ -10,6 +10,8 @@
 #include <libuhuru-config.h>
 #include <libuhuru/core.h>
 
+#include "quarantine.h"
+
 
 #define SCAN_PORT_NAME L"\\UhuruPortScanFilter"
 #define USER_SCAN_THREAD_COUNT 6

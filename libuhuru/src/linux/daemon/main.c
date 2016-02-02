@@ -4,13 +4,21 @@
 #include "log.h"
 #include "server.h"
 #include "daemonize.h"
-#include "tcpsock.h"
-#include "unixsock.h"
+#include "tcpsockserver.h"
+#include "unixsockserver.h"
 
 #include <glib.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#define DEFAULT_SOCKET_TYPE   "unix"
+#define DEFAULT_SOCKET_PORT   "14444"
+#define DEFAULT_SOCKET_PATH   "/tmp/.uhuru-daemon"
+/* #define DEFAULT_SOCKET_PATH   "@/tmp/.uhuru-daemon"  /* for abstract sockets (see man 7 unix) */
+#define DEFAULT_LOG_LEVEL     "error"
+#define DEFAULT_IPC_TYPE      "old"
+#define DEFAULT_PID_FILE      LOCALSTATEDIR "/run/uhuru-scand.pid"
 
 struct uhuru_daemon_options {
   int no_daemon;
@@ -24,9 +32,6 @@ struct uhuru_daemon_options {
   const char *pid_file;
   enum ipc_type ipc_type;
 };
-
-#define DEFAULT_LOG_LEVEL "error"
-#define DEFAULT_IPC_TYPE "old"
 
 struct opt daemon_opt_defs[] = {
   { .long_form = "help", .short_form = 'h', .need_arg = 0, .is_set = 0, .value = NULL},
@@ -52,14 +57,16 @@ static void usage(void)
   fprintf(stderr, "  --no-daemon -n                     do not fork and go to background\n");
   fprintf(stderr, "  --log-level=LEVEL | -l LEVEL       set log level\n");
   fprintf(stderr, "                                     Log level can be: error, warning, info, debug\n");
-  fprintf(stderr, "                                     Default is : %s\n", DEFAULT_LOG_LEVEL);
-  fprintf(stderr, "  --tcp -t | --unix -u               use TCP (--tcp) or unix (--unix) socket (default is unix)\n");
-  fprintf(stderr, "  --port=PORT | -p PORT              TCP port number\n");
-  fprintf(stderr, "  --path=PATH | -a PATH              unix socket path\n");
+  fprintf(stderr, "                                     (default is : " DEFAULT_LOG_LEVEL "\n");
+  fprintf(stderr, "  --tcp -t | --unix -u               use TCP (--tcp) or unix (--unix) socket (default is " DEFAULT_SOCKET_TYPE ")\n");
+  fprintf(stderr, "  --port=PORT | -p PORT              TCP port number (default is " DEFAULT_SOCKET_PORT ")\n");
+  fprintf(stderr, "  --path=PATH | -a PATH              unix socket path (default is " DEFAULT_SOCKET_PATH ")\n");
   fprintf(stderr, "  --pidfile=PATH | -i PATH           create PID file at specified location\n");
+  fprintf(stderr, "                                     (default is : " DEFAULT_PID_FILE ")\n");
   fprintf(stderr, "  --ipc=old|json | -c old|json       select IPC type for communication with the user interface\n");
   fprintf(stderr, "                                     json: for new web interface\n");
   fprintf(stderr, "                                     old: for old Qt interface\n");
+  fprintf(stderr, "                                     (default is : " DEFAULT_IPC_TYPE ")\n");
   fprintf(stderr, "\n");
 
   exit(1);
@@ -81,10 +88,7 @@ static int check_ipc_type(const char *s_ipc_type)
 static void parse_options(int argc, const char **argv, struct uhuru_daemon_options *opts)
 {
   int r = opt_parse(daemon_opt_defs, argc, argv);
-  const char *s_port, *s_ipc_type;
-
- // printf( "ARGV[0] : %s \n", argv[0] );
- // printf( "ARGV[1] : %s \n", argv[1] );
+  const char *s_port, *s_ipc_type, *s_socket_type;
 
   if (r < 0 || r > argc)
     usage();
@@ -103,18 +107,21 @@ static void parse_options(int argc, const char **argv, struct uhuru_daemon_optio
   if (check_log_level(opts->s_log_level))
     usage();
 
-  opts->socket_type = UNIX_SOCKET;
+  s_socket_type = DEFAULT_SOCKET_TYPE;
   if (opt_is_set(daemon_opt_defs, "tcp"))
-    opts->socket_type = TCP_SOCKET;
+    s_socket_type = "tcp";
+  else if (opt_is_set(daemon_opt_defs, "unix"))
+    s_socket_type = "unix";
 
-  s_port = opt_value(daemon_opt_defs, "port", "14444");
+  opts->socket_type = (!strcmp(s_socket_type, "unix")) ? UNIX_SOCKET : TCP_SOCKET;
+
+  s_port = opt_value(daemon_opt_defs, "port", DEFAULT_SOCKET_PORT);
   opts->port_number = (unsigned short)atoi(s_port);
 
-  opts->unix_path = opt_value(daemon_opt_defs, "path", "/tmp/.uhuru-daemon");
-  /* opts->unix_path = opt_value(daemon_opt_defs, "path", "@/tmp/.uhuru/daemon"); */
+  opts->unix_path = opt_value(daemon_opt_defs, "path", DEFAULT_SOCKET_PATH);
 
   if (opt_is_set(daemon_opt_defs, "pidfile"))
-    opts->pid_file = opt_value(daemon_opt_defs, "pidfile", LOCALSTATEDIR "/run/uhuru-scand.pid");
+    opts->pid_file = opt_value(daemon_opt_defs, "pidfile", DEFAULT_PID_FILE);
 
   s_ipc_type = opt_value(daemon_opt_defs, "ipc", DEFAULT_IPC_TYPE);
   if (check_ipc_type(s_ipc_type))
