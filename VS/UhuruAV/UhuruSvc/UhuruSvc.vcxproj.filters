@@ -42,7 +42,13 @@
     <ClCompile Include="..\..\..\libuhuru\src\utils\getopt.c">
       <Filter>Fichiers sources\utils</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\libuhuru\src\utils\json.c">
+    <ClCompile Include="quarantine.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="update.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\utils\uh_json.c">
       <Filter>Fichiers sources\utils</Filter>
     </ClCompile>
   </ItemGroup>
@@ -68,7 +74,13 @@
     <ClInclude Include="..\..\..\libuhuru\src\utils\getopt.h">
       <Filter>Fichiers d%27en-tête\utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\libuhuru\src\utils\json.h">
+    <ClInclude Include="quarantine.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="update.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\utils\uh_json.h">
       <Filter>Fichiers d%27en-tête\utils</Filter>
     </ClInclude>
   </ItemGroup>

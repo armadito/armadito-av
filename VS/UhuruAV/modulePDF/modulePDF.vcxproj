@@ -11,19 +11,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{BDB70B28-0B54-405C-87AE-ABDFC9CE7795}</ProjectGuid>
+    <ProjectGuid>{DD99F15B-29CE-4092-BD72-BC99B961995D}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>UhuruSvc</RootNamespace>
+    <RootNamespace>modulePDF</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
-    <CharacterSet>NotSet</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -41,8 +41,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)..\..\libuhuru\include\config;$(SolutionDir)..\..\libuhuru\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)Debug;D:\Novit\uhuru-av\VS\json-c\json-c\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)..\..\libuhuru\include;$(SolutionDir)..\..\..\uhurupdf\module7\includes;$(IncludePath)</IncludePath>
     <SourcePath>$(SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -54,14 +53,13 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;MODULEPDF_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>D:\Novit\uhuru-av\libuhuru\src\windows\service\MessageText;D:\Novit\uhuru-av\libuhuru\src;D:\Novit\uhuru-av\VS\json-c\json-c;D:\Novit\uhuru-av\VS\UhuruAV\UhuruSvc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>FltLib.lib;libuhuru_core.lib;Wtsapi32.lib;json-c.lib;urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>modulePDF.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -72,39 +70,32 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;MODULEPDF_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <ModuleDefinitionFile>modulePDF.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\libuhuru\src\utils\getopt.c" />
-    <ClCompile Include="..\..\..\libuhuru\src\utils\uh_json.c" />
-    <ClCompile Include="log.c" />
-    <ClCompile Include="named_pipe_client.c" />
-    <ClCompile Include="named_pipe_server.c" />
-    <ClCompile Include="quarantine.c" />
-    <ClCompile Include="scan_on_access.c" />
-    <ClCompile Include="scan_on_demand.c" />
-    <ClCompile Include="service.c" />
-    <ClCompile Include="update.c" />
+    <ClCompile Include="..\..\..\..\uhurupdf\module7\src\filters.c" />
+    <ClCompile Include="..\..\..\..\uhurupdf\module7\src\osdeps.c" />
+    <ClCompile Include="..\..\..\..\uhurupdf\module7\src\pdfAnalysis.c" />
+    <ClCompile Include="..\..\..\..\uhurupdf\module7\src\pdfObjectsAnalysis.c" />
+    <ClCompile Include="..\..\..\..\uhurupdf\module7\src\pdfParsing.c" />
+    <ClCompile Include="..\..\..\..\uhurupdf\module7\src\pdfStructAnalysis.c" />
+    <ClCompile Include="..\..\..\..\uhurupdf\module7\src\utils.c" />
+    <ClCompile Include="..\..\..\modules\modulePDF\modulePDF.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\libuhuru\src\utils\getopt.h" />
-    <ClInclude Include="..\..\..\libuhuru\src\utils\uh_json.h" />
-    <ClInclude Include="log.h" />
-    <ClInclude Include="named_pipe_client.h" />
-    <ClInclude Include="named_pipe_server.h" />
-    <ClInclude Include="quarantine.h" />
-    <ClInclude Include="scan_on_access.h" />
-    <ClInclude Include="scan_on_demand.h" />
-    <ClInclude Include="service.h" />
-    <ClInclude Include="update.h" />
+    <ClInclude Include="..\..\..\modules\modulePDF\modulePDF.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="modulePDF.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

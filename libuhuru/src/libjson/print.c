@@ -6,9 +6,7 @@ static void json_print_value(struct json_object *obj, FILE *out, int level);
 
 static void space(FILE *out, int level)
 {
-  int i;
-
-  for(i = 0; i < level; i++)
+  while (level--)
     fprintf(out, " ");
 }
 

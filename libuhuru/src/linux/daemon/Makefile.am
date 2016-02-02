@@ -20,10 +20,10 @@ server.c \
 server.h \
 daemonize.c \
 daemonize.h \
-unixsock.c \
-unixsock.h \
-tcpsock.c \
-tcpsock.h \
+unixsockserver.c \
+unixsockserver.h \
+tcpsockserver.c \
+tcpsockserver.h \
 ../../utils/getopt.c \
 ../../utils/getopt.h 
 
