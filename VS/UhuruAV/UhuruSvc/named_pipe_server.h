@@ -8,7 +8,7 @@
 #include <strsafe.h>
 #include <libuhuru-config.h>
 #include <libuhuru/core.h>
-#include "utils/json.h"
+#include "utils/uh_json.h"
 #include "scan_on_demand.h"
 #include "json_tokener.h"
 #include "log.h"

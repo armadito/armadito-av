@@ -184,12 +184,16 @@ static enum uhuru_mod_status clamav_close(struct uhuru_module *module)
   struct clamav_data *cl_data = (struct clamav_data *)module->data;
   int ret;
 
+  
   if ((ret = cl_engine_free(cl_data->clamav_engine)) != CL_SUCCESS) {
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "ClamAV: can't free engine");
     return UHURU_MOD_CLOSE_ERROR;
   }
 
   cl_data->clamav_engine = NULL;
+
+  // Ulrich add
+  cl_cleanup_crypto(); 
 
   return UHURU_MOD_OK;
 }
