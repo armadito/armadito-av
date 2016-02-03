@@ -16,6 +16,8 @@
 
 #include "monitor.h"
 #include "mount.h"
+#include "reason.h"
+#include "watchdog.h"
 #include "onaccessmod.h"
 
 #include <assert.h>
@@ -54,21 +56,21 @@ struct access_monitor {
   int enable_removable_media;
   GPtrArray *entries;
 
-  pid_t my_pid;
-
   int start_pipe[2];
 
   int command_pipe[2];
   GIOChannel *command_channel;
 
+  GThread *monitor_thread;
+
   int fanotify_fd;
+  pid_t my_pid;
+  GThreadPool *thread_pool;  
+  struct watchdog *watchdog;
 
   int inotify_fd;
   GHashTable *wd2path_table;
   GHashTable *path2wd_table;
-
-  GThread *monitor_thread;
-  GThreadPool *thread_pool;  
 
   struct mount_monitor *mount_monitor;
 };
@@ -79,7 +81,10 @@ static gboolean fanotify_cb(GIOChannel *source, GIOCondition condition, gpointer
 static gboolean inotify_cb(GIOChannel *source, GIOCondition condition, gpointer data);
 
 static gpointer notify_thread_fun(gpointer data);
+static gpointer timeout_thread_fun(gpointer data);
 static void scan_file_thread_fun(gpointer data, gpointer user_data);
+
+static int write_response(struct access_monitor *m, int fd, __u32 r, const char *path, const char *reason, int dequeue);
 
 static void path_destroy_notify(gpointer data)
 {
@@ -406,6 +411,8 @@ static gpointer notify_thread_fun(gpointer data)
     return NULL;
   }
 
+  m->watchdog = watchdog_new(m->fanotify_fd);
+
   m->inotify_fd = inotify_init();
   if (m->inotify_fd == -1) {
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_NAME ": " "inotify_init failed (%s)", strerror(errno));
@@ -474,11 +481,15 @@ static char *get_file_path_from_fd(int fd, char *buffer, size_t buffer_size)
   return buffer;
 }
 
-static int write_response(struct access_monitor *m, int fd, __u32 r, const char *path, const char *reason)
+static int write_response(struct access_monitor *m, int fd, __u32 r, const char *path, const char *reason, int dequeue)
 {
   struct fanotify_response response;
   GLogLevelFlags log_level = UHURU_LOG_LEVEL_INFO;
   const char *auth = "ALLOW";
+
+ /* FIXME: really use path??? */
+  if (dequeue && !watchdog_remove(m->watchdog, fd, &path, NULL))
+      return;
 
   response.fd = fd;
   response.response = r;
@@ -491,6 +502,10 @@ static int write_response(struct access_monitor *m, int fd, __u32 r, const char 
     log_level = UHURU_LOG_LEVEL_WARNING;
     auth = "DENY";
   }
+
+  /* FIXME */
+  /* if (dequeue && path == NULL) */
+  /*   path = entry.path; */
 
   if (path == NULL)
     uhuru_log(UHURU_LOG_MODULE, log_level, MODULE_NAME ": " "fd %d %s (%s)", fd, auth, reason != NULL ? reason : "unknown");
@@ -520,7 +535,7 @@ void scan_file_thread_fun(gpointer data, gpointer user_data)
 	
   status = uhuru_scan_context(scan, file_context);
 
-  write_response(m, file_context->fd, file_status_2_response(status), file_context->path, "file was scanned");
+  write_response(m, file_context->fd, file_status_2_response(status), file_context->path, "file was scanned", 1);
 
   uhuru_file_context_free(file_context);
 
@@ -538,46 +553,37 @@ static int fanotify_perm_event_process(struct access_monitor *m, struct fanotify
   char *p;
 
   if (m->enable_permission == 0)  /* permission check is disabled, always allow */
-    return write_response(m, event->fd, FAN_ALLOW, NULL, "permission is not activated");
+    return write_response(m, event->fd, FAN_ALLOW, NULL, "permission is not activated", 1);
 
+  /* should not happen now */
   if (m->my_pid == event->pid)   /* file was opened by myself, always allow */
-    return write_response(m, event->fd, FAN_ALLOW, NULL, "event PID is myself");
+    return write_response(m, event->fd, FAN_ALLOW, NULL, "event PID is myself", 1);
 
   /* the 2 following tests could be removed: */
   /* if file descriptor does not refer to a file, read() will fail inside os_mime_type_guess_fd() */
   /* in this case, mime_type will be null, context_status will be error and */
   /* response will be ALLOW */
   if (fstat(event->fd, &buf) < 0)
-    return write_response(m, event->fd, FAN_ALLOW, NULL, "stat failed");
+    return write_response(m, event->fd, FAN_ALLOW, NULL, "stat failed", 1);
 
   if (!S_ISREG(buf.st_mode))
-    return write_response(m, event->fd, FAN_ALLOW, NULL, "fd is not a file");
+    return write_response(m, event->fd, FAN_ALLOW, NULL, "fd is not a file", 1);
 
-  p = get_file_path_from_fd(event->fd, file_path, PATH_MAX);
+  /* p = get_file_path_from_fd(event->fd, file_path, PATH_MAX); */
 
-  if (p == NULL)
-    return write_response(m, event->fd, FAN_ALLOW, NULL, "cannot get path from file descriptor");
+  /* if (p == NULL) */
+  /*   return write_response(m, event->fd, FAN_ALLOW, NULL, "cannot get path from file descriptor", 1); */
 
   /* get file scan context */
   context_status = uhuru_file_context_get(&file_context, event->fd, p, m->scan_conf);
 
   if (context_status) {   /* means file must not be scanned */
     uhuru_file_context_close(&file_context);
-    return write_response(m, event->fd, FAN_ALLOW, p, "file type is not scanned");
+    return write_response(m, event->fd, FAN_ALLOW, p, "file type is not scanned", 1);
   }
 
   /* scan in thread pool */
   g_thread_pool_push(m->thread_pool, uhuru_file_context_clone(&file_context), NULL);
-
-#if 0
-  /* scan in this thread */
-  scan = uhuru_scan_new(m->uhuru, -1);
-  status = uhuru_scan_context(scan, &file_context);
-  write_response(m, file_context.fd, file_status_2_response(status), p, NULL);
-  uhuru_scan_free(scan);
-
-  uhuru_file_context_close(&file_context);
-#endif
 
   return 0;
 }
@@ -603,16 +609,36 @@ static gboolean fanotify_cb(GIOChannel *source, GIOCondition condition, gpointer
   struct access_monitor *m = (struct access_monitor *)data;
   char buf[FANOTIFY_BUFFER_SIZE];
   ssize_t len;
+  struct fanotify_event_metadata *event;
+  struct timespec now;
 
-  if ((len = read (m->fanotify_fd, buf, FANOTIFY_BUFFER_SIZE)) > 0)  {
-    struct fanotify_event_metadata *event;
+  if ((len = read (m->fanotify_fd, buf, FANOTIFY_BUFFER_SIZE)) <= 0) {
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_NAME ": " "error reading fanotify event descriptor (%s)", strerror(errno));
+    return TRUE;
+  }
 
-    for(event = (struct fanotify_event_metadata *)buf; FAN_EVENT_OK(event, len); event = FAN_EVENT_NEXT(event, len)) {
-      if ((event->mask & FAN_OPEN_PERM))
-	fanotify_perm_event_process(m, event);
+  /* first pass: allow all PERM events from myself, enqueue other PERM events */
+  stamp_now(&now);
+  for(event = (struct fanotify_event_metadata *)buf; FAN_EVENT_OK(event, len); event = FAN_EVENT_NEXT(event, len)) {
+    char file_path[PATH_MAX + 1];
+    char *p = get_file_path_from_fd(event->fd, file_path, PATH_MAX);
+
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_NAME ": " "fanotify event fd %d path %s", event->fd, p);
+
+    if ((event->mask & FAN_OPEN_PERM))
+      if (event->pid == m->my_pid)
+	write_response(m, event->fd, FAN_ALLOW, p, "event PID is myself", 1);
       else
-	fanotify_notify_event_process(m, event);
-    }
+	watchdog_add(m->watchdog, event->fd, p);
+  }
+
+  /* second pass: process all PERM events that were not from myself and all other events */
+  for(event = (struct fanotify_event_metadata *)buf; FAN_EVENT_OK(event, len); event = FAN_EVENT_NEXT(event, len)) {
+    if ((event->mask & FAN_OPEN_PERM)) {
+      if (event->pid != m->my_pid)
+	fanotify_perm_event_process(m, event);
+    } else
+      fanotify_notify_event_process(m, event);
   }
 
   return TRUE;
