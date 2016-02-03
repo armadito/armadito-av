@@ -3,16 +3,19 @@
 
 #include <alloca.h>
 #include <stdlib.h>
+#include <string.h>
 
-static struct queue_entry *queue_entry_new(int fd, struct timespec *timestamp)
+static struct queue_node *queue_node_new(int fd, const char *path, struct timespec *timestamp)
 {
-  struct queue_entry *e = malloc(sizeof(struct queue_entry));
+  struct queue_node *n = malloc(sizeof(struct queue_node));
 
-  e->fd = fd;
-  stamp_cpy(&e->timestamp, timestamp);
-  e->prev = e->next = NULL;
+  n->entry.fd = fd;
+  n->entry.path = strdup(path);
+  stamp_cpy(&n->entry.timestamp, timestamp);
 
-  return e;
+  n->prev = n->next = NULL;
+
+  return n;
 }
 
 struct queue *queue_new(void)
@@ -45,9 +48,9 @@ static inline void queue_unlock(struct queue *q)
   pthread_mutex_unlock(&q->queue_lock);
 }
 
-void queue_push(struct queue *q, int fd, struct timespec *timestamp)
+void queue_push(struct queue *q, int fd, const char *path, struct timespec *timestamp)
 {
-  struct queue_entry *new_entry = queue_entry_new(fd, timestamp);
+  struct queue_node *new_entry = queue_node_new(fd, path, timestamp);
 
   queue_lock(q);
 
@@ -63,63 +66,65 @@ void queue_push(struct queue *q, int fd, struct timespec *timestamp)
   queue_unlock(q);
 }
 
-static inline void queue_remove(struct queue *q, struct queue_entry *e)
+static inline void queue_remove(struct queue *q, struct queue_node *n)
 {
-  if (e->prev != NULL)
-    e->prev->next = e->next;
+  if (n->prev != NULL)
+    n->prev->next = n->next;
   else
-    q->head = e->next;
+    q->head = n->next;
 
-  if (e->next != NULL)
-    e->next->prev = e->prev;
+  if (n->next != NULL)
+    n->next->prev = n->prev;
   else
-    q->tail = e->prev;
+    q->tail = n->prev;
 }
 
-int queue_pop(struct queue *q, int fd)
+int queue_pop_fd(struct queue *q, int fd, struct queue_entry *pop_entry)
 {
-  struct queue_entry *e;
+  struct queue_node *n;
 
   queue_lock(q);
 
-  e = q->head; 
-  while (e != NULL & e->fd != fd)
-    e = e->next;
+  n = q->head; 
+  while (n != NULL & n->entry.fd != fd)
+    n = n->next;
 
-  if (e == NULL) {
+  if (n == NULL) {
     queue_unlock(q);
     return 0;
   }
 
-  queue_remove(q, e);
+  queue_remove(q, n);
 
   queue_unlock(q);
 
-  free(e);
+  *pop_entry = n->entry;
+
+  free(n);
 
   return 1;
 }
 
-int queue_pop_timeout(struct queue *q, struct timespec *before, int *fds, int n_fd)
+int queue_pop_timeout(struct queue *q, struct timespec *before, struct queue_entry *pop_entries, int n_entries)
 {
-  struct queue_entry *e;
-  struct queue_entry **to_free;
+  struct queue_node *n;
+  struct queue_node **to_free;
   int count = 0, i;
 
-  to_free = alloca(n_fd * sizeof(struct queue_entry *));
+  to_free = alloca(n_entries * sizeof(struct queue_node *));
 
   queue_lock(q);
 
-  e = q->tail; 
-  while (e != NULL && count < n_fd) {
-    if (stamp_cmp(&e->timestamp, before) <= 0) {
-      queue_remove(q, e);
-      to_free[count] = e;
-      fds[count] = e->fd;
+  n = q->tail; 
+  while (n != NULL && count < n_entries) {
+    if (stamp_cmp(&n->entry.timestamp, before) <= 0) {
+      queue_remove(q, n);
+      to_free[count] = n;
+      pop_entries[count] = n->entry;
       count++;
     }
 
-    e = e->prev;
+    n = n->prev;
   }
 
   queue_unlock(q);

@@ -10,9 +10,13 @@ monitor.c \
 monitor.h \
 mount.c \
 mount.h \
+reason.c \
+reason.h \
 queue.c \
 queue.h \
-stamp.h 
+stamp.h \
+watchdog.c \
+watchdog.h 
 
 on_access_linux_la_LDFLAGS= -module -avoid-version
 on_access_linux_la_LIBADD= @GLIB2_LIBS@ @GIO2_LIBS@
