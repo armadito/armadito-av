@@ -6,6 +6,8 @@ modules_LTLIBRARIES=on-access-linux.la
 on_access_linux_la_SOURCES= \
 famonitor.c \
 famonitor.h \
+imonitor.c \
+imonitor.h \
 onaccessmod.c \
 onaccessmod.h \
 monitor.c \
