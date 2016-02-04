@@ -6,12 +6,12 @@
 #define _GNU_SOURCE
 
 #include <libuhuru/core.h>
-
 #include "config/libuhuru-config.h"
 
 #include "monitor.h"
-#include "mount.h"
 #include "famonitor.h"
+#include "imonitor.h"
+#include "mount.h"
 #include "onaccessmod.h"
 
 #include <dirent.h>
@@ -19,11 +19,9 @@
 #include <fcntl.h>
 #include <glib.h>
 #include <limits.h>
-#include <linux/fanotify.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/inotify.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -50,25 +48,15 @@ struct access_monitor {
   GThread *monitor_thread;
 
   struct fanotify_monitor *fanotify_monitor;
-
-  int inotify_fd;
-  GHashTable *wd2path_table;
-  GHashTable *path2wd_table;
-
+  struct inotify_monitor *inotify_monitor;
   struct mount_monitor *mount_monitor;
 };
 
 static gboolean start_cb(GIOChannel *source, GIOCondition condition, gpointer data);
 static gboolean command_cb(GIOChannel *source, GIOCondition condition, gpointer data);
-static gboolean inotify_cb(GIOChannel *source, GIOCondition condition, gpointer data);
 
 static gpointer monitor_thread_fun(gpointer data);
 static void scan_file_thread_fun(gpointer data, gpointer user_data);
-
-static void path_destroy_notify(gpointer data)
-{
-  free(data);
-}
 
 static void entry_destroy_notify(gpointer data)
 {
@@ -108,11 +96,9 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
   start_channel = g_io_channel_unix_new(m->start_pipe[0]);	
   g_io_add_watch(start_channel, G_IO_IN, start_cb, m);
 
-  m->wd2path_table = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, path_destroy_notify);
-  m->path2wd_table = g_hash_table_new_full(g_str_hash, g_str_equal, path_destroy_notify, NULL);
-
-  m->mount_monitor = NULL;
   m->fanotify_monitor = fanotify_monitor_new(u);
+  m->inotify_monitor = inotify_monitor_new(m);
+  m->mount_monitor = NULL;
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_NAME ": " "init ok");
 
@@ -230,46 +216,22 @@ static gboolean start_cb(GIOChannel *source, GIOCondition condition, gpointer da
 
 static void mark_directory(struct access_monitor *m, const char *path)
 {
-  int wd;
-
   if (fanotify_monitor_mark_directory(m->fanotify_monitor, path, m->enable_permission) < 0)
     return;
 
-  wd = inotify_add_watch(m->inotify_fd, path, IN_ONLYDIR | IN_MOVE | IN_DELETE | IN_CREATE);
-  if (wd == -1) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, MODULE_NAME ": " "adding inotify watch for %s failed (%s)", path, strerror(errno));
+  if (inotify_monitor_mark_directory(m->inotify_monitor, path) < 0)
     return;
-  }
 
-  g_hash_table_insert(m->wd2path_table, GINT_TO_POINTER(wd), (gpointer)strdup(path));
-  g_hash_table_insert(m->path2wd_table, (gpointer)strdup(path), GINT_TO_POINTER(wd));
-
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_NAME ": " "added mark for directory %s (wd=%d)", path, wd);
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_NAME ": " "added mark for directory %s", path);
 }
 
 static void unmark_directory(struct access_monitor *m, const char *path)
 {
-  void *p;
-
   if (fanotify_monitor_unmark_directory(m->fanotify_monitor, path, m->enable_permission) < 0)
     return;
 
-  /* retrieve the watch descriptor associated to path */
-  p = g_hash_table_lookup(m->path2wd_table, path);
-  if (p == NULL) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, MODULE_NAME ": " "retrieving inotify watch id for %s failed", path);
-  } else {
-    int wd = GPOINTER_TO_INT(p);
-  
-    /* errors are ignored: if the watch descriptor is invalid, it means it is no longer being watched because of deletion */
-    if (inotify_rm_watch(m->inotify_fd, wd) == -1) {
-      uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, MODULE_NAME ": " "removing inotify watch %d for %s failed (%s)", wd, path, strerror(errno));
-    }
-
-    g_hash_table_remove(m->wd2path_table, GINT_TO_POINTER(wd));
-  }
-
-  g_hash_table_remove(m->path2wd_table, path);
+  if (inotify_monitor_unmark_directory(m->inotify_monitor, path) < 0)
+    return;
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_NAME ": " "removed mark for directory %s", path);
 }
@@ -354,22 +316,16 @@ static void mount_cb(enum mount_event_type ev_type, const char *path, void *user
 static gpointer monitor_thread_fun(gpointer data)
 {
   struct access_monitor *m = (struct access_monitor *)data;
+  GIOChannel *command_channel;
   GMainLoop *loop;
-  GIOChannel *inotify_channel, *command_channel;
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_NAME ": " "started thread");
 
   if (fanotify_monitor_start(m->fanotify_monitor))
     return NULL;
 
-  m->inotify_fd = inotify_init();
-  if (m->inotify_fd == -1) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_NAME ": " "inotify_init failed (%s)", strerror(errno));
+  if (inotify_monitor_start(m->inotify_monitor))
     return NULL;
-  }
-
-  inotify_channel = g_io_channel_unix_new(m->inotify_fd);	
-  g_io_add_watch(inotify_channel, G_IO_IN, inotify_cb, m);
 
   /* if configured, add the mount monitor */
   if (m->enable_removable_media) {
@@ -409,110 +365,3 @@ static gboolean command_cb(GIOChannel *source, GIOCondition condition, gpointer 
   return TRUE;
 }
 
-#ifdef DEBUG
-static void inotify_event_log(const struct inotify_event *e, const char *full_path)
-{
-  GString *s = g_string_new("");
-
-  g_string_append_printf(s, "inotify event: wd=%2d ", e->wd);
-
-  if (e->cookie > 0)
-    g_string_append_printf(s, "cookie=%4d ", e->cookie);
-
-  g_string_append_printf(s, "mask=");
-
-#define M(_mask, _mask_bit) do { if ((_mask) & (_mask_bit)) g_string_append_printf(s, #_mask_bit " "); } while(0)
-
-  M(e->mask, IN_ACCESS);
-  M(e->mask, IN_ATTRIB);
-  M(e->mask, IN_CLOSE_NOWRITE);
-  M(e->mask, IN_CLOSE_WRITE);
-  M(e->mask, IN_CREATE);
-  M(e->mask, IN_DELETE);
-  M(e->mask, IN_DELETE_SELF);
-  M(e->mask, IN_IGNORED);
-  M(e->mask, IN_ISDIR);
-  M(e->mask, IN_MODIFY);
-  M(e->mask, IN_MOVE_SELF);
-  M(e->mask, IN_MOVED_FROM);
-  M(e->mask, IN_MOVED_TO);
-  M(e->mask, IN_OPEN);
-  M(e->mask, IN_Q_OVERFLOW);
-  M(e->mask, IN_UNMOUNT);
-
-  if (e->len > 0)
-    g_string_append_printf(s, "name=%s", e->name);
-
-  g_string_append_printf(s, " full_path=%s", full_path != NULL ? full_path : "null");
-
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_NAME ": " "%s", s->str);
-
-  g_string_free(s, TRUE);
-}
-#endif
-
-static char *inotify_event_full_path(struct access_monitor *m, struct inotify_event *event)
-{
-  char *dir, *full_path;
-
-  dir = (char *)g_hash_table_lookup(m->wd2path_table, GINT_TO_POINTER(event->wd));
-
-  if (dir == NULL)
-    return NULL;
-
-  if (event->len) {
-    GString *tmp = g_string_new("");
-
-    g_string_printf(tmp, "%s/%s", dir, event->name);
-
-    full_path = tmp->str;
-
-    g_string_free(tmp, FALSE);
-  } else {
-    full_path = strdup(dir);
-  }
-
-  return full_path;
-}
-
-static void inotify_event_process(struct access_monitor *m, struct inotify_event *event)
-{
-  char *full_path = inotify_event_full_path(m, event);
-
-  if (!(event->mask & IN_ISDIR))
-    return;
-
-  if (event->mask & IN_CREATE && event->mask & IN_ISDIR
-      || event->mask & IN_MOVED_TO && event->mask & IN_ISDIR)
-    recursive_mark_directory(m, full_path);
-  else if (event->mask & IN_DELETE && event->mask & IN_ISDIR
-	   || event->mask & IN_MOVED_FROM && event->mask & IN_ISDIR)
-    unmark_directory(m, full_path);
-
-  free(full_path);
-}
-
-/* Size of buffer to use when reading inotify events */
-#define INOTIFY_BUFFER_SIZE 8192
-
-static gboolean inotify_cb(GIOChannel *source, GIOCondition condition, gpointer data)
-{
-  struct access_monitor *m = (struct access_monitor *)data;
-  char event_buffer[INOTIFY_BUFFER_SIZE];
-  ssize_t len;
-
-  if ((len = read (m->inotify_fd, event_buffer, INOTIFY_BUFFER_SIZE)) > 0)  {
-    char *p;
-
-    p = event_buffer;
-    while (p < event_buffer + len) {
-      struct inotify_event *event = (struct inotify_event *) p;
-
-      inotify_event_process(m, event);
-
-      p += sizeof(struct inotify_event) + event->len;
-    }
-  }
-
-  return TRUE;
-}
