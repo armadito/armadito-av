@@ -29,6 +29,11 @@ enum uhuru_file_context_status uhuru_file_context_get(struct uhuru_file_context 
   struct uhuru_module **applicable_modules;
   const char *mime_type;
 
+  if (fd == -1 && path == NULL) {
+    ctx->status = UHURU_FC_FILE_OPEN_ERROR;
+    return ctx->status;
+  }
+
   ctx->status = UHURU_FC_MUST_SCAN;
   ctx->fd = fd;
   ctx->path = NULL;
@@ -36,7 +41,7 @@ enum uhuru_file_context_status uhuru_file_context_get(struct uhuru_file_context 
   ctx->applicable_modules = NULL;
 
   /* 1) check file name vs. directories white list */
-  if (uhuru_scan_conf_is_white_listed(conf, path)) {
+  if (path != NULL && uhuru_scan_conf_is_white_listed(conf, path)) {
     ctx->status = UHURU_FC_WHITE_LISTED_DIRECTORY;
     return ctx->status;
   }

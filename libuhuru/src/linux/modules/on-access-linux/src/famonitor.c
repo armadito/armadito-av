@@ -93,31 +93,19 @@ static void scan_file_thread_fun(gpointer data, gpointer user_data)
   enum uhuru_file_status status;
   __u32 fan_r;
 	
-  scan = uhuru_scan_new(f->uhuru, -1);
-  status = uhuru_scan_context(scan, file_context);
-  fan_r = status == UHURU_MALWARE ? FAN_DENY : FAN_ALLOW;
+  /* scan = uhuru_scan_new(f->uhuru, -1); */
+  /* status = uhuru_scan_context(scan, file_context); */
+  /* fan_r = status == UHURU_MALWARE ? FAN_DENY : FAN_ALLOW; */
+
+  fan_r = FAN_ALLOW;
 
   if (watchdog_remove(f->watchdog, file_context->fd, NULL))
     response_write(f->fanotify_fd, file_context->fd, fan_r, file_context->path, "file was scanned");
 
   uhuru_file_context_free(file_context);
 
-  uhuru_scan_free(scan);
+  /* uhuru_scan_free(scan); */
 }
-
-#if 0
-  /* FIXME: remove */
-  struct stat buf;
-
-  /* the 2 following tests could be removed: */
-  /* if file descriptor does not refer to a file, read() will fail inside os_mime_type_guess_fd() */
-  /* in this case, mime_type will be null, context_status will be error and */
-  /* response will be ALLOW */
-  if (fstat(event->fd, &buf) < 0)
-    return response_write(m, event->fd, FAN_ALLOW, NULL, "stat failed", 1);
-  if (!S_ISREG(buf.st_mode))
-    return response_write(m, event->fd, FAN_ALLOW, NULL, "fd is not a file", 1);
-#endif
 
 static int fanotify_perm_event_process(struct fanotify_monitor *f, struct fanotify_event_metadata *event)
 {
@@ -125,10 +113,28 @@ static int fanotify_perm_event_process(struct fanotify_monitor *f, struct fanoti
   enum uhuru_file_context_status context_status;
   char file_path[PATH_MAX + 1];
   char *p;
+  struct stat buf;
+
+  /* the 2 following tests could be removed: */
+  /* if file descriptor does not refer to a file, read() will fail inside os_mime_type_guess_fd() */
+  /* in this case, mime_type will be null, context_status will be error and response will be ALLOW */
+  /* BUT: this gives a lot of warning in os_mime_type_guess() */
+  /* and the read() in os_mime_type_guess() could be successfull for a device for instance */
+  /* so for now I keep the fstat() */
+  if (fstat(event->fd, &buf) < 0) {
+    if (watchdog_remove(f->watchdog, event->fd, NULL))
+      response_write(f->fanotify_fd, event->fd, FAN_ALLOW, NULL, "stat failed");
+    return;
+  }
+
+  if (!S_ISREG(buf.st_mode)) {
+    if (watchdog_remove(f->watchdog, event->fd, NULL))
+      response_write(f->fanotify_fd, event->fd, FAN_ALLOW, NULL, "fd is not a file");
+    return;
+  }
 
   p = get_file_path_from_fd(event->fd, file_path, PATH_MAX);
 
-  /* get file scan context */
   context_status = uhuru_file_context_get(&file_context, event->fd, p, f->scan_conf);
 
   if (context_status) {   /* means file must not be scanned */
@@ -143,12 +149,61 @@ static int fanotify_perm_event_process(struct fanotify_monitor *f, struct fanoti
   /* scan in thread pool */
   g_thread_pool_push(f->thread_pool, uhuru_file_context_clone(&file_context), NULL);
 
+#if 0
+  if (watchdog_remove(f->watchdog, event->fd, NULL))
+    response_write(f->fanotify_fd, event->fd, FAN_ALLOW, p, "zob");
+#endif
+
   return 0;
 }
 
 static void fanotify_notify_event_process(struct fanotify_monitor *m, struct fanotify_event_metadata *event)
 {
   /* FIXME: TODO */
+}
+
+static void fanotify_pass_1(struct fanotify_monitor *f, struct fanotify_event_metadata *buf, ssize_t len)
+{
+  struct fanotify_event_metadata *event;
+
+  /* first pass: allow all PERM events from myself, enqueue other PERM events */
+  for(event = buf; FAN_EVENT_OK(event, len); event = FAN_EVENT_NEXT(event, len)) {
+#ifdef DEBUG
+    {
+      char file_path[PATH_MAX + 1];
+      char *p = get_file_path_from_fd(event->fd, file_path, PATH_MAX);
+
+      uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_NAME ": " "fanotify pass 1: event fd %d path %s", event->fd, p != NULL ? p : "null");
+    }
+#endif
+    if ((event->mask & FAN_OPEN_PERM))
+      if (event->pid == f->my_pid)
+	response_write(f->fanotify_fd, event->fd, FAN_ALLOW, NULL, "event PID is myself");
+      else
+	watchdog_add(f->watchdog, event->fd);
+  }
+}
+
+static void fanotify_pass_2(struct fanotify_monitor *f, struct fanotify_event_metadata *buf, ssize_t len)
+{
+  struct fanotify_event_metadata *event;
+
+  /* second pass: process all PERM events that were not from myself and all other events */
+  for(event = buf; FAN_EVENT_OK(event, len); event = FAN_EVENT_NEXT(event, len)) {
+    if ((event->mask & FAN_OPEN_PERM)) {
+#ifdef DEBUG
+      {
+	char file_path[PATH_MAX + 1];
+	char *p = get_file_path_from_fd(event->fd, file_path, PATH_MAX);
+
+	uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_NAME ": " "fanotify pass 2: event fd %d path %s", event->fd, p != NULL ? p : "null");
+      }
+#endif
+      if (event->pid != f->my_pid)
+	fanotify_perm_event_process(f, event);
+    } else
+      fanotify_notify_event_process(f, event);
+  }
 }
 
 /* Size of buffer to use when reading fanotify events */
@@ -160,38 +215,14 @@ static gboolean fanotify_cb(GIOChannel *source, GIOCondition condition, gpointer
   struct fanotify_monitor *f = (struct fanotify_monitor *)data;
   char buf[FANOTIFY_BUFFER_SIZE];
   ssize_t len;
-  struct fanotify_event_metadata *event;
 
   if ((len = read (f->fanotify_fd, buf, FANOTIFY_BUFFER_SIZE)) <= 0) {
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_NAME ": " "error reading fanotify event descriptor (%s)", strerror(errno));
     return TRUE;
   }
 
-  /* first pass: allow all PERM events from myself, enqueue other PERM events */
-  for(event = (struct fanotify_event_metadata *)buf; FAN_EVENT_OK(event, len); event = FAN_EVENT_NEXT(event, len)) {
-#ifdef DEBUG
-    {
-      char file_path[PATH_MAX + 1];
-      char *p = get_file_path_from_fd(event->fd, file_path, PATH_MAX);
-
-      uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_NAME ": " "fanotify event fd %d path %s", event->fd, p != NULL ? p : "null");
-    }
-#endif
-    if ((event->mask & FAN_OPEN_PERM))
-      if (event->pid == f->my_pid)
-	response_write(f->fanotify_fd, event->fd, FAN_ALLOW, NULL, "event PID is myself");
-      else
-	watchdog_add(f->watchdog, event->fd);
-  }
-
-  /* second pass: process all PERM events that were not from myself and all other events */
-  for(event = (struct fanotify_event_metadata *)buf; FAN_EVENT_OK(event, len); event = FAN_EVENT_NEXT(event, len)) {
-    if ((event->mask & FAN_OPEN_PERM)) {
-      if (event->pid != f->my_pid)
-	fanotify_perm_event_process(f, event);
-    } else
-      fanotify_notify_event_process(f, event);
-  }
+  fanotify_pass_1(f, (struct fanotify_event_metadata *)buf, len);
+  fanotify_pass_2(f, (struct fanotify_event_metadata *)buf, len);
 
   return TRUE;
 }
