@@ -29,6 +29,8 @@ static gpointer watchdog_thread_fun(gpointer data)
   struct queue_entry entries[N_FD];
 
   while (1) {
+    nanosleep(&sleep_duration, NULL);
+
     stamp_now(&before);
     stamp_sub(&before, &timeout);
 
@@ -39,10 +41,8 @@ static gpointer watchdog_thread_fun(gpointer data)
 
       for(i = 0; i < n_fd; i++)
 	/* FIXME */
-	write_response(w->fanotify_fd, entries[i].fd, FAN_ALLOW, entries[i].path, "timeout", 0);
+	write_response(w->fanotify_fd, entries[i].fd, FAN_ALLOW, NULL, "timeout");
     }
-
-    nanosleep(&sleep_duration, NULL);
   }
 
   return NULL;
@@ -59,16 +59,16 @@ struct watchdog *watchdog_new(int fanotify_fd)
   return w;
 }
 
-void watchdog_add(struct watchdog *w, int fd, const char *path)
+void watchdog_add(struct watchdog *w, int fd)
 {
   struct timespec now;
 
   stamp_now(&now);
 
-  queue_push(w->queue, fd, path, &now);
+  queue_push(w->queue, fd, &now);
 }
 
-int watchdog_remove(struct watchdog *w, int fd, const char **p_path, struct timespec *after)
+int watchdog_remove(struct watchdog *w, int fd, struct timespec *after)
 {
   int r;
   struct queue_entry entry;
@@ -80,8 +80,6 @@ int watchdog_remove(struct watchdog *w, int fd, const char **p_path, struct time
       stamp_now(after);
       stamp_sub(after, &entry.timestamp);
     }
-
-    *p_path = entry.path;
   }
 
   return r;
