@@ -225,18 +225,20 @@ static void mark_directory(struct access_monitor *m, const char *path)
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_NAME ": " "added mark for directory %s", path);
 }
 
-static void unmark_directory(struct access_monitor *m, const char *path)
+int access_monitor_unmark_directory(struct access_monitor *m, const char *path)
 {
   if (fanotify_monitor_unmark_directory(m->fanotify_monitor, path, m->enable_permission) < 0)
-    return;
+    return -1;
 
   if (inotify_monitor_unmark_directory(m->inotify_monitor, path) < 0)
-    return;
+    return -1;
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_NAME ": " "removed mark for directory %s", path);
+
+  return 0;
 }
 
-static void recursive_mark_directory(struct access_monitor *m, const char *path)
+int access_monitor_recursive_mark_directory(struct access_monitor *m, const char *path)
 {
   DIR *dir;
   struct dirent *entry;
@@ -246,7 +248,7 @@ static void recursive_mark_directory(struct access_monitor *m, const char *path)
 
   if ((dir = opendir(path)) == NULL) {
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, MODULE_NAME ": " "error opening directory %s (%s)", path, strerror(errno));
-    return;
+    return -1;
   }
 
   entry_path = g_string_new("");
@@ -264,6 +266,8 @@ static void recursive_mark_directory(struct access_monitor *m, const char *path)
 
   if (closedir(dir) < 0)
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, MODULE_NAME ": " "error closing directory %s (%s)", path, strerror(errno));
+
+  return 0;
 }
 
 static void mark_mount_point(struct access_monitor *m, const char *path)

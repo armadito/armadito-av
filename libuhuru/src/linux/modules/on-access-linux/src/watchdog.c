@@ -3,6 +3,7 @@
 
 #include "queue.h"
 #include "stamp.h"
+#include "response.h"
 #include "onaccessmod.h"
 
 #include <glib.h>
@@ -16,8 +17,8 @@ struct watchdog {
 };
 
 #define N_FD 100
-#define TIMEOUT  1000  /* micro seconds */
-#define SLEEP    (TIMEOUT / 2)  /* micro seconds */
+#define TIMEOUT  100000  /* micro seconds */
+#define SLEEP    TIMEOUT  /* micro seconds */
 
 static gpointer watchdog_thread_fun(gpointer data)
 {
@@ -40,8 +41,7 @@ static gpointer watchdog_thread_fun(gpointer data)
       uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_NAME ": " "got %d fd in timeout", n_fd);
 
       for(i = 0; i < n_fd; i++)
-	/* FIXME */
-	write_response(w->fanotify_fd, entries[i].fd, FAN_ALLOW, NULL, "timeout");
+	response_write(w->fanotify_fd, entries[i].fd, FAN_ALLOW, NULL, "timeout");
     }
   }
 
