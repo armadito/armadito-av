@@ -1,5 +1,5 @@
-#ifndef _REASON_H_
-#define _REASON_H_
+#ifndef _RESPONSE_H_
+#define _RESPONSE_H_
 
 enum response_reason {
   RR_TIMEOUT                       = 0,
@@ -11,7 +11,5 @@ enum response_reason {
   RR_EVENT_PID_IS_MYSELF           = 6,
   RR_LAST                          = 6,
 };
-
-const char *response_reason_str(enum response_reason rr);
 
 #endif

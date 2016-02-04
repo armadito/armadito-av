@@ -6,7 +6,6 @@
 
 struct queue_entry {
   int fd;
-  const char *path;
   struct timespec timestamp;
 };
 
@@ -27,7 +26,7 @@ void queue_free(struct queue *q);
 /**
    Atomically enqueue a file descriptor in the queue
  */
-void queue_push(struct queue *q, int fd, const char *path, struct timespec *timestamp);
+void queue_push(struct queue *q, int fd, struct timespec *timestamp);
 
 /**
    Atomically dequeue a file descriptor in the queue

@@ -4,14 +4,16 @@ modulesdir=$(libdir)/libuhuru/modules
 modules_LTLIBRARIES=on-access-linux.la
 
 on_access_linux_la_SOURCES= \
+famonitor.c \
+famonitor.h \
 onaccessmod.c \
 onaccessmod.h \
 monitor.c \
 monitor.h \
 mount.c \
 mount.h \
-reason.c \
-reason.h \
+response.c \
+response.h \
 queue.c \
 queue.h \
 stamp.h \

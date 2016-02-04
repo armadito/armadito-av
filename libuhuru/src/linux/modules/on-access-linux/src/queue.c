@@ -5,12 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-static struct queue_node *queue_node_new(int fd, const char *path, struct timespec *timestamp)
+static struct queue_node *queue_node_new(int fd, struct timespec *timestamp)
 {
   struct queue_node *n = malloc(sizeof(struct queue_node));
 
   n->entry.fd = fd;
-  n->entry.path = strdup(path);
   stamp_cpy(&n->entry.timestamp, timestamp);
 
   n->prev = n->next = NULL;
@@ -48,9 +47,9 @@ static inline void queue_unlock(struct queue *q)
   pthread_mutex_unlock(&q->queue_lock);
 }
 
-void queue_push(struct queue *q, int fd, const char *path, struct timespec *timestamp)
+void queue_push(struct queue *q, int fd, struct timespec *timestamp)
 {
-  struct queue_node *new_entry = queue_node_new(fd, path, timestamp);
+  struct queue_node *new_entry = queue_node_new(fd, timestamp);
 
   queue_lock(q);
 
