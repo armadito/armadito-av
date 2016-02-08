@@ -1,6 +1,8 @@
 #ifndef _RESPONSE_H_
 #define _RESPONSE_H_
 
+#include <linux/fanotify.h>
+
 enum response_reason {
   RR_TIMEOUT                       = 0,
   RR_SCANNED_ALLOWED               = 1,
@@ -11,5 +13,7 @@ enum response_reason {
   RR_EVENT_PID_IS_MYSELF           = 6,
   RR_LAST                          = 6,
 };
+
+void response_write(int fanotify_fd, int fd, __u32 r, const char *path, const char *reason);
 
 #endif

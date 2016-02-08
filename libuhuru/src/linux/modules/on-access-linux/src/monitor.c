@@ -81,14 +81,14 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
   /* so that the monitor thread does not start before all modules are initialized  */
   /* and the daemon main loop is entered */
   if (pipe(m->start_pipe) < 0) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_NAME ": " "pipe failed (%s)", strerror(errno));
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "pipe failed (%s)", strerror(errno));
     g_free(m);
     return NULL;
   }
 
   /* this pipe will be used to send commands to the monitor thread */
   if (pipe(m->command_pipe) < 0) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_NAME ": " "pipe failed (%s)", strerror(errno));
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "pipe failed (%s)", strerror(errno));
     g_free(m);
     return NULL;
   }
@@ -100,7 +100,7 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
   m->inotify_monitor = inotify_monitor_new(m);
   m->mount_monitor = NULL;
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_NAME ": " "init ok");
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "init ok");
 
   return m;
 }
@@ -153,18 +153,18 @@ void access_monitor_add_mount(struct access_monitor *m, const char *mount_point)
   /* check that mount_point is not in the same partition as / */
   slash_dev_id = get_dev_id("/");
   if (slash_dev_id < 0) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_NAME ": " "cannot get device id for / (%s)", strerror(errno));
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "cannot get device id for / (%s)", strerror(errno));
     return;
   }
 
   mount_dev_id = get_dev_id(mount_point);
   if (mount_dev_id < 0) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_NAME ": " "cannot get device id for %s (%s)", mount_point, strerror(errno));
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "cannot get device id for %s (%s)", mount_point, strerror(errno));
     return;
   }
 
   if (mount_dev_id == slash_dev_id) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_NAME ": " "\"%s\" is in same partition as \"/\"; adding \"/\" as monitored mount point is not supported", mount_point);
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "\"%s\" is in same partition as \"/\"; adding \"/\" as monitored mount point is not supported", mount_point);
     return;
   }
 
@@ -195,13 +195,13 @@ static gboolean start_cb(GIOChannel *source, GIOCondition condition, gpointer da
   char c;
 
   if (read(m->start_pipe[0], &c, 1) < 0) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_NAME ": " "read() in activation callback failed (%s)", strerror(errno));
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "read() in activation callback failed (%s)", strerror(errno));
 
     return FALSE;
   }
 
   if (c != 'A') {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_NAME ": " "unexpected character ('%c' (0x%x) != 'A')", c, c);
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "unexpected character ('%c' (0x%x) != 'A')", c, c);
     return FALSE;
   }
 
@@ -222,7 +222,7 @@ static void mark_directory(struct access_monitor *m, const char *path)
   if (inotify_monitor_mark_directory(m->inotify_monitor, path) < 0)
     return;
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_NAME ": " "added mark for directory %s", path);
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "added mark for directory %s", path);
 }
 
 int access_monitor_unmark_directory(struct access_monitor *m, const char *path)
@@ -233,7 +233,7 @@ int access_monitor_unmark_directory(struct access_monitor *m, const char *path)
   if (inotify_monitor_unmark_directory(m->inotify_monitor, path) < 0)
     return -1;
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_NAME ": " "removed mark for directory %s", path);
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "removed mark for directory %s", path);
 
   return 0;
 }
@@ -247,7 +247,7 @@ int access_monitor_recursive_mark_directory(struct access_monitor *m, const char
   mark_directory(m, path);
 
   if ((dir = opendir(path)) == NULL) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, MODULE_NAME ": " "error opening directory %s (%s)", path, strerror(errno));
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "error opening directory %s (%s)", path, strerror(errno));
     return -1;
   }
 
@@ -259,13 +259,13 @@ int access_monitor_recursive_mark_directory(struct access_monitor *m, const char
       
     g_string_printf(entry_path, "%s/%s", path, entry->d_name);
 
-    recursive_mark_directory(m, entry_path->str);
+    access_monitor_recursive_mark_directory(m, entry_path->str);
   }
 
   g_string_free(entry_path, TRUE);
 
   if (closedir(dir) < 0)
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, MODULE_NAME ": " "error closing directory %s (%s)", path, strerror(errno));
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "error closing directory %s (%s)", path, strerror(errno));
 
   return 0;
 }
@@ -275,7 +275,7 @@ static void mark_mount_point(struct access_monitor *m, const char *path)
   if (fanotify_monitor_mark_mount(m->fanotify_monitor, path, m->enable_permission) < 0)
     return;
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_NAME ": " "added mark for mount point %s", path);
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "added mark for mount point %s", path);
 }
 
 static void unmark_mount_point(struct access_monitor *m, const char *path)
@@ -286,7 +286,7 @@ static void unmark_mount_point(struct access_monitor *m, const char *path)
   if (fanotify_monitor_unmark_mount(m->fanotify_monitor, path, m->enable_permission) < 0)
     return;
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_NAME ": " "removed mark for mount point %s", path);
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "removed mark for mount point %s", path);
 }
 
 static void mark_entries(struct access_monitor *m)
@@ -297,7 +297,7 @@ static void mark_entries(struct access_monitor *m)
     struct monitor_entry *e = (struct monitor_entry *)g_ptr_array_index(m->entries, i);
 
     if (e->flag == ENTRY_DIR)
-      recursive_mark_directory(m, e->path);
+      access_monitor_recursive_mark_directory(m, e->path);
     else
       mark_mount_point(m, e->path);
   }
@@ -307,7 +307,7 @@ static void mount_cb(enum mount_event_type ev_type, const char *path, void *user
 {
   struct access_monitor *m = (struct access_monitor *)user_data;
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_NAME ": " "received mount notification for %s (%s)", path, ev_type == EVENT_MOUNT ? "mount" : "umount");
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "received mount notification for %s (%s)", path, ev_type == EVENT_MOUNT ? "mount" : "umount");
 
   if (ev_type == EVENT_MOUNT)
     mark_mount_point(m, path);
@@ -323,7 +323,7 @@ static gpointer monitor_thread_fun(gpointer data)
   GIOChannel *command_channel;
   GMainLoop *loop;
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_NAME ": " "started thread");
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "started thread");
 
   if (fanotify_monitor_start(m->fanotify_monitor))
     return NULL;
@@ -334,7 +334,7 @@ static gpointer monitor_thread_fun(gpointer data)
   /* if configured, add the mount monitor */
   if (m->enable_removable_media) {
     m->mount_monitor = mount_monitor_new(mount_cb, m);
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_NAME ": " "added removable media monitor");
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "added removable media monitor");
   }
 
   /* init all fanotify and inotify marks */
@@ -354,7 +354,7 @@ static gboolean command_cb(GIOChannel *source, GIOCondition condition, gpointer 
   char cmd;
 
   if (read(m->command_pipe[0], &cmd, 1) < 0) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_NAME ": " "read() in command callback failed (%s)", strerror(errno));
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "read() in command callback failed (%s)", strerror(errno));
 
     return FALSE;
   }
