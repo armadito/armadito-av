@@ -5,6 +5,7 @@
 #include "os/io.h"
 #include "os/mimetype.h"
 
+#include <errno.h>
 #include <stdlib.h>
 
 const char *uhuru_file_context_status_str(enum uhuru_file_context_status status)
@@ -49,8 +50,7 @@ enum uhuru_file_context_status uhuru_file_context_get(struct uhuru_file_context 
   /* 2) cache => NOT YET */
 
   /* open file if no fd given */
-  if (ctx->fd == -1) {
-	
+  if (ctx->fd < 0) {
     /* open the file */
     ctx->fd = os_open(path, O_RDONLY);
     if (ctx->fd < 0) {
@@ -101,8 +101,12 @@ struct uhuru_file_context *uhuru_file_context_clone(struct uhuru_file_context *c
 
 void uhuru_file_context_close(struct uhuru_file_context *ctx)
 {
-  if (ctx->fd > 0)
-    os_close(ctx->fd);
+  if (ctx->fd > 0) {
+    if (os_close(ctx->fd) != 0)
+      uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "closing file descriptor %3d failed (%s)", ctx->fd, os_strerror(errno));
+    else
+      uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_DEBUG, "file descriptor %3d closed ok", ctx->fd);
+  }
 }
 
 void uhuru_file_context_destroy(struct uhuru_file_context *ctx)

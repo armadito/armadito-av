@@ -138,7 +138,7 @@ struct mount_monitor *mount_monitor_new(mount_cb_t cb, void *user_data)
   m->conn = g_bus_get_sync(MON_DBUS_TYPE, NULL, &error);
 
   if (m->conn == NULL) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, MODULE_NAME ": " "error getting connection to D-Bus (%s)", error->message);
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "error getting connection to D-Bus (%s)", error->message);
     free(m);
 
     return NULL;
