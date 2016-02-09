@@ -23,3 +23,5 @@ libuhuru_json_la_LIBADD=
 
 libuhuru_json_la_CFLAGS+= @LIBJSONC_CFLAGS@
 libuhuru_json_la_LIBADD+= @LIBJSONC_LIBS@
+libuhuru_json_la_CFLAGS+= @GLIB2_CFLAGS@
+libuhuru_json_la_LIBADD+= @GLIB2_LIBS@
