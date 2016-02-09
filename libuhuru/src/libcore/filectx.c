@@ -101,12 +101,11 @@ struct uhuru_file_context *uhuru_file_context_clone(struct uhuru_file_context *c
 
 void uhuru_file_context_close(struct uhuru_file_context *ctx)
 {
-  if (ctx->fd > 0) {
-    if (os_close(ctx->fd) != 0)
-      uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "closing file descriptor %3d failed (%s)", ctx->fd, os_strerror(errno));
-    else
-      uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_DEBUG, "file descriptor %3d closed ok", ctx->fd);
-  }
+  if (ctx->fd < 0)
+    return;
+
+  if (os_close(ctx->fd) != 0)
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "closing file descriptor %3d failed (%s)", ctx->fd, os_strerror(errno));
 }
 
 void uhuru_file_context_destroy(struct uhuru_file_context *ctx)

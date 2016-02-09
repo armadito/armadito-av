@@ -171,7 +171,7 @@ static void inotify_event_process(struct inotify_monitor *im, struct inotify_eve
 
   full_path = inotify_event_full_path(im, event);
 
-  trace_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "inotify full path %s", full_path != NULL ? full_path : "(null)");
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "inotify full path %s", full_path != NULL ? full_path : "(null)");
 
   if (full_path == NULL)
     return;
