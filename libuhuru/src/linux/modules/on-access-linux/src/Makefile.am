@@ -19,7 +19,6 @@ response.h \
 queue.c \
 queue.h \
 stamp.h \
-trace.h \
 watchdog.c \
 watchdog.h 
 

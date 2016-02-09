@@ -4,7 +4,6 @@
 #include <config/libuhuru-config.h>
 
 #include "response.h"
-#include "trace.h"
 #include "watchdog.h"
 #include "onaccessmod.h"
 
@@ -106,7 +105,7 @@ static void scan_file_thread_fun(gpointer data, gpointer user_data)
   if (watchdog_remove(f->watchdog, file_context->fd, NULL))
     response_write(f->fanotify_fd, file_context->fd, fan_r, file_context->path, "scanned");
 
-  file_context->fd = -1; /* this will prevent uhuru_file_context_free from closing the file descriptor a second time :( */
+  file_context->fd = -1; /* this will prevent uhuru_file_context_free from closing the file descriptor twice :( */
   uhuru_file_context_free(file_context);
   uhuru_scan_free(scan);
 }
@@ -170,7 +169,7 @@ static void fanotify_pass_1(struct fanotify_monitor *f, struct fanotify_event_me
 
   /* first pass: allow all PERM events from myself, enqueue other PERM events */
   for(event = buf; FAN_EVENT_OK(event, len); event = FAN_EVENT_NEXT(event, len)) {
-    trace_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "fd %3d path ??? pass 1", event->fd);
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "fd %3d path ??? pass 1", event->fd);
 
     if ((event->mask & FAN_OPEN_PERM))
       if (event->pid == f->my_pid)
@@ -188,12 +187,16 @@ static void fanotify_pass_2(struct fanotify_monitor *f, struct fanotify_event_me
   for(event = buf; FAN_EVENT_OK(event, len); event = FAN_EVENT_NEXT(event, len)) {
     if ((event->mask & FAN_OPEN_PERM)) {
       char file_path[PATH_MAX + 1];
-      char *p = get_file_path_from_fd(event->fd, file_path, PATH_MAX);
+      char *p;
 
-      trace_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "fd %3d path %s pass 2", event->fd, p != NULL ? p : "null");
+      if (event->pid == f->my_pid)
+	continue;
 
-      if (event->pid != f->my_pid)
-	fanotify_perm_event_process(f, event, p);
+      p = get_file_path_from_fd(event->fd, file_path, PATH_MAX);
+
+      uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "fd %3d path %s pass 2", event->fd, p != NULL ? p : "null");
+
+      fanotify_perm_event_process(f, event, p);
     } else
       fanotify_notify_event_process(f, event);
   }
