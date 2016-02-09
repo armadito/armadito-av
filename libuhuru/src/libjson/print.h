@@ -2,8 +2,7 @@
 #define _PRINT_H_
 
 #include <json.h>
-#include <stdio.h>
 
-void uhuru_json_print(struct json_object *obj, FILE *out);
+const char *uhuru_json_str(struct json_object *obj);
 
 #endif

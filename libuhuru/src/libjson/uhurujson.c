@@ -30,8 +30,16 @@ struct uhuru_json_av_response {
   int id;
   enum uhuru_json_status status;
   struct json_object *info;
-  const char *error_message;
 };
+
+static void debug_json_object(struct json_object *obj, const char *obj_name)
+{
+  const char *s = uhuru_json_str(obj);
+
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "JSON %s: %s", obj_name, s);
+
+  free((void *)s);
+}
 
 struct uhuru_json_handler *uhuru_json_handler_new(void)
 {
@@ -49,13 +57,26 @@ void uhuru_json_handler_free(struct uhuru_json_handler *jh)
   free(jh);
 }
 
-static enum uhuru_json_status parse_request(struct uhuru_json_handler *jh, const char *req, int req_len, struct json_object **p_json_req)
+static const char *status_2_error(enum uhuru_json_status status)
+{
+  switch(status) {
+  case JSON_OK: return "ok";
+  case JSON_PARSE_ERROR: return "invalid JSON string";
+  case JSON_MALFORMED_REQUEST: return "malformed request in JSON object";
+  case JSON_INVALID_REQUEST: return "invalid request";
+  case JSON_REQUEST_FAILED: return "execution of request failed";
+  }
+
+  return "??? invalid status";
+}
+
+static enum uhuru_json_status parse_request(struct uhuru_json_handler *jh, const char *req, int req_len, struct json_object **p_j_request)
 {
   json_tokener_reset(jh->tokener);
 
-  *p_json_req = json_tokener_parse_ex(jh->tokener, req, req_len);
+  *p_j_request = json_tokener_parse_ex(jh->tokener, req, req_len);
 
-  if (*p_json_req == NULL) {
+  if (*p_j_request == NULL) {
     enum json_tokener_error jerr = json_tokener_get_error(jh->tokener);
 
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "error in JSON parsing: %s", json_tokener_error_desc(jerr));
@@ -109,14 +130,10 @@ static struct {
   { NULL, NULL},
 };
 
-enum uhuru_json_status call_request_handler(struct uhuru *uhuru, struct uhuru_json_av_request *av_request, struct uhuru_json_av_response *av_response)
+enum uhuru_json_status call_request_handler(struct uhuru *uhuru, struct uhuru_json_av_request *av_request, struct json_object **p_info)
 {
   int i;
-
-  av_response->response = strdup(av_request->request);
-  av_response->id = av_request->id;
-  av_response->info = NULL;
-  av_response->status = JSON_INVALID_REQUEST;
+  enum uhuru_json_status status = JSON_INVALID_REQUEST;  
 
   i = 0;
   while (request_dispatch[i].request != NULL && strcmp(request_dispatch[i].request, av_request->request))
@@ -125,15 +142,12 @@ enum uhuru_json_status call_request_handler(struct uhuru *uhuru, struct uhuru_js
   if (request_dispatch[i].request != NULL) {
     request_cb_t cb = request_dispatch[i].cb;
 
-    av_response->status = (*cb)(av_request->request, av_request->id, av_request->params, uhuru, &av_response->info, NULL);
+    status = (*cb)(av_request->request, av_request->id, av_request->params, uhuru, p_info, NULL);
 
-    uhuru_json_print(av_response->info, stderr);
+    debug_json_object(*p_info, "info");
   }
 
-  /* FIXME */
-  av_response->error_message = NULL;
-
-  return av_response->status;
+  return status;
 }
 
 static enum uhuru_json_status fill_response(struct uhuru_json_av_response *av_response, char **p_resp, int *p_resp_len)
@@ -142,13 +156,23 @@ static enum uhuru_json_status fill_response(struct uhuru_json_av_response *av_re
 
   j_response = json_object_new_object();
 
-  json_object_object_add(j_response, "av_response", json_object_new_string(av_response->response));
+  if (av_response->response != NULL)
+    json_object_object_add(j_response, "av_response", json_object_new_string(av_response->response));
+
   json_object_object_add(j_response, "id", json_object_new_int(av_response->id));
+
   json_object_object_add(j_response, "status", json_object_new_int(av_response->status));
-  if (av_response->info != NULL)
-    json_object_object_add(j_response, "info", av_response->info);
-  else
-    json_object_object_add(j_response, "info", json_object_new_object());
+
+  if (av_response->status == JSON_OK) {
+    if (av_response->info != NULL)
+      json_object_object_add(j_response, "info", av_response->info);
+    else
+      json_object_object_add(j_response, "info", json_object_new_object());
+  } else {
+    json_object_object_add(j_response, "error-message", json_object_new_string(status_2_error(av_response->status)));
+  }
+
+  debug_json_object(j_response, "response");
 
   *p_resp = strdup(json_object_to_json_string(j_response));
   *p_resp_len = strlen(*p_resp);
@@ -162,28 +186,35 @@ enum uhuru_json_status uhuru_json_handler_process_request(struct uhuru_json_hand
   struct json_object *j_request, *j_response;
   struct uhuru_json_av_request av_request;
   struct uhuru_json_av_response av_response;
-  enum uhuru_json_status status;
 
-  status = parse_request(jh, req, req_len, &j_request);
+  av_response.response = NULL;
+  av_response.id = -1;
+  av_response.info = NULL;
 
-  if (status) {
-    return status;
+  av_response.status = parse_request(jh, req, req_len, &j_request);
+
+  if (av_response.status) {
+    fill_response(&av_response, p_resp, p_resp_len);
+    return av_response.status;
   }
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "JSON parsed ok");
-    
-  uhuru_json_print(j_request, stderr);
 
-  status = extract_request(j_request, &av_request);
+  debug_json_object(j_request, "request");
 
-  if (status) {
-    /* fill_error_response_1(); */
-    return status;
+  av_response.status = extract_request(j_request, &av_request);
+
+  if (av_response.status) {
+    fill_response(&av_response, p_resp, p_resp_len);
+    return av_response.status;
   }
 
-  status = call_request_handler(uhuru, &av_request, &av_response);
+  av_response.response = av_request.request;
+  av_response.id = av_request.id;
+
+  av_response.status = call_request_handler(uhuru, &av_request, &av_response.info);
 
   fill_response(&av_response, p_resp, p_resp_len);
 
-  return status;
+  return av_response.status;
 }
