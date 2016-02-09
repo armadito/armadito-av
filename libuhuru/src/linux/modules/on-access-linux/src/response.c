@@ -29,12 +29,10 @@ void response_write(int fanotify_fd, int fd, __u32 r, const char *path, const ch
   response.response = r;
 
   if ((ret = write(fanotify_fd, &response, sizeof(struct fanotify_response))) != sizeof(struct fanotify_response))
-    trace_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "writing to fd %d failed (%d, %s)", fanotify_fd, ret, strerror(errno));
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "writing to fd %d failed (%d, %s)", fanotify_fd, ret, strerror(errno));
   
-  if (close(fd) == 0)
-    trace_log(UHURU_LOG_MODULE, log_level, MODULE_LOG_NAME ": " "fd %3d path %s closed ok", fd, path != NULL ? path : "null");
-  else
-    trace_log(UHURU_LOG_MODULE, log_level, MODULE_LOG_NAME ": " "fd %3d path %s closed failed (%s)", fd, path != NULL ? path : "null", fd, strerror(errno));
+  if (close(fd) != 0)
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "fd %3d path %s closed failed (%s)", fd, path != NULL ? path : "null", fd, strerror(errno));
 
 #ifdef DEBUG
   {
@@ -46,7 +44,7 @@ void response_write(int fanotify_fd, int fd, __u32 r, const char *path, const ch
       auth = "DENY";
     }
 
-    trace_log(UHURU_LOG_MODULE, log_level, MODULE_LOG_NAME ": " "fd %3d path %s %s (%s)", fd, path != NULL ? path : "null", auth, reason != NULL ? reason : "unknown");
+    uhuru_log(UHURU_LOG_MODULE, log_level, MODULE_LOG_NAME ": " "fd %3d path %s %s (%s)", fd, path != NULL ? path : "null", auth, reason != NULL ? reason : "unknown");
   }
 #endif
 }

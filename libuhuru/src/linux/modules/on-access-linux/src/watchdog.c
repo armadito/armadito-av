@@ -41,7 +41,7 @@ static gpointer watchdog_thread_fun(gpointer data)
     n_fd = queue_pop_timeout(w->queue, &before, entries, N_FD);
 
     if (n_fd) {
-      trace_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "%d file descriptors in timeout", n_fd);
+      uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "%d file descriptors in timeout", n_fd);
 
       for(i = 0; i < n_fd; i++)
 	response_write(w->fanotify_fd, entries[i].fd, FAN_ALLOW, NULL, "timeout");
