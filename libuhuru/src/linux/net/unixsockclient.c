@@ -44,10 +44,8 @@ int unix_client_connect(const char *socket_path, int max_retry)
     retry_count++;
   } while (r < 0 && retry_count <= max_retry);
 
-  if (r < 0) {
-    perror("connect() failed");
-    return -1;
-  }
+  if (r < 0)
+    return r;
 
   return fd;
 }
