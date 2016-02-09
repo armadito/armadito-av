@@ -44,7 +44,8 @@ angular.module('armadito.services', [])
           }
           serverBuilder(scanData.scan_id, 'IHM_scan_' + scanData.scan_id, handler);
           $log.info('starting scan ' +  scanData);
-          var cli = socketClientBuilder(scanData.scan_id, 'mockavsocket');
+		//var cli = socketClientBuilder(scanData.scan_id, 'mockavsocket');
+	  var cli = socketClientBuilder(scanData.scan_id, '/tmp/.uhuru-daemon');
           var buff_to_write = new Buffer( JSON.stringify(scanData), 'ascii' );
           cli.end(buff_to_write, 'ascii');
           $log.info('scan query sent. Should now wait on Local Server for AV Answer');

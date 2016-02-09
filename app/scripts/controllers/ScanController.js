@@ -93,11 +93,19 @@ angular.module('tatouApp')
 
               $scope.startMe = function(){
                 $scope.startTimer();
-                AntivirusService.startScan({
-                    scan_action: 'new_scan',
-                    scan_id: 77,
-                    scan_path: '/home/kimios'
-                  });
+		      // FD
+                      //AntivirusService.startScan({
+                      //scan_action: 'new_scan',
+                      //scan_id: 77,
+                      //scan_path: '/home/kimios'
+              //});
+                      AntivirusService.startScan({
+			      av_request: 'scan',
+			      id: 77,
+			      params : {
+				      path: "c:\\windows"
+			      }
+		      });
               };
 
               $scope.stopMe = function(){

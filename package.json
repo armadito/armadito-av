@@ -38,7 +38,7 @@
   "main": "app/index.html",
   "window": {
     "title": "Armadito",
-    "toolbar": false,
+    "toolbar": true,
     "frame": false,
     "width": 800,
     "height": 500,
