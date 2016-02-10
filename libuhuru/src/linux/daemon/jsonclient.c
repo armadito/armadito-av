@@ -114,8 +114,9 @@ static ssize_t write_n(int fd, char *buffer, size_t len)
 
 int json_client_process(struct json_client *cl)
 {
-  int n_read, i, response_len;
-  char *response;
+  int n_read, i, response_len = 0;
+  char *response = NULL;
+  enum uhuru_json_status status;
 
   do {
     /* + 1 for ending null byte */
@@ -134,12 +135,12 @@ int json_client_process(struct json_client *cl)
 
   *buffer_end(&cl->input_buffer) = '\0';
 
-  fprintf(stderr, "json_client: received %s\n", buffer_data(&cl->input_buffer));
-
-  uhuru_json_handler_process_request(cl->json_handler, buffer_data(&cl->input_buffer), buffer_length(&cl->input_buffer), cl->uhuru, &response, &response_len);
+  status = uhuru_json_handler_process_request(cl->json_handler, buffer_data(&cl->input_buffer), buffer_length(&cl->input_buffer), cl->uhuru, &response, &response_len);
   
   write_n(cl->sock, response, response_len);
   write_n(cl->sock, "\r\n\r\n", 4);
+
+  free(response);
 
   /* FIXME: check return value */
   close(cl->sock);
