@@ -30,7 +30,8 @@ static void json_object_str(struct json_object *obj, GString *out, int level)
     json_value_str(val, out, level + 2);
   }
 
-  g_string_append_c(out, '\n');
+  if (!first)
+    g_string_append_c(out, '\n');
 
   space(out, level);
 
@@ -57,7 +58,8 @@ static void json_array_str(struct json_object *obj, GString *out, int level)
     json_value_str(val, out, level + 2);
   }
 
-  g_string_append_c(out, '\n');
+  if (!first)
+    g_string_append_c(out, '\n');
 
   space(out, level);
 
@@ -92,7 +94,7 @@ static void json_value_str(struct json_object *obj, GString *out, int level)
   }
 }
 
-const char *uhuru_json_str(struct json_object *obj)
+const char *jobj_str(struct json_object *obj)
 {
   GString *out = g_string_sized_new(100);
   const char *ret;
@@ -105,3 +107,13 @@ const char *uhuru_json_str(struct json_object *obj)
 
   return ret;
 }
+
+void jobj_debug(struct json_object *obj, const char *obj_name)
+{
+  const char *s = jobj_str(obj);
+
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "JSON %s: %s", obj_name, s);
+
+  free((void *)s);
+}
+
