@@ -1,9 +1,9 @@
 #include "libuhuru-config.h"
-
 #include <libuhuru/core.h>
 
 #include "uhurujson.h"
 #include "state.h"
+#include "os/string.h"
 
 #include <json.h>
 #include <stdlib.h>
@@ -90,7 +90,7 @@ enum uhuru_json_status state_request_cb(const char *request, int id, struct json
 
   if (info == NULL) {
     *p_info = NULL;
-    *p_error_message = strdup("getting info failed...");
+    *p_error_message = os_strdup("getting info failed...");
 
     return JSON_REQUEST_FAILED;
   }
