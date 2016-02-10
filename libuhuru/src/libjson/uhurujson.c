@@ -1,5 +1,4 @@
 #include "libuhuru-config.h"
-
 #include <libuhuru/core.h>
 
 #include "uhurujson.h"
