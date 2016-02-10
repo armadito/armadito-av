@@ -3,7 +3,6 @@
 
 #include "imonitor.h"
 #include "monitor.h"
-#include "trace.h"
 #include "onaccessmod.h"
 
 #include <errno.h>
