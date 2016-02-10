@@ -4,7 +4,6 @@
 #include "queue.h"
 #include "stamp.h"
 #include "response.h"
-#include "trace.h"
 #include "onaccessmod.h"
 
 #include <glib.h>

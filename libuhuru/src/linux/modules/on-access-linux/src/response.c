@@ -1,7 +1,6 @@
 #include <libuhuru/core.h>
 #include <config/libuhuru-config.h>
 
-#include "trace.h"
 #include "response.h"
 #include "onaccessmod.h"
 
