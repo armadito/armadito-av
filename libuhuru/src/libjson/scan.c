@@ -2,8 +2,9 @@
 
 #include <libuhuru/core.h>
 
-#include "uhurujson.h"
+#include "print.h"
 #include "scan.h"
+#include "uhurujson.h"
 
 #ifdef linux
 #include "net/unixsockclient.h"
@@ -136,9 +137,9 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
   json_object_object_add(j_request, "id", json_object_new_int(report->scan_id));
   json_object_object_add(j_request, "params", report_json(report));
 
-  req = json_object_to_json_string(j_request);
+  jobj_debug(j_request, "IHM request");
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "scan_callback: sending req = %s", req);
+  req = json_object_to_json_string(j_request);
 
   if (write(fd, req, strlen(req)) < 0)
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "error writing JSON response (%s)", strerror(errno));

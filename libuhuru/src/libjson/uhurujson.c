@@ -6,6 +6,7 @@
 #include "print.h"
 #include "state.h"
 #include "scan.h"
+#include "os/string.h"
 
 #include <assert.h>
 #include <json.h>
@@ -31,15 +32,6 @@ struct uhuru_json_av_response {
   enum uhuru_json_status status;
   struct json_object *info;
 };
-
-static void debug_json_object(struct json_object *obj, const char *obj_name)
-{
-  const char *s = uhuru_json_str(obj);
-
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "JSON %s: %s", obj_name, s);
-
-  free((void *)s);
-}
 
 struct uhuru_json_handler *uhuru_json_handler_new(void)
 {
@@ -91,7 +83,7 @@ static enum uhuru_json_status extract_request(struct json_object *j_request, str
 {
   struct json_object *j_av_request, *j_id, *j_params;
 
-  av_request->request = strdup("");
+  av_request->request = os_strdup("");
   av_request->id = 0;
   av_request->params = NULL;
 
@@ -114,7 +106,7 @@ static enum uhuru_json_status extract_request(struct json_object *j_request, str
       || !json_object_is_type(j_params, json_type_object))
     return JSON_INVALID_REQUEST;
 
-  av_request->request = strdup(json_object_get_string(j_av_request));
+  av_request->request = os_strdup(json_object_get_string(j_av_request));
   av_request->id = json_object_get_int(j_id);
   av_request->params = json_object_get(j_params);
 
@@ -144,7 +136,7 @@ enum uhuru_json_status call_request_handler(struct uhuru *uhuru, struct uhuru_js
 
     status = (*cb)(av_request->request, av_request->id, av_request->params, uhuru, p_info, NULL);
 
-    debug_json_object(*p_info, "info");
+    jobj_debug(*p_info, "info");
   }
 
   return status;
@@ -172,14 +164,13 @@ static enum uhuru_json_status fill_response(struct uhuru_json_av_response *av_re
     json_object_object_add(j_response, "error-message", json_object_new_string(status_2_error(av_response->status)));
   }
 
-  debug_json_object(j_response, "response");
+  jobj_debug(j_response, "AV response");
 
-  *p_resp = strdup(json_object_to_json_string(j_response));
+  *p_resp = os_strdup(json_object_to_json_string(j_response));
   *p_resp_len = strlen(*p_resp);
 
   return JSON_OK;
 }
-
 
 enum uhuru_json_status uhuru_json_handler_process_request(struct uhuru_json_handler *jh, const char *req, int req_len, struct uhuru *uhuru, char **p_resp, int *p_resp_len)
 {
@@ -200,7 +191,7 @@ enum uhuru_json_status uhuru_json_handler_process_request(struct uhuru_json_hand
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "JSON parsed ok");
 
-  debug_json_object(j_request, "request");
+  jobj_debug(j_request, "AV request");
 
   av_response.status = extract_request(j_request, &av_request);
 
