@@ -1,4 +1,7 @@
-#include "print.h"
+#include "libuhuru-config.h"
+#include <libuhuru/core.h>
+
+#include "debug.h"
 
 #include <glib.h>
 
