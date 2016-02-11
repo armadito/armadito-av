@@ -7,10 +7,11 @@ AUTOMAKE_OPTIONS=subdir-objects
 lib_LTLIBRARIES=libuhuru_json.la
 
 libuhuru_json_la_SOURCES= \
-uhurujson.c \
-uhurujson.h \
-print.c \
-print.h \
+jsonhandler.c \
+jsonhandler.h \
+jsonhandler_p.h \
+debug.c \
+debug.h \
 scan.c \
 scan.h \
 state.c \

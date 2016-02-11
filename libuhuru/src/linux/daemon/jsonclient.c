@@ -1,8 +1,7 @@
 #include <libuhuru-config.h>
-
 #include <libuhuru/core.h>
-#include "uhurujson.h"
 
+#include "jsonhandler.h"
 #include "jsonclient.h"
 
 #include <assert.h>
@@ -57,6 +56,11 @@ static char *buffer_end(struct buffer *b)
   return b->p + b->first_free;
 }
 
+static void buffer_clear(struct buffer *b)
+{
+  b->first_free = 0;
+}
+
 #define INPUT_READ_SIZE 1024
 
 struct json_client {
@@ -75,7 +79,7 @@ struct json_client *json_client_new(int sock, struct uhuru *uhuru)
 
   buffer_init(&cl->input_buffer, 3 * INPUT_READ_SIZE);
 
-  cl->json_handler = uhuru_json_handler_new();
+  cl->json_handler = uhuru_json_handler_new(cl->uhuru);
 
   return cl;
 }
@@ -83,6 +87,8 @@ struct json_client *json_client_new(int sock, struct uhuru *uhuru)
 void json_client_free(struct json_client *cl)
 {
   buffer_destroy(&cl->input_buffer);
+
+  uhuru_json_handler_free(cl->json_handler);
 
   free(cl);
 }
@@ -114,8 +120,9 @@ static ssize_t write_n(int fd, char *buffer, size_t len)
 
 int json_client_process(struct json_client *cl)
 {
-  int n_read, i, response_len;
-  char *response;
+  int n_read, i, response_len = 0;
+  char *response = NULL;
+  enum uhuru_json_status status;
 
   do {
     /* + 1 for ending null byte */
@@ -134,12 +141,14 @@ int json_client_process(struct json_client *cl)
 
   *buffer_end(&cl->input_buffer) = '\0';
 
-  fprintf(stderr, "json_client: received %s\n", buffer_data(&cl->input_buffer));
-
-  uhuru_json_handler_process_request(cl->json_handler, buffer_data(&cl->input_buffer), buffer_length(&cl->input_buffer), cl->uhuru, &response, &response_len);
+  status = uhuru_json_handler_av_request(cl->json_handler, buffer_data(&cl->input_buffer), buffer_length(&cl->input_buffer), &response, &response_len);
   
   write_n(cl->sock, response, response_len);
   write_n(cl->sock, "\r\n\r\n", 4);
+
+  free(response);
+
+  buffer_clear(&cl->input_buffer);
 
   /* FIXME: check return value */
   close(cl->sock);

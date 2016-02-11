@@ -1,9 +1,9 @@
 #include "libuhuru-config.h"
-
 #include <libuhuru/core.h>
 
-#include "uhurujson.h"
+#include "jsonhandler.h"
 #include "state.h"
+#include "os/string.h"
 
 #include <json.h>
 #include <stdlib.h>
@@ -78,7 +78,7 @@ static struct json_object *state_json(struct uhuru_info *info)
   return j_state;
 }
 
-enum uhuru_json_status state_request_cb(const char *request, int id, struct json_object *params, struct uhuru *uhuru, struct json_object **p_info, const char **p_error_message)
+enum uhuru_json_status state_request_cb(struct uhuru *uhuru, struct json_request *req, struct json_response *resp)
 {
   struct uhuru_info *info;
 
@@ -89,13 +89,12 @@ enum uhuru_json_status state_request_cb(const char *request, int id, struct json
   info = uhuru_info_new(uhuru);
 
   if (info == NULL) {
-    *p_info = NULL;
-    *p_error_message = strdup("getting info failed...");
+    resp->error_message = os_strdup("getting info failed");
 
     return JSON_REQUEST_FAILED;
   }
 
-  *p_info = state_json(info);
+  resp->info = state_json(info);
 
   uhuru_info_free(info);
 
