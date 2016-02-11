@@ -1,9 +1,10 @@
 #include "libuhuru-config.h"
-
 #include <libuhuru/core.h>
 
-#include "uhurujson.h"
+#include "jsonhandler.h"
+#include "debug.h"
 #include "scan.h"
+#include "os/string.h"
 
 #ifdef linux
 #include "net/unixsockclient.h"
@@ -136,9 +137,9 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
   json_object_object_add(j_request, "id", json_object_new_int(report->scan_id));
   json_object_object_add(j_request, "params", report_json(report));
 
-  req = json_object_to_json_string(j_request);
+  jobj_debug(j_request, "IHM request");
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "scan_callback: sending req = %s", req);
+  req = json_object_to_json_string(j_request);
 
   if (write(fd, req, strlen(req)) < 0)
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "error writing JSON response (%s)", strerror(errno));
@@ -171,7 +172,7 @@ static void *scan_thread_fun(void *arg)
 }
 
 
-enum uhuru_json_status scan_request_cb(const char *request, int id, struct json_object *params, struct uhuru *uhuru, struct json_object **p_info, const char **p_error_message)
+enum uhuru_json_status scan_request_cb(struct uhuru *uhuru, struct json_request *req, struct json_response *resp)
 {
   struct json_object *j_path;
   const char *path;
@@ -183,7 +184,7 @@ enum uhuru_json_status scan_request_cb(const char *request, int id, struct json_
 #endif
 
   /* check if 'params' object contains key "path" with a string value */
-  if (!json_object_object_get_ex(params, "path", &j_path)
+  if (!json_object_object_get_ex(req->params, "path", &j_path)
       || !json_object_is_type(j_path, json_type_string))
     return JSON_INVALID_REQUEST;
 
@@ -191,15 +192,13 @@ enum uhuru_json_status scan_request_cb(const char *request, int id, struct json_
   /* "mode": "personnalized", */
   /* "configuration": "toto1", */
 
-  *p_info = NULL;
-
-  path = json_object_get_string(j_path);
+  path = os_strdup(json_object_get_string(j_path));
 
   uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_DEBUG, "JSON: scan path = %s", path);
 
   scan_data = malloc(sizeof(struct scan_data));
   scan_data->uhuru = uhuru;
-  scan_data->scan_id = id;
+  scan_data->scan_id = req->id;
   scan_data->path = path;
   scan_data->last_send_time = 0L;
   scan_data->last_send_progress = REPORT_PROGRESS_UNKNOWN;
