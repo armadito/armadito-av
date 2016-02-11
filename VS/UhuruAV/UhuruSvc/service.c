@@ -1,6 +1,8 @@
 #include "service.h"
 #include "log.h"
 #include "scan_on_access.h"
+#include "uh_crypt.h"
+#include "update.h"
 
 // Msdn documentation: 
 // https://msdn.microsoft.com/en-us/library/windows/desktop/ms685141%28v=vs.85%29.aspx
@@ -1277,6 +1279,22 @@ int main(int argc, char ** argv) {
 	}
 
 	// Only for test purposes (command line)
+	if ( argc >=2 && strncmp(argv[1],"--crypt",7) == 0 ){
+
+		if (argv[2] == NULL) {
+			printf("[-] Error :: --crypt option ::  missing parameter [filename]\n");
+			return EXIT_FAILURE;
+		}
+
+		ret = verify_file_signature(argv[2],SIGNATURE_FILE);
+		if (ret < 0) {
+			return EXIT_FAILURE;
+		}
+		return EXIT_SUCCESS;
+
+	}
+
+	// Only for test purposes (command line)
 	if ( argc >=3 && strncmp(argv[1],"--quarantine",11) == 0 ){
 
 		ret = MoveFileInQuarantine(argv[2]);
@@ -1290,7 +1308,9 @@ int main(int argc, char ** argv) {
 
 	if ( argc >=2 && strncmp(argv[1],"--updatedb",10) == 0 ){
 
-		ret = UpdateModulesDB(1);
+		// 0 : do not reload service (for test)
+		// 1 : reload service.
+		ret = UpdateModulesDB(0);
 		if (ret < 0) {
 			return EXIT_FAILURE;
 		}

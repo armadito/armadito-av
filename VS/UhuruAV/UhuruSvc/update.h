@@ -14,6 +14,8 @@
 // ---------------------------------------------------
 
 #define CACHE_FILEPATH "modules\\DB\\dbcache"
+#define DB_DESC_URL "http://uhuru.gendarmerie.fr/current/uhurudbvirus.json"
+#define DB_SIG_URL "http://uhuru.gendarmerie.fr/current/uhurudbvirus.json.sig"
 
 typedef struct packageStruct{
 	char * displayname;
@@ -25,5 +27,5 @@ typedef struct packageStruct{
 }Package ;
 
 
-int UpdateModulesDB(int cmdLineMode);
+int UpdateModulesDB(int reload);
 BYTE * GetFileHash(char * data, int len, ALG_ID algo);

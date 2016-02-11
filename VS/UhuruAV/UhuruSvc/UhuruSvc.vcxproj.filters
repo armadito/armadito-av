@@ -51,6 +51,9 @@
     <ClCompile Include="..\..\..\libuhuru\src\utils\uh_json.c">
       <Filter>Fichiers sources\utils</Filter>
     </ClCompile>
+    <ClCompile Include="uh_crypt.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="service.h">
@@ -82,6 +85,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\libuhuru\src\utils\uh_json.h">
       <Filter>Fichiers d%27en-tête\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="uh_crypt.h">
+      <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
