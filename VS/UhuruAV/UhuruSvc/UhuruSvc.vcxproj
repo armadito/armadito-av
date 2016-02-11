@@ -61,7 +61,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>FltLib.lib;libuhuru_core.lib;Wtsapi32.lib;json-c.lib;urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>FltLib.lib;libuhuru_core.lib;Wtsapi32.lib;json-c.lib;urlmon.lib;Crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -92,6 +92,7 @@
     <ClCompile Include="scan_on_access.c" />
     <ClCompile Include="scan_on_demand.c" />
     <ClCompile Include="service.c" />
+    <ClCompile Include="uh_crypt.c" />
     <ClCompile Include="update.c" />
   </ItemGroup>
   <ItemGroup>
@@ -104,6 +105,7 @@
     <ClInclude Include="scan_on_access.h" />
     <ClInclude Include="scan_on_demand.h" />
     <ClInclude Include="service.h" />
+    <ClInclude Include="uh_crypt.h" />
     <ClInclude Include="update.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
