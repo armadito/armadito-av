@@ -22,6 +22,9 @@
 
 struct scan_data {
   struct uhuru *uhuru;
+  /* this parameter will allow the scan to connect back to the client (IHM or command-line tool) */
+  /* value is unix socket path on linux, named pipe path on windows */
+  const char *client_ipc_path;
   const char *path;
   int scan_id;
   time_t last_send_time;
@@ -125,13 +128,6 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
       && (now - scan_data->last_send_time) < SEND_PERIOD)
     return;
 
-  fd = unix_client_connect(DEFAULT_SOCKET_PATH, 10);
-
-  if (fd < 0) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "error connecting to IHM (%s)", strerror(errno));
-    return;
-  }
-
   j_request = json_object_new_object();
   json_object_object_add(j_request, "ihm_request", json_object_new_string("scan"));
   json_object_object_add(j_request, "id", json_object_new_int(report->scan_id));
@@ -141,16 +137,24 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
 
   req = json_object_to_json_string(j_request);
 
+  fd = unix_client_connect(DEFAULT_SOCKET_PATH, 10);
+
+  if (fd < 0) {
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "error connecting to IHM (%s)", strerror(errno));
+    return;
+  }
+
   if (write(fd, req, strlen(req)) < 0)
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "error writing JSON response (%s)", strerror(errno));
 
   if (write(fd, "\r\n\r\n", 4) < 0)
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "error writing JSON response (%s)", strerror(errno));
 
+  close(fd);
+
   scan_data->last_send_time = now;
   scan_data->last_send_progress = report->progress;
 
-  close(fd);
 }
 
 static void *scan_thread_fun(void *arg)

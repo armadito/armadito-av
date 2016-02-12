@@ -1,5 +1,5 @@
-#ifndef _PRINT_H_
-#define _PRINT_H_
+#ifndef _DEBUG_H_
+#define _DEBUG_H_
 
 #include <json.h>
 
