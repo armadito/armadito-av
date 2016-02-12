@@ -19,6 +19,12 @@
     <Filter Include="Fichiers sources\utils">
       <UniqueIdentifier>{28154a10-b999-4ad0-858f-df0d61990022}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers d%27en-tête\json">
+      <UniqueIdentifier>{97602a34-0b3a-43bf-b162-45a455c3024f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\json">
+      <UniqueIdentifier>{72f596e1-6baa-4589-a3ce-ae4bae215039}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="service.c">
@@ -54,6 +60,9 @@
     <ClCompile Include="uh_crypt.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\json\updatedb\uh_json_parse.c">
+      <Filter>Fichiers sources\json</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="service.h">
@@ -88,6 +97,9 @@
     </ClInclude>
     <ClInclude Include="uh_crypt.h">
       <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\json\updatedb\uh_json_parse.h">
+      <Filter>Fichiers d%27en-tête\json</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

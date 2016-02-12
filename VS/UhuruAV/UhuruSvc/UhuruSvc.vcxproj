@@ -83,6 +83,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\libuhuru\src\json\updatedb\uh_json_parse.c" />
     <ClCompile Include="..\..\..\libuhuru\src\utils\getopt.c" />
     <ClCompile Include="..\..\..\libuhuru\src\utils\uh_json.c" />
     <ClCompile Include="log.c" />
@@ -96,6 +97,7 @@
     <ClCompile Include="update.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\libuhuru\src\json\updatedb\uh_json_parse.h" />
     <ClInclude Include="..\..\..\libuhuru\src\utils\getopt.h" />
     <ClInclude Include="..\..\..\libuhuru\src\utils\uh_json.h" />
     <ClInclude Include="log.h" />
