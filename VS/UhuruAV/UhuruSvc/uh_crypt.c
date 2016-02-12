@@ -15,7 +15,7 @@ BYTE * _GetFileContent(char * filename, int * retsize) {
 
 	__try {
 
-		hFile = CreateFileA(filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, NULL, NULL);
+		hFile = CreateFileA(filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
 		if (hFile == INVALID_HANDLE_VALUE) {
 			printf("[-] Error :: GetFileContent :: Opening the file failed! :: error = %d\n",GetLastError());
 			ret = -1;
@@ -76,6 +76,93 @@ void print_hexa(BYTE* data, int size) {
 }
 
 
+BYTE * GetFileHash(char * data, int len, ALG_ID algo ) {
+
+	BYTE * hashval = NULL;
+	int hashsize = 0;
+	int i = 0;
+	int ret = 0;
+	HCRYPTPROV hProv = 0;
+	HCRYPTHASH hHash = 0;
+	
+	
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/aa382380%28v=vs.85%29.aspx
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/aa382453%28v=vs.85%29.aspx
+	
+	if (data == NULL || len <= 0) {
+		printf("[-] Error :: GetFileHash :: Invalid parameters!\n");
+		return NULL ; 
+	}
+
+
+	__try {
+
+		// Acquire a handle to a particular key container within a particular cryptographic service provider.
+		if (CryptAcquireContextA(&hProv,NULL, NULL,PROV_RSA_FULL,CRYPT_VERIFYCONTEXT) == FALSE) {
+			printf("[-] Error :: GetFileHash :: Acquire crypt context failed. :: GLE = %d\n",GetLastError);
+			__leave;
+		}
+
+		if (CryptCreateHash(hProv, algo, 0, 0, &hHash) == FALSE) {
+			printf("[-] Error :: GetFileHash :: Create hash failed. :: GLE = %d\n",GetLastError);
+			__leave;
+		}
+
+		if (CryptHashData(hHash, data, len, 0) == FALSE) {
+			printf("[-] Error :: GetFileHash :: Crypt hash data failed. :: GLE = %d\n",GetLastError);
+			__leave;
+		}
+
+		// determine the size of the hash value
+		if (CryptGetHashParam(hHash, HP_HASHVAL, NULL, &hashsize, 0) == FALSE) {
+			printf("[-] Error :: GetFileHash :: Crypt Get hash Param failed. :: GLE = %d\n",GetLastError);
+			__leave;
+		}
+
+		//printf("[+] Debug :: GetFileHash :: Hash size = %d\n",hashsize);
+
+		hashval = (BYTE*)calloc(hashsize + 1, sizeof(BYTE));
+		hashval[hashsize] = '\0';
+
+		if (CryptGetHashParam(hHash, HP_HASHVAL, hashval, &hashsize, 0) == FALSE) {
+			printf("[-] Error :: GetFileHash :: Crypt Get hash Param failed. :: GLE = %d\n",GetLastError);
+			ret = -1;
+			__leave;
+		}
+
+
+		/*printf("[+] Debug :: GetFileHash :: Hash value = ");
+		print_hexa(hashval, hashsize);
+		printf("\n");*/
+
+
+	}
+	__finally {
+
+		if (CryptReleaseContext(hProv, 0) == FALSE) {
+			printf("[-] Error :: GetFileHash :: Release crypt context failed. :: GLE = %d\n",GetLastError);
+			//return NULL;
+		}
+
+		CryptDestroyHash(hHash);
+
+		if (hashval != NULL && ret<0 ) {
+			free(hashval);
+			hashval = NULL;
+		}
+
+	}
+	
+
+
+	// Get a handle to a hash value
+	//CryptCreateHash()
+	
+
+	return hashval;
+}
+
+
 HCRYPTKEY import_public_key(char * filename, HCRYPTPROV hProv) {
 
 	HCRYPTKEY hPubKey = 0;
@@ -98,7 +185,7 @@ HCRYPTKEY import_public_key(char * filename, HCRYPTPROV hProv) {
 			__leave;
 		}
 
-		printf("[+] Debug :: import_public_key :: pksize = %d :: content = \n%s\n\n", size,content);
+		//printf("[+] Debug :: import_public_key :: pksize = %d :: content = \n%s\n\n", size,content);
 
 
 		if (CryptStringToBinaryA(content, size, CRYPT_STRING_BASE64_ANY, NULL, &buf_size, 0, NULL) == FALSE) {
@@ -106,7 +193,7 @@ HCRYPTKEY import_public_key(char * filename, HCRYPTPROV hProv) {
 			__leave;
 		}
 
-		printf("[+] Debug :: import_public_key :: public key buf size = %d bytes\n", buf_size);
+		//printf("[+] Debug :: import_public_key :: public key buf size = %d bytes\n", buf_size);
 
 		buf = (BYTE*)calloc(buf_size,sizeof(BYTE));
 
@@ -127,7 +214,7 @@ HCRYPTKEY import_public_key(char * filename, HCRYPTPROV hProv) {
 			__leave;
 		}
 		
-		printf("[+] Debug :: import_public_key :: public key Blob size = %d bytes\n",cbPubKeyBlob);
+		//printf("[+] Debug :: import_public_key :: public key Blob size = %d bytes\n",cbPubKeyBlob);
 
 		pubKeyBlob = (BYTE*)calloc(cbPubKeyBlob ,sizeof(BYTE));
 

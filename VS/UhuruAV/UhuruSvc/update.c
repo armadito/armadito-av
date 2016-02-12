@@ -3,251 +3,6 @@
 #include "uh_crypt.h"
 
 //struct packageStruct ** pkgList = NULL;
-Package ** pkgList = NULL;
-int nbPackages = 0;
-
-
-int fillPackageParam(int index, char * key, char * value) {
-
-	if (key == NULL || value == NULL || index < 0) {
-		printf("[-] Error :: fillPackageParam :: Invalid parameter\n");
-		return -1;
-	}
-	
-	if (strncmp(key,"displayName",11) == 0) {
-
-		pkgList[index]->displayname = value;
-
-	}
-	else if (strncmp(key,"fileUrl",7) == 0) {
-
-		pkgList[index]->fileurl = value;
-		//printf("index = %d :: value = %s\n", index,value);
-		//printf("index = %d :: value = %s\n", index,pkgList[index]->fileurl);
-		//pkgList[index]->fileurl = _strdup(value);
-		//printf("index = %d :: value = %s\n", index,value);
-
-	}
-	else if (strncmp(key,"controlSum",10) == 0) {
-
-		pkgList[index]->controlsum = value;
-
-	}
-	else if (strncmp(key,"controlType",11) == 0) {
-
-		pkgList[index]->controltype = value;
-
-	}
-	else if (strncmp(key,"licence",7) == 0) {
-
-		pkgList[index]->licence = value;
-
-	}
-	else {
-		printf("[-] Error :: fillPackageParam :: Invalid key :: %s !\n",key);
-		return -2;
-	}
-
-	return 0;
-
-}
-
-
-
-/*
-	This function parses json object and  fills the array of packages structure.
-*/
-int json_parse_obj_and_process(json_object * obj, int index) {
-
-	int ret = 0;
-	char *key = NULL;
-	struct json_object *val = NULL;
-	struct lh_entry *entrykey = NULL;
-	struct lh_entry *entry_nextkey = NULL;
-
-	enum json_type type;
-	char * string = NULL;
-
-	if (obj == NULL || pkgList == NULL) {
-		printf("[-] Error :: json_parse_obj_and_process :: Invalid parameter\n");
-		return -1;
-	}
-
-
-	for (entrykey = json_object_get_object(obj)->head;
-		 (entrykey ? (key = (char*)entrykey->k, val = (struct json_object*)entrykey->v, entry_nextkey = entrykey->next, entrykey) : 0);
-		 entrykey = entry_nextkey) {
-
-		if (key == NULL) {
-			printf("[-] Error :: json_parse_obj_and_process :: uninitialized key char*\n");
-			continue;
-		}
-
-		//printf("[+] Debug :: json_parse_obj_and_process :: key = %s\n", key);
-
-		type = json_object_get_type(val);
-
-		switch (type) {
-
-			case json_type_boolean:				
-				break;
-			case json_type_double:
-				break;
-			case json_type_int:
-				break;
-			case json_type_string:				
-				string = json_object_get_string(val);
-				//printf("[+] Debug :: json_parse_obj_and_process :: string value = %s\n",string);
-				// Fill the pachage structure.
-				fillPackageParam(index, key, string);
-				break;
-			case json_type_object:
-				json_parse_obj_rec(val);
-				break;
-			case json_type_array:
-				json_parse_array(val);
-				break;
-			default:
-				printf(" [+] Error :: json_parse_obj_and_process :: Unknown json_object type :: %d \n",type);
-				break;
-
-		}
-
-	}
-
-
-	return ret;
-
-}
-
-
-int json_parse_obj_rec(json_object * obj) {
-
-	int ret = 0;
-	char *key = NULL;
-	struct json_object *val = NULL;
-	struct json_object *pkgList = NULL;
-	struct lh_entry *entrykey = NULL;
-	struct lh_entry *entry_nextkey = NULL;
-
-	enum json_type type;
-
-	if (obj == NULL) {
-		printf("[-] Error :: json_parse_obj_rec :: Invalid parameter\n");
-		return -1;
-	}
-
-	for (entrykey = json_object_get_object(obj)->head;
-		 (entrykey ? (key = (char*)entrykey->k, val = (struct json_object*)entrykey->v, entry_nextkey = entrykey->next, entrykey) : 0);
-		 entrykey = entry_nextkey) {
-
-		if (key == NULL) {
-			printf("[-] Error :: json_parse_obj_rec :: uninitialized key char*\n");
-			continue;
-		}
-
-		//printf("[+] Debug :: json_parse_obj_rec :: key = %s\n", key);
-
-		type = json_object_get_type(val);
-
-		switch (type) {
-
-			case json_type_boolean:
-				break;
-			case json_type_double:
-				break;
-			case json_type_int:
-				break;
-			case json_type_string:
-				break;
-			case json_type_object:
-				json_parse_obj_rec(val);
-				break;
-			case json_type_array:
-				json_parse_array(val);
-				break;
-			default:
-				printf(" [+] Error :: json_parse_obj_rec :: Unknown json_object type :: %d \n",type);
-				break;
-
-		}
-
-	}
-
-
-	return ret;
-
-}
-
-
-
-int json_parse_array(json_object * jarray) {
-
-	int ret = 0;
-	int arraylen = 0;
-	int i = 0;
-	json_object * jvalue;
-	enum json_type type;
-
-	// 
-	if (jarray == NULL) {
-		printf("[-] Error :: json_parse_array :: Invalid parameter\n");
-		return -1;
-	}
-
-	arraylen = json_object_array_length(jarray);
-
-	if (arraylen <= 0) {
-		return -2;
-	}
-
-	nbPackages = arraylen;
-	// init packagelist;
-	//pkgList = (struct packageStruct**)calloc(arraylen,sizeof(struct packageStruct*));
-	pkgList = (Package**)calloc(arraylen,sizeof(Package*));
-	if (pkgList == NULL) {
-		printf("[-] Error :: json_parse_array :: Memory allocation failed!\n");
-		return -3;
-	}
-
-	for (int i = 0; i < arraylen; i++) {
-		pkgList[i] = (Package*)calloc(arraylen,sizeof(Package));
-	}
-
-	//printf("[+] Debug :: json_parse_array :: package %d ::\n",i);
-
-	for (i = 0; i < arraylen; i++) {
-
-		//printf("[+] Debug :: json_parse_array :: package %d ::\n",i);
-		jvalue = json_object_array_get_idx(jarray, i) ;
-		type = json_object_get_type(jvalue);
-
-		switch (type) {
-			case json_type_boolean:
-				break;
-			case json_type_double:
-				break;
-			case json_type_int:
-				break;
-			case json_type_string:
-				break;
-			case json_type_object:
-				json_parse_obj_and_process(jvalue,i);
-				break;
-			case json_type_array:
-				break;
-			default:
-				printf("[-] Warning :: json_parse_array :: Unknown json_object type :: %d \n",type);
-				break;
-		}
-
-	}
-
-	//PrintPackageList(pkgList, nbPackages);
-
-
-	return ret;
-}
 
 
 //
@@ -743,12 +498,10 @@ void PrintPackageList(Package ** list, int len) {
 
 }
 
-
-
 /*
 	This function parses the descrption file and download the databases files.
 */
-int ParseDescriptionFile(char * desc) {
+Package ** ParseDescriptionFile(char * desc, int * nbPackages){
 	
 	int ret = 0, i = 0;
 	enum json_tokener_error error;
@@ -758,14 +511,13 @@ int ParseDescriptionFile(char * desc) {
 	struct json_object *val = NULL;
 	struct lh_entry *entrykey = NULL;
 	struct lh_entry *entry_nextkey = NULL;
+	Package ** pkgList = NULL;
+	int len = 0;
 
-	// -----------------------------------------------------------------
-	char * data = NULL;
-	// -----------------------------------------------------------------
 
 	if (desc == NULL) {
-		printf("[-] Error :: ParseDescriptionFile :: Invalid parameters!\n");
-		return -1 ; 
+		printf("[-] Error :: ParseDescriptionFile :: Invalid parameter!\n");
+		return NULL ; 
 	}
 	
 	__try {
@@ -776,26 +528,55 @@ int ParseDescriptionFile(char * desc) {
 		jObj =  json_tokener_parse_verbose(desc,&error);
 		if (jObj == NULL) {			
 			printf("[-] Error :: ParseDescriptionFile :: Parsing description file failed! :: error = %d\n",error);
-			ret = -5;
+			ret = -2;
 			__leave;
+		}		
+
+		// This function returns the number of packages.
+		ret = json_parse_obj_rec(jObj,NULL);
+		if (ret <= 0 ) {
+			printf("[-] Error :: ParseDescriptionFile :: parsing json object failed! ::nbpackages %d :: pkgList %d\n",ret,pkgList);
+			return NULL;
 		}
 
-		json_parse_obj_rec(jObj);
 
+		// allocate memory for package List
+		pkgList = (Package**)calloc(ret,sizeof(Package*));
+		if (pkgList == NULL) {
+			printf("[-] Error :: ParseDescriptionFile :: Memory allocation failed!\n");
+			return NULL;
+		}
+
+		for (i = 0; i < ret; i++) {
+
+			pkgList[i] = (Package*)calloc(1,sizeof(Package));
+
+			if (pkgList[i] == NULL) {
+				printf("[-] Error :: ParseDescriptionFile :: Memory allocation failed!\n");
+				free(pkgList);
+				return NULL;
+			}
+		}
+
+		// fill package list
+		ret = json_parse_obj_rec(jObj,pkgList);
+		if (ret <= 0 ) {
+			printf("[-] Error :: ParseDescriptionFile :: parsing json object failed! ::nbpackages %d :: pkgList %d\n",ret,pkgList);
+			return NULL;
+		}
+
+
+		// 
+		*nbPackages = ret;
 
 	}
 	__finally {
 
-		if (data != NULL) {
-			free(data);
-			data = NULL;
-		}		
-
-
+		
 	}
 
 	
-	return ret;
+	return pkgList;
 }
 
 int SaveHashInCacheFile(BYTE * hash) {
@@ -812,7 +593,7 @@ int SaveHashInCacheFile(BYTE * hash) {
 	__try {
 
 		// Create hidden file (TODO)
-		hFile = CreateFileA(CACHE_FILEPATH, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, NULL, NULL);
+		hFile = CreateFileA(CACHE_FILEPATH, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, 0, NULL);
 		if (hFile == INVALID_HANDLE_VALUE) {
 			printf("[-] Error :: SaveHashInCacheFile :: Creating the cache file failed! :: error = %d\n",GetLastError());
 			ret = -2;
@@ -871,25 +652,19 @@ int CompareWithCachedHash(BYTE * hash) {
 		// TODO: build the cache file complete path.
 		cachedHash = GetFileContent(CACHE_FILEPATH,&size);
 
-		printf("[+] Debug :: CompareWithCachedHash :: Comparing hash=%s with cache=%s\n",hash,cachedHash);
+		//printf("[+] Debug :: CompareWithCachedHash :: Comparing hash=%s with cache=%s\n",hash,cachedHash);
 		
 		printf("[+] Debug :: CompareWithCachedHash :: Hash value  = ");
-		for(i = 0 ; i < size ; i++){
-			printf("%02x ",hash[i]);
-		}
+		print_hexa(hash, size);
 		printf("\n");
 
 		printf("[+] Debug :: CompareWithCachedHash :: Cache value = ");
-		for(i = 0 ; i < size ; i++){
-			printf("%02x ",cachedHash[i]);
-		}
+		print_hexa(cachedHash, size);
 		printf("\n");		
 
 		if (strncmp(hash, cachedHash, size) != 0) {
 			ret = 1;
 		}
-
-
 
 	}
 	__finally {
@@ -909,95 +684,7 @@ int CompareWithCachedHash(BYTE * hash) {
 	return ret;
 }
 
-BYTE * GetFileHash(char * data, int len, ALG_ID algo ) {
 
-	BYTE * hashval = NULL;
-	int hashsize = 0;
-	int i = 0;
-	int ret = 0;
-	HCRYPTPROV hProv = 0;
-	HCRYPTHASH hHash = 0;
-	
-	
-	// https://msdn.microsoft.com/en-us/library/windows/desktop/aa382380%28v=vs.85%29.aspx
-	// https://msdn.microsoft.com/en-us/library/windows/desktop/aa382453%28v=vs.85%29.aspx
-	
-	if (data == NULL || len <= 0) {
-		printf("[-] Error :: GetFileHash :: Invalid parameters!\n");
-		return NULL ; 
-	}
-
-
-	__try {
-
-		// Acquire a handle to a particular key container within a particular cryptographic service provider.
-		if (CryptAcquireContextA(&hProv,NULL, NULL,PROV_RSA_FULL,CRYPT_VERIFYCONTEXT) == FALSE) {
-			printf("[-] Error :: GetFileHash :: Acquire crypt context failed. :: GLE = %d\n",GetLastError);
-			__leave;
-		}
-
-		if (CryptCreateHash(hProv, algo, 0, 0, &hHash) == FALSE) {
-			printf("[-] Error :: GetFileHash :: Create hash failed. :: GLE = %d\n",GetLastError);
-			__leave;
-		}
-
-		if (CryptHashData(hHash, data, len, 0) == FALSE) {
-			printf("[-] Error :: GetFileHash :: Crypt hash data failed. :: GLE = %d\n",GetLastError);
-			__leave;
-		}
-
-		// determine the size of the hash value
-		if (CryptGetHashParam(hHash, HP_HASHVAL, NULL, &hashsize, 0) == FALSE) {
-			printf("[-] Error :: GetFileHash :: Crypt Get hash Param failed. :: GLE = %d\n",GetLastError);
-			__leave;
-		}
-
-		//printf("[+] Debug :: GetFileHash :: Hash size = %d\n",hashsize);
-
-		hashval = (BYTE*)calloc(hashsize + 1, sizeof(BYTE));
-		hashval[hashsize] = '\0';
-
-		if (CryptGetHashParam(hHash, HP_HASHVAL, hashval, &hashsize, 0) == FALSE) {
-			printf("[-] Error :: GetFileHash :: Crypt Get hash Param failed. :: GLE = %d\n",GetLastError);
-			ret = -1;
-			__leave;
-		}
-
-		//printf("[+] Debug :: GetFileHash :: Hash value  =%s\n",hashval);
-		//printf("[+] Debug :: GetFileHash :: Hash value  =%02x\n",hashval);
-		printf("[+] Debug :: GetFileHash :: Hash value = ");
-		for(i = 0 ; i < hashsize ; i++)
-        {
-           printf("%02x ",hashval[i]);
-        }
-		printf("\n");
-
-
-	}
-	__finally {
-
-		if (CryptReleaseContext(hProv, 0) == FALSE) {
-			printf("[-] Error :: GetFileHash :: Release crypt context failed. :: GLE = %d\n",GetLastError);
-			//return NULL;
-		}
-
-		CryptDestroyHash(hHash);
-
-		if (hashval != NULL && ret<0 ) {
-			free(hashval);
-			hashval = NULL;
-		}
-
-	}
-	
-
-
-	// Get a handle to a hash value
-	//CryptCreateHash()
-	
-
-	return hashval;
-}
 
 /*
 	This function checks for databases updates and download new databases files if needed.
@@ -1018,6 +705,9 @@ int UpdateModulesDB(int reload) {
 	char * test = NULL;
 	int len = 0, desc_size = 0, read = 0;
 	LARGE_INTEGER fileSize = {0};
+
+	Package ** packageList = NULL;
+	int nbPackages = 0;
 
 
 	__try {
@@ -1118,24 +808,28 @@ int UpdateModulesDB(int reload) {
 		// if the hash are equal
 		if (res == 0) {
 			printf("[+] Debug :: UpdateModulesDB :: Database is already up to date!\n");
-			__leave;
+			//__leave;
 		}
 
-		// Download files from server and relaunch Service.
-		if (ParseDescriptionFile(desc) < 0) {
+		// Parse description file and extract package list.
+		if ((packageList = ParseDescriptionFile(desc,&nbPackages)) == NULL) {
 			printf("[-] Error :: UpdateModulesDB :: Parsing Description file failed!\n");
 			res = -7;
 			__leave;
 		}
+		/*PrintPackageList(packageList, nbPackages);
+		if (reload == 0)
+			__leave;
+			*/
 
 		printf("\n");
-		if (DownloadPackageFiles(pkgList, nbPackages) < 0) {
+		if (DownloadPackageFiles(packageList, nbPackages) < 0) {
 			printf("[-] Error :: UpdateModulesDB :: Parsing Description file failed!\n");
 			res = -7;
 			__leave;
 		}
 
-		PrintPackageList(pkgList, nbPackages);
+		PrintPackageList(packageList, nbPackages);
 
 
 		// Unload the service (unloadProcedure).
@@ -1148,7 +842,7 @@ int UpdateModulesDB(int reload) {
 
 		printf("\n\n");
 		// Copy databases files to the right places.
-		if (CopyModulesDatabaseFiles(pkgList, nbPackages) < 0) {
+		if (CopyModulesDatabaseFiles(packageList, nbPackages) < 0) {
 			printf("[-] Error :: UpdateModulesDB :: Copy Databases files failed!\n");
 			res = -9;
 			__leave;
@@ -1198,7 +892,7 @@ int UpdateModulesDB(int reload) {
 			hash = NULL;
 		}
 
-		FreePackageList(pkgList, nbPackages);
+		FreePackageList(packageList, nbPackages);
 
 	}
 
