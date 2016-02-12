@@ -12,6 +12,9 @@
 
 #define UH_PUBKEY "keys\\uh_rsa_public.pem"
 
+void print_hexa(BYTE* data, int size);
+
+BYTE * GetFileHash(char * data, int len, ALG_ID algo);
 HCRYPTKEY import_public_key(char * filename, HCRYPTPROV hProv);
 HCRYPTHASH calc_file_hash(char * filename, HCRYPTPROV hProv, ALG_ID  algo);
 int verify_file_signature(char *filename, char *sigfile);
