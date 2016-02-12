@@ -1,5 +1,5 @@
-#ifndef _UHURUJSON_H_
-#define _UHURUJSON_H_
+#ifndef _JSONHANDLER_H_
+#define _JSONHANDLER_H_
 
 #include <json.h>
 

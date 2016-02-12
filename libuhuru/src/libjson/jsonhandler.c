@@ -156,6 +156,8 @@ static enum uhuru_json_status fill_response(struct json_response *av_response, c
   *p_resp = (char *)os_strdup(json_object_to_json_string(j_response));
   *p_resp_len = strlen(*p_resp);
 
+  /* note that this will automatically free the objects contained in j_response */
+  /* but NOT its "info" member which has been referenced with json_object_get() */
   assert(json_object_put(j_response));
 
   return JSON_OK;
