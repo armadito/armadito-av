@@ -1,5 +1,5 @@
-#ifndef _JSONP_H_
-#define _JSONP_H_
+#ifndef _JSONHANDLER_P_H_
+#define _JSONHANDLER_P_H_
 
 #include "jsonhandler.h"
 
