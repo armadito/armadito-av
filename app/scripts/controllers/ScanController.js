@@ -19,7 +19,7 @@ angular.module('tatouApp')
             /* Antivirus scan*/
 
              //start Dummy AV
-              MockAvService.startMockAv();
+		//MockAvService.startMockAv();
 
 
               $scope.pdata = {
@@ -27,17 +27,20 @@ angular.module('tatouApp')
               };
 
              EventService.onMessageReceived('scan_event', function(evt, data){
+                    console.log('received data ' + data);
+		     $scope.pdata.scan_progress = data.params.progress;
+
                   $scope.$apply(function () {                  
                     var threats;
                     if(data){
                       $scope.tableScan = [
                         {
                           title : "Object courant",
-                          data : $scope.pdata.scan_file_path
+                          data : $scope.pdata.params.path
                         },
                         {
                           title : "Fichiers traités",
-                          data : $scope.pdata.scan_progress + 37
+                          data : $scope.pdata.params.progress
                         },
                         {
                           title : "Temps écoulé",
@@ -46,30 +49,13 @@ angular.module('tatouApp')
                       ];
 
                       $scope.pdata =  data;
+
                         threats = [
                           { 
-                              id: data.scan_id,
-                              Etat: data.new_items[0].scan_status,
-                              Detail: data.new_items[0].mod_report,
-                              Chemin : data.scan_file_path
-                          },
-                          {
-                              id: 1,
-                              Etat: "test",
-                              Detail: "spybot",
-                              Chemin : "path/myPath/mySpecialpath..."
-                          },
-                          {
-                              id: 3,
-                              Etat: "test",
-                              Detail: "trojan",
-                              Chemin : "path/myPath/mySpecialpath..."
-                          },
-                          {
-                              id: 4,
-                              Etat: "test",
-                              Detail: "vers",
-                              Chemin : "path/myPath/mySpecialpath..."
+                              id: data.id,
+                              Etat: data.params.scan_status,
+                              Detail: data.params.mod_report,
+                              Chemin : data.params.path
                           }
                       ];
                     }
@@ -78,7 +64,6 @@ angular.module('tatouApp')
                       $scope.displayedCollection.push(selectedTreath);  
                     }
                     $scope.showScanDetails = true;
-                    console.log('received data ' + data.scan_progress);
                     console.log($scope.displayedCollection);
                   });
                 }, $scope)
@@ -99,11 +84,13 @@ angular.module('tatouApp')
                       //scan_id: 77,
                       //scan_path: '/home/kimios'
               //});
+		      // FIXME: must get the path from platform (unix socket vs. named pipe)
                       AntivirusService.startScan({
 			      av_request: 'scan',
 			      id: 77,
 			      params : {
-				      path: "c:\\windows"
+				      ui_ipc_path: '/tmp/.uhuru-ihm',
+				      path_to_scan: "/home/francois/Bureau/MalwareStore/contagio-malware/elf-linux"
 			      }
 		      });
               };

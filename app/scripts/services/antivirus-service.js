@@ -42,9 +42,14 @@ angular.module('armadito.services', [])
             console.log(scanResult);
             EventService.sendMsg('scan_event', scanResult);
           }
-          serverBuilder(scanData.scan_id, 'IHM_scan_' + scanData.scan_id, handler);
+		// FD
+		// FIXME: must get the path from platform (unix socket vs. named pipe)
+		//serverBuilder(scanData.scan_id, '/tmp/.uhuru-ihm', handler);
+	  serverBuilder(scanData.scan_id, scanData.params.ui_ipc_path, handler);
+
           $log.info('starting scan ' +  scanData);
 		//var cli = socketClientBuilder(scanData.scan_id, 'mockavsocket');
+		// FIXME: idem
 	  var cli = socketClientBuilder(scanData.scan_id, '/tmp/.uhuru-daemon');
           var buff_to_write = new Buffer( JSON.stringify(scanData), 'ascii' );
           cli.end(buff_to_write, 'ascii');
@@ -54,7 +59,7 @@ angular.module('armadito.services', [])
         this.stopScan = function (scanData) {
 
           $log.info('starting scan ' +  scanData);
-          var cli = socketClientBuilder(scanData.scan_id, 'mockavsocket');
+//          var cli = socketClientBuilder(scanData.scan_id, 'mockavsocket');
           var buff_to_write = new Buffer( JSON.stringify(scanData), 'ascii' );
           cli.end(buff_to_write, 'ascii');
           $log.info('scan query sent. Should now wait on Local Server for AV Answer to confirm it s cancelled');
