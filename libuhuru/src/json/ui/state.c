@@ -78,7 +78,7 @@ static struct json_object *state_json(struct uhuru_info *info)
   return j_state;
 }
 
-enum uhuru_json_status state_request_cb(struct uhuru *uhuru, struct json_request *req, struct json_response *resp)
+enum uhuru_json_status state_response_cb(struct uhuru *uhuru, struct json_request *req, struct json_response *resp, void **request_data)
 {
   struct uhuru_info *info;
 
