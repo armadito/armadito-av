@@ -4,6 +4,7 @@
 #include "debug.h"
 
 #include <glib.h>
+#include <stdlib.h>
 
 static void json_object_str(struct json_object *obj, GString *out, int level);
 static void json_array_str(struct json_object *obj, GString *out, int level);
