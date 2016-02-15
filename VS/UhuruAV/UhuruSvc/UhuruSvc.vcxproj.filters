@@ -63,6 +63,9 @@
     <ClCompile Include="..\..\..\libuhuru\src\json\updatedb\uh_json_parse.c">
       <Filter>Fichiers sources\json</Filter>
     </ClCompile>
+    <ClCompile Include="register.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="service.h">
@@ -100,6 +103,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\libuhuru\src\json\updatedb\uh_json_parse.h">
       <Filter>Fichiers d%27en-tête\json</Filter>
+    </ClInclude>
+    <ClInclude Include="register.h">
+      <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
