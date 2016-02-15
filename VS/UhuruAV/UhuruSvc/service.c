@@ -3,6 +3,7 @@
 #include "scan_on_access.h"
 #include "uh_crypt.h"
 #include "update.h"
+#include "register.h"
 
 // Msdn documentation: 
 // https://msdn.microsoft.com/en-us/library/windows/desktop/ms685141%28v=vs.85%29.aspx
@@ -1271,6 +1272,17 @@ int main(int argc, char ** argv) {
 	if ( argc >=2 && strncmp(argv[1],"--test",6) == 0 ){
 
 		ret = LaunchCmdLineServiceTest( );
+		if (ret < 0) {
+			return EXIT_FAILURE;
+		}
+		return EXIT_SUCCESS;
+
+	}
+
+	// Only for test purposes (command line)
+	if ( argc >=2 && strncmp(argv[1],"--register",10) == 0 ){
+
+		ret = register_av( );
 		if (ret < 0) {
 			return EXIT_FAILURE;
 		}
