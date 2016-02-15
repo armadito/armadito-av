@@ -131,7 +131,8 @@ include/libuhuru/Makefile
 pkgconfig/Makefile
 src/Makefile
 src/libcore/Makefile
-src/libjson/Makefile
+src/json/Makefile
+src/json/ui/Makefile
 src/linux/Makefile
 src/linux/daemon/Makefile
 src/linux/modules/Makefile
