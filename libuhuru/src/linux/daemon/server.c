@@ -41,8 +41,7 @@ static void client_thread(gpointer data, gpointer user_data)
     {
       struct json_client *client = (struct json_client *)data;
       
-      while (json_client_process(client) > 0)
-	;
+      json_client_process(client);
       
       json_client_free(client);
     }
