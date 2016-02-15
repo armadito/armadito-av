@@ -120,7 +120,7 @@ static ssize_t write_n(int fd, char *buffer, size_t len)
 
 int json_client_process(struct json_client *cl)
 {
-  int n_read, i, response_len = 0;
+  int n_read, response_len = 0;
   char *response = NULL;
   enum uhuru_json_status status;
 
@@ -141,7 +141,7 @@ int json_client_process(struct json_client *cl)
 
   *buffer_end(&cl->input_buffer) = '\0';
 
-  status = uhuru_json_handler_av_request(cl->json_handler, buffer_data(&cl->input_buffer), buffer_length(&cl->input_buffer), &response, &response_len);
+  status = uhuru_json_handler_get_response(cl->json_handler, buffer_data(&cl->input_buffer), buffer_length(&cl->input_buffer), &response, &response_len);
   
   write_n(cl->sock, response, response_len);
   write_n(cl->sock, "\r\n\r\n", 4);
@@ -150,8 +150,10 @@ int json_client_process(struct json_client *cl)
 
   buffer_clear(&cl->input_buffer);
 
-  /* FIXME: check return value */
-  close(cl->sock);
+  if (close(cl->sock) < 0)
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "error closing JSON socket: %s", strerror(errno));
+
+  uhuru_json_handler_process(cl->json_handler);
 
   return 0;
 }

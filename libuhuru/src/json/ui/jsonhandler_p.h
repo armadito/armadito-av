@@ -3,7 +3,6 @@
 
 #include "jsonhandler.h"
 
-#include <assert.h>
 #include <json.h>
 #include <stdlib.h>
 
@@ -21,27 +20,8 @@ struct json_response {
   const char *error_message;
 };
 
-typedef enum uhuru_json_status (*request_cb_t)(struct uhuru *uhuru, struct json_request *req, struct json_response *resp);
+typedef enum uhuru_json_status (*response_cb_t)(struct uhuru *uhuru, struct json_request *req, struct json_response *resp, void **request_data);
 
-static inline void json_request_destroy(struct json_request *req)
-{
-  if (req->request != NULL)
-    free((void *)req->request);
-
-  if (req->params != NULL)
-    assert(json_object_put(req->params));
-}
-
-static inline void json_response_destroy(struct json_response *resp)
-{
-  if (resp->response != NULL)
-    free((void *)resp->response);
-
-  if (resp->info != NULL)
-    assert(json_object_put(resp->info));
-
-  if (resp->error_message != NULL)
-    free((void *)resp->error_message);
-}
+typedef void (*process_cb_t)(struct uhuru *uhuru, void *request_data);
 
 #endif
