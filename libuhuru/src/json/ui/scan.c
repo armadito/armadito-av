@@ -6,32 +6,14 @@
 #include "scan.h"
 #include "os/string.h"
 
-#ifdef linux
-#include "net/unixsockclient.h"
-#define DEFAULT_SOCKET_PATH   "/tmp/.uhuru-ihm"
-#endif
-
 #include <json.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+
 #ifdef linux
-#include <pthread.h>
 #include <sys/time.h>
-#endif
 
-struct scan_data {
-  struct uhuru *uhuru;
-  /* this parameter will allow the scan to connect back to the client (IHM or command-line tool) */
-  /* value is unix socket path on linux, named pipe path on windows */
-  const char *client_ipc_path;
-  const char *path;
-  int scan_id;
-  time_t last_send_time;
-  int last_send_progress;
-};
-
-#ifdef linux
 static time_t get_milliseconds(void)
 {
   struct timeval now;
@@ -108,11 +90,18 @@ static struct json_object *report_json(struct uhuru_report *report)
 }
 */
 
+struct scan_data {
+  /* this parameter will allow the scan to connect back to the client (IHM or command-line tool) */
+  /* value is unix socket path on linux, named pipe path on windows */
+  const char *client_ipc_path;
+  time_t last_send_time;
+  int last_send_progress;
+};
+
 #define SEND_PERIOD 200  /* milliseconds */
 
 static void scan_callback(struct uhuru_report *report, void *callback_data)
 {
-  int fd;
   struct json_object *j_request;
   struct scan_data *scan_data = (struct scan_data *)callback_data;
   const char *req;
@@ -137,58 +126,25 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
 
   req = json_object_to_json_string(j_request);
 
-  fd = unix_client_connect(DEFAULT_SOCKET_PATH, 10);
-
-  if (fd < 0) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "error connecting to IHM (%s)", strerror(errno));
-    return;
-  }
-
-  if (write(fd, req, strlen(req)) < 0)
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "error writing JSON response (%s)", strerror(errno));
-
-  if (write(fd, "\r\n\r\n", 4) < 0)
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "error writing JSON response (%s)", strerror(errno));
-
-  close(fd);
+  /* here gui exchange using platform specific function */
 
   scan_data->last_send_time = now;
   scan_data->last_send_progress = report->progress;
-
 }
-
-static void *scan_thread_fun(void *arg)
-{
-  struct scan_data *scan_data = (struct scan_data *)arg;
-  struct uhuru_on_demand *on_demand;
-
-  on_demand = uhuru_on_demand_new(scan_data->uhuru, scan_data->scan_id, scan_data->path, UHURU_SCAN_RECURSE | UHURU_SCAN_THREADED);
-
-  uhuru_scan_add_callback(uhuru_on_demand_get_scan(on_demand), scan_callback, scan_data);
-
-  uhuru_on_demand_run(on_demand);
-
-  free(arg);
-
-  uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_DEBUG, "JSON: scan thread terminated");
-
-  return NULL;
-}
-
 
 enum uhuru_json_status scan_request_cb(struct uhuru *uhuru, struct json_request *req, struct json_response *resp)
 {
   struct json_object *j_path;
   const char *path;
+  struct uhuru_on_demand *on_demand;
   struct scan_data *scan_data;
-  pthread_t scan_thread;
 
 #ifdef DEBUG
   uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_DEBUG, "JSON: scan cb called");
 #endif
 
-  /* check if 'params' object contains key "path" with a string value */
-  if (!json_object_object_get_ex(req->params, "path", &j_path)
+  /* check if 'params' object contains key "path_to_scan" with a string value */
+  if (!json_object_object_get_ex(req->params, "path_to_scan", &j_path)
       || !json_object_is_type(j_path, json_type_string))
     return JSON_INVALID_REQUEST;
 
@@ -201,21 +157,16 @@ enum uhuru_json_status scan_request_cb(struct uhuru *uhuru, struct json_request 
   uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_DEBUG, "JSON: scan path = %s", path);
 
   scan_data = malloc(sizeof(struct scan_data));
-  scan_data->uhuru = uhuru;
-  scan_data->scan_id = req->id;
-  scan_data->path = path;
   scan_data->last_send_time = 0L;
   scan_data->last_send_progress = REPORT_PROGRESS_UNKNOWN;
 
-#ifdef linux
-  if (pthread_create(&scan_thread, NULL, scan_thread_fun, scan_data)) {
-    uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_ERROR, "JSON: cannot create scan thread (%s)", strerror(errno));
-    return JSON_REQUEST_FAILED;
-  }
-#endif
-#ifdef WIN32
-#error must add thread creation
-#endif
+  on_demand = uhuru_on_demand_new(uhuru, req->id, path, UHURU_SCAN_RECURSE | UHURU_SCAN_THREADED);
+
+  uhuru_scan_add_callback(uhuru_on_demand_get_scan(on_demand), scan_callback, scan_data);
+
+  uhuru_on_demand_run(on_demand);
+
+  free(scan_data);
 
   return JSON_OK;
 }
