@@ -16,6 +16,7 @@ scan.c \
 scan.h \
 state.c \
 state.h \
+linux.c \
 ../../linux/net/unixsockclient.c \
 ../../linux/net/unixsockclient.h
 
