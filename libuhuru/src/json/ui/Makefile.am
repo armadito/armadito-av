@@ -16,8 +16,8 @@ scan.c \
 scan.h \
 state.c \
 state.h \
-../linux/net/unixsockclient.c \
-../linux/net/unixsockclient.h
+../../linux/net/unixsockclient.c \
+../../linux/net/unixsockclient.h
 
 libuhuru_json_la_CFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/include/config -I$(top_srcdir)/src -I$(top_srcdir)/src/linux
 libuhuru_json_la_LIBADD= 
