@@ -103,7 +103,7 @@ static ssize_t write_n(int fd, char *buffer, size_t len)
     int w = write(fd, buffer, to_write);
 
     if (w < 0) {
-      uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "error writing response in JSON receive: %s", strerror(errno));
+      uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "error writing response in JSON receive: %s", strerror(errno));
 
       return w;
     }
