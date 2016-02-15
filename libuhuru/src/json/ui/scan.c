@@ -93,9 +93,10 @@ static struct json_object *report_json(struct uhuru_report *report)
 struct scan_data {
   /* this parameter will allow the scan to connect back to the client (IHM or command-line tool) */
   /* value is unix socket path on linux, named pipe path on windows */
-  const char *client_ipc_path;
+  const char *ui_ipc_path;
   time_t last_send_time;
   int last_send_progress;
+  struct uhuru_on_demand *on_demand;
 };
 
 #define SEND_PERIOD 200  /* milliseconds */
@@ -127,16 +128,15 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
   req = json_object_to_json_string(j_request);
 
   /* here gui exchange using platform specific function */
+  /* FIXME */
 
   scan_data->last_send_time = now;
   scan_data->last_send_progress = report->progress;
 }
 
-enum uhuru_json_status scan_request_cb(struct uhuru *uhuru, struct json_request *req, struct json_response *resp)
+enum uhuru_json_status scan_response_cb(struct uhuru *uhuru, struct json_request *req, struct json_response *resp, void **request_data)
 {
-  struct json_object *j_path;
-  const char *path;
-  struct uhuru_on_demand *on_demand;
+  struct json_object *j_path, *j_ui_ipc_path;
   struct scan_data *scan_data;
 
 #ifdef DEBUG
@@ -148,26 +148,34 @@ enum uhuru_json_status scan_request_cb(struct uhuru *uhuru, struct json_request 
       || !json_object_is_type(j_path, json_type_string))
     return JSON_INVALID_REQUEST;
 
+  /* check if 'params' object contains key "ui_ipc_path" with a string value */
+  if (!json_object_object_get_ex(req->params, "ui_ipc_path", &j_ui_ipc_path)
+      || !json_object_is_type(j_ui_ipc_path, json_type_string))
+    return JSON_INVALID_REQUEST;
+
   /* future fields of the 'params' object: */
   /* "mode": "personnalized", */
   /* "configuration": "toto1", */
 
-  path = os_strdup(json_object_get_string(j_path));
-
-  uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_DEBUG, "JSON: scan path = %s", path);
-
   scan_data = malloc(sizeof(struct scan_data));
   scan_data->last_send_time = 0L;
   scan_data->last_send_progress = REPORT_PROGRESS_UNKNOWN;
+  scan_data->ui_ipc_path = os_strdup(json_object_get_string(j_ui_ipc_path));
+  scan_data->on_demand = uhuru_on_demand_new(uhuru, req->id, json_object_get_string(j_path), UHURU_SCAN_RECURSE | UHURU_SCAN_THREADED);
 
-  on_demand = uhuru_on_demand_new(uhuru, req->id, path, UHURU_SCAN_RECURSE | UHURU_SCAN_THREADED);
+  uhuru_scan_add_callback(uhuru_on_demand_get_scan(scan_data->on_demand), scan_callback, scan_data);
 
-  uhuru_scan_add_callback(uhuru_on_demand_get_scan(on_demand), scan_callback, scan_data);
-
-  uhuru_on_demand_run(on_demand);
-
-  free(scan_data);
+  *request_data = scan_data;
 
   return JSON_OK;
+}
+
+void scan_process_cb(struct uhuru *uhuru, void *request_data)
+{
+  struct scan_data *scan_data = (struct scan_data *)request_data;
+
+  uhuru_on_demand_run(scan_data->on_demand);
+
+  free(scan_data);
 }
 
