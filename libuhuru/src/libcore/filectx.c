@@ -5,6 +5,7 @@
 #include "os/io.h"
 #include "os/mimetype.h"
 
+#include <errno.h>
 #include <stdlib.h>
 
 const char *uhuru_file_context_status_str(enum uhuru_file_context_status status)
@@ -29,6 +30,11 @@ enum uhuru_file_context_status uhuru_file_context_get(struct uhuru_file_context 
   struct uhuru_module **applicable_modules;
   const char *mime_type;
 
+  if (fd == -1 && path == NULL) {
+    ctx->status = UHURU_FC_FILE_OPEN_ERROR;
+    return ctx->status;
+  }
+
   ctx->status = UHURU_FC_MUST_SCAN;
   ctx->fd = fd;
   ctx->path = NULL;
@@ -36,7 +42,7 @@ enum uhuru_file_context_status uhuru_file_context_get(struct uhuru_file_context 
   ctx->applicable_modules = NULL;
 
   /* 1) check file name vs. directories white list */
-  if (uhuru_scan_conf_is_white_listed(conf, path)) {
+  if (path != NULL && uhuru_scan_conf_is_white_listed(conf, path)) {
     ctx->status = UHURU_FC_WHITE_LISTED_DIRECTORY;
     return ctx->status;
   }
@@ -44,8 +50,7 @@ enum uhuru_file_context_status uhuru_file_context_get(struct uhuru_file_context 
   /* 2) cache => NOT YET */
 
   /* open file if no fd given */
-  if (ctx->fd == -1) {
-	
+  if (ctx->fd < 0) {
     /* open the file */
     ctx->fd = os_open(path, O_RDONLY);
     if (ctx->fd < 0) {
@@ -96,8 +101,11 @@ struct uhuru_file_context *uhuru_file_context_clone(struct uhuru_file_context *c
 
 void uhuru_file_context_close(struct uhuru_file_context *ctx)
 {
-  if (ctx->fd > 0)
-    os_close(ctx->fd);
+  if (ctx->fd < 0)
+    return;
+
+  if (os_close(ctx->fd) != 0)
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "closing file descriptor %3d failed (%s)", ctx->fd, os_strerror(errno));
 }
 
 void uhuru_file_context_destroy(struct uhuru_file_context *ctx)

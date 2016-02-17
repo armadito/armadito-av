@@ -7,7 +7,7 @@
 #include <libuhuru/core.h>
 
 void print_json_value(struct json_object *jobj);
-void json_parse_array(struct json_object *jobj, char *key);
+//void json_parse_array(struct json_object *jobj, char *key);
 void json_parse_and_print(struct json_object * jobj);
 const char* json_parse_and_process(struct json_object * jobj, struct new_scan_action* scan);
 const char* json_get_protocol_err_msg(const char* err_msg, int scan_id);
