@@ -1,7 +1,8 @@
 #include <libuhuru/core.h>
 
 #include "server.h"
-#include "client.h"
+#include "ipcclient.h"
+#include "jsonclient.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -9,34 +10,48 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#if defined(linux)
 #include <sys/types.h>
 #include <sys/socket.h>
-#elif defined(WIN32)
-#include <WinSock2.h>
-#endif
 
 struct server {
   int listen_sock;
   struct uhuru *uhuru;
   GThreadPool *thread_pool;  
   GIOChannel *channel;
+  enum ipc_type ipc_type;
 };
 
 static void client_thread(gpointer data, gpointer user_data)
 {
-  struct client *client = (struct client *)data;
+  struct server *server = (struct server *)user_data;
 
-  while (client_process(client) > 0)
-    ;
-
-  client_free(client);
+  switch(server->ipc_type) {
+  case OLD_IPC: 
+    {
+      struct ipc_client *client = (struct ipc_client *)data;
+      
+      while (ipc_client_process(client) > 0)
+	;
+      
+      ipc_client_free(client);
+    }
+    break;
+  case JSON_IPC:
+    {
+      struct json_client *client = (struct json_client *)data;
+      
+      json_client_process(client);
+      
+      json_client_free(client);
+    }
+    break;
+  }
 }
 
 static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpointer data)
 {
   struct server *server = (struct server *)data;
-  struct client *client;
+  void *client;
   int client_sock;
 
   client_sock = accept(server->listen_sock, NULL, NULL);
@@ -48,20 +63,28 @@ static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpo
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, "accepted client connection: fd = %d", client_sock);
 
-  client = client_new(client_sock, server->uhuru);
+  switch(server->ipc_type) {
+  case OLD_IPC:
+    client = ipc_client_new(client_sock, server->uhuru);
+    break;
+  case JSON_IPC:
+    client = json_client_new(client_sock, server->uhuru);
+    break;
+  }
 
   g_thread_pool_push(server->thread_pool, (gpointer)client, NULL);
 
   return TRUE;
 }
 
-struct server *server_new(struct uhuru *uhuru, int server_sock)
+struct server *server_new(struct uhuru *uhuru, int server_sock, enum ipc_type ipc_type)
 {
   struct server *server = (struct server *)malloc(sizeof(struct server));
   assert(server != NULL);
 
   server->uhuru = uhuru;
   server->listen_sock = server_sock;
+  server->ipc_type = ipc_type;
 
   server->thread_pool = g_thread_pool_new(client_thread, server, -1, FALSE, NULL);
 

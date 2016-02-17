@@ -2,9 +2,15 @@
 
 #include <libuhuru/core.h>
 
+#include <errno.h>
 #include <glib.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#ifdef linux
+#include <time.h>
+#endif
 
 /* should not be there, but for now... */
 #ifdef HAVE_GETPID
@@ -97,11 +103,26 @@ const char *uhuru_log_level_str(enum uhuru_log_level log_level)
   return "";
 }
 
+#ifdef linux
+static void append_uptime(GString *gstring)
+{
+  struct timespec now = {0L, 0L};
+
+  clock_gettime(CLOCK_MONOTONIC_COARSE, &now);
+
+  g_string_append_printf(gstring, "[%6.6f] ", now.tv_sec + now.tv_nsec / 1000000000.0);
+}
+#endif
+
 void uhuru_log_default_handler(enum uhuru_log_domain domain, enum uhuru_log_level log_level, const char *message, void *user_data)
 {
   FILE *stream = get_stream(log_level);
   GString *gstring = g_string_new(NULL);
   gchar *string;
+
+#ifdef linux
+  append_uptime(gstring);
+#endif
 
   g_string_append_printf(gstring, "%s[%d]: ", LOG_NAME, os_getpid());
 

@@ -102,8 +102,15 @@ fi
 # check for fanotify
 AC_CHECK_FUNCS(fanotify_init, [HAVE_FANOTIFY_INIT=1], [HAVE_FANOTIFY_INIT=0])
 if test "$HAVE_FANOTIFY_INIT" = "0" ; then
-   AC_MSG_ERROR("fanotify is not availble on this Linux distribution")
+   AC_MSG_ERROR("fanotify is not available on this Linux distribution")
 fi
+
+# check for json-c library
+PKG_CHECK_MODULES(LIBJSONC, json-c, [HAVE_LIBJSONC=yes], [HAVE_LIBJSONC=no])
+if test "$HAVE_LIBJSONC" = "no"; then
+   AC_MSG_ERROR("cannot find json-c library")
+fi
+
 
 # documentation
 # check for asciidoc and a2x
@@ -124,6 +131,8 @@ include/libuhuru/Makefile
 pkgconfig/Makefile
 src/Makefile
 src/libcore/Makefile
+src/json/Makefile
+src/json/ui/Makefile
 src/linux/Makefile
 src/linux/daemon/Makefile
 src/linux/modules/Makefile
