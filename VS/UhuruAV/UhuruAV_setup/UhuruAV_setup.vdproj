@@ -2733,6 +2733,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_A8E2ECDD16854792B7B88B20A513AAF8"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_A8FC6429B9C0491B98554E872DF3F30A"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -13316,6 +13322,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_A8E2ECDD16854792B7B88B20A513AAF8"
+            {
+            "SourcePath" = "8:..\\Debug\\keys\\uh_rsa_public.pem"
+            "TargetName" = "8:uh_rsa_public.pem"
+            "Tag" = "8:"
+            "Folder" = "8:_E408818788FA417DB60BEFE62D4CA329"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_A8FC6429B9C0491B98554E872DF3F30A"
             {
             "SourcePath" = "8:..\\..\\..\\..\\nwjs\\locales\\gu.pak"
@@ -18200,6 +18226,17 @@
                         {
                         }
                     }
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_E408818788FA417DB60BEFE62D4CA329"
+                    {
+                    "Name" = "8:keys"
+                    "AlwaysCreate" = "11:FALSE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_6B52C9329E3444CC89ABD7FFD5069526"
+                        "Folders"
+                        {
+                        }
+                    }
                     "{9EF0B969-E518-4E46-987F-47570745A589}:_EB94A0A9907445C2AF4D8921FF4E815D"
                     {
                     "Name" = "8:conf"
@@ -19890,7 +19927,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_2603A6ADCEDD42CA98FDEC967CAF8CF7"
             {
-            "SourcePath" = "8:..\\Debug\\UhuruGuardSetup.exe"
+            "SourcePath" = "8:..\\Release\\UhuruGuardSetup.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_45349E98B4B548F68EADFC742F0C7FF8"
@@ -19918,7 +19955,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_86662C37329146A5939D0481DC590FC3"
             {
-            "SourcePath" = "8:..\\Debug\\UhuruSvc.exe"
+            "SourcePath" = "8:..\\Release\\UhuruSvc.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_DFCFC7849A9D443B9E935C5F301DEB21"
@@ -19946,7 +19983,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_A26842C85429476DA76CC415E0EFBC03"
             {
-            "SourcePath" = "8:..\\Debug\\libuhuru_core.dll"
+            "SourcePath" = "8:..\\Release\\libuhuru_core.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_DFCFC7849A9D443B9E935C5F301DEB21"
@@ -19974,7 +20011,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_A73057E72DDC4201B24C6E67DA13C84E"
             {
-            "SourcePath" = "8:..\\Debug\\clamav.dll"
+            "SourcePath" = "8:..\\Release\\clamav.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_421DA39434254887B5C12097EC49D60C"
