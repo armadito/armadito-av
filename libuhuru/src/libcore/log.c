@@ -50,8 +50,10 @@ void uhuru_log(enum uhuru_log_domain domain, enum uhuru_log_level level, const c
 
   g_free(message);
 
+#ifndef WIN32
   if (level & UHURU_LOG_LEVEL_ERROR)
     abort();
+#endif
 }
 
 void uhuru_log_set_handler(enum uhuru_log_level max_level, uhuru_log_handler_t handler, void *user_data)

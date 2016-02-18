@@ -47,6 +47,8 @@ int ServiceLoadProcedure( ) {
 				ret = -2;
 				__leave;
 			}
+
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_INFO, " Service connected to the driver successfully!\n");
 		}
 		
 
@@ -56,7 +58,9 @@ int ServiceLoadProcedure( ) {
 			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," Start IHM connection failed :: %d\n",ret);
 			ret = -3;
 			__leave;
+
 		}	
+		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_INFO, " Service connected to the GUI successfully!\n");
 
 
 	}
@@ -1234,8 +1238,7 @@ int LaunchCmdLineServiceTest( ) {
 		}
 		else if (c == 'c') {
 
-			// continue.
-			
+			// continue.			
 			ret = ServiceLoadProcedure( );
 			if (ret < 0) {
 				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service Initialization failed during continue \n");
@@ -1259,6 +1262,73 @@ int LaunchCmdLineServiceTest( ) {
 
 }
 
+int LaunchCmdLineService( ) {
+
+	int ret = 0;
+	unsigned char c;
+	uhuru_error * uh_error = NULL;
+	HRESULT hres = S_OK;
+
+
+	__try {
+		
+		if (ServiceLoadProcedure( ) < 0) {
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service Initialization failed:\n");
+			//uhLog("[+] Error :: Service Initialization failed\n");
+			printf("[-] Error :: Service Load Procedure failed! :: %d\n", ret);
+			__leave;
+		}
+
+		while(1) {
+
+			printf("press 'q' to quit: \n");
+			c = (unsigned char) getchar();
+
+
+			if (c == 'q') {
+				__leave;
+			}
+			else if (c == 'p') {
+
+				// pause.				
+				if (ServiceUnloadProcedure( ) != 0) {
+					//uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service unloaded with errors during pause.\n");
+					//uhLog("[-] Error :: Service unloaded with errors\n");
+					printf("[-] Error :: Service Unload Procedure failed! ::\n");
+					break;
+				}
+			
+
+			}
+			else if (c == 'c') {
+
+				// continue.							
+				if (ServiceLoadProcedure( ) < 0) {
+					uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service Initialization failed during continue \n");
+					//uhLog("[+] Error :: Service Initialization failed\n");
+					printf("[-] Error :: Service Load Procedure failed! ::\n");
+				}
+
+			}
+
+		}
+
+
+
+
+	}
+	__finally {
+
+		if (ServiceUnloadProcedure( ) != 0) {
+			printf("[-] Error :: Service Unload Procedure failed! ::\n");
+		}
+
+	}
+
+	return ret;
+
+}
+
 
 int main(int argc, char ** argv) {
 
@@ -1271,7 +1341,7 @@ int main(int argc, char ** argv) {
 	// Only for test purposes (command line)
 	if ( argc >=2 && strncmp(argv[1],"--test",6) == 0 ){
 
-		ret = LaunchCmdLineServiceTest( );
+		ret = LaunchCmdLineService( );
 		if (ret < 0) {
 			return EXIT_FAILURE;
 		}

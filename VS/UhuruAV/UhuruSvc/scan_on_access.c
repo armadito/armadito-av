@@ -206,7 +206,7 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 					uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: Failed to move file in quarantine!! \n file: [%s] ",msDosFilename);
 				}
 			}
-				
+			
 
 
 			if (msDosFilename != NULL) {
