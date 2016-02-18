@@ -290,7 +290,7 @@ char * GetFileContent(char * filename, int * retsize) {
 
 		hFile = CreateFileA(filename, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, NULL);
 		if (hFile == INVALID_HANDLE_VALUE) {
-			printf("[-] Error :: GetFileContent :: Opening the description file failed! :: error = %d\n",GetLastError());
+			printf("[-] Error :: GetFileContent :: Opening the file [%s] failed! :: error = %d\n",filename,GetLastError());
 			ret = -1;
 			__leave;
 		}
@@ -651,6 +651,9 @@ int CompareWithCachedHash(BYTE * hash) {
 		// Get the cached hash.		
 		// TODO: build the cache file complete path.
 		cachedHash = GetFileContent(CACHE_FILEPATH,&size);
+		if (cachedHash == NULL || size <= 0) {
+			return 1;
+		}
 
 		//printf("[+] Debug :: CompareWithCachedHash :: Comparing hash=%s with cache=%s\n",hash,cachedHash);
 		
@@ -840,6 +843,8 @@ int UpdateModulesDB(int reload) {
 			__leave;
 		}
 
+		printf("[+] Debug :: UpdateModulesDB :: Uhuru service suspended successfully!\n");
+
 		printf("\n\n");
 		// Copy databases files to the right places.
 		if (CopyModulesDatabaseFiles(packageList, nbPackages) < 0) {
@@ -855,6 +860,8 @@ int UpdateModulesDB(int reload) {
 			ret = -10;
 			__leave;
 		}
+
+		printf("[+] Debug :: UpdateModulesDB :: Uhuru service resumed successfully!\n");
 
 		// Save hash in cache file.
 		res = SaveHashInCacheFile(hash);
