@@ -4,6 +4,7 @@
 #include "jsonhandler.h"
 #include "debug.h"
 #include "scan.h"
+#include "ui.h"
 #include "os/string.h"
 
 #include <json.h>
@@ -100,13 +101,14 @@ struct scan_data {
 };
 
 #define SEND_PERIOD 200  /* milliseconds */
+#define RESPONSE_BUFFER_SIZE 1024
 
 static void scan_callback(struct uhuru_report *report, void *callback_data)
 {
   struct json_object *j_request;
   struct scan_data *scan_data = (struct scan_data *)callback_data;
   const char *req;
-  size_t req_len;
+  char resp[RESPONSE_BUFFER_SIZE];
   time_t now;
 
   now = get_milliseconds();
@@ -127,8 +129,8 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
 
   req = json_object_to_json_string(j_request);
 
-  /* here gui exchange using platform specific function */
-  /* FIXME */
+  /* ui exchange using platform specific function */
+  json_handler_ui_request(scan_data->ui_ipc_path, req, strlen(req), resp, sizeof(resp));
 
   scan_data->last_send_time = now;
   scan_data->last_send_progress = report->progress;

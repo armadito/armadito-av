@@ -153,7 +153,8 @@ int json_client_process(struct json_client *cl)
   if (close(cl->sock) < 0)
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "error closing JSON socket: %s", strerror(errno));
 
-  uhuru_json_handler_process(cl->json_handler);
+  if (!status)
+    uhuru_json_handler_process(cl->json_handler);
 
   return 0;
 }
