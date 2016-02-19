@@ -83,6 +83,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\libuhuru\src\json\ui\jsonhandler.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\json\ui\scan.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\json\ui\state.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\json\ui\ui_win.c" />
     <ClCompile Include="..\..\..\libuhuru\src\json\updatedb\uh_json_parse.c" />
     <ClCompile Include="..\..\..\libuhuru\src\utils\getopt.c" />
     <ClCompile Include="..\..\..\libuhuru\src\utils\uh_json.c" />
@@ -98,6 +102,11 @@
     <ClCompile Include="update.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\libuhuru\src\json\ui\jsonhandler.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\json\ui\jsonhandler_p.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\json\ui\scan.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\json\ui\state.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\json\ui\ui_win.h" />
     <ClInclude Include="..\..\..\libuhuru\src\json\updatedb\uh_json_parse.h" />
     <ClInclude Include="..\..\..\libuhuru\src\utils\getopt.h" />
     <ClInclude Include="..\..\..\libuhuru\src\utils\uh_json.h" />

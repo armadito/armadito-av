@@ -1201,7 +1201,7 @@ int ServiceContinue( ) {
 	return ret;
 }
 
-int LaunchCmdLineServiceTest( ) {
+int LaunchCmdLineServiceGUI( ) {
 
 	int ret = 0;
 	unsigned char c;
@@ -1338,7 +1338,21 @@ int main(int argc, char ** argv) {
 	printf("----- Uhuru Scan service -----\n");
 	printf("------------------------------\n");
 
-	// Only for test purposes (command line)
+
+
+	// Only for test purposes (command line) complete test = GUI + driver.
+	if ( argc >=2 && strncmp(argv[1],"--testGUI",9) == 0 ){
+
+		ret = LaunchCmdLineServiceGUI( );
+		if (ret < 0) {
+			return EXIT_FAILURE;
+		}
+		return EXIT_SUCCESS;
+
+	}
+
+
+	// Only for test purposes (command line) complete test = GUI + driver.
 	if ( argc >=2 && strncmp(argv[1],"--test",6) == 0 ){
 
 		ret = LaunchCmdLineService( );
@@ -1348,6 +1362,8 @@ int main(int argc, char ** argv) {
 		return EXIT_SUCCESS;
 
 	}
+
+	
 
 	// Only for test purposes (command line)
 	if ( argc >=2 && strncmp(argv[1],"--register",10) == 0 ){

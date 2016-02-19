@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static inline void json_request_destroy(struct json_request *req)
+static void json_request_destroy(struct json_request *req)
 {
   if (req->request != NULL)
     free((void *)req->request);
@@ -22,7 +22,7 @@ static inline void json_request_destroy(struct json_request *req)
     assert(json_object_put(req->params));
 }
 
-static inline void json_response_destroy(struct json_response *resp)
+static void json_response_destroy(struct json_response *resp)
 {
   if (resp->response != NULL)
     free((void *)resp->response);
@@ -44,7 +44,7 @@ static struct {
   { NULL, NULL, NULL},
 };
 
-struct uhuru_json_handler {
+typedef struct uhuru_json_handler {
   struct json_tokener *tokener;
   struct uhuru *uhuru;
   process_cb_t process;
@@ -142,18 +142,23 @@ enum uhuru_json_status call_request_handler(struct uhuru_json_handler *j, struct
   enum uhuru_json_status status = JSON_INVALID_REQUEST;  
 
   i = 0;
-  while (request_dispatch[i].request != NULL && strcmp(request_dispatch[i].request, av_request->request))
-    i++;
-
+  while (request_dispatch[i].request != NULL && strcmp(request_dispatch[i].request, av_request->request)) {	  
+	  printf("[+] Debug :: call_request_handler :: request_dispatch[%d].request = %s\n", i, request_dispatch[i].request);
+	  i++;
+  }
+    //i++;
+  
   if (request_dispatch[i].request != NULL) {
     response_cb_t cb = request_dispatch[i].response;
-
+	printf("[+] Debug :: call_request_handler :: request_dispatch[%d].request = %s :: request_dispatch[i].response= %d\n", i, request_dispatch[i].request, request_dispatch[i].response);
     status = (*cb)(j->uhuru, av_request, av_response, &j->request_data);
 
     j->process = request_dispatch[i].process;
-
+	printf("[+] Debug :: call_request_handler :: request_dispatch[i].process= %d\n", request_dispatch[i].process);
+#ifndef WIN32
     if (av_response->info != NULL)
       jobj_debug(av_response->info, "info");
+#endif
   }
 
   return status;
@@ -180,7 +185,7 @@ static enum uhuru_json_status fill_response(struct json_response *av_response, c
       json_object_object_add(j_response, "error-message", json_object_new_string(av_response->error_message));
   }
 
-  jobj_debug(j_response, "AV response");
+  //jobj_debug(j_response, "AV response");
 
   *p_resp = (char *)os_strdup(json_object_to_json_string(j_response));
   *p_resp_len = strlen(*p_resp);
@@ -203,21 +208,32 @@ enum uhuru_json_status uhuru_json_handler_get_response(struct uhuru_json_handler
   av_response.info = NULL;
   av_response.error_message = NULL;
 
+  // Check parameters
+  if (j == NULL || req == NULL || req_len <= 0) {
+	  printf("[-] Error :: uhuru_json_handler_get_response :: invalids parameters\n");
+	  return JSON_UNEXPECTED_ERR;
+  }
+
   av_response.status = parse_request(j, req, req_len, &j_request);
+  printf("[+] Debug :: parse_request :: av_response.status = %d\n", av_response.status);
 
   if (av_response.status)
     goto get_out;
 
-  jobj_debug(j_request, "AV request");
+  //jobj_debug(j_request, "AV request");
 
   av_response.status = extract_request(j_request, &av_request);
+  printf("[+] Debug :: extract_request :: av_response.status = %d\n", av_response.status);
 
   if (av_response.status)
     goto get_out;
 
   av_response.response = os_strdup(av_request.request);
   av_response.id = av_request.id;
+  printf("[+] Debug :: ... :: av_response.response = %s :: av_response.id = %d\n", av_response.response, av_response.id);
   av_response.status = call_request_handler(j, &av_request, &av_response);
+  printf("[+] Debug :: call_request_handler :: av_response.status = %d\n", av_response.status);
+  printf("[+] Debug :: ... :: av_response.error = %s ::\n", av_response.error_message);
 
  get_out:
   fill_response(&av_response, p_resp, p_resp_len);
@@ -233,3 +249,5 @@ void uhuru_json_handler_process(struct uhuru_json_handler *j)
   if (j->process != NULL)
     (*j->process)(j->uhuru, j->request_data);
 }
+;
+
