@@ -1,5 +1,6 @@
 #include "named_pipe_server.h"
 #include "named_pipe_client.h"
+#include "json\ui\jsonhandler.h"
 
 
 #define BUFSIZE 512
@@ -124,7 +125,7 @@ int TerminateAllScanThreads(PONDEMAND_SCAN_CONTEXT Context) {
 	return ret;
 }
 
-int WINAPI ScanThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
+int WINAPI ScanThreadWork__old(PONDEMAND_SCAN_CONTEXT Context) {
 
 	int ret = 0;
 	BOOL bConnected = FALSE;
@@ -139,6 +140,8 @@ int WINAPI ScanThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
 	DWORD cbBytesRead = 0, cbReplyBytes = 0, cbWritten = 0;
 	BOOL fSuccess = FALSE;
 	struct new_scan_action* scan = NULL;
+
+	enum uhuru_json_status status = JSON_OK ;
 
 	if (Context == NULL) {
 		printf("[-] Error :: ScanThreadWork :: NULL Context\n" );
@@ -222,6 +225,8 @@ int WINAPI ScanThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
 			// To avoid random data on buffer after data read
 			pchRequest[cbBytesRead] = '\0';
 
+			//status = uhuru_json_handler_get_response(cl->json_handler, buffer_data(&cl->input_buffer), buffer_length(&cl->input_buffer), &response, &response_len);
+
 			// Process the incoming message. Json parsing -> fill scan variable
 			GetAnswerToRequest(pchRequest, pchReply, &cbReplyBytes, scan);
 
@@ -259,6 +264,257 @@ int WINAPI ScanThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
 
 	}
 	__finally {
+
+		// Free allocated memory.
+		if (pchReply != NULL)
+			HeapFree(hHeap, 0, pchReply);
+
+		if (pchRequest != NULL) 
+			HeapFree(hHeap, 0, pchRequest);
+
+		if (scan != NULL) {
+			free(scan);
+			scan = NULL;
+		}		
+
+		// Close the pipe instance.
+		if (!CloseHandle(threadCtx->hPipeInst)) {
+			printf("[-] Error :: ScanThreadWork :: [%d] :: CloseHandle failed with error :: %d\n",GetLastError());
+		}
+
+		// remove the thread from the scan thread pool.		
+		Context->ScanThreadCtx[index].Aborted = FALSE ;
+		Context->ScanThreadCtx[index].Handle = NULL;
+		Context->ScanThreadCtx[index].hPipeInst = NULL;
+		Context->ScanThreadCtx[index].ScanId = 0;
+		Context->ScanThreadCtx[index].ThreadId = 0;
+
+		// decrease the thread count.
+		Context->Scan_thread_count --;
+
+	}
+	
+
+	return ret;
+}
+
+int WINAPI ScanThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
+
+	int ret = 0;
+	BOOL bConnected = FALSE;
+	HANDLE hPipe = NULL;
+	int i = 0, index = 0, count =0;
+	DWORD threadId = 0;
+	PONDEMAND_THREAD_CONTEXT threadCtx = NULL;
+	
+	HANDLE hHeap = GetProcessHeap();
+	TCHAR* pchRequest = NULL;
+	TCHAR* pchReply = NULL;
+	DWORD cbBytesRead = 0, cbReplyBytes = 0, cbWritten = 0;
+	BOOL fSuccess = FALSE;
+	struct new_scan_action* scan = NULL;
+	
+	struct json_client * cl = NULL;
+
+	struct uhuru_json_handler * json_handler = NULL;
+	enum uhuru_json_status status = JSON_OK ;
+	char * request = NULL;
+	int req_len = 0;
+	char * response = NULL;
+	int resp_len = 0;
+
+	if (Context == NULL) {
+		printf("[-] Error :: ScanThreadWork :: NULL Context\n" );
+		return -1;
+	}
+
+
+	// Get thread context by ID.
+	threadId = GetCurrentThreadId( );
+	printf("[+] Debug :: ScanThreadWork :: Thread Id = %d \n",threadId);
+
+	for (i = 0; i < SCAN_THREAD_COUNT; i++) {		
+		if (threadId == Context->ScanThreadCtx[i].ThreadId) {
+			threadCtx = &Context->ScanThreadCtx[i];
+			index = i;
+			break;
+		}
+	}
+
+	if (threadCtx == NULL) {
+		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " ScanThreadWork :: Thread context not found!\n");
+		printf("[-] Error :: ScanThreadWork :: Thread Context not found\n");
+		return -2;
+	}
+
+
+	__try {
+
+
+		if (Context->Finalized) {
+			printf("[+] Debug :: ScanThreadWork :: [%d] :: Finalizing thread execution...\n",threadCtx->ThreadId);
+			__leave;
+		}
+		
+		if (threadCtx->hPipeInst == NULL) {
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " ScanThreadWork :: Thread pipe instance is invalid (NULL) !\n");
+			printf("[-] Error :: ScanThreadWork :: Thread pipe instance is NULL\n");
+			ret = -3;
+			__leave;
+		}
+
+		/*pchRequest = (TCHAR*)HeapAlloc(hHeap, 0, BUFSIZE*sizeof(TCHAR));
+		if (pchRequest == NULL) {
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " ScanThreadWork :: Request Buffer Allocation failed! :: GLE= %d \n",GetLastError());
+			printf("[-] Error :: ScanThreadWork :: Request buffer Allocation failed with error :: %d \n",GetLastError());
+			ret = -4;
+			__leave;
+		}*/
+		
+		// allocate request buffer
+		request = (char*)calloc(BUFSIZE,sizeof(char));
+		if (request == NULL) {
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " ScanThreadWork :: Request Buffer Allocation failed! :: GLE= %d \n",GetLastError());
+			printf("[-] Error :: ScanThreadWork :: Request buffer Allocation failed with error :: %d \n",GetLastError());
+			ret = -4;
+			__leave;
+		}		
+
+
+		/*pchReply = (TCHAR*)HeapAlloc(hHeap, 0, BUFSIZE*sizeof(TCHAR));
+		if (pchReply == NULL){
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " ScanThreadWork :: Reply Buffer Allocation failed! :: GLE= %d \n",GetLastError());
+			printf("[-] Error :: ScanThreadWork :: Reply buffer Allocation failed with error :: %d \n",GetLastError());
+			ret = -5;
+			__leave;
+		}*/
+
+		while (TRUE) {
+
+			if (Context->Finalized) {
+				printf("[+] Debug :: ScanThreadWork :: [%d] :: Finalizing thread execution...\n",threadCtx->ThreadId);
+				__leave;
+			}
+
+			// Read client requests from the pipe. This simplistic code only allows messages
+			// up to BUFSIZE characters in length.
+			/*fSuccess = ReadFile(
+				threadCtx->hPipeInst,        // handle to pipe 
+				pchRequest,    // buffer to receive data 
+				BUFSIZE, // size of buffer 
+				&cbBytesRead, // number of bytes read 
+				NULL);        // not overlapped I/O 
+			*/
+
+			// Read GUI request from the pipe.
+			if ((ReadFile(threadCtx->hPipeInst, request, BUFSIZE,&cbBytesRead,NULL) == FALSE) || cbBytesRead <=0) {
+				printf("[-] Error :: ScanThreadWork :: Read in pipe failed with error :: %d \n",GetLastError());
+				ret = -6;
+				break;
+			}
+			req_len = cbBytesRead;
+			printf("[+] Debug :: ScanThreadWork :: len = %d ::  GUI request = %s ::\n",req_len, request);
+			
+			// intialize json_handler.
+			json_handler =  uhuru_json_handler_new(Context->Uhuru);
+			if (json_handler == NULL) {
+				printf("[-] Error :: ScanThreadWork :: uhuru_json_handler_new failed! \n");
+				ret = -7;
+				__leave;
+			}
+
+			//json_handler = (struct uhuru_json_handler *)calloc(1,sizeof(struct uhuru_json_handler));
+
+			status = uhuru_json_handler_get_response(json_handler, request, req_len, &response, &resp_len);
+			if (status != JSON_OK) {
+				printf("[-] Error :: ScanThreadWork :: uhuru json handler get response failed :: status = %d\n",status);
+				ret = -8;
+				break;
+			}
+
+			printf("[+] Debug :: ScanThreadWork :: resp_len= %d :: response= %s\n",resp_len, response);
+
+			// write answer to GUI.
+			if ( (WriteFile(threadCtx->hPipeInst, response, resp_len, &cbWritten, NULL) == FALSE ) || cbWritten <= 0) {
+				printf("[-] Error :: ScanThreadWork :: Write in pipe failed with error :: %d \n",GetLastError());
+				ret = -9;
+				break;
+			}
+
+			// execute request callback.
+			uhuru_json_handler_process(json_handler);
+
+
+
+			/*if (!fSuccess || cbBytesRead == 0) {
+				printf("[-] Error :: ScanThreadWork :: Read in pipe failed with error :: %d \n",GetLastError());
+				ret = -6;
+				break;
+			}*/
+
+			/*scan = (struct new_scan_action*)malloc(sizeof(struct new_scan_action));
+			// To avoid random data on buffer after data read
+			
+
+			status = uhuru_json_handler_get_response(cl->json_handler, buffer_data(&cl->input_buffer), buffer_length(&cl->input_buffer), &response, &response_len);
+
+			// Process the incoming message. Json parsing -> fill scan variable
+			GetAnswerToRequest(pchRequest, pchReply, &cbReplyBytes, scan);
+
+			// Write the reply to the pipe. 
+			fSuccess = WriteFile(
+				threadCtx->hPipeInst,        // handle to pipe 
+				pchReply,     // buffer to write from 
+				cbReplyBytes, // number of bytes to write 
+				&cbWritten,   // number of bytes written 
+				NULL);        // not overlapped I/O
+
+			if (!fSuccess || cbReplyBytes != cbWritten) {
+				printf("[-] Error :: ScanThreadWork :: Write in pipe failed with error :: %d \n",GetLastError());
+				ret = -7;
+				break;
+			}
+
+			// Step 4 -- Start Scan here if message already sent
+			if (strcmp(scan->scan_action, "new_scan") == 0){
+				start_new_scan(scan, Context->Uhuru);
+			}
+			else if (strcmp(scan->scan_action, "cancel") == 0){
+				cancel_current_scan(scan, Context->Uhuru);
+			}
+			*/
+
+		} // end of while
+
+		// Flush the pipe to allow the client to read the pipe's contents 
+		// before disconnecting. Then disconnect the pipe, and close the 
+		// handle to this pipe instance.
+		FlushFileBuffers(threadCtx->hPipeInst);
+		DisconnectNamedPipe(threadCtx->hPipeInst);
+		//CloseHandle(Context->PipeHandle);
+
+
+	}
+	__finally {
+
+		
+		if (request != NULL) {
+			free(request);
+			request = NULL;
+		}
+
+		if (response != NULL) {
+			free(response);
+			response = NULL;
+		}
+
+		if (json_handler != NULL) {
+			uhuru_json_handler_free(json_handler);
+			//free(json_handler);
+			json_handler = NULL;
+		}
+
+		
 
 		// Free allocated memory.
 		if (pchReply != NULL)
@@ -346,7 +602,7 @@ int WINAPI MainThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
 
 			//. create the pipe instance.
 			hPipe = CreateNamedPipeA(
-				PIPE_NAME,             // pipe name 
+				A8_PIPE_NAME,             // pipe name 
 				PIPE_ACCESS_DUPLEX|FILE_FLAG_OVERLAPPED,       // read/write access 
 				PIPE_TYPE_MESSAGE |       // message type pipe 
 				PIPE_READMODE_MESSAGE |   // message-read mode 
@@ -609,6 +865,7 @@ int Close_IHM_Connection(_In_ PONDEMAND_SCAN_CONTEXT Context ) {
 
 }
 
+#if 0
 int start_named_pipe_server(struct uhuru* uhuru)
 {
 	BOOL   fConnected = FALSE;
@@ -684,6 +941,7 @@ int start_named_pipe_server(struct uhuru* uhuru)
 
 	return 0;
 }
+#endif
 
 int WINAPI InstanceThreadWork( PONDEMAND_SCAN_CONTEXT Context) {
 
@@ -831,6 +1089,7 @@ int WINAPI InstanceThreadWork( PONDEMAND_SCAN_CONTEXT Context) {
 
 }
 
+#if 0
 DWORD WINAPI InstanceThread(LPVOID lpvParam)
 // This routine is a thread processing function to read from and reply to a client
 // via the open pipe connection passed from the main loop. Note this allows
@@ -970,6 +1229,8 @@ DWORD WINAPI InstanceThread(LPVOID lpvParam)
 	printf("InstanceThread exiting.\n");
 	return 1;
 }
+#endif
+
 
 VOID GetAnswerToRequest(LPTSTR pchRequest,
 	LPTSTR pchReply,

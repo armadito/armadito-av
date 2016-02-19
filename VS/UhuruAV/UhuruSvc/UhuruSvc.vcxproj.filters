@@ -25,6 +25,9 @@
     <Filter Include="Fichiers sources\json">
       <UniqueIdentifier>{72f596e1-6baa-4589-a3ce-ae4bae215039}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers sources\json\ui">
+      <UniqueIdentifier>{fbd32394-e0e6-4a2e-8251-78ccf690aa91}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="service.c">
@@ -66,6 +69,18 @@
     <ClCompile Include="register.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\json\ui\jsonhandler.c">
+      <Filter>Fichiers sources\json\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\json\ui\scan.c">
+      <Filter>Fichiers sources\json\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\json\ui\state.c">
+      <Filter>Fichiers sources\json\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\json\ui\ui_win.c">
+      <Filter>Fichiers sources\json\ui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="service.h">
@@ -106,6 +121,21 @@
     </ClInclude>
     <ClInclude Include="register.h">
       <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\json\ui\jsonhandler.h">
+      <Filter>Fichiers d%27en-tête\json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\json\ui\jsonhandler_p.h">
+      <Filter>Fichiers d%27en-tête\json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\json\ui\scan.h">
+      <Filter>Fichiers d%27en-tête\json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\json\ui\state.h">
+      <Filter>Fichiers d%27en-tête\json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\json\ui\ui_win.h">
+      <Filter>Fichiers d%27en-tête\json</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

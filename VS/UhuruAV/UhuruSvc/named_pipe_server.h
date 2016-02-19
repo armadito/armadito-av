@@ -13,6 +13,7 @@
 #include "json_tokener.h"
 #include "log.h"
 
+#define A8_PIPE_NAME "\\\\.\\pipe\\Armadito_ondemand"
 #define PIPE_NAME "\\\\.\\pipe\\uhuruAV_ondemand"
 #define SCAN_THREAD_COUNT 3
 
