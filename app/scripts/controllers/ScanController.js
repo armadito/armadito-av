@@ -29,7 +29,7 @@ angular.module('tatouApp')
               };
 
              EventService.onMessageReceived('scan_event', function(evt, data){
-                    console.log('received data ' + data);
+                    //console.log('received data ' + data);
 
 		     $scope.pdata.scan_progress = data.params.progress;
 			 $scope.pdata.path = data.params.path;
@@ -55,6 +55,7 @@ angular.module('tatouApp')
                       $scope.pdata =  data;
 					 // console.log('[+] Debug :: path = ' + $scope.pdata.params.path);
 					  //$scope.pdata.params.path = data.params.path;
+					  $scope.pdata.scan_progress = data.params.progress;
 
                         threats = [
                           { 
@@ -70,7 +71,7 @@ angular.module('tatouApp')
                       $scope.displayedCollection.push(selectedTreath);  
                     }
                     $scope.showScanDetails = true;
-                    console.log($scope.displayedCollection);
+                    //console.log($scope.displayedCollection);
                   });
                 }, $scope)
               
