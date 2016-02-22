@@ -44,7 +44,7 @@ static struct {
   { NULL, NULL, NULL},
 };
 
-typedef struct uhuru_json_handler {
+struct uhuru_json_handler {
   struct json_tokener *tokener;
   struct uhuru *uhuru;
   process_cb_t process;
@@ -185,7 +185,9 @@ static enum uhuru_json_status fill_response(struct json_response *av_response, c
       json_object_object_add(j_response, "error-message", json_object_new_string(av_response->error_message));
   }
 
-  //jobj_debug(j_response, "AV response");
+#ifndef WIN32
+  jobj_debug(j_response, "AV response");
+#endif
 
   *p_resp = (char *)os_strdup(json_object_to_json_string(j_response));
   *p_resp_len = strlen(*p_resp);
@@ -220,7 +222,9 @@ enum uhuru_json_status uhuru_json_handler_get_response(struct uhuru_json_handler
   if (av_response.status)
     goto get_out;
 
-  //jobj_debug(j_request, "AV request");
+#ifndef WIN32
+  jobj_debug(j_request, "AV request");
+#endif
 
   av_response.status = extract_request(j_request, &av_request);
   printf("[+] Debug :: extract_request :: av_response.status = %d\n", av_response.status);
