@@ -447,26 +447,6 @@ HRESULT UserScanInit(_Inout_  PUSER_SCAN_CONTEXT Context) {
 	return hRes;
 }
 
-int initializeScanService(struct uhuru ** uhuru, PUSER_SCAN_CONTEXT Context) {
-
-	uhuru_error * uh_error = NULL;
-	HRESULT hres = S_OK;			
-	
-
-	*uhuru = uhuru_open(&uh_error);
-	if (*uhuru == NULL) {	
-		uhLog("[-] Error :: uhuru_open failed\n");
-		return -1;
-	}
-
-	uhLog("[+] Debug :: uhuru struct initialized successfully\n");
-
-	//  Initialize scan listening threads.
-	// hres = UserScanInit(&userScanCtx);
-
-
-	return 0;
-}
 
 HRESULT UserScanFinalize(_In_  PUSER_SCAN_CONTEXT Context) {
 

@@ -2,10 +2,14 @@
 #include <libuhuru/core.h>
 
 #include "jsonhandler.h"
-//#include "debug.h"
 #include "scan.h"
-//#include "ui.h"
+#ifdef WIN32
 #include "ui_win.h"
+#else
+#include "debug.h"
+#include "ui.h"
+#endif
+
 #include "os/string.h"
 
 #include <json.h>
@@ -127,8 +131,9 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
   json_object_object_add(j_request, "id", json_object_new_int(report->scan_id));
   json_object_object_add(j_request, "params", report_json(report));
 
-
-  //jobj_debug(j_request, "IHM request");  
+#ifndef WIN32
+  jobj_debug(j_request, "IHM request");
+#endif
   req = json_object_to_json_string(j_request);
   printf("[i] Debug :: scan_callback :: req to GUI = %s\n", req);
 
