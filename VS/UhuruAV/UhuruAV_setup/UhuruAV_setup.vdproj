@@ -93,6 +93,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_0441C3A1ECC94354B0225486F0114093"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_047D555621FF4DE7B6A945CD2DBAB539"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -2068,6 +2074,12 @@
         "Entry"
         {
         "MsmKey" = "8:_7B8D70700185445C9D6B47F2EECA9754"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_7BCA03A353874C13BECE77AD639F8825"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -4588,6 +4600,26 @@
             "TargetName" = "8:bs-commonjs-generator.js"
             "Tag" = "8:"
             "Folder" = "8:_69EBF5C6F3244E89B00A67E67D2FAA06"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_0441C3A1ECC94354B0225486F0114093"
+            {
+            "SourcePath" = "8:..\\..\\dependencies\\ssleay32.dll"
+            "TargetName" = "8:ssleay32.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_DFCFC7849A9D443B9E935C5F301DEB21"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -11168,6 +11200,26 @@
             "TargetName" = "8:effects.js"
             "Tag" = "8:"
             "Folder" = "8:_9D9072BBC2974420BBCC7B47661CB8FF"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_7BCA03A353874C13BECE77AD639F8825"
+            {
+            "SourcePath" = "8:..\\..\\dependencies\\libeay32.dll"
+            "TargetName" = "8:libeay32.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_DFCFC7849A9D443B9E935C5F301DEB21"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -19927,7 +19979,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_2603A6ADCEDD42CA98FDEC967CAF8CF7"
             {
-            "SourcePath" = "8:..\\Release\\UhuruGuardSetup.exe"
+            "SourcePath" = "8:..\\Debug\\UhuruGuardSetup.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_45349E98B4B548F68EADFC742F0C7FF8"
@@ -19955,7 +20007,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_86662C37329146A5939D0481DC590FC3"
             {
-            "SourcePath" = "8:..\\Release\\UhuruSvc.exe"
+            "SourcePath" = "8:..\\Debug\\UhuruSvc.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_DFCFC7849A9D443B9E935C5F301DEB21"
@@ -19983,7 +20035,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_A26842C85429476DA76CC415E0EFBC03"
             {
-            "SourcePath" = "8:..\\Release\\libuhuru_core.exe"
+            "SourcePath" = "8:..\\Debug\\libuhuru_core.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_DFCFC7849A9D443B9E935C5F301DEB21"
@@ -20011,7 +20063,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_A73057E72DDC4201B24C6E67DA13C84E"
             {
-            "SourcePath" = "8:..\\Release\\clamav.exe"
+            "SourcePath" = "8:..\\Debug\\clamav.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_421DA39434254887B5C12097EC49D60C"

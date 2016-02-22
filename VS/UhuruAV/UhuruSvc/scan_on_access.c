@@ -207,8 +207,6 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 				}
 			}
 			
-
-
 			if (msDosFilename != NULL) {
 				free(msDosFilename);
 				msDosFilename = NULL;
@@ -558,14 +556,16 @@ char * ConvertDeviceNameToMsDosName(LPSTR DeviceFileName) {
 	
 
 	if (DeviceFileName == NULL) {
-		uhLog("[-] Error :: ConvertDeviceNameToMsDosName :: null parameter DeviceName\n");
+		uhLog("[-] Error :: ConvertDeviceNameToMsDosName :: invalid parameter DeviceName\n");
+		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING, " [-] Error :: ConvertDeviceNameToMsDosName :: invalid parameter DeviceName\n");
 		return NULL;
 	}
-
+	
 	// Get the list of the logical drives.
 	len = GetLogicalDriveStringsA(BUFSIZE,deviceDosName);
 	if (len == 0) {
 		uhLog("[-] Error :: ConvertDeviceNameToMsDosName!GetLogicalDriveStrings() failed ::  error code = 0x%03d\n",GetLastError());
+		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING, "[-] Error :: ConvertDeviceNameToMsDosName!GetLogicalDriveStrings() failed ::  error code = 0x%03d",GetLastError());
 		return NULL;
 	}
 		
@@ -581,11 +581,13 @@ char * ConvertDeviceNameToMsDosName(LPSTR DeviceFileName) {
 		
 		if (!QueryDosDeviceA(deviceLetter, deviceNameQuery, BUFSIZE)) {
 			uhLog("[-] Error :: QueryDosDeviceA() failed ::  error code = 0x%03d\n",GetLastError());
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING,"[-] Error :: QueryDosDeviceA() failed ::  error code = 0x%03d\n",GetLastError());
 			return NULL;
 		}
 		//printf("[+] Debug :: DeviceName = %s ==> %s\n",deviceNameQuery,deviceLetter);
 		if (deviceNameQuery == NULL) {
 			uhLog("[-] Error :: ConvertDeviceNameToMsDosName :: QueryDosDeviceA() failed ::  deviceNameQuery is NULL\n",GetLastError());
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING,"[-] Error :: ConvertDeviceNameToMsDosName :: QueryDosDeviceA() failed ::  deviceNameQuery is NULL\n",GetLastError());
 		}
 
 		if (deviceNameQuery != NULL && strstr(DeviceFileName,deviceNameQuery) != NULL) {
