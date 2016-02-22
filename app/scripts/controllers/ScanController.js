@@ -74,28 +74,50 @@ angular.module('tatouApp')
                   $scope.$broadcast('timer-start');
                   $scope.timerRunning = true;
               };
+              
+              $scope.chooseFile = function (name) {
+                var chooser = document.querySelector(name);
+                chooser.addEventListener("change", function(evt) {
+                  console.log("value", this.value);
+                }, false);
+
+                chooser.click();  
+              }
+                
+              $scope.chooseFile = function (name) {
+                var chooser = document.querySelector(name);
+                chooser.addEventListener("change", function(evt) {
+                  var path = this.value;
+                  $scope.$apply(function(){
+                    $scope.pathToScan = path;
+                  })
+                }, false);
+              };
+
+              $scope.chooseFile('#pathToScan');
 
               $scope.startMe = function(){
+                console.log("path to scan  : " ,$scope.pathToScan);
                 if(($scope.pathToScan === "") || ($scope.pathToScan === undefined)){
-                  toastr.warning('Veuillez entrer un chemin à analyser svp', 'Warning');
-                }else{
-                  $scope.startTimer();
-                  // FD
-                  //AntivirusService.startScan({
-                  //scan_action: 'new_scan',
-                  //scan_id: 77,
-                  //scan_path: '/home/kimios'
-                  //});
-                  // FIXME: must get the path from platform (unix socket vs. named pipe)
-                  AntivirusService.startScan({
-                    av_request: 'scan',
-                    id: 77,
-                    params : {
-                      ui_ipc_path: '/tmp/.uhuru-ihm',
-                      path_to_scan: $scope.pathToScan
-                    }
-                  });
+                  toastr.warning('Veuillez choisir un dossier à analyser svp', '');
+                  return false;
                 }
+                $scope.startTimer();
+                // FD
+                //AntivirusService.startScan({
+                //scan_action: 'new_scan',
+                //scan_id: 77,
+                //scan_path: '/home/kimios'
+                //});
+                // FIXME: must get the path from platform (unix socket vs. named pipe)
+                AntivirusService.startScan({
+                  av_request: 'scan',
+                  id: 77,
+                  params : {
+                    ui_ipc_path: '/tmp/.uhuru-ihm',
+                    path_to_scan: $scope.pathToScan
+                  }
+                });
               };
 
               $scope.stopMe = function(){

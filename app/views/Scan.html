@@ -69,11 +69,15 @@
   <div class="col-xs-8 col-sm-8 col-md-8">
   	<div class="panel panel-primary panel-scanProgression">
 	  <div class="panel-body">
-	  	<div class="col-xs-12" ng-hide="pdata.scan_progress > 0">
-		  <label for="ex2">Chemin à analyser</label>
-		  <input class="form-control" id="ex2" type="text" ng-model="pathToScan" placeholder="Entrez le chemin d'un dossier à analyser...">
-		</div>
-	    <div class="row" ng-if="pdata.scan_progress > 0">
+	  	<div class="col-xs-12">
+		  <label for="ex2">Dossier à analyser</label><br>
+		  <hr>
+		  <span class="btn btn-default btn-file">
+			Parcourir <input id="pathToScan" nwdirectory type="file">
+		   </span>
+		</div><br>
+		&nbsp; &nbsp; &nbsp; &nbsp; {{pathToScan}}
+	    <div class="row" ng-if="pdata.scan_progress > 0" >
     	  	<div class="col-xs-12 col-sm-12 col-md-12" >
 	    	  	<!-- Progress bar-->
 	    	  	<label class="control-label">Scan progression</label>
@@ -81,7 +85,7 @@
 		    	</uib-progressbar>   
     	  	</div>
 	    </div>
-	    <div ng-if="pdata.scan_progress > 0">
+	    <div ng-if="pdata.scan_progress > 0" >
 	    	<table class="table borderless">
 			  <tbody ng-repeat="obj in tableScan">
 			  	<tr>
