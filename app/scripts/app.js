@@ -21,7 +21,8 @@ angular
     'ui.router',
     'ui.bootstrap',
     'armadito.services',
-    'timer'
+    'timer',
+    'toastr'
   ])
   .config(function ($stateProvider, $urlRouterProvider) {
    //

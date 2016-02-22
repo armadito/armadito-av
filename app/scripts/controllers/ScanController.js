@@ -8,8 +8,8 @@
  * Controller of the tatouApp
  */
 angular.module('tatouApp')
-  .controller('ScanController', ['$scope', '$interval', 'MockAvService', 'AntivirusService', 'EventService', 
-        function ($scope,  $interval, MockAvService, AntivirusService, EventService) {
+  .controller('ScanController', ['$scope', '$interval', 'MockAvService', 'AntivirusService', 'EventService', 'toastr',
+        function ($scope,  $interval, MockAvService, AntivirusService, EventService, toastr) {
 
             $scope.rowCollection = [];
 
@@ -21,14 +21,13 @@ angular.module('tatouApp')
              //start Dummy AV
 		//MockAvService.startMockAv();
 
-
               $scope.pdata = {
                 scan_progress : 0
               };
 
              EventService.onMessageReceived('scan_event', function(evt, data){
                     console.log('received data ' + data);
-		     $scope.pdata.scan_progress = data.params.progress;
+		         $scope.pdata.scan_progress = data.params.progress;
 
                   $scope.$apply(function () {                  
                     var threats;
@@ -77,22 +76,26 @@ angular.module('tatouApp')
               };
 
               $scope.startMe = function(){
-                $scope.startTimer();
-		      // FD
-                      //AntivirusService.startScan({
-                      //scan_action: 'new_scan',
-                      //scan_id: 77,
-                      //scan_path: '/home/kimios'
-              //});
-		      // FIXME: must get the path from platform (unix socket vs. named pipe)
-                      AntivirusService.startScan({
-			      av_request: 'scan',
-			      id: 77,
-			      params : {
-				      ui_ipc_path: '/tmp/.uhuru-ihm',
-				      path_to_scan: "/home/francois/Bureau/MalwareStore/contagio-malware/elf-linux"
-			      }
-		      });
+                if(($scope.pathToScan === "") || ($scope.pathToScan === undefined)){
+                  toastr.warning('Veuillez entrer un chemin à analyser svp', 'Warning');
+                }else{
+                  $scope.startTimer();
+                  // FD
+                  //AntivirusService.startScan({
+                  //scan_action: 'new_scan',
+                  //scan_id: 77,
+                  //scan_path: '/home/kimios'
+                  //});
+                  // FIXME: must get the path from platform (unix socket vs. named pipe)
+                  AntivirusService.startScan({
+                    av_request: 'scan',
+                    id: 77,
+                    params : {
+                      ui_ipc_path: '/tmp/.uhuru-ihm',
+                      path_to_scan: $scope.pathToScan
+                    }
+                  });
+                }
               };
 
               $scope.stopMe = function(){
