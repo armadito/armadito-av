@@ -7,6 +7,9 @@
  * # ScanController
  * Controller of the tatouApp
  */
+ 
+ var os = require('os');
+ 
 angular.module('tatouApp')
   .controller('ScanController', ['$scope', '$interval', 'MockAvService', 'AntivirusService', 'EventService', 'toastr',
         function ($scope,  $interval, MockAvService, AntivirusService, EventService, toastr) {
@@ -27,7 +30,9 @@ angular.module('tatouApp')
 
              EventService.onMessageReceived('scan_event', function(evt, data){
                     console.log('received data ' + data);
-		         $scope.pdata.scan_progress = data.params.progress;
+
+		     $scope.pdata.scan_progress = data.params.progress;
+			 $scope.pdata.path = data.params.path;
 
                   $scope.$apply(function () {                  
                     var threats;
@@ -35,11 +40,11 @@ angular.module('tatouApp')
                       $scope.tableScan = [
                         {
                           title : "Object courant",
-                          data : $scope.pdata.params.path
+                          data : $scope.pdata.path
                         },
                         {
                           title : "Fichiers traités",
-                          data : $scope.pdata.params.progress
+                          data : $scope.pdata.path
                         },
                         {
                           title : "Temps écoulé",
@@ -48,6 +53,8 @@ angular.module('tatouApp')
                       ];
 
                       $scope.pdata =  data;
+					 // console.log('[+] Debug :: path = ' + $scope.pdata.params.path);
+					  //$scope.pdata.params.path = data.params.path;
 
                         threats = [
                           { 
@@ -74,8 +81,9 @@ angular.module('tatouApp')
                   $scope.$broadcast('timer-start');
                   $scope.timerRunning = true;
               };
-
+				
               $scope.startMe = function(){
+
                 if(($scope.pathToScan === "") || ($scope.pathToScan === undefined)){
                   toastr.warning('Veuillez entrer un chemin à analyser svp', 'Warning');
                 }else{
@@ -87,15 +95,23 @@ angular.module('tatouApp')
                   //scan_path: '/home/kimios'
                   //});
                   // FIXME: must get the path from platform (unix socket vs. named pipe)
+				  
+				  if(os.platform() == "win32"){
+					  $scope.ui_ipc_path = '\\\\.\\pipe\\uhuru-IHM';
+				  }else{
+					  $scope.ui_ipc_path = '/tmp/.uhuru-ihm';
+				  }
+				  
                   AntivirusService.startScan({
                     av_request: 'scan',
                     id: 77,
                     params : {
-                      ui_ipc_path: '/tmp/.uhuru-ihm',
+                      ui_ipc_path: $scope.ui_ipc_path,
                       path_to_scan: $scope.pathToScan
                     }
                   });
                 }
+                
               };
 
               $scope.stopMe = function(){
