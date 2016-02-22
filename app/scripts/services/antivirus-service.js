@@ -24,10 +24,22 @@ angular.module('armadito.services', [])
     //Provider Settings
     var clientPath;
     var clientId;
+	var os = require('os');
 
     this.setClientPath = function(clPath){
-      clientPath = clPath;
+		
+		if(os.platform() == "win32")
+		{
+			clientPath = '\\\\.\\pipe\\armadito_ondemand';
+		}else{
+			clientPath = '\\\\.\\pipe\\armadito_ondemand';
+		}
+      //clientPath = clPath;
     }
+	
+	//this.setClientPath = function(clPath){
+     // clientPath = clPath;
+    //}
 
     this.setClientId = function(clId){
       clientId = clId;
@@ -50,7 +62,18 @@ angular.module('armadito.services', [])
           $log.info('starting scan ' +  scanData);
 		//var cli = socketClientBuilder(scanData.scan_id, 'mockavsocket');
 		// FIXME: idem
-	  var cli = socketClientBuilder(scanData.scan_id, '/tmp/.uhuru-daemon');
+	 
+		// uf :: set client path:
+		if(os.platform() == "win32")
+		{
+			clientPath = '\\\\.\\pipe\\armadito_ondemand';
+		}else{
+			clientPath = '/tmp/.uhuru-daemon';
+		}
+		
+	 
+	  //var cli = socketClientBuilder(scanData.scan_id, '/tmp/.uhuru-daemon');
+	  var cli = socketClientBuilder(scanData.scan_id, clientPath);
           var buff_to_write = new Buffer( JSON.stringify(scanData), 'ascii' );
           cli.end(buff_to_write, 'ascii');
           $log.info('scan query sent. Should now wait on Local Server for AV Answer');
@@ -70,11 +93,13 @@ angular.module('armadito.services', [])
 
       var socketClientBuilder = function(clientId, clientPath){
         var net = require('net');
+		$log.info('[+] Debug :: socketClientBuilder :: try to connect to Scan service :: ' + clientPath);
         var client_socket = net.connect({path:clientPath});
         client_socket.on(
           'error',
           function(err){
-            $log.error("error: ", err)
+			$log.error('[-] Error :: socketClientBuilder :: connect  failed ! :: ',clientPath,err);
+            //$log.error("error: ", err)
             return -1;
           }
         );
@@ -99,7 +124,9 @@ angular.module('armadito.services', [])
         client_socket.on(
           'data',
           function(data) {
-            $log.info("retrieved data from AV", data);
+            //$log.info("retrieved data from AV", data);
+			$log.info("[+] Debug :: Data from AV service ::"+ data);
+			
           }
         );
 
@@ -116,7 +143,7 @@ angular.module('armadito.services', [])
           server_socket.on('data', function(data) {
 
             var resp = null;
-            $log.info("reveived data on IHM server from AV: " + data);
+            $log.info("received data on IHM server from AV: " + data);
             var buff = new Buffer(data, 'ascii');
             try {
               var scanReport = JSON.parse(buff.toString('ascii'));
