@@ -22,6 +22,8 @@
 #if defined(HAVE_OPEN)
 #define os_open open
 #elif defined(HAVE__OPEN)
+#include <share.h> // for sharing flags
+#include <sys\stat.h> // for mode flags
 #define os_open _open
 #endif
 
