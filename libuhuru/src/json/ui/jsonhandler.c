@@ -237,7 +237,7 @@ enum uhuru_json_status uhuru_json_handler_get_response(struct uhuru_json_handler
   printf("[+] Debug :: ... :: av_response.response = %s :: av_response.id = %d\n", av_response.response, av_response.id);
   av_response.status = call_request_handler(j, &av_request, &av_response);
   printf("[+] Debug :: call_request_handler :: av_response.status = %d\n", av_response.status);
-  printf("[+] Debug :: ... :: av_response.error = %s ::\n", av_response.error_message);
+  //printf("[+] Debug :: ... :: av_response.error = %s ::\n", av_response.error_message);
 
  get_out:
   fill_response(&av_response, p_resp, p_resp_len);
