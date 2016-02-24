@@ -12,7 +12,6 @@ int os_file_stat(const char *path, struct os_file_stat *buf, int *pfile_errno)
 	if (_stat(path, &sb) == -1) {
 		*pfile_errno = errno;
 		buf->flags = FILE_FLAG_IS_ERROR;
-
 		return -1;
 	}
 
