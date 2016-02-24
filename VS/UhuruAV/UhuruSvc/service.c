@@ -4,6 +4,7 @@
 #include "uh_crypt.h"
 #include "update.h"
 #include "register.h"
+#include "uh_info.h"
 
 // Msdn documentation: 
 // https://msdn.microsoft.com/en-us/library/windows/desktop/ms685141%28v=vs.85%29.aspx
@@ -1330,18 +1331,25 @@ int LaunchCmdLineService( ) {
 }
 
 
-int main(int argc, char ** argv) {
-
-	int ret = 0;
+void DisplayBanner( ) {
 
 	printf("------------------------------\n");
 	printf("----- Uhuru Scan service -----\n");
 	printf("------------------------------\n");
 
+	return;
+}
+
+
+int main(int argc, char ** argv) {
+
+	int ret = 0;
 
 
 	// Only for test purposes (command line) complete test = GUI + driver.
 	if ( argc >=2 && strncmp(argv[1],"--testGUI",9) == 0 ){
+
+		DisplayBanner( );
 
 		ret = LaunchCmdLineServiceGUI( );
 		if (ret < 0) {
@@ -1354,6 +1362,8 @@ int main(int argc, char ** argv) {
 
 	// Only for test purposes (command line) complete test = GUI + driver.
 	if ( argc >=2 && strncmp(argv[1],"--test",6) == 0 ){
+
+		DisplayBanner( );
 
 		ret = LaunchCmdLineService( );
 		if (ret < 0) {
@@ -1406,9 +1416,20 @@ int main(int argc, char ** argv) {
 
 	if ( argc >=2 && strncmp(argv[1],"--updatedb",10) == 0 ){
 
+		DisplayBanner( );
+
 		// 0 : do not reload service (for test)
 		// 1 : reload service.
 		ret = UpdateModulesDB(0);
+		if (ret < 0) {
+			return EXIT_FAILURE;
+		}
+		return EXIT_SUCCESS;
+	}
+
+	if ( argc >=2 && strncmp(argv[1],"--info",6) == 0 ){
+		
+		ret = get_av_info();
 		if (ret < 0) {
 			return EXIT_FAILURE;
 		}
@@ -1419,6 +1440,8 @@ int main(int argc, char ** argv) {
 	
 	// command line parameter "--install", install the service.
 	if ( argc >=2 && strncmp(argv[1],"--install",9) == 0 ){
+
+		DisplayBanner( );
 
 		ret = ServiceInstall( );
 		if (ret < 0) {
@@ -1437,7 +1460,7 @@ int main(int argc, char ** argv) {
 
 	// command line parameter "--uninstall", uninstall the service.
 	if ( argc >=2 && strncmp(argv[1],"--uninstall",11) == 0 ){
-
+		DisplayBanner( );
 		ret = ServiceRemove( );
 		return EXIT_SUCCESS;
 	}

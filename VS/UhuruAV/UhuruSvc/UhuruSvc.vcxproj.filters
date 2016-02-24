@@ -81,6 +81,9 @@
     <ClCompile Include="..\..\..\libuhuru\src\json\ui\ui_win.c">
       <Filter>Fichiers sources\json\ui</Filter>
     </ClCompile>
+    <ClCompile Include="uh_info.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="service.h">
@@ -136,6 +139,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\libuhuru\src\json\ui\ui_win.h">
       <Filter>Fichiers d%27en-tête\json</Filter>
+    </ClInclude>
+    <ClInclude Include="uh_info.h">
+      <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
