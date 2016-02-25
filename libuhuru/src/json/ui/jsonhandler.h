@@ -9,6 +9,7 @@ enum uhuru_json_status {
   JSON_MALFORMED_REQUEST = 101,
   JSON_INVALID_REQUEST = 102,
   JSON_REQUEST_FAILED = 200,
+  JSON_UNEXPECTED_ERR = 300,
 };
 
 struct uhuru_json_handler;

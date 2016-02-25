@@ -26,7 +26,7 @@
 #define DUMP_TYPE 1 
 
 // If the real time analysis is enabled or not.
-#define REAL_TIME_ENABLED 0
+#define REAL_TIME_ENABLED 1
 
 int ServiceInstall( );
 int ServiceRemove( );
