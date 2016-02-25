@@ -16,7 +16,8 @@ scan.c \
 scan.h \
 state.c \
 state.h \
-linux.c \
+ui.h \
+ui_linux.c \
 ../../linux/net/unixsockclient.c \
 ../../linux/net/unixsockclient.h
 
