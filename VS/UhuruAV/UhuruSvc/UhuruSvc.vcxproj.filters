@@ -84,6 +84,9 @@
     <ClCompile Include="uh_info.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="others.c">
+      <Filter>Fichiers sources\utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="service.h">
@@ -142,6 +145,9 @@
     </ClInclude>
     <ClInclude Include="uh_info.h">
       <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="others.h">
+      <Filter>Fichiers d%27en-tête\utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
