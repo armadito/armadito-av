@@ -3,11 +3,9 @@
 
 #include "jsonhandler.h"
 #include "scan.h"
-#ifdef WIN32
-#include "ui_win.h"
-#else
-#include "debug.h"
 #include "ui.h"
+#ifdef linux
+#include "debug.h"
 #endif
 
 #include "os/string.h"
