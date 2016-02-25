@@ -90,6 +90,7 @@
     <ClCompile Include="..\..\..\libuhuru\src\json\updatedb\uh_json_parse.c" />
     <ClCompile Include="..\..\..\libuhuru\src\utils\getopt.c" />
     <ClCompile Include="..\..\..\libuhuru\src\utils\uh_json.c" />
+    <ClCompile Include="others.c" />
     <ClCompile Include="uh_info.c" />
     <ClCompile Include="log.c" />
     <ClCompile Include="named_pipe_client.c" />
@@ -111,6 +112,7 @@
     <ClInclude Include="..\..\..\libuhuru\src\json\updatedb\uh_json_parse.h" />
     <ClInclude Include="..\..\..\libuhuru\src\utils\getopt.h" />
     <ClInclude Include="..\..\..\libuhuru\src\utils\uh_json.h" />
+    <ClInclude Include="others.h" />
     <ClInclude Include="uh_info.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="named_pipe_client.h" />
