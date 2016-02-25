@@ -150,11 +150,11 @@ enum uhuru_json_status call_request_handler(struct uhuru_json_handler *j, struct
   
   if (request_dispatch[i].request != NULL) {
     response_cb_t cb = request_dispatch[i].response;
-	printf("[+] Debug :: call_request_handler :: request_dispatch[%d].request = %s :: request_dispatch[i].response= %d\n", i, request_dispatch[i].request, request_dispatch[i].response);
+    printf("[+] Debug :: call_request_handler :: request_dispatch[%d].request = %s :: request_dispatch[i].response= %d\n", i, request_dispatch[i].request, request_dispatch[i].response);
     status = (*cb)(j->uhuru, av_request, av_response, &j->request_data);
 
     j->process = request_dispatch[i].process;
-	printf("[+] Debug :: call_request_handler :: request_dispatch[i].process= %d\n", request_dispatch[i].process);
+    printf("[+] Debug :: call_request_handler :: request_dispatch[i].process= %d\n", request_dispatch[i].process);
 #ifndef WIN32
     if (av_response->info != NULL)
       jobj_debug(av_response->info, "info");
