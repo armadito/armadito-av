@@ -61,7 +61,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>FltLib.lib;libuhuru_core.lib;Wtsapi32.lib;json-c.lib;urlmon.lib;Crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>FltLib.lib;libuhuru_core.lib;Wtsapi32.lib;json-c.lib;urlmon.lib;Crypt32.lib;Wbemuuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -83,9 +83,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\libuhuru\src\json\ui\jsonhandler.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\json\ui\scan.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\json\ui\state.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\json\ui\ui_win.c" />
     <ClCompile Include="..\..\..\libuhuru\src\json\updatedb\uh_json_parse.c" />
     <ClCompile Include="..\..\..\libuhuru\src\utils\getopt.c" />
     <ClCompile Include="..\..\..\libuhuru\src\utils\uh_json.c" />
+    <ClCompile Include="uh_info.c" />
     <ClCompile Include="log.c" />
     <ClCompile Include="named_pipe_client.c" />
     <ClCompile Include="named_pipe_server.c" />
@@ -98,9 +103,15 @@
     <ClCompile Include="update.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\libuhuru\src\json\ui\jsonhandler.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\json\ui\jsonhandler_p.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\json\ui\scan.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\json\ui\state.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\json\ui\ui_win.h" />
     <ClInclude Include="..\..\..\libuhuru\src\json\updatedb\uh_json_parse.h" />
     <ClInclude Include="..\..\..\libuhuru\src\utils\getopt.h" />
     <ClInclude Include="..\..\..\libuhuru\src\utils\uh_json.h" />
+    <ClInclude Include="uh_info.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="named_pipe_client.h" />
     <ClInclude Include="named_pipe_server.h" />

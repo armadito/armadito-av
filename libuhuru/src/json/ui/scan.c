@@ -2,9 +2,14 @@
 #include <libuhuru/core.h>
 
 #include "jsonhandler.h"
-#include "debug.h"
 #include "scan.h"
+#ifdef WIN32
+#include "ui_win.h"
+#else
+#include "debug.h"
 #include "ui.h"
+#endif
+
 #include "os/string.h"
 
 #include <json.h>
@@ -29,7 +34,7 @@ static time_t get_milliseconds(void)
 #endif
 
 #ifdef WIN32
-#error must implement get_milliseconds on windows
+//#error must implement get_milliseconds on windows
 #if 0
 Note: gettimeofday on windows:
 #include <time.h>
@@ -109,9 +114,10 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
   struct scan_data *scan_data = (struct scan_data *)callback_data;
   const char *req;
   char resp[RESPONSE_BUFFER_SIZE];
-  time_t now;
+  time_t now = 0;
+  enum uhuru_json_status status = JSON_OK;
 
-  now = get_milliseconds();
+  //now = get_milliseconds();
   if (report->status == UHURU_CLEAN
       && report->progress != 100
       && scan_data->last_send_progress != REPORT_PROGRESS_UNKNOWN
@@ -125,12 +131,20 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
   json_object_object_add(j_request, "id", json_object_new_int(report->scan_id));
   json_object_object_add(j_request, "params", report_json(report));
 
+#ifndef WIN32
   jobj_debug(j_request, "IHM request");
-
+#endif
   req = json_object_to_json_string(j_request);
+  printf("[i] Debug :: scan_callback :: req to GUI = %s\n", req);
 
+  
   /* ui exchange using platform specific function */
-  json_handler_ui_request(scan_data->ui_ipc_path, req, strlen(req), resp, sizeof(resp));
+  status = json_handler_ui_request(scan_data->ui_ipc_path, req, strlen(req), resp, sizeof(resp));
+  if (status != JSON_OK) {
+	  printf("[-] Debug :: scan_callback :: req to GUI = %s\n\n", req);
+  }
+
+  printf("[+] Debug :: scan_callback :: response  = %s\n\n",resp);
 
   scan_data->last_send_time = now;
   scan_data->last_send_progress = report->progress;

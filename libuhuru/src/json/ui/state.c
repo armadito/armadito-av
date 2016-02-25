@@ -53,7 +53,9 @@ static struct json_object *update_json(enum uhuru_update_status status, const ch
 static struct json_object *state_json(struct uhuru_info *info)
 {
   struct json_object *j_state, *j_mod_array;
-  struct uhuru_module_info **m;
+  //struct uhuru_module_info **m;
+  struct uhuru_module_info *m;
+  int i = 0;
 
   j_state = json_object_new_object();
 
@@ -62,16 +64,31 @@ static struct json_object *state_json(struct uhuru_info *info)
   json_object_object_add(j_state, "update", update_json(info->global_status, "1970-01-01 00:00"));
 
   j_mod_array = json_object_new_array();
+  
+  //printf("[+] Debug :: state_json :: module name = %s\n",info->module_infos[i]->name);
 
-  for(m = info->module_infos; *m != NULL; m++) {
+  for (i = 0; info->module_infos[i] != NULL; i++) {
+	  m = info->module_infos[i];
+	  
+	struct json_object *j_mod = json_object_new_object();
+	//printf("[+] Debug :: state_json :: module name = %s\n",m->name);
+    json_object_object_add(j_mod, "name", json_object_new_string(m->name));
+    json_object_object_add(j_mod, "version", json_object_new_string("0.0.0"));
+    json_object_object_add(j_mod, "update", update_json(m->mod_status, m->update_date));
+
+    json_object_array_add(j_mod_array, j_mod);
+  }
+  
+  /*for(m = info->module_infos; *m != NULL; m++) {
     struct json_object *j_mod = json_object_new_object();
-
+	printf("[+] Debug :: state_json :: module name = %s\n",(*m)->name);
     json_object_object_add(j_mod, "name", json_object_new_string((*m)->name));
     json_object_object_add(j_mod, "version", json_object_new_string("0.0.0"));
     json_object_object_add(j_mod, "update", update_json((*m)->mod_status, (*m)->update_date));
 
     json_object_array_add(j_mod_array, j_mod);
-  }
+	
+  }*/
 
   json_object_object_add(j_state, "modules", j_mod_array);
 
