@@ -488,7 +488,8 @@ Return Value:
     return retStatus;
 }
 
-
+_IRQL_requires_same_
+_IRQL_requires_max_(APC_LEVEL)
 FLT_POSTOP_CALLBACK_STATUS
 PostOperationIrpWrite(
 _Inout_ PFLT_CALLBACK_DATA Data,
@@ -567,7 +568,7 @@ Return Value:
 			__leave;
 		}
 
-		ntStatus = FltGetFileContext(Data->Iopb->TargetInstance, Data->Iopb->TargetFileObject, (PFLT_CONTEXT *)&FileContext);
+		ntStatus = FltGetFileContext(FltObjects->Instance, FltObjects->FileObject, (PFLT_CONTEXT *)&FileContext);
 
 		
 		if (ntStatus == STATUS_NOT_SUPPORTED) {			
@@ -774,12 +775,12 @@ Return Value:
 	
 
 	UNREFERENCED_PARAMETER( Flags );  
-	//UNREFERENCED_PARAMETER( FltObjects ); 
+	UNREFERENCED_PARAMETER( Data ); 
     UNREFERENCED_PARAMETER( CompletionContext );
 
 	__try {
 
-		ntStatus = FltGetFileContext(Data->Iopb->TargetInstance, Data->Iopb->TargetFileObject, (PFLT_CONTEXT *)&FileContext);
+		ntStatus = FltGetFileContext(FltObjects->Instance, FltObjects->FileObject, (PFLT_CONTEXT *)&FileContext);
 
 		if (!NT_SUCCESS(ntStatus)) {			
 			__leave; //return FLT_POSTOP_FINISHED_PROCESSING;

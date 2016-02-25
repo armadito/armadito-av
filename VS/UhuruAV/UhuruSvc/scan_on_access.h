@@ -168,7 +168,6 @@ typedef struct _SCANNER_REPLY_MESSAGE {
 
 
 // Functions
-int initializeScanService(struct uhuru ** uhuru);
 int closeScanService(struct uhuru * uhuru );
 HRESULT UserScanWorker(_In_  PUSER_SCAN_CONTEXT Context);
 HRESULT UserScanInit(_Inout_  PUSER_SCAN_CONTEXT Context);

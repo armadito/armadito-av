@@ -11,6 +11,7 @@ extern "C" {
 #include <string.h>
 #define os_strdup strdup
 #elif defined(HAVE__STRDUP)
+#include <string.h>
 #define os_strdup _strdup
 #endif
 

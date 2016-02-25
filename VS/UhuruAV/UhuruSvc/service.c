@@ -4,6 +4,7 @@
 #include "uh_crypt.h"
 #include "update.h"
 #include "register.h"
+#include "uh_info.h"
 
 // Msdn documentation: 
 // https://msdn.microsoft.com/en-us/library/windows/desktop/ms685141%28v=vs.85%29.aspx
@@ -47,6 +48,8 @@ int ServiceLoadProcedure( ) {
 				ret = -2;
 				__leave;
 			}
+
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_INFO, " Service connected to the driver successfully!\n");
 		}
 		
 
@@ -56,7 +59,9 @@ int ServiceLoadProcedure( ) {
 			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," Start IHM connection failed :: %d\n",ret);
 			ret = -3;
 			__leave;
+
 		}	
+		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_INFO, " Service connected to the GUI successfully!\n");
 
 
 	}
@@ -1197,7 +1202,7 @@ int ServiceContinue( ) {
 	return ret;
 }
 
-int LaunchCmdLineServiceTest( ) {
+int LaunchCmdLineServiceGUI( ) {
 
 	int ret = 0;
 	unsigned char c;
@@ -1234,8 +1239,7 @@ int LaunchCmdLineServiceTest( ) {
 		}
 		else if (c == 'c') {
 
-			// continue.
-			
+			// continue.			
 			ret = ServiceLoadProcedure( );
 			if (ret < 0) {
 				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service Initialization failed during continue \n");
@@ -1259,25 +1263,117 @@ int LaunchCmdLineServiceTest( ) {
 
 }
 
-
-int main(int argc, char ** argv) {
+int LaunchCmdLineService( ) {
 
 	int ret = 0;
+	unsigned char c;
+	uhuru_error * uh_error = NULL;
+	HRESULT hres = S_OK;
+
+
+	__try {
+		
+		if (ServiceLoadProcedure( ) < 0) {
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service Initialization failed:\n");
+			//uhLog("[+] Error :: Service Initialization failed\n");
+			printf("[-] Error :: Service Load Procedure failed! :: %d\n", ret);
+			__leave;
+		}
+
+		while(1) {
+
+			printf("press 'q' to quit: \n");
+			c = (unsigned char) getchar();
+
+
+			if (c == 'q') {
+				__leave;
+			}
+			else if (c == 'p') {
+
+				// pause.				
+				if (ServiceUnloadProcedure( ) != 0) {
+					//uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service unloaded with errors during pause.\n");
+					//uhLog("[-] Error :: Service unloaded with errors\n");
+					printf("[-] Error :: Service Unload Procedure failed! ::\n");
+					break;
+				}
+			
+
+			}
+			else if (c == 'c') {
+
+				// continue.							
+				if (ServiceLoadProcedure( ) < 0) {
+					uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service Initialization failed during continue \n");
+					//uhLog("[+] Error :: Service Initialization failed\n");
+					printf("[-] Error :: Service Load Procedure failed! ::\n");
+				}
+
+			}
+
+		}
+
+
+
+
+	}
+	__finally {
+
+		if (ServiceUnloadProcedure( ) != 0) {
+			printf("[-] Error :: Service Unload Procedure failed! ::\n");
+		}
+
+	}
+
+	return ret;
+
+}
+
+
+void DisplayBanner( ) {
 
 	printf("------------------------------\n");
 	printf("----- Uhuru Scan service -----\n");
 	printf("------------------------------\n");
 
-	// Only for test purposes (command line)
-	if ( argc >=2 && strncmp(argv[1],"--test",6) == 0 ){
+	return;
+}
 
-		ret = LaunchCmdLineServiceTest( );
+
+int main(int argc, char ** argv) {
+
+	int ret = 0;
+
+
+	// Only for test purposes (command line) complete test = GUI + driver.
+	if ( argc >=2 && strncmp(argv[1],"--testGUI",9) == 0 ){
+
+		DisplayBanner( );
+
+		ret = LaunchCmdLineServiceGUI( );
 		if (ret < 0) {
 			return EXIT_FAILURE;
 		}
 		return EXIT_SUCCESS;
 
 	}
+
+
+	// Only for test purposes (command line) complete test = GUI + driver.
+	if ( argc >=2 && strncmp(argv[1],"--test",6) == 0 ){
+
+		DisplayBanner( );
+
+		ret = LaunchCmdLineService( );
+		if (ret < 0) {
+			return EXIT_FAILURE;
+		}
+		return EXIT_SUCCESS;
+
+	}
+
+	
 
 	// Only for test purposes (command line)
 	if ( argc >=2 && strncmp(argv[1],"--register",10) == 0 ){
@@ -1320,9 +1416,20 @@ int main(int argc, char ** argv) {
 
 	if ( argc >=2 && strncmp(argv[1],"--updatedb",10) == 0 ){
 
+		DisplayBanner( );
+
 		// 0 : do not reload service (for test)
 		// 1 : reload service.
 		ret = UpdateModulesDB(0);
+		if (ret < 0) {
+			return EXIT_FAILURE;
+		}
+		return EXIT_SUCCESS;
+	}
+
+	if ( argc >=2 && strncmp(argv[1],"--info",6) == 0 ){
+		
+		ret = get_av_info();
 		if (ret < 0) {
 			return EXIT_FAILURE;
 		}
@@ -1333,6 +1440,8 @@ int main(int argc, char ** argv) {
 	
 	// command line parameter "--install", install the service.
 	if ( argc >=2 && strncmp(argv[1],"--install",9) == 0 ){
+
+		DisplayBanner( );
 
 		ret = ServiceInstall( );
 		if (ret < 0) {
@@ -1351,7 +1460,7 @@ int main(int argc, char ** argv) {
 
 	// command line parameter "--uninstall", uninstall the service.
 	if ( argc >=2 && strncmp(argv[1],"--uninstall",11) == 0 ){
-
+		DisplayBanner( );
 		ret = ServiceRemove( );
 		return EXIT_SUCCESS;
 	}

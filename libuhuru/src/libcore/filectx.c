@@ -5,6 +5,7 @@
 #include "os/io.h"
 #include "os/mimetype.h"
 
+
 #include <errno.h>
 #include <stdlib.h>
 
@@ -29,6 +30,7 @@ enum uhuru_file_context_status uhuru_file_context_get(struct uhuru_file_context 
 {
   struct uhuru_module **applicable_modules;
   const char *mime_type;
+  int err = 0;
 
   if (fd == -1 && path == NULL) {
     ctx->status = UHURU_FC_FILE_OPEN_ERROR;
@@ -51,10 +53,18 @@ enum uhuru_file_context_status uhuru_file_context_get(struct uhuru_file_context 
 
   /* open file if no fd given */
   if (ctx->fd < 0) {
-    /* open the file */
+
+#ifdef WIN32
+	  /* open the file :: TODO write portable code for this function */
+	  err = _sopen_s(&(ctx->fd), path, O_RDONLY, _SH_DENYNO, _S_IREAD);
+#else
+	/* open the file */
     ctx->fd = os_open(path, O_RDONLY);
+#endif
+    
     if (ctx->fd < 0) {
       ctx->status = UHURU_FC_FILE_OPEN_ERROR;
+	  uhuru_log(UHURU_LOG_LIB,UHURU_LOG_LEVEL_WARNING, " Error :: uhuru_file_context_get :: Opening file [%s] for scan failed :: err = %d\n",path,err);
       return ctx->status;
     }
   }
