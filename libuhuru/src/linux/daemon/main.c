@@ -1,4 +1,5 @@
 #include <libuhuru/core.h>
+#include "config/libuhuru-config.h"
 
 #include "utils/getopt.h"
 #include "log.h"
@@ -6,19 +7,19 @@
 #include "daemonize.h"
 #include "tcpsockserver.h"
 #include "unixsockserver.h"
+#include "net/netdefaults.h"
 
 #include <glib.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#define DEFAULT_SOCKET_TYPE   "unix"
-#define DEFAULT_SOCKET_PORT   "14444"
-#define DEFAULT_SOCKET_PATH   "/tmp/.uhuru-daemon"
-/* #define DEFAULT_SOCKET_PATH   "@/tmp/.uhuru-daemon"  /* for abstract sockets (see man 7 unix) */
 #define DEFAULT_LOG_LEVEL     "error"
 #define DEFAULT_IPC_TYPE      "old"
 #define DEFAULT_PID_FILE      LOCALSTATEDIR "/run/uhuru-scand.pid"
+
+#define PROGRAM_NAME "uhuru-scand"
+#define PROGRAM_VERSION PACKAGE_VERSION
 
 struct uhuru_daemon_options {
   int no_daemon;
@@ -35,6 +36,7 @@ struct uhuru_daemon_options {
 
 struct opt daemon_opt_defs[] = {
   { .long_form = "help", .short_form = 'h', .need_arg = 0, .is_set = 0, .value = NULL},
+  { .long_form = "version", .short_form = 'V', .need_arg = 0, .is_set = 0, .value = NULL},
   { .long_form = "no-daemon", .short_form = 'n', .need_arg = 0, .is_set = 0, .value = NULL},
   { .long_form = "log-level", .short_form = 'l', .need_arg = 1, .is_set = 0, .value = NULL},
   { .long_form = "tcp", .short_form = 't', .need_arg = 0, .is_set = 0, .value = NULL},
@@ -46,6 +48,12 @@ struct opt daemon_opt_defs[] = {
   { .long_form = NULL, .short_form = '\0', .need_arg = 0, .is_set = 0, .value = NULL},
 };
 
+static void version(void)
+{
+  printf("%s %s\n", PROGRAM_NAME, PROGRAM_VERSION);
+  exit(EXIT_SUCCESS);
+}
+
 static void usage(void)
 {
   fprintf(stderr, "usage: uhuru-daemon [options]\n");
@@ -54,9 +62,10 @@ static void usage(void)
   fprintf(stderr, "\n");
   fprintf(stderr, "Options:\n");
   fprintf(stderr, "  --help  -h                         print help and quit\n");
+  fprintf(stderr, "  --version -V                       print program version\n");
   fprintf(stderr, "  --no-daemon -n                     do not fork and go to background\n");
   fprintf(stderr, "  --log-level=LEVEL | -l LEVEL       set log level\n");
-  fprintf(stderr, "                                     Log level can be: error, warning, info, debug\n");
+  fprintf(stderr, "                                     log level can be: error, warning, info, debug\n");
   fprintf(stderr, "                                     (default is : " DEFAULT_LOG_LEVEL "\n");
   fprintf(stderr, "  --tcp -t | --unix -u               use TCP (--tcp) or unix (--unix) socket (default is " DEFAULT_SOCKET_TYPE ")\n");
   fprintf(stderr, "  --port=PORT | -p PORT              TCP port number (default is " DEFAULT_SOCKET_PORT ")\n");
@@ -69,7 +78,7 @@ static void usage(void)
   fprintf(stderr, "                                     (default is : " DEFAULT_IPC_TYPE ")\n");
   fprintf(stderr, "\n");
 
-  exit(1);
+  exit(EXIT_FAILURE);
 }
 
 static int check_log_level(const char *s_log_level)
@@ -96,6 +105,9 @@ static void parse_options(int argc, const char **argv, struct uhuru_daemon_optio
   if (opt_is_set(daemon_opt_defs, "help"))
       usage();
 
+  if (opt_is_set(daemon_opt_defs, "version"))
+      version();
+
   if (opt_is_set(daemon_opt_defs, "tcp") && opt_is_set(daemon_opt_defs, "unix"))
     usage();
 
@@ -112,7 +124,6 @@ static void parse_options(int argc, const char **argv, struct uhuru_daemon_optio
     s_socket_type = "tcp";
   else if (opt_is_set(daemon_opt_defs, "unix"))
     s_socket_type = "unix";
-
   opts->socket_type = (!strcmp(s_socket_type, "unix")) ? UNIX_SOCKET : TCP_SOCKET;
 
   s_port = opt_value(daemon_opt_defs, "port", DEFAULT_SOCKET_PORT);
@@ -212,5 +223,5 @@ int main(int argc, const char **argv)
 
   start_daemon(argv[0], &opts);
 
-  return 0;
+  return EXIT_SUCCESS;
 }

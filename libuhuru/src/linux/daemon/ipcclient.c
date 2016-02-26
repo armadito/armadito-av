@@ -18,6 +18,8 @@ struct ipc_client {
   GMutex lock;
 };
 
+static void ipc_client_close(struct ipc_client *cl);
+
 static void ipc_ping_handler(struct ipc_manager *m, void *data)
 {
   struct ipc_client *cl = (struct ipc_client *)data;
@@ -79,6 +81,8 @@ static void ipc_scan_handler(struct ipc_manager *m, void *data)
 
   ipc_manager_msg_send(cl->manager, IPC_MSG_ID_SCAN_END, IPC_NONE_T);
 
+  ipc_client_close(cl);
+
 #ifdef DEBUG
   uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_DEBUG, "ipc: scan handler finished");
 #endif
@@ -133,6 +137,8 @@ static void ipc_info_handler(struct ipc_manager *manager, void *data)
 
   uhuru_info_free(info);
 
+  ipc_client_close(cl);
+
 #ifdef DEBUG
   uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_DEBUG, "ipc: info handler finished");
 #endif
@@ -155,17 +161,25 @@ struct ipc_client *ipc_client_new(int sock, struct uhuru *uhuru)
   return cl;
 }
 
-void ipc_client_free(struct ipc_client *cl)
+static void ipc_client_close(struct ipc_client *cl)
 {
-  ipc_manager_free(cl->manager);
-
-  g_mutex_clear(&cl->lock);
+  if (cl->sock < 0)
+    return;
 
   if (close(cl->sock) < 0) {
     uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_WARNING, "closing socket %d failed (%s)", cl->sock, strerror(errno));
   }
 
   cl->sock = -1;
+}
+
+void ipc_client_free(struct ipc_client *cl)
+{
+  ipc_manager_free(cl->manager);
+
+  g_mutex_clear(&cl->lock);
+
+  ipc_client_close(cl);
 
   free(cl);
 }

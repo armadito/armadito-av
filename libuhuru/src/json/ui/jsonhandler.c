@@ -34,11 +34,11 @@ static void json_response_destroy(struct json_response *resp)
     free((void *)resp->error_message);
 }
 
-static struct {
+static struct request_dispatch_entry {
   const char *request;
   response_cb_t response;
   process_cb_t process;
-} request_dispatch[] = {
+} request_dispatch_table[] = {
   { "state", state_response_cb, NULL},
   { "scan", scan_response_cb, scan_process_cb},
   { NULL, NULL, NULL},
@@ -138,23 +138,19 @@ static enum uhuru_json_status extract_request(struct json_object *j_request, str
 
 enum uhuru_json_status call_request_handler(struct uhuru_json_handler *j, struct json_request *av_request, struct json_response *av_response)
 {
-  int i;
   enum uhuru_json_status status = JSON_INVALID_REQUEST;  
+  struct request_dispatch_entry *p;
 
-  i = 0;
-  while (request_dispatch[i].request != NULL && strcmp(request_dispatch[i].request, av_request->request)) {	  
-	  printf("[+] Debug :: call_request_handler :: request_dispatch[%d].request = %s\n", i, request_dispatch[i].request);
-	  i++;
-  }
-    //i++;
+  for (p = request_dispatch_table; p->request != NULL && strcmp(p->request, av_request->request); p++)
+    ;
   
-  if (request_dispatch[i].request != NULL) {
-    response_cb_t cb = request_dispatch[i].response;
-    printf("[+] Debug :: call_request_handler :: request_dispatch[%d].request = %s :: request_dispatch[i].response= %d\n", i, request_dispatch[i].request, request_dispatch[i].response);
+  if (p->request != NULL) {
+    response_cb_t cb = p->response;
+
     status = (*cb)(j->uhuru, av_request, av_response, &j->request_data);
 
-    j->process = request_dispatch[i].process;
-    printf("[+] Debug :: call_request_handler :: request_dispatch[i].process= %d\n", request_dispatch[i].process);
+    j->process = p->process;
+
 #ifndef WIN32
     if (av_response->info != NULL)
       jobj_debug(av_response->info, "info");
