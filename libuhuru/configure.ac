@@ -1,4 +1,4 @@
-AC_INIT(libuhuru,1.5.3,francois@dechelle.net)
+AC_INIT(libuhuru,1.6.0,francois@dechelle.net)
 AM_INIT_AUTOMAKE
 
 # collect arguments
