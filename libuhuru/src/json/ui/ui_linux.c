@@ -1,47 +1,50 @@
 #include "libuhuru-config.h"
 #include <libuhuru/core.h>
 
-#include "os/string.h"
-
+#include "ui.h"
 #include "net/unixsockclient.h"
-#define DEFAULT_SOCKET_PATH   "/tmp/.uhuru-ihm"
 
 #include <errno.h>
 #include <unistd.h>
 
-int json_handler_ui_request(const char *ui_ipc_path, const char *req, int req_len, char *resp, int resp_len)
+enum uhuru_json_status json_handler_ui_request(const char * ip_path, const char * request, int request_len, char * response, int response_len)
 {
+  enum uhuru_json_status status = JSON_OK;
   int fd;
   ssize_t n_read;
 
-  fd = unix_client_connect(ui_ipc_path, 10);
+  fd = unix_client_connect(ip_path, 10);
 
   if (fd < 0) {
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "error connecting to UI (%s)", strerror(errno));
-    return -1;
+    return JSON_UNEXPECTED_ERR;
   }
 
-  if (write(fd, req, strlen(req)) < 0) {
+  if (write(fd, request, request_len) < 0) {
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "error writing JSON request to UI (%s)", strerror(errno));
-    return -1;
+    status = JSON_REQUEST_FAILED;
+    goto get_out;
   }
 
   if (write(fd, "\r\n\r\n", 4) < 0) {
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "error writing JSON request to UI (%s)", strerror(errno));
-    return -1;
+    status = JSON_REQUEST_FAILED;
+    goto get_out;
   }
 
-  n_read = read(fd, resp, resp_len);
+  n_read = read(fd, response, response_len);
 
   if (n_read < 0) {
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "error reading JSON response from UI (%s)", strerror(errno));
-    return -1;
+    status = JSON_REQUEST_FAILED;
   }
 
+ get_out:
+  
   if (close(fd) < 0) {
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "error closing JSON socket to UI (%s)", strerror(errno));
-    return -1;
+    status = JSON_UNEXPECTED_ERR;
   }
 
-  return 0;
+  return status;
 }
