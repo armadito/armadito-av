@@ -1,13 +1,19 @@
+#include "config/libuhuru-config.h"
+
 #include "utils/getopt.h"
 #include "daemon/ipc.h"
 #include "net/tcpsockclient.h"
 #include "net/unixsockclient.h"
+#include "net/netdefaults.h"
 
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#define PROGRAM_NAME "uhuru-scan"
+#define PROGRAM_VERSION PACKAGE_VERSION
 
 struct scan_summary {
   int scanned;
@@ -42,12 +48,19 @@ static struct opt scan_opt_defs[] = {
   { "threaded", 't', 0, 0, NULL},
   { "no-summary", 'n',  0, 0, NULL},
   { "print-clean", 'c', 0, 0, NULL},
+  { .long_form = "version", .short_form = 'V', .need_arg = 0, .is_set = 0, .value = NULL},
   { .long_form = "tcp", .short_form = 't', .need_arg = 0, .is_set = 0, .value = NULL},
   { .long_form = "port", .short_form = 'p', .need_arg = 1, .is_set = 0, .value = NULL},
   { .long_form = "unix", .short_form = 'u', .need_arg = 0, .is_set = 0, .value = NULL},
   { .long_form = "path", .short_form = 'a', .need_arg = 1, .is_set = 0, .value = NULL},
   { .long_form = NULL, .short_form = 0, .need_arg = 0, .is_set = 0, .value = NULL},
 };
+
+static void version(void)
+{
+  printf("%s %s\n", PROGRAM_NAME, PROGRAM_VERSION);
+  exit(EXIT_SUCCESS);
+}
 
 static void usage(void)
 {
@@ -56,14 +69,15 @@ static void usage(void)
   fprintf(stderr, "Uhuru antivirus scanner\n");
   fprintf(stderr, "\n");
   fprintf(stderr, "Options:\n");
-  fprintf(stderr, "  --help  -h               print help and quit\n");
-  fprintf(stderr, "  --recursive  -r          scan directories recursively\n");
-  fprintf(stderr, "  --threaded -t            scan using multiple threads\n");
-  fprintf(stderr, "  --no-summary -n          disable summary at end of scanning\n");
-  fprintf(stderr, "  --print-clean -c         print also clean files as they are scanned\n");
-  fprintf(stderr, "  --tcp -t | --unix -u     use TCP (--tcp) or unix (--unix) socket (default is unix)\n");
-  fprintf(stderr, "  --port=PORT | -p PORT    TCP port number\n");
-  fprintf(stderr, "  --path=PATH | -a PATH    unix socket path\n");
+  fprintf(stderr, "  --help  -h                    print help and quit\n");
+  fprintf(stderr, "  --version -V                  print program version\n");
+  fprintf(stderr, "  --recursive  -r               scan directories recursively\n");
+  fprintf(stderr, "  --threaded -t                 scan using multiple threads\n");
+  fprintf(stderr, "  --no-summary -n               disable summary at end of scanning\n");
+  fprintf(stderr, "  --print-clean -c              print also clean files as they are scanned\n");
+  fprintf(stderr, "  --tcp -t | --unix -u          use TCP (--tcp) or unix (--unix) socket (default is " DEFAULT_SOCKET_TYPE ")\n");
+  fprintf(stderr, "  --port=PORT | -p PORT         TCP port number (default is " DEFAULT_SOCKET_PORT ")\n");
+  fprintf(stderr, "  --path=PATH | -a PATH         unix socket path (default is " DEFAULT_SOCKET_PATH ")\n");
   fprintf(stderr, "\n");
 
   exit(1);
@@ -72,28 +86,28 @@ static void usage(void)
 static void parse_options(int argc, const char *argv[], struct scan_options *opts)
 {
   int r = opt_parse(scan_opt_defs, argc, argv);
-  const char *s_port;
+  const char *s_port, *s_socket_type;
 
-  if (r < 0|| r >= argc)
+  if (r < 0|| r > argc)
     usage();
 
   if (opt_is_set(scan_opt_defs, "help"))
       usage();
 
-  if (opt_is_set(scan_opt_defs, "tcp") && opt_is_set(scan_opt_defs, "unix"))
-    usage();
-
-  if (opt_is_set(scan_opt_defs, "help"))
-      usage();
+  if (opt_is_set(scan_opt_defs, "version"))
+      version();
 
   if (opt_is_set(scan_opt_defs, "tcp") && opt_is_set(scan_opt_defs, "unix"))
     usage();
 
-  opts->socket_type = UNIX_SOCKET;
+  s_socket_type = DEFAULT_SOCKET_TYPE;
   if (opt_is_set(scan_opt_defs, "tcp"))
-    opts->socket_type = TCP_SOCKET;
+    s_socket_type = "tcp";
+  else if (opt_is_set(scan_opt_defs, "unix"))
+    s_socket_type = "unix";
+  opts->socket_type = (!strcmp(s_socket_type, "unix")) ? UNIX_SOCKET : TCP_SOCKET;
 
-  s_port = opt_value(scan_opt_defs, "port", DEFAULT_TCP_PORT);
+  s_port = opt_value(scan_opt_defs, "port", DEFAULT_SOCKET_PORT);
   opts->port_number = (unsigned short)atoi(s_port);
 
   opts->unix_path = opt_value(scan_opt_defs, "path", DEFAULT_SOCKET_PATH);

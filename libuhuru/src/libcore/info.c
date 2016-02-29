@@ -61,23 +61,13 @@ struct uhuru_info *uhuru_info_new(struct uhuru *uhuru)
       struct uhuru_module_info *mod_info = g_new0(struct uhuru_module_info, 1);
       
       mod_status = (*(*modv)->info_fun)((*modv), mod_info);
-	  
+
       if (mod_status != UHURU_UPDATE_NON_AVAILABLE) {
-		  //printf("[+] Debug :: uhuru_info_new :: module name = %s \n", (*modv)->name);
-		  printf("[+] Debug :: uhuru_info_new :: module name = %s \n", (*modv)->name);
-		  if (*modv == NULL) {
-			  printf("[-] Error :: uhuru_info_new :: Get Uhuru module info failed !\n");
-		  }
-		mod_info->name = os_strdup((*modv)->name);
-		mod_info->mod_status = mod_status;
-		g_array_append_val(g_module_infos, mod_info);
-	  }
-	  else {
-		  uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "[-] Error :: uhuru_info_new :: Get Uhuru module info failed !\n");
-		  printf("[-] Error :: uhuru_info_new :: Get Uhuru module info failed !\n");
-		  g_free(mod_info);
-	  }
-	
+	mod_info->name = os_strdup((*modv)->name);
+	mod_info->mod_status = mod_status;
+	g_array_append_val(g_module_infos, mod_info);
+      } else
+	g_free(mod_info);
 
       if (update_status_compare(info->global_status, mod_status) < 0)
 	info->global_status = mod_status;

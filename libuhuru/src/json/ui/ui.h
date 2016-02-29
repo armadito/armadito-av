@@ -1,3 +1,9 @@
+#ifndef _UI_H_
+#define _UI_H_
 
-int json_handler_ui_request(const char *ui_ipc_path, const char *req, int req_len, char *resp, int resp_len);
+#include "jsonhandler.h"
 
+// AV service request to IHM.
+enum uhuru_json_status json_handler_ui_request(const char * ip_path, const char * request, int request_len, char * response, int response_len);
+
+#endif
