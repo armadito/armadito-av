@@ -157,8 +157,8 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath) {
 	int len = 0;
 	char * content = NULL;
 	char * timestamp = NULL;
-	//HANDLE fh = INVALID_HANDLE_VALUE;
-	//int written = 0;
+	HANDLE fh = INVALID_HANDLE_VALUE;
+	int written = 0;
 	struct json_object *jobj = NULL;
 
 	if (oldfilepath == NULL || quarantinePath == NULL ) {
@@ -188,30 +188,36 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath) {
 		json_object_object_add(jobj, "path", json_object_new_string(oldfilepath));
 		json_object_object_add(jobj, "module", json_object_new_string("clamav")); // TODO :: Get module which has detected the malware.
 		
-		/*content = json_object_to_json_string(jobj);
+		content = json_object_to_json_string(jobj);
 		if (content == NULL) {
 			printf("[-] Error :: WriteQuarantineInfoFile :: can't build info content\n");
 			ret = -2;
 			__leave;
 		}
-		printf("[+] Debug :: json content = %s \n",content);
-		*/
+		//printf("[+] Debug :: json content = %s \n",content);
+		
 		
 		// write in file.
-		if ((ret = json_object_to_file(info_path, jobj)) != 0) {
+		/*if ((ret = json_object_to_file(info_path, jobj)) != 0) {
 			printf("[-] Error :: WriteQuarantineInfoFile :: writing information file failed !\n",ret);
 			__leave;
-		}
+		}*/
 
-		/*fh = CreateFile(info_path, GENERIC_WRITE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+		fh = CreateFile(info_path, GENERIC_WRITE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (fh == INVALID_HANDLE_VALUE) {
 			ret = -3;
 			printf("[-] Error :: WriteQuarantineInfoFile :: can't open the info file :: GLE = %d\n",GetLastError());
 			__leave;
 		}
 
-		WriteFile(fh, content, len, written, NULL);
-		*/		
+		len = strnlen(content,2048);
+
+		if (WriteFile(fh, content, len, &written, NULL) == FALSE) {
+			ret = -3;
+			printf("[-] Error :: WriteQuarantineInfoFile :: write failed :: GLE = %d\n",GetLastError());
+			__leave;
+		}
+			
 
 	}
 	__finally {
@@ -230,10 +236,10 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath) {
 			json_object_put(jobj);
 		}
 		
-		/*if (fh != INVALID_HANDLE_VALUE) {
+		if (fh != INVALID_HANDLE_VALUE) {
 			CloseHandle(fh);
 			fh = INVALID_HANDLE_VALUE;
-		}*/
+		}
 		
 	}
 
@@ -371,6 +377,7 @@ int RestoreFileFromQuarantine(char * filename) {
 			ret = -4;
 			__leave;
 		}
+
 
 		// format verification
 		if (!json_object_object_get_ex(jobj, "path", &jobj_path)) {

@@ -242,7 +242,10 @@ enum uhuru_json_status uhuru_json_handler_get_response(struct uhuru_json_handler
  get_out:
   fill_response(&av_response, p_resp, p_resp_len);
 
-  json_request_destroy(&av_request);
+  if (&av_request != NULL)
+	json_request_destroy(&av_request);
+
+  if (&av_response != NULL)
   json_response_destroy(&av_response);
 
   return av_response.status;

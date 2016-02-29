@@ -63,6 +63,7 @@ SCAN_RESULT LaunchFileAnalysis(_In_ PFLT_CALLBACK_DATA Data, _In_ PCFLT_RELATED_
 	
 	
 	UNREFERENCED_PARAMETER( FltObjects );
+	UNREFERENCED_PARAMETER( quarantineDir );
 
 	if (gClientComPort == NULL) {
 		//DbgPrint("[-] Warning :: UhuruGuard!LaunchFileAnalysis :: Scan service not connected yet !! \n");
@@ -97,11 +98,12 @@ SCAN_RESULT LaunchFileAnalysis(_In_ PFLT_CALLBACK_DATA Data, _In_ PCFLT_RELATED_
 		}
 
 		// Deny access to Quarantine folder		
-		RtlInitUnicodeString(&quarantineDir,QUARANTINE_DIR); // Free unicode string.
+		/*RtlInitUnicodeString(&quarantineDir,QUARANTINE_DIR); // Free unicode string.
 		if (RtlEqualUnicodeString(&FileNameInformation->ParentDir, &quarantineDir, FALSE) == TRUE) {
 			answer = UHURU_MALWARE;
 			__leave;
 		}
+		*/
 
 		//-----------------------------------------
 		// Send scan order to the scan service.
