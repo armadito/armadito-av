@@ -410,7 +410,7 @@ int WINAPI ScanThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
 			if ((ReadFile(threadCtx->hPipeInst, request, BUFSIZE,&cbBytesRead,NULL) == FALSE) || cbBytesRead <=0) {
 				printf("[-] Error :: ScanThreadWork :: Read in pipe failed with error :: %d \n",GetLastError());
 				ret = -6;
-				break;
+				__leave;
 			}
 			req_len = cbBytesRead;
 			printf("[+] Debug :: ScanThreadWork :: len = %d ::  GUI request = %s ::\n",req_len, request);
@@ -489,13 +489,16 @@ int WINAPI ScanThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
 		// Flush the pipe to allow the client to read the pipe's contents 
 		// before disconnecting. Then disconnect the pipe, and close the 
 		// handle to this pipe instance.
-		FlushFileBuffers(threadCtx->hPipeInst);
-		DisconnectNamedPipe(threadCtx->hPipeInst);
+		//FlushFileBuffers(threadCtx->hPipeInst);
+		//DisconnectNamedPipe(threadCtx->hPipeInst);
 		//CloseHandle(Context->PipeHandle);
 
 
 	}
 	__finally {
+
+		FlushFileBuffers(threadCtx->hPipeInst);
+		DisconnectNamedPipe(threadCtx->hPipeInst);
 
 		
 		if (request != NULL) {
@@ -530,7 +533,7 @@ int WINAPI ScanThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
 
 		// Close the pipe instance.
 		if (!CloseHandle(threadCtx->hPipeInst)) {
-			printf("[-] Error :: ScanThreadWork :: [%d] :: CloseHandle failed with error :: %d\n",GetLastError());
+			printf("[-] Error :: ScanThreadWork :: [%d] :: CloseHandle failed with error :: %d\n",index,GetLastError());
 		}
 
 		// remove the thread from the scan thread pool.		
