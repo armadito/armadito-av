@@ -57,7 +57,7 @@ static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpo
   client_sock = accept(server->listen_sock, NULL, NULL);
 
   if (client_sock < 0) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "accept() failed: errno = %d", errno);
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "accept() failed (%s)", strerror(errno));
     return FALSE;
   }
 
