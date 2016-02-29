@@ -21,10 +21,19 @@ angular
     'ui.router',
     'ui.bootstrap',
     'armadito.services',
+	'armadito.svc',
+	'armadito.ipc',
     'timer',
     'toastr'
   ])
-  .config(function ($stateProvider, $urlRouterProvider) {
+  .config(function ($stateProvider, $urlRouterProvider, toastrConfig) {
+	  
+	   angular.extend(toastrConfig, {
+			progressBar: false,
+			tapToDismiss: true,
+			timeOut: 5000,
+			maxOpened: 1
+		  });
    //
   // For any unmatched url, redirect to /main
   $urlRouterProvider.otherwise("/Main");
@@ -39,7 +48,7 @@ angular
     .state('Main.Information', {
       url: '/Information',
       templateUrl: 'views/Information.html',
-      //controller: 'ScanController'
+      controller: 'InformationController'
     })
     .state('Main.Scan', {
       url: '/Scan',

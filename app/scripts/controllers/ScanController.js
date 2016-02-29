@@ -13,7 +13,9 @@
 angular.module('tatouApp')
   .controller('ScanController', ['$scope', '$interval', 'MockAvService', 'AntivirusService', 'EventService', 'toastr',
         function ($scope,  $interval, MockAvService, AntivirusService, EventService, toastr) {
-
+			
+			$scope.HideInputFile = true;
+			
             $scope.rowCollection = [];
 
             //copy the references (you could clone ie angular.copy but then have to go through a dirty checking for the matches)
@@ -105,10 +107,10 @@ angular.module('tatouApp')
               $scope.chooseFile('#pathToScan');
 				
               $scope.startMe = function(){
-
                 if(($scope.pathToScan === "") || ($scope.pathToScan === undefined)){
                   toastr.warning('Veuillez choisir un dossier à analyser svp', '');
                 }else{
+				  $scope.HideInputFile = false;
                   $scope.startTimer();
                   // FD
                   //AntivirusService.startScan({

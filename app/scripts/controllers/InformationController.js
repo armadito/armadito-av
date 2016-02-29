@@ -1,0 +1,160 @@
+'use strict';
+
+/**
+ * @ngdoc function
+ * @name tatouApp.controller:InformationController
+ * @description
+ * # InformationController
+ * Controller of the tatouApp
+ */
+ 
+ var os = require('os');
+ 
+angular.module('tatouApp')
+  .controller('InformationController', ['$scope','ArmaditoSVC','ArmaditoIPC', function ($scope,ArmaditoSVC,ArmaditoIPC) {
+
+		
+		$scope.rowCollection = [];
+		
+
+		//copy the references (you could clone ie angular.copy but then have to go through a dirty checking for the matches)
+		$scope.displayedCollection = [].concat($scope.rowCollection);
+		
+		// Initialize state.
+		$scope.state = {
+			status : 0,
+			service : false,
+			realtime : false,
+			update : "critical",
+			last_update : "Il y a 3 jour",
+			version : 0.1				
+		};
+		
+		$scope.state.modules = [];
+		
+		$scope.state.modules = 
+		[{
+			name : "clamav",
+			version: "0.0.0",
+			update: {"status": "not loaded", "last-update": "1970-01-01T06:13:00Z" }
+		 },
+		 {
+			name : "module5.2",
+			version: "0.0.0",
+			update: {"status": "not loaded", "last-update": "1970-01-01T06:13:00Z" }
+		 },
+		 {
+			name : "modulePDF",
+			version: "1.0.1",
+			update: {"status": "not loaded", "last-update": "1970-01-01T06:13:00Z" }
+		 }
+		]
+		
+		
+
+		$scope.threatDataFromAv = function(data){
+			
+			var json_object;
+			var jobj_modules;
+			var date = new Date().toISOString();
+			
+			console.log('------- current date = ',date);
+			
+			try {
+				json_object = JSON.parse(data);
+				
+				if(json_object.info.antivirus.service == 'on'){
+					$scope.state.service = true;					
+				}else{
+					$scope.state.service = false;					
+				}
+								
+				if(json_object.info.antivirus['real-time-protection']  == 'on'){
+					$scope.state.realtime = true;
+				}else{
+					$scope.state.realtime = false;
+				}
+								
+				$scope.state.update = json_object.info.update;
+				
+				
+				$scope.state.version = json_object.info.antivirus.version;
+				
+				// modules infos.
+				console.log('------- module tab obj = ',json_object.info.modules);
+				console.log('[+] Debug :: threatDataFromAv :: Number of modules :: ',json_object.info.modules.length);
+				//console.log('[+] Debug :: threatDataFromAv :: module name :: ',json_object.info.modules[i].name);
+				$scope.state.modules = json_object.info.modules;				
+				for (var i = 0; i< $scope.state.modules.length ; i++){
+					
+					console.log('[+] Debug :: threatDataFromAv :: module name :: ',$scope.state.modules[i].name);
+					console.log('[+] Debug :: threatDataFromAv :: module date :: ',$scope.state.modules[i].update['last-update']);
+					
+					//var ret = date - $scope.state.modules[i].update['last-update'];
+					//console.log('[+] Debug :: threatDataFromAv :: rsult:: ',ret);
+					
+					//$scope.modules[];					
+				}
+				
+				/*for (var i = 0; i< json_object.info.modules.length ; i++){
+					
+					console.log('[+] Debug :: threatDataFromAv :: module name :: ',json_object.info.modules[i].name);
+					
+					for (var j = 0; j< $scope.modules.length ; j++){
+						
+						if( json_object.info.modules[i].name == $scope.modules[j].name){
+							console.log('[+] Debug :: threatDataFromAv :: module found :: ');	
+							$scope.modules[j] = json_object.info.modules[i];
+						}
+						
+					}					
+				}
+				
+				for (var i = 0; i< $scope.modules.length ; i++){
+					//console.log('[+] Debug :: threatDataFromAv :: module name :: ',json_object.info.modules[i].name);
+					console.log('[+] Debug :: threatDataFromAv :: module name :: ',$scope.modules[i].name);
+					//$scope.modules[];					
+				}
+				
+				//
+				
+				*/
+				
+				
+				//$scope.state.version = json_object.info.antivirus.version;
+				//$scope.state.service = json_object.info.antivirus.version;
+				
+			}
+			catch(e){
+				console.error("Parsing error:", e); 
+				return null;
+			}
+			
+			//console.log('[+] Debug :: In callback refresh object with data :: ' + data);
+						
+			//$scope.state.service = 3;
+			$scope.$apply();
+			return;
+		}
+			
+		// refresh antivirus status.
+		$scope.refresh_status = function(){
+			
+			console.log('[+] Debug :: Refreshing antivirus status...');
+			
+			// send state request to av.			
+			//$scope.state.service = "2";
+			//$scope.state.service = ArmaditoIPC.av_response;
+			//$scope.state.last_update = ArmaditoIPC.av_response;
+			ArmaditoSVC.requestAVstatus($scope.threatDataFromAv);
+			
+			console.log('[+] Debug :: Refreshing antivirus status ::' + ArmaditoIPC.client_socket);
+		}		
+		
+		//$scope.state.service = 2;
+		//$scope.state.last_update = ArmaditoIPC.av_response;
+
+  }]);
+
+  
+ 
