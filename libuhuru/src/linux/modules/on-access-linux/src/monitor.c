@@ -52,7 +52,7 @@ struct access_monitor {
   struct mount_monitor *mount_monitor;
 };
 
-static gboolean start_cb(GIOChannel *source, GIOCondition condition, gpointer data);
+static gboolean delayed_start_cb(GIOChannel *source, GIOCondition condition, gpointer data);
 static gboolean command_cb(GIOChannel *source, GIOCondition condition, gpointer data);
 
 static gpointer monitor_thread_fun(gpointer data);
@@ -69,7 +69,7 @@ static void entry_destroy_notify(gpointer data)
 struct access_monitor *access_monitor_new(struct uhuru *u)
 {
   struct access_monitor *m = malloc(sizeof(struct access_monitor));
-  GIOChannel *start_channel;
+  GIOChannel *start_channel, *command_channel;
 
   m->enable = 0;
   m->enable_permission = 0;
@@ -94,7 +94,10 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
   }
 
   start_channel = g_io_channel_unix_new(m->start_pipe[0]);	
-  g_io_add_watch(start_channel, G_IO_IN, start_cb, m);
+  g_io_add_watch(start_channel, G_IO_IN, delayed_start_cb, m);
+
+  command_channel = g_io_channel_unix_new(m->command_pipe[0]);	
+  g_io_add_watch(command_channel, G_IO_IN, command_cb, m);
 
   m->fanotify_monitor = fanotify_monitor_new(u);
   m->inotify_monitor = inotify_monitor_new(m);
@@ -164,7 +167,7 @@ void access_monitor_add_mount(struct access_monitor *m, const char *mount_point)
   }
 
   if (mount_dev_id == slash_dev_id) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "\"%s\" is in same partition as \"/\"; adding \"/\" as monitored mount point is not supported", mount_point);
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "\"%s\" is in same partition as \"/\"; adding \"/\" as monitored mount point is not supported", mount_point);
     return;
   }
 
@@ -176,7 +179,7 @@ void access_monitor_add_directory(struct access_monitor *m, const char *path)
   add_entry(m, path, ENTRY_DIR);
 }
 
-int access_monitor_start(struct access_monitor *m)
+int access_monitor_delayed_start(struct access_monitor *m)
 {
   char c = 'A';
 
@@ -189,7 +192,7 @@ int access_monitor_start(struct access_monitor *m)
   return 0;
 }
 
-static gboolean start_cb(GIOChannel *source, GIOCondition condition, gpointer data)
+static gboolean delayed_start_cb(GIOChannel *source, GIOCondition condition, gpointer data)
 {
   struct access_monitor *m = (struct access_monitor *)data;
   char c;
@@ -320,7 +323,6 @@ static void mount_cb(enum mount_event_type ev_type, const char *path, void *user
 static gpointer monitor_thread_fun(gpointer data)
 {
   struct access_monitor *m = (struct access_monitor *)data;
-  GIOChannel *command_channel;
   GMainLoop *loop;
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "started thread");
@@ -340,9 +342,6 @@ static gpointer monitor_thread_fun(gpointer data)
   /* init all fanotify and inotify marks */
   mark_entries(m);
 
-  command_channel = g_io_channel_unix_new(m->command_pipe[0]);	
-  g_io_add_watch(command_channel, G_IO_IN, command_cb, m);
-
   loop = g_main_loop_new(NULL, FALSE);
 
   g_main_loop_run(loop);
@@ -360,12 +359,27 @@ static gboolean command_cb(GIOChannel *source, GIOCondition condition, gpointer 
   }
 
   switch(cmd) {
-  case 'g':
+  case ACCESS_MONITOR_START:
+    access_monitor_start_cmd(m);
     break;
-  case 's':
+  case ACCESS_MONITOR_STOP:
+    access_monitor_stop_cmd(m);
+    break;
+  case ACCESS_MONITOR_STATUS:
+    access_monitor_status_cmd(m);
     break;
   }
 
   return TRUE;
+}
+
+int access_monitor_send_command(struct access_monitor *m, char command)
+{
+  if (write(m->command_pipe[1], &command, 1) < 0) {
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "error sending command to access monitor thread (%s)", strerror(errno));
+    return -1;
+  }
+
+  return 0;
 }
 

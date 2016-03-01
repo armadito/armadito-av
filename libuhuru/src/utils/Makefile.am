@@ -1,6 +1,6 @@
 EXTRA_DIST= \
 getopt.c \
 getopt.h \
-json.c \
-json.h 
+uh_json.c \
+uh_json.h
 
