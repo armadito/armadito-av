@@ -14,6 +14,11 @@ then
 	 sudo apt-get --purge autoremove uhuru-desktop
 fi
 
+if [[ $PACKAGE == "install-test" ]]
+then
+	 sudo apt-get update && sudo apt-get install uhuru-desktop-test
+fi
+
 set -e
 
 if [[ $PACKAGE == "libuhuru" || $PACKAGE == "" ]];
