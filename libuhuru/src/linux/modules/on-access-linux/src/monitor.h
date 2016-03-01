@@ -19,6 +19,12 @@ int access_monitor_recursive_mark_directory(struct access_monitor *m, const char
 
 int access_monitor_unmark_directory(struct access_monitor *m, const char *path);
 
-int access_monitor_start(struct access_monitor *m);
+int access_monitor_delayed_start(struct access_monitor *m);
+
+#define ACCESS_MONITOR_START    ((char)0x1)
+#define ACCESS_MONITOR_STOP     ((char)0x2)
+#define ACCESS_MONITOR_STATUS   ((char)0x3)
+
+int access_monitor_send_command(struct access_monitor *m, char command);
 
 #endif

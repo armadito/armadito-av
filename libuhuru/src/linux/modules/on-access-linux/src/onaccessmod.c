@@ -120,7 +120,7 @@ static enum uhuru_mod_status mod_oal_post_init(struct uhuru_module *module)
 {
   struct mod_oal_data *data = (struct mod_oal_data *)module->data;
 
-  access_monitor_start(data->monitor);
+  access_monitor_delayed_start(data->monitor);
 
   return UHURU_MOD_OK;
 }
