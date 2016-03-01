@@ -1,6 +1,7 @@
 #include "ui.h"
 #include <stdio.h>
 #include <Windows.h>
+#include <libuhuru\core.h>
 
 #ifdef WIN32
 enum uhuru_json_status json_handler_ui_request(const char * ip_path, const char * request, int request_len, char * response, int response_len) {
@@ -11,7 +12,7 @@ enum uhuru_json_status json_handler_ui_request(const char * ip_path, const char 
 	int cbBytesRead = 0;
 
 	if (ip_path == NULL || request == NULL || request_len <= 0 ) {
-		printf("[-] Error :: json_handler_ui_request :: invalids parameters!\n");
+		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR,"[-] Error :: json_handler_ui_request :: invalids parameters!\n");		
 		return JSON_UNEXPECTED_ERR;
 	}
 
@@ -20,7 +21,7 @@ enum uhuru_json_status json_handler_ui_request(const char * ip_path, const char 
 		// Connect to pipe.
 		hPipe = CreateFile( ip_path, GENERIC_READ | GENERIC_WRITE,	0, NULL, OPEN_EXISTING, 0,NULL);
 		if (hPipe == INVALID_HANDLE_VALUE) {
-			printf("[-] Error :: json_handler_ui_request :: Opening GUI Pipe failed ! :: GLE = %d\n", GetLastError());
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR,"[-] Error :: json_handler_ui_request :: Opening Pipe [%s] failed ! :: GLE = %d\n",ip_path,GetLastError());
 			status = JSON_UNEXPECTED_ERR;
 			__leave;
 		}

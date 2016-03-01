@@ -1344,6 +1344,7 @@ void DisplayBanner( ) {
 int main(int argc, char ** argv) {
 
 	int ret = 0;
+	struct uhuru_report uh_report = {0};
 
 
 	// Only for test purposes (command line) complete test = GUI + driver.
@@ -1405,7 +1406,16 @@ int main(int argc, char ** argv) {
 	// Only for test purposes (command line)
 	if ( argc >=3 && strncmp(argv[1],"--quarantine",11) == 0 ){
 
-		ret = MoveFileInQuarantine(argv[2]);
+		ret = MoveFileInQuarantine(argv[2],uh_report);
+		if (ret < 0) {
+			return EXIT_FAILURE;
+		}
+		return EXIT_SUCCESS;
+
+	}
+	if ( argc >=2 && strncmp(argv[1],"--quarantine",11) == 0 ){
+
+		ret = EnumQuarantine();
 		if (ret < 0) {
 			return EXIT_FAILURE;
 		}
