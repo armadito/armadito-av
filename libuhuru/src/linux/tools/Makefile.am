@@ -10,6 +10,7 @@ COMMON_SOURCES=\
 ../../utils/getopt.h \
 ../daemon/ipc.c \
 ../daemon/ipc.h \
+../net/netdefaults.h \
 ../net/tcpsockclient.c \
 ../net/tcpsockclient.h \
 ../net/unixsockclient.c \
