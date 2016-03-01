@@ -1,5 +1,5 @@
 AC_INIT(libuhuru,1.6.0,francois@dechelle.net)
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects])
 
 # collect arguments
 # debug

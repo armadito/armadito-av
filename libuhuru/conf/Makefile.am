@@ -11,3 +11,6 @@ EDIT = sed \
 	mv $*.conf.tmp $*.conf
 
 EXTRA_DIST=uhuru.conf.in
+
+CLEANFILES=uhuru.conf
+
