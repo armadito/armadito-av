@@ -52,6 +52,7 @@ char * GetDBDirectory( ) {
 struct clamav_data {
   struct cl_engine *clamav_engine;
   const char *db_dir;
+  const char *tmp_dir;
   int late_days;
   int critical_days;
 };
@@ -85,9 +86,7 @@ static enum uhuru_mod_status clamav_init(struct uhuru_module *module)
 #endif
 
 #ifdef WIN32
- 
   cl_data->db_dir = GetDBDirectory();
-  
 #else
   cl_data->db_dir = os_strdup(MODULE_CLAMAV_DBDIR);
 #endif
@@ -108,6 +107,18 @@ static enum uhuru_mod_status clamav_conf_set_dbdir(struct uhuru_module *module, 
     free((char *)cl_data->db_dir);
 
   cl_data->db_dir = os_strdup(argv[0]);
+
+  return UHURU_MOD_OK;
+}
+
+static enum uhuru_mod_status clamav_conf_set_tmpdir(struct uhuru_module *module, const char *directive, const char **argv)
+{
+  struct clamav_data *cl_data = (struct clamav_data *)module->data;
+
+  if (cl_data->tmp_dir != NULL)
+    free((char *)cl_data->tmp_dir);
+
+  cl_data->tmp_dir = os_strdup(argv[0]);
 
   return UHURU_MOD_OK;
 }
@@ -136,6 +147,13 @@ static enum uhuru_mod_status clamav_post_init(struct uhuru_module *module)
   int ret;
   unsigned int signature_count = 0;
   
+  if ((ret = cl_engine_set_str(cl_data->clamav_engine, CL_ENGINE_TMPDIR, cl_data->tmp_dir)) != CL_SUCCESS) {
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "ClamAV: error setting temporary directory: %s", cl_strerror(ret));
+    cl_engine_free(cl_data->clamav_engine);
+    cl_data->clamav_engine = NULL;
+    return UHURU_MOD_INIT_ERROR;
+  }
+
   if ((ret = cl_load(cl_data->db_dir, cl_data->clamav_engine, &signature_count, CL_DB_STDOPT)) != CL_SUCCESS) {
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "ClamAV: error loading databases: %s", cl_strerror(ret));
     cl_engine_free(cl_data->clamav_engine);
@@ -339,6 +357,7 @@ static enum uhuru_update_status clamav_info(struct uhuru_module *module, struct 
 
 struct uhuru_conf_entry clamav_conf_table[] = {
   { "dbdir", clamav_conf_set_dbdir},
+  { "tmpdir", clamav_conf_set_tmpdir},
   /* { "db", clamav_conf_set_db}, */
   { "late_days", clamav_conf_set_late_days},
   { "critical_days", clamav_conf_set_critical_days},
