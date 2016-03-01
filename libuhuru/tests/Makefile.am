@@ -1,4 +1,4 @@
-AUTOMAKE_OPTIONS=subdir-objects
+AUTOMAKE_OPTIONS=subdir-objects no-dependencies
 
 #check_PROGRAMS=testfind1 testuhuru1 testuhuruscan1 testxmlreport1 testprotocol1 testprotocol2
 check_PROGRAMS=testuhuru1 testuhuruscan1 testxmlreport1 testconfparser1 testipcreceive1 testipcsend1 testdir1 testjsonprint1
@@ -14,8 +14,8 @@ testipcreceive1_SOURCES=testipcreceive1.c ../src/linux/daemon/ipc.c ../src/linux
 testdir1_SOURCES=testdir1.c
 
 testjsonprint1_SOURCES=testjsonprint1.c
-testjsonprint1_CFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/include/config -I$(top_srcdir)/src -I$(top_srcdir)/src/libjson @LIBJSONC_CFLAGS@
-testjsonprint1_LDADD=$(top_builddir)/src/libjson/libuhuru_json.la $(top_builddir)/src/libcore/libuhuru_core.la @LIBJSONC_LIBS@ -lmagic
+testjsonprint1_CFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/include/config -I$(top_srcdir)/src -I$(top_srcdir)/src/json/ui @LIBJSONC_CFLAGS@
+testjsonprint1_LDADD=$(top_builddir)/src/json/ui/libuhuru_json.la $(top_builddir)/src/libcore/libuhuru_core.la @LIBJSONC_LIBS@ -lmagic
 
 #testfind1_SOURCES=testfind1.c
 #testprotocol1_SOURCES=testprotocol1.c

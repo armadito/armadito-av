@@ -18,3 +18,4 @@ EDIT = sed \
 
 EXTRA_DIST=libuhuru.pc.in
 
+CLEANFILES=libuhuru.pc
