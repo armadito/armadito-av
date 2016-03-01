@@ -66,7 +66,7 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
     ULONG_PTR key;
 	LPOVERLAPPED pOvlp = NULL;
 	char * msDosFilename = NULL;
-	struct uhuru_report report;
+	struct uhuru_report report = {0};
 	enum uhuru_file_status scan_result = UHURU_IERROR;
 
 
@@ -202,7 +202,7 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 
 			// If the file is detected as malicious, move it to the quarantine folder
 			if (scan_result == UHURU_MALWARE) {
-				if (MoveFileInQuarantine(msDosFilename) < 0) {					
+				if (MoveFileInQuarantine(msDosFilename, report) < 0) {					
 					uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: Failed to move file in quarantine!! \n file: [%s] ",msDosFilename);
 				}
 			}

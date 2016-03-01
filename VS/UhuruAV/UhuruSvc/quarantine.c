@@ -58,6 +58,66 @@ char * GetQuarantineCompletepath() {
 	return completePath;
 }
 
+/*
+	This function returns the complete path of a location given in parameter
+	according to the installation path.
+*/
+char * GetLocationCompletepath(char * specialDir) {
+
+	char * dirpath = NULL;
+	char * completePath = NULL;
+	char filepath[MAX_PATH];	
+	char * ptr = NULL;
+	int dir_len = 0, len= 0;
+	int ret = 0;
+	
+	__try {
+
+		if (!GetModuleFileNameA(NULL, (LPSTR)&filepath, MAX_PATH)) {	
+			printf("[-] Error :: GetLocationCompletepath :: GetModuleFilename failed :: GLE = %d\n",GetLastError());
+			return NULL;
+		}
+
+		// Remove the module filename from the complete file path
+		ptr = strrchr(filepath,'\\');
+		if (ptr == NULL) {
+			printf("[-] Error :: GetLocationCompletepath :: No backslash found in the path\n");
+			return NULL;
+		}
+
+		// calc the dir buffer length.
+		dir_len = (int)(ptr - filepath);
+		dirpath = (char*)(calloc(dir_len+1,sizeof(char)));
+		dirpath[dir_len] = '\0';
+
+		memcpy_s(dirpath, dir_len, filepath, dir_len);
+		//printf("[+] Debug :: GetLocationCompletepath :: dirpath = %s\n",dirpath);
+
+		len = dir_len + strnlen(specialDir, MAX_PATH) + 2;
+		
+		completePath = (char*)calloc(len+1,sizeof(char));
+		completePath[len] = '\0';
+
+		strncat_s(completePath, len, dirpath, dir_len);
+		strncat_s(completePath, len, "\\", 1);
+		strncat_s(completePath, len, specialDir, strnlen(specialDir, MAX_PATH));		
+
+		printf("[+] Debug :: GetLocationCompletepath :: completePath = %s\n",completePath);
+
+		
+	}
+	__finally {
+
+		if (dirpath != NULL) {
+			free(dirpath);
+			dirpath = NULL;
+		}
+
+	}	
+
+	return completePath;
+}
+
 
 char * GetTimestampString( ) {
 
@@ -76,7 +136,7 @@ char * GetTimestampString( ) {
 	return timestamp;
 }
 
-char * BuildQuarantineFilePath(char * filepath ) {
+char * BuildQuarantineFilePath(char * filepath) {
 
 	char * qPath = NULL;
 	int len = 0;
@@ -149,17 +209,92 @@ char * BuildQuarantineFilePath(char * filepath ) {
 
 }
 
+char * BuildLocationFilePath(char * filepath, char * specialDir) {
 
-int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath) {
+	char * qPath = NULL;
+	int len = 0;
+	char * filename = NULL;
+	char * timestamp  = NULL;
+	char * location_dir = NULL;
+
+
+	if (filepath == NULL) {
+		printf("[-] Error :: BuildLocationFilePath :: Invalid file path!\n");
+		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," BuildLocationFilePath :: Invalid file path!\n");
+		return NULL;
+	}
+
+	__try {
+
+		location_dir = GetLocationCompletepath(specialDir );
+		if (location_dir == NULL) {
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR,"Get Location complete path failed\n");
+			printf("[-] Error :: BuildLocationFilePath :: Get Location complete path failed\n");
+			return NULL;
+		}
+
+
+		// Get the file name from the complete file path
+		filename = strrchr(filepath,'\\');
+		if (filename == NULL) {
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," BuildQuarantineFilePath!strrchr() failed :: backslash not found in the path :: %s.\n",filepath);
+			printf("[-] Error :: BuildLocationFilePath!strrchr() failed :: backslash not found in the path :: %s.\n",filepath);
+			return NULL;
+		}
+
+		// get the current system time in format // year + month + day + hour + minute + second
+		timestamp = GetTimestampString( );				
+
+		// printf("[i] Debug :: BuildQuarantineFilePath :: filename = %s\n", filename);
+		// printf("[i] Debug :: BuildQuarantineFilePath :: timestamp len = %d\n",strnlen_s(timestamp,MAX_PATH) );
+		len = 0;
+		len = strnlen_s(location_dir, MAX_PATH) + strnlen_s(filepath,MAX_PATH) + strnlen_s(timestamp,MAX_PATH) +3;
+		//printf("[i] Debug :: BuildQuarantineFilePath :: len = %d\n", len);
+
+
+		qPath = (char*)calloc(len + 1, sizeof(char));
+		qPath[len] = '\0';
+
+		strncat_s(qPath, len, location_dir, strnlen_s(location_dir, MAX_PATH));
+		//printf("[i] Debug :: BuildQuarantineFilePath :: path = %s\n", qPath);		
+		strncat_s(qPath, len, filename, strnlen_s(filename,MAX_PATH));
+		strncat_s(qPath, len, "_", 1);
+		strncat_s(qPath, len, timestamp, strnlen_s(timestamp,MAX_PATH));
+
+		printf("[i] Debug :: BuildLocationFilePath :: path = %s\n", qPath);
+		
+	}
+	__finally {
+
+		if (timestamp != NULL) {
+			free(timestamp);
+			timestamp = NULL;
+		}
+
+		if (location_dir != NULL) {
+			free(location_dir);
+			location_dir = NULL;
+		}
+
+	}
+
+	return qPath;
+
+}
+
+int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct uhuru_report uh_report) {
 
 	int ret = 0;
 	char * info_path = NULL;
+	char * alert_path = NULL;
 	int len = 0;
+	char * alert_tmp = NULL;
 	char * content = NULL;
 	char * timestamp = NULL;
 	HANDLE fh = INVALID_HANDLE_VALUE;
 	int written = 0;
 	struct json_object *jobj = NULL;
+	
 
 	if (oldfilepath == NULL || quarantinePath == NULL ) {
 		printf("[-] Error :: WriteQuarantineInfoFile :: invalid parameter\n");
@@ -168,7 +303,7 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath) {
 
 	__try {
 
-		// build information file path.
+		// build information file path for quarantine.
 		len = strnlen_s(quarantinePath ,MAX_PATH) + strnlen_s(".info" ,MAX_PATH) +1;
 		info_path = (char*)calloc(len + 1, sizeof(char));
 		info_path[len] = '\0';
@@ -178,6 +313,19 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath) {
 
 		printf("[+] Debug :: WriteQuarantineInfoFile :: info file path = %s\n",info_path);
 
+		// build information file path for quarantine.
+		alert_tmp = BuildLocationFilePath(oldfilepath, ALERT_DIR);
+		len = 0;
+		len = strnlen_s(alert_tmp ,MAX_PATH) + strnlen_s(".info" ,MAX_PATH) +1;
+		alert_path = (char*)calloc(len + 1, sizeof(char));
+		alert_path[len] = '\0';
+
+		strncat_s(alert_path, len, alert_tmp, strnlen_s(alert_tmp ,MAX_PATH));
+		strncat_s(alert_path, len, ".info", strnlen_s(".info" ,MAX_PATH));
+
+		
+		printf("[+] Debug :: WriteQuarantineInfoFile :: alert file path = %s\n",alert_path);
+
 
 		// create content. Ex: {"date":"20160224142724","path":"C:\\Quarantine\\malware.txt","module":"clamav"}
 
@@ -186,7 +334,20 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath) {
 		jobj = json_object_new_object();
 		json_object_object_add(jobj, "date", json_object_new_string(timestamp));
 		json_object_object_add(jobj, "path", json_object_new_string(oldfilepath));
-		json_object_object_add(jobj, "module", json_object_new_string("clamav")); // TODO :: Get module which has detected the malware.
+
+		if (uh_report.mod_name != NULL) {
+			json_object_object_add(jobj, "module", json_object_new_string(uh_report.mod_name));
+		}
+		else {
+			json_object_object_add(jobj, "module", json_object_new_string("black_list"));
+		}
+
+		if (uh_report.mod_report != NULL) {
+			json_object_object_add(jobj, "desc", json_object_new_string(uh_report.mod_report));
+		}
+		else {
+			json_object_object_add(jobj, "desc", json_object_new_string("uh_malware"));
+		}
 		
 		content = json_object_to_json_string(jobj);
 		if (content == NULL) {
@@ -217,7 +378,18 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath) {
 			printf("[-] Error :: WriteQuarantineInfoFile :: write failed :: GLE = %d\n",GetLastError());
 			__leave;
 		}
-			
+
+		if (fh != INVALID_HANDLE_VALUE) {
+			CloseHandle(fh);
+			fh = INVALID_HANDLE_VALUE;
+		}
+
+		// copy info file in alert
+		if (CopyFile(info_path,alert_path,TRUE)  == FALSE){
+			//ret = -4;
+			printf("[-] Error :: WriteQuarantineInfoFile :: Copy info file in alert dir failed :: GLE = %d\n",GetLastError());
+			//__leave;
+		}			
 
 	}
 	__finally {
@@ -225,6 +397,11 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath) {
 		if (info_path != NULL) {
 			free(info_path);
 			info_path = NULL;
+		}
+
+		if (alert_path != NULL) {
+			free(alert_path);
+			alert_path = NULL;
 		}
 
 		if (timestamp != NULL) {
@@ -248,7 +425,7 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath) {
 }
 
 
-int MoveFileInQuarantine(char * filepath) {
+int MoveFileInQuarantine(char * filepath, struct uhuru_report uh_report) {
 
 	int ret = 0;
 	char * quarantineFilepath = NULL;
@@ -271,7 +448,7 @@ int MoveFileInQuarantine(char * filepath) {
 		}
 
 		// Write info file
-		if (WriteQuarantineInfoFile(filepath, quarantineFilepath) != 0) {
+		if (WriteQuarantineInfoFile(filepath, quarantineFilepath, uh_report) != 0) {
 			ret = -3;
 			printf("[-] Error :: MoveFileInQuarantine :: Write Quarantine Information File failed!\n");
 			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," Write Quarantine Information File failed! :: [%s] :: [%s]\n",filepath, quarantineFilepath);
@@ -453,4 +630,10 @@ int RestoreFileFromQuarantine(char * filename) {
 
 	return ret;
 
+}
+
+
+int EnumQuarantine( ) {
+	int ret = 0;
+	return ret;
 }
