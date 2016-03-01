@@ -10,20 +10,8 @@ PACKAGE=$1
 ## Used to locally purge from all uhuru-av-packages
 if [[ $PACKAGE == "purge" ]]
 then
-	sudo dpkg --purge uhuru-desktop-test
-	sudo dpkg --purge uhuru-desktop
-	sudo dpkg --purge uhuru-cli
-	sudo dpkg --purge uhuru-cli-test 
-	sudo dpkg --purge uhuru-mod-module5-2
-	sudo dpkg --purge uhuru-mod-clamav
-	sudo dpkg --purge uhuru-mod-fanotify-test
-	sudo dpkg --purge uhuru-mod-fanotify
-	sudo dpkg --purge libuhuru-dev
-	sudo dpkg --purge libuhuru-tools
-	sudo dpkg --purge libuhuru-daemon
-	sudo dpkg --purge libuhuru-daemon-test
-	sudo dpkg --purge libuhuru
-	sudo dpkg --purge uhuru-qt
+	 sudo apt-get --purge autoremove uhuru-desktop-test
+	 sudo apt-get --purge autoremove uhuru-desktop
 fi
 
 set -e
