@@ -423,6 +423,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_CF89FEFEE9587ABD95418F717FE67F05"
+        "OwnerKey" = "8:_2603A6ADCEDD42CA98FDEC967CAF8CF7"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_D2DD9349CD5A4BD0BCDE0C72576EB8A6"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -461,6 +467,12 @@
         {
         "MsmKey" = "8:_DCB404F7924E41AD85432672CC90ABBD"
         "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_DD173E02F95F42ACBA49A4B1E71A4AC6"
+        "OwnerKey" = "8:_2603A6ADCEDD42CA98FDEC967CAF8CF7"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1974,6 +1986,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_CF89FEFEE9587ABD95418F717FE67F05"
+            {
+            "SourcePath" = "8:SETUPAPI.dll"
+            "TargetName" = "8:SETUPAPI.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_45349E98B4B548F68EADFC742F0C7FF8"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D2DD9349CD5A4BD0BCDE0C72576EB8A6"
             {
             "SourcePath" = "8:..\\Debug\\libclamav.dll"
@@ -2363,6 +2395,17 @@
             "Property" = "8:TARGETDIR"
                 "Folders"
                 {
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_2218EF6785504E94816FBD6B2115EFD0"
+                    {
+                    "Name" = "8:Alerts"
+                    "AlwaysCreate" = "11:TRUE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_486494AD90254E8B96EE913DEE69AC7D"
+                        "Folders"
+                        {
+                        }
+                    }
                     "{9EF0B969-E518-4E46-987F-47570745A589}:_421DA39434254887B5C12097EC49D60C"
                     {
                     "Name" = "8:modules"
@@ -3011,6 +3054,20 @@
         }
         "MergeModule"
         {
+            "{CEE29DC0-9FBA-4B99-8D47-5BC643D9B626}:_DD173E02F95F42ACBA49A4B1E71A4AC6"
+            {
+            "UseDynamicProperties" = "11:TRUE"
+            "IsDependency" = "11:TRUE"
+            "SourcePath" = "8:microsoft_vc120_debugcrt_x64.msm"
+                "Properties"
+                {
+                }
+            "LanguageId" = "3:0"
+            "Exclude" = "11:FALSE"
+            "Folder" = "8:"
+            "Feature" = "8:"
+            "IsolateTo" = "8:"
+            }
         }
         "ProjectOutput"
         {
