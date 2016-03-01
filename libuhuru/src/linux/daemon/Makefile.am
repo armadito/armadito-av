@@ -24,6 +24,7 @@ unixsockserver.c \
 unixsockserver.h \
 tcpsockserver.c \
 tcpsockserver.h \
+../net/netdefaults.h \
 ../../utils/getopt.c \
 ../../utils/getopt.h 
 
