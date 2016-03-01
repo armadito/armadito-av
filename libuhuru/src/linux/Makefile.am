@@ -1,2 +1,2 @@
-SUBDIRS=daemon modules service tools
+SUBDIRS=daemon modules net service tools
 
