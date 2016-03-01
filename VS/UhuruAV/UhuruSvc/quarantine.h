@@ -6,6 +6,8 @@
 
 #define QUARANTINE_DIR "C:\\Program Files\\Novit\\UhuruAV\\Quarantine"
 #define _QUARANTINE_DIR "Quarantine"
+#define ALERT_DIR "Alerts"
 
-int MoveFileInQuarantine(char * filepath);
+int MoveFileInQuarantine(char * filepath, struct uhuru_report uh_report);
 int RestoreFileFromQuarantine(char* filename);
+int EnumQuarantine( );
