@@ -46,6 +46,7 @@ struct access_monitor {
   int command_pipe[2];
 
   GThread *monitor_thread;
+  GMainContext *monitor_thread_context;
 
   struct fanotify_monitor *fanotify_monitor;
   struct inotify_monitor *inotify_monitor;
@@ -103,6 +104,8 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
   m->mount_monitor = mount_monitor_new(mount_cb, m);
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "main thread %p", g_thread_self());
+
+  m->monitor_thread_context = g_main_context_new();
 
   m->monitor_thread = g_thread_new("access monitor thread", monitor_thread_fun, m);
 
@@ -346,17 +349,18 @@ static gpointer monitor_thread_fun(gpointer data)
   struct access_monitor *m = (struct access_monitor *)data;
   GMainLoop *loop;
   GIOChannel *command_channel;
-  GMainContext *thread_context;
-
-  thread_context = g_main_context_new();
-  g_main_context_push_thread_default(thread_context);
-
-  loop = g_main_loop_new(thread_context, FALSE);
-
-  command_channel = g_io_channel_unix_new(m->command_pipe[0]);	
-  g_io_add_watch(command_channel, G_IO_IN, command_cb, m);
+  GSource *source;
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "started thread %p", g_thread_self());
+
+  loop = g_main_loop_new(m->monitor_thread_context, FALSE);
+
+  command_channel = g_io_channel_unix_new(m->command_pipe[0]);	
+
+  source = g_io_create_watch(command_channel, G_IO_IN);
+  g_source_set_callback(source, (GSourceFunc)command_cb, m, NULL);
+  g_source_attach(source, m->monitor_thread_context);
+  g_source_unref(source);
 
   g_main_loop_run(loop);
 }
