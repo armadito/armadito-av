@@ -28,6 +28,9 @@
     <Filter Include="Fichiers sources\json\ui">
       <UniqueIdentifier>{fbd32394-e0e6-4a2e-8251-78ccf690aa91}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers d%27en-tête\json\ui">
+      <UniqueIdentifier>{fc9c2f26-6100-4931-8ea4-c5cfdedf0a9d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="service.c">
@@ -50,9 +53,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\libuhuru\src\utils\getopt.c">
       <Filter>Fichiers sources\utils</Filter>
-    </ClCompile>
-    <ClCompile Include="quarantine.c">
-      <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="update.c">
       <Filter>Fichiers sources</Filter>
@@ -87,6 +87,12 @@
     <ClCompile Include="others.c">
       <Filter>Fichiers sources\utils</Filter>
     </ClCompile>
+    <ClCompile Include="uh_quarantine.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\json\ui\quarantine.c">
+      <Filter>Fichiers sources\json\ui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="service.h">
@@ -110,9 +116,6 @@
     <ClInclude Include="..\..\..\libuhuru\src\utils\getopt.h">
       <Filter>Fichiers d%27en-tête\utils</Filter>
     </ClInclude>
-    <ClInclude Include="quarantine.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
     <ClInclude Include="update.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
@@ -128,26 +131,32 @@
     <ClInclude Include="register.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\libuhuru\src\json\ui\jsonhandler.h">
-      <Filter>Fichiers d%27en-tête\json</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\libuhuru\src\json\ui\jsonhandler_p.h">
-      <Filter>Fichiers d%27en-tête\json</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\libuhuru\src\json\ui\scan.h">
-      <Filter>Fichiers d%27en-tête\json</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\libuhuru\src\json\ui\state.h">
-      <Filter>Fichiers d%27en-tête\json</Filter>
-    </ClInclude>
     <ClInclude Include="uh_info.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="others.h">
       <Filter>Fichiers d%27en-tête\utils</Filter>
     </ClInclude>
+    <ClInclude Include="uh_quarantine.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\json\ui\jsonhandler.h">
+      <Filter>Fichiers d%27en-tête\json\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\json\ui\quarantine.h">
+      <Filter>Fichiers d%27en-tête\json\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\json\ui\scan.h">
+      <Filter>Fichiers d%27en-tête\json\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\json\ui\jsonhandler_p.h">
+      <Filter>Fichiers d%27en-tête\json\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\json\ui\state.h">
+      <Filter>Fichiers d%27en-tête\json\ui</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\libuhuru\src\json\ui\ui.h">
-      <Filter>Fichiers d%27en-tête\json</Filter>
+      <Filter>Fichiers d%27en-tête\json\ui</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -40,20 +40,20 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(SolutionDir)..\glib\win32\glib_2.28.8\lib\glib-2.0\include;$(SolutionDir)..\glib\win32\glib_2.28.8\include\glib-2.0;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)..\glib\win32\glib_2.28.8\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)..\glib\win32\glib_2.28.8\lib;$(SolutionDir)..\json-c\json-c\Debug;D:\Novit\uhuru-av\VS\json-c\json-c\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>false</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\libuhuru\src\libcore;$(SolutionDir)..\..\libuhuru\src;$(SolutionDir)..\..\libuhuru\include\config;$(SolutionDir)..\..\libuhuru\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\libuhuru\src\libcore;$(SolutionDir)..\..\libuhuru\src;$(SolutionDir)..\..\libuhuru\include\config;$(SolutionDir)..\..\libuhuru\include;$(SolutionDir)..\..\VS\json-c\json-c;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;urlmon.lib;json-c.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
       <ModuleDefinitionFile>libuhuru_core.def</ModuleDefinitionFile>
     </Link>
@@ -88,6 +88,7 @@
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\scanconf.h" />
     <ClInclude Include="..\..\..\libuhuru\src\libcore\builtin-modules\onaccess_windows.h" />
     <ClInclude Include="..\..\..\libuhuru\src\libcore\builtin-modules\ondemandmod.h" />
+    <ClInclude Include="..\..\..\libuhuru\src\libcore\builtin-modules\quarantine.h" />
     <ClInclude Include="..\..\..\libuhuru\src\libcore\conf.h" />
     <ClInclude Include="..\..\..\libuhuru\src\libcore\confparser.h" />
     <ClInclude Include="..\..\..\libuhuru\src\libcore\modulep.h" />
@@ -106,6 +107,7 @@
     <ClCompile Include="..\..\..\libuhuru\src\libcore\action.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\builtin-modules\onaccess_windows.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\builtin-modules\ondemandmod.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\builtin-modules\quarantine_windows.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\conf.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\confparser.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\error.c" />
