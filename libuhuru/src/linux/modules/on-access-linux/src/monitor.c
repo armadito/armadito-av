@@ -71,7 +71,7 @@ static void entry_destroy_notify(gpointer data)
 struct access_monitor *access_monitor_new(struct uhuru *u)
 {
   struct access_monitor *m = malloc(sizeof(struct access_monitor));
-  GIOChannel *start_channel, *command_channel;
+  GIOChannel *start_channel;
 
   m->enable = 0;
   m->enable_permission = 0;
@@ -98,14 +98,15 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
   start_channel = g_io_channel_unix_new(m->start_pipe[0]);	
   g_io_add_watch(start_channel, G_IO_IN, delayed_start_cb, m);
 
-  command_channel = g_io_channel_unix_new(m->command_pipe[0]);	
-  g_io_add_watch(command_channel, G_IO_IN, command_cb, m);
-
   m->fanotify_monitor = fanotify_monitor_new(u);
   m->inotify_monitor = inotify_monitor_new(m);
   m->mount_monitor = mount_monitor_new(mount_cb, m);
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "init ok");
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "main thread %p", g_thread_self());
+
+  m->monitor_thread = g_thread_new("access monitor thread", monitor_thread_fun, m);
+
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "created monitor thread %p", m->monitor_thread);
 
   return m;
 }
@@ -214,6 +215,8 @@ static gboolean delayed_start_cb(GIOChannel *source, GIOCondition condition, gpo
   struct access_monitor *m = (struct access_monitor *)data;
   char c;
 
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "delayed_start_cb: thread %p", g_thread_self());
+
   if (read(m->start_pipe[0], &c, 1) < 0) {
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "read() in activation callback failed (%s)", strerror(errno));
 
@@ -229,7 +232,8 @@ static gboolean delayed_start_cb(GIOChannel *source, GIOCondition condition, gpo
   /* of the pipe input file descriptor (namely, for one associated with a client connection) and in IPC errors */
   /* g_io_channel_shutdown(source, FALSE, NULL); */
 
-  m->monitor_thread = g_thread_new("access monitor thread", monitor_thread_fun, m);
+  if (access_monitor_is_enable(m))
+    access_monitor_send_command(m, ACCESS_MONITOR_START);
 
   return TRUE;
 }
@@ -341,10 +345,18 @@ static gpointer monitor_thread_fun(gpointer data)
 {
   struct access_monitor *m = (struct access_monitor *)data;
   GMainLoop *loop;
+  GIOChannel *command_channel;
+  GMainContext *thread_context;
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "started thread");
+  thread_context = g_main_context_new();
+  g_main_context_push_thread_default(thread_context);
 
-  loop = g_main_loop_new(NULL, FALSE);
+  loop = g_main_loop_new(thread_context, FALSE);
+
+  command_channel = g_io_channel_unix_new(m->command_pipe[0]);	
+  g_io_add_watch(command_channel, G_IO_IN, command_cb, m);
+
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "started thread %p", g_thread_self());
 
   g_main_loop_run(loop);
 }
@@ -383,6 +395,8 @@ static gboolean command_cb(GIOChannel *source, GIOCondition condition, gpointer 
 {
   struct access_monitor *m = (struct access_monitor *)data;
   char cmd;
+
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "command_cb: thread %p", g_thread_self());
 
   if (read(m->command_pipe[0], &cmd, 1) < 0) {
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "read() in command callback failed (%s)", strerror(errno));

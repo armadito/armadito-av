@@ -122,10 +122,10 @@ static enum uhuru_mod_status mod_oal_post_init(struct uhuru_module *module)
 
 #define YES_NO(v) ((v) ? "yes" : "no")
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "on-access protection configuration:");
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "  enabled                   : %s", YES_NO(access_monitor_is_enable(data->monitor)));
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "  permission enabled        : %s", YES_NO(access_monitor_is_enable_permission(data->monitor)));
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "  removable media monitoring: %s", YES_NO(access_monitor_is_enable_removable_media(data->monitor)));
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "protection configuration:");
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "-> enabled: %s", YES_NO(access_monitor_is_enable(data->monitor)));
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "-> permission enabled: %s", YES_NO(access_monitor_is_enable_permission(data->monitor)));
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "-> removable media monitoring: %s", YES_NO(access_monitor_is_enable_removable_media(data->monitor)));
 
   access_monitor_delayed_start(data->monitor);
 
