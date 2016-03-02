@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "named_pipe_server.h"
-#include "quarantine.h"
+#include "uh_quarantine.h"
 
 #define SVCNAME TEXT("UhuruSvc")
 #define SVCDISPLAY TEXT("Uhuru Scan Service")

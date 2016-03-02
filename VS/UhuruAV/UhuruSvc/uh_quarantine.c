@@ -1,6 +1,9 @@
-#include "quarantine.h"
+#include "uh_quarantine.h"
 #include "others.h"
 #include <string.h>
+#include "json\ui\ui.h"
+
+#define PIPE_NAME "\\\\.\\pipe\\Armadito_ondemand"
 //
 char * GetQuarantineCompletepath() {
 
@@ -282,7 +285,7 @@ char * BuildLocationFilePath(char * filepath, char * specialDir) {
 
 }
 
-int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct uhuru_report uh_report) {
+int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct uhuru_report * uh_report) {
 
 	int ret = 0;
 	char * info_path = NULL;
@@ -335,15 +338,15 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct uh
 		json_object_object_add(jobj, "date", json_object_new_string(timestamp));
 		json_object_object_add(jobj, "path", json_object_new_string(oldfilepath));
 
-		if (uh_report.mod_name != NULL) {
-			json_object_object_add(jobj, "module", json_object_new_string(uh_report.mod_name));
+		if (uh_report->mod_name != NULL) {
+			json_object_object_add(jobj, "module", json_object_new_string(uh_report->mod_name));
 		}
 		else {
 			json_object_object_add(jobj, "module", json_object_new_string("black_list"));
 		}
 
-		if (uh_report.mod_report != NULL) {
-			json_object_object_add(jobj, "desc", json_object_new_string(uh_report.mod_report));
+		if (uh_report->mod_report != NULL) {
+			json_object_object_add(jobj, "desc", json_object_new_string(uh_report->mod_report));
 		}
 		else {
 			json_object_object_add(jobj, "desc", json_object_new_string("uh_malware"));
@@ -425,7 +428,7 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct uh
 }
 
 
-int MoveFileInQuarantine(char * filepath, struct uhuru_report uh_report) {
+int MoveFileInQuarantine(char * filepath, struct uhuru_report * uh_report) {
 
 	int ret = 0;
 	char * quarantineFilepath = NULL;
@@ -456,7 +459,7 @@ int MoveFileInQuarantine(char * filepath, struct uhuru_report uh_report) {
 		}
 		
 		// Test if the quarantine folder is present.		
-		if (MoveFileEx(filepath,quarantineFilepath,MOVEFILE_REPLACE_EXISTING|MOVEFILE_FAIL_IF_NOT_TRACKABLE) == FALSE){
+		if (MoveFileEx(filepath,quarantineFilepath,MOVEFILE_REPLACE_EXISTING|MOVEFILE_FAIL_IF_NOT_TRACKABLE|MOVEFILE_COPY_ALLOWED) == FALSE){
 			printf("[-] Error :: MoveFileInQuarantine :: Move file [%s] to quarantine failed ! :: GLE = %d\n",filepath,GetLastError());
 			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," Move file [%s] to quarantine folder failed !\n",filepath);
 			ret = -4;
@@ -634,6 +637,33 @@ int RestoreFileFromQuarantine(char * filename) {
 
 
 int EnumQuarantine( ) {
+
 	int ret = 0;
+	enum uhuru_json_status status = JSON_OK;
+	char * request = "{ \"av_request\":\"quarantine\", \"id\":123, \"params\": {}}";
+	int request_len = 0;
+	char response[4096] = {0};
+	int response_len = 4096;
+
+	
+
+	__try {
+
+		request_len = strnlen_s(request,_MAX_PATH);
+		
+		status = json_handler_ui_request(PIPE_NAME, request, request_len, response, response_len);
+		if (status != JSON_OK) {
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR,"[-] Error :: EnumQuarantine :: json_handler_ui_request failed :: status= %d \n", status);
+			ret = -1;
+			__leave;
+		}
+
+		printf("av_response = %s\n",response);
+
+	}
+	__finally {
+
+	}
+
 	return ret;
 }

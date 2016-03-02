@@ -187,6 +187,11 @@ enum uhuru_file_status uhuru_scan_context(struct uhuru_scan *scan, struct uhuru_
   /* compute progress if have one */
   scan_progress(scan, &report);
 
+#ifdef WIN32
+  // close file descriptor.
+  uhuru_file_context_close(ctx);
+#endif
+
   /* once done, call the callbacks */
   uhuru_scan_call_callbacks(scan, &report);
 
