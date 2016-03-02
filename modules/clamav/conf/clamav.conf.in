@@ -5,9 +5,10 @@
 
 # temporary directory for Clamav scan
 # used by clamav engine to unpack archives, extract binaries, etc...
-# a priori on windows, no need to change it
-# usefull on linux because of on-access scan
-#tmpdir="C:\\tmp"
+# on linux, by default Clamav use /tmp but /tmp is monitored by real-time
+# so having temporary directory used by the antivirus and monitored by the antivirus
+# at the same time is not a good idea
+tmpdir="@localstatedir@/lib/uhuru/tmp"
 
 # default signatures databases directory
 #dbdir=/var/lib/uhuru/bases/clamav

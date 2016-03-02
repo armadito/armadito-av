@@ -31,3 +31,6 @@ install-exec-hook:
 
 install-data-hook:
 	-rm -f "$(DESTDIR)$(modulesdir)"/on-access-linux.la "$(DESTDIR)$(modulesdir)"/on-access-linux.a
+
+uninstall-hook:
+	-rm -f "$(DESTDIR)$(modulesdir)"/on-access-linux.so

@@ -1,4 +1,4 @@
-#include "print.h"
+#include "debug.h"
 
 #include <json.h>
 #include <stdio.h>
@@ -38,7 +38,7 @@ int main(int argc, char **argv)
   struct json_object *obj;
 
   obj = json_read(STDIN_FILENO);
-  uhuru_json_print(obj, stdout);
+  jobj_debug(obj, "object");
 
   return 0;
 }
