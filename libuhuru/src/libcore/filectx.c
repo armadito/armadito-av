@@ -56,7 +56,7 @@ enum uhuru_file_context_status uhuru_file_context_get(struct uhuru_file_context 
 
 #ifdef WIN32
 	  /* open the file :: TODO write portable code for this function */
-	  err = _sopen_s(&(ctx->fd), path, O_RDONLY, _SH_DENYNO, _S_IREAD|_S_IWRITE);
+	  err = _sopen_s(&(ctx->fd), path, O_RDONLY, _SH_DENYNO, _S_IREAD);
 #else
 	/* open the file */
     ctx->fd = os_open(path, O_RDONLY);
