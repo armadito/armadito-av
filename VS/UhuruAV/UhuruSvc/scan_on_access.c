@@ -174,10 +174,15 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 			else if (strstr(msDosFilename,"UHURU.TXT") != NULL) {  // Do not scan the log file.
 				scan_result = UHURU_WHITE_LISTED;
 			}
+			else if (strstr(msDosFilename,"UH_EICAR") != NULL) {  // Do not scan the log file.
+				printf("[+] Debug :: UserScanWorker :: [%d] :: uhuru_scan :: [%s] \n",ThreadId,msDosFilename);
+				scan_result = uhuru_scan_simple(uhuru, msDosFilename, &report);
+			}
 			else {
 
 				// launch a simple file scan
-				scan_result = uhuru_scan_simple(uhuru, msDosFilename, &report);
+				//scan_result = uhuru_scan_simple(uhuru, msDosFilename, &report);
+				scan_result = UHURU_CLEAN;
 
 			}
 
@@ -201,11 +206,11 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 			}
 
 			// If the file is detected as malicious, move it to the quarantine folder
-			if (scan_result == UHURU_MALWARE) {
+			/*if (scan_result == UHURU_MALWARE) {
 				if (MoveFileInQuarantine(msDosFilename, report) < 0) {					
 					uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: Failed to move file in quarantine!! \n file: [%s] ",msDosFilename);
 				}
-			}
+			}*/
 			
 			if (msDosFilename != NULL) {
 				free(msDosFilename);

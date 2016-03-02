@@ -6,6 +6,7 @@
 #include "debug.h"
 #include "state.h"
 #include "scan.h"
+#include "quarantine.h"
 #include "os/string.h"
 
 #include <assert.h>
@@ -41,6 +42,7 @@ static struct request_dispatch_entry {
 } request_dispatch_table[] = {
   { "state", state_response_cb, NULL},
   { "scan", scan_response_cb, scan_process_cb},
+  { "quarantine", quarantine_response_cb, NULL},
   { NULL, NULL, NULL},
 };
 

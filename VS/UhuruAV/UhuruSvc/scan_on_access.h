@@ -10,7 +10,7 @@
 #include <libuhuru-config.h>
 #include <libuhuru/core.h>
 
-#include "quarantine.h"
+#include "uh_quarantine.h"
 
 
 #define SCAN_PORT_NAME L"\\UhuruPortScanFilter"
