@@ -116,6 +116,8 @@ void uhuru_file_context_close(struct uhuru_file_context *ctx)
 
   if (os_close(ctx->fd) != 0)
     uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "closing file descriptor %3d failed (%s)", ctx->fd, os_strerror(errno));
+
+  ctx->fd = -1;
 }
 
 void uhuru_file_context_destroy(struct uhuru_file_context *ctx)
