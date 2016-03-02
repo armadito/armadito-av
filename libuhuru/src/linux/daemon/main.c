@@ -185,6 +185,8 @@ static void start_daemon(const char *progname, struct uhuru_daemon_options *opts
   uhuru_error *error = NULL;
   GMainLoop *loop;
 
+  loop = g_main_loop_new(NULL, FALSE);
+
   log_init(opts->s_log_level, !opts->no_daemon);
 
   if (!opts->no_daemon)
@@ -205,8 +207,6 @@ static void start_daemon(const char *progname, struct uhuru_daemon_options *opts
   }
 
   server = server_new(uhuru, server_sock, opts->ipc_type);
-
-  loop = g_main_loop_new(NULL, FALSE);
 
   g_main_loop_run(loop);
 }
