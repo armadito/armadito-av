@@ -160,7 +160,7 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 
 			// Get the MS-DOS filename 
 			msDosFilename = ConvertDeviceNameToMsDosName(message->msg.FileName);
-
+			report.status = UHURU_CLEAN;
 
 			if (msDosFilename == NULL) {
 				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: [%d] :: ConvertDeviceNameToMsDosName failed :: \n",ThreadId);
@@ -175,8 +175,8 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 				scan_result = UHURU_WHITE_LISTED;
 			}
 			else if (strstr(msDosFilename,"UH_EICAR") != NULL) {  // Do not scan the log file.
-				printf("[+] Debug :: UserScanWorker :: [%d] :: uhuru_scan :: [%s] \n",ThreadId,msDosFilename);
-				scan_result = uhuru_scan_simple(uhuru, msDosFilename, &report);
+				//printf("[+] Debug :: UserScanWorker :: [%d] :: uhuru_scan :: [%s] \n",ThreadId,msDosFilename);				
+				scan_result = uhuru_scan_simple(uhuru, msDosFilename, &report);				
 			}
 			else {
 
@@ -199,8 +199,15 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: [%d] :: FilterReplyMessage failed :: hres = 0x%x.\n",ThreadId, hres);
 			}
 			else {
-				if (scan_result == UHURU_MALWARE)
-					uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: Malware found !! \n file: [%s] ",msDosFilename);
+				if (scan_result == UHURU_MALWARE) {
+					// UF :: For test ONly :: remove after modif.
+					report.status = scan_result;
+					//printf("[+] Debug :: UserScanWorker :: [%d] :: uhuru_scan (second scan). :: [%s] \n",ThreadId,msDosFilename);
+					scan_result = uhuru_scan_simple(uhuru, msDosFilename, &report);
+					uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: Malware found !! \n file: [%s] ",msDosFilename);					
+					report.status = UHURU_CLEAN;
+				}
+					
 				
 				uhLog("[+] Debug :: UserScanWorker :: [%d] :: %s :: %s\n",ThreadId,msDosFilename,PrintUhuruScanResult(scan_result));
 			}
