@@ -55,6 +55,8 @@ struct access_monitor {
 static gboolean delayed_start_cb(GIOChannel *source, GIOCondition condition, gpointer data);
 static gboolean command_cb(GIOChannel *source, GIOCondition condition, gpointer data);
 
+static void mount_cb(enum mount_event_type ev_type, const char *path, void *user_data);
+
 static gpointer monitor_thread_fun(gpointer data);
 static void scan_file_thread_fun(gpointer data, gpointer user_data);
 
@@ -101,7 +103,7 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
 
   m->fanotify_monitor = fanotify_monitor_new(u);
   m->inotify_monitor = inotify_monitor_new(m);
-  m->mount_monitor = NULL;
+  m->mount_monitor = mount_monitor_new(mount_cb, m);
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "init ok");
 
@@ -112,21 +114,36 @@ int access_monitor_enable(struct access_monitor *m, int enable)
 {
   m->enable = enable;
 
-  return enable;
+  return m->enable;
+}
+
+int access_monitor_is_enable(struct access_monitor *m)
+{
+  return m->enable;
 }
 
 int access_monitor_enable_permission(struct access_monitor *m, int enable_permission)
 {
   m->enable_permission = enable_permission;
 
-  return enable_permission;
+  return m->enable_permission;
+}
+
+int access_monitor_is_enable_permission(struct access_monitor *m)
+{
+  return m->enable_permission;
 }
 
 int access_monitor_enable_removable_media(struct access_monitor *m, int enable_removable_media)
 {
   m->enable_removable_media = enable_removable_media;
 
-  return enable_removable_media;
+  return m->enable_removable_media;
+}
+
+int access_monitor_is_enable_removable_media(struct access_monitor *m)
+{
+  return m->enable_removable_media;
 }
 
 static void add_entry(struct access_monitor *m, const char *path, enum entry_flag flag)
@@ -327,24 +344,39 @@ static gpointer monitor_thread_fun(gpointer data)
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "started thread");
 
+  loop = g_main_loop_new(NULL, FALSE);
+
+  g_main_loop_run(loop);
+}
+
+static void access_monitor_start_command(struct access_monitor *m)
+{
   if (fanotify_monitor_start(m->fanotify_monitor))
-    return NULL;
+    return;
 
   if (inotify_monitor_start(m->inotify_monitor))
-    return NULL;
+    return;
 
   /* if configured, add the mount monitor */
   if (m->enable_removable_media) {
-    m->mount_monitor = mount_monitor_new(mount_cb, m);
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "added removable media monitor");
+    if (mount_monitor_start(m->mount_monitor) < 0)
+      return;
   }
 
   /* init all fanotify and inotify marks */
   mark_entries(m);
 
-  loop = g_main_loop_new(NULL, FALSE);
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "on-access protection started");
+}
 
-  g_main_loop_run(loop);
+static void access_monitor_stop_command(struct access_monitor *m)
+{
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "on-access protection stopped (Not Yet Implemented)");
+}
+
+static void access_monitor_status_command(struct access_monitor *m)
+{
+  /* ??? */
 }
 
 static gboolean command_cb(GIOChannel *source, GIOCondition condition, gpointer data)
@@ -360,13 +392,13 @@ static gboolean command_cb(GIOChannel *source, GIOCondition condition, gpointer 
 
   switch(cmd) {
   case ACCESS_MONITOR_START:
-    access_monitor_start_cmd(m);
+    access_monitor_start_command(m);
     break;
   case ACCESS_MONITOR_STOP:
-    access_monitor_stop_cmd(m);
+    access_monitor_stop_command(m);
     break;
   case ACCESS_MONITOR_STATUS:
-    access_monitor_status_cmd(m);
+    access_monitor_status_command(m);
     break;
   }
 
