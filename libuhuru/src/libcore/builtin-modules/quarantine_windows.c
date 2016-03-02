@@ -77,7 +77,7 @@ char * GetLocationCompletepath(char * specialDir) {
 		strncat_s(completePath, len, "\\", 1);
 		strncat_s(completePath, len, specialDir, strnlen(specialDir, MAX_PATH));		
 
-		printf("[+] Debug :: GetLocationCompletepath :: completePath = %s\n",completePath);
+		//printf("[+] Debug :: GetLocationCompletepath :: completePath = %s\n",completePath);
 
 		
 	}
@@ -265,10 +265,10 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct uh
 			__leave;
 		}*/
 
-		fh = CreateFile(info_path, GENERIC_WRITE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+		fh = CreateFile(info_path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (fh == INVALID_HANDLE_VALUE) {
 			ret = -3;
-			printf("[-] Error :: WriteQuarantineInfoFile :: can't open the info file :: GLE = %d\n",GetLastError());
+			printf("[-] Error :: WriteQuarantineInfoFile :: can't open the info file [%s] :: GLE = %d\n",info_path,GetLastError());
 			__leave;
 		}
 
@@ -290,7 +290,7 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct uh
 			//ret = -4;
 			printf("[-] Error :: WriteQuarantineInfoFile :: Copy info file in alert dir failed :: GLE = %d\n",GetLastError());
 			//__leave;
-		}			
+		}
 
 	}
 	__finally {
@@ -330,9 +330,9 @@ static int quarantine_do(struct quarantine_data *qu_data, const char *path, stru
 {
 	int ret = 0;
 	char * quarantineFilepath = NULL;
+	HANDLE fh = INVALID_HANDLE_VALUE;
 
-	printf("[+] Debug :: quarantine_do path= %s -----------------\n",path);
-	uhuru_log(UHURU_LOG_LIB,UHURU_LOG_LEVEL_INFO, "[+] Debug :: quarantine_do\n");
+	//printf("[+] Debug :: quarantine_do path= %s -----------------\n",path);	
 
 
 	if (path == NULL) {
@@ -360,10 +360,19 @@ static int quarantine_do(struct quarantine_data *qu_data, const char *path, stru
 			__leave;
 		}
 
-
+		// try to open the file.
+		/*fh = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE, 0, OPEN_EXISTING, 0, NULL);
+		if (fh == INVALID_HANDLE_VALUE) {
+			printf("[-] Error :: quarantine_do :: Opening the file [%s] failed! :: error = %d\n",path,GetLastError());
+			ret = -5;
+			__leave;
+		}	
+		printf("[+] Debug :: quarantine_do :: file [%s] opened successfully !!\n",path);
+		CloseHandle(fh);
+		*/
 
 		// Test if the quarantine folder is present.		
-		if (MoveFileEx(path,quarantineFilepath,MOVEFILE_REPLACE_EXISTING|MOVEFILE_FAIL_IF_NOT_TRACKABLE|MOVEFILE_COPY_ALLOWED) == FALSE){
+		if (MoveFileEx(path,quarantineFilepath,MOVEFILE_REPLACE_EXISTING|MOVEFILE_FAIL_IF_NOT_TRACKABLE|MOVEFILE_COPY_ALLOWED|MOVEFILE_WRITE_THROUGH) == FALSE){
 			printf("[-] Error :: MoveFileInQuarantine :: Move file [%s] to quarantine failed ! :: GLE = %d\n",path,GetLastError());
 			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," Move file [%s] to quarantine folder failed !\n",path);
 			ret = -4;
@@ -392,8 +401,8 @@ void quarantine_callback(struct uhuru_report *report, void *callback_data)
 {
   struct quarantine_data *qu_data = (struct quarantine_data *)callback_data;
   
-  printf("[+] Debug :: quarantine_callback :: enable = %d :: dir = %s :: status = %d \n", qu_data->enable, qu_data->quarantine_dir, report->status);
-  uhuru_log(UHURU_LOG_LIB,UHURU_LOG_LEVEL_INFO, "[+] Debug :: quarantine_callback :: enable = %d :: dir = %s :: status = %d\n", qu_data->enable, qu_data->quarantine_dir, report->status);
+  //printf("[+] Debug :: quarantine_callback :: enable = %d :: dir = %s :: status = %d \n", qu_data->enable, qu_data->quarantine_dir, report->status);
+  //uhuru_log(UHURU_LOG_LIB,UHURU_LOG_LEVEL_INFO, "[+] Debug :: quarantine_callback :: enable = %d :: dir = %s :: status = %d\n", qu_data->enable, qu_data->quarantine_dir, report->status);
 
   if (!qu_data->enable)
     return;
