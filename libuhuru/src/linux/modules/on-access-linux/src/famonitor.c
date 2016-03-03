@@ -3,10 +3,12 @@
 #include <libuhuru/core.h>
 #include <config/libuhuru-config.h>
 
+#include "monitor.h"
 #include "response.h"
 #include "watchdog.h"
 #include "onaccessmod.h"
 
+#include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <glib.h>
@@ -22,22 +24,30 @@
 #define ENABLE_THREAD_POOL
 
 struct fanotify_monitor {
+  struct access_monitor *monitor;
   struct uhuru *uhuru;
+
   struct uhuru_scan_conf *scan_conf;
+
   pid_t my_pid;
+
   int fanotify_fd;
+
   GThreadPool *thread_pool;  
+
   struct watchdog *watchdog;
 };
 
 static gboolean fanotify_cb(GIOChannel *source, GIOCondition condition, gpointer data);
 static void scan_file_thread_fun(gpointer data, gpointer user_data);
 
-struct fanotify_monitor *fanotify_monitor_new(struct uhuru *u)
+struct fanotify_monitor *fanotify_monitor_new(struct access_monitor *m, struct uhuru *u)
 {
   struct fanotify_monitor *f = malloc(sizeof(struct fanotify_monitor));
 
+  f->monitor = m;
   f->uhuru = u;
+
   f->scan_conf = uhuru_scan_conf_on_access();
   f->my_pid = getpid();
 
@@ -47,6 +57,7 @@ struct fanotify_monitor *fanotify_monitor_new(struct uhuru *u)
 int fanotify_monitor_start(struct fanotify_monitor *f)
 {
   GIOChannel *fanotify_channel;
+  GSource *source;
 
   f->fanotify_fd = fanotify_init(FAN_CLASS_CONTENT | FAN_UNLIMITED_QUEUE | FAN_UNLIMITED_MARKS, O_LARGEFILE | O_RDONLY);
 
@@ -69,7 +80,12 @@ int fanotify_monitor_start(struct fanotify_monitor *f)
 
   /* add the fanotify file desc to the thread loop */
   fanotify_channel = g_io_channel_unix_new(f->fanotify_fd);	
-  g_io_add_watch(fanotify_channel, G_IO_IN, fanotify_cb, f);
+
+  /* g_io_add_watch(fanotify_channel, G_IO_IN, fanotify_cb, f); */
+  source = g_io_create_watch(fanotify_channel, G_IO_IN);
+  g_source_set_callback(source, (GSourceFunc)fanotify_cb, f, NULL);
+  g_source_attach(source, access_monitor_get_main_context(f->monitor));
+  g_source_unref(source);
 
   return 0;
 }
@@ -169,7 +185,10 @@ static void fanotify_pass_1(struct fanotify_monitor *f, struct fanotify_event_me
 
   /* first pass: allow all PERM events from myself, enqueue other PERM events */
   for(event = buf; FAN_EVENT_OK(event, len); event = FAN_EVENT_NEXT(event, len)) {
+#if 0
+    /* no longer usefull */
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "fd %3d path ??? pass 1", event->fd);
+#endif
 
     if ((event->mask & FAN_OPEN_PERM))
       if (event->pid == f->my_pid)
@@ -194,7 +213,10 @@ static void fanotify_pass_2(struct fanotify_monitor *f, struct fanotify_event_me
 
       p = get_file_path_from_fd(event->fd, file_path, PATH_MAX);
 
+#if 0
+    /* no longer usefull */
       uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "fd %3d path %s pass 2", event->fd, p != NULL ? p : "null");
+#endif
 
       fanotify_perm_event_process(f, event, p);
     } else
@@ -211,6 +233,8 @@ static gboolean fanotify_cb(GIOChannel *source, GIOCondition condition, gpointer
   struct fanotify_monitor *f = (struct fanotify_monitor *)data;
   char buf[FANOTIFY_BUFFER_SIZE];
   ssize_t len;
+
+  assert(g_main_context_is_owner(access_monitor_get_main_context(f->monitor)));
 
   if ((len = read(f->fanotify_fd, buf, FANOTIFY_BUFFER_SIZE)) < 0) {
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "error reading fanotify event descriptor (%s)", strerror(errno));
