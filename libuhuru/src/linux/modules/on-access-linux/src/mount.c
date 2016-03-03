@@ -17,10 +17,10 @@
 #define MON_DBUS_MEMBER        "PropertiesChanged"
 
 struct mount_monitor {
-  GDBusConnection *conn;
-  guint signal_sub_id;
   mount_cb_t cb;
   void *user_data;
+  GDBusConnection *conn;
+  guint signal_sub_id;
 };
 
 #ifdef DEBUG_DBUS_MESSAGE
@@ -133,23 +133,33 @@ static void mount_monitor_unsubscribe_signals(struct mount_monitor *m)
 struct mount_monitor *mount_monitor_new(mount_cb_t cb, void *user_data)
 {
   struct mount_monitor *m = malloc(sizeof(struct mount_monitor));
+
+  m->cb = cb;
+  m->user_data = user_data;
+  m->conn = NULL;
+
+  return m;
+}
+
+int mount_monitor_start(struct mount_monitor *m)
+{
   GError *error = NULL;
 
   m->conn = g_bus_get_sync(MON_DBUS_TYPE, NULL, &error);
 
   if (m->conn == NULL) {
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "error getting connection to D-Bus (%s)", error->message);
-    free(m);
-
-    return NULL;
+    return -1;
   }
 
   mount_monitor_subscribe_signals(m);
 
-  m->cb = cb;
-  m->user_data = user_data;
+  return 0;
+}
 
-  return m;
+int mount_monitor_stop(struct mount_monitor *m)
+{
+  /* TODO */
 }
 
 void mount_monitor_free(struct mount_monitor *m)
