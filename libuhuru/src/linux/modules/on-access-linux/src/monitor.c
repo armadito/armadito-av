@@ -14,6 +14,7 @@
 #include "mount.h"
 #include "onaccessmod.h"
 
+#include <assert.h>
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -46,6 +47,7 @@ struct access_monitor {
   int command_pipe[2];
 
   GThread *monitor_thread;
+  GMainContext *monitor_thread_context;
 
   struct fanotify_monitor *fanotify_monitor;
   struct inotify_monitor *inotify_monitor;
@@ -54,6 +56,8 @@ struct access_monitor {
 
 static gboolean delayed_start_cb(GIOChannel *source, GIOCondition condition, gpointer data);
 static gboolean command_cb(GIOChannel *source, GIOCondition condition, gpointer data);
+
+static void mount_cb(enum mount_event_type ev_type, const char *path, void *user_data);
 
 static gpointer monitor_thread_fun(gpointer data);
 static void scan_file_thread_fun(gpointer data, gpointer user_data);
@@ -69,7 +73,7 @@ static void entry_destroy_notify(gpointer data)
 struct access_monitor *access_monitor_new(struct uhuru *u)
 {
   struct access_monitor *m = malloc(sizeof(struct access_monitor));
-  GIOChannel *start_channel, *command_channel;
+  GIOChannel *start_channel;
 
   m->enable = 0;
   m->enable_permission = 0;
@@ -96,14 +100,17 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
   start_channel = g_io_channel_unix_new(m->start_pipe[0]);	
   g_io_add_watch(start_channel, G_IO_IN, delayed_start_cb, m);
 
-  command_channel = g_io_channel_unix_new(m->command_pipe[0]);	
-  g_io_add_watch(command_channel, G_IO_IN, command_cb, m);
-
-  m->fanotify_monitor = fanotify_monitor_new(u);
+  m->fanotify_monitor = fanotify_monitor_new(m, u);
   m->inotify_monitor = inotify_monitor_new(m);
-  m->mount_monitor = NULL;
+  m->mount_monitor = mount_monitor_new(mount_cb, m);
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "init ok");
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "main thread %p", g_thread_self());
+
+  m->monitor_thread_context = g_main_context_new();
+
+  m->monitor_thread = g_thread_new("access monitor thread", monitor_thread_fun, m);
+
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "created monitor thread %p", m->monitor_thread);
 
   return m;
 }
@@ -112,21 +119,41 @@ int access_monitor_enable(struct access_monitor *m, int enable)
 {
   m->enable = enable;
 
-  return enable;
+  return m->enable;
+}
+
+int access_monitor_is_enable(struct access_monitor *m)
+{
+  return m->enable;
 }
 
 int access_monitor_enable_permission(struct access_monitor *m, int enable_permission)
 {
   m->enable_permission = enable_permission;
 
-  return enable_permission;
+  return m->enable_permission;
+}
+
+int access_monitor_is_enable_permission(struct access_monitor *m)
+{
+  return m->enable_permission;
 }
 
 int access_monitor_enable_removable_media(struct access_monitor *m, int enable_removable_media)
 {
   m->enable_removable_media = enable_removable_media;
 
-  return enable_removable_media;
+  return m->enable_removable_media;
+}
+
+int access_monitor_is_enable_removable_media(struct access_monitor *m)
+{
+  return m->enable_removable_media;
+}
+
+GMainContext *access_monitor_get_main_context(struct access_monitor *m)
+{
+  return m->monitor_thread_context;
 }
 
 static void add_entry(struct access_monitor *m, const char *path, enum entry_flag flag)
@@ -197,6 +224,8 @@ static gboolean delayed_start_cb(GIOChannel *source, GIOCondition condition, gpo
   struct access_monitor *m = (struct access_monitor *)data;
   char c;
 
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "delayed_start_cb: thread %p", g_thread_self());
+
   if (read(m->start_pipe[0], &c, 1) < 0) {
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "read() in activation callback failed (%s)", strerror(errno));
 
@@ -212,7 +241,8 @@ static gboolean delayed_start_cb(GIOChannel *source, GIOCondition condition, gpo
   /* of the pipe input file descriptor (namely, for one associated with a client connection) and in IPC errors */
   /* g_io_channel_shutdown(source, FALSE, NULL); */
 
-  m->monitor_thread = g_thread_new("access monitor thread", monitor_thread_fun, m);
+  if (access_monitor_is_enable(m))
+    access_monitor_send_command(m, ACCESS_MONITOR_START);
 
   return TRUE;
 }
@@ -310,6 +340,8 @@ static void mount_cb(enum mount_event_type ev_type, const char *path, void *user
 {
   struct access_monitor *m = (struct access_monitor *)user_data;
 
+  assert(g_main_context_is_owner(m->monitor_thread_context));
+
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "received mount notification for %s (%s)", path, ev_type == EVENT_MOUNT ? "mount" : "umount");
 
   if (ev_type == EVENT_MOUNT)
@@ -324,33 +356,61 @@ static gpointer monitor_thread_fun(gpointer data)
 {
   struct access_monitor *m = (struct access_monitor *)data;
   GMainLoop *loop;
+  GIOChannel *command_channel;
+  GSource *source;
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "started thread");
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "started thread %p", g_thread_self());
 
+  loop = g_main_loop_new(m->monitor_thread_context, FALSE);
+
+  command_channel = g_io_channel_unix_new(m->command_pipe[0]);	
+
+  source = g_io_create_watch(command_channel, G_IO_IN);
+  g_source_set_callback(source, (GSourceFunc)command_cb, m, NULL);
+  g_source_attach(source, m->monitor_thread_context);
+  g_source_unref(source);
+
+  g_main_loop_run(loop);
+}
+
+static void access_monitor_start_command(struct access_monitor *m)
+{
   if (fanotify_monitor_start(m->fanotify_monitor))
-    return NULL;
+    return;
 
   if (inotify_monitor_start(m->inotify_monitor))
-    return NULL;
+    return;
 
   /* if configured, add the mount monitor */
   if (m->enable_removable_media) {
-    m->mount_monitor = mount_monitor_new(mount_cb, m);
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "added removable media monitor");
+    if (mount_monitor_start(m->mount_monitor) < 0)
+      return;
   }
 
   /* init all fanotify and inotify marks */
   mark_entries(m);
 
-  loop = g_main_loop_new(NULL, FALSE);
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "on-access protection started");
+}
 
-  g_main_loop_run(loop);
+static void access_monitor_stop_command(struct access_monitor *m)
+{
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "on-access protection stopped (Not Yet Implemented)");
+}
+
+static void access_monitor_status_command(struct access_monitor *m)
+{
+  /* ??? */
 }
 
 static gboolean command_cb(GIOChannel *source, GIOCondition condition, gpointer data)
 {
   struct access_monitor *m = (struct access_monitor *)data;
   char cmd;
+
+  assert(g_main_context_is_owner(m->monitor_thread_context));
+
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "command_cb: thread %p", g_thread_self());
 
   if (read(m->command_pipe[0], &cmd, 1) < 0) {
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "read() in command callback failed (%s)", strerror(errno));
@@ -360,13 +420,13 @@ static gboolean command_cb(GIOChannel *source, GIOCondition condition, gpointer 
 
   switch(cmd) {
   case ACCESS_MONITOR_START:
-    access_monitor_start_cmd(m);
+    access_monitor_start_command(m);
     break;
   case ACCESS_MONITOR_STOP:
-    access_monitor_stop_cmd(m);
+    access_monitor_stop_command(m);
     break;
   case ACCESS_MONITOR_STATUS:
-    access_monitor_status_cmd(m);
+    access_monitor_status_command(m);
     break;
   }
 
