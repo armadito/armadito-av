@@ -14,6 +14,7 @@
 #include "mount.h"
 #include "onaccessmod.h"
 
+#include <assert.h>
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -99,7 +100,7 @@ struct access_monitor *access_monitor_new(struct uhuru *u)
   start_channel = g_io_channel_unix_new(m->start_pipe[0]);	
   g_io_add_watch(start_channel, G_IO_IN, delayed_start_cb, m);
 
-  m->fanotify_monitor = fanotify_monitor_new(u);
+  m->fanotify_monitor = fanotify_monitor_new(m, u);
   m->inotify_monitor = inotify_monitor_new(m);
   m->mount_monitor = mount_monitor_new(mount_cb, m);
 
@@ -148,6 +149,11 @@ int access_monitor_enable_removable_media(struct access_monitor *m, int enable_r
 int access_monitor_is_enable_removable_media(struct access_monitor *m)
 {
   return m->enable_removable_media;
+}
+
+GMainContext *access_monitor_get_main_context(struct access_monitor *m)
+{
+  return m->monitor_thread_context;
 }
 
 static void add_entry(struct access_monitor *m, const char *path, enum entry_flag flag)
@@ -334,6 +340,8 @@ static void mount_cb(enum mount_event_type ev_type, const char *path, void *user
 {
   struct access_monitor *m = (struct access_monitor *)user_data;
 
+  assert(g_main_context_is_owner(m->monitor_thread_context));
+
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "received mount notification for %s (%s)", path, ev_type == EVENT_MOUNT ? "mount" : "umount");
 
   if (ev_type == EVENT_MOUNT)
@@ -399,6 +407,8 @@ static gboolean command_cb(GIOChannel *source, GIOCondition condition, gpointer 
 {
   struct access_monitor *m = (struct access_monitor *)data;
   char cmd;
+
+  assert(g_main_context_is_owner(m->monitor_thread_context));
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "command_cb: thread %p", g_thread_self());
 
