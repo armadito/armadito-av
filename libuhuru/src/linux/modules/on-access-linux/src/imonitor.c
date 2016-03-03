@@ -5,6 +5,7 @@
 #include "monitor.h"
 #include "onaccessmod.h"
 
+#include <assert.h>
 #include <errno.h>
 #include <glib.h>
 #include <stdlib.h>
@@ -13,11 +14,11 @@
 #include <unistd.h>
 
 struct inotify_monitor {
+  struct access_monitor *monitor;
+
   int inotify_fd;
   GHashTable *wd2path_table;
   GHashTable *path2wd_table;
-
-  struct access_monitor *monitor;
 };
 
 static gboolean inotify_cb(GIOChannel *source, GIOCondition condition, gpointer data);
@@ -31,10 +32,10 @@ struct inotify_monitor *inotify_monitor_new(struct access_monitor *m)
 {
   struct inotify_monitor *im = malloc(sizeof(struct inotify_monitor));
 
+  im->monitor = m;
+
   im->wd2path_table = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, path_destroy_notify);
   im->path2wd_table = g_hash_table_new_full(g_str_hash, g_str_equal, path_destroy_notify, NULL);
-
-  im->monitor = m;
 
   return im;
 }
@@ -42,6 +43,7 @@ struct inotify_monitor *inotify_monitor_new(struct access_monitor *m)
 int inotify_monitor_start(struct inotify_monitor *im)
 {
   GIOChannel *inotify_channel;
+  GSource *source;
 
   im->inotify_fd = inotify_init();
   if (im->inotify_fd == -1) {
@@ -50,7 +52,12 @@ int inotify_monitor_start(struct inotify_monitor *im)
   }
 
   inotify_channel = g_io_channel_unix_new(im->inotify_fd);	
-  g_io_add_watch(inotify_channel, G_IO_IN, inotify_cb, im);
+
+  /* g_io_add_watch(inotify_channel, G_IO_IN, inotify_cb, im); */
+  source = g_io_create_watch(inotify_channel, G_IO_IN);
+  g_source_set_callback(source, (GSourceFunc)inotify_cb, im, NULL);
+  g_source_attach(source, access_monitor_get_main_context(im->monitor));
+  g_source_unref(source);
 
   return 0;
 }
@@ -191,6 +198,8 @@ static gboolean inotify_cb(GIOChannel *source, GIOCondition condition, gpointer 
   struct inotify_monitor *im = (struct inotify_monitor *)data;
   char event_buffer[INOTIFY_BUFFER_SIZE];
   ssize_t len;
+
+  assert(g_main_context_is_owner(access_monitor_get_main_context(im->monitor)));
 
   if ((len = read (im->inotify_fd, event_buffer, INOTIFY_BUFFER_SIZE)) > 0)  {
     char *p;

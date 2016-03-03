@@ -1,3 +1,7 @@
+#include "libuhuru-config.h"
+#include <libuhuru/core.h>
+
+#include "jsonhandler.h"
 #include "quarantine.h"
 #include <stdio.h>
 #include "libuhuru-config.h"
