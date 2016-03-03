@@ -174,15 +174,15 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 			else if (strstr(msDosFilename,"UHURU.TXT") != NULL) {  // Do not scan the log file.
 				scan_result = UHURU_WHITE_LISTED;
 			}
-			else if (strstr(msDosFilename,"UH_EICAR") != NULL) {  // Do not scan the log file.
+			/*else if (strstr(msDosFilename,"UH_EICAR") != NULL) {  // Do not scan the log file.
 				//printf("[+] Debug :: UserScanWorker :: [%d] :: uhuru_scan :: [%s] \n",ThreadId,msDosFilename);				
 				scan_result = uhuru_scan_simple(uhuru, msDosFilename, &report);				
-			}
+			}*/
 			else {
 
 				// launch a simple file scan
-				//scan_result = uhuru_scan_simple(uhuru, msDosFilename, &report);
-				scan_result = UHURU_CLEAN;
+				//printf("[+] Debug :: UserScanWorker :: [%d] :: uhuru_scan :: [%s] \n",ThreadId,msDosFilename);
+				scan_result = uhuru_scan_simple(uhuru, msDosFilename, &report);				
 
 			}
 
