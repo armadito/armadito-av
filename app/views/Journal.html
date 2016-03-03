@@ -115,7 +115,7 @@
 				</div>
 			</uib-tab>
 			<uib-tab >
-				<uib-tab-heading>
+				<uib-tab-heading ng-click="query_quarantine()">
 			    	<i class="fa fa-exclamation-triangle text-warning"></i> Quarantaine <i style="visibility: hidden;">Quarantaine</i>
 			  	</uib-tab-heading>
 			  	<br/>
@@ -130,14 +130,16 @@
 							<tr>
 								<th st-sort="Nom">Nom</th>
 								<th st-sort="Emplacement">Emplacement</th>
+								<th st-sort="Module">Module</th>
 								<th st-sort="Date">Date</th>
 							</tr>
 							</thead>
 							<tbody>
-							<tr ng-repeat="row in displayedCollection">
-								<td>{{row.Nom}}</td>
-								<td>{{row.Emplacement}}</td>
-								<td>{{row.Date}}</td>
+							<tr ng-repeat="file in quarantine.files">
+								<td>{{file.desc}}</td>
+								<td>{{file.path}}</td>
+								<td>{{file.module}}</td>
+								<td>{{file.date}}</td>
 								<td>
 									<button type="button" ng-click="removeItem(row)" class="btn btn-sm btn-danger" title="Delete">
 										<i class="glyphicon glyphicon-remove-circle">

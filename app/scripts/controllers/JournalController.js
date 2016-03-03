@@ -8,12 +8,64 @@
  * Controller of the tatouApp
  */
 angular.module('tatouApp')
-  .controller('JournalController', ['$scope', '$uibModal', '$log', function ($scope, $uibModal, $log) {
+  .controller('JournalController', ['$scope', '$uibModal', '$log','ArmaditoSVC','ArmaditoIPC', function ($scope, $uibModal, $log,ArmaditoSVC,ArmaditoIPC) {
+	  
     var Noms = ['Malware1', 'Malware2', 'Malware3', 'Malware4'];
     var Emplacements = ['/home/userName/...', '/home/Desktop/folder/...', '/home/userName/...', '/home/userName/...'];
     var Dates = ['05/11/2015', '18/11/2015', '13/12/2015', '15/12/2015'];
     var id = 1;
-
+	
+	$scope.quarantine = {
+		count : 0,
+		last_update : "1970"
+		//files: []
+	};
+	
+	//$scope.quarantine.count = 0;
+	$scope.quarantine.files = [];
+	
+	
+	$scope.threatDataFromAv = function(data){
+		
+		var json_obj;
+		
+		console.log('[+] Debug :: threatDataFromAv :: '+data);
+		
+		try{
+			
+			json_obj = JSON.parse(data);
+			//console.log('[+] Debug :: threatDataFromAv :: jobj :: ',json_obj);
+			//onsole.log('[+] Debug :: threatDataFromAv :: jobj :: ',json_obj.info.files[0].date);
+			
+			$scope.quarantine.files = json_obj.info.files;
+			//console.log('[+] Debug :: threatDataFromAv :: date :: ',json_obj.info.files[0].date);
+			
+			/*for (var i = 0; i< $scope.quarantine.files.length ; i++){
+				
+				console.log('[+] Debug :: threatDataFromAv :: date :: ',$scope.quarantine.files[i].date);
+				console.log('[+] Debug :: threatDataFromAv :: path :: ',$scope.quarantine.files[i].path);
+				console.log('[+] Debug :: threatDataFromAv :: desc :: ',$scope.quarantine.files[i].desc);				
+			}*/
+			
+		}
+		catch(e){
+			console.error("Parsing error:", e); 
+			return null;
+		}
+		
+		$scope.$apply();
+			
+		return;
+	}
+	
+	$scope.query_quarantine = function(){
+			
+			console.log('[+] Debug :: Refreshing antivirus quarantine...');			
+			// send quarantine request to av.			
+			ArmaditoSVC.requestAVquarantine($scope.threatDataFromAv);			
+			console.log('[+] Debug :: Refreshing antivirus status ::' + ArmaditoIPC.client_socket);
+	}
+	
     function generateRandomItem(id) {
 
         var Nom = Noms[Math.floor(Math.random() * 3)];
