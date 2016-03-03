@@ -5,7 +5,7 @@
 
 struct fanotify_monitor;
 
-struct fanotify_monitor *fanotify_monitor_new(struct uhuru *u);
+struct fanotify_monitor *fanotify_monitor_new(struct access_monitor *m, struct uhuru *u);
 
 int fanotify_monitor_start(struct fanotify_monitor *f);
 
