@@ -12,6 +12,7 @@
 
 typedef void (*dirent_cb_t)(const char *full_path, enum os_file_flag flags, int entry_errno, void *data);
 
+
 // libuhuru :: os/dir.h functions :: TODO :: quarantine in libuhuru.
 static enum os_file_flag dirent_flags(DWORD fileAttributes)
 {
@@ -224,13 +225,15 @@ void qu_os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void * 
 //static void conf_load_dirent_cb(const char *full_path, enum os_file_flag flags, int entry_errno, void *data);
 json_object * quarantine_enum_files_cb( ) {
 
-	char * quarantine_dir = "Quarantine";
+	char * quarantine_dir = NULL;
 	json_object * jobj = NULL;
 	json_object * jinfo = NULL;
 	json_object * jfiles = NULL;
 	int ret = 0,count = 0;
 
 	__try {
+
+		quarantine_dir = GetLocationCompletepath("Quarantine");
 
 
 		if ((jfiles = json_object_new_array( ))== NULL) {
@@ -269,6 +272,11 @@ json_object * quarantine_enum_files_cb( ) {
 		
 	}
 	__finally {
+
+		if (quarantine_dir != NULL) {
+			free(quarantine_dir);
+			quarantine_dir = NULL;
+		}
 		
 
 	}
@@ -281,7 +289,7 @@ json_object * quarantine_enum_files_cb( ) {
 json_object * quarantine_restore_file_cb(char* filename) {
 
 	json_object * jfiles = NULL;
-	char * quarantine_dir = "Quarantine";
+	char * quarantine_dir = NULL;
 	char * infopath = NULL;
 	char * info = NULL;
 	int info_len = 0;
@@ -298,6 +306,8 @@ json_object * quarantine_restore_file_cb(char* filename) {
 		if (filename == NULL) {
 			__leave;
 		}
+
+		quarantine_dir = GetLocationCompletepath("Quarantine");
 
 
 		// quarantine file complete path.
@@ -379,6 +389,11 @@ json_object * quarantine_restore_file_cb(char* filename) {
 
 	}
 	__finally {
+
+		if (quarantine_dir != NULL) {
+			free(quarantine_dir);
+			quarantine_dir = NULL;
+		}
 
 		if (infopath != NULL) {
 			free(infopath);
