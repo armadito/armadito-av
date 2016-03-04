@@ -12,7 +12,7 @@ jsonhandler.h \
 jsonhandler_p.h \
 debug.c \
 debug.h \
-quarantine.c \
+quarantine_dummy.c \
 quarantine.h \
 scan.c \
 scan.h \
