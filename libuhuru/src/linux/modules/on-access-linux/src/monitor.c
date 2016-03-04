@@ -336,20 +336,56 @@ static void mark_entries(struct access_monitor *m)
   }
 }
 
-static void mount_cb(enum mount_event_type ev_type, const char *path, void *user_data)
+struct mount_data {
+  enum mount_event_type ev_type;
+  const char *path;
+  struct access_monitor *monitor;
+};
+
+static void mount_data_free(struct mount_data *data)
 {
-  struct access_monitor *m = (struct access_monitor *)user_data;
+  if (data->path != NULL)
+    free((void *)data->path);
+  free(data);
+}
 
-  assert(g_main_context_is_owner(m->monitor_thread_context));
+static gboolean mount_idle_cb(gpointer user_data)
+{
+  struct mount_data *data = user_data;
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "received mount notification for %s (%s)", path, ev_type == EVENT_MOUNT ? "mount" : "umount");
+  assert(g_main_context_is_owner(access_monitor_get_main_context(data->monitor)));
 
-  if (ev_type == EVENT_MOUNT)
-    mark_mount_point(m, path);
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "received mount notification for %s (%s)", data->path, data->ev_type == EVENT_MOUNT ? "mount" : "umount");
+
+  if (data->ev_type == EVENT_MOUNT)
+    mark_mount_point(data->monitor, data->path);
 
   /* if ev_type is EVENT_UMOUNT, nothing to be done, the kernel has already removed the fanotify mark */
   /* and anyway, path is NULL, so... */
   /* unmark_mount_point(m, path); */
+
+  return G_SOURCE_REMOVE;
+}
+
+static void mount_cb(enum mount_event_type ev_type, const char *path, void *user_data)
+{
+  struct mount_data *data;
+  struct access_monitor *monitor = (struct access_monitor *)user_data;
+
+  data = malloc(sizeof(struct mount_data));
+  data->ev_type = ev_type;
+  if (path != NULL)
+    data->path = strdup(path);
+  else
+    data->path = NULL;
+  data->monitor = monitor;
+ 
+  /* Invoke the function. */
+  g_main_context_invoke_full(monitor->monitor_thread_context,
+			     G_PRIORITY_DEFAULT, 
+			     mount_idle_cb,
+			     data,
+			     (GDestroyNotify)mount_data_free);
 }
 
 static gpointer monitor_thread_fun(gpointer data)
@@ -358,6 +394,8 @@ static gpointer monitor_thread_fun(gpointer data)
   GMainLoop *loop;
   GIOChannel *command_channel;
   GSource *source;
+
+  g_main_context_push_thread_default(m->monitor_thread_context);
 
   uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "started thread %p", g_thread_self());
 
