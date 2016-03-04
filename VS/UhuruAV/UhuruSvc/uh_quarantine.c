@@ -61,67 +61,6 @@ char * GetQuarantineCompletepath() {
 	return completePath;
 }
 
-/*
-	This function returns the complete path of a location given in parameter
-	according to the installation path.
-*/
-char * GetLocationCompletepath(char * specialDir) {
-
-	char * dirpath = NULL;
-	char * completePath = NULL;
-	char filepath[MAX_PATH];	
-	char * ptr = NULL;
-	int dir_len = 0, len= 0;
-	int ret = 0;
-	
-	__try {
-
-		if (!GetModuleFileNameA(NULL, (LPSTR)&filepath, MAX_PATH)) {	
-			printf("[-] Error :: GetLocationCompletepath :: GetModuleFilename failed :: GLE = %d\n",GetLastError());
-			return NULL;
-		}
-
-		// Remove the module filename from the complete file path
-		ptr = strrchr(filepath,'\\');
-		if (ptr == NULL) {
-			printf("[-] Error :: GetLocationCompletepath :: No backslash found in the path\n");
-			return NULL;
-		}
-
-		// calc the dir buffer length.
-		dir_len = (int)(ptr - filepath);
-		dirpath = (char*)(calloc(dir_len+1,sizeof(char)));
-		dirpath[dir_len] = '\0';
-
-		memcpy_s(dirpath, dir_len, filepath, dir_len);
-		//printf("[+] Debug :: GetLocationCompletepath :: dirpath = %s\n",dirpath);
-
-		len = dir_len + strnlen(specialDir, MAX_PATH) + 2;
-		
-		completePath = (char*)calloc(len+1,sizeof(char));
-		completePath[len] = '\0';
-
-		strncat_s(completePath, len, dirpath, dir_len);
-		strncat_s(completePath, len, "\\", 1);
-		strncat_s(completePath, len, specialDir, strnlen(specialDir, MAX_PATH));		
-
-		printf("[+] Debug :: GetLocationCompletepath :: completePath = %s\n",completePath);
-
-		
-	}
-	__finally {
-
-		if (dirpath != NULL) {
-			free(dirpath);
-			dirpath = NULL;
-		}
-
-	}	
-
-	return completePath;
-}
-
-
 char * GetTimestampString( ) {
 
 	char * timestamp = NULL;
@@ -640,7 +579,7 @@ int EnumQuarantine( ) {
 
 	int ret = 0;
 	enum uhuru_json_status status = JSON_OK;
-	char * request = "{ \"av_request\":\"quarantine\", \"id\":123, \"params\": {}}";
+	char * request = "{ \"av_request\":\"quarantine\", \"id\":123, \"params\": {\"action\":\"enum\"}}";
 	int request_len = 0;
 	char response[4096] = {0};
 	int response_len = 4096;
@@ -666,4 +605,36 @@ int EnumQuarantine( ) {
 	}
 
 	return ret;
+}
+
+int ui_restore_quarantine_file(char * filename) {
+
+	int ret = 0;
+	enum uhuru_json_status status = JSON_OK;
+	char * request = "{ \"av_request\":\"quarantine\", \"id\":123, \"params\": {\"action\":\"restore\" , \"fname\":\"UH_EICAR - Copie (3).txt_20160302142554\"}}";
+	int request_len = 0;
+	char response[4096] = {0};
+	int response_len = 4096;
+
+
+	__try {
+
+		request_len = strnlen_s(request,_MAX_PATH);
+		
+		status = json_handler_ui_request(PIPE_NAME, request, request_len, response, response_len);
+		if (status != JSON_OK) {
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR,"[-] Error :: EnumQuarantine :: json_handler_ui_request failed :: status= %d \n", status);
+			ret = -1;
+			__leave;
+		}
+
+		printf("av_response = %s\n",response);
+
+	}
+	__finally {
+
+	}
+
+	return ret;
+
 }

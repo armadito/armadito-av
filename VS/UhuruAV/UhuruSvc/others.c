@@ -62,3 +62,63 @@ char * GetFileContent(char * filename, int * retsize) {
 
 	return content;
 }
+
+/*
+	This function returns the complete path of a location given in parameter
+	according to the installation path.
+*/
+char * GetLocationCompletepath(char * specialDir) {
+
+	char * dirpath = NULL;
+	char * completePath = NULL;
+	char filepath[MAX_PATH];	
+	char * ptr = NULL;
+	int dir_len = 0, len= 0;
+	int ret = 0;
+	
+	__try {
+
+		if (!GetModuleFileNameA(NULL, (LPSTR)&filepath, MAX_PATH)) {	
+			printf("[-] Error :: GetLocationCompletepath :: GetModuleFilename failed :: GLE = %d\n",GetLastError());
+			return NULL;
+		}
+
+		// Remove the module filename from the complete file path
+		ptr = strrchr(filepath,'\\');
+		if (ptr == NULL) {
+			printf("[-] Error :: GetLocationCompletepath :: No backslash found in the path\n");
+			return NULL;
+		}
+
+		// calc the dir buffer length.
+		dir_len = (int)(ptr - filepath);
+		dirpath = (char*)(calloc(dir_len+1,sizeof(char)));
+		dirpath[dir_len] = '\0';
+
+		memcpy_s(dirpath, dir_len, filepath, dir_len);
+		//printf("[+] Debug :: GetLocationCompletepath :: dirpath = %s\n",dirpath);
+
+		len = dir_len + strnlen(specialDir, MAX_PATH) + 2;
+		
+		completePath = (char*)calloc(len+1,sizeof(char));
+		completePath[len] = '\0';
+
+		strncat_s(completePath, len, dirpath, dir_len);
+		strncat_s(completePath, len, "\\", 1);
+		strncat_s(completePath, len, specialDir, strnlen(specialDir, MAX_PATH));		
+
+		//printf("[+] Debug :: GetLocationCompletepath :: completePath = %s\n",completePath);
+
+		
+	}
+	__finally {
+
+		if (dirpath != NULL) {
+			free(dirpath);
+			dirpath = NULL;
+		}
+
+	}	
+
+	return completePath;
+}
