@@ -183,6 +183,31 @@ char * BuildLocationFilePath(char * filepath, char * specialDir) {
 
 }
 
+char * GetFilenameFromPath(char * path) {
+
+	char * filename = NULL;
+
+	if (path == NULL) {
+		return NULL;
+	}
+
+	__try {
+
+		filename = strrchr(path,'\\');
+		if (filename == NULL) {
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," GetFilenameFromPath!strrchr() failed :: backslash not found in the path :: %s.\n",path);
+			printf("[-] Error :: GetFilenameFromPath!strrchr() failed :: backslash not found in the path :: %s.\n",path);
+			return NULL;
+		}
+
+	}
+	__finally {
+
+	}
+
+	return filename;
+}
+
 int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct uhuru_report * uh_report) {
 
 	int ret = 0;
@@ -234,6 +259,12 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct uh
 
 		jobj = json_object_new_object();
 		json_object_object_add(jobj, "date", json_object_new_string(timestamp));
+
+		json_object_object_add(jobj, "fname", json_object_new_string(GetFilenameFromPath(quarantinePath)));
+
+		// TODO :: add file checksum..
+		//json_object_object_add(jobj, "checksum", json_object_new_string(GetFilenameFromPath(quarantinePath)));
+		
 		json_object_object_add(jobj, "path", json_object_new_string(oldfilepath));
 
 		if (uh_report != NULL && uh_report->mod_name != NULL) {
