@@ -2,6 +2,7 @@
 #define _JSONHANDLER_H_
 
 #include <json.h>
+#include <libuhuru/core.h>
 
 enum uhuru_json_status {
   JSON_OK = 0,
