@@ -1422,6 +1422,16 @@ int main(int argc, char ** argv) {
 		return EXIT_SUCCESS;
 
 	}
+	if ( argc >=2 && strncmp(argv[1],"--restore",9) == 0 ){
+
+		ret = ui_restore_quarantine_file(argv[1]);
+		if (ret < 0) {
+			return EXIT_FAILURE;
+		}
+		return EXIT_SUCCESS;
+
+	}
+
 	if ( argc >=3 && strncmp(argv[1],"--restore",9) == 0 ){
 
 		ret = RestoreFileFromQuarantine(argv[2]);

@@ -640,7 +640,7 @@ int EnumQuarantine( ) {
 
 	int ret = 0;
 	enum uhuru_json_status status = JSON_OK;
-	char * request = "{ \"av_request\":\"quarantine\", \"id\":123, \"params\": {}}";
+	char * request = "{ \"av_request\":\"quarantine\", \"id\":123, \"params\": {\"action\":\"enum\"}}";
 	int request_len = 0;
 	char response[4096] = {0};
 	int response_len = 4096;
@@ -666,4 +666,36 @@ int EnumQuarantine( ) {
 	}
 
 	return ret;
+}
+
+int ui_restore_quarantine_file(char * filename) {
+
+	int ret = 0;
+	enum uhuru_json_status status = JSON_OK;
+	char * request = "{ \"av_request\":\"quarantine\", \"id\":123, \"params\": {\"action\":\"restore\" , \"fname\":\"UH_EICAR - Copie (3).txt_20160302142554\"}}";
+	int request_len = 0;
+	char response[4096] = {0};
+	int response_len = 4096;
+
+
+	__try {
+
+		request_len = strnlen_s(request,_MAX_PATH);
+		
+		status = json_handler_ui_request(PIPE_NAME, request, request_len, response, response_len);
+		if (status != JSON_OK) {
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR,"[-] Error :: EnumQuarantine :: json_handler_ui_request failed :: status= %d \n", status);
+			ret = -1;
+			__leave;
+		}
+
+		printf("av_response = %s\n",response);
+
+	}
+	__finally {
+
+	}
+
+	return ret;
+
 }
