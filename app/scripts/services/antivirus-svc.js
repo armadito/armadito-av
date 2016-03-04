@@ -67,7 +67,31 @@ angular.module('armadito.svc', [])
 	factory.requestAVquarantine = function(callback){
 		
 		console.log("[+] Debug :: requestAVqurantine ::");		
-		var request = { "av_request":"quarantine", "id":123, "params": {}};
+		var request = { "av_request":"quarantine", "id":123, "params": {"action":"enum"}};
+		var buffer = new Buffer( JSON.stringify(request), 'ascii' );
+		
+		// Set ipc path.
+		this.setClientPath();	
+
+		ArmaditoIPC.connect2_av(ipc_path,callback);
+		
+		ArmaditoIPC.write2_av(buffer);
+		
+		ArmaditoIPC.disconnect2_av();		
+		
+		// send data
+		//var response = ArmaditoIPC.sendAndReceive(clientPath, request);
+		//console.log("[+] Debug :: requestAVstatus :: antivirus response = " + av_response);
+		
+		//console.log("[+] Debug :: requestAVstatus :: antivirus response = " + ArmaditoIPC.av_response);		
+		
+		return ;	
+	};
+	
+	factory.requestAVrestore = function(filename,callback){
+		
+		console.log("[+] Debug :: requestAVqurantine ::");		
+		var request = { "av_request":"quarantine", "id":123, "params": {"action":"restore", "fname":filename}};
 		var buffer = new Buffer( JSON.stringify(request), 'ascii' );
 		
 		// Set ipc path.

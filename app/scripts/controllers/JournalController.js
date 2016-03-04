@@ -60,10 +60,21 @@ angular.module('tatouApp')
 	
 	$scope.query_quarantine = function(){
 			
-			console.log('[+] Debug :: Refreshing antivirus quarantine...');			
+			console.log('[+] Debug :: Refreshing antivirus quarantine...');
 			// send quarantine request to av.			
 			ArmaditoSVC.requestAVquarantine($scope.threatDataFromAv);			
 			console.log('[+] Debug :: Refreshing antivirus status ::' + ArmaditoIPC.client_socket);
+			
+			return;
+	}
+	
+	$scope.restore_qurantine_file = function(filename){
+		
+		console.log('[+] Debug :: Restoring file : '+filename);
+		ArmaditoSVC.requestAVrestore(filename,$scope.threatDataFromAv);
+		
+		return;
+		
 	}
 	
     function generateRandomItem(id) {
