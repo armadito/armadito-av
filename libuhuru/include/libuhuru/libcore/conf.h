@@ -4,6 +4,20 @@
  * \brief definition of configuration management
  *
  * ...
+ *
+ * The syntax of the configuration file is given by the following BNF: 
+ *
+ * configuration : section_list
+ * section_list : section section_list | EMPTY
+ * section : '[' section_name ']' definition_list
+ * section_name : STRING
+ * definition_list: definition definition_list | EMPTY
+ * definition : key '=' value opt_value_list
+ * key : STRING
+ * opt_value_list : list_sep value opt_value_list | EMPTY
+ * value : STRING
+ * list_sep : ',' | ';' 
+ *
  */
 
 #ifndef _LIBUHURU_LIBCORE_CONF_H_
