@@ -13,6 +13,27 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if 0
+finally, values are untyped and stored as arrays of strings
+  enum uhuru_conf_value_type {
+    TYPE_INT,
+    TYPE_STRING,
+    TYPE_LIST,
+  };
+
+  struct uhuru_conf_value {
+    enum uhuru_conf_value_type type;
+    union {
+      int int_value;
+      const char *string_value;
+      struct {
+	size_t length;
+	const char **values;
+      } list_value;
+    };
+  };
+#endif
+
 /* old function, empty for now just to compile */
 void conf_load_file(struct uhuru *uhuru, const char *filename)
 {
@@ -25,9 +46,22 @@ void conf_load_path(struct uhuru *uhuru, const char *path)
   uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "conf_load_path() stub");
 }
 
+struct conf_entry {
+  const char *key;
+  GPtrArray *value;
+};
+
+struct conf_section {
+  GPtrArray *keys;
+};
 
 struct uhuru_conf {
+  GPtrArray *sections;
 };
+
+static struct conf_section *conf_section_get(struct uhuru_conf *conf, const char *section)
+{
+}
 
 struct uhuru_conf *uhuru_conf_new(void)
 {
@@ -35,6 +69,10 @@ struct uhuru_conf *uhuru_conf_new(void)
 }
 
 void uhuru_conf_free(struct uhuru_conf *conf)
+{
+}
+
+static void conf_load_parser_cb(const char *section, const char *key, const char **argv, size_t length, void *user_data)
 {
 }
 
