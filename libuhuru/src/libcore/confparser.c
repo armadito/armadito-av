@@ -37,7 +37,7 @@ enum token_type {
 
 static struct scanner *scanner_new(FILE *input)
 {
-  struct scanner *s = g_new(struct scanner, 1);
+  struct scanner *s = malloc(sizeof(struct scanner));
 
   s->input = input;
   s->current_line = 1;
@@ -190,7 +190,7 @@ int scanner_get_next_token(struct scanner *s)
 static void scanner_free(struct scanner *s)
 {
   g_string_free(s->token_text, TRUE);
-  g_free(s);
+  free(s);
 }
 
 /*
@@ -213,7 +213,7 @@ struct uhuru_conf_parser {
 
 struct uhuru_conf_parser *uhuru_conf_parser_new(const char *filename, conf_parser_callback_t callback, void *user_data)
 {
-  struct uhuru_conf_parser *cp = g_new0(struct uhuru_conf_parser, 1);
+  struct uhuru_conf_parser *cp = malloc(sizeof(struct uhuru_conf_parser));
 
   cp->filename = os_strdup(filename);
 
@@ -230,6 +230,10 @@ struct uhuru_conf_parser *uhuru_conf_parser_new(const char *filename, conf_parse
   }
 
   cp->scanner = scanner_new(cp->input);
+  cp->lookahead_token = TOKEN_EOF;
+  cp->current_section = NULL;
+  cp->current_key = NULL;
+  cp->current_value_list = NULL;
 
   cp->callback = callback;
   cp->user_data = user_data;
@@ -273,7 +277,7 @@ static const char *token_str(enum token_type token)
   else if (token == TOKEN_EOF)
     return "end of file";
   else if (token < TOKEN_NONE) {
-    /* memory leak, I know, I know, but this function is called only in case of syntax error... */
+    /* memory leak, I know, but this function is called only in case of syntax error... */
     char *tmp = (char *)malloc(2);
 
     tmp[0] = (char)token;
@@ -300,12 +304,8 @@ static void syntax_error(struct uhuru_conf_parser *cp, guint token)
 static void accept(struct uhuru_conf_parser *cp, guint token)
 {
   if (cp->lookahead_token == token) {
-    if (cp->lookahead_token != TOKEN_EOF) {
+    if (cp->lookahead_token != TOKEN_EOF)
       cp->lookahead_token = scanner_get_next_token(cp->scanner);
-#if 0
-      print_token(cp->scanner, cp->lookahead_token);
-#endif
-    }
   } else
     syntax_error(cp, token);
 }
@@ -439,9 +439,6 @@ int uhuru_conf_parser_parse(struct uhuru_conf_parser *cp)
     return -1;
 
   cp->lookahead_token = scanner_get_next_token(cp->scanner);
-#if 0
-  print_token(cp->scanner, cp->lookahead_token);
-#endif
 
   cp->current_section = NULL;
   cp->current_key = NULL;
@@ -470,5 +467,5 @@ void uhuru_conf_parser_free(struct uhuru_conf_parser *cp)
 
   free((void *)cp->filename);
 
-  g_free(cp);
+  free(cp);
 }
