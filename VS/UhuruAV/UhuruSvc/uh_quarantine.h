@@ -11,3 +11,4 @@
 int MoveFileInQuarantine(char * filepath, struct uhuru_report uh_report);
 int RestoreFileFromQuarantine(char* filename);
 int EnumQuarantine( );
+int ui_restore_quarantine_file(char * filename);

@@ -65,6 +65,7 @@ enum uhuru_file_context_status uhuru_file_context_get(struct uhuru_file_context 
     if (ctx->fd < 0) {
       ctx->status = UHURU_FC_FILE_OPEN_ERROR;
 	  uhuru_log(UHURU_LOG_LIB,UHURU_LOG_LEVEL_WARNING, " Error :: uhuru_file_context_get :: Opening file [%s] for scan failed :: err = %d\n",path,err);
+	  printf("[-] Error :: uhuru_file_context_get :: Opening file [%s] for scan failed :: err = %d\n",path,err);
       return ctx->status;
     }
   }

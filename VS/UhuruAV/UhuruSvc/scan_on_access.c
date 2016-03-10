@@ -68,7 +68,14 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 	char * msDosFilename = NULL;
 	struct uhuru_report report = {0};
 	enum uhuru_file_status scan_result = UHURU_IERROR;
+	PVOID OldValue = NULL;
 
+
+	// Disables file system redirection for the calling thread.
+	if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {
+		return S_FALSE;
+	}
+	
 
 	// Get thread context by ID.
 	ThreadId = GetCurrentThreadId( );
@@ -88,6 +95,9 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 
 	if (threadCtx == NULL) {
 		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " UhuruSvc!UserScanWorker :: NULL Thread context\n");
+		if (Wow64RevertWow64FsRedirection(OldValue) == FALSE ){
+			return S_FALSE;
+		}
 		//uhLog("[-] Error :: UserScanWorker :: Thread Not found\n");
 		return S_FALSE;
 	}	
@@ -273,6 +283,12 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
     }
 
 	uhLog("\n[i] Debug  :: UserScanWorker :: Thread id %d exiting\n",ThreadId);
+
+	// Re enable FS redirection for this thread.
+	if (Wow64RevertWow64FsRedirection(OldValue) == FALSE ){
+		return S_FALSE;
+	}
+
 
 	return hres;
 }
