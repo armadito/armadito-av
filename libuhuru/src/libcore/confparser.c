@@ -25,7 +25,7 @@ struct scanner {
 };
 
 enum token_type {
-  TOKEN_EOF			=   0,
+  TOKEN_EOF			= 0,
   TOKEN_LEFT_BRACE		= '[',
   TOKEN_RIGHT_BRACE		= ']',
   TOKEN_EQUAL_SIGN		= '=',
@@ -204,9 +204,9 @@ struct uhuru_conf_parser {
   struct scanner *scanner;
   enum token_type lookahead_token;
   jmp_buf env;
-  char *current_group;
-  char *current_directive;
-  GPtrArray *current_args;
+  char *current_section;
+  char *current_key;
+  GPtrArray *current_value_list;
   conf_parser_callback_t callback;
   void *user_data;
 };
@@ -311,27 +311,16 @@ static void accept(struct uhuru_conf_parser *cp, guint token)
 }
 
 /*
-  the grammar:
-
-  configuration : group_list
-  group_list : group group_list | EMPTY
-  group : '[' groupname ']' definition_list
-  groupname : STRING
-  definition_list: definition definition_list | EMPTY
-  definition : directive '=' value opt_value_list
-  directive : STRING
-  opt_value_list : list_sep value opt_value_list | EMPTY
-  value : STRING
-  list_sep : ',' | ';' 
+  recursive descent parser functions:
+  the grammar is given in conf.h
 */
-
 static void r_configuration(struct uhuru_conf_parser *cp);
-static void r_group_list(struct uhuru_conf_parser *cp);
-static void r_group(struct uhuru_conf_parser *cp);
-static void r_groupname(struct uhuru_conf_parser *cp);
+static void r_section_list(struct uhuru_conf_parser *cp);
+static void r_section(struct uhuru_conf_parser *cp);
+static void r_section_name(struct uhuru_conf_parser *cp);
 static void r_definition_list(struct uhuru_conf_parser *cp);
 static void r_definition(struct uhuru_conf_parser *cp);
-static void r_directive(struct uhuru_conf_parser *cp);
+static void r_key(struct uhuru_conf_parser *cp);
 static void r_opt_value_list(struct uhuru_conf_parser *cp);
 static void r_value(struct uhuru_conf_parser *cp);
 static void r_list_sep(struct uhuru_conf_parser *cp);
@@ -344,35 +333,35 @@ static void free_and_set(char **old, char *new)
   *old = os_strdup(new);
 }
 
-/* configuration : group_list */
+/* configuration : section_list */
 static void r_configuration(struct uhuru_conf_parser *cp)
 {
-  r_group_list(cp);
+  r_section_list(cp);
 }
 
-/* group_list : group group_list | EMPTY */
-static void r_group_list(struct uhuru_conf_parser *cp)
+/* section_list : section section_list | EMPTY */
+static void r_section_list(struct uhuru_conf_parser *cp)
 {
   if (cp->lookahead_token == TOKEN_LEFT_BRACE) {
-    r_group(cp);
-    r_group_list(cp);
+    r_section(cp);
+    r_section_list(cp);
   }
 }
 
-/* group : '[' STRING ']' definition_list */
-static void r_group(struct uhuru_conf_parser *cp)
+/* section : '[' STRING ']' definition_list */
+static void r_section(struct uhuru_conf_parser *cp)
 {
   accept(cp, TOKEN_LEFT_BRACE);
-  r_groupname(cp);
+  r_section_name(cp);
   accept(cp, TOKEN_RIGHT_BRACE);
   r_definition_list(cp);
 }
 
-/* groupname : STRING */
-static void r_groupname(struct uhuru_conf_parser *cp)
+/* section_name : STRING */
+static void r_section_name(struct uhuru_conf_parser *cp)
 {
-  /* store current group */
-  free_and_set(&cp->current_group, scanner_token_text(cp->scanner));
+  /* store current section */
+  free_and_set(&cp->current_section, scanner_token_text(cp->scanner));
 
   accept(cp, TOKEN_STRING);
 }
@@ -386,25 +375,25 @@ static void r_definition_list(struct uhuru_conf_parser *cp)
   }
 }
 
-/* definition : directive '=' value opt_value_list  */
+/* definition : key '=' value opt_value_list  */
 static void r_definition(struct uhuru_conf_parser *cp)
 {
-  r_directive(cp);
+  r_key(cp);
   accept(cp, TOKEN_EQUAL_SIGN);
   r_value(cp);
   r_opt_value_list(cp);
 
   /* process stored values by calling the callback */
-  g_ptr_array_add(cp->current_args, NULL);
-  (*cp->callback)(cp->current_group, cp->current_directive, (const char **)cp->current_args->pdata, cp->user_data);
-  g_ptr_array_set_size(cp->current_args, 0);
+  g_ptr_array_add(cp->current_value_list, NULL);
+  (*cp->callback)(cp->current_section, cp->current_key, (const char **)cp->current_value_list->pdata, cp->user_data);
+  g_ptr_array_set_size(cp->current_value_list, 0);
 }
 
-/* directive : STRING */
-static void r_directive(struct uhuru_conf_parser *cp)
+/* key : STRING */
+static void r_key(struct uhuru_conf_parser *cp)
 {
-  /* store current directive */
-  free_and_set(&cp->current_directive, scanner_token_text(cp->scanner));
+  /* store current key */
+  free_and_set(&cp->current_key, scanner_token_text(cp->scanner));
 
   accept(cp, TOKEN_STRING);
 }
@@ -423,7 +412,7 @@ static void r_opt_value_list(struct uhuru_conf_parser *cp)
 static void r_value(struct uhuru_conf_parser *cp)
 {
   /* store current value */
-  g_ptr_array_add(cp->current_args, os_strdup(scanner_token_text(cp->scanner)));
+  g_ptr_array_add(cp->current_value_list, os_strdup(scanner_token_text(cp->scanner)));
 
   accept(cp, TOKEN_STRING);
 }
@@ -454,9 +443,9 @@ int uhuru_conf_parser_parse(struct uhuru_conf_parser *cp)
   print_token(cp->scanner, cp->lookahead_token);
 #endif
 
-  cp->current_group = NULL;
-  cp->current_directive = NULL;
-  cp->current_args = g_ptr_array_new_with_free_func(arg_destroy_notify);
+  cp->current_section = NULL;
+  cp->current_key = NULL;
+  cp->current_value_list = g_ptr_array_new_with_free_func(arg_destroy_notify);
 
   if (!setjmp(cp->env)) {
     r_configuration(cp);
@@ -476,7 +465,7 @@ void uhuru_conf_parser_free(struct uhuru_conf_parser *cp)
 
     scanner_free(cp->scanner);
 
-    g_ptr_array_free(cp->current_args, TRUE);
+    g_ptr_array_free(cp->current_value_list, TRUE);
   }
 
   free((void *)cp->filename);
