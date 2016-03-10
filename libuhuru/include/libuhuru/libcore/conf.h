@@ -45,7 +45,7 @@ extern "C" {
 
   int uhuru_conf_is_int(struct uhuru_conf *conf, const char *section, const char *key);
 
-  int uhuru_conf_is_tring(struct uhuru_conf *conf, const char *section, const char *key);
+  int uhuru_conf_is_string(struct uhuru_conf *conf, const char *section, const char *key);
 
   int uhuru_conf_is_list(struct uhuru_conf *conf, const char *section, const char *key);
 
