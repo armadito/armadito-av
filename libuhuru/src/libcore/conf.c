@@ -7,79 +7,72 @@
 #include "confparser.h"
 #include "os/dir.h"
 
-#include <glib.h>
-#include <stdlib.h>
 #include <assert.h>
-#define _GNU_SOURCE
+#include <glib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-static struct uhuru_conf_entry *conf_entry_get(struct uhuru_module *module, const char *directive)
+/* old function, empty for now just to compile */
+void conf_load_file(struct uhuru *uhuru, const char *filename)
 {
-  struct uhuru_conf_entry *p;
+  uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "conf_load_file() stub");
+}
 
-  if (module->conf_table == NULL)
-    return NULL;
+/* old function, empty for now just to compile */
+void conf_load_path(struct uhuru *uhuru, const char *path)
+{
+  uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "conf_load_path() stub");
+}
 
-  for(p = module->conf_table; p->directive != NULL; p++)
-    if (!strcmp(directive, p->directive))
-      return p;
 
+struct uhuru_conf {
+};
+
+struct uhuru_conf *uhuru_conf_new(void)
+{
   return NULL;
 }
 
-static int conf_set(struct uhuru *uhuru, const char *mod_name, const char *directive, const char **argv)
+void uhuru_conf_free(struct uhuru_conf *conf)
 {
-  struct uhuru_module *mod;
-  struct uhuru_conf_entry *conf_entry;
+}
 
-  mod = uhuru_get_module_by_name(uhuru, mod_name);
-  if (mod == NULL) {
-    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "conf_set: no module '%s'", mod_name);
-    return -1;
-  }
-
-  conf_entry = conf_entry_get(mod, directive);
-  if (conf_entry == NULL || conf_entry->conf_fun == NULL) {
-    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "conf_set: no directive '%s' for module '%s'", directive, mod_name);
-    return -1;
-  }
-
-  if ((*conf_entry->conf_fun)(mod, directive, argv) != UHURU_MOD_OK) {
-    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "conf_set: cannot assign value to directive '%s' for module '%s'", directive, mod_name);
-    return -1;
-  }
-
+int uhuru_conf_load_file(struct uhuru_conf *conf, const char *path, uhuru_error **error)
+{
   return 0;
 }
 
-static void conf_parser_set_cb(const char *group, const char *directive, const char **argv, void *user_data)
+int uhuru_conf_save_file(struct uhuru_conf *conf, const char *path, uhuru_error **error)
 {
-  conf_set((struct uhuru *)user_data, group, directive, argv);
+  return 0;
 }
 
-void conf_load_file(struct uhuru *uhuru, const char *filename)
+const char **uhuru_conf_get_sections(struct uhuru_conf *conf, size_t *length)
 {
-  struct uhuru_conf_parser *cp = uhuru_conf_parser_new(filename, conf_parser_set_cb, uhuru);
-
-  uhuru_conf_parser_parse(cp);
-
-  uhuru_conf_parser_free(cp);
+  return NULL;
 }
 
-static void conf_load_dirent_cb(const char *full_path, enum os_file_flag flags, int entry_errno, void *data)
+const char **uhuru_conf_get_keys(struct uhuru_conf *conf, const char *section, size_t *length)
 {
-  if (flags & FILE_FLAG_IS_PLAIN_FILE) {
-    size_t len = strlen(full_path);
-
-    if (len > 5 && !strcmp(full_path + len - 5, ".conf"))
-      conf_load_file((struct uhuru *)data, full_path);
-  }
+  return NULL;
 }
 
-void conf_load_path(struct uhuru *uhuru, const char *path)
+const char *uhuru_conf_get_value(struct uhuru_conf *conf, const char *section, const char *key)
 {
-  os_dir_map(path, 0, conf_load_dirent_cb, uhuru);
+  return NULL;
 }
 
+const char **uhuru_conf_get_list(struct uhuru_conf *conf, const char *section, const char *key, size_t *length)
+{
+  return NULL;
+}
+
+void uhuru_conf_set_value(struct uhuru_conf *conf, const char *section, const char *key, const char *value)
+{
+}
+
+void uhuru_conf_set_list(struct uhuru_conf *conf, const char *section, const char *key, const char **list, size_t length)
+{
+}
 
