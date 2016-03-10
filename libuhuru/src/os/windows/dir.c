@@ -126,6 +126,8 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 
 	while (FindNextFile(fh, &tmp) != FALSE) {
 
+		//printf("[+] Debug :: os_dir_map :: entry name ===> [%s] <===\n",tmp.cFileName);
+
 		// exclude paths "." and ".."
 		if (strncmp(tmp.cFileName,".",strlen(tmp.cFileName)) == 0 || strncmp(tmp.cFileName,"..",strlen(tmp.cFileName)) == 0)
 		{
@@ -192,7 +194,7 @@ char * GetBinaryDirectory( ) {
 	int len = 0;
 
 	if (!GetModuleFileNameA(NULL, (LPSTR)&filepath, MAX_PATH)) {		
-		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "[-] Error :: GetBinaryDirectory!GetModuleFileName() failed :: %d\n",GetLastError());
+		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_ERROR, "[-] Error :: GetBinaryDirectory!GetModuleFileName() failed :: %d\n",GetLastError());
 		return NULL;
 	}	
 

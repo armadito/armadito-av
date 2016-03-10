@@ -323,6 +323,11 @@ int WINAPI ScanThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
 	char * response = NULL;
 	int resp_len = 0;
 
+	PVOID OldValue = NULL;
+
+
+	
+
 	if (Context == NULL) {
 		printf("[-] Error :: ScanThreadWork :: NULL Context\n" );
 		return -1;
@@ -347,6 +352,10 @@ int WINAPI ScanThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
 		return -2;
 	}
 
+	// Disables file system redirection for the calling thread.
+	if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {
+		return S_FALSE;
+	}
 
 	__try {
 
@@ -496,6 +505,11 @@ int WINAPI ScanThreadWork(PONDEMAND_SCAN_CONTEXT Context) {
 
 	}
 	__finally {
+
+		// Re enable FS redirection for this thread.
+		if (Wow64RevertWow64FsRedirection(OldValue) == FALSE ){
+			printf("[-] Error :: ScanThreadWork :: can't revert file system redirection !\n");
+		}
 
 		FlushFileBuffers(threadCtx->hPipeInst);
 		DisconnectNamedPipe(threadCtx->hPipeInst);

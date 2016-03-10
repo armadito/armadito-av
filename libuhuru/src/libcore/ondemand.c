@@ -1,15 +1,21 @@
 #include <libuhuru/core.h>
 #include "libuhuru-config.h"
 
+#include "reportp.h"
 #include "ondemandp.h"
 #include "scanp.h"
 #include "os/file.h"
 #include "os/io.h"
 #include "os/string.h"
+#include "os/dir.h"
 
 #include <errno.h>
 #include <glib.h>
 #include <stdlib.h>
+
+#ifdef WIN32
+#include <Windows.h>
+#endif
 
 static void process_error(struct uhuru_scan *scan, const char *full_path, int entry_errno);
 
@@ -68,10 +74,23 @@ static void scan_entry_thread_fun(gpointer data, gpointer user_data)
   struct uhuru_on_demand *on_demand = (struct uhuru_on_demand *)user_data;
   char *path = (char *)data;
 
+#ifdef WIN32
+	void * OldValue = NULL;
+	if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {
+		return;
+	}
+#endif
+
   scan_file(on_demand, path);
 
   /* path was strdup'ed, so free it */
   free(path);
+
+#ifdef WIN32
+	if (Wow64RevertWow64FsRedirection(OldValue) == FALSE ){	
+	return;
+	}
+#endif
 }
 
 /* this function is called when an error is found during directory traversal */
@@ -81,7 +100,7 @@ static void process_error(struct uhuru_scan *scan, const char *full_path, int en
 
   uhuru_report_init(&report, scan->scan_id, full_path, REPORT_PROGRESS_UNKNOWN);
 
-  uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "error processing %s (error %s)", full_path, os_strerror(entry_errno));
+  uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_ERROR, "error processing %s (error %s)", full_path, os_strerror(entry_errno));
 
   report.status = UHURU_IERROR;
   report.mod_report = os_strdup(os_strerror(entry_errno));
@@ -133,12 +152,24 @@ static gpointer count_thread_fun(gpointer data)
   struct uhuru_on_demand *on_demand = (struct uhuru_on_demand *)data;
   int recurse = on_demand->flags & UHURU_SCAN_RECURSE;
   int count = 0;
+#ifdef WIN32
+	void * OldValue = NULL;
+	if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {
+		return NULL;
+	}
+#endif
 
   os_dir_map(on_demand->root_path, recurse, count_entry, &count);
 
   /* set the counter inside the uhuru_scan struct only at the end, so */
   /* that the scan function does not see the intermediate values, only the last one */
   on_demand->scan->to_scan_count = count;
+
+#ifdef WIN32
+	if (Wow64RevertWow64FsRedirection(OldValue) == FALSE ){	
+	return NULL;
+	}
+#endif
 
   return NULL;
 }
@@ -179,7 +210,10 @@ void uhuru_on_demand_run(struct uhuru_on_demand *on_demand)
   uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_INFO, "starting %sthreaded scan of %s", 
 	    on_demand->flags & UHURU_SCAN_THREADED ? "" : "non-", 
 	    on_demand->root_path);
-
+  
+  if (on_demand->flags & UHURU_SCAN_THREADED) {
+	  printf("[i] Info :: uhuru_on_demand_run :: threaded scan !!\n");
+  }
   /* create the thread pool now */
   if (on_demand->flags & UHURU_SCAN_THREADED)
     on_demand->thread_pool = g_thread_pool_new(scan_entry_thread_fun, on_demand, get_max_threads(), FALSE, NULL);
@@ -190,18 +224,24 @@ void uhuru_on_demand_run(struct uhuru_on_demand *on_demand)
   /* it is a file, scan it, in a thread if scan is threaded */
   /* otherwise, walk through the directory and apply 'scan_entry' function to each entry (either file or directory) */
   if (stat_buf.flags & FILE_FLAG_IS_PLAIN_FILE) {
-    on_demand->scan->to_scan_count = 1;
+	  
+	  on_demand->scan->to_scan_count = 1;
 
-    if (on_demand->flags & UHURU_SCAN_THREADED)
-      g_thread_pool_push(on_demand->thread_pool, (gpointer)os_strdup(on_demand->root_path), NULL);
-    else
-      scan_file(on_demand, on_demand->root_path);
+		if (on_demand->flags & UHURU_SCAN_THREADED)
+			g_thread_pool_push(on_demand->thread_pool, (gpointer)os_strdup(on_demand->root_path), NULL);
+		else
+			scan_file(on_demand, on_demand->root_path);
+
   } else if (stat_buf.flags & FILE_FLAG_IS_DIRECTORY) {
+
     int recurse = on_demand->flags & UHURU_SCAN_RECURSE;
 
     count_to_scan(on_demand);
-
+	printf("[-] Warning :: uhuru_on_demand_run :: before os dir map... [%s] :: count = %d ---------\n",on_demand->root_path,on_demand->scan->to_scan_count);
     os_dir_map(on_demand->root_path, recurse, scan_entry, on_demand);
+	
+	
+
   }
 
   /* if threaded, free the thread_pool */
