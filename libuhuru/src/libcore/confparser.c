@@ -378,6 +378,9 @@ static void r_definition_list(struct uhuru_conf_parser *cp)
 /* definition : key '=' value opt_value_list  */
 static void r_definition(struct uhuru_conf_parser *cp)
 {
+  const char **argv;
+  size_t length;
+
   r_key(cp);
   accept(cp, TOKEN_EQUAL_SIGN);
   r_value(cp);
@@ -385,7 +388,9 @@ static void r_definition(struct uhuru_conf_parser *cp)
 
   /* process stored values by calling the callback */
   g_ptr_array_add(cp->current_value_list, NULL);
-  (*cp->callback)(cp->current_section, cp->current_key, (const char **)cp->current_value_list->pdata, cp->user_data);
+  argv = (const char **)cp->current_value_list->pdata;
+  length = cp->current_value_list->len;
+  (*cp->callback)(cp->current_section, cp->current_key, argv, length, cp->user_data);
   g_ptr_array_set_size(cp->current_value_list, 0);
 }
 
