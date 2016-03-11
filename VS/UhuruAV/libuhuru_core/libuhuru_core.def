@@ -19,3 +19,5 @@ uhuru_action_pretty_str
 uhuru_report_init
 uhuru_log_set_handler
 uhuru_log
+uhuru_notify_set_handler
+uhuru_notify

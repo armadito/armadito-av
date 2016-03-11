@@ -5,6 +5,7 @@
 #include "update.h"
 #include "register.h"
 #include "uh_info.h"
+#include "uh_notify.h"
 
 // Msdn documentation: 
 // https://msdn.microsoft.com/en-us/library/windows/desktop/ms685141%28v=vs.85%29.aspx
@@ -1350,7 +1351,7 @@ void dir_map(char * path, int recurse) {
 	int size = 0;
 	WIN32_FIND_DATAA fdata ;
 	WIN32_FIND_DATAA tmp ;
-	enum os_file_flag flags;
+
 
 	// Check parameters
 	if (path == NULL) {
@@ -1453,6 +1454,16 @@ int main(int argc, char ** argv) {
 		return EXIT_SUCCESS;
 	}
 
+
+	if (argc >= 2 && strncmp(argv[1], "--notify", 8) == 0) {
+
+		uhuru_notify_set_handler(send_notif);
+		
+		uhuru_notify(NOTIF_INFO,"Service started!");
+		uhuru_notify(NOTIF_WARNING,"Malware detected :: [%s]","TrojanFake");
+		uhuru_notify(NOTIF_ERROR,"An error occured during scan !!");
+		return EXIT_SUCCESS;
+	}
 
 	// Only for test purposes (command line) complete test = GUI + driver.
 	if ( argc >=2 && strncmp(argv[1],"--testGUI",9) == 0 ){
