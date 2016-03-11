@@ -1,6 +1,8 @@
 #ifndef _LIBUHURU_CONFPARSER_H_
 #define _LIBUHURU_CONFPARSER_H_
 
+#include <stddef.h>
+
 struct uhuru_conf_parser;
 
 typedef void (*conf_parser_callback_t)(const char *section, const char *key, const char **argv, size_t length, void *user_data);
