@@ -8,17 +8,17 @@
 white-list-dir="/boot"; "/dev"; "/etc"; "/proc"; "/run"; "/sys"; "/var"
 
 # scan executables with module5_2 and clamav
-mime-type="application/x-executable"; module5_2; clamav
-mime-type="application/x-object"; module5_2; clamav
-mime-type="application/x-sharedlib"; module5_2; clamav
+"application/x-executable" = module5_2; clamav
+"application/x-object" = module5_2; clamav
+"application/x-sharedlib" = module5_2; clamav
 # scan windows executables with module5_2 and clamav
-mime-type="application/x-dosexec"; clamav; module5_2
-mime-type="application/x-msdos-program"; module5_2; clamav
-mime-type="application/x-msdownload"; module5_2; clamav
+"application/x-dosexec" = clamav; module5_2
+"application/x-msdos-program" = module5_2; clamav
+"application/x-msdownload" = module5_2; clamav
 # scan PDF with clamav
-mime-type="application/pdf"; clamav
+"application/pdf" = clamav
 # clamav scans every file if no other module applies
-mime-type="*"; clamav
+default=clamav
 
 # 1M, must support units ;-)
 max-size=1048576 
