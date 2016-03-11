@@ -32,7 +32,7 @@ angular.module('armadito.services', [])
 		{
 			clientPath = '\\\\.\\pipe\\armadito_ondemand';
 		}else{
-			clientPath = '\\\\.\\pipe\\armadito_ondemand';
+			clientPath = '/tmp/.uhuru-daemon';
 		}
       //clientPath = clPath;
     }

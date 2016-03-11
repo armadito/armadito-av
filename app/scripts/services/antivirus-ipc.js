@@ -14,28 +14,10 @@ angular.module('armadito.ipc', [])
 	var av_response;
 	var client_socket;
 	var client_sock;
-	var net = require('net');
+	var server;
+	var net = require('net');	
 	
 	//var factory.client_sock;
-		
-	factory.sendRequest = function(request){
-						
-		var buffer = new Buffer( JSON.stringify(request), 'ascii' );
-		console.log("[+] Debug :: [IPC] requestRequest :: send request = " + buffer);	
-				
-		return;
-		
-	};
-	
-	factory.respHandler = function(data){
-		
-		var buffer = new Buffer(data, 'ascii');		
-		//console.log("[+] Debug :: [IPC] respHandler :: response received = " + buffer);
-		
-		global.av_response = buffer;
-						
-		return buffer;
-	};
 	
 	
 	// ----------------------------------------------
@@ -57,6 +39,7 @@ angular.module('armadito.ipc', [])
 		
 		client_sock.on('data',function(data){
 			//console.log("dans la fonction connect_AV : "+ data);			
+			
 			return callback(data);
 		});
 		
@@ -77,15 +60,53 @@ angular.module('armadito.ipc', [])
 		});
 		
 		
-		return;		
-	}
+		return;
+	};
 	
 	factory.disconnect2_av = function(){
 		client_sock.end();
 		client_sock.close;
 	};
-		
+
+
+	// ----------------------------------------------
+	factory.createUIServer = function(ipc_path,callback){
+
+		server = net.createServer(function(server_sock){
+
+			console.log("[+] Debug :: client connected!");
+
+			server_sock.on('end', function(){
+				console.log("[+] Debug :: client disconnected from server.");
+			});
+
+
+			server_sock.on('error', function(err){
+				console.log("[-] Error :: server error :: ",err);
+			});
+
+			server_sock.on('data', function(data){
+				//console.log("[+] Debug :: data received ::"+ data);
+				var response = { "ihm_response":"state", "id":0, "status":0 };
+				var buffer = new Buffer( JSON.stringify(response), 'ascii' );
+				server_sock.write(buffer);
+				callback(data);
+			});
+
+
+		});
+
+		server.listen(ipc_path, function(){
+			console.log("[+] Debug :: server listening on ::", ipc_path);
+		});
+
+
+		return server;
+
+	};
+
 
 	return factory;
+	
 });
 	

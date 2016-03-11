@@ -13,6 +13,7 @@ angular.module('armadito.svc', [])
 
 	var factory = {};
 	var ipc_path;
+	var server_ipc_path;
 	var clientId;
 	var os = require('os');
 	var client_sock;
@@ -35,6 +36,31 @@ angular.module('armadito.svc', [])
 		}
 		return;		
 	};
+
+	factory.setServerPath = function(){
+				
+		if(os.platform() == "win32"){
+			server_ipc_path = '\\\\.\\pipe\\armadito-UI';
+		}else{
+			server_ipc_path = '\\\\.\\pipe\\armadito-UI';
+		}
+		return;		
+	};
+
+	
+
+	factory.startNotificationServer = function(callback){
+
+		var server;
+
+		console.log("[+] Debug :: startNotificationServer ::");
+		// set server ipc path according to OS version.
+		this.setServerPath();
+
+		server = ArmaditoIPC.createUIServer(server_ipc_path, callback);		
+
+	}
+
 
 	factory.requestAVstatus = function(callback){
 		
