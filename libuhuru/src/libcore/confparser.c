@@ -389,7 +389,7 @@ static void r_definition(struct uhuru_conf_parser *cp)
   /* process stored values by calling the callback */
   g_ptr_array_add(cp->current_value_list, NULL);
   argv = (const char **)cp->current_value_list->pdata;
-  length = cp->current_value_list->len;
+  length = cp->current_value_list->len - 1;
   (*cp->callback)(cp->current_section, cp->current_key, argv, length, cp->user_data);
   g_ptr_array_set_size(cp->current_value_list, 0);
 }
