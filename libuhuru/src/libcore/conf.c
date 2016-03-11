@@ -82,27 +82,39 @@ struct uhuru_conf *uhuru_conf_new(void)
 
 void uhuru_conf_free(struct uhuru_conf *conf)
 {
+  dict_free(conf->sections);
   free(conf);
 }
 
-static struct dict *uhuru_conf_section_add(struct uhuru_conf *conf, const char *section_name)
+static void value_free(gpointer data)
 {
+  g_ptr_array_free((GPtrArray *)data, TRUE);
+}
+
+static void conf_load_parser_cb(const char *section_name, const char *key, const char **value, size_t length, void *user_data)
+{
+  struct uhuru_conf *conf = (struct uhuru_conf *)user_data;
   struct dict *section;
+  GPtrArray *value_array;
+  int i;
 
   section = dict_lookup(conf->sections, section_name);
 
   if (section == NULL) {
-    section = dict_new((GDestroyNotify)dict_free);
+    section = dict_new(value_free);
     dict_insert(conf->sections, section_name, section);
   }
 
-  return section;
-}
+  if (dict_lookup(section, key) != NULL) {
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "duplicate key '%s' in section '%s'", key, section_name);
+    return;
+  }
 
-static void conf_load_parser_cb(const char *section_name, const char *key, const char **argv, size_t length, void *user_data)
-{
-  struct uhuru_conf *conf = (struct uhuru_conf *)user_data;
-  struct dict *section = uhuru_conf_section_add(conf, section_name);
+  value_array = g_ptr_array_new();
+  for(i = 0; i < length; i++)
+    g_ptr_array_add(value_array, os_strdup(value[i]));
+
+  dict_insert(section, key, value_array);
 }
 
 int uhuru_conf_load_file(struct uhuru_conf *conf, const char *path, uhuru_error **error)
@@ -116,11 +128,29 @@ int uhuru_conf_load_file(struct uhuru_conf *conf, const char *path, uhuru_error 
   return 0;
 }
 
+static void key_print_fun(const char *key, void *value, void *user_data)
+{
+  FILE *f = (FILE *)user_data;
+  GPtrArray *values = (GPtrArray *)value;
+  int i;
+  const char **argv = (const char **)values->pdata;
+
+  fprintf(f, "%s=", key);
+
+  for(i = 0; i < values->len; i++)
+    fprintf(f, "%c\"%s\" ", (i == 0) ? ' ' : ',', argv[i]);
+
+  fprintf(f, "\n");
+}
+
 static void section_print_fun(const char *key, void *value, void *user_data)
 {
   FILE *f = (FILE *)user_data;
+  struct dict *section = (struct dict *)value;
 
-  fprintf(f, "[%s]\n\n", key);
+  fprintf(f, "\n[%s]\n\n", key);
+
+  dict_foreach(section, key_print_fun, f);
 }
 
 int uhuru_conf_save_file(struct uhuru_conf *conf, const char *path, uhuru_error **error)
