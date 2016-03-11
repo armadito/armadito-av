@@ -291,7 +291,7 @@ static const char *token_str(enum token_type token)
 
 static void syntax_error(struct uhuru_conf_parser *cp, guint token) 
 {
-  uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_ERROR, "syntax error: file %s line %d column %d expecting '%s' got '%s'\n", 
+  uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_ERROR, "syntax error: file %s line %d column %d expecting '%s' got '%s'", 
 	    cp->filename,
 	    scanner_current_line(cp->scanner),
 	    scanner_current_column(cp->scanner),
@@ -390,7 +390,14 @@ static void r_definition(struct uhuru_conf_parser *cp)
   g_ptr_array_add(cp->current_value_list, NULL);
   argv = (const char **)cp->current_value_list->pdata;
   length = cp->current_value_list->len - 1;
-  (*cp->callback)(cp->current_section, cp->current_key, argv, length, cp->user_data);
+  if ((*cp->callback)(cp->current_section, cp->current_key, argv, length, cp->user_data) != 0) {
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_ERROR, "configuration file parser: callback return != 0 file %s line %d column %d",
+	      cp->filename,
+	      scanner_current_line(cp->scanner),
+	      scanner_current_column(cp->scanner));
+    longjmp(cp->env, 1);
+  }
+    
   g_ptr_array_set_size(cp->current_value_list, 0);
 }
 
