@@ -91,7 +91,7 @@ static void value_free(gpointer data)
   g_ptr_array_free((GPtrArray *)data, TRUE);
 }
 
-static void conf_load_parser_cb(const char *section_name, const char *key, const char **value, size_t length, void *user_data)
+static int conf_load_parser_cb(const char *section_name, const char *key, const char **value, size_t length, void *user_data)
 {
   struct uhuru_conf *conf = (struct uhuru_conf *)user_data;
   struct dict *section;
@@ -107,7 +107,7 @@ static void conf_load_parser_cb(const char *section_name, const char *key, const
 
   if (dict_lookup(section, key) != NULL) {
     uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "duplicate key '%s' in section '%s'", key, section_name);
-    return;
+    return 1;
   }
 
   value_array = g_ptr_array_new();
@@ -115,6 +115,8 @@ static void conf_load_parser_cb(const char *section_name, const char *key, const
     g_ptr_array_add(value_array, os_strdup(value[i]));
 
   dict_insert(section, key, value_array);
+
+  return 0;
 }
 
 int uhuru_conf_load_file(struct uhuru_conf *conf, const char *path, uhuru_error **error)
@@ -135,10 +137,10 @@ static void key_print_fun(const char *key, void *value, void *user_data)
   int i;
   const char **argv = (const char **)values->pdata;
 
-  fprintf(f, "%s=", key);
+  fprintf(f, "\"%s\"=", key);
 
   for(i = 0; i < values->len; i++)
-    fprintf(f, "%c\"%s\" ", (i == 0) ? ' ' : ',', argv[i]);
+    fprintf(f, "%c\"%s\" ", (i == 0) ? ' ' : ';', argv[i]);
 
   fprintf(f, "\n");
 }
