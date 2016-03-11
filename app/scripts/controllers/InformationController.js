@@ -151,8 +151,8 @@ angular.module('tatouApp')
 			console.log('[+] Debug :: Refreshing antivirus status ::' + ArmaditoIPC.client_socket);
 		}		
 		
-		//$scope.state.service = 2;
-		//$scope.state.last_update = ArmaditoIPC.av_response;
+		
+		$scope.refresh_status();
 
   }]);
 
