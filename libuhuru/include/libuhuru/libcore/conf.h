@@ -41,28 +41,21 @@ extern "C" {
 
   const char **uhuru_conf_get_sections(struct uhuru_conf *conf, size_t *length);
 
-  const char **uhuru_conf_get_keys(struct uhuru_conf *conf, const char *section_name, size_t *length);
+  const char **uhuru_conf_get_keys(struct uhuru_conf *conf, const char *section, size_t *length);
 
-  int uhuru_conf_is_int(struct uhuru_conf *conf, const char *section_name, const char *key);
+  enum uhuru_conf_op {
+    CONF_SET,
+    CONF_ADD,
+  };
 
-  int uhuru_conf_is_string(struct uhuru_conf *conf, const char *section_name, const char *key);
+  int uhuru_conf_set(struct uhuru_conf *conf, enum uhuru_conf_op op, const char *section, const char *key, const char **list, size_t length);
 
-  int uhuru_conf_is_list(struct uhuru_conf *conf, const char *section_name, const char *key);
-
-  int uhuru_conf_get_uint(struct uhuru_conf *conf, const char *section_name, const char *key);
-
-  const char *uhuru_conf_get_string(struct uhuru_conf *conf, const char *section_name, const char *key);
-
-  const char **uhuru_conf_get_list(struct uhuru_conf *conf, const char *section_name, const char *key, size_t *length);
-
-  void uhuru_conf_set_uint(struct uhuru_conf *conf, const char *section_name, const char *key, unsigned int value);
-
-  void uhuru_conf_set_string(struct uhuru_conf *conf, const char *section_name, const char *key, const char *value);
-
-  void uhuru_conf_set_list(struct uhuru_conf *conf, const char *section_name, const char *key, const char **list, size_t length);
+  const char **uhuru_conf_get(struct uhuru_conf *conf, const char *section, const char *key, size_t *length, void **p);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
+
+

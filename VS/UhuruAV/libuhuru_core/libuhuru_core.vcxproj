@@ -83,6 +83,7 @@
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\info.h" />
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\log.h" />
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\module.h" />
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\notify.h" />
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\ondemand.h" />
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\scan.h" />
     <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\scanconf.h" />
@@ -115,6 +116,7 @@
     <ClCompile Include="..\..\..\libuhuru\src\libcore\info.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\log.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\module.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\notify.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\ondemand.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\report.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\scan.c" />
