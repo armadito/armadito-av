@@ -152,42 +152,6 @@ int uhuru_conf_load_file(struct uhuru_conf *conf, const char *path, uhuru_error 
   return 0;
 }
 
-static int uhuru_conf_save_file_old(struct uhuru_conf *conf, const char *path, uhuru_error **error)
-{
-  FILE *f;
-  int i;
-
-  if (!strcmp(path, "-"))
-    f = stdout;
-  else
-    f = fopen(path, "w");
-
-  for(i = 0; i < conf->sections->len; i++) {
-    struct section_entry *s = &g_array_index(conf->sections, struct section_entry, i);
-    int j;
-
-    fprintf(f, "[%s]\n\n", s->section);
-
-    for(j = 0; j < s->keys->len; j++) {
-      struct key_entry *k = &g_array_index(s->keys, struct key_entry, j);
-      int n;
-	
-      fprintf(f, "%s =", k->key);
-
-      for(n = 0; n < k->len; n++)
-	fprintf(f, "%s\"%s\"", (n == 0) ? " " : "; ", k->values[n]);
-
-      fprintf(f, "\n");
-    }     
-
-    fprintf(f, "\n");
-  }
-
-  fclose(f);
-  
-  return 0;
-}
-
 struct conf_save_data {
   FILE *f;
   const char *p;
@@ -210,7 +174,6 @@ static void conf_save_fun(const char *section, const char *key, const char **val
 
   fprintf(data->f, "\n");
 }
-
 
 int uhuru_conf_save_file(struct uhuru_conf *conf, const char *path, uhuru_error **error)
 {
