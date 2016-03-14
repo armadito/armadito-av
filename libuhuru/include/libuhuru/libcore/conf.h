@@ -39,8 +39,10 @@ extern "C" {
 
   int uhuru_conf_save_file(struct uhuru_conf *conf, const char *path, uhuru_error **error);
 
+  /* not yet implemented */
   const char **uhuru_conf_get_sections(struct uhuru_conf *conf, size_t *len);
 
+  /* not yet implemented */
   const char **uhuru_conf_get_keys(struct uhuru_conf *conf, const char *section, size_t *len);
 
   void uhuru_conf_append(struct uhuru_conf *conf, const char *section, const char *key, const char **values, size_t len);
