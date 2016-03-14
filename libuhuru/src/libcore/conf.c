@@ -2,7 +2,6 @@
 
 #include <libuhuru/core.h>
 
-#include "conf.h"
 #include "uhurup.h"
 #include "confparser.h"
 #include "os/dir.h"
@@ -26,95 +25,125 @@ void conf_load_path(struct uhuru *uhuru, const char *path)
   uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "conf_load_path() stub");
 }
 
-struct dict {
-  GHashTable *bindings;
+struct key_entry {
+  const char *key;
+  size_t len;
+  const char **values;
 };
 
-static struct dict *dict_new(GDestroyNotify value_free_fun)
+static void key_entry_init(struct key_entry *entry, const char *key, const char **values, size_t len)
 {
-  struct dict *d = malloc(sizeof(struct dict));
+  int i;
 
-  d->bindings = g_hash_table_new_full(g_str_hash, g_str_equal, (GDestroyNotify)free, value_free_fun);
+  entry->key = os_strdup(key);
 
-  return d;
-}     
+  entry->len = len;
+  entry->values = malloc((len + 1)*sizeof(const char *));
 
-static void dict_free(struct dict *d)
-{
-  g_hash_table_destroy(d->bindings);
-  free(d);
+  for(i = 0; i < len; i++)
+    entry->values[i] = os_strdup(values[i]);
+
+  entry->values[len] = NULL;
 }
 
-static void *dict_lookup(struct dict *d, const char *name)
+static void key_entry_destroy(struct key_entry *entry)
 {
-  return g_hash_table_lookup(d->bindings, name);
-}
-
-static int dict_insert(struct dict *d, const char *name, void *value)
-{
-  if (g_hash_table_contains(d->bindings, name))
-    return 1;
-      
-  g_hash_table_insert(d->bindings, os_strdup(name), value);
+  const char **p;
   
-  return 0;
+  free((void *)entry->key);
+
+  for(p = entry->values; *p != NULL; p++)
+    free((void *)*p);
 }
 
-typedef void (*dict_fun_t)(const char *key, void *value, void *user_data);
+struct section_entry {
+  const char *section;
+  GArray *keys;
+};
 
-static void dict_foreach(struct dict *d, dict_fun_t fun, void *user_data)
+static void section_entry_init(struct section_entry *entry, const char *section)
 {
-  g_hash_table_foreach(d->bindings, (GHFunc)fun, user_data);
+  entry->section = os_strdup(section);
+
+  entry->keys = g_array_new(FALSE, FALSE, sizeof(struct key_entry));
+  g_array_set_clear_func(entry->keys,(GDestroyNotify)key_entry_destroy);
+}
+
+static void section_entry_destroy(struct section_entry *entry)
+{
+  free((void *)entry->section);
+
+  g_array_free(entry->keys, TRUE);
 }
 
 struct uhuru_conf {
-  struct dict *sections;
+  GArray *sections;
 };
 
 struct uhuru_conf *uhuru_conf_new(void)
 {
-  struct uhuru_conf *c = malloc(sizeof(struct uhuru_conf));
+  struct uhuru_conf *conf = malloc(sizeof(struct uhuru_conf));
+  
+  conf->sections = g_array_new(FALSE, FALSE, sizeof(struct section_entry));
+  g_array_set_clear_func(conf->sections,(GDestroyNotify)section_entry_destroy);
 
-  c->sections = dict_new((GDestroyNotify)dict_free);
-
-  return c;
+  return conf;
 }
 
 void uhuru_conf_free(struct uhuru_conf *conf)
 {
-  dict_free(conf->sections);
+  g_array_free(conf->sections, TRUE);
+
   free(conf);
 }
 
-static void value_free(gpointer data)
+static struct section_entry *conf_section_insert(struct uhuru_conf *conf, const char *section)
 {
-  g_ptr_array_free((GPtrArray *)data, TRUE);
+  int i;
+  struct section_entry new_s;
+
+ for(i = 0; i < conf->sections->len; i++) {
+   struct section_entry *s = &g_array_index(conf->sections, struct section_entry, i);
+
+    if (!strcmp(s->section, section))
+      return s;
+ }
+
+  section_entry_init(&new_s, section);
+  g_array_append_val(conf->sections, new_s);
+
+  return &g_array_index(conf->sections, struct section_entry, conf->sections->len - 1);
 }
 
-static int conf_load_parser_cb(const char *section_name, const char *key, const char **value, size_t length, void *user_data)
+static void conf_key_insert(struct uhuru_conf *conf, const char *section, const char *key, const char **values, size_t len)
+{
+  struct section_entry *s = conf_section_insert(conf, section);
+  int i;
+  struct key_entry new_k;
+
+  for(i = 0; i < s->keys->len; i++) {
+    struct key_entry *k = &g_array_index(s->keys, struct key_entry, i);
+
+    if (!strcmp(k->key, key))
+      return;
+  }
+
+  key_entry_init(&new_k, key, values, len);
+  g_array_append_val(s->keys, new_k);
+}
+
+static void conf_key_append(struct uhuru_conf *conf, const char *section, const char *key, const char **values, size_t len)
+{
+}
+
+static int conf_load_parser_cb(const char *section, const char *key, const char **values, size_t len, void *user_data)
 {
   struct uhuru_conf *conf = (struct uhuru_conf *)user_data;
-  struct dict *section;
-  GPtrArray *value_array;
-  int i;
+  struct section_entry *s = conf_section_insert(conf, section);
+  struct key_entry new_k;
 
-  section = dict_lookup(conf->sections, section_name);
-
-  if (section == NULL) {
-    section = dict_new(value_free);
-    dict_insert(conf->sections, section_name, section);
-  }
-
-  if (dict_lookup(section, key) != NULL) {
-    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "duplicate key '%s' in section '%s'", key, section_name);
-    return 1;
-  }
-
-  value_array = g_ptr_array_new();
-  for(i = 0; i < length; i++)
-    g_ptr_array_add(value_array, os_strdup(value[i]));
-
-  dict_insert(section, key, value_array);
+  key_entry_init(&new_k, key, values, len);
+  g_array_append_val(s->keys, new_k);
 
   return 0;
 }
@@ -130,95 +159,58 @@ int uhuru_conf_load_file(struct uhuru_conf *conf, const char *path, uhuru_error 
   return 0;
 }
 
-static void key_print_fun(const char *key, void *value, void *user_data)
-{
-  FILE *f = (FILE *)user_data;
-  GPtrArray *values = (GPtrArray *)value;
-  int i;
-  const char **argv = (const char **)values->pdata;
-
-  fprintf(f, "\"%s\"=", key);
-
-  for(i = 0; i < values->len; i++)
-    fprintf(f, "%c\"%s\" ", (i == 0) ? ' ' : ';', argv[i]);
-
-  fprintf(f, "\n");
-}
-
-static void section_print_fun(const char *key, void *value, void *user_data)
-{
-  FILE *f = (FILE *)user_data;
-  struct dict *section = (struct dict *)value;
-
-  fprintf(f, "\n[%s]\n\n", key);
-
-  dict_foreach(section, key_print_fun, f);
-}
-
 int uhuru_conf_save_file(struct uhuru_conf *conf, const char *path, uhuru_error **error)
 {
+  struct section_entry *section_entry;
   FILE *f;
+  int i;
 
   if (!strcmp(path, "-"))
     f = stdout;
   else
     f = fopen(path, "w");
 
-  dict_foreach(conf->sections, section_print_fun, f);
+  for(i = 0; i < conf->sections->len; i++) {
+    struct section_entry *s = &g_array_index(conf->sections, struct section_entry, i);
+    int j;
+
+    fprintf(f, "\n[%s]\n\n", s->section);
+
+    for(j = 0; j < s->keys->len; j++) {
+      struct key_entry *k = &g_array_index(s->keys, struct key_entry, j);
+      int n;
+	
+      fprintf(f, "%s =", k->key);
+
+      for(n = 0; n < k->len; n++)
+	fprintf(f, "%s\"%s\"", (n == 0) ? " " : "; ", k->values[n]);
+
+      fprintf(f, "\n");
+    }     
+  }
+
 
   fclose(f);
   
   return 0;
 }
 
-const char **uhuru_conf_get_sections(struct uhuru_conf *conf, size_t *length)
+const char **uhuru_conf_get_sections(struct uhuru_conf *conf, size_t *plen)
 {
   return NULL;
 }
 
-const char **uhuru_conf_get_keys(struct uhuru_conf *conf, const char *section_name, size_t *length)
+const char **uhuru_conf_get_keys(struct uhuru_conf *conf, const char *section, size_t *plen)
 {
   return NULL;
 }
 
-int uhuru_conf_is_int(struct uhuru_conf *conf, const char *section_name, const char *key)
+int uhuru_conf_set(struct uhuru_conf *conf, enum uhuru_conf_op op, const char *section, const char *key, const char **list, size_t len)
 {
   return 0;
 }
 
-int uhuru_conf_is_string(struct uhuru_conf *conf, const char *section_name, const char *key)
-{
-  return 0;
-}
-
-int uhuru_conf_is_list(struct uhuru_conf *conf, const char *section_name, const char *key)
-{
-  return 0;
-}
-
-int uhuru_conf_get_uint(struct uhuru_conf *conf, const char *section_name, const char *key)
-{
-  return -1;
-}
-
-const char *uhuru_conf_get_string(struct uhuru_conf *conf, const char *section_name, const char *key)
+const char **uhuru_conf_get(struct uhuru_conf *conf, const char *section, const char *key, size_t *len, void **p)
 {
   return NULL;
-}
-
-const char **uhuru_conf_get_list(struct uhuru_conf *conf, const char *section_name, const char *key, size_t *length)
-{
-  return NULL;
-}
-
-void uhuru_conf_set_uint(struct uhuru_conf *conf, const char *section_name, const char *key, unsigned int value)
-{
-}
-
-void uhuru_conf_set_string(struct uhuru_conf *conf, const char *section_name, const char *key, const char *value)
-{
-}
-
-void uhuru_conf_set_list(struct uhuru_conf *conf, const char *section_name, const char *key, const char **list, size_t length)
-{
 }

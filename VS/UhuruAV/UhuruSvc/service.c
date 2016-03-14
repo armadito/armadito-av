@@ -5,6 +5,7 @@
 #include "update.h"
 #include "register.h"
 #include "uh_info.h"
+#include "uh_notify.h"
 
 // Msdn documentation: 
 // https://msdn.microsoft.com/en-us/library/windows/desktop/ms685141%28v=vs.85%29.aspx
@@ -1341,18 +1342,146 @@ void DisplayBanner( ) {
 }
 
 
+void dir_map(char * path, int recurse) {
+
+	char * sPath = NULL, *entryPath= NULL;
+	char * escapedPath = NULL;
+
+	HANDLE fh = NULL;
+	int size = 0;
+	WIN32_FIND_DATAA fdata ;
+	WIN32_FIND_DATAA tmp ;
+
+
+	// Check parameters
+	if (path == NULL) {
+		printf("Error :: NULL parameter in function os_dir_map()");
+		return;
+	}
+	
+	// We escape ? and * characters
+	// escapedPath = cpp_escape_str(path);
+
+	// Check if it is a directory
+	if (!(GetFileAttributesA(path) & FILE_ATTRIBUTE_DIRECTORY)) {
+		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "Warning :: os_dir_map() :: (%s) is not a directory. ", path);
+		return;
+	}
+
+	size = strlen(path) + 3;
+	sPath = (char*)calloc(size + 1, sizeof(char));
+	sPath[size] = '\0';
+	sprintf_s(sPath, size, "%s\\*", path);
+
+	//g_log(NULL, UHURU_LOG_LEVEL_WARNING, "os_dir_map() :: (%s)", sPath);
+
+	/*
+	FindFirstFile note
+	Be aware that some other thread or process could create or delete a file with this name between the time you query for the result and the time you act on the information. If this is a potential concern for your application, one possible solution is to use the CreateFile function with CREATE_NEW (which fails if the file exists) or OPEN_EXISTING (which fails if the file does not exist).
+	*/
+
+
+	fh = FindFirstFile(sPath, &fdata);
+	if (fh == INVALID_HANDLE_VALUE) {
+		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "Warning :: os_dir_map() :: FindFirstFileA() failed ::  (%s) :: [%s]", os_strerror(errno),sPath);
+		return;
+	}
+
+	while (FindNextFile(fh, &tmp) != FALSE) {
+
+		printf("[+] Debug :: os_dir_map :: entry name ===> [%s] <===\n",tmp.cFileName);
+
+		// exclude paths "." and ".."
+		if (strncmp(tmp.cFileName,".",strlen(tmp.cFileName)) == 0 || strncmp(tmp.cFileName,"..",strlen(tmp.cFileName)) == 0)
+		{
+			continue;
+		}
+
+		// build the entry complete path.
+		size = strlen(path)+strlen(tmp.cFileName)+2;
+
+		entryPath = (char*)calloc(size + 1, sizeof(char));
+		entryPath[size] = '\0';
+		sprintf_s(entryPath, size,"%s\\%s", path, tmp.cFileName);
+
+
+		// If it is a directory and we do recursive scan
+		if ((GetFileAttributesA(entryPath) & FILE_ATTRIBUTE_DIRECTORY) && recurse >= 1) {
+			dir_map(entryPath,recurse);
+		}
+		else {
+			
+			//flags = dirent_flags(tmp.dwFileAttributes);
+			//(*dirent_cb)(entryPath, flags, 0, data);
+		}
+
+		free(entryPath);
+	}
+
+	free(sPath);
+	FindClose(fh);
+
+	///
+	
+
+	return;
+
+}
+
+
+
 int main(int argc, char ** argv) {
 
 	int ret = 0;
 	struct uhuru_report uh_report = {0};
+	PVOID OldValue = NULL;
 
+	if ( argc >=3 && strncmp(argv[1],"--osdir",7) == 0 ){
+
+		if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {
+			return -1;
+		}
+
+		dir_map(argv[2],1);
+
+		if (Wow64RevertWow64FsRedirection(OldValue) == FALSE ){
+			//  Failure to re-enable redirection should be considered
+			//  a criticial failure and execution aborted.
+			return -2;
+		}
+
+
+		return EXIT_SUCCESS;
+	}
+
+
+	if (argc >= 2 && strncmp(argv[1], "--notify", 8) == 0) {
+
+		uhuru_notify_set_handler(send_notif);
+		
+		uhuru_notify(NOTIF_INFO,"Service started!");
+		uhuru_notify(NOTIF_WARNING,"Malware detected :: [%s]","TrojanFake");
+		uhuru_notify(NOTIF_ERROR,"An error occured during scan !!");
+		return EXIT_SUCCESS;
+	}
 
 	// Only for test purposes (command line) complete test = GUI + driver.
 	if ( argc >=2 && strncmp(argv[1],"--testGUI",9) == 0 ){
 
-		DisplayBanner( );
+		DisplayBanner();
+
+		if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {
+			return -1;
+		}
 
 		ret = LaunchCmdLineServiceGUI( );
+
+		if (Wow64RevertWow64FsRedirection(OldValue) == FALSE ){
+			//  Failure to re-enable redirection should be considered
+			//  a criticial failure and execution aborted.
+			return -2;
+		}
+
 		if (ret < 0) {
 			return EXIT_FAILURE;
 		}

@@ -2,7 +2,7 @@
 
 #include <libuhuru/core.h>
 
-#include "conf.h"
+#include "confp.h"
 #include "modulep.h"
 #include "statusp.h"
 #include "uhurup.h"

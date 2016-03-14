@@ -133,16 +133,16 @@ static void scan_callback(struct uhuru_report *report, void *callback_data)
   jobj_debug(j_request, "IHM request");
 #endif
   req = json_object_to_json_string(j_request);
-  printf("[i] Debug :: scan_callback :: req to GUI = %s\n", req);
+  printf("[+] Debug :: scan_callback :: req to GUI = %s\n", req);
 
   
   /* ui exchange using platform specific function */
   status = json_handler_ui_request(scan_data->ui_ipc_path, req, strlen(req), resp, sizeof(resp));
   if (status != JSON_OK) {
-	  printf("[-] Debug :: scan_callback :: req to GUI = %s\n\n", req);
+	  printf("[-] Error :: scan_callback :: fail to send request to GUI = %s\n\n", req);
   }
 
-  printf("[+] Debug :: scan_callback :: response  = %s\n\n",resp);
+  //printf("[+] Debug :: scan_callback :: response  = %s\n\n",resp);
 
   scan_data->last_send_time = now;
   scan_data->last_send_progress = report->progress;
