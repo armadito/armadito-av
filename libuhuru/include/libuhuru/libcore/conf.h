@@ -39,18 +39,15 @@ extern "C" {
 
   int uhuru_conf_save_file(struct uhuru_conf *conf, const char *path, uhuru_error **error);
 
-  const char **uhuru_conf_get_sections(struct uhuru_conf *conf, size_t *length);
+  const char **uhuru_conf_get_sections(struct uhuru_conf *conf, size_t *len);
 
-  const char **uhuru_conf_get_keys(struct uhuru_conf *conf, const char *section, size_t *length);
+  const char **uhuru_conf_get_keys(struct uhuru_conf *conf, const char *section, size_t *len);
 
-  enum uhuru_conf_op {
-    CONF_SET,
-    CONF_ADD,
-  };
+  void uhuru_conf_append(struct uhuru_conf *conf, const char *section, const char *key, const char **values, size_t len);
 
-  int uhuru_conf_set(struct uhuru_conf *conf, enum uhuru_conf_op op, const char *section, const char *key, const char **list, size_t length);
-
-  const char **uhuru_conf_get(struct uhuru_conf *conf, const char *section, const char *key, size_t *length, void **p);
+  typedef void (*uhuru_conf_fun_t)(const char *section, const char *key, const char **values, size_t len, void *user_data);
+  
+  void uhuru_conf_apply(struct uhuru_conf *conf, uhuru_conf_fun_t fun, void *user_data);
 
 #ifdef __cplusplus
 }
