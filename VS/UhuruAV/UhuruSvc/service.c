@@ -63,6 +63,7 @@ int ServiceLoadProcedure( ) {
 
 		}	
 		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_INFO, " Service connected to the GUI successfully!\n");
+		uhuru_notify(NOTIF_INFO,"Service started!" );
 
 
 	}
@@ -114,7 +115,9 @@ int ServiceUnloadProcedure( ) {
 	if (uhuru != NULL) {
 		uhuru_close(uhuru, &uh_error);
 		uhuru = NULL;
-	}		
+	}
+
+	uhuru_notify(NOTIF_WARNING,"Service stopped!" );
 
 	return ret;
 }
@@ -668,6 +671,8 @@ void PerformServiceAction( ) {
 	// set log handler (windows log event) // move this statement to a better place.
 	uhuru_log_set_handler(UHURU_LOG_LEVEL_NONE, winEventHandler,NULL);
 
+	uhuru_notify_set_handler(send_notif);
+
 	ret = ServiceLoadProcedure( );
 	if (ret < 0) {
 		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service Initialization failed \n");
@@ -1218,6 +1223,7 @@ int LaunchCmdLineServiceGUI( ) {
 	}
 
 	ret = Start_IHM_Connection(uhuru,&onDemandCtx);
+	uhuru_notify(NOTIF_INFO, "[TEST mode] :: Service started !");
 
 	while(1) {
 		 printf("press 'q' to quit: \n");
@@ -1259,6 +1265,8 @@ int LaunchCmdLineServiceGUI( ) {
 		uhuru_close(uhuru,&uh_error);
 		uhuru = NULL;
 	}
+
+	uhuru_notify(NOTIF_WARNING, "[TEST mode] :: Service stopped !");
 
 	return ret;
 
@@ -1470,6 +1478,8 @@ int main(int argc, char ** argv) {
 
 		DisplayBanner();
 
+		uhuru_notify_set_handler(send_notif);
+
 		if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {
 			return -1;
 		}
@@ -1494,6 +1504,8 @@ int main(int argc, char ** argv) {
 	if ( argc >=2 && strncmp(argv[1],"--test",6) == 0 ){
 
 		DisplayBanner( );
+
+		uhuru_notify_set_handler(send_notif);
 
 		ret = LaunchCmdLineService( );
 		if (ret < 0) {
