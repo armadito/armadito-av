@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-void conf_parser_print_cb(const char *group, const char *key, const char **argv, void *user_data)
+void conf_parser_print_cb(const char *group, const char *key, const char **argv, size_t length, void *user_data)
 {
   int i;
 
