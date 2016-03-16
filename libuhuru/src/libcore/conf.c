@@ -97,17 +97,23 @@ void uhuru_conf_free(struct uhuru_conf *conf)
   free(conf);
 }
 
-static struct section_entry *conf_section_get_or_append(struct uhuru_conf *conf, const char *section)
+static struct section_entry *conf_section_get(struct uhuru_conf *conf, const char *section)
 {
   int i;
-  struct section_entry new_s;
 
- for(i = 0; i < conf->sections->len; i++) {
-   struct section_entry *s = &g_array_index(conf->sections, struct section_entry, i);
+  for(i = 0; i < conf->sections->len; i++) {
+    struct section_entry *s = &g_array_index(conf->sections, struct section_entry, i);
 
     if (!strcmp(s->section, section))
       return s;
- }
+  }
+
+  return NULL;
+}
+
+static struct section_entry *conf_section_append(struct uhuru_conf *conf, const char *section)
+{
+  struct section_entry new_s;
 
   section_entry_init(&new_s, section);
   g_array_append_val(conf->sections, new_s);
@@ -189,25 +195,69 @@ int uhuru_conf_save_file(struct uhuru_conf *conf, const char *path, uhuru_error 
   data.p = NULL;
   uhuru_conf_apply(conf, conf_save_fun, &data);
 
-  fclose(f);
+  if (f != stdout)
+    fclose(f);
   
   return 0;
 }
 
 const char **uhuru_conf_get_sections(struct uhuru_conf *conf, size_t *plen)
 {
-  return NULL;
+  const char **ret;
+  size_t len, i;
+
+  len = conf->sections->len;
+  ret = malloc((len + 1)*sizeof(const char *));
+
+  for(i = 0; i < len; i++) {
+    struct section_entry *s = &g_array_index(conf->sections, struct section_entry, i);
+
+    ret[i] = os_strdup(s->section);
+  }
+
+  ret[len] = NULL;
+
+  if (plen != NULL)
+    *plen = len;
+
+  return ret;
 }
 
 const char **uhuru_conf_get_keys(struct uhuru_conf *conf, const char *section, size_t *plen)
 {
-  return NULL;
+  struct section_entry *s;
+  const char **ret;
+  size_t len, i;
+
+  s = conf_section_get(conf, section);
+  if (s == NULL)
+    return NULL;
+
+  len = s->keys->len;
+  ret = malloc((len + 1)*sizeof(const char *));
+
+  for(i = 0; i < len; i++) {
+    struct key_entry *k = &g_array_index(s->keys, struct key_entry, i);
+
+    ret[i] = os_strdup(k->key);
+  }
+
+  ret[len] = NULL;
+
+  if (plen != NULL)
+    *plen = len;
+
+  return ret;
 }
 
 void uhuru_conf_append(struct uhuru_conf *conf, const char *section, const char *key, const char **values, size_t len)
 {
-  struct section_entry *s = conf_section_get_or_append(conf, section);
+  struct section_entry *s;
   struct key_entry new_k;
+
+  s = conf_section_get(conf, section);
+  if (s == NULL)
+    s= conf_section_append(conf, section);
 
   key_entry_init(&new_k, key, values, len);
   g_array_append_val(s->keys, new_k);
