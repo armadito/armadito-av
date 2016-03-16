@@ -58,4 +58,5 @@ libuhuru_core_la_LIBADD+= @LIBXML2_LIBS@
 install-exec-hook:
 	-mkdir -p $(DESTDIR)$(localstatedir)/spool/uhuru
 	-chmod 0777 $(DESTDIR)$(localstatedir)/spool/uhuru
+	-mkdir -p $(DESTDIR)$(localstatedir)/lib/uhuru/tmp
 

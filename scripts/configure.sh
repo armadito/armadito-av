@@ -4,7 +4,6 @@ function configure()
 	local PACKAGE_NAME=$1
 	local DISTRIB=$2
 
-
 	set +e
 	mkdir -p $OUT_DIR/build/$OS_V/uhuru-av/$PACKAGE_NAME
 

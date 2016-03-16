@@ -81,7 +81,7 @@ static enum uhuru_mod_status mod_oal_conf_white_list_dir(struct uhuru_module *mo
   while (*argv != NULL) {
     uhuru_scan_conf_white_list_directory(on_access_conf, *argv);
 
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_NAME ": " "white list %s", *argv);
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "white list %s", *argv);
 
     argv++;
   }
@@ -95,7 +95,7 @@ static enum uhuru_mod_status mod_oal_conf_mime_type(struct uhuru_module *module,
   struct uhuru_scan_conf *on_access_conf = uhuru_scan_conf_on_access();
 
   if (argv[0] == NULL || argv[1] == NULL) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, MODULE_NAME ": " "invalid configuration directive, not enough arguments");
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "invalid configuration directive, not enough arguments");
     return UHURU_MOD_CONF_ERROR;
   }
 
@@ -120,7 +120,14 @@ static enum uhuru_mod_status mod_oal_post_init(struct uhuru_module *module)
 {
   struct mod_oal_data *data = (struct mod_oal_data *)module->data;
 
-  access_monitor_start(data->monitor);
+#define YES_NO(v) ((v) ? "yes" : "no")
+
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "protection configuration:");
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "-> enabled: %s", YES_NO(access_monitor_is_enable(data->monitor)));
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "-> permission enabled: %s", YES_NO(access_monitor_is_enable_permission(data->monitor)));
+  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "-> removable media monitoring: %s", YES_NO(access_monitor_is_enable_removable_media(data->monitor)));
+
+  access_monitor_delayed_start(data->monitor);
 
   return UHURU_MOD_OK;
 }

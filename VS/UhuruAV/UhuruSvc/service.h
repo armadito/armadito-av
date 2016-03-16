@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "named_pipe_server.h"
-#include "quarantine.h"
+#include "uh_quarantine.h"
 
 #define SVCNAME TEXT("UhuruSvc")
 #define SVCDISPLAY TEXT("Uhuru Scan Service")
@@ -26,7 +26,7 @@
 #define DUMP_TYPE 1 
 
 // If the real time analysis is enabled or not.
-#define REAL_TIME_ENABLED 0
+#define REAL_TIME_ENABLED 1
 
 int ServiceInstall( );
 int ServiceRemove( );

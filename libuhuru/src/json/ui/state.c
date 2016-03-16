@@ -1,9 +1,9 @@
 #include "libuhuru-config.h"
-
 #include <libuhuru/core.h>
 
-#include "uhurujson.h"
+#include "jsonhandler.h"
 #include "state.h"
+#include "os/string.h"
 
 #include <json.h>
 #include <stdlib.h>
@@ -58,11 +58,10 @@ static struct json_object *state_json(struct uhuru_info *info)
   j_state = json_object_new_object();
 
   json_object_object_add(j_state, "antivirus", antivirus_json(info));
-
   json_object_object_add(j_state, "update", update_json(info->global_status, "1970-01-01 00:00"));
 
   j_mod_array = json_object_new_array();
-
+  
   for(m = info->module_infos; *m != NULL; m++) {
     struct json_object *j_mod = json_object_new_object();
 
@@ -78,7 +77,7 @@ static struct json_object *state_json(struct uhuru_info *info)
   return j_state;
 }
 
-enum uhuru_json_status state_request_cb(const char *request, int id, struct json_object *params, struct uhuru *uhuru, struct json_object **p_info, const char **p_error_message)
+enum uhuru_json_status state_response_cb(struct uhuru *uhuru, struct json_request *req, struct json_response *resp, void **request_data)
 {
   struct uhuru_info *info;
 
@@ -89,13 +88,12 @@ enum uhuru_json_status state_request_cb(const char *request, int id, struct json
   info = uhuru_info_new(uhuru);
 
   if (info == NULL) {
-    *p_info = NULL;
-    *p_error_message = strdup("getting info failed...");
+    resp->error_message = os_strdup("getting info failed");
 
     return JSON_REQUEST_FAILED;
   }
 
-  *p_info = state_json(info);
+  resp->info = state_json(info);
 
   uhuru_info_free(info);
 

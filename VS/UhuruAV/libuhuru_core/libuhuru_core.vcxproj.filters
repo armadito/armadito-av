@@ -117,6 +117,12 @@
     <ClInclude Include="..\..\..\libuhuru\src\libcore\builtin-modules\onaccess_windows.h">
       <Filter>Source Files\libcore\builtin-modules</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\libcore\builtin-modules\quarantine.h">
+      <Filter>Source Files\libcore\builtin-modules</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\include\libuhuru\libcore\notify.h">
+      <Filter>Header Files\libcore</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\libuhuru\src\libcore\action.c">
@@ -178,6 +184,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\libuhuru\src\libcore\builtin-modules\onaccess_windows.c">
       <Filter>Source Files\libcore\builtin-modules</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\builtin-modules\quarantine_windows.c">
+      <Filter>Source Files\libcore\builtin-modules</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\notify.c">
+      <Filter>Source Files\libcore</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
