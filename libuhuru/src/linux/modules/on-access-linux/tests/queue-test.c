@@ -9,13 +9,13 @@
 
 static void queue_test_print(struct queue *q)
 {
-  struct queue_entry *e;
+  struct queue_node *e;
 
   printf("-> ");
 
   e = q->head; 
   while (e != NULL) {
-    printf("{%d, %ld.%09ld s} ", e->fd, e->timestamp.tv_sec, e->timestamp.tv_nsec);
+    printf("{%d, %ld.%09ld s} ", e->entry.fd, e->entry.timestamp.tv_sec, e->entry.timestamp.tv_nsec);
     e = e->next;
   }
 
@@ -25,7 +25,7 @@ static void queue_test_print(struct queue *q)
 
   e = q->tail; 
   while (e != NULL) {
-    printf("{%d, %ld.%09ld s} ", e->fd, e->timestamp.tv_sec, e->timestamp.tv_nsec);
+    printf("{%d, %ld.%09ld s} ", e->entry.fd, e->entry.timestamp.tv_sec, e->entry.timestamp.tv_nsec);
     e = e->prev;
   }
 
@@ -56,13 +56,13 @@ static void queue_test_push(struct queue *q)
 static void queue_test_timeout_1(struct queue *q)
 {
   struct timespec now;
-  int fds[6];
+  struct queue_entry entries[6];
   int n;
 
   stamp_now(&now);
   stamp_add(&now, &one_s);
 
-  n = queue_pop_timeout(q, &now, fds, 6);
+  n = queue_pop_timeout(q, &now, entries, 6);
 
   printf("pop'ed %d filedesc\n", n);
 }
@@ -140,13 +140,13 @@ static void *timeout_thread_fun(void *arg)
   int i, n_fd;
   struct timespec before;
   long msec;
-  int fds[N_FD];
+  struct queue_entry entries[N_FD];
 
   for(i = 0; i < TIMEOUT_COUNT; i++) {
     stamp_now(&before);
     stamp_sub(&before, &timeout);
 
-    n_fd = queue_pop_timeout(q, &before, fds, N_FD);
+    n_fd = queue_pop_timeout(q, &before, entries, N_FD);
 
     if (n_fd)
       printf("got %d fd in timeout\n", n_fd);

@@ -12,6 +12,7 @@
 #include "builtin-modules/quarantine.h"
 #endif
 #include "os/string.h"
+#include "os/io.h"
 #include "os/mimetype.h"
 
 #ifdef HAVE_ON_ACCESS_WINDOWS_MODULE
@@ -113,7 +114,7 @@ static enum uhuru_file_status scan_apply_modules(int fd, const char *path, const
 
     /* call the scan function of the module */
     /* but, after rewinding the file !!! */
-    if (lseek(fd, 0, SEEK_SET) < 0)  {
+    if (os_lseek(fd, 0, SEEK_SET) < 0)  {
       uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "cannot seek on file %s (error %s)", path, os_strerror(errno) );
       return UHURU_IERROR;
     }
@@ -186,8 +187,19 @@ enum uhuru_file_status uhuru_scan_context(struct uhuru_scan *scan, struct uhuru_
   /* compute progress if have one */
   scan_progress(scan, &report);
 
-  /* once done, call the callbacks */
-  uhuru_scan_call_callbacks(scan, &report);
+#ifdef WIN32
+  // UF :: only for test :: if malware callback is called in the second call of uhuru_scan_simple.
+  if (status != UHURU_MALWARE && report.status != UHURU_MALWARE) {
+	  /* once done, call the callbacks */
+	  uhuru_scan_call_callbacks(scan, &report);
+
+  }
+#else
+
+	  /* once done, call the callbacks */
+	  uhuru_scan_call_callbacks(scan, &report);
+
+#endif
 
   /* and free the report (it may contain a strdup'ed string) */
   uhuru_report_destroy(&report);
@@ -256,6 +268,19 @@ enum uhuru_file_status uhuru_scan_simple(struct uhuru *uhuru, const char *path, 
 	struct uhuru_scan * scan;
 	enum uhuru_file_context_status context_status;
 	enum uhuru_file_status status;
+
+#ifdef WIN32	
+	// only for test purpose :: TODO :: separate uhuru_scan from callbacks.	
+	if (report->status == UHURU_MALWARE) {
+		//printf("[+] Info :: uhuru_scan_simple :: %d\n",report->status);
+		report->path = path;
+		scan = uhuru_scan_new(uhuru, -1);
+		uhuru_scan_call_callbacks(scan, report);
+		uhuru_scan_free(scan);
+		return UHURU_MALWARE;
+	}
+
+#endif
 	
 	context_status = uhuru_file_context_get(&file_context, fd, path, uhuru_scan_conf_on_access());
 	//

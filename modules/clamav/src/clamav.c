@@ -52,6 +52,7 @@ char * GetDBDirectory( ) {
 struct clamav_data {
   struct cl_engine *clamav_engine;
   const char *db_dir;
+  const char *tmp_dir;
   int late_days;
   int critical_days;
 };
@@ -85,9 +86,7 @@ static enum uhuru_mod_status clamav_init(struct uhuru_module *module)
 #endif
 
 #ifdef WIN32
- 
   cl_data->db_dir = GetDBDirectory();
-  
 #else
   cl_data->db_dir = os_strdup(MODULE_CLAMAV_DBDIR);
 #endif
@@ -108,6 +107,18 @@ static enum uhuru_mod_status clamav_conf_set_dbdir(struct uhuru_module *module, 
     free((char *)cl_data->db_dir);
 
   cl_data->db_dir = os_strdup(argv[0]);
+
+  return UHURU_MOD_OK;
+}
+
+static enum uhuru_mod_status clamav_conf_set_tmpdir(struct uhuru_module *module, const char *directive, const char **argv)
+{
+  struct clamav_data *cl_data = (struct clamav_data *)module->data;
+
+  if (cl_data->tmp_dir != NULL)
+    free((char *)cl_data->tmp_dir);
+
+  cl_data->tmp_dir = os_strdup(argv[0]);
 
   return UHURU_MOD_OK;
 }
@@ -136,6 +147,13 @@ static enum uhuru_mod_status clamav_post_init(struct uhuru_module *module)
   int ret;
   unsigned int signature_count = 0;
   
+  if ((ret = cl_engine_set_str(cl_data->clamav_engine, CL_ENGINE_TMPDIR, cl_data->tmp_dir)) != CL_SUCCESS) {
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "ClamAV: error setting temporary directory: %s", cl_strerror(ret));
+    cl_engine_free(cl_data->clamav_engine);
+    cl_data->clamav_engine = NULL;
+    return UHURU_MOD_INIT_ERROR;
+  }
+
   if ((ret = cl_load(cl_data->db_dir, cl_data->clamav_engine, &signature_count, CL_DB_STDOPT)) != CL_SUCCESS) {
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "ClamAV: error loading databases: %s", cl_strerror(ret));
     cl_engine_free(cl_data->clamav_engine);
@@ -211,14 +229,21 @@ static int get_month(const char *month)
 
 static GDateTime *clamav_convert_datetime(const char *clamav_datetime)
 {
-  int day, year, hour, minute;
-  char s_month[4], s_timezone[6];
+  int day=0, year=0, hour=0, minute=0;
+  char s_month[4] = {0}, s_timezone[6] = {0};
   GDateTime *datetime, *datetime_utc;
   GTimeZone *timezone = NULL;
 
+  if (clamav_datetime == NULL) {	  
+	  return NULL;
+  }
+  
   /* ClamAV format: 17 Sep 2013 10-57 -0400 */
+#ifdef WIN32
+  os_sscanf(clamav_datetime, "%d %3s %d %2d-%2d %5s", &day, s_month,sizeof(s_month), &year, &hour, &minute, s_timezone,sizeof(s_timezone));
+#else
   os_sscanf(clamav_datetime, "%d %3s %d %2d-%2d %5s", &day, s_month, &year, &hour, &minute, s_timezone);
-
+#endif
   timezone = g_time_zone_new(s_timezone);
 
   datetime = g_date_time_new(timezone, year, get_month(s_month), day, hour, minute, 0);  
@@ -259,7 +284,8 @@ static enum uhuru_update_status clamav_info(struct uhuru_module *module, struct 
   enum uhuru_update_status ret_status = UHURU_UPDATE_OK;
   GString *full_path = g_string_new("");
   GString *version = g_string_new("");
-  const char *names[] = { "daily.cld", "bytecode.cld", "main.cvd", };
+  //const char *names[] = { "daily.cld", "bytecode.cld", "main.cvd", };
+  const char *names[] = { "daily.cld", }; // require only daily for module info. #TODISCUSS...
   GDateTime *base_datetime;
   int n, i;
 
@@ -271,8 +297,9 @@ static enum uhuru_update_status clamav_info(struct uhuru_module *module, struct 
     struct cl_cvd *cvd;
     struct uhuru_base_info *base_info;
     char *s_base_datetime;
-
+	
     g_string_printf(full_path, "%s%s%s", cl_data->db_dir, G_DIR_SEPARATOR_S, names[i]);
+	printf("[+] Debug :: clamav_info :: db name = %s\n", names[i]);
 
     cvd = cl_cvdhead(full_path->str);
     if (cvd == NULL)
@@ -284,9 +311,22 @@ static enum uhuru_update_status clamav_info(struct uhuru_module *module, struct 
 
     g_string_printf(version, "%d", cvd->version);
     base_info->version = os_strdup(version->str);
+	printf("[+] Debug :: clamav_info :: cvd->time = %s\n", cvd->time);
+	if (cvd->time != NULL)
+		base_datetime = clamav_convert_datetime(cvd->time);
+	else{
+		printf("[-] Error :: clamav_info :: cvd->time is invalid!\n");
+		continue;
+	}
 
-    base_datetime = clamav_convert_datetime(cvd->time);
-    s_base_datetime = g_date_time_format(base_datetime, "%FT%H:%M:%SZ");
+	if (base_datetime != NULL) {
+		s_base_datetime = g_date_time_format(base_datetime, "%FT%H:%M:%SZ");
+	}
+	else {
+		printf("[-] Error :: clamav_info :: s_base_datetime is invalid!\n");
+		continue;
+	}
+    
     base_info->date = os_strdup(s_base_datetime);
     g_free(s_base_datetime);
 
@@ -317,6 +357,7 @@ static enum uhuru_update_status clamav_info(struct uhuru_module *module, struct 
 
 struct uhuru_conf_entry clamav_conf_table[] = {
   { "dbdir", clamav_conf_set_dbdir},
+  { "tmpdir", clamav_conf_set_tmpdir},
   /* { "db", clamav_conf_set_db}, */
   { "late_days", clamav_conf_set_late_days},
   { "critical_days", clamav_conf_set_critical_days},
