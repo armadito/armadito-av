@@ -63,6 +63,7 @@ SCAN_RESULT LaunchFileAnalysis(_In_ PFLT_CALLBACK_DATA Data, _In_ PCFLT_RELATED_
 	
 	
 	UNREFERENCED_PARAMETER( FltObjects );
+	UNREFERENCED_PARAMETER( quarantineDir );
 
 	if (gClientComPort == NULL) {
 		//DbgPrint("[-] Warning :: UhuruGuard!LaunchFileAnalysis :: Scan service not connected yet !! \n");
@@ -97,11 +98,12 @@ SCAN_RESULT LaunchFileAnalysis(_In_ PFLT_CALLBACK_DATA Data, _In_ PCFLT_RELATED_
 		}
 
 		// Deny access to Quarantine folder		
-		RtlInitUnicodeString(&quarantineDir,QUARANTINE_DIR); // Free unicode string.
+		/*RtlInitUnicodeString(&quarantineDir,QUARANTINE_DIR); // Free unicode string.
 		if (RtlEqualUnicodeString(&FileNameInformation->ParentDir, &quarantineDir, FALSE) == TRUE) {
 			answer = UHURU_MALWARE;
 			__leave;
 		}
+		*/
 
 		//-----------------------------------------
 		// Send scan order to the scan service.
@@ -143,6 +145,54 @@ SCAN_RESULT LaunchFileAnalysis(_In_ PFLT_CALLBACK_DATA Data, _In_ PCFLT_RELATED_
 
 	return answer;
 }
+
+
+/*++
+
+Routine Description:
+
+    This routine obtains the File ID and saves it in the stream context.
+
+Arguments:
+
+    Instance - Opaque filter pointer for the caller. This parameter is required and cannot be NULL.
+    
+    FileObject - File object pointer for the file. This parameter is required and cannot be NULL.
+
+    Encrypted - Pointer to a boolean indicating if this file is encrypted or not. This is the output.
+
+Return Value:
+
+    Returns statuses forwarded from FltQueryInformationFile.
+
+--*/
+NTSTATUS IsFileEncrypted (
+    _In_   PFLT_INSTANCE Instance,
+    _In_   PFILE_OBJECT FileObject,
+    _Out_  PBOOLEAN  Encrypted
+    ){
+    NTSTATUS status = STATUS_SUCCESS;
+    FILE_BASIC_INFORMATION basicInfo;
+
+    //
+    //  Querying for basic information to get encryption.
+    //
+
+    status = FltQueryInformationFile( Instance,
+                                      FileObject,
+                                      &basicInfo,
+                                      sizeof(FILE_BASIC_INFORMATION),
+                                      FileBasicInformation,
+                                      NULL );
+
+    if (NT_SUCCESS( status )) {
+
+        *Encrypted = BooleanFlagOn( basicInfo.FileAttributes, FILE_ATTRIBUTE_ENCRYPTED );
+    }
+
+    return status;
+}
+
 
 
 /*************************************************************************
@@ -301,6 +351,9 @@ Return Value:
 	//BOOLEAN bleave = FALSE;
 	PFILE_CONTEXT FileContext = NULL;
 	SCAN_RESULT scanRes;
+	BOOLEAN encrypted = FALSE;
+	ACCESS_MASK desiredAccess = Data->Iopb->Parameters.Create.SecurityContext->DesiredAccess;
+	
 
 	UNREFERENCED_PARAMETER( Flags );
     UNREFERENCED_PARAMETER( CompletionContext );
@@ -344,22 +397,21 @@ Return Value:
 			__leave;
 		}
 
-#if 0
+#if 1
 		// Skip encrypted files :: source avscan project.
 		if (!(FlagOn(desiredAccess, FILE_WRITE_DATA)) && 
         !(FlagOn(desiredAccess, FILE_READ_DATA)) ) {
-        
-			BOOLEAN encrypted = FALSE;
-			status = AvGetFileEncrypted( FltObjects->Instance,
+        			
+			ntStatus = IsFileEncrypted( FltObjects->Instance,
 										 FltObjects->FileObject,
 										 &encrypted );
-			if (!NT_SUCCESS( status )) {
+			if (!NT_SUCCESS( ntStatus )) {
 
-				AV_DBG_PRINT( AVDBG_TRACE_ROUTINES,
-					  ("[AV] AvPostCreate: AvGetFileEncrypted FAILED!! \n0x%x\n", status) );
+				DbgPrint("[-] Error :: UhuruGuard!PostOperationIrpCreate :: AvGetFileEncrypted routine failed :: status = 0x%x\n",ntStatus);
+				__leave;
 			}
 			if (encrypted) {
-        
+				DbgPrint("[i] Info :: UhuruGuard!PostOperationIrpCreate :: skip encrypted file :: [%wZ]\n",FltObjects->FileObject->FileName);
 				return FLT_POSTOP_FINISHED_PROCESSING;
 			}
 		}
@@ -367,8 +419,7 @@ Return Value:
 
 		// 
 		//Data->Iopb->Parameters.Create.SecurityContext->DesiredAccess == GENERIC_READ;
-		//Data->Iopb->Parameters.Create.SecurityContext->AccessState->OriginalDesiredAccess == GENERIC_READ;		
-
+		//Data->Iopb->Parameters.Create.SecurityContext->AccessState->OriginalDesiredAccess == GENERIC_READ;
 
 		/* Create a context to the file. */
 		ntStatus = FltGetFileContext(Data->Iopb->TargetInstance, Data->Iopb->TargetFileObject, (PFLT_CONTEXT *)&FileContext);
@@ -488,7 +539,8 @@ Return Value:
     return retStatus;
 }
 
-
+_IRQL_requires_same_
+_IRQL_requires_max_(APC_LEVEL)
 FLT_POSTOP_CALLBACK_STATUS
 PostOperationIrpWrite(
 _Inout_ PFLT_CALLBACK_DATA Data,
@@ -567,7 +619,7 @@ Return Value:
 			__leave;
 		}
 
-		ntStatus = FltGetFileContext(Data->Iopb->TargetInstance, Data->Iopb->TargetFileObject, (PFLT_CONTEXT *)&FileContext);
+		ntStatus = FltGetFileContext(FltObjects->Instance, FltObjects->FileObject, (PFLT_CONTEXT *)&FileContext);
 
 		
 		if (ntStatus == STATUS_NOT_SUPPORTED) {			
@@ -774,12 +826,12 @@ Return Value:
 	
 
 	UNREFERENCED_PARAMETER( Flags );  
-	//UNREFERENCED_PARAMETER( FltObjects ); 
+	UNREFERENCED_PARAMETER( Data ); 
     UNREFERENCED_PARAMETER( CompletionContext );
 
 	__try {
 
-		ntStatus = FltGetFileContext(Data->Iopb->TargetInstance, Data->Iopb->TargetFileObject, (PFLT_CONTEXT *)&FileContext);
+		ntStatus = FltGetFileContext(FltObjects->Instance, FltObjects->FileObject, (PFLT_CONTEXT *)&FileContext);
 
 		if (!NT_SUCCESS(ntStatus)) {			
 			__leave; //return FLT_POSTOP_FINISHED_PROCESSING;

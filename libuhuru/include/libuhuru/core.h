@@ -12,5 +12,6 @@
 #include <libuhuru/libcore/scan.h>
 #include <libuhuru/libcore/ondemand.h>
 #include <libuhuru/libcore/log.h>
+#include <libuhuru/libcore/notify.h>
 
 #endif

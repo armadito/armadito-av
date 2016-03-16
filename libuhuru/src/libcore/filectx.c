@@ -5,6 +5,8 @@
 #include "os/io.h"
 #include "os/mimetype.h"
 
+
+#include <errno.h>
 #include <stdlib.h>
 
 const char *uhuru_file_context_status_str(enum uhuru_file_context_status status)
@@ -28,6 +30,12 @@ enum uhuru_file_context_status uhuru_file_context_get(struct uhuru_file_context 
 {
   struct uhuru_module **applicable_modules;
   const char *mime_type;
+  int err = 0;
+
+  if (fd == -1 && path == NULL) {
+    ctx->status = UHURU_FC_FILE_OPEN_ERROR;
+    return ctx->status;
+  }
 
   ctx->status = UHURU_FC_MUST_SCAN;
   ctx->fd = fd;
@@ -36,7 +44,7 @@ enum uhuru_file_context_status uhuru_file_context_get(struct uhuru_file_context 
   ctx->applicable_modules = NULL;
 
   /* 1) check file name vs. directories white list */
-  if (uhuru_scan_conf_is_white_listed(conf, path)) {
+  if (path != NULL && uhuru_scan_conf_is_white_listed(conf, path)) {
     ctx->status = UHURU_FC_WHITE_LISTED_DIRECTORY;
     return ctx->status;
   }
@@ -44,12 +52,20 @@ enum uhuru_file_context_status uhuru_file_context_get(struct uhuru_file_context 
   /* 2) cache => NOT YET */
 
   /* open file if no fd given */
-  if (ctx->fd == -1) {
-	
-    /* open the file */
+  if (ctx->fd < 0) {
+
+#ifdef WIN32
+	  /* open the file :: TODO write portable code for this function */
+	  err = _sopen_s(&(ctx->fd), path, O_RDONLY, _SH_DENYNO, _S_IREAD);
+#else
+	/* open the file */
     ctx->fd = os_open(path, O_RDONLY);
+#endif
+    
     if (ctx->fd < 0) {
       ctx->status = UHURU_FC_FILE_OPEN_ERROR;
+	  uhuru_log(UHURU_LOG_LIB,UHURU_LOG_LEVEL_WARNING, " Error :: uhuru_file_context_get :: Opening file [%s] for scan failed :: err = %d\n",path,err);
+	  printf("[-] Error :: uhuru_file_context_get :: Opening file [%s] for scan failed :: err = %d\n",path,err);
       return ctx->status;
     }
   }
@@ -96,8 +112,13 @@ struct uhuru_file_context *uhuru_file_context_clone(struct uhuru_file_context *c
 
 void uhuru_file_context_close(struct uhuru_file_context *ctx)
 {
-  if (ctx->fd > 0)
-    os_close(ctx->fd);
+  if (ctx->fd < 0)
+    return;
+
+  if (os_close(ctx->fd) != 0)
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "closing file descriptor %3d failed (%s)", ctx->fd, os_strerror(errno));
+
+  ctx->fd = -1;
 }
 
 void uhuru_file_context_destroy(struct uhuru_file_context *ctx)

@@ -1,9 +1,6 @@
 #ifndef _IPC_H_
 #define _IPC_H_
 
-#define DEFAULT_TCP_PORT "14444"
-#define DEFAULT_SOCKET_PATH "@/tmp/.uhuru/daemon"
-
 typedef int ipc_int32_t;
 
 typedef unsigned char ipc_type_t;

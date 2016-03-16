@@ -98,10 +98,10 @@ void uhuru_info_free(struct uhuru_info *info)
 	  free((void *)(*b)->version);
 	  free((void *)(*b)->full_path);
 
-	  free(*b);
+	  g_free(*b);
 	}
 
-	free((*m)->base_infos);
+	g_free((*m)->base_infos);
       }
 
       g_free(*m);

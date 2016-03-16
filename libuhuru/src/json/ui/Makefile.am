@@ -7,19 +7,26 @@ AUTOMAKE_OPTIONS=subdir-objects
 lib_LTLIBRARIES=libuhuru_json.la
 
 libuhuru_json_la_SOURCES= \
-uhurujson.c \
-uhurujson.h \
-print.c \
-print.h \
+jsonhandler.c \
+jsonhandler.h \
+jsonhandler_p.h \
+debug.c \
+debug.h \
+quarantine_dummy.c \
+quarantine.h \
 scan.c \
 scan.h \
 state.c \
 state.h \
-../linux/net/unixsockclient.c \
-../linux/net/unixsockclient.h
+ui.h \
+ui_linux.c \
+../../linux/net/unixsockclient.c \
+../../linux/net/unixsockclient.h
 
 libuhuru_json_la_CFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/include/config -I$(top_srcdir)/src -I$(top_srcdir)/src/linux
 libuhuru_json_la_LIBADD= 
 
 libuhuru_json_la_CFLAGS+= @LIBJSONC_CFLAGS@
 libuhuru_json_la_LIBADD+= @LIBJSONC_LIBS@
+libuhuru_json_la_CFLAGS+= @GLIB2_CFLAGS@
+libuhuru_json_la_LIBADD+= @GLIB2_LIBS@

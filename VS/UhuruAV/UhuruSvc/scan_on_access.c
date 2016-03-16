@@ -66,9 +66,16 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
     ULONG_PTR key;
 	LPOVERLAPPED pOvlp = NULL;
 	char * msDosFilename = NULL;
-	struct uhuru_report report;
+	struct uhuru_report report = {0};
 	enum uhuru_file_status scan_result = UHURU_IERROR;
+	PVOID OldValue = NULL;
 
+
+	// Disables file system redirection for the calling thread.
+	if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {
+		return S_FALSE;
+	}
+	
 
 	// Get thread context by ID.
 	ThreadId = GetCurrentThreadId( );
@@ -88,6 +95,9 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 
 	if (threadCtx == NULL) {
 		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " UhuruSvc!UserScanWorker :: NULL Thread context\n");
+		if (Wow64RevertWow64FsRedirection(OldValue) == FALSE ){
+			return S_FALSE;
+		}
 		//uhLog("[-] Error :: UserScanWorker :: Thread Not found\n");
 		return S_FALSE;
 	}	
@@ -160,7 +170,7 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 
 			// Get the MS-DOS filename 
 			msDosFilename = ConvertDeviceNameToMsDosName(message->msg.FileName);
-
+			report.status = UHURU_CLEAN;
 
 			if (msDosFilename == NULL) {
 				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: [%d] :: ConvertDeviceNameToMsDosName failed :: \n",ThreadId);
@@ -174,10 +184,15 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 			else if (strstr(msDosFilename,"UHURU.TXT") != NULL) {  // Do not scan the log file.
 				scan_result = UHURU_WHITE_LISTED;
 			}
+			/*else if (strstr(msDosFilename,"UH_EICAR") != NULL) {  // Do not scan the log file.
+				//printf("[+] Debug :: UserScanWorker :: [%d] :: uhuru_scan :: [%s] \n",ThreadId,msDosFilename);				
+				scan_result = uhuru_scan_simple(uhuru, msDosFilename, &report);				
+			}*/
 			else {
 
 				// launch a simple file scan
-				scan_result = uhuru_scan_simple(uhuru, msDosFilename, &report);
+				//printf("[+] Debug :: UserScanWorker :: [%d] :: uhuru_scan :: [%s] \n",ThreadId,msDosFilename);
+				scan_result = uhuru_scan_simple(uhuru, msDosFilename, &report);				
 
 			}
 
@@ -194,21 +209,26 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
 				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: [%d] :: FilterReplyMessage failed :: hres = 0x%x.\n",ThreadId, hres);
 			}
 			else {
-				if (scan_result == UHURU_MALWARE)
-					uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: Malware found !! \n file: [%s] ",msDosFilename);
+				if (scan_result == UHURU_MALWARE) {
+					// UF :: For test ONly :: remove after modif.
+					report.status = scan_result;
+					//printf("[+] Debug :: UserScanWorker :: [%d] :: uhuru_scan (second scan). :: [%s] \n",ThreadId,msDosFilename);
+					scan_result = uhuru_scan_simple(uhuru, msDosFilename, &report);
+					uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: Malware found !! \n file: [%s] ",msDosFilename);					
+					report.status = UHURU_CLEAN;
+				}
+					
 				
 				uhLog("[+] Debug :: UserScanWorker :: [%d] :: %s :: %s\n",ThreadId,msDosFilename,PrintUhuruScanResult(scan_result));
 			}
 
 			// If the file is detected as malicious, move it to the quarantine folder
-			if (scan_result == UHURU_MALWARE) {
-				if (MoveFileInQuarantine(msDosFilename) < 0) {					
+			/*if (scan_result == UHURU_MALWARE) {
+				if (MoveFileInQuarantine(msDosFilename, report) < 0) {					
 					uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: Failed to move file in quarantine!! \n file: [%s] ",msDosFilename);
 				}
-			}
-				
-
-
+			}*/
+			
 			if (msDosFilename != NULL) {
 				free(msDosFilename);
 				msDosFilename = NULL;
@@ -263,6 +283,12 @@ HRESULT UserScanWorker( _In_  PUSER_SCAN_CONTEXT Context )
     }
 
 	uhLog("\n[i] Debug  :: UserScanWorker :: Thread id %d exiting\n",ThreadId);
+
+	// Re enable FS redirection for this thread.
+	if (Wow64RevertWow64FsRedirection(OldValue) == FALSE ){
+		return S_FALSE;
+	}
+
 
 	return hres;
 }
@@ -449,26 +475,6 @@ HRESULT UserScanInit(_Inout_  PUSER_SCAN_CONTEXT Context) {
 	return hRes;
 }
 
-int initializeScanService(struct uhuru ** uhuru, PUSER_SCAN_CONTEXT Context) {
-
-	uhuru_error * uh_error = NULL;
-	HRESULT hres = S_OK;			
-	
-
-	*uhuru = uhuru_open(&uh_error);
-	if (*uhuru == NULL) {	
-		uhLog("[-] Error :: uhuru_open failed\n");
-		return -1;
-	}
-
-	uhLog("[+] Debug :: uhuru struct initialized successfully\n");
-
-	//  Initialize scan listening threads.
-	// hres = UserScanInit(&userScanCtx);
-
-
-	return 0;
-}
 
 HRESULT UserScanFinalize(_In_  PUSER_SCAN_CONTEXT Context) {
 
@@ -558,14 +564,16 @@ char * ConvertDeviceNameToMsDosName(LPSTR DeviceFileName) {
 	
 
 	if (DeviceFileName == NULL) {
-		uhLog("[-] Error :: ConvertDeviceNameToMsDosName :: null parameter DeviceName\n");
+		uhLog("[-] Error :: ConvertDeviceNameToMsDosName :: invalid parameter DeviceName\n");
+		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING, " [-] Error :: ConvertDeviceNameToMsDosName :: invalid parameter DeviceName\n");
 		return NULL;
 	}
-
+	
 	// Get the list of the logical drives.
 	len = GetLogicalDriveStringsA(BUFSIZE,deviceDosName);
 	if (len == 0) {
 		uhLog("[-] Error :: ConvertDeviceNameToMsDosName!GetLogicalDriveStrings() failed ::  error code = 0x%03d\n",GetLastError());
+		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING, "[-] Error :: ConvertDeviceNameToMsDosName!GetLogicalDriveStrings() failed ::  error code = 0x%03d",GetLastError());
 		return NULL;
 	}
 		
@@ -581,11 +589,13 @@ char * ConvertDeviceNameToMsDosName(LPSTR DeviceFileName) {
 		
 		if (!QueryDosDeviceA(deviceLetter, deviceNameQuery, BUFSIZE)) {
 			uhLog("[-] Error :: QueryDosDeviceA() failed ::  error code = 0x%03d\n",GetLastError());
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING,"[-] Error :: QueryDosDeviceA() failed ::  error code = 0x%03d\n",GetLastError());
 			return NULL;
 		}
 		//printf("[+] Debug :: DeviceName = %s ==> %s\n",deviceNameQuery,deviceLetter);
 		if (deviceNameQuery == NULL) {
 			uhLog("[-] Error :: ConvertDeviceNameToMsDosName :: QueryDosDeviceA() failed ::  deviceNameQuery is NULL\n",GetLastError());
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING,"[-] Error :: ConvertDeviceNameToMsDosName :: QueryDosDeviceA() failed ::  deviceNameQuery is NULL\n",GetLastError());
 		}
 
 		if (deviceNameQuery != NULL && strstr(DeviceFileName,deviceNameQuery) != NULL) {

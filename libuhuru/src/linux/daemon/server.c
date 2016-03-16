@@ -23,7 +23,6 @@ struct server {
 
 static void client_thread(gpointer data, gpointer user_data)
 {
-  struct ipc_client *client = (struct ipc_client *)data;
   struct server *server = (struct server *)user_data;
 
   switch(server->ipc_type) {
@@ -41,8 +40,7 @@ static void client_thread(gpointer data, gpointer user_data)
     {
       struct json_client *client = (struct json_client *)data;
       
-      while (json_client_process(client) > 0)
-	;
+      json_client_process(client);
       
       json_client_free(client);
     }
@@ -59,7 +57,7 @@ static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpo
   client_sock = accept(server->listen_sock, NULL, NULL);
 
   if (client_sock < 0) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "accept() failed: errno = %d", errno);
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "accept() failed (%s)", strerror(errno));
     return FALSE;
   }
 

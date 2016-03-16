@@ -1,5 +1,5 @@
-AC_INIT(libuhuru,1.5.3,francois@dechelle.net)
-AM_INIT_AUTOMAKE
+AC_INIT(libuhuru,1.6.0,francois@dechelle.net)
+AM_INIT_AUTOMAKE([subdir-objects])
 
 # collect arguments
 # debug
@@ -131,7 +131,8 @@ include/libuhuru/Makefile
 pkgconfig/Makefile
 src/Makefile
 src/libcore/Makefile
-src/libjson/Makefile
+src/json/Makefile
+src/json/ui/Makefile
 src/linux/Makefile
 src/linux/daemon/Makefile
 src/linux/modules/Makefile
@@ -139,6 +140,7 @@ src/linux/modules/on-access-linux/Makefile
 src/linux/modules/on-access-linux/conf/Makefile
 src/linux/modules/on-access-linux/src/Makefile
 src/linux/modules/on-access-linux/tests/Makefile
+src/linux/net/Makefile
 src/linux/service/Makefile
 src/linux/tools/Makefile
 src/os/Makefile
