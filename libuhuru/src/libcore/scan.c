@@ -13,6 +13,7 @@
 #endif
 #include "os/string.h"
 #include "os/io.h"
+#include "os/file.h"
 #include "os/mimetype.h"
 
 #ifdef HAVE_ON_ACCESS_WINDOWS_MODULE
