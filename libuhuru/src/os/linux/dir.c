@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <libuhuru/core.h>
 
 #include "libuhuru-config.h"
@@ -7,7 +8,6 @@
 #include <glib.h>
 #include <dirent.h>
 #include <sys/types.h>
-#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
