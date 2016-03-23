@@ -207,7 +207,7 @@ struct uhuru_conf_parser {
   jmp_buf env;
   char *current_section;
   char *current_key;
-  enum conf_parser_value_type current_value_type;
+  enum uhuru_conf_value_type current_value_type;
   int current_value_int;
   const char *current_value_string;
   GPtrArray *current_value_list;
@@ -237,7 +237,7 @@ struct uhuru_conf_parser *uhuru_conf_parser_new(const char *filename, conf_parse
   cp->lookahead_token = TOKEN_EOF;
   cp->current_section = NULL;
   cp->current_key = NULL;
-  cp->current_value_type = CP_VALUE_NONE;
+  cp->current_value_type = CONF_TYPE_VOID;
   cp->current_value_int = 0;
   cp->current_value_string = NULL;
   cp->current_value_list = NULL;
@@ -320,30 +320,33 @@ static void accept(struct uhuru_conf_parser *cp, guint token)
 static void call_callback(struct uhuru_conf_parser *cp)
 {
   int ret;
-  const char **argv;
-  size_t len;
+  struct uhuru_conf_value value;
 
-  fprintf(stderr, "parser call_callback: section %s key %s value_type %d\n", cp->current_section, cp->current_key, cp->current_value_type);
-
+  value.type = cp->current_value_type;
+  
   switch(cp->current_value_type) {
-  case CP_VALUE_INT:
-    ret = (*cp->callback)(cp->user_data, cp->current_section, cp->current_key, cp->current_value_type, cp->current_value_int);
+  case CONF_TYPE_INT:
+    value.v.int_v = cp->current_value_int;
+    ret = (*cp->callback)(cp->current_section, cp->current_key, &value, cp->user_data);
     break;
-  case CP_VALUE_STRING:
-    ret = (*cp->callback)(cp->user_data, cp->current_section, cp->current_key, cp->current_value_type, cp->current_value_string);
+
+  case CONF_TYPE_STRING:
+    value.v.str_v = cp->current_value_string;
+    ret = (*cp->callback)(cp->current_section, cp->current_key, &value, cp->user_data);
     free((void *)cp->current_value_string);
     cp->current_value_string = NULL;
     break;
-  case CP_VALUE_LIST:    
+
+  case CONF_TYPE_LIST:    
     g_ptr_array_add(cp->current_value_list, NULL);
-    argv = (const char **)cp->current_value_list->pdata;
-    len = cp->current_value_list->len - 1;
-    ret = (*cp->callback)(cp->user_data, cp->current_section, cp->current_key, cp->current_value_type, argv, len);
+    value.v.list_v.values = (const char **)cp->current_value_list->pdata;
+    value.v.list_v.len = cp->current_value_list->len - 1;
+    ret = (*cp->callback)(cp->current_section, cp->current_key, &value, cp->user_data);
     g_ptr_array_set_size(cp->current_value_list, 0);
     break;
   }
 
-  cp->current_value_type = CP_VALUE_NONE;
+  cp->current_value_type = CONF_TYPE_VOID;
   
   if (ret != 0) {
     uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_ERROR, "configuration file parser: callback return != 0 file %s line %d column %d",
@@ -457,7 +460,7 @@ static void r_value(struct uhuru_conf_parser *cp)
 static void r_int_value(struct uhuru_conf_parser *cp)
 {
   /* store current value */
-  cp->current_value_type = CP_VALUE_INT;
+  cp->current_value_type = CONF_TYPE_INT;
   cp->current_value_int = atoi(scanner_token_text(cp->scanner));
 
   accept(cp, TOKEN_INTEGER);
@@ -467,7 +470,7 @@ static void r_int_value(struct uhuru_conf_parser *cp)
 static void r_string_value(struct uhuru_conf_parser *cp)
 {
   /* store current value */
-  cp->current_value_type = CP_VALUE_STRING;
+  cp->current_value_type = CONF_TYPE_STRING;
   cp->current_value_string = os_strdup(scanner_token_text(cp->scanner));
 
   accept(cp, TOKEN_STRING);
@@ -488,7 +491,7 @@ static void r_list_string_value(struct uhuru_conf_parser *cp)
 {
   /* if cp->current_value_string is not NULL, it is the first element of the list */
   if (cp->current_value_string != NULL) {
-    cp->current_value_type = CP_VALUE_LIST;
+    cp->current_value_type = CONF_TYPE_LIST;
 
     g_ptr_array_add(cp->current_value_list, os_strdup(cp->current_value_string));
     free((void *)cp->current_value_string);

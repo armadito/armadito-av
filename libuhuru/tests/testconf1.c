@@ -21,7 +21,6 @@ int main(int argc, char **argv)
   if (uhuru_conf_save_file(conf, argv[2], &error))
     return 2;
 
-#if 0
   sections = uhuru_conf_get_sections(conf, &len);
 
   printf("== sections\n");
@@ -33,7 +32,6 @@ int main(int argc, char **argv)
     free((void *)*p);
 
   free((void *)sections);
-#endif
 
   uhuru_conf_free(conf);
 
