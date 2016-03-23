@@ -12,10 +12,12 @@
  * section : '[' section_name ']' definition_list
  * section_name : STRING
  * definition_list: definition definition_list | EMPTY
- * definition : key '=' value opt_value_list
+ * definition : key '=' value
  * key : STRING
- * opt_value_list : list_sep value opt_value_list | EMPTY
- * value : STRING
+ * value : int_value | string_value opt_string_list
+ * int_value: INTEGER
+ * string_value: STRING
+ * opt_string_list : list_sep string_value opt_string_list | EMPTY
  * list_sep : ',' | ';' 
  *
  */
@@ -62,6 +64,12 @@ extern "C" {
   int uhuru_conf_set_string(struct uhuru_conf *conf, const char *section, const char *key, const char *value);
 
   int uhuru_conf_set_list(struct uhuru_conf *conf, const char *section, const char *key, const char **list, size_t length);
+
+  int uhuru_conf_add_uint(struct uhuru_conf *conf, const char *section, const char *key, unsigned int value);
+
+  int uhuru_conf_add_string(struct uhuru_conf *conf, const char *section, const char *key, const char *value);
+
+  int uhuru_conf_add_list(struct uhuru_conf *conf, const char *section, const char *key, const char **list, size_t length);
 
 #ifdef __cplusplus
 }
