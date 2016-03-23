@@ -9,6 +9,7 @@
 
 #include <assert.h>
 #include <glib.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -74,6 +75,50 @@ static void *array_search(GPtrArray *array, cmp_fun_t cmp_fun, const char *name)
   return NULL;
 }
 
+static void key_value_set_int(struct key_value *kv, unsigned int val)
+{
+  kv->type = TYPE_INT;
+  kv->v.int_v = val;
+}
+
+static void key_value_set_string(struct key_value *kv, const char *val)
+{
+  kv->type = TYPE_STR;
+  kv->v.str_v = os_strdup(val);
+}
+
+static void key_value_set_list(struct key_value *kv, const char **val, size_t len)
+{
+  int i;
+
+  kv->type = TYPE_LIST;
+  kv->v.list_v.len = len;
+  kv->v.list_v.values = malloc((len + 1)*sizeof(char *));
+
+  for(i = 0; i < len; i++)
+    kv->v.list_v.values[i] = os_strdup(val[i]);
+
+  kv->v.list_v.values[len] = NULL;
+}
+
+static void key_value_destroy(struct key_value *kv)
+{
+  const char **p;
+
+  switch (kv->type) {
+  case TYPE_INT:
+    break;
+  case TYPE_STR:
+    free((void *)kv->v.str_v);
+    break;
+  case TYPE_LIST:
+    for(p = kv->v.list_v.values; *p != NULL; p++)
+      free((void *)*p);
+    free((void *)kv->v.list_v.values);
+    break;
+  }
+}
+
 static void key_entry_free(struct key_entry *k);
 
 static struct section_entry *section_entry_new(const char *section)
@@ -126,22 +171,9 @@ static struct key_entry *key_entry_new(const char *key)
 
 static void key_entry_free(struct key_entry *k)
 {
-  const char **p;
-
   free((void *)k->key);
 
-  switch (k->value.type) {
-  case TYPE_INT:
-    break;
-  case TYPE_STR:
-    free((void *)k->value.v.str_v);
-    break;
-  case TYPE_LIST:
-    for(p = k->value.v.list_v.values; *p != NULL; p++)
-      free((void *)*p);
-    free((void *)k->value.v.list_v.values);
-    break;
-  }
+  key_value_destroy(&k->value);
 
   free((void *)k);
 }
@@ -182,8 +214,10 @@ static struct key_entry *key_entry_add(struct uhuru_conf *conf, const char *sect
   if (s == NULL)
     s = section_entry_add(conf, section);
 
-  if (key_entry_get_sect(s, key) != NULL)
+  if (key_entry_get_sect(s, key) != NULL) {
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "duplicate key in configuration section %s: %s", section, key);
     return NULL;
+  }
 
   return key_entry_add_sect(s, key);
 }
@@ -208,9 +242,13 @@ void uhuru_conf_apply(struct uhuru_conf *conf, uhuru_conf_fun_t fun, void *user_
 {
   int i;
 
+  fprintf(stderr, "conf: %d sections\n", conf->sections->len);
+  
   for(i = 0; i < conf->sections->len; i++) {
     struct section_entry *s = g_ptr_array_index(conf->sections, i);
     int j;
+
+    fprintf(stderr, "conf: section %d %s: %d keys\n", i, s->section, s->keys->len);
 
     for(j = 0; j < s->keys->len; j++) {
       struct key_entry *k = g_ptr_array_index(s->keys, j);
@@ -220,19 +258,39 @@ void uhuru_conf_apply(struct uhuru_conf *conf, uhuru_conf_fun_t fun, void *user_
   }
 }
 
-static int conf_load_parser_cb(const char *section, const char *key, const char **values, size_t len, void *user_data)
+static int conf_load_parser_cb(void *user_data, const char *section, const char *key, enum conf_parser_value_type type, ...)
 {
   struct uhuru_conf *conf = (struct uhuru_conf *)user_data;
-  struct section_entry *s;
+  va_list args;
+  unsigned int v;
+  const char *s;
+  const char **argv;
+  size_t len;
+  int ret;
 
-  s = section_entry_get(conf, section);
+  fprintf(stderr, "parser_cb: adding section %s key %s\n", section, key);
 
-  if (s == NULL)
-    s = section_entry_add(conf, section);
+  va_start(args, type);
 
-  /* to be completed */
+  switch(type) {
+  case CP_VALUE_INT:
+    v = va_arg(args, unsigned int);
+    ret = uhuru_conf_add_uint(conf, section, key, v);
+    break;
+  case CP_VALUE_STRING:
+    s = va_arg(args, const char *);
+    ret = uhuru_conf_add_string(conf, section, key, s);
+    break;
+  case CP_VALUE_LIST:    
+    argv = va_arg(args, const char **);
+    len = va_arg(args, size_t);
+    ret = uhuru_conf_add_list(conf, section, key, argv, len);
+    break;
+  }
 
-  return 0;
+  va_end(args);
+
+  return ret;
 }
 
 int uhuru_conf_load_file(struct uhuru_conf *conf, const char *path, uhuru_error **error)
@@ -268,7 +326,7 @@ static void conf_save_fun(const char *section, const char *key, struct key_value
     fprintf(data->f, "%d", value->v.int_v);
     break;
   case TYPE_STR:
-    fprintf(data->f, "%s", value->v.str_v);
+    fprintf(data->f, "\"%s\"", value->v.str_v);
     break;
   case TYPE_LIST:
     for(n = 0; n < value->v.list_v.len; n++)
@@ -379,6 +437,60 @@ const char **uhuru_conf_get_list(struct uhuru_conf *conf, const char *section, c
   return k->value.v.list_v.values;
 }
 
+int uhuru_conf_set_uint(struct uhuru_conf *conf, const char *section, const char *key, unsigned int val)
+{
+  struct key_entry *k = key_entry_get(conf, section, key);
+
+  if (k == NULL)
+    return 1;
+
+  if (k->value.type != TYPE_INT) {
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "cannot set key to a different type in configuration section %s: %s", section, key);
+    return 1;
+  }
+
+  key_value_set_int(&k->value, val);
+
+  return 0;
+}
+
+int uhuru_conf_set_string(struct uhuru_conf *conf, const char *section, const char *key, const char *val)
+{
+  struct key_entry *k = key_entry_get(conf, section, key);
+
+  if (k == NULL)
+    return 1;
+
+  if (k->value.type != TYPE_STR) {
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "cannot set key to a different type in configuration section %s: %s", section, key);
+    return 1;
+  }
+
+  key_value_destroy(&k->value);
+  key_value_set_string(&k->value, val);
+
+  return 0;
+}
+
+int uhuru_conf_set_list(struct uhuru_conf *conf, const char *section, const char *key, const char **val, size_t len)
+{
+  struct key_entry *k = key_entry_get(conf, section, key);
+  int i;
+
+  if (k == NULL)
+    return 1;
+
+  if (k->value.type != TYPE_LIST) {
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "cannot set key to a different type in configuration section %s: %s", section, key);
+    return 1;
+  }
+
+  key_value_destroy(&k->value);
+  key_value_set_list(&k->value, val, len);
+
+  return 0;
+}
+
 int uhuru_conf_add_uint(struct uhuru_conf *conf, const char *section, const char *key, unsigned int val)
 {
   struct key_entry *k = key_entry_add(conf, section, key);
@@ -386,26 +498,24 @@ int uhuru_conf_add_uint(struct uhuru_conf *conf, const char *section, const char
   if (k == NULL)
     return 1;
 
-  k->value.type = TYPE_INT;
-  k->value.v.int_v = val;
+  key_value_set_int(&k->value, val);
 
   return 0;
 }
 
-int uhuru_conf_set_string(struct uhuru_conf *conf, const char *section, const char *key, const char *val)
+int uhuru_conf_add_string(struct uhuru_conf *conf, const char *section, const char *key, const char *val)
 {
   struct key_entry *k = key_entry_add(conf, section, key);
 
   if (k == NULL)
     return 1;
 
-  k->value.type = TYPE_STR;
-  k->value.v.str_v = os_strdup(val);
+  key_value_set_string(&k->value, val);
 
   return 0;
 }
 
-int uhuru_conf_set_list(struct uhuru_conf *conf, const char *section, const char *key, const char **val, size_t len)
+int uhuru_conf_add_list(struct uhuru_conf *conf, const char *section, const char *key, const char **val, size_t len)
 {
   struct key_entry *k = key_entry_add(conf, section, key);
   int i;
@@ -413,14 +523,7 @@ int uhuru_conf_set_list(struct uhuru_conf *conf, const char *section, const char
   if (k == NULL)
     return 1;
 
-  k->value.type = TYPE_LIST;
-  k->value.v.list_v.len = len;
-  k->value.v.list_v.values = malloc((len + 1)*sizeof(char *));
-
-  for(i = 0; i < len; i++)
-    k->value.v.list_v.values[i] = os_strdup(val[i]);
-
-  k->value.v.list_v.values[len] = NULL;
+  key_value_set_list(&k->value, val, len);
 
   return 0;
 }
