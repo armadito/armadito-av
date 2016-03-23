@@ -2,7 +2,6 @@
 
 #include <libuhuru/core.h>
 
-#include "confp.h"
 #include "confparser.h"
 #include "os/dir.h"
 #include "os/string.h"
@@ -12,18 +11,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-/* old function, empty for now just to compile */
-void conf_load_file(struct uhuru *uhuru, const char *filename)
-{
-  uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "conf_load_file() stub");
-}
-
-/* old function, empty for now just to compile */
-void conf_load_path(struct uhuru *uhuru, const char *path)
-{
-  uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "conf_load_path() stub");
-}
 
 struct key_entry {
   const char *key;
@@ -202,7 +189,7 @@ static struct key_entry *key_entry_get(struct uhuru_conf *conf, const char *sect
   if (s == NULL)
     return NULL;
 
-  return array_search(s->keys, (cmp_fun_t)key_entry_cmp, key);
+  return key_entry_get_sect(s, key);
 }
 
 static struct key_entry *key_entry_add_sect(struct section_entry *s, const char *key)
