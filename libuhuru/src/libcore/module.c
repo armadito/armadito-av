@@ -66,7 +66,7 @@ static void module_free(struct uhuru_module *mod)
   free(mod);
 }
 
-static module_load(const char *filename, struct uhuru_module **pmodule, uhuru_error **error)
+static int module_load(const char *filename, struct uhuru_module **pmodule, uhuru_error **error)
 {
   struct uhuru_module *mod_loaded;
   GModule *g_mod;

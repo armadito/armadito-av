@@ -3,10 +3,11 @@
 
 /* #include <libuhuru/scan.h> */
 
+#define _GNU_SOURCE
+
 #include <assert.h>
 #include <glib.h>
 
-#define _GNU_SOURCE
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
