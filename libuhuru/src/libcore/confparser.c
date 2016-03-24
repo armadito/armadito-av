@@ -33,6 +33,7 @@ enum token_type {
   TOKEN_SEMI_COLON		= ';',
   TOKEN_NONE			= 256,
   TOKEN_STRING,
+  TOKEN_INTEGER,
 };
 
 static struct scanner *scanner_new(FILE *input)
@@ -177,7 +178,7 @@ int scanner_get_next_token(struct scanner *s)
 	g_string_append_c(s->token_text, c);
       else {
 	scanner_ungetc(s, c);
-	return TOKEN_STRING;
+	return TOKEN_INTEGER;
       }
       break;
 
@@ -206,6 +207,9 @@ struct uhuru_conf_parser {
   jmp_buf env;
   char *current_section;
   char *current_key;
+  enum uhuru_conf_value_type current_value_type;
+  int current_value_int;
+  const char *current_value_string;
   GPtrArray *current_value_list;
   conf_parser_callback_t callback;
   void *user_data;
@@ -233,6 +237,9 @@ struct uhuru_conf_parser *uhuru_conf_parser_new(const char *filename, conf_parse
   cp->lookahead_token = TOKEN_EOF;
   cp->current_section = NULL;
   cp->current_key = NULL;
+  cp->current_value_type = CONF_TYPE_VOID;
+  cp->current_value_int = 0;
+  cp->current_value_string = NULL;
   cp->current_value_list = NULL;
 
   cp->callback = callback;
@@ -310,6 +317,46 @@ static void accept(struct uhuru_conf_parser *cp, guint token)
     syntax_error(cp, token);
 }
 
+static void call_callback(struct uhuru_conf_parser *cp)
+{
+  int ret;
+  struct uhuru_conf_value value;
+
+  value.type = cp->current_value_type;
+  
+  switch(cp->current_value_type) {
+  case CONF_TYPE_INT:
+    value.v.int_v = cp->current_value_int;
+    ret = (*cp->callback)(cp->current_section, cp->current_key, &value, cp->user_data);
+    break;
+
+  case CONF_TYPE_STRING:
+    value.v.str_v = cp->current_value_string;
+    ret = (*cp->callback)(cp->current_section, cp->current_key, &value, cp->user_data);
+    free((void *)cp->current_value_string);
+    cp->current_value_string = NULL;
+    break;
+
+  case CONF_TYPE_LIST:    
+    g_ptr_array_add(cp->current_value_list, NULL);
+    value.v.list_v.values = (const char **)cp->current_value_list->pdata;
+    value.v.list_v.len = cp->current_value_list->len - 1;
+    ret = (*cp->callback)(cp->current_section, cp->current_key, &value, cp->user_data);
+    g_ptr_array_set_size(cp->current_value_list, 0);
+    break;
+  }
+
+  cp->current_value_type = CONF_TYPE_VOID;
+  
+  if (ret != 0) {
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_ERROR, "configuration file parser: callback return != 0 file %s line %d column %d",
+	      cp->filename,
+	      scanner_current_line(cp->scanner),
+	      scanner_current_column(cp->scanner));
+    longjmp(cp->env, 1);
+  }
+}
+
 /*
   recursive descent parser functions:
   the grammar is given in conf.h
@@ -321,8 +368,11 @@ static void r_section_name(struct uhuru_conf_parser *cp);
 static void r_definition_list(struct uhuru_conf_parser *cp);
 static void r_definition(struct uhuru_conf_parser *cp);
 static void r_key(struct uhuru_conf_parser *cp);
-static void r_opt_value_list(struct uhuru_conf_parser *cp);
 static void r_value(struct uhuru_conf_parser *cp);
+static void r_int_value(struct uhuru_conf_parser *cp);
+static void r_string_value(struct uhuru_conf_parser *cp);
+static void r_opt_string_list(struct uhuru_conf_parser *cp);
+static void r_list_string_value(struct uhuru_conf_parser *cp);
 static void r_list_sep(struct uhuru_conf_parser *cp);
 
 static void free_and_set(char **old, char *new)
@@ -375,30 +425,15 @@ static void r_definition_list(struct uhuru_conf_parser *cp)
   }
 }
 
-/* definition : key '=' value opt_value_list  */
+/* definition : key '=' value */
 static void r_definition(struct uhuru_conf_parser *cp)
 {
-  const char **argv;
-  size_t length;
-
   r_key(cp);
   accept(cp, TOKEN_EQUAL_SIGN);
   r_value(cp);
-  r_opt_value_list(cp);
 
   /* process stored values by calling the callback */
-  g_ptr_array_add(cp->current_value_list, NULL);
-  argv = (const char **)cp->current_value_list->pdata;
-  length = cp->current_value_list->len - 1;
-  if ((*cp->callback)(cp->current_section, cp->current_key, argv, length, cp->user_data) != 0) {
-    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_ERROR, "configuration file parser: callback return != 0 file %s line %d column %d",
-	      cp->filename,
-	      scanner_current_line(cp->scanner),
-	      scanner_current_column(cp->scanner));
-    longjmp(cp->env, 1);
-  }
-    
-  g_ptr_array_set_size(cp->current_value_list, 0);
+  call_callback(cp);
 }
 
 /* key : STRING */
@@ -410,20 +445,59 @@ static void r_key(struct uhuru_conf_parser *cp)
   accept(cp, TOKEN_STRING);
 }
 
-/* opt_value_list : list_sep value opt_value_list | EMPTY */
-static void r_opt_value_list(struct uhuru_conf_parser *cp)
+/* value : int_value | string_value opt_string_list */
+static void r_value(struct uhuru_conf_parser *cp)
 {
-  if (cp->lookahead_token == TOKEN_COMMA || cp->lookahead_token == TOKEN_SEMI_COLON) {
-    r_list_sep(cp);
-    r_value(cp);
-    r_opt_value_list(cp);
+  if (cp->lookahead_token == TOKEN_INTEGER)
+    r_int_value(cp);
+  else if (cp->lookahead_token == TOKEN_STRING) {
+    r_string_value(cp);
+    r_opt_string_list(cp);
   }
 }
 
-/* value : STRING */
-static void r_value(struct uhuru_conf_parser *cp)
+/* int_value: INT */
+static void r_int_value(struct uhuru_conf_parser *cp)
 {
   /* store current value */
+  cp->current_value_type = CONF_TYPE_INT;
+  cp->current_value_int = atoi(scanner_token_text(cp->scanner));
+
+  accept(cp, TOKEN_INTEGER);
+}
+
+/* string_value: STRING */
+static void r_string_value(struct uhuru_conf_parser *cp)
+{
+  /* store current value */
+  cp->current_value_type = CONF_TYPE_STRING;
+  cp->current_value_string = os_strdup(scanner_token_text(cp->scanner));
+
+  accept(cp, TOKEN_STRING);
+}
+
+/* opt_string_list : list_sep list_string_value opt_string_list | EMPTY */
+static void r_opt_string_list(struct uhuru_conf_parser *cp)
+{
+  if (cp->lookahead_token == TOKEN_COMMA || cp->lookahead_token == TOKEN_SEMI_COLON) {
+    r_list_sep(cp);
+    r_list_string_value(cp);
+    r_opt_string_list(cp);
+  }
+}
+
+/* list_string_value: STRING */
+static void r_list_string_value(struct uhuru_conf_parser *cp)
+{
+  /* if cp->current_value_string is not NULL, it is the first element of the list */
+  if (cp->current_value_string != NULL) {
+    cp->current_value_type = CONF_TYPE_LIST;
+
+    g_ptr_array_add(cp->current_value_list, os_strdup(cp->current_value_string));
+    free((void *)cp->current_value_string);
+    cp->current_value_string = NULL;
+  }
+
   g_ptr_array_add(cp->current_value_list, os_strdup(scanner_token_text(cp->scanner)));
 
   accept(cp, TOKEN_STRING);
@@ -474,7 +548,11 @@ void uhuru_conf_parser_free(struct uhuru_conf_parser *cp)
 
     scanner_free(cp->scanner);
 
-    g_ptr_array_free(cp->current_value_list, TRUE);
+    if (cp->current_value_string != NULL)
+      free((void *)cp->current_value_string);
+    
+    if (cp->current_value_list != NULL)
+      g_ptr_array_free(cp->current_value_list, TRUE);
   }
 
   free((void *)cp->filename);

@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 enum ipc_manager_state {
   EXPECTING_MSG_ID = 1,
@@ -306,7 +307,7 @@ int ipc_manager_msg_begin(struct ipc_manager *manager, ipc_msg_id_t msg_id)
   return ipc_manager_write(manager, &msg_id, sizeof(guchar));
 }
 
-static ipc_manager_msg_addv(struct ipc_manager *manager, va_list ap)
+static void ipc_manager_msg_addv(struct ipc_manager *manager, va_list ap)
 {
   ipc_type_t type;
 
