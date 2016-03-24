@@ -126,7 +126,7 @@ static void scan_file_thread_fun(gpointer data, gpointer user_data)
   uhuru_scan_free(scan);
 }
 
-static int fanotify_perm_event_process(struct fanotify_monitor *f, struct fanotify_event_metadata *event, const char *path)
+static void fanotify_perm_event_process(struct fanotify_monitor *f, struct fanotify_event_metadata *event, const char *path)
 {
   struct uhuru_file_context file_context;
   enum uhuru_file_context_status context_status;
@@ -170,8 +170,6 @@ static int fanotify_perm_event_process(struct fanotify_monitor *f, struct fanoti
   if (watchdog_remove(f->watchdog, event->fd, NULL))
     response_write(f->fanotify_fd, event->fd, FAN_ALLOW, path, "thread pool disabled");
 #endif
-
-  return 0;
 }
 
 static void fanotify_notify_event_process(struct fanotify_monitor *m, struct fanotify_event_metadata *event)

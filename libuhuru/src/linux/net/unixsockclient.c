@@ -1,12 +1,13 @@
 #include "unixsockclient.h"
 
 #include <assert.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/un.h>
+#include <errno.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/un.h>
 #include <unistd.h>
 
 #define UNIX_PATH_MAX	108  /* sic... taken from /usr/include/linux/un.h */

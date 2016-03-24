@@ -2,7 +2,6 @@
 
 #include <libuhuru/core.h>
 
-#include "confp.h"
 #include "modulep.h"
 #include "statusp.h"
 #include "uhurup.h"
@@ -26,11 +25,8 @@
 #include <string.h>
 #include <stdio.h>
 
-extern struct uhuru_module on_access_module;
-
 struct uhuru {
   struct module_manager *module_manager;
-  GHashTable *mime_type_table;
 };
 
 static struct uhuru *uhuru_new(void)
@@ -39,15 +35,12 @@ static struct uhuru *uhuru_new(void)
 
   u->module_manager = module_manager_new(u);
 
-  u->mime_type_table = g_hash_table_new(g_str_hash, g_str_equal);
-
   return u;
 }
 
 static void uhuru_free(struct uhuru *u)
 {
   module_manager_free(u->module_manager);
-  g_hash_table_destroy(u->mime_type_table);
   g_free(u);
 }
 
@@ -127,15 +120,19 @@ struct uhuru *uhuru_open(uhuru_error **error)
 	memcpy_s(confdir+strnlen_s(dirpath, _MAX_PATH)+strnlen_s(LIBUHURU_CONF_DIR, _MAX_PATH)+1,len,conffile,strnlen_s(conffile, _MAX_PATH));
  
   printf("Conf_file = %s ", confdir);
+#if 0
   conf_load_file(u, confdir);
+#endif
   //conf_load_path(u, LIBUHURU_CONF_DIR "/conf.d");
 
   free(dirpath);
   free(confdir);
 
 #else
+#if 0
   conf_load_file(u, LIBUHURU_CONF_DIR "/uhuru.conf");
   conf_load_path(u, LIBUHURU_CONF_DIR "/conf.d");
+#endif
 #endif
 
   if (module_manager_post_init_all(u->module_manager, error))
@@ -177,20 +174,6 @@ static void mod_print_name(gpointer data, gpointer user_data)
   printf("%s ", mod->name);
 }
 
-static void print_mime_type_entry(gpointer key, gpointer value, gpointer user_data)
-{
-  GString *s = (GString *)user_data;
-  GArray *modules = (GArray *)value;
-  struct uhuru_module **modv;
-
-  g_string_append_printf(s, "    mimetype: %s handled by modules:", (char *)key);
- 
-  for (modv = (struct uhuru_module **)modules->data; *modv != NULL; modv++)
-    g_string_append_printf(s, " %s", (*modv)->name);
-
-  g_string_append_printf(s, "\n");
-}
-
 const char *uhuru_debug(struct uhuru *u)
 {
   struct uhuru_module **modv;
@@ -203,7 +186,6 @@ const char *uhuru_debug(struct uhuru *u)
     g_string_append_printf(s, "%s\n", module_debug(*modv));
 
   g_string_append_printf(s, "  mime types:\n");
-  g_hash_table_foreach(u->mime_type_table, print_mime_type_entry, s);
 
   ret = s->str;
   g_string_free(s, FALSE);

@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <libuhuru/core.h>
 
 #include "os/dir.h"
@@ -13,7 +14,6 @@
 #ifdef ALERT_VIA_SSL
 #include <curl/curl.h>
 #endif
-#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

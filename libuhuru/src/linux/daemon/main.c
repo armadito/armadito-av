@@ -13,6 +13,8 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #define DEFAULT_LOG_LEVEL     "error"
 #define DEFAULT_IPC_TYPE      "old"
