@@ -59,7 +59,7 @@ static void uhuru_add_builtin_modules(struct uhuru *u)
 #endif
 }
 
-struct uhuru *uhuru_open(uhuru_error **error)
+struct uhuru *uhuru_open(struct uhuru_conf *conf, uhuru_error **error)
 {
   struct uhuru *u;
   const char *modules_dir;
@@ -84,8 +84,8 @@ struct uhuru *uhuru_open(uhuru_error **error)
   if (module_manager_init_all(u->module_manager, error))
     goto error;
 
-  // apply conf to all modules
-  // TODO
+  if (module_manager_configure_all(u->module_manager, conf, error))
+    goto error;
 
   if (module_manager_post_init_all(u->module_manager, error))
     goto error;

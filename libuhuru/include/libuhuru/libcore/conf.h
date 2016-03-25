@@ -56,6 +56,10 @@ extern "C" {
 
 #define uhuru_conf_value_get_type(cv) ((cv)->type)
 
+#define uhuru_conf_value_is_int(cv) (uhuru_conf_value_get_type(cv) == CONF_TYPE_INT)
+#define uhuru_conf_value_is_string(cv) (uhuru_conf_value_get_type(cv) == CONF_TYPE_STRING)
+#define uhuru_conf_value_is_list(cv) (uhuru_conf_value_get_type(cv) == CONF_TYPE_LIST)
+
 #define uhuru_conf_value_get_int(cv) ((cv)->v.int_v)
 #define uhuru_conf_value_get_string(cv) ((cv)->v.str_v)
 #define uhuru_conf_value_get_list(cv) ((cv)->v.list_v.values)
@@ -77,7 +81,11 @@ extern "C" {
 
   void uhuru_conf_free(struct uhuru_conf *conf);
 
-  int uhuru_conf_load_file(struct uhuru_conf *conf, const char *path, uhuru_error **error);
+  typedef void (*uhuru_conf_fun_t)(const char *section, const char *key, struct uhuru_conf_value *value, void *user_data);
+
+  void uhuru_conf_apply(struct uhuru_conf *conf, uhuru_conf_fun_t fun, void *user_data);
+
+ int uhuru_conf_load_file(struct uhuru_conf *conf, const char *path, uhuru_error **error);
 
   int uhuru_conf_save_file(struct uhuru_conf *conf, const char *path, uhuru_error **error);
 
@@ -87,13 +95,15 @@ extern "C" {
 
   int uhuru_conf_has_key(struct uhuru_conf *conf, const char *section, const char *key);
 
-  int uhuru_conf_get_value(struct uhuru_conf *conf, const char *section, const char *key, struct uhuru_conf_value *value);
+  enum uhuru_conf_value_type uhuru_conf_get_type(struct uhuru_conf *conf, const char *section, const char *key);
 
   int uhuru_conf_is_int(struct uhuru_conf *conf, const char *section, const char *key);
 
   int uhuru_conf_is_string(struct uhuru_conf *conf, const char *section, const char *key);
 
   int uhuru_conf_is_list(struct uhuru_conf *conf, const char *section, const char *key);
+
+  int uhuru_conf_get_value(struct uhuru_conf *conf, const char *section, const char *key, struct uhuru_conf_value *value);
 
   int uhuru_conf_get_uint(struct uhuru_conf *conf, const char *section, const char *key);
 

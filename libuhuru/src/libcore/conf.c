@@ -230,9 +230,7 @@ void uhuru_conf_free(struct uhuru_conf *conf)
   g_ptr_array_free(conf->sections, TRUE);
 }
 
-typedef void (*uhuru_conf_fun_t)(const char *section, const char *key, struct uhuru_conf_value *value, void *user_data);
-
-static void uhuru_conf_apply(struct uhuru_conf *conf, uhuru_conf_fun_t fun, void *user_data)
+void uhuru_conf_apply(struct uhuru_conf *conf, uhuru_conf_fun_t fun, void *user_data)
 {
   int i;
 
@@ -374,6 +372,16 @@ int uhuru_conf_has_key(struct uhuru_conf *conf, const char *section, const char 
   return key_entry_get(conf, section, key) != NULL;
 }
 
+enum uhuru_conf_value_type uhuru_conf_get_type(struct uhuru_conf *conf, const char *section, const char *key)
+{
+  struct key_entry *k = key_entry_get(conf, section, key);
+
+  if (k == NULL)
+    return CONF_TYPE_VOID;
+
+  return uhuru_conf_value_get_type(&k->value);
+}
+
 int uhuru_conf_is_int(struct uhuru_conf *conf, const char *section, const char *key)
 {
   struct key_entry *k = key_entry_get(conf, section, key);
@@ -402,6 +410,18 @@ int uhuru_conf_is_list(struct uhuru_conf *conf, const char *section, const char 
     return 0;
 
   return uhuru_conf_value_get_type(&k->value) == CONF_TYPE_LIST;
+}
+
+int uhuru_conf_get_value(struct uhuru_conf *conf, const char *section, const char *key, struct uhuru_conf_value *value)
+{
+  struct key_entry *k = key_entry_get(conf, section, key);
+
+  if (k == NULL)
+    return 0;
+
+  uhuru_conf_value_set(value, &k->value);
+
+  return 1;
 }
 
 int uhuru_conf_get_uint(struct uhuru_conf *conf, const char *section, const char *key)
