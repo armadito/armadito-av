@@ -195,6 +195,11 @@ int module_manager_init_all(struct module_manager *mm, uhuru_error **error)
   return module_manager_all(mm, module_init, error);
 }
 
+int module_manager_configure_all(struct module_manager *mm, struct uhuru_conf *conf, uhuru_error **error)
+{
+  return 0;
+}
+
 static int module_post_init(struct uhuru_module *mod, uhuru_error **error)
 {
   if (mod->post_init_fun == NULL)
@@ -267,8 +272,8 @@ const char *module_debug(struct uhuru_module *module)
     struct uhuru_conf_entry *p;
 
     g_string_append_printf(s, "  configuration:\n");
-    for(p = module->conf_table; p->directive != NULL; p++)
-      g_string_append_printf(s, "    directive %-20s conf %p\n", p->directive, p->conf_fun);
+    for(p = module->conf_table; p->key != NULL; p++)
+      g_string_append_printf(s, "    directive %-20s conf %p\n", p->key, p->conf_fun);
   }
 
   ret = s->str;

@@ -355,11 +355,14 @@ static enum uhuru_mod_status alert_init(struct uhuru_module *module)
   return UHURU_MOD_OK;
 }
 
-static enum uhuru_mod_status alert_conf_alert_dir(struct uhuru_module *module, const char *directive, const char **argv)
+static enum uhuru_mod_status alert_conf_alert_dir(struct uhuru_module *module, const char *key, struct uhuru_conf_value *value)
 {
   struct alert_data *al_data = (struct alert_data *)module->data;
 
-  al_data->alert_dir = strdup(argv[0]);
+  if (!uhuru_conf_value_is_string(value))
+    return UHURU_MOD_CONF_ERROR;
+
+  al_data->alert_dir = strdup(uhuru_conf_value_get_string(value));
 
   /* really necessary??? */
   os_mkdir_p(al_data->alert_dir);
@@ -399,11 +402,11 @@ void alert_callback(struct uhuru_report *report, void *callback_data)
 
 static struct uhuru_conf_entry alert_conf_table[] = {
   { 
-    .directive = "alert-dir", 
+    .key = "alert-dir", 
     .conf_fun = alert_conf_alert_dir, 
   },
   { 
-    .directive = NULL,
+    .key = NULL,
     .conf_fun = NULL, 
   },
 };
