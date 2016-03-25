@@ -15,6 +15,8 @@ int module_manager_load_path(struct module_manager *mm, const char *path, uhuru_
 
 int module_manager_init_all(struct module_manager *mm, uhuru_error **error);
 
+int module_manager_configure_all(struct module_manager *mm, struct uhuru_conf *conf, uhuru_error **error);
+
 int module_manager_post_init_all(struct module_manager *mm, uhuru_error **error);
 
 int module_manager_close_all(struct module_manager *mm, uhuru_error **error);

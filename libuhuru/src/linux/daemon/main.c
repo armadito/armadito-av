@@ -181,6 +181,7 @@ static int create_server_socket(struct uhuru_daemon_options *opts)
 
 static void start_daemon(const char *progname, struct uhuru_daemon_options *opts)
 {
+  struct uhuru_conf *conf;
   struct uhuru *uhuru;
   int server_sock;
   struct server *server;
@@ -201,7 +202,9 @@ static void start_daemon(const char *progname, struct uhuru_daemon_options *opts
 
   server_sock = create_server_socket(opts);
 
-  uhuru = uhuru_open(&error);
+  // TODO: loading the configuration
+  conf = NULL;
+  uhuru = uhuru_open(conf, &error);
   if (uhuru == NULL) {
     uhuru_error_print(error, stderr);
     close(server_sock);
