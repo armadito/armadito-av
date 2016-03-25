@@ -14,5 +14,6 @@
 #include <libuhuru/libcore/ondemand.h>
 #include <libuhuru/libcore/log.h>
 #include <libuhuru/libcore/notify.h>
+#include <libuhuru/libcore/stdpaths.h>
 
 #endif
