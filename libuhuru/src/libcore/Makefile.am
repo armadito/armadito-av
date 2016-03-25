@@ -23,6 +23,7 @@ scanp.h \
 scanconf.c \
 status.c \
 statusp.h \
+stdpaths.c \
 uhuru.c \
 uhurup.h \
 builtin-modules/alert.c \
@@ -33,9 +34,11 @@ builtin-modules/quarantine.c \
 builtin-modules/quarantine.h \
 ../os/linux/dir.c \
 ../os/linux/file.c \
-../os/linux/mimetype.c 
+../os/linux/mimetype.c \
+../os/linux/stdpaths.c 
 
-AM_CPPFLAGS=-DUSE_FILE_DESCRIPTORS -DLIBUHURU_MODULES_PATH='"$(pkglibdir)/modules"' -DLIBUHURU_CONF_DIR='"$(sysconfdir)/uhuru"' -DG_LOG_DOMAIN='"uhuru"'
+AM_CPPFLAGS=-DUSE_FILE_DESCRIPTORS -DLIBUHURU_MODULES_PATH='"$(pkglibdir)/modules"' -DLIBUHURU_CONF_DIR='"$(sysconfdir)/uhuru"' -DLIBUHURU_BASES_DIR='"$(localstatedir)/lib/uhuru/bases"' -DLIBUHURU_TMP_DIR='"$(localstatedir)/lib/uhuru/tmp"' 
+# removed the following -DG_LOG_DOMAIN='"uhuru"' which is remaining from glib log
 libuhuru_core_la_CFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/include/config -I$(top_srcdir)/src
 #libuhuru_core_la_LIBADD= $(top_builddir)/src/os/linux/dir.$(OBJEXT) $(top_builddir)/src/os/linux/file.$(OBJEXT) $(top_builddir)/src/os/linux/mimetype.$(OBJEXT)
 libuhuru_core_la_LIBADD= 
