@@ -129,15 +129,15 @@ static enum uhuru_mod_status quarantine_conf_enable(struct uhuru_module *module,
 
 static struct uhuru_conf_entry quarantine_conf_table[] = {
   { 
-    .directive = "quarantine-dir", 
+    .key = "quarantine-dir", 
     .conf_fun = quarantine_conf_quarantine_dir, 
   },
   { 
-    .directive = "enable", 
+    .key = "enable", 
     .conf_fun = quarantine_conf_enable, 
   },
   { 
-    .directive = NULL, 
+    .key = NULL, 
     .conf_fun = NULL, 
   },
 };
