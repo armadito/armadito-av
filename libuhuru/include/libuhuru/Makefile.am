@@ -13,4 +13,5 @@ libcore/module.h \
 libcore/ondemand.h \
 libcore/scanconf.h \
 libcore/scan.h \
+libcore/stdpaths.h \
 libcore/log.h 

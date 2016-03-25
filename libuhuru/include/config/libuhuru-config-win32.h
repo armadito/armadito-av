@@ -33,10 +33,6 @@
 /* file handling macros */
 #define MAXPATHLEN _MAX_PATH
 
-/* misc */
-#define LIBUHURU_CONF_DIR "conf"
-#define LIBUHURU_MODULES_PATH "modules"
-
 /* modules */
 #undef HAVE_ALERT_MODULE
 #define HAVE_QUARANTINE_MODULE
