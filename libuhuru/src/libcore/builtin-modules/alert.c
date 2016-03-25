@@ -403,10 +403,12 @@ void alert_callback(struct uhuru_report *report, void *callback_data)
 static struct uhuru_conf_entry alert_conf_table[] = {
   { 
     .key = "alert-dir", 
+    .type = CONF_TYPE_STRING,
     .conf_fun = alert_conf_alert_dir, 
   },
   { 
     .key = NULL,
+    .type = 0,
     .conf_fun = NULL, 
   },
 };
