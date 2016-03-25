@@ -140,15 +140,15 @@ static enum uhuru_mod_status mod_oal_close(struct uhuru_module *module)
 }
 
 struct uhuru_conf_entry mod_oal_conf_table[] = {
-  { "enable", mod_oal_conf_enable},
-  { "enable-permission", mod_oal_conf_enable_permission},
-  { "enable-removable-media", mod_oal_conf_enable_removable_media},
-  { "mount", mod_oal_conf_mount},
-  { "directory", mod_oal_conf_directory},
-  { "white-list-dir", mod_oal_conf_white_list_dir},
-  { "mime-type", mod_oal_conf_mime_type},
-  { "max-size", mod_oal_conf_max_size},
-  { NULL, NULL},
+  { "enable", CONF_TYPE_INT, mod_oal_conf_enable},
+  { "enable-permission", CONF_TYPE_INT, mod_oal_conf_enable_permission},
+  { "enable-removable-media", CONF_TYPE_INT, mod_oal_conf_enable_removable_media},
+  { "mount", CONF_TYPE_STRING | CONF_TYPE_LIST, mod_oal_conf_mount},
+  { "directory", CONF_TYPE_STRING | CONF_TYPE_LIST, mod_oal_conf_directory},
+  { "white-list-dir", CONF_TYPE_STRING | CONF_TYPE_LIST, mod_oal_conf_white_list_dir},
+  /* { "mime-type", mod_oal_conf_mime_type}, */
+  { "max-size", CONF_TYPE_INT, mod_oal_conf_max_size},
+  { NULL, 0, NULL},
 };
 
 struct uhuru_module module = {

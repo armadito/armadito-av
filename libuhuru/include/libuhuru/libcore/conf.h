@@ -32,10 +32,10 @@ extern "C" {
 #include <libuhuru/libcore/error.h>
 
   enum uhuru_conf_value_type {
-    CONF_TYPE_VOID,
-    CONF_TYPE_INT,
-    CONF_TYPE_STRING,
-    CONF_TYPE_LIST,
+    CONF_TYPE_VOID     = 0,
+    CONF_TYPE_INT      = 1 << 0,
+    CONF_TYPE_STRING   = 1 << 1,
+    CONF_TYPE_LIST     = 1 << 2,
   };
 
   struct uhuru_conf_value {
