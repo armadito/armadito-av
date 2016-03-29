@@ -38,6 +38,8 @@ struct uhuru_module {
 
   enum uhuru_update_status (*info_fun)(struct uhuru_module *module, struct uhuru_module_info *info);
 
+  const char **supported_mime_types;
+
   const char *name;
 
   size_t size;

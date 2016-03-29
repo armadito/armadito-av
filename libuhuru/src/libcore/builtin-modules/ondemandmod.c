@@ -71,6 +71,7 @@ struct uhuru_module on_demand_module = {
   .post_init_fun = NULL,
   .scan_fun = NULL,
   .close_fun = NULL,
+  .supported_mime_types = NULL,
   .name = "on-demand",
 };
 
