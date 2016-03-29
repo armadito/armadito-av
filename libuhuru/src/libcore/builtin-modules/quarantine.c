@@ -109,20 +109,20 @@ void quarantine_callback(struct uhuru_report *report, void *callback_data)
     report->action |= UHURU_ACTION_QUARANTINE;
 }
 
-static enum uhuru_mod_status quarantine_conf_quarantine_dir(struct uhuru_module *module, const char *directive, const char **argv)
+static enum uhuru_mod_status quarantine_conf_quarantine_dir(struct uhuru_module *module, const char *key, struct uhuru_conf_value *value)
 {
   struct quarantine_data *qu_data = (struct quarantine_data *)module->data;
 
-  qu_data->quarantine_dir = strdup(argv[0]);
+  qu_data->quarantine_dir = strdup(uhuru_conf_value_get_string(value));
 
   return UHURU_MOD_OK;
 }
 
-static enum uhuru_mod_status quarantine_conf_enable(struct uhuru_module *module, const char *directive, const char **argv)
+static enum uhuru_mod_status quarantine_conf_enable(struct uhuru_module *module, const char *key, struct uhuru_conf_value *value)
 {
   struct quarantine_data *qu_data = (struct quarantine_data *)module->data;
 
-  qu_data->enable = !strcmp(argv[0], "yes") || !strcmp(argv[0], "1") ;
+  qu_data->enable = uhuru_conf_value_get_int(value);
 
   return UHURU_MOD_OK;
 }
@@ -130,14 +130,17 @@ static enum uhuru_mod_status quarantine_conf_enable(struct uhuru_module *module,
 static struct uhuru_conf_entry quarantine_conf_table[] = {
   { 
     .key = "quarantine-dir", 
+    .type = CONF_TYPE_STRING,
     .conf_fun = quarantine_conf_quarantine_dir, 
   },
   { 
     .key = "enable", 
+    .type = CONF_TYPE_INT,
     .conf_fun = quarantine_conf_enable, 
   },
   { 
     .key = NULL, 
+    .type = 0,
     .conf_fun = NULL, 
   },
 };

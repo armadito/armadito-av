@@ -75,10 +75,10 @@ static enum uhuru_mod_status mod_onaccess_close(struct uhuru_module *module)
 }
 
 struct uhuru_conf_entry mod_onaccess_conf_table[] = {
-  { "enable-on-access", mod_onaccess_conf_set_enable_on_access},
-  { "mime-type", mod_onaccess_conf_mime_type},
-  { "max-size", mod_onaccess_conf_max_size},
-  { NULL, NULL},
+  { "enable-on-access", CONF_TYPE_INT, mod_onaccess_conf_set_enable_on_access},
+  /* { "mime-type", mod_onaccess_conf_mime_type}, */
+  { "max-size", CONF_TYPE_INT, mod_onaccess_conf_max_size},
+  { NULL, 0, NULL},
 };
 
 struct uhuru_module on_access_win_module = {

@@ -59,10 +59,10 @@ static enum uhuru_mod_status mod_on_demand_conf_max_size(struct uhuru_module *mo
 }
 
 struct uhuru_conf_entry on_demand_conf_table[] = {
-  { "white-list-dir", mod_on_demand_conf_white_list_dir},
+  { "white-list-dir", CONF_TYPE_STRING | CONF_TYPE_LIST, mod_on_demand_conf_white_list_dir},
   /* { "mime-type", mod_on_demand_conf_mime_type}, */
-  { "max-size", mod_on_demand_conf_max_size},
-  { NULL, NULL},
+  { "max-size", CONF_TYPE_INT, mod_on_demand_conf_max_size},
+  { NULL, 0, NULL},
 };
 
 struct uhuru_module on_demand_module = {

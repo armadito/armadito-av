@@ -28,67 +28,82 @@ static enum uhuru_mod_status mod_oal_init(struct uhuru_module *module)
   return UHURU_MOD_OK;
 }
 
-static enum uhuru_mod_status mod_oal_conf_enable(struct uhuru_module *module, const char *directive, const char **argv)
+static enum uhuru_mod_status mod_oal_conf_enable(struct uhuru_module *module, const char *key, struct uhuru_conf_value *value)
 {
   struct mod_oal_data *data = (struct mod_oal_data *)module->data;
 
-  access_monitor_enable(data->monitor, atoi(argv[0]));
+  access_monitor_enable(data->monitor, uhuru_conf_value_get_int(value));
 
   return UHURU_MOD_OK;
 }
 
-static enum uhuru_mod_status mod_oal_conf_enable_permission(struct uhuru_module *module, const char *directive, const char **argv)
+static enum uhuru_mod_status mod_oal_conf_enable_permission(struct uhuru_module *module, const char *key, struct uhuru_conf_value *value)
 {
   struct mod_oal_data *data = (struct mod_oal_data *)module->data;
 
-  access_monitor_enable_permission(data->monitor, atoi(argv[0]));
+  access_monitor_enable_permission(data->monitor, uhuru_conf_value_get_int(value));
 
   return UHURU_MOD_OK;
 }
 
-static enum uhuru_mod_status mod_oal_conf_enable_removable_media(struct uhuru_module *module, const char *directive, const char **argv)
+static enum uhuru_mod_status mod_oal_conf_enable_removable_media(struct uhuru_module *module, const char *key, struct uhuru_conf_value *value)
 {
   struct mod_oal_data *data = (struct mod_oal_data *)module->data;
 
-  access_monitor_enable_removable_media(data->monitor, atoi(argv[0]));
+  access_monitor_enable_removable_media(data->monitor, uhuru_conf_value_get_int(value));
 
   return UHURU_MOD_OK;
 }
 
-static enum uhuru_mod_status mod_oal_conf_mount(struct uhuru_module *module, const char *directive, const char **argv)
+static enum uhuru_mod_status mod_oal_conf_mount(struct uhuru_module *module, const char *key, struct uhuru_conf_value *value)
 {
   struct mod_oal_data *data = (struct mod_oal_data *)module->data;
 
-  for(; *argv != NULL; argv++)
-    access_monitor_add_mount(data->monitor, *argv);
+  if (uhuru_conf_value_is_string(value))
+    access_monitor_add_mount(data->monitor, uhuru_conf_value_get_string(value));
+  else {
+    const char **p;
 
-  return UHURU_MOD_OK;
-}
-static enum uhuru_mod_status mod_oal_conf_directory(struct uhuru_module *module, const char *directive, const char **argv)
-{
-  struct mod_oal_data *data = (struct mod_oal_data *)module->data;
-
-  for(; *argv != NULL; argv++)
-    access_monitor_add_directory(data->monitor, *argv);
-
-  return UHURU_MOD_OK;
-}
-
-static enum uhuru_mod_status mod_oal_conf_white_list_dir(struct uhuru_module *module, const char *directive, const char **argv)
-{
-  struct uhuru_scan_conf *on_access_conf = uhuru_scan_conf_on_access();
-
-  while (*argv != NULL) {
-    uhuru_scan_conf_white_list_directory(on_access_conf, *argv);
-
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "white list %s", *argv);
-
-    argv++;
+    for (p = uhuru_conf_value_get_list(value); *p != NULL; p++)
+      access_monitor_add_mount(data->monitor, *p);
   }
 
   return UHURU_MOD_OK;
 }
 
+static enum uhuru_mod_status mod_oal_conf_directory(struct uhuru_module *module, const char *key, struct uhuru_conf_value *value)
+{
+  struct mod_oal_data *data = (struct mod_oal_data *)module->data;
+
+  if (uhuru_conf_value_is_string(value))
+    access_monitor_add_directory(data->monitor, uhuru_conf_value_get_string(value));
+  else {
+    const char **p;
+
+    for (p = uhuru_conf_value_get_list(value); *p != NULL; p++)
+      access_monitor_add_directory(data->monitor, *p);
+  }
+
+  return UHURU_MOD_OK;
+}
+
+static enum uhuru_mod_status mod_oal_conf_white_list_dir(struct uhuru_module *module, const char *key, struct uhuru_conf_value *value)
+{
+  struct uhuru_scan_conf *on_access_conf = uhuru_scan_conf_on_access();
+
+  if (uhuru_conf_value_is_string(value))
+    uhuru_scan_conf_white_list_directory(on_access_conf, uhuru_conf_value_get_string(value));
+  else {
+    const char **p;
+
+    for (p = uhuru_conf_value_get_list(value); *p != NULL; p++)
+      uhuru_scan_conf_white_list_directory(on_access_conf, *p);
+  }
+
+  return UHURU_MOD_OK;
+}
+
+#if 0
 static enum uhuru_mod_status mod_oal_conf_mime_type(struct uhuru_module *module, const char *directive, const char **argv)
 {
   const char *mime_type;
@@ -106,12 +121,13 @@ static enum uhuru_mod_status mod_oal_conf_mime_type(struct uhuru_module *module,
 
   return UHURU_MOD_OK;
 }
+#endif
 
-static enum uhuru_mod_status mod_oal_conf_max_size(struct uhuru_module *module, const char *directive, const char **argv)
+static enum uhuru_mod_status mod_oal_conf_max_size(struct uhuru_module *module, const char *key, struct uhuru_conf_value *value)
 {
   struct uhuru_scan_conf *on_access_conf = uhuru_scan_conf_on_access();
 
-  uhuru_scan_conf_max_file_size(on_access_conf, atoi(argv[0]));
+  uhuru_scan_conf_max_file_size(on_access_conf, uhuru_conf_value_get_int(value));
 
   return UHURU_MOD_OK;
 }
@@ -140,15 +156,15 @@ static enum uhuru_mod_status mod_oal_close(struct uhuru_module *module)
 }
 
 struct uhuru_conf_entry mod_oal_conf_table[] = {
-  { "enable", mod_oal_conf_enable},
-  { "enable-permission", mod_oal_conf_enable_permission},
-  { "enable-removable-media", mod_oal_conf_enable_removable_media},
-  { "mount", mod_oal_conf_mount},
-  { "directory", mod_oal_conf_directory},
-  { "white-list-dir", mod_oal_conf_white_list_dir},
-  { "mime-type", mod_oal_conf_mime_type},
-  { "max-size", mod_oal_conf_max_size},
-  { NULL, NULL},
+  { "enable", CONF_TYPE_INT, mod_oal_conf_enable},
+  { "enable-permission", CONF_TYPE_INT, mod_oal_conf_enable_permission},
+  { "enable-removable-media", CONF_TYPE_INT, mod_oal_conf_enable_removable_media},
+  { "mount", CONF_TYPE_STRING | CONF_TYPE_LIST, mod_oal_conf_mount},
+  { "directory", CONF_TYPE_STRING | CONF_TYPE_LIST, mod_oal_conf_directory},
+  { "white-list-dir", CONF_TYPE_STRING | CONF_TYPE_LIST, mod_oal_conf_white_list_dir},
+  /* { "mime-type", mod_oal_conf_mime_type}, */
+  { "max-size", CONF_TYPE_INT, mod_oal_conf_max_size},
+  { NULL, 0, NULL},
 };
 
 struct uhuru_module module = {
