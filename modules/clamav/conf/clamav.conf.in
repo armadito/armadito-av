@@ -15,3 +15,9 @@ tmpdir="@localstatedir@/lib/uhuru/tmp"
 
 # additional signatures database
 #db=/var/lib/uhuru/bases/clamav/extras/oiv.db
+
+# number of days after which the module will be considered 'late'
+#late_days = 3
+
+# number of days after which the module will be considered 'critical'
+#critical_days = 10
