@@ -191,6 +191,12 @@
     <ClCompile Include="..\..\..\libuhuru\src\libcore\notify.c">
       <Filter>Source Files\libcore</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\stdpaths.c">
+      <Filter>Source Files\libcore</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\os\windows\stdpaths_win.c">
+      <Filter>Header Files\os</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="libuhuru_core.def">
