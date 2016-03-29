@@ -21,6 +21,7 @@ enum uhuru_mod_status {
 
 struct uhuru_conf_entry {
   const char *key;
+  enum uhuru_conf_value_type type;
   enum uhuru_mod_status (*conf_fun)(struct uhuru_module *module, const char *key, struct uhuru_conf_value *value);
 };
 
