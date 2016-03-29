@@ -102,15 +102,9 @@ struct uhuru_module **uhuru_get_modules(struct uhuru *u)
   return module_manager_get_modules(u->module_manager);
 }
 
-struct uhuru_module *uhuru_get_module_by_name(struct uhuru *u, const char *module_name)
+struct uhuru_module *uhuru_get_module_by_name(struct uhuru *u, const char *name)
 {
-  struct uhuru_module **modv;
-
-  for (modv = module_manager_get_modules(u->module_manager); *modv != NULL; modv++)
-    if (!strcmp((*modv)->name, module_name))
-      return *modv;
-
-  return NULL;
+  return module_manager_get_module_by_name(u->module_manager, name);
 }
 
 int uhuru_close(struct uhuru *u, uhuru_error **error)

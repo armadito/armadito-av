@@ -419,6 +419,7 @@ struct uhuru_module alert_module = {
   .post_init_fun = NULL,
   .scan_fun = NULL,
   .close_fun = NULL,
+  .supported_mime_types = NULL,
   .name = "alert",
   .size = sizeof(struct alert_data),
 };

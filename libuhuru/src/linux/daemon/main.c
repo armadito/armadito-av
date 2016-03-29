@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <libuhuru/core.h>
 #include "config/libuhuru-config.h"
 
@@ -179,6 +180,69 @@ static int create_server_socket(struct uhuru_daemon_options *opts)
   return server_sock;
 }
 
+static void load_conf(struct uhuru_conf *conf)
+{
+  const char *conf_file;
+  uhuru_error *error = NULL;
+
+  conf_file = uhuru_std_path(CONFIG_FILE_LOCATION);
+
+  uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_INFO, "loading configuration file %s", conf_file);
+
+  if (uhuru_conf_load_file(conf, conf_file, &error)) {
+    uhuru_error_print(error, stderr);
+    exit(EXIT_FAILURE);
+  }    
+
+  free((void *)conf_file);
+}
+
+static void load_conf_dir(struct uhuru_conf *conf)
+{
+  const char *conf_dir;
+  DIR *dir;
+  struct dirent *dp;
+
+  conf_dir = uhuru_std_path(CONFIG_DIR_LOCATION);
+
+  uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_INFO, "loading configuration directory %s", conf_dir);
+
+  dir = opendir(conf_dir);
+  if (dir == NULL) {
+    uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_WARNING, "error opening configuration directory %s (%s)", conf_dir, strerror(errno));
+    return;
+  }
+
+  while ((dp = readdir(dir)) != NULL) {
+    const char *file_name = dp->d_name;
+    size_t len;
+    char *full_path;
+    uhuru_error *error = NULL;
+
+    if ( !strcmp(file_name, ".") || !strcmp(file_name, ".."))
+      continue;
+
+    len = strlen(file_name);
+    if (len > 5 && !strcmp(file_name + len - 5, ".conf")) {
+      if (asprintf(&full_path, "%s/%s", conf_dir, file_name) == -1)
+	break;
+
+      uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_INFO, "loading configuration file %s", full_path);
+
+      if (uhuru_conf_load_file(conf, full_path, &error)) {
+	uhuru_error_print(error, stderr);
+	exit(EXIT_FAILURE);
+      }    
+
+      free((void *)full_path);
+    }
+  }
+
+  closedir(dir);
+
+  free((void *)conf_dir);
+}
+
 static void start_daemon(const char *progname, struct uhuru_daemon_options *opts)
 {
   struct uhuru_conf *conf;
@@ -200,16 +264,17 @@ static void start_daemon(const char *progname, struct uhuru_daemon_options *opts
 
   uhuru_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_NONE, "starting %s%s", progname, opts->no_daemon ? "" : " in daemon mode");
 
-  server_sock = create_server_socket(opts);
+  conf = uhuru_conf_new();
+  load_conf(conf);
+  load_conf_dir(conf);
 
-  // TODO: loading the configuration
-  conf = NULL;
   uhuru = uhuru_open(conf, &error);
   if (uhuru == NULL) {
     uhuru_error_print(error, stderr);
-    close(server_sock);
     exit(EXIT_FAILURE);
   }
+
+  server_sock = create_server_socket(opts);
 
   server = server_new(uhuru, server_sock, opts->ipc_type);
 
