@@ -151,6 +151,7 @@ struct uhuru_module quarantine_module = {
   .post_init_fun = NULL,
   .scan_fun = NULL,
   .close_fun = NULL,
+  .supported_mime_types = NULL,
   .name = "quarantine",
   .size = sizeof(struct quarantine_data),
 };
