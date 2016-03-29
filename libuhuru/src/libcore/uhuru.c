@@ -27,6 +27,8 @@
 
 struct uhuru {
   struct module_manager *module_manager;
+
+/* TODO: add struct uhuru_conf *conf */
 };
 
 static struct uhuru *uhuru_new(void)
