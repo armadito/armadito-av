@@ -44,6 +44,7 @@ static struct uhuru_module *module_new(struct uhuru_module *src, struct uhuru *u
   mod->scan_fun = src->scan_fun;
   mod->close_fun = src->close_fun;
   mod->info_fun = src->info_fun;
+  mod->supported_mime_types = src->supported_mime_types;
   mod->name = os_strdup(src->name);
   mod->size = src->size;
   mod->status = UHURU_MOD_OK;
