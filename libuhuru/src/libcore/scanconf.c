@@ -105,6 +105,36 @@ void uhuru_scan_conf_add_mime_type(struct uhuru_scan_conf *c, const char *mime_t
   g_array_append_val(modules, mod);
 }
 
+void uhuru_scan_conf_add_module(struct uhuru_scan_conf *c, const char *module_name, struct uhuru *u)
+{
+  /* a GArray and not a GPtrArray because GArray can be automatically NULL terminated */
+  GArray *modules;
+  struct uhuru_module *mod = uhuru_get_module_by_name(u, module_name);
+  const char **p_mime_type;
+    
+  if (mod == NULL) {
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "scan configuration: no module '%s'", module_name);
+    return;
+  }
+    
+  if (mod->supported_mime_types == NULL) {
+    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "scan configuration: module '%s' has no supported mime types", module_name);
+    return;
+  }
+
+  for (p_mime_type = mod->supported_mime_types; *p_mime_type != NULL; p_mime_type++) {
+    modules = (GArray *)g_hash_table_lookup(c->mime_type_table, *p_mime_type);
+
+    if (modules == NULL) {
+      modules = g_array_new(TRUE, TRUE, sizeof(struct uhuru_module *));
+
+      g_hash_table_insert(c->mime_type_table, (gpointer)(os_strdup(*p_mime_type)), modules);
+    }
+    
+    g_array_append_val(modules, mod);
+  }
+}
+
 struct uhuru_module **uhuru_scan_conf_get_applicable_modules(struct uhuru_scan_conf *c, const char *mime_type)
 {
   GArray *modules;
