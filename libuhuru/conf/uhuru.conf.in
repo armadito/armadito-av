@@ -7,7 +7,10 @@
 # white list of directories: files in these directories will never be scanned for on-access scan
 white-list-dir = "/boot"; "/dev"; "/etc"; "/proc"; "/run"; "/sys"; "/var"
 
-# scan executables with module5_2 and clamav
+# scan with module5_2 and clamav
+modules=module5_2; clamav
+default-modules=clamav
+
 #mime-type = "application/x-executable"; module5_2; clamav
 #mime-type = "application/x-object"; module5_2; clamav
 #mime-type = "application/x-sharedlib"; module5_2; clamav

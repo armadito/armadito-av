@@ -103,6 +103,16 @@ static enum uhuru_update_status module5_2_info(struct uhuru_module *module, stru
   return UHURU_UPDATE_OK;
 }
 
+static const char *module5_2_mime_types[] = {
+  "application/x-executable",
+  "application/x-object",
+  "application/x-sharedlib",
+  "application/x-dosexec",
+  "application/x-msdos-program",
+  "application/x-msdownload",
+  NULL,
+};
+
 struct uhuru_module module = {
   .init_fun = module5_2_init,
   .conf_table= NULL,
@@ -110,5 +120,6 @@ struct uhuru_module module = {
   .scan_fun = module5_2_scan,
   .close_fun = module5_2_close,
   .info_fun = module5_2_info,
+  .supported_mime_types = module5_2_mime_types,
   .name = "module5_2",
 };
