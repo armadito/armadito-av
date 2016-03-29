@@ -4,10 +4,9 @@
 
 #include <wincrypt.h>
 #include <libuhuru-config.h>
+#include <libuhuru/libcore/stdpaths.h>
 
 #include "json\updatedb\uh_json_parse.h"
-
-
 
 // ---------------------------------------------------
 

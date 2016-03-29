@@ -6,6 +6,7 @@
 #include "register.h"
 #include "uh_info.h"
 #include "uh_notify.h"
+#include "uh_conf.h"
 
 // Msdn documentation: 
 // https://msdn.microsoft.com/en-us/library/windows/desktop/ms685141%28v=vs.85%29.aspx
@@ -29,11 +30,17 @@ int ServiceLoadProcedure( ) {
 	int ret = 0;
 	uhuru_error * uh_error = NULL;
 	HRESULT hres = S_OK;
+	struct uhuru_conf * conf = NULL;
 
 	__try {
 
+		// Init configuration structure
+		conf = uhuru_conf_new();
+
+		// Load configuration from registry.
+
 		// Init uhuru structure
-		uhuru = uhuru_open(&uh_error);
+		uhuru = uhuru_open(conf,&uh_error);
 		if (uhuru == NULL) {
 			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " uhuru_open() struct initialization failed!\n");
 			ret = -1;
@@ -1213,10 +1220,17 @@ int LaunchCmdLineServiceGUI( ) {
 	int ret = 0;
 	unsigned char c;
 	uhuru_error * uh_error = NULL;
+	struct uhuru_conf * conf = NULL;
 	HRESULT hres = S_OK;
-	
+
+
+	// Init configuration structure
+	conf = uhuru_conf_new();
+
+	// Load configuration from registry.
+
 	// Init uhuru structure
-	uhuru = uhuru_open(&uh_error);
+	uhuru = uhuru_open(conf,&uh_error);
 	if (uhuru == NULL) {
 		printf("[-] Error :: uhuru_open() struct initialization failed!\n");
 		return -1;
@@ -1444,6 +1458,29 @@ int main(int argc, char ** argv) {
 	struct uhuru_report uh_report = {0};
 	PVOID OldValue = NULL;
 
+	if (argc >= 2 && strncmp(argv[1],"--conf",6) == 0 ) {
+
+		/*if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {
+			return -1;
+		}*/
+
+		// TODO :: https://msdn.microsoft.com/fr-fr/library/windows/desktop/ms724072%28v=vs.85%29.aspx
+
+
+		conf_poc_windows( );
+
+		//restore_conf_from_registry( );
+
+		/*if (Wow64RevertWow64FsRedirection(OldValue) == FALSE ){
+			//  Failure to re-enable redirection should be considered
+			//  a criticial failure and execution aborted.
+			return -2;
+		}*/
+
+
+		return 0;
+	}
+
 	if ( argc >=3 && strncmp(argv[1],"--osdir",7) == 0 ){
 
 		if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {
@@ -1465,7 +1502,7 @@ int main(int argc, char ** argv) {
 
 	if (argc >= 2 && strncmp(argv[1], "--notify", 8) == 0) {
 
-		uhuru_notify_set_handler(send_notif);
+		uhuru_notify_set_handler((uhuru_notify_handler_t)send_notif);
 		
 		uhuru_notify(NOTIF_INFO,"Service started!");
 		uhuru_notify(NOTIF_WARNING,"Malware detected :: [%s]","TrojanFake");
