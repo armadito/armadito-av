@@ -3,24 +3,26 @@
 
 #include "os/stdpaths.h"
 
+#include <string.h>
+
 const char *os_stdpath_module()
 {
-  return LIBUHURU_MODULES_PATH;
+  return strdup(LIBUHURU_MODULES_PATH);
 }
 
 const char *os_stdpath_config_file()
 {
-  return LIBUHURU_CONF_DIR "/uhuru.conf";
+  return strdup(LIBUHURU_CONF_DIR "/uhuru.conf");
 }
 
 const char *os_stdpath_config_dir()
 {
-  return LIBUHURU_CONF_DIR "/conf.d";
+  return strdup(LIBUHURU_CONF_DIR "/conf.d");
 }
 
 const char *os_stdpath_bases()
 {
-  return LIBUHURU_BASES_DIR;
+  return strdup(LIBUHURU_BASES_DIR);
 }
 
 const char *os_stdpath_binary()
