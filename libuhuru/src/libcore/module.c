@@ -92,7 +92,7 @@ static int module_load(const char *filename, struct uhuru_module **pmodule, uhur
     return UHURU_ERROR_MODULE_SYMBOL_NOT_FOUND;
   }
 
-  uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_DEBUG, "module %s loaded from file %s", mod_loaded->name, filename);
+  uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_INFO, "module %s loaded from file %s", mod_loaded->name, filename);
 
   *pmodule = mod_loaded;
 
@@ -195,8 +195,40 @@ int module_manager_init_all(struct module_manager *mm, uhuru_error **error)
   return module_manager_all(mm, module_init, error);
 }
 
+static void module_conf_fun(const char *section, const char *key, struct uhuru_conf_value *value, void *user_data)
+{
+  struct module_manager *mm = (struct module_manager *)user_data;
+  struct uhuru_module *mod;
+  struct uhuru_conf_entry *conf_entry;
+
+  mod = module_manager_get_module_by_name(mm, section);
+  if (mod == NULL) {
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "configuration: no module '%s'", section);
+    return;
+  }
+
+  if (mod->conf_table == NULL)
+    return;
+
+  for(conf_entry = mod->conf_table; conf_entry->key != NULL; conf_entry++)
+    if (!strcmp(conf_entry->key, key))
+      break;
+
+  if (conf_entry->key == NULL || conf_entry->conf_fun == NULL) {
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "configuration: no key '%s' for module '%s'", key, mod->name);
+    return;
+  }
+
+  if ((*conf_entry->conf_fun)(mod, key, value) != UHURU_MOD_OK) {
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "configuration: cannot assign value to key '%s' for module '%s'", key, mod->name);
+    return;
+  }
+}
+
 int module_manager_configure_all(struct module_manager *mm, struct uhuru_conf *conf, uhuru_error **error)
 {
+  uhuru_conf_apply(conf, module_conf_fun, mm);
+
   return 0;
 }
 
@@ -254,6 +286,18 @@ struct uhuru_module **module_manager_get_modules(struct module_manager *mm)
   return (struct uhuru_module **)mm->modules->data;
 }
 
+struct uhuru_module *module_manager_get_module_by_name(struct module_manager *mm, const char *name)
+{
+  struct uhuru_module **modv;
+
+  for (modv = module_manager_get_modules(mm); *modv != NULL; modv++)
+    if (!strcmp((*modv)->name, name))
+      return *modv;
+
+  return NULL;
+}
+
+
 #ifdef DEBUG
 const char *module_debug(struct uhuru_module *module)
 {
@@ -273,7 +317,7 @@ const char *module_debug(struct uhuru_module *module)
 
     g_string_append_printf(s, "  configuration:\n");
     for(p = module->conf_table; p->key != NULL; p++)
-      g_string_append_printf(s, "    directive %-20s conf %p\n", p->key, p->conf_fun);
+      g_string_append_printf(s, "    key %-20s conf %p\n", p->key, p->conf_fun);
   }
 
   ret = s->str;
