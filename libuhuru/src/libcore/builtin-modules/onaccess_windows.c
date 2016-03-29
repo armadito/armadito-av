@@ -88,6 +88,7 @@ struct uhuru_module on_access_win_module = {
   .scan_fun = NULL,
   .close_fun = mod_onaccess_close,
   .info_fun = NULL,
+  .supported_mime_types = NULL,
   .name = "on-access",
   .size = sizeof(struct onaccess_data),
 };
