@@ -24,6 +24,8 @@ int module_manager_close_all(struct module_manager *mm, uhuru_error **error);
 /* returns a NULL-terminated array of struct uhuru_module */
 struct uhuru_module **module_manager_get_modules(struct module_manager *mm);
 
+struct uhuru_module *module_manager_get_module_by_name(struct module_manager *mm, const char *name);
+
 #ifdef DEBUG
 const char *module_debug(struct uhuru_module *module);
 #endif
