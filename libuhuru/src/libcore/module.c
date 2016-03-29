@@ -219,6 +219,12 @@ static void module_conf_fun(const char *section, const char *key, struct uhuru_c
     return;
   }
 
+  /* does the type in value match the type in the configuration entry? */
+  if ((uhuru_conf_value_get_type(value) & conf_entry->type) == 0) {
+    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "configuration: value type (%d) does not match declared type (%d) for key '%s' module '%s'", uhuru_conf_value_get_type(value), conf_entry->type, key, mod->name);
+    return;
+  }
+
   if ((*conf_entry->conf_fun)(mod, key, value) != UHURU_MOD_OK) {
     uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "configuration: cannot assign value to key '%s' for module '%s'", key, mod->name);
     return;
