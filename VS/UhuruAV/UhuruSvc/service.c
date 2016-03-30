@@ -6,6 +6,7 @@
 #include "register.h"
 #include "uh_info.h"
 #include "uh_notify.h"
+#include "uh_conf.h"
 
 // Msdn documentation: 
 // https://msdn.microsoft.com/en-us/library/windows/desktop/ms685141%28v=vs.85%29.aspx
@@ -29,11 +30,17 @@ int ServiceLoadProcedure( ) {
 	int ret = 0;
 	uhuru_error * uh_error = NULL;
 	HRESULT hres = S_OK;
+	struct uhuru_conf * conf = NULL;
 
 	__try {
 
+		// Init configuration structure
+		conf = uhuru_conf_new();
+
+		// Load configuration from registry.
+
 		// Init uhuru structure
-		uhuru = uhuru_open(&uh_error);
+		uhuru = uhuru_open(conf,&uh_error);
 		if (uhuru == NULL) {
 			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " uhuru_open() struct initialization failed!\n");
 			ret = -1;
@@ -63,6 +70,7 @@ int ServiceLoadProcedure( ) {
 
 		}	
 		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_INFO, " Service connected to the GUI successfully!\n");
+		uhuru_notify(NOTIF_INFO,"Service started!" );
 
 
 	}
@@ -114,7 +122,9 @@ int ServiceUnloadProcedure( ) {
 	if (uhuru != NULL) {
 		uhuru_close(uhuru, &uh_error);
 		uhuru = NULL;
-	}		
+	}
+
+	uhuru_notify(NOTIF_WARNING,"Service stopped!" );
 
 	return ret;
 }
@@ -668,6 +678,8 @@ void PerformServiceAction( ) {
 	// set log handler (windows log event) // move this statement to a better place.
 	uhuru_log_set_handler(UHURU_LOG_LEVEL_NONE, winEventHandler,NULL);
 
+	uhuru_notify_set_handler(send_notif);
+
 	ret = ServiceLoadProcedure( );
 	if (ret < 0) {
 		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service Initialization failed \n");
@@ -1208,16 +1220,24 @@ int LaunchCmdLineServiceGUI( ) {
 	int ret = 0;
 	unsigned char c;
 	uhuru_error * uh_error = NULL;
+	struct uhuru_conf * conf = NULL;
 	HRESULT hres = S_OK;
-	
+
+
+	// Init configuration structure
+	conf = uhuru_conf_new();
+
+	// Load configuration from registry.
+
 	// Init uhuru structure
-	uhuru = uhuru_open(&uh_error);
+	uhuru = uhuru_open(conf,&uh_error);
 	if (uhuru == NULL) {
 		printf("[-] Error :: uhuru_open() struct initialization failed!\n");
 		return -1;
 	}
 
 	ret = Start_IHM_Connection(uhuru,&onDemandCtx);
+	uhuru_notify(NOTIF_INFO, "[TEST mode] :: Service started !");
 
 	while(1) {
 		 printf("press 'q' to quit: \n");
@@ -1259,6 +1279,8 @@ int LaunchCmdLineServiceGUI( ) {
 		uhuru_close(uhuru,&uh_error);
 		uhuru = NULL;
 	}
+
+	uhuru_notify(NOTIF_WARNING, "[TEST mode] :: Service stopped !");
 
 	return ret;
 
@@ -1436,6 +1458,29 @@ int main(int argc, char ** argv) {
 	struct uhuru_report uh_report = {0};
 	PVOID OldValue = NULL;
 
+	if (argc >= 2 && strncmp(argv[1],"--conf",6) == 0 ) {
+
+		/*if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {
+			return -1;
+		}*/
+
+		// TODO :: https://msdn.microsoft.com/fr-fr/library/windows/desktop/ms724072%28v=vs.85%29.aspx
+
+
+		conf_poc_windows( );
+
+		//restore_conf_from_registry( );
+
+		/*if (Wow64RevertWow64FsRedirection(OldValue) == FALSE ){
+			//  Failure to re-enable redirection should be considered
+			//  a criticial failure and execution aborted.
+			return -2;
+		}*/
+
+
+		return 0;
+	}
+
 	if ( argc >=3 && strncmp(argv[1],"--osdir",7) == 0 ){
 
 		if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {
@@ -1457,7 +1502,7 @@ int main(int argc, char ** argv) {
 
 	if (argc >= 2 && strncmp(argv[1], "--notify", 8) == 0) {
 
-		uhuru_notify_set_handler(send_notif);
+		uhuru_notify_set_handler((uhuru_notify_handler_t)send_notif);
 		
 		uhuru_notify(NOTIF_INFO,"Service started!");
 		uhuru_notify(NOTIF_WARNING,"Malware detected :: [%s]","TrojanFake");
@@ -1469,6 +1514,8 @@ int main(int argc, char ** argv) {
 	if ( argc >=2 && strncmp(argv[1],"--testGUI",9) == 0 ){
 
 		DisplayBanner();
+
+		uhuru_notify_set_handler(send_notif);
 
 		if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {
 			return -1;
@@ -1494,6 +1541,8 @@ int main(int argc, char ** argv) {
 	if ( argc >=2 && strncmp(argv[1],"--test",6) == 0 ){
 
 		DisplayBanner( );
+
+		uhuru_notify_set_handler(send_notif);
 
 		ret = LaunchCmdLineService( );
 		if (ret < 0) {
