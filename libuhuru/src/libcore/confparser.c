@@ -17,181 +17,181 @@
  * the lexical analyzer
  */
 struct scanner {
-  int current_line;
-  int current_column;
-  int previous_column;
-  FILE *input;
-  GString *token_text;
+	int current_line;
+	int current_column;
+	int previous_column;
+	FILE *input;
+	GString *token_text;
 };
 
 enum token_type {
-  TOKEN_EOF			= 0,
-  TOKEN_LEFT_BRACE		= '[',
-  TOKEN_RIGHT_BRACE		= ']',
-  TOKEN_EQUAL_SIGN		= '=',
-  TOKEN_COMMA			= ',',
-  TOKEN_SEMI_COLON		= ';',
-  TOKEN_NONE			= 256,
-  TOKEN_STRING,
-  TOKEN_INTEGER,
+	TOKEN_EOF			= 0,
+	TOKEN_LEFT_BRACE		= '[',
+	TOKEN_RIGHT_BRACE		= ']',
+	TOKEN_EQUAL_SIGN		= '=',
+	TOKEN_COMMA			= ',',
+	TOKEN_SEMI_COLON		= ';',
+	TOKEN_NONE			= 256,
+	TOKEN_STRING,
+	TOKEN_INTEGER,
 };
 
 static struct scanner *scanner_new(FILE *input)
 {
-  struct scanner *s = malloc(sizeof(struct scanner));
+	struct scanner *s = malloc(sizeof(struct scanner));
 
-  s->input = input;
-  s->current_line = 1;
-  s->current_column = 1;
-  s->previous_column = 1;
+	s->input = input;
+	s->current_line = 1;
+	s->current_column = 1;
+	s->previous_column = 1;
 
-  s->token_text = g_string_new("");
+	s->token_text = g_string_new("");
 
-  return s;
+	return s;
 }
 
 static int scanner_current_line(struct scanner *s)
 {
-  return s->current_line;
+	return s->current_line;
 }
 
 static int scanner_current_column(struct scanner *s)
 {
-  return s->current_column;
+	return s->current_column;
 }
 
 static char *scanner_token_text(struct scanner *s)
 {
-  return s->token_text->str;
+	return s->token_text->str;
 }
 
 static int is_first_identifier(int c)
 {
-  return isalpha(c) || c == '_';
+	return isalpha(c) || c == '_';
 }
 
 static int is_identifier(int c)
 {
-  return isalnum(c) || c == '-'  || c == '_';
+	return isalnum(c) || c == '-'  || c == '_';
 }
 
 static int scanner_getc(struct scanner *s)
 {
-  int c;
+	int c;
 
-  c = getc(s->input);
+	c = getc(s->input);
 
-  if (c == '\n') {
-    s->current_line++;
-    s->previous_column = s->current_column;
-    s->current_column = 1;
-  } else
-    s->current_column++;
+	if (c == '\n') {
+		s->current_line++;
+		s->previous_column = s->current_column;
+		s->current_column = 1;
+	} else
+		s->current_column++;
 
-  return c;
+	return c;
 }
 
 static int scanner_ungetc(struct scanner *s, int c)
 {
-  if (c == '\n') {
-    s->current_line--;
-    s->current_column = s->previous_column;
-  }
-  else
-    s->current_column--;
+	if (c == '\n') {
+		s->current_line--;
+		s->current_column = s->previous_column;
+	}
+	else
+		s->current_column--;
 
-  return ungetc(c, s->input);
+	return ungetc(c, s->input);
 }
 
 int scanner_get_next_token(struct scanner *s)
 {
-  int c;
-  enum { 
-    S_INITIAL,
-    S_SPACE,
-    S_COMMENT,
-    S_IDENTIFIER,
-    S_INTEGER,
-    S_STRING,
-  } state;
+	int c;
+	enum {
+		S_INITIAL,
+		S_SPACE,
+		S_COMMENT,
+		S_IDENTIFIER,
+		S_INTEGER,
+		S_STRING,
+	} state;
 
-  state = S_INITIAL;
-  g_string_set_size(s->token_text, 0);
-
-  while(1) {
-    c = scanner_getc(s);
-
-    if (c == EOF)
-      return TOKEN_EOF;
-
-    switch(state) {
-
-    case S_INITIAL:
-      if (isblank(c))
-	state = S_SPACE;
-      else if (c == '#')
-	state = S_COMMENT;
-      else if (c == '"')
-	state = S_STRING;
-      else if (is_first_identifier(c)) {
-	g_string_append_c(s->token_text, c);
-	state = S_IDENTIFIER;
-      } else if (isdigit(c)) {
-	g_string_append_c(s->token_text, c);
-	state = S_INTEGER;
-      } else if (c == '[' || c == ']' || c == '=' || c == ',' || c == ';') {  /* may be return char in any case ? */
-	g_string_append_c(s->token_text, c);
-	return c;
-      }
-      break;
-
-    case S_SPACE:
-      if (!isspace(c)) {
-	scanner_ungetc(s, c);
 	state = S_INITIAL;
-      }
-      break;
+	g_string_set_size(s->token_text, 0);
 
-    case S_COMMENT:
-      if (c == '\n')
-	state = S_INITIAL;
-      break;
+	while(1) {
+		c = scanner_getc(s);
 
-    case S_STRING:
-      if (c != '"')
-	g_string_append_c(s->token_text, c);
-      else
-	return TOKEN_STRING;
-      break;
+		if (c == EOF)
+			return TOKEN_EOF;
 
-    case S_IDENTIFIER:
-      if (is_identifier(c))
-	g_string_append_c(s->token_text, c);
-      else {
-	scanner_ungetc(s, c);
-	return TOKEN_STRING;
-      }
-      break;
+		switch(state) {
 
-    case S_INTEGER:
-      if (isdigit(c))
-	g_string_append_c(s->token_text, c);
-      else {
-	scanner_ungetc(s, c);
-	return TOKEN_INTEGER;
-      }
-      break;
+		case S_INITIAL:
+			if (isblank(c))
+				state = S_SPACE;
+			else if (c == '#')
+				state = S_COMMENT;
+			else if (c == '"')
+				state = S_STRING;
+			else if (is_first_identifier(c)) {
+				g_string_append_c(s->token_text, c);
+				state = S_IDENTIFIER;
+			} else if (isdigit(c)) {
+				g_string_append_c(s->token_text, c);
+				state = S_INTEGER;
+			} else if (c == '[' || c == ']' || c == '=' || c == ',' || c == ';') {  /* may be return char in any case ? */
+				g_string_append_c(s->token_text, c);
+				return c;
+			}
+			break;
 
-    }
-  }
+		case S_SPACE:
+			if (!isspace(c)) {
+				scanner_ungetc(s, c);
+				state = S_INITIAL;
+			}
+			break;
 
-  return TOKEN_NONE;
+		case S_COMMENT:
+			if (c == '\n')
+				state = S_INITIAL;
+			break;
+
+		case S_STRING:
+			if (c != '"')
+				g_string_append_c(s->token_text, c);
+			else
+				return TOKEN_STRING;
+			break;
+
+		case S_IDENTIFIER:
+			if (is_identifier(c))
+				g_string_append_c(s->token_text, c);
+			else {
+				scanner_ungetc(s, c);
+				return TOKEN_STRING;
+			}
+			break;
+
+		case S_INTEGER:
+			if (isdigit(c))
+				g_string_append_c(s->token_text, c);
+			else {
+				scanner_ungetc(s, c);
+				return TOKEN_INTEGER;
+			}
+			break;
+
+		}
+	}
+
+	return TOKEN_NONE;
 }
 
 static void scanner_free(struct scanner *s)
 {
-  g_string_free(s->token_text, TRUE);
-  free(s);
+	g_string_free(s->token_text, TRUE);
+	free(s);
 }
 
 /*
@@ -200,161 +200,161 @@ static void scanner_free(struct scanner *s)
  */
 
 struct uhuru_conf_parser {
-  const char *filename;
-  FILE *input;
-  struct scanner *scanner;
-  enum token_type lookahead_token;
-  jmp_buf env;
-  char *current_section;
-  char *current_key;
-  enum uhuru_conf_value_type current_value_type;
-  int current_value_int;
-  const char *current_value_string;
-  GPtrArray *current_value_list;
-  conf_parser_callback_t callback;
-  void *user_data;
+	const char *filename;
+	FILE *input;
+	struct scanner *scanner;
+	enum token_type lookahead_token;
+	jmp_buf env;
+	char *current_section;
+	char *current_key;
+	enum uhuru_conf_value_type current_value_type;
+	int current_value_int;
+	const char *current_value_string;
+	GPtrArray *current_value_list;
+	conf_parser_callback_t callback;
+	void *user_data;
 };
 
 struct uhuru_conf_parser *uhuru_conf_parser_new(const char *filename, conf_parser_callback_t callback, void *user_data)
 {
-  struct uhuru_conf_parser *cp = malloc(sizeof(struct uhuru_conf_parser));
+	struct uhuru_conf_parser *cp = malloc(sizeof(struct uhuru_conf_parser));
 
-  cp->filename = os_strdup(filename);
+	cp->filename = os_strdup(filename);
 
 #ifdef WIN32
-  fopen_s(&cp->input,filename, "r");
+	fopen_s(&cp->input,filename, "r");
 #else
-  cp->input = fopen(filename, "r");
+	cp->input = fopen(filename, "r");
 #endif
 
-  if (cp->input == NULL) {
-    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "cannot open conf file %s", filename);
+	if (cp->input == NULL) {
+		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "cannot open conf file %s", filename);
 
-    return cp;
-  }
+		return cp;
+	}
 
-  cp->scanner = scanner_new(cp->input);
-  cp->lookahead_token = TOKEN_EOF;
-  cp->current_section = NULL;
-  cp->current_key = NULL;
-  cp->current_value_type = CONF_TYPE_VOID;
-  cp->current_value_int = 0;
-  cp->current_value_string = NULL;
-  cp->current_value_list = NULL;
+	cp->scanner = scanner_new(cp->input);
+	cp->lookahead_token = TOKEN_EOF;
+	cp->current_section = NULL;
+	cp->current_key = NULL;
+	cp->current_value_type = CONF_TYPE_VOID;
+	cp->current_value_int = 0;
+	cp->current_value_string = NULL;
+	cp->current_value_list = NULL;
 
-  cp->callback = callback;
-  cp->user_data = user_data;
+	cp->callback = callback;
+	cp->user_data = user_data;
 
-  return cp;
+	return cp;
 }
 
 static char *token2str(guint token)
 {
-  switch(token) {
+	switch(token) {
 #define M(E) case E: return #E
-    M(TOKEN_EOF);
-    M(TOKEN_LEFT_BRACE);
-    M(TOKEN_RIGHT_BRACE);
-    M(TOKEN_EQUAL_SIGN);
-    M(TOKEN_COMMA);
-    M(TOKEN_SEMI_COLON);
-    M(TOKEN_NONE);
-    M(TOKEN_STRING);
-  default:
-    return "???";
-  }
+		M(TOKEN_EOF);
+		M(TOKEN_LEFT_BRACE);
+		M(TOKEN_RIGHT_BRACE);
+		M(TOKEN_EQUAL_SIGN);
+		M(TOKEN_COMMA);
+		M(TOKEN_SEMI_COLON);
+		M(TOKEN_NONE);
+		M(TOKEN_STRING);
+	default:
+		return "???";
+	}
 
-  return "???";
+	return "???";
 }
 
 static void print_token(struct scanner *scanner, enum token_type token)
 {
-  fprintf(stderr, "%-20s %3d ", token2str(token), token);
-  if (token == TOKEN_STRING) 
-    fprintf(stderr, " \"%s\"", scanner_token_text(scanner));
-  else
-    fprintf(stderr, " %c", (token < 255) ? (char)token : '?');
-  fprintf(stderr, "\n");
+	fprintf(stderr, "%-20s %3d ", token2str(token), token);
+	if (token == TOKEN_STRING)
+		fprintf(stderr, " \"%s\"", scanner_token_text(scanner));
+	else
+		fprintf(stderr, " %c", (token < 255) ? (char)token : '?');
+	fprintf(stderr, "\n");
 }
 
 static const char *token_str(enum token_type token)
 {
-  if (token == TOKEN_STRING) 
-    return "string";
-  else if (token == TOKEN_EOF)
-    return "end of file";
-  else if (token < TOKEN_NONE) {
-    /* memory leak, I know, but this function is called only in case of syntax error... */
-    char *tmp = (char *)malloc(2);
+	if (token == TOKEN_STRING)
+		return "string";
+	else if (token == TOKEN_EOF)
+		return "end of file";
+	else if (token < TOKEN_NONE) {
+		/* memory leak, I know, but this function is called only in case of syntax error... */
+		char *tmp = (char *)malloc(2);
 
-    tmp[0] = (char)token;
-    tmp[1] = '\0';
+		tmp[0] = (char)token;
+		tmp[1] = '\0';
 
-    return tmp;
-  }
+		return tmp;
+	}
 
-  return "???";
+	return "???";
 }
 
-static void syntax_error(struct uhuru_conf_parser *cp, guint token) 
+static void syntax_error(struct uhuru_conf_parser *cp, guint token)
 {
-  uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_ERROR, "syntax error: file %s line %d column %d expecting '%s' got '%s'", 
-	    cp->filename,
-	    scanner_current_line(cp->scanner),
-	    scanner_current_column(cp->scanner),
-	    token_str(token), 
-	    token_str(cp->lookahead_token));
+	uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_ERROR, "syntax error: file %s line %d column %d expecting '%s' got '%s'",
+		cp->filename,
+		scanner_current_line(cp->scanner),
+		scanner_current_column(cp->scanner),
+		token_str(token),
+		token_str(cp->lookahead_token));
 
-  longjmp(cp->env, 1);
+	longjmp(cp->env, 1);
 }
 
 static void accept(struct uhuru_conf_parser *cp, guint token)
 {
-  if (cp->lookahead_token == token) {
-    if (cp->lookahead_token != TOKEN_EOF)
-      cp->lookahead_token = scanner_get_next_token(cp->scanner);
-  } else
-    syntax_error(cp, token);
+	if (cp->lookahead_token == token) {
+		if (cp->lookahead_token != TOKEN_EOF)
+			cp->lookahead_token = scanner_get_next_token(cp->scanner);
+	} else
+		syntax_error(cp, token);
 }
 
 static void call_callback(struct uhuru_conf_parser *cp)
 {
-  int ret;
-  struct uhuru_conf_value value;
+	int ret;
+	struct uhuru_conf_value value;
 
-  value.type = cp->current_value_type;
-  
-  switch(cp->current_value_type) {
-  case CONF_TYPE_INT:
-    value.v.int_v = cp->current_value_int;
-    ret = (*cp->callback)(cp->current_section, cp->current_key, &value, cp->user_data);
-    break;
+	value.type = cp->current_value_type;
 
-  case CONF_TYPE_STRING:
-    value.v.str_v = cp->current_value_string;
-    ret = (*cp->callback)(cp->current_section, cp->current_key, &value, cp->user_data);
-    free((void *)cp->current_value_string);
-    cp->current_value_string = NULL;
-    break;
+	switch(cp->current_value_type) {
+	case CONF_TYPE_INT:
+		value.v.int_v = cp->current_value_int;
+		ret = (*cp->callback)(cp->current_section, cp->current_key, &value, cp->user_data);
+		break;
 
-  case CONF_TYPE_LIST:    
-    g_ptr_array_add(cp->current_value_list, NULL);
-    value.v.list_v.values = (const char **)cp->current_value_list->pdata;
-    value.v.list_v.len = cp->current_value_list->len - 1;
-    ret = (*cp->callback)(cp->current_section, cp->current_key, &value, cp->user_data);
-    g_ptr_array_set_size(cp->current_value_list, 0);
-    break;
-  }
+	case CONF_TYPE_STRING:
+		value.v.str_v = cp->current_value_string;
+		ret = (*cp->callback)(cp->current_section, cp->current_key, &value, cp->user_data);
+		free((void *)cp->current_value_string);
+		cp->current_value_string = NULL;
+		break;
 
-  cp->current_value_type = CONF_TYPE_VOID;
-  
-  if (ret != 0) {
-    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_ERROR, "configuration file parser: callback return != 0 file %s line %d column %d",
-	      cp->filename,
-	      scanner_current_line(cp->scanner),
-	      scanner_current_column(cp->scanner));
-    longjmp(cp->env, 1);
-  }
+	case CONF_TYPE_LIST:
+		g_ptr_array_add(cp->current_value_list, NULL);
+		value.v.list_v.values = (const char **)cp->current_value_list->pdata;
+		value.v.list_v.len = cp->current_value_list->len - 1;
+		ret = (*cp->callback)(cp->current_section, cp->current_key, &value, cp->user_data);
+		g_ptr_array_set_size(cp->current_value_list, 0);
+		break;
+	}
+
+	cp->current_value_type = CONF_TYPE_VOID;
+
+	if (ret != 0) {
+		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_ERROR, "configuration file parser: callback return != 0 file %s line %d column %d",
+			cp->filename,
+			scanner_current_line(cp->scanner),
+			scanner_current_column(cp->scanner));
+		longjmp(cp->env, 1);
+	}
 }
 
 /*
@@ -377,185 +377,185 @@ static void r_list_sep(struct uhuru_conf_parser *cp);
 
 static void free_and_set(char **old, char *new)
 {
-  if (*old != NULL)
-    free(*old);
+	if (*old != NULL)
+		free(*old);
 
-  *old = os_strdup(new);
+	*old = os_strdup(new);
 }
 
 /* configuration : section_list */
 static void r_configuration(struct uhuru_conf_parser *cp)
 {
-  r_section_list(cp);
+	r_section_list(cp);
 }
 
 /* section_list : section section_list | EMPTY */
 static void r_section_list(struct uhuru_conf_parser *cp)
 {
-  if (cp->lookahead_token == TOKEN_LEFT_BRACE) {
-    r_section(cp);
-    r_section_list(cp);
-  }
+	if (cp->lookahead_token == TOKEN_LEFT_BRACE) {
+		r_section(cp);
+		r_section_list(cp);
+	}
 }
 
 /* section : '[' STRING ']' definition_list */
 static void r_section(struct uhuru_conf_parser *cp)
 {
-  accept(cp, TOKEN_LEFT_BRACE);
-  r_section_name(cp);
-  accept(cp, TOKEN_RIGHT_BRACE);
-  r_definition_list(cp);
+	accept(cp, TOKEN_LEFT_BRACE);
+	r_section_name(cp);
+	accept(cp, TOKEN_RIGHT_BRACE);
+	r_definition_list(cp);
 }
 
 /* section_name : STRING */
 static void r_section_name(struct uhuru_conf_parser *cp)
 {
-  /* store current section */
-  free_and_set(&cp->current_section, scanner_token_text(cp->scanner));
+	/* store current section */
+	free_and_set(&cp->current_section, scanner_token_text(cp->scanner));
 
-  accept(cp, TOKEN_STRING);
+	accept(cp, TOKEN_STRING);
 }
 
 /* definition_list: definition definition_list | EMPTY */
 static void r_definition_list(struct uhuru_conf_parser *cp)
 {
-  if (cp->lookahead_token == TOKEN_STRING) {
-    r_definition(cp);
-    r_definition_list(cp);
-  }
+	if (cp->lookahead_token == TOKEN_STRING) {
+		r_definition(cp);
+		r_definition_list(cp);
+	}
 }
 
 /* definition : key '=' value */
 static void r_definition(struct uhuru_conf_parser *cp)
 {
-  r_key(cp);
-  accept(cp, TOKEN_EQUAL_SIGN);
-  r_value(cp);
+	r_key(cp);
+	accept(cp, TOKEN_EQUAL_SIGN);
+	r_value(cp);
 
-  /* process stored values by calling the callback */
-  call_callback(cp);
+	/* process stored values by calling the callback */
+	call_callback(cp);
 }
 
 /* key : STRING */
 static void r_key(struct uhuru_conf_parser *cp)
 {
-  /* store current key */
-  free_and_set(&cp->current_key, scanner_token_text(cp->scanner));
+	/* store current key */
+	free_and_set(&cp->current_key, scanner_token_text(cp->scanner));
 
-  accept(cp, TOKEN_STRING);
+	accept(cp, TOKEN_STRING);
 }
 
 /* value : int_value | string_value opt_string_list */
 static void r_value(struct uhuru_conf_parser *cp)
 {
-  if (cp->lookahead_token == TOKEN_INTEGER)
-    r_int_value(cp);
-  else if (cp->lookahead_token == TOKEN_STRING) {
-    r_string_value(cp);
-    r_opt_string_list(cp);
-  }
+	if (cp->lookahead_token == TOKEN_INTEGER)
+		r_int_value(cp);
+	else if (cp->lookahead_token == TOKEN_STRING) {
+		r_string_value(cp);
+		r_opt_string_list(cp);
+	}
 }
 
 /* int_value: INT */
 static void r_int_value(struct uhuru_conf_parser *cp)
 {
-  /* store current value */
-  cp->current_value_type = CONF_TYPE_INT;
-  cp->current_value_int = atoi(scanner_token_text(cp->scanner));
+	/* store current value */
+	cp->current_value_type = CONF_TYPE_INT;
+	cp->current_value_int = atoi(scanner_token_text(cp->scanner));
 
-  accept(cp, TOKEN_INTEGER);
+	accept(cp, TOKEN_INTEGER);
 }
 
 /* string_value: STRING */
 static void r_string_value(struct uhuru_conf_parser *cp)
 {
-  /* store current value */
-  cp->current_value_type = CONF_TYPE_STRING;
-  cp->current_value_string = os_strdup(scanner_token_text(cp->scanner));
+	/* store current value */
+	cp->current_value_type = CONF_TYPE_STRING;
+	cp->current_value_string = os_strdup(scanner_token_text(cp->scanner));
 
-  accept(cp, TOKEN_STRING);
+	accept(cp, TOKEN_STRING);
 }
 
 /* opt_string_list : list_sep list_string_value opt_string_list | EMPTY */
 static void r_opt_string_list(struct uhuru_conf_parser *cp)
 {
-  if (cp->lookahead_token == TOKEN_COMMA || cp->lookahead_token == TOKEN_SEMI_COLON) {
-    r_list_sep(cp);
-    r_list_string_value(cp);
-    r_opt_string_list(cp);
-  }
+	if (cp->lookahead_token == TOKEN_COMMA || cp->lookahead_token == TOKEN_SEMI_COLON) {
+		r_list_sep(cp);
+		r_list_string_value(cp);
+		r_opt_string_list(cp);
+	}
 }
 
 /* list_string_value: STRING */
 static void r_list_string_value(struct uhuru_conf_parser *cp)
 {
-  /* if cp->current_value_string is not NULL, it is the first element of the list */
-  if (cp->current_value_string != NULL) {
-    cp->current_value_type = CONF_TYPE_LIST;
+	/* if cp->current_value_string is not NULL, it is the first element of the list */
+	if (cp->current_value_string != NULL) {
+		cp->current_value_type = CONF_TYPE_LIST;
 
-    g_ptr_array_add(cp->current_value_list, os_strdup(cp->current_value_string));
-    free((void *)cp->current_value_string);
-    cp->current_value_string = NULL;
-  }
+		g_ptr_array_add(cp->current_value_list, os_strdup(cp->current_value_string));
+		free((void *)cp->current_value_string);
+		cp->current_value_string = NULL;
+	}
 
-  g_ptr_array_add(cp->current_value_list, os_strdup(scanner_token_text(cp->scanner)));
+	g_ptr_array_add(cp->current_value_list, os_strdup(scanner_token_text(cp->scanner)));
 
-  accept(cp, TOKEN_STRING);
+	accept(cp, TOKEN_STRING);
 }
 
 /* list_sep : ',' | ';'  */
 static void r_list_sep(struct uhuru_conf_parser *cp)
 {
-  if (cp->lookahead_token == TOKEN_COMMA)
-    accept(cp, TOKEN_COMMA);
-  else
-    accept(cp, TOKEN_SEMI_COLON);
+	if (cp->lookahead_token == TOKEN_COMMA)
+		accept(cp, TOKEN_COMMA);
+	else
+		accept(cp, TOKEN_SEMI_COLON);
 }
 
 void arg_destroy_notify(gpointer data)
 {
-  free(data);
+	free(data);
 }
 
 int uhuru_conf_parser_parse(struct uhuru_conf_parser *cp)
 {
-  int ret = -2;
+	int ret = -2;
 
-  if (cp->input == NULL)
-    return -1;
+	if (cp->input == NULL)
+		return -1;
 
-  cp->lookahead_token = scanner_get_next_token(cp->scanner);
+	cp->lookahead_token = scanner_get_next_token(cp->scanner);
 
-  cp->current_section = NULL;
-  cp->current_key = NULL;
-  cp->current_value_list = g_ptr_array_new_with_free_func(arg_destroy_notify);
+	cp->current_section = NULL;
+	cp->current_key = NULL;
+	cp->current_value_list = g_ptr_array_new_with_free_func(arg_destroy_notify);
 
-  if (!setjmp(cp->env)) {
-    r_configuration(cp);
+	if (!setjmp(cp->env)) {
+		r_configuration(cp);
 
-    accept(cp, TOKEN_EOF);
+		accept(cp, TOKEN_EOF);
 
-    ret = 0;
-  }
+		ret = 0;
+	}
 
-  return ret;
+	return ret;
 }
 
 void uhuru_conf_parser_free(struct uhuru_conf_parser *cp)
 {
-  if (cp->input != NULL) {
-    fclose(cp->input);
+	if (cp->input != NULL) {
+		fclose(cp->input);
 
-    scanner_free(cp->scanner);
+		scanner_free(cp->scanner);
 
-    if (cp->current_value_string != NULL)
-      free((void *)cp->current_value_string);
-    
-    if (cp->current_value_list != NULL)
-      g_ptr_array_free(cp->current_value_list, TRUE);
-  }
+		if (cp->current_value_string != NULL)
+			free((void *)cp->current_value_string);
 
-  free((void *)cp->filename);
+		if (cp->current_value_list != NULL)
+			g_ptr_array_free(cp->current_value_list, TRUE);
+	}
 
-  free(cp);
+	free((void *)cp->filename);
+
+	free(cp);
 }
