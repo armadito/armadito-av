@@ -30,7 +30,7 @@ extern "C" {
    * \brief allocate and initialize a uhuru handle
    *
    * This function allocates a `uhuru` structure and initializes it.
-   * 
+   *
    * Initialization steps are:
    * - dynamic loading of the module located in modules path (platform dependant)
    * - calling the `init` function of each module
@@ -41,7 +41,7 @@ extern "C" {
    *
    *
    * If any step fails, the function returns NULL and fills the error if error return location is non NULL.
-   * 
+   *
    * \param[in] conf       the configuration
    * \param[out] error     return location for a uhuru_error, or NULL
    *
@@ -54,18 +54,20 @@ extern "C" {
    * \brief de-initialize and de-allocate a uhuru handle
    *
    * This function de-initializes and de-allocates a `uhuru` structure.
-   * 
+   *
    * De-initialization steps are:
    * - calling the `close` function of each module
    * - de-allocating the module data
    *
    * If any step fails, the function returns an error code and fills the error if error return location is non NULL.
-   * 
+   *
    * \param[out] error     return location for a uhuru_error, or NULL
    *
    * \return               0 if OK, error code if an error occured
    */
   int uhuru_close(struct uhuru *u, uhuru_error **error);
+
+	struct uhuru_conf *uhuru_get_conf(struct uhuru *u);
 
 #ifdef __cplusplus
 }
