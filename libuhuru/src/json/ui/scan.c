@@ -30,7 +30,7 @@ static time_t get_milliseconds(void)
 #endif
 
 #ifdef WIN32
-#error must implement get_milliseconds on windows
+//#error must implement get_milliseconds on windows
 #if 0
 Note: gettimeofday on windows:
 #include <time.h>
