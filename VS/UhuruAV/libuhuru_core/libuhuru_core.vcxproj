@@ -39,8 +39,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)..\glib\win32\glib_2.28.8\lib\glib-2.0\include;$(SolutionDir)..\glib\win32\glib_2.28.8\include\glib-2.0;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)..\glib\win32\glib_2.28.8\lib;$(SolutionDir)..\json-c\json-c\Debug;D:\Novit\uhuru-av\VS\json-c\json-c\Debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)..\glib\win32\glib_2.28.8\lib\glib-2.0\include;$(SolutionDir)..\glib\win32\glib_2.28.8\include\glib-2.0;D:\Novit\uhuru-av\VS\glib\win32\glib-2.47.6\glib_;D:\Novit\uhuru-av\VS\glib\win32\glib-2.47.6_;D:\Novit\uhuru-av\VS\glib\win32\glib-2.47.6\gmodule_;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\glib\win32\glib_2.28.8\lib;$(SolutionDir)..\json-c\json-c\Debug;D:\Novit\uhuru-av\VS\json-c\json-c\Debug;D:\Novit\uhuru-av\VS\glib\win32\glib-2.47.6\build\win32\vs12\Debug\Win32\bin_;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -122,6 +122,7 @@
     <ClCompile Include="..\..\..\libuhuru\src\libcore\scan.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\scanconf.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\status.c" />
+    <ClCompile Include="..\..\..\libuhuru\src\libcore\stdpaths.c" />
     <ClCompile Include="..\..\..\libuhuru\src\libcore\uhuru.c" />
     <ClCompile Include="..\..\..\libuhuru\src\os\windows\dir.c">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
@@ -130,6 +131,7 @@
     <ClCompile Include="..\..\..\libuhuru\src\os\windows\mimetype.c">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
     </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\os\windows\stdpaths_win.c" />
     <ClCompile Include="..\..\..\libuhuru\src\os\windows\string.c" />
   </ItemGroup>
   <ItemGroup>
