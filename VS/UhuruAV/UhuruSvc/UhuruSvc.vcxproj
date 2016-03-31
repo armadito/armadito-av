@@ -83,6 +83,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\libuhuru\src\json\ui\conf.c" />
     <ClCompile Include="..\..\..\libuhuru\src\json\ui\jsonhandler.c" />
     <ClCompile Include="..\..\..\libuhuru\src\json\ui\quarantine.c" />
     <ClCompile Include="..\..\..\libuhuru\src\json\ui\scan.c" />
@@ -97,7 +98,6 @@
     <ClCompile Include="uh_info.c" />
     <ClCompile Include="log.c" />
     <ClCompile Include="named_pipe_client.c" />
-    <ClCompile Include="named_pipe_server.c" />
     <ClCompile Include="uh_quarantine.c" />
     <ClCompile Include="register.c" />
     <ClCompile Include="scan_on_access.c" />
@@ -107,6 +107,7 @@
     <ClCompile Include="update.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\libuhuru\src\json\ui\conf.h" />
     <ClInclude Include="..\..\..\libuhuru\src\json\ui\jsonhandler.h" />
     <ClInclude Include="..\..\..\libuhuru\src\json\ui\jsonhandler_p.h" />
     <ClInclude Include="..\..\..\libuhuru\src\json\ui\quarantine.h" />
@@ -117,11 +118,11 @@
     <ClInclude Include="..\..\..\libuhuru\src\utils\getopt.h" />
     <ClInclude Include="..\..\..\libuhuru\src\utils\uh_json.h" />
     <ClInclude Include="others.h" />
+    <ClInclude Include="structs.h" />
     <ClInclude Include="uh_conf.h" />
     <ClInclude Include="uh_info.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="named_pipe_client.h" />
-    <ClInclude Include="named_pipe_server.h" />
     <ClInclude Include="uh_notify.h" />
     <ClInclude Include="uh_quarantine.h" />
     <ClInclude Include="register.h" />

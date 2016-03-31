@@ -1,13 +1,16 @@
 #include "uh_conf.h"
 //#include <Windows.h>
+#include <libuhuru/core.h>
+#include <json\ui\ui.h>
 
 #define APP_ROOT_KEY_PATH "SOFTWARE\\Novit\\Armadito"
 #define COMPAGNY_NAME "BLABLA"
 #define PRODUCT_NAME "Armadito"
 
+#define SVC_IPC_PATH "\\\\.\\pipe\\Armadito_ondemand"
+
 
 #define MAX_LEN 512
-
 
 
 int create_app_registry( ) {
@@ -454,7 +457,7 @@ int registry_walker(HKEY hkey, const char * section,  struct uhuru_conf * conf){
 						break;
 					}
 					//printf("[+] Debug :: value_name = %s :: value_type = %d :: data_len = %d :: data_int = %d\n",value_name,value_type,data_len,data_int );
-					printf("[+] Debug :: (%s) => %d\n",value_name,data_int );
+					//printf("[+] Debug :: (%s) => %d\n",value_name,data_int );
 
 					// add value to conf struct
 					if (section != NULL)
@@ -469,7 +472,7 @@ int registry_walker(HKEY hkey, const char * section,  struct uhuru_conf * conf){
 						printf("[-] Error :: RegEnumValueA failed! :: GLE= %d\n", res);
 						break;
 					}
-					printf("[+] Debug :: (%s) => %s\n",value_name,data_str);
+					//printf("[+] Debug :: (%s) => %s\n",value_name,data_str);
 
 					if (section != NULL)
 						uhuru_conf_add_string(conf, section, value_name, data_str);
@@ -479,7 +482,7 @@ int registry_walker(HKEY hkey, const char * section,  struct uhuru_conf * conf){
 				case REG_MULTI_SZ:
 
 					//data_string
-					printf("[+] Debug :: value_name = %s :: value_type = %d :: data_len = %d\n",value_name,value_type,data_len );
+					//printf("[+] Debug :: value_name = %s :: value_type = %d :: data_len = %d\n",value_name,value_type,data_len );
 
 					data_str = (char *)calloc(data_len + 1, sizeof(char));
 					if ((res = RegGetValueA(hkey,NULL,value_name,RRF_RT_ANY, NULL,data_str,&data_len)) != ERROR_SUCCESS ) {
@@ -488,15 +491,15 @@ int registry_walker(HKEY hkey, const char * section,  struct uhuru_conf * conf){
 					}
 
 					//printf("[+] Debug :: [%s] => %s\n",value_name,data_str);
-					printf("[+] Debug :: (%s) =>\n",value_name);
+					//printf("[+] Debug :: (%s) =>\n",value_name);
 
 					list_len = 0;
 					tmp = data_str;
 					for (; *tmp != '\0'; tmp += strnlen(tmp,MAX_PATH)+1) {
-						printf("\t\tvalue = %s\n",tmp);
+						//printf("\t\tvalue = %s\n",tmp);
 						list_len++;
 					}
-					printf("\n",list_len);
+					///printf("\n");
 
 					data_list = (char**)calloc(list_len, sizeof(char*));
 					tmp = data_str;
@@ -554,7 +557,8 @@ int registry_walker(HKEY hkey, const char * section,  struct uhuru_conf * conf){
 				__leave;
 			}
 
-			printf("[+] Debug :: sub_key_name = [%s] :: sub_key_len = %d :: class_len = %d\n",subkey_name, subkey_len,class_len);			
+			printf("[+] Debug :: section = [%s]\n",subkey_name);
+			//printf("[+] Debug :: sub_key_name = [%s] :: sub_key_len = %d :: class_len = %d\n",subkey_name, subkey_len,class_len);
 
 			
 			if ((res = RegOpenKeyA(hkey,subkey_name, &hSubKey)) != ERROR_SUCCESS) {
@@ -566,7 +570,7 @@ int registry_walker(HKEY hkey, const char * section,  struct uhuru_conf * conf){
 
 			registry_walker(hSubKey,subkey_name,conf);
 
-			printf("\n\n");
+			//printf("\n\n");
 
 		}
 
@@ -650,9 +654,9 @@ int restore_conf_from_registry(struct uhuru_conf * conf) {
 		registry_walker(hAppKey,NULL,conf);
 
 
-		printf("\n\n UHURU_CONF :::\n\n");		
+		//printf("\n\n UHURU_CONF :::\n\n");		
 		// display uhuru_conf
-		uhuru_conf_apply(conf,(uhuru_conf_fun_t)display_entry, &data);
+		//uhuru_conf_apply(conf,(uhuru_conf_fun_t)display_entry, &data);
 		
 
 	}
@@ -668,7 +672,6 @@ int restore_conf_from_registry(struct uhuru_conf * conf) {
 
 	return ret;
 }
-
 
 
 int conf_poc_windows( ) {
@@ -716,3 +719,83 @@ int conf_poc_windows( ) {
 	return ret;
 
 }
+
+
+int disable_onaccess() {
+
+	int ret = 0;
+	json_object * jobj = NULL;
+	json_object * jparams = NULL;
+	char * request = NULL;
+	int req_len = 0;
+	char response[2048];
+	int response_len = 2048;
+	enum uhuru_json_status status = JSON_OK;
+
+
+	__try {
+
+		if ((jobj = json_object_new_object()) == NULL) {
+			printf("[-] Error :: disable_onaccess :: can't create json object!\n");
+			ret = -2;
+			__leave;
+		}
+
+		if ((jparams = json_object_new_object()) == NULL) {
+			printf("[-] Error :: disable_onaccess :: can't create json object!\n");
+			ret = -3;
+			__leave;
+		}		
+
+		/*
+		{ 
+			"av_request":"conf_set",
+			"id":123,			
+			"params": {
+				"section":"on-access"
+				"key":"enable",
+				"value":1
+			} 
+		}
+		*/
+
+		json_object_object_add(jobj, "av_request", json_object_new_string("conf_set"));
+		json_object_object_add(jobj, "id", json_object_new_int(123));
+
+		json_object_object_add(jparams,"section", json_object_new_string("on-access"));
+		json_object_object_add(jparams, "key", json_object_new_string("enable"));
+		json_object_object_add(jparams, "value", json_object_new_int(0));
+		json_object_object_add(jobj, "params", jparams);
+			
+		request = json_object_get_string(jobj);
+		req_len = strnlen(request,MAX_LEN);
+		
+		status = json_handler_ui_request(SVC_IPC_PATH, request, req_len, response, response_len);
+		if (status != JSON_OK) {
+			//printf("[-] Warning :: send_notif :: notification not sent/received correctly!\n");
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_WARNING,"[-] Warning :: disable_onaccess :: notification not sent/received correctly!\n");
+			ret = -4;
+			__leave;
+		}
+
+		printf("[+] Debug :: disable_onaccess :: notification = %s\n",request);
+
+
+
+	}
+	__finally {
+
+		if (jobj != NULL) {
+			json_object_put(jobj);
+		}
+
+		if (jparams != NULL) {
+			json_object_put(jparams);
+		}
+	}
+
+
+	return ret;
+
+}
+

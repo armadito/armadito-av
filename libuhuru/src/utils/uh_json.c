@@ -183,9 +183,9 @@ const char* json_parse_and_process(json_object * jobj, struct new_scan_action* s
 		return json_get_protocol_err_msg("scan_path was empty or not found.", scan_id);
 	}
 
-	scan->scan_path = scan_path;
-	scan->scan_id = scan_id;
-	scan->scan_action = scan_action;
+	//scan->scan_path = scan_path;
+	//scan->scan_id = scan_id;
+	//scan->scan_action = scan_action;
 
 	// Step 3 : send ok to IHM
 	return json_get_basic_ok_response(scan_id, scan_action);
