@@ -149,12 +149,16 @@ static enum uhuru_mod_status clamav_post_init(struct uhuru_module *module)
   int ret;
   unsigned int signature_count = 0;
   
-  if ((ret = cl_engine_set_str(cl_data->clamav_engine, CL_ENGINE_TMPDIR, cl_data->tmp_dir)) != CL_SUCCESS) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "ClamAV: error setting temporary directory: %s", cl_strerror(ret));
-    cl_engine_free(cl_data->clamav_engine);
-    cl_data->clamav_engine = NULL;
-    return UHURU_MOD_INIT_ERROR;
+  if (cl_data->tmp_dir != NULL) {
+
+	  if ((ret = cl_engine_set_str(cl_data->clamav_engine, CL_ENGINE_TMPDIR, cl_data->tmp_dir)) != CL_SUCCESS) {
+		uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "ClamAV: error setting temporary directory: %s", cl_strerror(ret));
+		cl_engine_free(cl_data->clamav_engine);
+		cl_data->clamav_engine = NULL;
+		return UHURU_MOD_INIT_ERROR;
+	  }
   }
+	  
 
   if ((ret = cl_load(cl_data->db_dir, cl_data->clamav_engine, &signature_count, CL_DB_STDOPT)) != CL_SUCCESS) {
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "ClamAV: error loading databases: %s", cl_strerror(ret));

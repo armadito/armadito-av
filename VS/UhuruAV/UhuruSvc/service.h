@@ -4,8 +4,6 @@
 #include <Windows.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "named_pipe_server.h"
-#include "uh_quarantine.h"
 
 #define SVCNAME TEXT("UhuruSvc")
 #define SVCDISPLAY TEXT("Uhuru Scan Service")
@@ -28,6 +26,13 @@
 // If the real time analysis is enabled or not.
 #define REAL_TIME_ENABLED 1
 
+typedef enum cmd_mode {
+	WITHOUT_DRIVER = 1,
+	WITH_DRIVER = 2
+}cmd_mode;
+
+
+
 int ServiceInstall( );
 int ServiceRemove( );
 VOID ReportSvcStatus(DWORD dwCurrentState, DWORD dwWin32ExitCode, DWORD dwWaitHint);
@@ -44,6 +49,7 @@ int ServiceContinue();
 
 
 int ServiceLoadProcedure( );
+int ServiceLoadProcedure_cmd(cmd_mode mode);
 int ServiceUnloadProcedure( );
 
 
