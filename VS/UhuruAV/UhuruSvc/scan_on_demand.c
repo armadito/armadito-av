@@ -3,6 +3,15 @@
 #include <stdio.h>
 #include "scan_on_demand.h"
 
+/*
+	int do_apply_conf( )
+	This function apply changes made in configuration (...)
+
+*/
+int do_apply_conf( ) {
+	return 0;
+}
+
 int CreatePipeSecurityAttributes(SECURITY_ATTRIBUTES * pSa) {
 
 	int ret = 0;
@@ -65,21 +74,13 @@ int CreatePipeSecurityAttributes(SECURITY_ATTRIBUTES * pSa) {
 
 int WINAPI ScanThreadWork(PGLOBAL_SCAN_CONTEXT Context) {
 
-	int ret = 0;
-	BOOL bConnected = FALSE;
-	HANDLE hPipe = NULL;
+	int ret = 0;	
 	int i = 0, index = 0, count =0;
 	DWORD threadId = 0;
-	PONDEMAND_THREAD_CONTEXT threadCtx = NULL;
-	
+	PONDEMAND_THREAD_CONTEXT threadCtx = NULL;	
 	HANDLE hHeap = GetProcessHeap();
-	TCHAR* pchRequest = NULL;
-	TCHAR* pchReply = NULL;
 	DWORD cbBytesRead = 0, cbReplyBytes = 0, cbWritten = 0;
-	BOOL fSuccess = FALSE;
-	struct new_scan_action* scan = NULL;
-	
-	struct json_client * cl = NULL;
+	BOOL fSuccess = FALSE;	
 
 	struct uhuru_json_handler * json_handler = NULL;
 	enum uhuru_json_status status = JSON_OK ;
@@ -89,8 +90,6 @@ int WINAPI ScanThreadWork(PGLOBAL_SCAN_CONTEXT Context) {
 	int resp_len = 0;
 
 	PVOID OldValue = NULL;
-
-
 	
 
 	if (Context == NULL) {
@@ -152,7 +151,7 @@ int WINAPI ScanThreadWork(PGLOBAL_SCAN_CONTEXT Context) {
 			if (Context->onDemandCtx->Finalized) {
 				printf("[+] Debug :: ScanThreadWork :: [%d] :: Finalizing thread execution...\n",threadCtx->ThreadId);
 				__leave;
-			}			
+			}
 
 			// Read GUI request from the pipe.
 			if ((ReadFile(threadCtx->hPipeInst, request, BUFSIZE,&cbBytesRead,NULL) == FALSE) || cbBytesRead <=0) {
@@ -230,21 +229,7 @@ int WINAPI ScanThreadWork(PGLOBAL_SCAN_CONTEXT Context) {
 			uhuru_json_handler_free(json_handler);
 			//free(json_handler);
 			json_handler = NULL;
-		}
-
-		
-
-		// Free allocated memory.
-		if (pchReply != NULL)
-			HeapFree(hHeap, 0, pchReply);
-
-		if (pchRequest != NULL) 
-			HeapFree(hHeap, 0, pchRequest);
-
-		if (scan != NULL) {
-			free(scan);
-			scan = NULL;
-		}		
+		}					
 
 		// Close the pipe instance.
 		if (!CloseHandle(threadCtx->hPipeInst)) {
@@ -450,6 +435,15 @@ int Start_IHM_Connection(_Inout_ PGLOBAL_SCAN_CONTEXT Context) {
 
 	__try {
 
+		// on-access context allocation.
+		Context->onDemandCtx = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(ONDEMAND_SCAN_CONTEXT) *1);
+		if (Context->onDemandCtx == NULL) {    
+			ret = -2;
+			__leave;
+		}
+		//ZeroMemory(Context->onDemandCtx, sizeof(ONDEMAND_SCAN_CONTEXT));
+
+
 		// Create and Initialize main thread contexts. (containing threadID, handle to the thread, 
 		mainThreadCtx = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(ONDEMAND_THREAD_CONTEXT) * 1);
 		if (mainThreadCtx == NULL) {
@@ -494,6 +488,7 @@ int Start_IHM_Connection(_Inout_ PGLOBAL_SCAN_CONTEXT Context) {
 	}
 	__finally {
 
+		// on failure.
 		if (ret < 0) {
 
 			if (Context->onDemandCtx->MainThreadCtx->Handle != NULL && Context->onDemandCtx->MainThreadCtx->Handle != INVALID_HANDLE_VALUE ) {
@@ -506,6 +501,11 @@ int Start_IHM_Connection(_Inout_ PGLOBAL_SCAN_CONTEXT Context) {
 					printf("[-] Error :: start_IHM_Connection :: HeapFree failed with error :: %d\n",GetLastError());
 				}
 				Context->onDemandCtx->MainThreadCtx = NULL;
+			}
+
+			if (Context->onDemandCtx != NULL) {
+				HeapFree(GetProcessHeap( ), 0, Context->onDemandCtx);
+				Context->onDemandCtx = NULL;
 			}
 
 		}
