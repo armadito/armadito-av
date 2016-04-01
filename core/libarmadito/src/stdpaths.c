@@ -1,5 +1,6 @@
-#include "libuhuru-config.h"
-#include <libuhuru/core.h>
+#include <libarmadito.h>
+
+#include "libarmadito-config.h"
 #include "os/string.h"
 #include "os/stdpaths.h"
 
@@ -7,7 +8,7 @@
 #include <stdlib.h>
 
 
-const char *uhuru_std_path(enum uhuru_std_location location)
+const char *a6o_std_path(enum a6o_std_location location)
 {
 	assert(location >= 0 && location < LAST_LOCATION);
 

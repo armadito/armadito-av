@@ -1,14 +1,14 @@
-#include "libuhuru-config.h"
+#include <libarmadito.h>
 
-#include <libuhuru/core.h>
+#include "libarmadito-config.h"
 
 #include <assert.h>
 #include <glib.h>
 #include <stdlib.h>
 
-uhuru_error *uhuru_error_new(int error_code, const char *error_message)
+a6o_error *a6o_error_new(int error_code, const char *error_message)
 {
-	uhuru_error *e = (uhuru_error *)malloc(sizeof(uhuru_error));
+	a6o_error *e = (a6o_error *)malloc(sizeof(a6o_error));
 
 	assert(e != NULL);
 
@@ -18,30 +18,30 @@ uhuru_error *uhuru_error_new(int error_code, const char *error_message)
 	return e;
 }
 
-void uhuru_error_set(uhuru_error **error, int error_code, const char *error_message)
+void a6o_error_set(a6o_error **error, int error_code, const char *error_message)
 {
 	if (error == NULL)
 		return;
 
 	/* same check as in glib: if error location is already set, do not overwrite it!!! */
 	if (*error != NULL) {
-		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "uhuru_error set over the top of a previous uhuru_error or uninitialized memory.\n\
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "a6o_error set over the top of a previous a6o_error or uninitialized memory.\n\
 This indicates a bug in someone's code. You must ensure an error is NULL before it's set.\n\
 The overwriting error message was: %s", error_message);
 
 		return;
 	}
 
-	*error = uhuru_error_new(error_code, error_message);
+	*error = a6o_error_new(error_code, error_message);
 }
 
-void uhuru_error_free(uhuru_error *err)
+void a6o_error_free(a6o_error *err)
 {
 	if (err != NULL)
 		free(err);
 }
 
-void uhuru_error_print(uhuru_error *err, FILE *out)
+void a6o_error_print(a6o_error *err, FILE *out)
 {
 	if (err == NULL)
 		return;

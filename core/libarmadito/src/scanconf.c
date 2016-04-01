@@ -1,13 +1,13 @@
-#include "libuhuru-config.h"
-#include <libuhuru/core.h>
+#include <libarmadito.h>
+#include "libarmadito-config.h"
 
 #include "os/string.h"
-#include "uhurup.h"
+#include "armaditop.h"
 
 #include <glib.h>
 #include <stdlib.h>
 
-struct uhuru_scan_conf {
+struct a6o_scan_conf {
 	const char *name;
 	size_t max_file_size;
 
@@ -20,19 +20,19 @@ struct uhuru_scan_conf {
 };
 
 /* macros for easy access to GArray */
-#define modules(c) ((struct uhuru_module **)((c)->modules->data))
+#define modules(c) ((struct a6o_module **)((c)->modules->data))
 #define mime_types(c) ((const char **)((c)->mime_types->data))
 #define directories_white_list(c) ((const char **)((c)->directories_white_list->data))
 
-static struct uhuru_scan_conf *uhuru_scan_conf_new(const char *name)
+static struct a6o_scan_conf *a6o_scan_conf_new(const char *name)
 {
-	struct uhuru_scan_conf *c = malloc(sizeof(struct uhuru_scan_conf));
+	struct a6o_scan_conf *c = malloc(sizeof(struct a6o_scan_conf));
 
 	c->name = os_strdup(name);
 	c->max_file_size = 0;
 
 	c->mime_types = g_array_new(TRUE, TRUE, sizeof(const char *));
-	c->modules = g_array_new(TRUE, TRUE, sizeof(struct uhuru_module *));
+	c->modules = g_array_new(TRUE, TRUE, sizeof(struct a6o_module *));
 	c->mime_type_cache = g_hash_table_new(g_str_hash, g_str_equal);
 
 	c->directories_white_list = g_array_new(TRUE, TRUE, sizeof(const char *));
@@ -40,28 +40,28 @@ static struct uhuru_scan_conf *uhuru_scan_conf_new(const char *name)
 	return c;
 }
 
-static struct uhuru_scan_conf *on_demand_conf = NULL;
-static struct uhuru_scan_conf *on_access_conf = NULL;
+static struct a6o_scan_conf *on_demand_conf = NULL;
+static struct a6o_scan_conf *on_access_conf = NULL;
 
-static struct uhuru_scan_conf *get_conf(struct uhuru_scan_conf **pc, const char *name)
+static struct a6o_scan_conf *get_conf(struct a6o_scan_conf **pc, const char *name)
 {
 	if (*pc == NULL)
-		*pc = uhuru_scan_conf_new(name);
+		*pc = a6o_scan_conf_new(name);
 
 	return *pc;
 }
 
-struct uhuru_scan_conf *uhuru_scan_conf_on_demand(void)
+struct a6o_scan_conf *a6o_scan_conf_on_demand(void)
 {
 	return get_conf(&on_demand_conf, "on-demand scan configuration");
 }
 
-struct uhuru_scan_conf *uhuru_scan_conf_on_access(void)
+struct a6o_scan_conf *a6o_scan_conf_on_access(void)
 {
 	return get_conf(&on_access_conf, "on-access scan configuration");
 }
 
-void uhuru_scan_conf_white_list_directory(struct uhuru_scan_conf *c, const char *path)
+void a6o_scan_conf_white_list_directory(struct a6o_scan_conf *c, const char *path)
 {
 	const char *cp = os_strdup(path);
 
@@ -79,7 +79,7 @@ static int strprefix(const char *s, const char *prefix)
 	return 0;
 }
 
-int uhuru_scan_conf_is_white_listed(struct uhuru_scan_conf *c, const char *path)
+int a6o_scan_conf_is_white_listed(struct a6o_scan_conf *c, const char *path)
 {
 	const char **p = directories_white_list(c);
 
@@ -92,19 +92,19 @@ int uhuru_scan_conf_is_white_listed(struct uhuru_scan_conf *c, const char *path)
 	return 0;
 }
 
-void uhuru_scan_conf_add_mime_type(struct uhuru_scan_conf *c, const char *mime_type)
+void a6o_scan_conf_add_mime_type(struct a6o_scan_conf *c, const char *mime_type)
 {
 	const char *p = os_strdup(mime_type);
 
 	g_array_append_val(c->mime_types, p);
 }
 
-void uhuru_scan_conf_add_module(struct uhuru_scan_conf *c, const char *module_name, struct uhuru *u)
+void a6o_scan_conf_add_module(struct a6o_scan_conf *c, const char *module_name, struct armadito *u)
 {
-	struct uhuru_module *mod = uhuru_get_module_by_name(u, module_name);
+	struct a6o_module *mod = a6o_get_module_by_name(u, module_name);
 
 	if (mod == NULL) {
-		uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_WARNING, "scan configuration: no module '%s'", module_name);
+		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_WARNING, "scan configuration: no module '%s'", module_name);
 		return;
 	}
 
@@ -123,10 +123,10 @@ static int mime_type_contains(const char **p_mime_type, const char *mime_type)
 	return 0;
 }
 
-static struct uhuru_module **build_module_array(struct uhuru_scan_conf *c, const char *mime_type)
+static struct a6o_module **build_module_array(struct a6o_scan_conf *c, const char *mime_type)
 {
-	GArray *modules = g_array_new(TRUE, TRUE, sizeof(struct uhuru_module *));
-	struct uhuru_module **p_module;
+	GArray *modules = g_array_new(TRUE, TRUE, sizeof(struct a6o_module *));
+	struct a6o_module **p_module;
 
 	for(p_module = modules(c); *p_module != NULL; p_module++) {
 		if (mime_type_contains((*p_module)->supported_mime_types, mime_type))
@@ -135,16 +135,16 @@ static struct uhuru_module **build_module_array(struct uhuru_scan_conf *c, const
 
 	/* did we add at least one module ? */
 	if (modules->len > 0)
-		return (struct uhuru_module **)g_array_free(modules, FALSE);
+		return (struct a6o_module **)g_array_free(modules, FALSE);
 
 	/* no module was added! */
 	g_array_free(modules, TRUE);
 	return NULL;
 }
 
-static struct uhuru_module **get_applicable_modules(struct uhuru_scan_conf *c, const char *mime_type)
+static struct a6o_module **get_applicable_modules(struct a6o_scan_conf *c, const char *mime_type)
 {
-	struct uhuru_module **modules = NULL;
+	struct a6o_module **modules = NULL;
 
 	if (g_hash_table_lookup_extended(c->mime_type_cache, mime_type, NULL, (gpointer *)&modules))
 		return modules;
@@ -160,19 +160,19 @@ static struct uhuru_module **get_applicable_modules(struct uhuru_scan_conf *c, c
 	return modules;
 }
 
-struct uhuru_module **uhuru_scan_conf_get_applicable_modules(struct uhuru_scan_conf *c, const char *mime_type)
+struct a6o_module **a6o_scan_conf_get_applicable_modules(struct a6o_scan_conf *c, const char *mime_type)
 {
-	struct uhuru_module **modules = get_applicable_modules(c, mime_type);
+	struct a6o_module **modules = get_applicable_modules(c, mime_type);
 
 	if (modules == NULL) {
-		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_DEBUG, "%s: mime-type '%s' -> NULL", c->name, mime_type);
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_DEBUG, "%s: mime-type '%s' -> NULL", c->name, mime_type);
 	} else {
-		struct uhuru_module **modv;
+		struct a6o_module **modv;
 		GString *s = g_string_new("");
 		for (modv = modules; *modv != NULL; modv++)
 			g_string_append_printf(s, " %s", (*modv)->name);
 
-		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_DEBUG, "%s: mime-type '%s' ->%s", c->name, mime_type, s->str);
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_DEBUG, "%s: mime-type '%s' ->%s", c->name, mime_type, s->str);
 
 		g_string_free(s, TRUE);
 	}
@@ -180,7 +180,7 @@ struct uhuru_module **uhuru_scan_conf_get_applicable_modules(struct uhuru_scan_c
 	return modules;
 }
 
-void uhuru_scan_conf_max_file_size(struct uhuru_scan_conf *c, int max_file_size)
+void a6o_scan_conf_max_file_size(struct a6o_scan_conf *c, int max_file_size)
 {
 	c->max_file_size = max_file_size;
 }
@@ -189,12 +189,12 @@ void uhuru_scan_conf_max_file_size(struct uhuru_scan_conf *c, int max_file_size)
 static void mime_type_print(gpointer key, gpointer value, gpointer user_data)
 {
 	GString *s = (GString *)user_data;
-	struct uhuru_module **modv;
+	struct a6o_module **modv;
 
 	g_string_append_printf(s, "    mimetype: %s handled by modules:", (char *)key);
 
 	if (value != NULL)
-		for (modv = (struct uhuru_module **)value; *modv != NULL; modv++)
+		for (modv = (struct a6o_module **)value; *modv != NULL; modv++)
 			g_string_append_printf(s, " %s", (*modv)->name);
 	else
 		g_string_append_printf(s, " none");
@@ -202,7 +202,7 @@ static void mime_type_print(gpointer key, gpointer value, gpointer user_data)
 	g_string_append_printf(s, "\n");
 }
 
-const char *uhuru_scan_conf_debug(struct uhuru_scan_conf *c)
+const char *a6o_scan_conf_debug(struct a6o_scan_conf *c)
 {
 	GString *s = g_string_new("");
 	const char *ret;
