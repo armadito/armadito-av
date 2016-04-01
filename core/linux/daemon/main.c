@@ -2,10 +2,6 @@
 #include <libarmadito.h>
 #include "libarmadito-config.h"
 
-#if 0
-#include "utils/getopt.h"
-#endif
-
 #include "log.h"
 #include "server.h"
 #include "daemonize.h"
@@ -13,8 +9,12 @@
 #include "unixsockserver.h"
 #include "net/netdefaults.h"
 
-#include <glib.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include <errno.h>
+#include <getopt.h>
+#include <glib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -29,29 +29,21 @@
 
 struct a6o_daemon_options {
 	int no_daemon;
-	enum {
-		TCP_SOCKET,
-		UNIX_SOCKET,
-	} socket_type;
-	unsigned short port_number;
 	const char *unix_path;
 	const char *s_log_level;
 	const char *pid_file;
 	enum ipc_type ipc_type;
 };
 
-struct opt daemon_opt_defs[] = {
-	{ .long_form = "help", .short_form = 'h', .need_arg = 0, .is_set = 0, .value = NULL},
-	{ .long_form = "version", .short_form = 'V', .need_arg = 0, .is_set = 0, .value = NULL},
-	{ .long_form = "no-daemon", .short_form = 'n', .need_arg = 0, .is_set = 0, .value = NULL},
-	{ .long_form = "log-level", .short_form = 'l', .need_arg = 1, .is_set = 0, .value = NULL},
-	{ .long_form = "tcp", .short_form = 't', .need_arg = 0, .is_set = 0, .value = NULL},
-	{ .long_form = "port", .short_form = 'p', .need_arg = 1, .is_set = 0, .value = NULL},
-	{ .long_form = "unix", .short_form = 'u', .need_arg = 0, .is_set = 0, .value = NULL},
-	{ .long_form = "path", .short_form = 'a', .need_arg = 1, .is_set = 0, .value = NULL},
-	{ .long_form = "pidfile", .short_form = 'i', .need_arg = 1, .is_set = 0, .value = NULL},
-	{ .long_form = "ipc", .short_form = 'c', .need_arg = 1, .is_set = 0, .value = NULL},
-	{ .long_form = NULL, .short_form = '\0', .need_arg = 0, .is_set = 0, .value = NULL},
+static struct option daemon_option_defs[] = {
+	{"help",      no_argument,        0, 'h'},
+	{"version",   no_argument,        0, 'V'},
+	{"no-daemon", no_argument,        0, 'n'},
+	{"log-level", required_argument,  0, 'l'},
+	{"path",      required_argument,  0, 'a'},
+	{"pidfile",   required_argument,  0, 'i'},
+	{"ipc",       required_argument,  0, 'c'},
+	{0, 0, 0, 0}
 };
 
 static void version(void)
@@ -73,8 +65,6 @@ static void usage(void)
 	fprintf(stderr, "  --log-level=LEVEL | -l LEVEL       set log level\n");
 	fprintf(stderr, "                                     log level can be: error, warning, info, debug\n");
 	fprintf(stderr, "                                     (default is : " DEFAULT_LOG_LEVEL "\n");
-	fprintf(stderr, "  --tcp -t | --unix -u               use TCP (--tcp) or unix (--unix) socket (default is " DEFAULT_SOCKET_TYPE ")\n");
-	fprintf(stderr, "  --port=PORT | -p PORT              TCP port number (default is " DEFAULT_SOCKET_PORT ")\n");
 	fprintf(stderr, "  --path=PATH | -a PATH              unix socket path (default is " DEFAULT_SOCKET_PATH ")\n");
 	fprintf(stderr, "  --pidfile=PATH | -i PATH           create PID file at specified location\n");
 	fprintf(stderr, "                                     (default is : " DEFAULT_PID_FILE ")\n");
@@ -100,8 +90,56 @@ static int check_ipc_type(const char *s_ipc_type)
 	return strcmp(s_ipc_type, "old") && strcmp(s_ipc_type, "json");
 }
 
-static void parse_options(int argc, const char **argv, struct a6o_daemon_options *opts)
+static void parse_options(int argc, char **argv, struct a6o_daemon_options *opts)
 {
+	opts->pid_file = NULL;
+	opts->no_daemon = 0;
+
+	while (1) {
+		int c, option_index = 0;
+
+		c = getopt_long(argc, argv, "hVnl:a:i:c:", daemon_option_defs, &option_index);
+
+		if (c == -1)
+			break;
+
+		switch (c) {
+		case 'h': /* help */
+			usage();
+			break;
+		case 'V': /* version */
+			version();
+			break;
+		case 'n': /* no-daemon */
+			break;
+		case 'l': /* log-level */
+			break;
+		case 'a': /* path */
+			break;
+		case 'i': /* pidfile */
+			break;
+		case 'c': /* ipc */
+			printf ("option -c with value `%s'\n", optarg);
+			break;
+		case '?':
+			/* getopt_long already printed an error message. */
+			break;
+		default:
+			abort ();
+		}
+	}
+
+	/* Print any remaining command line arguments (not options). */
+	if (optind < argc) {
+		printf ("non-option ARGV-elements: ");
+		while (optind < argc)
+			printf ("%s ", argv[optind++]);
+		putchar ('\n');
+	}
+}
+
+#if 0
+static void old_parse_options(int argc, const char **argv, struct a6o_daemon_options *opts)
 	int r = opt_parse(daemon_opt_defs, argc, argv);
 	const char *s_port, *s_ipc_type, *s_socket_type;
 
@@ -145,6 +183,7 @@ static void parse_options(int argc, const char **argv, struct a6o_daemon_options
 		usage();
 	opts->ipc_type = (!strcmp(s_ipc_type, "old")) ? OLD_IPC : JSON_IPC;
 }
+#endif
 
 static void create_pid_file(const char *pidfile)
 {
@@ -170,10 +209,7 @@ static int create_server_socket(struct a6o_daemon_options *opts)
 {
 	int server_sock = -1;
 
-	if (opts->socket_type == TCP_SOCKET)
-		server_sock = tcp_server_listen(opts->port_number, "127.0.0.1");
-	else
-		server_sock = unix_server_listen(opts->unix_path);
+	server_sock = unix_server_listen(opts->unix_path);
 
 	if (server_sock < 0) {
 		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR, "cannot open server socket (errno %d)", errno);
@@ -284,7 +320,7 @@ static void start_daemon(const char *progname, struct a6o_daemon_options *opts)
 	g_main_loop_run(loop);
 }
 
-int main(int argc, const char **argv)
+int main(int argc, char **argv)
 {
 	struct a6o_daemon_options opts;
 
