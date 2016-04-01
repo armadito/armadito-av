@@ -5,9 +5,9 @@ libdir=@libdir@
 moduledir=@moduledir@
 version=@PACKAGE_VERSION@
 
-Name: UHURU library
-Description: UHURU library
+Name: ARMADITO anti-virus library
+Description: ARMADITO anti-virus library
 Version: ${version} 
 Requires: gmodule-2.0 glib-2.0 libxml-2.0
-Libs:-L${libdir} -luhuru_core -lmagic
+Libs:-L${libdir} -larmadito -lmagic
 Cflags: -I${includedir} 
