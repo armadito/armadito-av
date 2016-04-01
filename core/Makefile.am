@@ -1,4 +1,4 @@
-SUBDIRS=libarmadito
+SUBDIRS=libarmadito linux
 
 TAGDIRS=\
 $(top_srcdir)/doc \

@@ -1,0 +1,3 @@
+# Sourced by /etc/init.d/armadito-scand 
+
+DAEMON_OPTS='--pidfile=/var/run/armadito-scand.pid --log-level=debug'

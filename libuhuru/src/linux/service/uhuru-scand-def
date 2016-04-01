@@ -1,3 +1,0 @@
-# Sourced by /etc/init.d/uhuru-scand 
-
-DAEMON_OPTS='--pidfile=/var/run/uhuru-scand.pid --log-level=debug'
