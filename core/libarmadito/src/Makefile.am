@@ -25,21 +25,20 @@ scanp.h \
 scanconf.c \
 status.c \
 statusp.h \
-stdpaths.c 
-
-#builtin-modules/alert.c \
-#builtin-modules/alert.h \
-#builtin-modules/ondemandmod.c \
-#builtin-modules/ondemandmod.h \
-#builtin-modules/quarantine.c \
-#builtin-modules/quarantine.h \
-#../os/linux/dir.c \
-#../os/linux/file.c \
-#../os/linux/mimetype.c \
-#../os/linux/stdpaths.c 
+stdpaths.c \
+linux/os/dir.c \
+linux/os/file.c \
+linux/os/mimetype.c \
+linux/os/stdpaths.c \
+linux/builtin-modules/alert.c \
+linux/builtin-modules/alert.h \
+linux/builtin-modules/ondemandmod.c \
+linux/builtin-modules/ondemandmod.h \
+linux/builtin-modules/quarantine.c \
+linux/builtin-modules/quarantine.h 
 
 AM_CPPFLAGS=-DUSE_FILE_DESCRIPTORS -DLIBARMADITO_MODULES_PATH='"$(pkglibdir)/modules"' -DLIBARMADITO_CONF_DIR='"$(sysconfdir)/armadito"' -DLIBARMADITO_BASES_DIR='"$(localstatedir)/lib/armadito/bases"' -DLIBARMADITO_TMP_DIR='"$(localstatedir)/lib/armadito/tmp"' 
-libarmadito_la_CFLAGS= -I$(top_srcdir)/libarmadito/include -I$(top_srcdir)/libarmadito/include/config
+libarmadito_la_CFLAGS= -I$(top_srcdir)/libarmadito/include -I$(top_srcdir)/libarmadito/include/config -I$(top_srcdir)/libarmadito/src/linux
 libarmadito_la_LIBADD= 
 
 libarmadito_la_CFLAGS+= @GLIB2_CFLAGS@

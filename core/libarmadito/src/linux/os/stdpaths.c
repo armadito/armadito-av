@@ -1,5 +1,5 @@
-#include <libuhuru/core.h>
-#include "libuhuru-config.h"
+#include <libarmadito.h>
+#include "libarmadito-config.h"
 
 #include "os/stdpaths.h"
 
@@ -7,30 +7,30 @@
 
 const char *os_stdpath_module()
 {
-  return strdup(LIBUHURU_MODULES_PATH);
+	return strdup(LIBARMADITO_MODULES_PATH);
 }
 
 const char *os_stdpath_config_file()
 {
-  return strdup(LIBUHURU_CONF_DIR "/uhuru.conf");
+	return strdup(LIBARMADITO_CONF_DIR "/armadito.conf");
 }
 
 const char *os_stdpath_config_dir()
 {
-  return strdup(LIBUHURU_CONF_DIR "/conf.d");
+	return strdup(LIBARMADITO_CONF_DIR "/conf.d");
 }
 
 const char *os_stdpath_bases()
 {
-  return strdup(LIBUHURU_BASES_DIR);
+	return strdup(LIBARMADITO_BASES_DIR);
 }
 
 const char *os_stdpath_binary()
 {
-  return NULL;
+	return NULL;
 }
 
 const char *os_stdpath_tmp()
 {
-  return NULL;
+	return NULL;
 }
