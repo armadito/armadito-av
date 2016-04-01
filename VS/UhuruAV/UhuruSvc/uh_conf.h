@@ -15,5 +15,6 @@ int save_conf_in_registry(struct uhuru_conf * conf);
 int restore_conf_from_registry(struct uhuru_conf * conf);
 
 int conf_poc_windows( );
+int disable_onaccess( );
 
 #endif
