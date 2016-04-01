@@ -6,12 +6,14 @@
 # white list of directories: files in these directories will never be scanned
 white-list-dir = "/boot"; "/dev"; "/etc"; "/proc"; "/run"; "/sys"; "/var"
 
-# scan with module5_2 and clamav
-modules=module5_2; clamav
-default-modules=clamav
+# scanned mime types: scan everything
+mime-types="*"
+
+# scan modules: scan with clamav and module5_2
+modules=clamav; module5_2
 
 # 1M, must support units
-max-size = 1048576 
+#max-size = 1048576 
 
 [alert]
 
