@@ -129,5 +129,15 @@ libarmadito/include/config/Makefile
 libarmadito/include/os/Makefile
 libarmadito/pkgconfig/Makefile
 libarmadito/src/Makefile
+linux/Makefile
+linux/modules/Makefile
+linux/modules/on-access-linux/Makefile
+linux/modules/on-access-linux/conf/Makefile
+linux/modules/on-access-linux/src/Makefile
+linux/modules/on-access-linux/tests/Makefile
+linux/service/Makefile
+linux/daemon/Makefile
+linux/tools/Makefile
+linux/net/Makefile
 ])
 AC_OUTPUT
