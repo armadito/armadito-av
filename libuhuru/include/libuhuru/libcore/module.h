@@ -2,9 +2,8 @@
 #define _LIBUHURU_LIBCORE_MODULE_H_
 
 #include <libuhuru/common/status.h>
+#include <libuhuru/libcore/conf.h>
 #include <libuhuru/libcore/info.h>
-
-#include <time.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,8 +20,9 @@ enum uhuru_mod_status {
 };
 
 struct uhuru_conf_entry {
-  const char *directive;
-  enum uhuru_mod_status (*conf_fun)(struct uhuru_module *module, const char *directive, const char **argv);
+  const char *key;
+  enum uhuru_conf_value_type type;
+  enum uhuru_mod_status (*conf_fun)(struct uhuru_module *module, const char *key, struct uhuru_conf_value *value);
 };
 
 struct uhuru_module {
@@ -37,6 +37,8 @@ struct uhuru_module {
   enum uhuru_mod_status (*close_fun)(struct uhuru_module *module);
 
   enum uhuru_update_status (*info_fun)(struct uhuru_module *module, struct uhuru_module_info *info);
+
+  const char **supported_mime_types;
 
   const char *name;
 

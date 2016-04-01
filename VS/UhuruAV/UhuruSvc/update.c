@@ -16,6 +16,7 @@ char * BuildCompleteDBpath(char * filename, char * module) {
 	int dir_len = 0, len= 0;
 	int ret = 0;
 	char * module_db_dir = NULL;
+	char * module_dir = NULL;
 	int module_db_len = 0;
 
 	
@@ -66,16 +67,19 @@ char * BuildCompleteDBpath(char * filename, char * module) {
 			//__leave; // leave or not ? 
 		}
 
+		// TODO: :get module path from configuration.
+		//module_dir = uhuru_std_path(MODULES_LOCATION);
+		module_dir = "modules";
 
 
-		len = dir_len + strnlen(LIBUHURU_MODULES_PATH, MAX_PATH) + strnlen(filename, MAX_PATH) + strnlen(module_db_dir, MAX_PATH) + 3;
+		len = dir_len + strnlen(module_dir, MAX_PATH) + strnlen(filename, MAX_PATH) + strnlen(module_db_dir, MAX_PATH) + 3;
 		
 		completePath = (char*)calloc(len+1,sizeof(char));
 		completePath[len] = '\0';
 
 		strncat_s(completePath, len, dirpath, dir_len);
 		strncat_s(completePath, len, "\\", 1);
-		strncat_s(completePath, len, LIBUHURU_MODULES_PATH, strnlen(LIBUHURU_MODULES_PATH, MAX_PATH));
+		strncat_s(completePath, len, module_dir, strnlen(module_dir, MAX_PATH));
 		strncat_s(completePath, len, "\\", 1);
 		strncat_s(completePath, len, module_db_dir, strnlen(module_db_dir, MAX_PATH));
 		strncat_s(completePath, len, filename, strnlen(filename, MAX_PATH));

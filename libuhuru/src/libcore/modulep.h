@@ -15,12 +15,16 @@ int module_manager_load_path(struct module_manager *mm, const char *path, uhuru_
 
 int module_manager_init_all(struct module_manager *mm, uhuru_error **error);
 
+int module_manager_configure_all(struct module_manager *mm, struct uhuru_conf *conf, uhuru_error **error);
+
 int module_manager_post_init_all(struct module_manager *mm, uhuru_error **error);
 
 int module_manager_close_all(struct module_manager *mm, uhuru_error **error);
 
 /* returns a NULL-terminated array of struct uhuru_module */
 struct uhuru_module **module_manager_get_modules(struct module_manager *mm);
+
+struct uhuru_module *module_manager_get_module_by_name(struct module_manager *mm, const char *name);
 
 #ifdef DEBUG
 const char *module_debug(struct uhuru_module *module);
