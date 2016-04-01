@@ -11,130 +11,130 @@
 
 const char *uhuru_file_context_status_str(enum uhuru_file_context_status status)
 {
-  switch(status) {
+	switch(status) {
 #undef M
 #define M(S) case S: return #S
-    M(UHURU_FC_MUST_SCAN);
-    M(UHURU_FC_WHITE_LISTED_DIRECTORY);
-    M(UHURU_FC_FILE_TOO_BIG);
-    M(UHURU_FC_FILE_CACHED);
-    M(UHURU_FC_FILE_TYPE_NOT_SCANNED);
-  }
+		M(UHURU_FC_MUST_SCAN);
+		M(UHURU_FC_WHITE_LISTED_DIRECTORY);
+		M(UHURU_FC_FILE_TOO_BIG);
+		M(UHURU_FC_FILE_CACHED);
+		M(UHURU_FC_FILE_TYPE_NOT_SCANNED);
+	}
 
-  return "UNKNOWN STATUS";
+	return "UNKNOWN STATUS";
 }
 
 /* beware: ctx is filled *only* if file must be scanned, otherwise it is left un-initialized, except for the status field */
 /* returns 0 if file must be scanned, !0 otherwise */
 enum uhuru_file_context_status uhuru_file_context_get(struct uhuru_file_context *ctx, int fd, const char *path, struct uhuru_scan_conf *conf)
 {
-  struct uhuru_module **applicable_modules;
-  const char *mime_type;
-  int err = 0;
+	struct uhuru_module **applicable_modules;
+	const char *mime_type;
+	int err = 0;
 
-  if (fd == -1 && path == NULL) {
-    ctx->status = UHURU_FC_FILE_OPEN_ERROR;
-    return ctx->status;
-  }
+	if (fd == -1 && path == NULL) {
+		ctx->status = UHURU_FC_FILE_OPEN_ERROR;
+		return ctx->status;
+	}
 
-  ctx->status = UHURU_FC_MUST_SCAN;
-  ctx->fd = fd;
-  ctx->path = NULL;
-  ctx->mime_type = NULL;
-  ctx->applicable_modules = NULL;
+	ctx->status = UHURU_FC_MUST_SCAN;
+	ctx->fd = fd;
+	ctx->path = NULL;
+	ctx->mime_type = NULL;
+	ctx->applicable_modules = NULL;
 
-  /* 1) check file name vs. directories white list */
-  if (path != NULL && uhuru_scan_conf_is_white_listed(conf, path)) {
-    ctx->status = UHURU_FC_WHITE_LISTED_DIRECTORY;
-    return ctx->status;
-  }
-  
-  /* 2) cache => NOT YET */
+	/* 1) check file name vs. directories white list */
+	if (path != NULL && uhuru_scan_conf_is_white_listed(conf, path)) {
+		ctx->status = UHURU_FC_WHITE_LISTED_DIRECTORY;
+		return ctx->status;
+	}
 
-  /* open file if no fd given */
-  if (ctx->fd < 0) {
+	/* 2) cache => NOT YET */
+
+	/* open file if no fd given */
+	if (ctx->fd < 0) {
 
 #ifdef WIN32
-	  /* open the file :: TODO write portable code for this function */
-	  err = _sopen_s(&(ctx->fd), path, O_RDONLY, _SH_DENYNO, _S_IREAD);
+		/* open the file :: TODO write portable code for this function */
+		err = _sopen_s(&(ctx->fd), path, O_RDONLY, _SH_DENYNO, _S_IREAD);
 #else
-	/* open the file */
-    ctx->fd = os_open(path, O_RDONLY);
+		/* open the file */
+		ctx->fd = os_open(path, O_RDONLY);
 #endif
-    
-    if (ctx->fd < 0) {
-      ctx->status = UHURU_FC_FILE_OPEN_ERROR;
-	  uhuru_log(UHURU_LOG_LIB,UHURU_LOG_LEVEL_WARNING, " Error :: uhuru_file_context_get :: Opening file [%s] for scan failed :: err = %d\n",path,err);
-	  printf("[-] Error :: uhuru_file_context_get :: Opening file [%s] for scan failed :: err = %d\n",path,err);
-      return ctx->status;
-    }
-  }
 
-  /* 3) fstat file descriptor and get file size */
-  /* not yet */
+		if (ctx->fd < 0) {
+			ctx->status = UHURU_FC_FILE_OPEN_ERROR;
+			uhuru_log(UHURU_LOG_LIB,UHURU_LOG_LEVEL_WARNING, " Error :: uhuru_file_context_get :: Opening file [%s] for scan failed :: err = %d\n",path,err);
+			printf("[-] Error :: uhuru_file_context_get :: Opening file [%s] for scan failed :: err = %d\n",path,err);
+			return ctx->status;
+		}
+	}
 
-  /* 4) file type using mime_type_guess and applicable modules from configuration */
-  mime_type = os_mime_type_guess_fd(ctx->fd);
-  if (mime_type == NULL) {
-    ctx->status = UHURU_FC_FILE_TYPE_NOT_SCANNED;
-    return ctx->status;
-  }
+	/* 3) fstat file descriptor and get file size */
+	/* not yet */
 
-  applicable_modules = uhuru_scan_conf_get_applicable_modules(conf, mime_type);
+	/* 4) file type using mime_type_guess and applicable modules from configuration */
+	mime_type = os_mime_type_guess_fd(ctx->fd);
+	if (mime_type == NULL) {
+		ctx->status = UHURU_FC_FILE_TYPE_NOT_SCANNED;
+		return ctx->status;
+	}
 
-  if (applicable_modules == NULL) {
-    free((void *)mime_type);
-    ctx->status = UHURU_FC_FILE_TYPE_NOT_SCANNED;
+	applicable_modules = uhuru_scan_conf_get_applicable_modules(conf, mime_type);
 
-    return ctx->status;
-  }
+	if (applicable_modules == NULL) {
+		free((void *)mime_type);
+		ctx->status = UHURU_FC_FILE_TYPE_NOT_SCANNED;
 
-  ctx->status = UHURU_FC_MUST_SCAN;
-  ctx->path = os_strdup(path);
-  ctx->mime_type = mime_type;
-  ctx->applicable_modules = applicable_modules;
+		return ctx->status;
+	}
 
-  return ctx->status;
+	ctx->status = UHURU_FC_MUST_SCAN;
+	ctx->path = os_strdup(path);
+	ctx->mime_type = mime_type;
+	ctx->applicable_modules = applicable_modules;
+
+	return ctx->status;
 }
 
 struct uhuru_file_context *uhuru_file_context_clone(struct uhuru_file_context *ctx)
 {
-  struct uhuru_file_context *clone_ctx = malloc(sizeof(struct uhuru_file_context));
+	struct uhuru_file_context *clone_ctx = malloc(sizeof(struct uhuru_file_context));
 
-  clone_ctx->status = ctx->status;
-  clone_ctx->fd = ctx->fd;
-  clone_ctx->path = ctx->path;
-  clone_ctx->mime_type = ctx->mime_type;
-  clone_ctx->applicable_modules = ctx->applicable_modules;  
+	clone_ctx->status = ctx->status;
+	clone_ctx->fd = ctx->fd;
+	clone_ctx->path = ctx->path;
+	clone_ctx->mime_type = ctx->mime_type;
+	clone_ctx->applicable_modules = ctx->applicable_modules;
 
-  return clone_ctx;
+	return clone_ctx;
 }
 
 void uhuru_file_context_close(struct uhuru_file_context *ctx)
 {
-  if (ctx->fd < 0)
-    return;
+	if (ctx->fd < 0)
+		return;
 
-  if (os_close(ctx->fd) != 0)
-    uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "closing file descriptor %3d failed (%s)", ctx->fd, os_strerror(errno));
+	if (os_close(ctx->fd) != 0)
+		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "closing file descriptor %3d failed (%s)", ctx->fd, os_strerror(errno));
 
-  ctx->fd = -1;
+	ctx->fd = -1;
 }
 
 void uhuru_file_context_destroy(struct uhuru_file_context *ctx)
 {
-  uhuru_file_context_close(ctx);
+	uhuru_file_context_close(ctx);
 
-  if (ctx->path != NULL)
-    free((void *)ctx->path);
-  if (ctx->mime_type != NULL)
-    free((void *)ctx->mime_type);
+	if (ctx->path != NULL)
+		free((void *)ctx->path);
+	if (ctx->mime_type != NULL)
+		free((void *)ctx->mime_type);
 }
 
 void uhuru_file_context_free(struct uhuru_file_context *ctx)
 {
-  uhuru_file_context_destroy(ctx);
+	uhuru_file_context_destroy(ctx);
 
-  free(ctx);
+	free(ctx);
 }
 

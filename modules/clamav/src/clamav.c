@@ -91,6 +91,8 @@ static enum uhuru_mod_status clamav_init(struct uhuru_module *module)
   cl_data->db_dir = os_strdup(MODULE_CLAMAV_DBDIR);
 #endif
 
+  cl_data->tmp_dir = NULL;
+  
   cl_data->late_days = DEFAULT_LATE_DAYS;
   cl_data->critical_days = DEFAULT_CRITICAL_DAYS;
 
@@ -99,44 +101,44 @@ static enum uhuru_mod_status clamav_init(struct uhuru_module *module)
   return UHURU_MOD_OK;
 }
 
-static enum uhuru_mod_status clamav_conf_set_dbdir(struct uhuru_module *module, const char *directive, const char **argv)
+static enum uhuru_mod_status clamav_conf_set_dbdir(struct uhuru_module *module, const char *key, struct uhuru_conf_value *value)
 {
   struct clamav_data *cl_data = (struct clamav_data *)module->data;
 
   if (cl_data->db_dir != NULL)
     free((char *)cl_data->db_dir);
 
-  cl_data->db_dir = os_strdup(argv[0]);
+  cl_data->db_dir = os_strdup(uhuru_conf_value_get_string(value));
 
   return UHURU_MOD_OK;
 }
 
-static enum uhuru_mod_status clamav_conf_set_tmpdir(struct uhuru_module *module, const char *directive, const char **argv)
+static enum uhuru_mod_status clamav_conf_set_tmpdir(struct uhuru_module *module, const char *key, struct uhuru_conf_value *value)
 {
   struct clamav_data *cl_data = (struct clamav_data *)module->data;
 
   if (cl_data->tmp_dir != NULL)
     free((char *)cl_data->tmp_dir);
 
-  cl_data->tmp_dir = os_strdup(argv[0]);
+  cl_data->tmp_dir = os_strdup(uhuru_conf_value_get_string(value));
 
   return UHURU_MOD_OK;
 }
 
-static enum uhuru_mod_status clamav_conf_set_late_days(struct uhuru_module *module, const char *directive, const char **argv)
+static enum uhuru_mod_status clamav_conf_set_late_days(struct uhuru_module *module, const char *key, struct uhuru_conf_value *value)
 {
   struct clamav_data *cl_data = (struct clamav_data *)module->data;
 
-  cl_data->late_days = atoi(argv[0]);
+  cl_data->late_days = uhuru_conf_value_get_int(value);
 
   return UHURU_MOD_OK;
 }
 
-static enum uhuru_mod_status clamav_conf_set_critical_days(struct uhuru_module *module, const char *directive, const char **argv)
+static enum uhuru_mod_status clamav_conf_set_critical_days(struct uhuru_module *module, const char *key, struct uhuru_conf_value *value)
 {
   struct clamav_data *cl_data = (struct clamav_data *)module->data;
 
-  cl_data->critical_days = atoi(argv[0]);
+  cl_data->critical_days = uhuru_conf_value_get_int(value);
 
   return UHURU_MOD_OK;
 }
@@ -147,12 +149,16 @@ static enum uhuru_mod_status clamav_post_init(struct uhuru_module *module)
   int ret;
   unsigned int signature_count = 0;
   
-  if ((ret = cl_engine_set_str(cl_data->clamav_engine, CL_ENGINE_TMPDIR, cl_data->tmp_dir)) != CL_SUCCESS) {
-    uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "ClamAV: error setting temporary directory: %s", cl_strerror(ret));
-    cl_engine_free(cl_data->clamav_engine);
-    cl_data->clamav_engine = NULL;
-    return UHURU_MOD_INIT_ERROR;
+  if (cl_data->tmp_dir != NULL) {
+
+	  if ((ret = cl_engine_set_str(cl_data->clamav_engine, CL_ENGINE_TMPDIR, cl_data->tmp_dir)) != CL_SUCCESS) {
+		uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "ClamAV: error setting temporary directory: %s", cl_strerror(ret));
+		cl_engine_free(cl_data->clamav_engine);
+		cl_data->clamav_engine = NULL;
+		return UHURU_MOD_INIT_ERROR;
+	  }
   }
+	  
 
   if ((ret = cl_load(cl_data->db_dir, cl_data->clamav_engine, &signature_count, CL_DB_STDOPT)) != CL_SUCCESS) {
     uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_ERROR, "ClamAV: error loading databases: %s", cl_strerror(ret));
@@ -355,15 +361,15 @@ static enum uhuru_update_status clamav_info(struct uhuru_module *module, struct 
   return ret_status;
 }
 
-struct uhuru_conf_entry clamav_conf_table[] = {
-  { "dbdir", clamav_conf_set_dbdir},
-  { "tmpdir", clamav_conf_set_tmpdir},
-  /* { "db", clamav_conf_set_db}, */
-  { "late_days", clamav_conf_set_late_days},
-  { "critical_days", clamav_conf_set_critical_days},
-  { "db", NULL},
-  { NULL, NULL},
+static struct uhuru_conf_entry clamav_conf_table[] = {
+  { "dbdir", CONF_TYPE_STRING, clamav_conf_set_dbdir},
+  { "tmpdir", CONF_TYPE_STRING, clamav_conf_set_tmpdir},
+  { "late_days", CONF_TYPE_INT, clamav_conf_set_late_days},
+  { "critical_days", CONF_TYPE_INT, clamav_conf_set_critical_days},
+  { NULL, CONF_TYPE_VOID, NULL},
 };
+
+static const char *clamav_mime_types[] = { "*", NULL, };
 
 struct uhuru_module module = {
   .init_fun = clamav_init,
@@ -372,6 +378,7 @@ struct uhuru_module module = {
   .scan_fun = clamav_scan,
   .close_fun = clamav_close,
   .info_fun = clamav_info,
+  .supported_mime_types = clamav_mime_types,
   .name = "clamav",
   .size = sizeof(struct clamav_data),
 };

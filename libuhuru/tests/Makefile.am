@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS=subdir-objects no-dependencies
 
 #check_PROGRAMS=testfind1 testuhuru1 testuhuruscan1 testxmlreport1 testprotocol1 testprotocol2
-check_PROGRAMS=testuhuru1 testuhuruscan1 testxmlreport1 testconfparser1 testipcreceive1 testipcsend1 testdir1 testjsonprint1
+check_PROGRAMS=testuhuru1 testuhuruscan1 testxmlreport1 testconfparser1 testipcreceive1 testipcsend1 testdir1 testjsonprint1 testconf1
 
 AM_CFLAGS=-I$(top_srcdir)/include -I$(top_srcdir)/src @GMODULE2_CFLAGS@ @LIBXML2_CFLAGS@
 LDADD=$(top_builddir)/src/libcore/libuhuru_core.la @GMODULE2_LIBS@ @LIBXML2_LIBS@ -lmagic
@@ -12,6 +12,7 @@ testconfparser1_SOURCES=testconfparser1.c
 testipcsend1_SOURCES=testipcsend1.c ../src/linux/daemon/ipc.c ../src/linux/daemon/ipc.h
 testipcreceive1_SOURCES=testipcreceive1.c ../src/linux/daemon/ipc.c ../src/linux/daemon/ipc.h
 testdir1_SOURCES=testdir1.c
+testconf1_SOURCES=testconf1.c
 
 testjsonprint1_SOURCES=testjsonprint1.c
 testjsonprint1_CFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/include/config -I$(top_srcdir)/src -I$(top_srcdir)/src/json/ui @LIBJSONC_CFLAGS@

@@ -4,9 +4,7 @@
 #include "jsonhandler.h"
 #include "scan.h"
 #include "ui.h"
-#ifdef linux
 #include "debug.h"
-#endif
 
 #include "os/string.h"
 

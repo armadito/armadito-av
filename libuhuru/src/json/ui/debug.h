@@ -1,5 +1,5 @@
-#ifndef _DEBUG_H_
-#define _DEBUG_H_
+#ifndef _UI_DEBUG_H_
+#define _UI_DEBUG_H_
 
 #include <json.h>
 

@@ -6,6 +6,7 @@
 #include <glib.h>
 #include <magic.h>
 #include <string.h>
+#include <unistd.h>
 
 /* Unfortunately, libmagic is not thread-safe. */
 /* We create a new magic_t for each thread, and keep it  */

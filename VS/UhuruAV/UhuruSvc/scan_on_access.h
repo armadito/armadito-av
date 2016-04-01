@@ -1,5 +1,5 @@
-#ifndef __SCAN_H_
-#define __SCAN_H_
+#ifndef __SCAN_ON_ACCESS_H_
+#define __SCAN_ON_ACCESS_H_
 
 #include <stdio.h>
 #include <Windows.h>
@@ -10,7 +10,8 @@
 #include <libuhuru-config.h>
 #include <libuhuru/core.h>
 
-#include "uh_quarantine.h"
+//#include "uh_quarantine.h"
+#include "structs.h"
 
 
 #define SCAN_PORT_NAME L"\\UhuruPortScanFilter"
@@ -22,71 +23,47 @@
 
 typedef struct _SCANNER_THREAD_CONTEXT {
 
-    //
-    //   Threand Handle
-    //
+	//   Threand Handle
+	HANDLE   Handle;
 
-    HANDLE   Handle;
+	//   Threand Id
+	DWORD   ThreadId;
 
-    //
-    //   Threand Id
-    //
+	//   We need to remember scan id to know which task to abort.
+	LONGLONG  ScanId;
 
-    DWORD   ThreadId;
+	//   A flag that indicates that if this scan thread has received cancel callback from the driver
+	UINT  Aborted;
 
-    //
-    //   We need to remember scan id to know which task to abort.
-    //
-    
-    LONGLONG  ScanId;
-    
-    //
-    //   A flag that indicates that if this scan thread has received cancel callback from the driver
-    //
-    
-    UINT  Aborted;
-
-    //
-    //   A critical section that synchronize the read/write of ScanId and Aborted.
-    //
-    
-    CRITICAL_SECTION  Lock;
+	//   A critical section that synchronize the read/write of ScanId and Aborted.
+	CRITICAL_SECTION  Lock;
 
 } SCANNER_THREAD_CONTEXT, *PSCANNER_THREAD_CONTEXT;
 
+
+
 typedef struct _USER_SCAN_CONTEXT {
 
-    //
     //  Scan thread contexts
-    //
-
-    PSCANNER_THREAD_CONTEXT  ScanThreadCtxes;
+    PSCANNER_THREAD_CONTEXT ScanThreadCtxes;
     
-    //
     //  The abortion thread handle
-    //
+    HANDLE AbortThreadHandle;
     
-    HANDLE   AbortThreadHandle;
-    
-    //
     //  Finalize flag, set at UserScanFinalize(...)
-    //
-    
     UINT  Finalized;
     
-    //
     //  Handle of connection port to the filter.
-    //
-    
     HANDLE   ConnectionPort;
     
-    //
     //  Completion port for asynchronous message passing
-    //
-    
     HANDLE   Completion;
 
 } USER_SCAN_CONTEXT, *PUSER_SCAN_CONTEXT;
+
+
+
+
 
 typedef enum uhuru_file_status  SCAN_RESULT;
 typedef enum uhuru_file_status*  PSCAN_RESULT;
@@ -148,8 +125,6 @@ typedef struct _SCANNER_MESSAGE {
 
 } SCANNER_MESSAGE, *PSCANNER_MESSAGE;
 
-
-
 typedef struct _SCANNER_REPLY_MESSAGE {
 
     //
@@ -167,11 +142,10 @@ typedef struct _SCANNER_REPLY_MESSAGE {
 } SCANNER_REPLY_MESSAGE, *PSCANNER_REPLY_MESSAGE;
 
 
-// Functions
-int closeScanService(struct uhuru * uhuru );
-HRESULT UserScanWorker(_In_  PUSER_SCAN_CONTEXT Context);
-HRESULT UserScanInit(_Inout_  PUSER_SCAN_CONTEXT Context);
-HRESULT UserScanFinalize(_In_  PUSER_SCAN_CONTEXT Context);
+// Functions prototypes
+HRESULT UserScanWorker(_In_  PGLOBAL_SCAN_CONTEXT Context);
+HRESULT UserScanInit(_Inout_  PGLOBAL_SCAN_CONTEXT Context);
+HRESULT UserScanFinalize(_In_  PGLOBAL_SCAN_CONTEXT Context);
 char * ConvertDeviceNameToMsDosName(LPSTR DeviceFileName);
 
 #endif
