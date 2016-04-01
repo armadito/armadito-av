@@ -1,5 +1,5 @@
 pkgconfigdir=$(libdir)/pkgconfig
-pkgconfig_DATA=libuhuru.pc
+pkgconfig_DATA=libarmadito.pc
 
 moduledir=$(pkglibdir)/modules
 
@@ -16,6 +16,6 @@ EDIT = sed \
 	$(EDIT) $(srcdir)/$*.pc.in >$*.pc.tmp
 	mv $*.pc.tmp $*.pc
 
-EXTRA_DIST=libuhuru.pc.in
+EXTRA_DIST=libarmadito.pc.in
 
-CLEANFILES=libuhuru.pc
+CLEANFILES=libarmadito.pc
