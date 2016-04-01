@@ -1,7 +1,7 @@
-#ifndef _LIBUHURU_OS_IO_H_
-#define _LIBUHURU_OS_IO_H_
+#ifndef _LIBARMADITO_OS_IO_H_
+#define _LIBARMADITO_OS_IO_H_
 
-#include "libuhuru-config.h"
+#include "libarmadito-config.h"
 
 #ifdef HAVE_IO_H
 #include <io.h>

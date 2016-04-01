@@ -1,6 +1,6 @@
-#include "libarmadito-config.h"
+#include <libarmadito.h>
 
-#include <libarmadito/core.h>
+#include "libarmadito-config.h"
 
 #include "modulep.h"
 #include "os/dir.h"
