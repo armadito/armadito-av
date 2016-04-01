@@ -45,9 +45,6 @@
     <ClCompile Include="named_pipe_client.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="named_pipe_server.c">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
     <ClCompile Include="scan_on_access.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
@@ -96,6 +93,12 @@
     <ClCompile Include="uh_notify.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="uh_conf.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\libuhuru\src\json\ui\conf.c">
+      <Filter>Fichiers sources\json\ui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="service.h">
@@ -105,9 +108,6 @@
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="named_pipe_client.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="named_pipe_server.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="scan_on_demand.h">
@@ -162,6 +162,15 @@
       <Filter>Fichiers d%27en-tête\json\ui</Filter>
     </ClInclude>
     <ClInclude Include="uh_notify.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="uh_conf.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\libuhuru\src\json\ui\conf.h">
+      <Filter>Fichiers d%27en-tête\json\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="structs.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>

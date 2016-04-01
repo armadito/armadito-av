@@ -1,11 +1,16 @@
 #include "service.h"
 #include "log.h"
+#include "scan_on_demand.h"
 #include "scan_on_access.h"
 #include "uh_crypt.h"
 #include "update.h"
 #include "register.h"
 #include "uh_info.h"
+#include "uh_quarantine.h"
 #include "uh_notify.h"
+#include "uh_conf.h"
+#include "structs.h"
+
 
 // Msdn documentation: 
 // https://msdn.microsoft.com/en-us/library/windows/desktop/ms685141%28v=vs.85%29.aspx
@@ -15,8 +20,11 @@ SERVICE_STATUS gSvcStatus;
 SERVICE_STATUS_HANDLE gSvcStatusHandle;
 HANDLE ghSvcStopEvent = NULL;
 
-struct uhuru * uhuru = NULL;
-USER_SCAN_CONTEXT userScanCtx = {0};
+//struct uhuru * uhuru = NULL;
+
+GLOBAL_SCAN_CONTEXT gScanContext = {0};
+//USER_SCAN_CONTEXT userScanCtx = {0};
+ONACCESS_SCAN_CONTEXT onAccessCtx = {0};
 ONDEMAND_SCAN_CONTEXT onDemandCtx = {0};
 
 /*------------------------------------------------
@@ -29,20 +37,54 @@ int ServiceLoadProcedure( ) {
 	int ret = 0;
 	uhuru_error * uh_error = NULL;
 	HRESULT hres = S_OK;
+	struct uhuru_conf * conf = NULL;
+	struct uhuru * uhuru = NULL;
+	int onaccess_enable = 0;
 
 	__try {
 
+		// Init configuration structure
+		conf = uhuru_conf_new();
+
+		// Load configuration from registry.
+		if (restore_conf_from_registry(conf) < 0) {			
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," [-] Error :: fail to load the configuration!\n");
+			ret = -1;
+			__leave;
+		}
+
+		printf("[+] Debug :: Configuration loaded successfully!\n");
+		
 		// Init uhuru structure
-		uhuru = uhuru_open(&uh_error);
+		uhuru = uhuru_open(conf,&uh_error);
 		if (uhuru == NULL) {
 			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " uhuru_open() struct initialization failed!\n");
 			ret = -1;
 			__leave;
 		}
 
+		// initialize global scan structure.
+		gScanContext.uhuru = uhuru;
+		gScanContext.onDemandCtx = NULL;
+		gScanContext.onAccessCtx = NULL;
+		gScanContext.FinalizeAll = 0;
+
 		//  Initialize scan listening threads. and Connect to the driver communication port. (Only if real time is enabled)
-		if (REAL_TIME_ENABLED) {
-			hres = UserScanInit(&userScanCtx);
+		// TODO :: get this information from config.
+		
+		// Get on-access configuration.
+		onaccess_enable = uhuru_conf_get_uint(conf, "on-access", "enable");
+		if (onaccess_enable < 0) { // On error
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " getting on_access configuration failed.\n");
+			ret = -1;
+			__leave;
+		}
+
+
+		if (onaccess_enable) {
+
+			gScanContext.onAccessCtx = &onAccessCtx;
+			hres = UserScanInit(&gScanContext);
 			if (FAILED(hres)) {
 				//hres = UserScanFinalize(&userScanCtx);
 				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Scan Thread initialization failed!\n");
@@ -56,7 +98,8 @@ int ServiceLoadProcedure( ) {
 
 		// Create Named Pipe for IHM
 		// Notes : If you intend to use a named pipe locally only, deny access to NT AUTHORITY\NETWORK or switch to local RPC.
-		if (Start_IHM_Connection(uhuru, &onDemandCtx) < 0) {
+		gScanContext.onDemandCtx = &onDemandCtx;
+		if (Start_IHM_Connection(&gScanContext) < 0) {
 			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," Start IHM connection failed :: %d\n",ret);
 			ret = -3;
 			__leave;
@@ -70,22 +113,92 @@ int ServiceLoadProcedure( ) {
 	__finally {
 
 		// if failed
-		if (ret < 0) {			
+		if (ret < 0) {
 
-			// Finalyze listening threads and Close communication port.
-			if (ret < -1 && REAL_TIME_ENABLED)
-				hres = UserScanFinalize(&userScanCtx);
+			ServiceUnloadProcedure( );
+			
+		}
 
-			// Close Named Pipe
-			if (ret < -2) {
-				ret = Close_IHM_Connection(&onDemandCtx);
+	}
+
+	return ret;
+}
+
+int ServiceLoadProcedure_cmd(cmd_mode mode) {
+
+	int ret = 0;
+	uhuru_error * uh_error = NULL;
+	HRESULT hres = S_OK;
+	struct uhuru_conf * conf = NULL;
+	struct uhuru * uhuru = NULL;
+	int onaccess_enable = 0;
+
+	__try {
+
+		// Init configuration structure
+		conf = uhuru_conf_new();
+
+		// Load configuration from registry.
+		if (restore_conf_from_registry(conf) < 0) {			
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR,"[-] Error :: fail to load the configuration!\n");
+			ret = -1;
+			__leave;
+		}
+
+		printf("[+] Debug :: Configuration loaded successfully!\n");
+		
+		// Init uhuru structure
+		uhuru = uhuru_open(conf,&uh_error);
+		if (uhuru == NULL) {
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " uhuru_open() struct initialization failed!\n");
+			ret = -1;
+			__leave;
+		}
+
+		// initialize global scan structure.
+		gScanContext.uhuru = uhuru;
+		gScanContext.onDemandCtx = NULL;
+		gScanContext.onAccessCtx = NULL;
+		gScanContext.FinalizeAll = 0;
+
+		// Initialize scan listening threads. and Connect to the driver communication port. (Only if real time is enabled)				
+		// Get on-access configuration.
+
+		if (mode == WITH_DRIVER) {
+
+			gScanContext.onAccessCtx = &onAccessCtx;
+			hres = UserScanInit(&gScanContext);
+			if (FAILED(hres)) {
+				//hres = UserScanFinalize(&userScanCtx);
+				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Scan Thread initialization failed!\n");
+				ret = -2;
+				__leave;
 			}
 
-			//close uhuru structure
-			if (uhuru != NULL) {
-				uhuru_close(uhuru,&uh_error);
-				uhuru = NULL;
-			}
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_INFO, " Service connected to the driver successfully!\n");
+		}
+		
+
+		// Create Named Pipe for IHM
+		// Notes : If you intend to use a named pipe locally only, deny access to NT AUTHORITY\NETWORK or switch to local RPC.
+		gScanContext.onDemandCtx = &onDemandCtx;
+		if (Start_IHM_Connection(&gScanContext) < 0) {
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," Start IHM connection failed :: %d\n",ret);
+			ret = -3;
+			__leave;
+
+		}	
+		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_INFO, " Service connected to the GUI successfully!\n");
+		uhuru_notify(NOTIF_INFO,"Service started!" );
+
+
+	}
+	__finally {
+
+		// if failed
+		if (ret < 0) {
+
+			ServiceUnloadProcedure( );
 			
 		}
 
@@ -101,21 +214,27 @@ int ServiceUnloadProcedure( ) {
 	int ret = 0;
 
 	// Finish all scan threads and close communication port with driver.	
-	if (REAL_TIME_ENABLED) {
-		hres = UserScanFinalize(&userScanCtx);
+	if (gScanContext.onAccessCtx != NULL) {
+		hres = UserScanFinalize(&gScanContext);
 		if (FAILED(hres)) {
 			 ret = -1;
-		}
+		}		
 	}
 	
 	// Finish all thread and Close the pipe.
-	ret = Close_IHM_Connection(&onDemandCtx);
+	if (gScanContext.onDemandCtx != NULL) {
+		ret = Close_IHM_Connection(&gScanContext);
+	}
+		
 
 	// Close Uhuru structure
-	if (uhuru != NULL) {
-		uhuru_close(uhuru, &uh_error);
-		uhuru = NULL;
+	if (gScanContext.uhuru != NULL) {
+		uhuru_close(gScanContext.uhuru,&uh_error);
 	}
+
+	gScanContext.onAccessCtx = NULL;
+	gScanContext.onDemandCtx = NULL;
+	gScanContext.uhuru = NULL;
 
 	uhuru_notify(NOTIF_WARNING,"Service stopped!" );
 
@@ -589,8 +708,6 @@ VOID ReportSvcStatus(DWORD dwCurrentState,
 
 
 
-
-
 /*
 	ServiceCtrlHandler()
 	https://msdn.microsoft.com/en-us/library/windows/desktop/ms687413%28v=vs.85%29.aspx
@@ -671,7 +788,7 @@ void PerformServiceAction( ) {
 	// set log handler (windows log event) // move this statement to a better place.
 	uhuru_log_set_handler(UHURU_LOG_LEVEL_NONE, winEventHandler,NULL);
 
-	uhuru_notify_set_handler(send_notif);
+	uhuru_notify_set_handler((uhuru_notify_handler_t)send_notif);
 
 	ret = ServiceLoadProcedure( );
 	if (ret < 0) {
@@ -1208,15 +1325,30 @@ int ServiceContinue( ) {
 	return ret;
 }
 
+#if 0
 int LaunchCmdLineServiceGUI( ) {
 
 	int ret = 0;
 	unsigned char c;
 	uhuru_error * uh_error = NULL;
+	struct uhuru_conf * conf = NULL;
+	struct uhuru * uhuru = NULL;
 	HRESULT hres = S_OK;
-	
+
+
+	// Init configuration structure
+	conf = uhuru_conf_new();
+
+	// Load configuration from registry.
+	if (restore_conf_from_registry(conf) < 0) {
+		printf("[-] Error :: fail to load the configuration!\n");
+		return -1;
+	}
+
+	printf("[+] Debug :: Configuration loaded suucessfully!\n");
+
 	// Init uhuru structure
-	uhuru = uhuru_open(&uh_error);
+	uhuru = uhuru_open(conf,&uh_error);
 	if (uhuru == NULL) {
 		printf("[-] Error :: uhuru_open() struct initialization failed!\n");
 		return -1;
@@ -1271,20 +1403,19 @@ int LaunchCmdLineServiceGUI( ) {
 	return ret;
 
 }
+#endif
 
-int LaunchCmdLineService( ) {
+int LaunchCmdLineService(cmd_mode mode) {
 
 	int ret = 0;
 	unsigned char c;
-	uhuru_error * uh_error = NULL;
 	HRESULT hres = S_OK;
 
 
 	__try {
 		
-		if (ServiceLoadProcedure( ) < 0) {
+		if (ServiceLoadProcedure_cmd(mode) < 0) {
 			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service Initialization failed:\n");
-			//uhLog("[+] Error :: Service Initialization failed\n");
 			printf("[-] Error :: Service Load Procedure failed! :: %d\n", ret);
 			__leave;
 		}
@@ -1303,7 +1434,6 @@ int LaunchCmdLineService( ) {
 				// pause.				
 				if (ServiceUnloadProcedure( ) != 0) {
 					//uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service unloaded with errors during pause.\n");
-					//uhLog("[-] Error :: Service unloaded with errors\n");
 					printf("[-] Error :: Service Unload Procedure failed! ::\n");
 					break;
 				}
@@ -1313,9 +1443,8 @@ int LaunchCmdLineService( ) {
 			else if (c == 'c') {
 
 				// continue.							
-				if (ServiceLoadProcedure( ) < 0) {
+				if (ServiceLoadProcedure_cmd(mode) < 0) {
 					uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Service Initialization failed during continue \n");
-					//uhLog("[+] Error :: Service Initialization failed\n");
 					printf("[-] Error :: Service Load Procedure failed! ::\n");
 				}
 
@@ -1350,92 +1479,6 @@ void DisplayBanner( ) {
 }
 
 
-void dir_map(char * path, int recurse) {
-
-	char * sPath = NULL, *entryPath= NULL;
-	char * escapedPath = NULL;
-
-	HANDLE fh = NULL;
-	int size = 0;
-	WIN32_FIND_DATAA fdata ;
-	WIN32_FIND_DATAA tmp ;
-
-
-	// Check parameters
-	if (path == NULL) {
-		printf("Error :: NULL parameter in function os_dir_map()");
-		return;
-	}
-	
-	// We escape ? and * characters
-	// escapedPath = cpp_escape_str(path);
-
-	// Check if it is a directory
-	if (!(GetFileAttributesA(path) & FILE_ATTRIBUTE_DIRECTORY)) {
-		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "Warning :: os_dir_map() :: (%s) is not a directory. ", path);
-		return;
-	}
-
-	size = strlen(path) + 3;
-	sPath = (char*)calloc(size + 1, sizeof(char));
-	sPath[size] = '\0';
-	sprintf_s(sPath, size, "%s\\*", path);
-
-	//g_log(NULL, UHURU_LOG_LEVEL_WARNING, "os_dir_map() :: (%s)", sPath);
-
-	/*
-	FindFirstFile note
-	Be aware that some other thread or process could create or delete a file with this name between the time you query for the result and the time you act on the information. If this is a potential concern for your application, one possible solution is to use the CreateFile function with CREATE_NEW (which fails if the file exists) or OPEN_EXISTING (which fails if the file does not exist).
-	*/
-
-
-	fh = FindFirstFile(sPath, &fdata);
-	if (fh == INVALID_HANDLE_VALUE) {
-		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "Warning :: os_dir_map() :: FindFirstFileA() failed ::  (%s) :: [%s]", os_strerror(errno),sPath);
-		return;
-	}
-
-	while (FindNextFile(fh, &tmp) != FALSE) {
-
-		printf("[+] Debug :: os_dir_map :: entry name ===> [%s] <===\n",tmp.cFileName);
-
-		// exclude paths "." and ".."
-		if (strncmp(tmp.cFileName,".",strlen(tmp.cFileName)) == 0 || strncmp(tmp.cFileName,"..",strlen(tmp.cFileName)) == 0)
-		{
-			continue;
-		}
-
-		// build the entry complete path.
-		size = strlen(path)+strlen(tmp.cFileName)+2;
-
-		entryPath = (char*)calloc(size + 1, sizeof(char));
-		entryPath[size] = '\0';
-		sprintf_s(entryPath, size,"%s\\%s", path, tmp.cFileName);
-
-
-		// If it is a directory and we do recursive scan
-		if ((GetFileAttributesA(entryPath) & FILE_ATTRIBUTE_DIRECTORY) && recurse >= 1) {
-			dir_map(entryPath,recurse);
-		}
-		else {
-			
-			//flags = dirent_flags(tmp.dwFileAttributes);
-			//(*dirent_cb)(entryPath, flags, 0, data);
-		}
-
-		free(entryPath);
-	}
-
-	free(sPath);
-	FindClose(fh);
-
-	///
-	
-
-	return;
-
-}
-
 
 
 int main(int argc, char ** argv) {
@@ -1444,28 +1487,28 @@ int main(int argc, char ** argv) {
 	struct uhuru_report uh_report = {0};
 	PVOID OldValue = NULL;
 
-	if ( argc >=3 && strncmp(argv[1],"--osdir",7) == 0 ){
-
-		if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {
-			return -1;
-		}
-
-		dir_map(argv[2],1);
-
-		if (Wow64RevertWow64FsRedirection(OldValue) == FALSE ){
-			//  Failure to re-enable redirection should be considered
-			//  a criticial failure and execution aborted.
-			return -2;
-		}
+	if (argc >= 2 && strncmp(argv[1],"--conf",6) == 0 ) {
 
 
+		// TODO :: https://msdn.microsoft.com/fr-fr/library/windows/desktop/ms724072%28v=vs.85%29.aspx
+		conf_poc_windows( );
+
+		//restore_conf_from_registry( );		
+
+
+		return 0;
+	}
+
+	// Only for test purposes (command line)
+	if (argc >= 2 && strncmp(argv[1], "--disable_rt", 12) == 0) {
+		disable_onaccess( );
 		return EXIT_SUCCESS;
 	}
 
 
 	if (argc >= 2 && strncmp(argv[1], "--notify", 8) == 0) {
 
-		uhuru_notify_set_handler(send_notif);
+		uhuru_notify_set_handler((uhuru_notify_handler_t)send_notif);
 		
 		uhuru_notify(NOTIF_INFO,"Service started!");
 		uhuru_notify(NOTIF_WARNING,"Malware detected :: [%s]","TrojanFake");
@@ -1478,13 +1521,13 @@ int main(int argc, char ** argv) {
 
 		DisplayBanner();
 
-		uhuru_notify_set_handler(send_notif);
+		uhuru_notify_set_handler((uhuru_notify_handler_t)send_notif);
 
 		if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {
 			return -1;
 		}
-
-		ret = LaunchCmdLineServiceGUI( );
+		
+		ret = LaunchCmdLineService(WITHOUT_DRIVER);
 
 		if (Wow64RevertWow64FsRedirection(OldValue) == FALSE ){
 			//  Failure to re-enable redirection should be considered
@@ -1505,9 +1548,9 @@ int main(int argc, char ** argv) {
 
 		DisplayBanner( );
 
-		uhuru_notify_set_handler(send_notif);
+		uhuru_notify_set_handler((uhuru_notify_handler_t)send_notif);
 
-		ret = LaunchCmdLineService( );
+		ret = LaunchCmdLineService(WITH_DRIVER);
 		if (ret < 0) {
 			return EXIT_FAILURE;
 		}

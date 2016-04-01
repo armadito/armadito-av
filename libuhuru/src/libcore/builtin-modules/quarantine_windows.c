@@ -18,18 +18,6 @@ struct quarantine_data {
   int enable;
 };
 
-static enum uhuru_mod_status quarantine_init(struct uhuru_module *module)
-{
-  struct quarantine_data *qu_data = calloc(1, sizeof(struct quarantine_data));
-
-  qu_data->quarantine_dir = NULL;
-  qu_data->enable = 0;
-
-  module->data = qu_data;
-
-  return UHURU_MOD_OK;
-}
-
 
 // Windows version.
 
@@ -453,35 +441,55 @@ void quarantine_callback(struct uhuru_report *report, void *callback_data)
     report->action |= UHURU_ACTION_QUARANTINE;
 }
 
-static enum uhuru_mod_status quarantine_conf_quarantine_dir(struct uhuru_module *module, const char *directive, const char **argv)
-{
-  struct quarantine_data *qu_data = (struct quarantine_data *)module->data;
 
-  qu_data->quarantine_dir = os_strdup(argv[0]);
+
+static enum uhuru_mod_status quarantine_init(struct uhuru_module *module)
+{
+  struct quarantine_data *qu_data = calloc(1, sizeof(struct quarantine_data));
+
+  qu_data->quarantine_dir = NULL;
+  qu_data->enable = 0;
+
+  module->data = qu_data;
 
   return UHURU_MOD_OK;
+
+
 }
 
-static enum uhuru_mod_status quarantine_conf_enable(struct uhuru_module *module, const char *directive, const char **argv)
+static enum uhuru_mod_status quarantine_conf_quarantine_dir(struct uhuru_module *module, const char *key, struct uhuru_conf_value *value)
 {
-  struct quarantine_data *qu_data = (struct quarantine_data *)module->data;
+	struct quarantine_data *qu_data = (struct quarantine_data *)module->data;
 
-  qu_data->enable = !strcmp(argv[0], "yes") || !strcmp(argv[0], "1") ;
+	qu_data->quarantine_dir = os_strdup(uhuru_conf_value_get_string(value));
 
-  return UHURU_MOD_OK;
+	return UHURU_MOD_OK;
+
+}
+
+static enum uhuru_mod_status quarantine_conf_enable(struct uhuru_module *module, const char *key, struct uhuru_conf_value *value)
+{
+	struct quarantine_data *qu_data = (struct quarantine_data *)module->data;
+
+	qu_data->enable = uhuru_conf_value_get_int(value);
+
+	return UHURU_MOD_OK;
 }
 
 static struct uhuru_conf_entry quarantine_conf_table[] = {
   { 
-    .directive = "quarantine-dir", 
+    .key = "quarantine-dir", 
+    .type = CONF_TYPE_STRING,
     .conf_fun = quarantine_conf_quarantine_dir, 
   },
   { 
-    .directive = "enable", 
+    .key = "enable", 
+    .type = CONF_TYPE_INT,
     .conf_fun = quarantine_conf_enable, 
   },
   { 
-    .directive = NULL, 
+    .key = NULL, 
+    .type = 0,
     .conf_fun = NULL, 
   },
 };
@@ -492,6 +500,7 @@ struct uhuru_module quarantine_module = {
   .post_init_fun = NULL,
   .scan_fun = NULL,
   .close_fun = NULL,
+  .supported_mime_types = NULL,
   .name = "quarantine",
   .size = sizeof(struct quarantine_data),
 };

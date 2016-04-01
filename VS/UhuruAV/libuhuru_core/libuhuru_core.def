@@ -21,3 +21,15 @@ uhuru_log_set_handler
 uhuru_log
 uhuru_notify_set_handler
 uhuru_notify
+uhuru_conf_load_file
+uhuru_conf_new
+uhuru_conf_free
+uhuru_conf_apply
+uhuru_conf_get_uint
+uhuru_conf_add_uint
+uhuru_conf_add_string
+uhuru_conf_add_list
+uhuru_conf_set_uint
+uhuru_conf_set_string
+uhuru_conf_set_list
+uhuru_get_conf

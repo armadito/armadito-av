@@ -5,6 +5,7 @@
 #include <libuhuru/common/status.h>
 #include <libuhuru/libcore/error.h>
 #include <libuhuru/libcore/handle.h>
+#include <libuhuru/libcore/conf.h>
 #include <libuhuru/libcore/info.h>
 #include <libuhuru/libcore/module.h>
 #include <libuhuru/libcore/scanconf.h>
@@ -13,5 +14,6 @@
 #include <libuhuru/libcore/ondemand.h>
 #include <libuhuru/libcore/log.h>
 #include <libuhuru/libcore/notify.h>
+#include <libuhuru/libcore/stdpaths.h>
 
 #endif
