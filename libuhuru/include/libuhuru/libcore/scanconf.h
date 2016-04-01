@@ -11,8 +11,7 @@ void uhuru_scan_conf_white_list_directory(struct uhuru_scan_conf *c, const char 
 
 int uhuru_scan_conf_is_white_listed(struct uhuru_scan_conf *c, const char *path);
 
-/* DEPRECATED */
-void uhuru_scan_conf_add_mime_type(struct uhuru_scan_conf *c, const char *mime_type, const char *module_name, struct uhuru *u);
+void uhuru_scan_conf_add_mime_type(struct uhuru_scan_conf *c, const char *mime_type);
 
 void uhuru_scan_conf_add_module(struct uhuru_scan_conf *c, const char *module_name, struct uhuru *u);
 
