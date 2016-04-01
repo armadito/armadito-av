@@ -12,8 +12,10 @@ AC_ARG_ENABLE([debug],
 AM_CONFIG_HEADER(libarmadito/include/config/libarmadito-config-autoconf.h)
 
 # for now, add builtin modules by hand
-AC_DEFINE([HAVE_ALERT_MODULE],[1],[Define to compile builtin module alert])
-AC_DEFINE([HAVE_QUARANTINE_MODULE],[1],[Define to compile builtin module quarantine])
+# disabled during reorganisation
+#AC_DEFINE([HAVE_ALERT_MODULE],[1],[Define to compile builtin module alert])
+#AC_DEFINE([HAVE_ONDEMAND_MODULE],[1],[Define to compile builtin module alert])
+#AC_DEFINE([HAVE_QUARANTINE_MODULE],[1],[Define to compile builtin module quarantine])
 
 # This is needed when the first PKG_CHECK_MODULES call is inside a conditional (not the case here, but who knows)
 PKG_PROG_PKG_CONFIG
@@ -125,6 +127,8 @@ libarmadito/Makefile
 libarmadito/conf/Makefile
 libarmadito/include/Makefile
 libarmadito/include/config/Makefile
+libarmadito/include/os/Makefile
 libarmadito/pkgconfig/Makefile
+libarmadito/src/Makefile
 ])
 AC_OUTPUT

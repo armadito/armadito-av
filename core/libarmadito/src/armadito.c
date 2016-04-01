@@ -9,7 +9,9 @@
 #include "os/mimetype.h"
 #include "os/string.h"
 #include "os/dir.h"
+#ifdef HAVE_ONDEMAND_MODULE
 #include "builtin-modules/ondemandmod.h"
+#endif
 #ifdef HAVE_ALERT_MODULE
 #include "builtin-modules/alert.h"
 #endif
@@ -47,8 +49,9 @@ static void a6o_free(struct armadito *u)
 
 static void a6o_add_builtin_modules(struct armadito *u)
 {
+#ifdef HAVE_ONDEMAND_MODULE
 	module_manager_add(u->module_manager, &on_demand_module);
-
+#endif
 #ifdef HAVE_ON_ACCESS_WINDOWS_MODULE
 	module_manager_add(u->module_manager, &on_access_win_module);
 #endif
