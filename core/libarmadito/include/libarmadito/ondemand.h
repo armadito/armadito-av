@@ -1,24 +1,16 @@
-#ifndef _LIBUHURU_LIBCORE_ONDEMAND_H_
-#define _LIBUHURU_LIBCORE_ONDEMAND_H_
+#ifndef _LIBARMADITO_ONDEMAND_H_
+#define _LIBARMADITO_ONDEMAND_H_
 
-#include <libuhuru/libcore/scan.h>
+#include <libarmadito/scan.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+struct a6o_on_demand;
 
-struct uhuru_on_demand;
+struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, int scan_id, const char *root_path, enum a6o_scan_flags flags);
 
-struct uhuru_on_demand *uhuru_on_demand_new(struct uhuru *uhuru, int scan_id, const char *root_path, enum uhuru_scan_flags flags);
+struct a6o_scan *a6o_on_demand_get_scan(struct a6o_on_demand *on_demand);
 
-struct uhuru_scan *uhuru_on_demand_get_scan(struct uhuru_on_demand *on_demand);
+void a6o_on_demand_run(struct a6o_on_demand *on_demand);
 
-void uhuru_on_demand_run(struct uhuru_on_demand *on_demand);
-
-void uhuru_on_demand_free(struct uhuru_on_demand *on_demand);
-
-#ifdef __cplusplus
-}
-#endif
+void a6o_on_demand_free(struct a6o_on_demand *on_demand);
 
 #endif

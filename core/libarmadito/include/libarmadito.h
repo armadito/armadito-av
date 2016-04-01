@@ -1,6 +1,10 @@
 #ifndef _LIBARMADITO_H_
 #define _LIBARMADITO_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <libarmadito/action.h>
 #include <libarmadito/status.h>
 #include <libarmadito/error.h>
@@ -15,5 +19,9 @@
 #include <libarmadito/log.h>
 #include <libarmadito/notify.h>
 #include <libarmadito/stdpaths.h>
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
