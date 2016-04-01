@@ -1,5 +1,5 @@
-#ifndef _LIBUHURU_OS_DIR_H_
-#define _LIBUHURU_OS_DIR_H_
+#ifndef _LIBARMADITO_OS_DIR_H_
+#define _LIBARMADITO_OS_DIR_H_
 
 #ifdef __cplusplus
 extern "C" {

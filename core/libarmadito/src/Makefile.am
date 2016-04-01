@@ -39,20 +39,20 @@ stdpaths.c
 #../os/linux/stdpaths.c 
 
 AM_CPPFLAGS=-DUSE_FILE_DESCRIPTORS -DLIBARMADITO_MODULES_PATH='"$(pkglibdir)/modules"' -DLIBARMADITO_CONF_DIR='"$(sysconfdir)/armadito"' -DLIBARMADITO_BASES_DIR='"$(localstatedir)/lib/armadito/bases"' -DLIBARMADITO_TMP_DIR='"$(localstatedir)/lib/armadito/tmp"' 
-libarmadito_core_la_CFLAGS= -I$(top_srcdir)/include -I$(top_srcdir)/include/config -I$(top_srcdir)/src
-libarmadito_core_la_LIBADD= 
+libarmadito_la_CFLAGS= -I$(top_srcdir)/libarmadito/include -I$(top_srcdir)/libarmadito/include/config
+libarmadito_la_LIBADD= 
 
-libarmadito_core_la_CFLAGS+= @GLIB2_CFLAGS@
-libarmadito_core_la_LIBADD+= @GLIB2_LIBS@
+libarmadito_la_CFLAGS+= @GLIB2_CFLAGS@
+libarmadito_la_LIBADD+= @GLIB2_LIBS@
 
-libarmadito_core_la_CFLAGS+= @GMODULE2_CFLAGS@
-libarmadito_core_la_LIBADD+= @GMODULE2_LIBS@
+libarmadito_la_CFLAGS+= @GMODULE2_CFLAGS@
+libarmadito_la_LIBADD+= @GMODULE2_LIBS@
 
-libarmadito_core_la_CFLAGS+= @GTHREAD2_CFLAGS@
-libarmadito_core_la_LIBADD+= @GTHREAD2_LIBS@
+libarmadito_la_CFLAGS+= @GTHREAD2_CFLAGS@
+libarmadito_la_LIBADD+= @GTHREAD2_LIBS@
 
-libarmadito_core_la_CFLAGS+= @LIBXML2_CFLAGS@
-libarmadito_core_la_LIBADD+= @LIBXML2_LIBS@
+libarmadito_la_CFLAGS+= @LIBXML2_CFLAGS@
+libarmadito_la_LIBADD+= @LIBXML2_LIBS@
 
 install-exec-hook:
 	-mkdir -p $(DESTDIR)$(localstatedir)/spool/armadito

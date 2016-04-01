@@ -3,10 +3,11 @@ dir.h \
 file.h \
 io.h \
 mimetype.h \
-string.h \
-linux/dir.c \
-linux/file.c \
-linux/mimetype.c 
+string.h 
+
+#linux/dir.c \
+#linux/file.c \
+#linux/mimetype.c 
 
 # bad try to make a static library that would have been included by others dynamic libraries
 # but libtool does not like it...

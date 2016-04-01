@@ -1,4 +1,4 @@
-SUBDIRS=config
+SUBDIRS=config os
 
 pkginclude_HEADERS= \
 libarmadito.h 

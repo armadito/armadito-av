@@ -1,5 +1,5 @@
-#ifndef _LIBUHURU_OS_STDPATHS_H_
-#define _LIBUHURU_OS_STDPATHS_H_
+#ifndef _LIBARMADITO_OS_STDPATHS_H_
+#define _LIBARMADITO_OS_STDPATHS_H_
 
 const char *os_stdpath_module();
 
