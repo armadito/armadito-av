@@ -1,6 +1,68 @@
 #include "scan_on_access.h"
 #include "log.h"
 
+int toggle_onaccess_state( PGLOBAL_SCAN_CONTEXT Context ) {
+	
+	int ret = 0, onaccess_enable = 0;
+	struct uhuru_conf * conf = NULL;
+	HRESULT hres = S_OK;
+
+
+	if (Context == NULL || Context->uhuru == NULL) {
+		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " toggle_onaccess_state :: invalid parameter\n");
+		return -1;
+	}
+
+	// 
+	__try {
+
+		conf = uhuru_get_conf(Context->uhuru);
+		if (conf == NULL) {
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " getting configuration failed.\n");
+			ret = -2;
+			__leave;
+		}
+
+		
+		// Get on-access configuration.
+		onaccess_enable = uhuru_conf_get_uint(conf, "on-access", "enable");
+		if (onaccess_enable < 0) { // On error
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " getting on_access configuration failed.\n");
+			ret = -3;
+			__leave;
+		}
+
+		// Enable on-access
+		if (onaccess_enable == 1 && Context->onAccessCtx == NULL) {
+			
+			if (FAILED( (hres = UserScanInit(Context)) )) {				
+				uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " Scan Thread initialization failed!\n");
+				ret = -2;
+				__leave;
+			}
+
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_INFO, " On-access enabled successfully!\n");
+			
+		}
+		//Disable on-access
+		else if(onaccess_enable == 0 && Context->onAccessCtx != NULL) {
+			
+			if (FAILED((hres = UserScanFinalize(Context)))) {
+				ret = -1;
+				__leave;
+			}
+			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_INFO, " On-access disabled successfully!\n");
+
+		}
+
+	}
+	__finally {
+
+
+	}
+	
+	return ret;
+}
 
 const CHAR * ScanResultToStr(SCAN_RESULT res) {
 
@@ -300,7 +362,7 @@ HRESULT UserScanInit(_Inout_  PGLOBAL_SCAN_CONTEXT Context) {
 	UCHAR ServiceIdentificationPassword[] = {0xBA, 0xDA, 0x5E, 0x52, 0x56, 0x1C, 0xE0};
 
 	// Check parameter.
-	if (Context == NULL || Context->onAccessCtx == NULL) {
+	if (Context == NULL) {
 		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR, " UserScanInit :: invalid parameter\n");		
 		hRes = E_INVALIDARG;
 		return hRes;
@@ -308,7 +370,13 @@ HRESULT UserScanInit(_Inout_  PGLOBAL_SCAN_CONTEXT Context) {
 
 	__try {
 
-
+		// on-access context allocation.
+		Context->onAccessCtx = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(ONACCESS_SCAN_CONTEXT));
+		if (Context->onAccessCtx == NULL) {    
+			hRes = MAKE_HRESULT(SEVERITY_ERROR, 0, E_OUTOFMEMORY);
+			__leave;
+		}
+		//ZeroMemory(Context->onAccessCtx, sizeof(ONACCESS_SCAN_CONTEXT));
 
 		// Initialize scan thread contexts. (containing threadID, handle to the thread, 
 		scanThreadCtxes = HeapAlloc(GetProcessHeap(), 0, sizeof(ONACCESS_THREAD_CONTEXT) * USER_SCAN_THREAD_COUNT);
@@ -453,6 +521,13 @@ HRESULT UserScanInit(_Inout_  PGLOBAL_SCAN_CONTEXT Context) {
 
 				// Free the allocated contexts.
 				HeapFree(GetProcessHeap(), 0, scanThreadCtxes);
+
+			}
+
+			if (Context->onAccessCtx != NULL) {
+				// Free the allocated contexts.
+				HeapFree(GetProcessHeap(), 0, Context->onAccessCtx);
+				Context->onAccessCtx = NULL;
 
 			}
 

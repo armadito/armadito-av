@@ -24,8 +24,8 @@ HANDLE ghSvcStopEvent = NULL;
 
 GLOBAL_SCAN_CONTEXT gScanContext = {0};
 //USER_SCAN_CONTEXT userScanCtx = {0};
-ONACCESS_SCAN_CONTEXT onAccessCtx = {0};
-ONDEMAND_SCAN_CONTEXT onDemandCtx = {0};
+//ONACCESS_SCAN_CONTEXT onAccessCtx = {0};
+//ONDEMAND_SCAN_CONTEXT onDemandCtx = {0};
 
 /*------------------------------------------------
 	Service Load and unload procedures functions
@@ -83,7 +83,7 @@ int ServiceLoadProcedure( ) {
 
 		if (onaccess_enable) {
 
-			gScanContext.onAccessCtx = &onAccessCtx;
+			//gScanContext.onAccessCtx = &onAccessCtx;
 			hres = UserScanInit(&gScanContext);
 			if (FAILED(hres)) {
 				//hres = UserScanFinalize(&userScanCtx);
@@ -98,7 +98,7 @@ int ServiceLoadProcedure( ) {
 
 		// Create Named Pipe for IHM
 		// Notes : If you intend to use a named pipe locally only, deny access to NT AUTHORITY\NETWORK or switch to local RPC.
-		gScanContext.onDemandCtx = &onDemandCtx;
+		//gScanContext.onDemandCtx = &onDemandCtx;
 		if (Start_IHM_Connection(&gScanContext) < 0) {
 			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," Start IHM connection failed :: %d\n",ret);
 			ret = -3;
@@ -166,7 +166,7 @@ int ServiceLoadProcedure_cmd(cmd_mode mode) {
 
 		if (mode == WITH_DRIVER) {
 
-			gScanContext.onAccessCtx = &onAccessCtx;
+			//gScanContext.onAccessCtx = &onAccessCtx;
 			hres = UserScanInit(&gScanContext);
 			if (FAILED(hres)) {
 				//hres = UserScanFinalize(&userScanCtx);
@@ -181,7 +181,7 @@ int ServiceLoadProcedure_cmd(cmd_mode mode) {
 
 		// Create Named Pipe for IHM
 		// Notes : If you intend to use a named pipe locally only, deny access to NT AUTHORITY\NETWORK or switch to local RPC.
-		gScanContext.onDemandCtx = &onDemandCtx;
+		//gScanContext.onDemandCtx = &onDemandCtx;
 		if (Start_IHM_Connection(&gScanContext) < 0) {
 			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," Start IHM connection failed :: %d\n",ret);
 			ret = -3;

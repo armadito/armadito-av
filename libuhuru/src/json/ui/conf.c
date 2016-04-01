@@ -12,7 +12,6 @@
 json_object * conf_change_entry() {
 
 	json_object * jfiles = NULL;
-		
 	return jfiles;
 }
 
