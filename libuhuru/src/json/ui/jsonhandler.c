@@ -6,6 +6,7 @@
 #include "debug.h"
 #include "state.h"
 #include "scan.h"
+#include "conf.h"
 #include "quarantine.h"
 #include "os/string.h"
 
@@ -43,6 +44,7 @@ static struct request_dispatch_entry {
   { "state", state_response_cb, NULL},
   { "scan", scan_response_cb, scan_process_cb},
   { "quarantine", quarantine_response_cb, NULL},
+  { "conf_set", conf_response_cb, NULL},
   { NULL, NULL, NULL},
 };
 
@@ -56,6 +58,10 @@ struct uhuru_json_handler {
 struct uhuru_json_handler *uhuru_json_handler_new(struct uhuru *uhuru)
 {
   struct uhuru_json_handler *j = malloc(sizeof(struct uhuru_json_handler));
+
+  if (uhuru == NULL) {
+	  return NULL;
+  }
 
   j->tokener = json_tokener_new();
   assert(j->tokener != NULL);
@@ -254,5 +260,3 @@ void uhuru_json_handler_process(struct uhuru_json_handler *j)
   if (j->process != NULL)
     (*j->process)(j->uhuru, j->request_data);
 }
-;
-
