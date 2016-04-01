@@ -1,5 +1,5 @@
-#ifndef _NOTIFY_H_
-#define _NOTIFY_H_
+#ifndef LIBARMADITO_NOTIFY_H_
+#define LIBARMADITO_NOTIFY_H_
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -12,10 +12,10 @@ enum notif_type {
 	NOTIF_ERROR
 };
 
-typedef int (*uhuru_notify_handler_t)(enum notif_type type, const char *message);
+typedef int (*a6o_notify_handler_t)(enum notif_type type, const char *message);
 
-void uhuru_notify_set_handler(uhuru_notify_handler_t handler);
-int uhuru_notify_default_handler(enum notif_type type, const char *message);
-int uhuru_notify(enum notif_type type, const char *format, ...);
+void a6o_notify_set_handler(a6o_notify_handler_t handler);
+int a6o_notify_default_handler(enum notif_type type, const char *message);
+int a6o_notify(enum notif_type type, const char *format, ...);
 
 #endif

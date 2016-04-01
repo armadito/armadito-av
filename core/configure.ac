@@ -1,4 +1,4 @@
-AC_INIT(libuhuru,1.6.0,francois@dechelle.net)
+AC_INIT(armadito-core,1.6.0,fdechelle@teclib.com)
 AM_INIT_AUTOMAKE([subdir-objects])
 
 # collect arguments
@@ -9,7 +9,7 @@ AC_ARG_ENABLE([debug],
 	enable_debug="yes")
 
 # configuration header
-AM_CONFIG_HEADER(include/config/libuhuru-config-autoconf.h)
+AM_CONFIG_HEADER(libarmadito/include/config/libarmadito-config-autoconf.h)
 
 # for now, add builtin modules by hand
 AC_DEFINE([HAVE_ALERT_MODULE],[1],[Define to compile builtin module alert])
@@ -121,30 +121,10 @@ AM_CONDITIONAL([COND_DOC], [test ! -z "$ASCIIDOC" -a ! -z "$A2X" ])
 # Output files
 AC_CONFIG_FILES([
 Makefile
-conf/Makefile
-doc/Makefile
-doc/man/Makefile
-doc/man/fr/Makefile
-include/Makefile
-include/config/Makefile
-include/libuhuru/Makefile
-pkgconfig/Makefile
-src/Makefile
-src/libcore/Makefile
-src/json/Makefile
-src/json/ui/Makefile
-src/linux/Makefile
-src/linux/daemon/Makefile
-src/linux/modules/Makefile
-src/linux/modules/on-access-linux/Makefile
-src/linux/modules/on-access-linux/conf/Makefile
-src/linux/modules/on-access-linux/src/Makefile
-src/linux/modules/on-access-linux/tests/Makefile
-src/linux/net/Makefile
-src/linux/service/Makefile
-src/linux/tools/Makefile
-src/os/Makefile
-src/utils/Makefile
-tests/Makefile
+libarmadito/Makefile
+libarmadito/conf/Makefile
+libarmadito/include/Makefile
+libarmadito/include/config/Makefile
+libarmadito/pkgconfig/Makefile
 ])
 AC_OUTPUT

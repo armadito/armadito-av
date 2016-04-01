@@ -5,7 +5,7 @@
  *
  * The std_path() function returns for accessing standard paths.
  *
- * This file defines functions to query standard locations on the local filesystem, such as 
+ * This file defines functions to query standard locations on the local filesystem, such as
  * - modules binaries directory
  * - configuration file
  * - configuration directory
@@ -15,26 +15,19 @@
  *
  */
 
-#ifndef _LIBUHURU_LIBCORE_STDPATHS_H_
-#define _LIBUHURU_LIBCORE_STDPATHS_H_
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef _LIBARMADITO_STDPATHS_H_
+#define _LIBARMADITO_STDPATHS_H_
 
-  enum uhuru_std_location {
-    MODULES_LOCATION,
-    CONFIG_FILE_LOCATION,
-    CONFIG_DIR_LOCATION,
-    BASES_LOCATION,
-    BINARY_LOCATION,
-    TMP_LOCATION,
-    LAST_LOCATION,
-  };
+enum a6o_std_location {
+	MODULES_LOCATION,
+	CONFIG_FILE_LOCATION,
+	CONFIG_DIR_LOCATION,
+	BASES_LOCATION,
+	BINARY_LOCATION,
+	TMP_LOCATION,
+	LAST_LOCATION,
+};
 
-  const char *uhuru_std_path(enum uhuru_std_location location);
-
-#ifdef __cplusplus
-}
-#endif
+const char *a6o_std_path(enum a6o_std_location location);
 
 #endif
