@@ -1,5 +1,5 @@
-uhuruconfdir=$(sysconfdir)/uhuru
-uhuruconf_DATA=uhuru.conf
+armaditoconfdir=$(sysconfdir)/armadito
+armaditoconf_DATA=armadito.conf
 
 EDIT = sed \
         -e 's,@sysconfdir\@,$(sysconfdir),g' \
@@ -10,7 +10,7 @@ EDIT = sed \
 	$(EDIT) $(srcdir)/$*.conf.in >$*.conf.tmp
 	mv $*.conf.tmp $*.conf
 
-EXTRA_DIST=uhuru.conf.in
+EXTRA_DIST=armadito.conf.in
 
-CLEANFILES=uhuru.conf
+CLEANFILES=armadito.conf
 
