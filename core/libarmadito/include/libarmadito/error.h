@@ -5,7 +5,7 @@
  *
  * Standard method of reporting errors from a called function to the calling code.
  *
- * A uhuru_error structure contains:
+ * A a6o_error structure contains:
  * - an error code specific to the domain (module, scan, info...)
  * - a formatted error message
  *
@@ -14,29 +14,29 @@
  * - a value != 0, meaning a real error
  */
 
-#ifndef _LIBUHURU_LIBCORE_ERROR_H_
-#define _LIBUHURU_LIBCORE_ERROR_H_
+#ifndef _LIBARMADITO_ERROR_H_
+#define _LIBARMADITO_ERROR_H_
 
 #include <stdio.h>  /* for FILE * */
 
 /**
- * \var typedef struct _uhuru_error uhuru_error;
- * \struct struct _uhuru_error
+ * \var typedef struct _a6o_error a6o_error;
+ * \struct struct _a6o_error
  *
  * \brief a structure containing an error
  *
- * The `uhuru_error` structure contains information about an error that has occurred.
+ * The `a6o_error` structure contains information about an error that has occurred.
  *
  */
 
-typedef struct _uhuru_error {
-  int error_code;
-  const char *error_message;
-} uhuru_error;
+typedef struct _a6o_error {
+	int error_code;
+	const char *error_message;
+} a6o_error;
 
 /**
- * \fn uhuru_error *uhuru_error_new(int error_code, const char *error_message);
- * \brief allocates an uhuru_error structure
+ * \fn a6o_error *a6o_error_new(int error_code, const char *error_message);
+ * \brief allocates an a6o_error structure
  *
  * This function uses malloc() to allocate the structure.
  * The message is NOT strdup'ed.
@@ -46,60 +46,60 @@ typedef struct _uhuru_error {
  *
  * \return a pointer to the allocated structure
  */
-uhuru_error *uhuru_error_new(int error_code, const char *error_message);
+a6o_error *a6o_error_new(int error_code, const char *error_message);
 
 /**
- * \fn void uhuru_error_set(uhuru_error **error, int error_code, const char *error_message);
+ * \fn void a6o_error_set(a6o_error **error, int error_code, const char *error_message);
  * \brief set an error
  *
  * Does nothing if error is NULL; if error is non NULL, then *error must be NULL (i.e. errors can't be
  * assigned twice).
- * A new uhuru_error is created and assigned to *error .
+ * A new a6o_error is created and assigned to *error .
  * The message is NOT strdup'ed.
  *
- * \param[in] error                return location for a uhuru_error code, or NULL
+ * \param[in] error                return location for a a6o_error code, or NULL
  * \param[in] error_code           the error code
  * \param[in] error_message        the error message
  *
  */
-void uhuru_error_set(uhuru_error **error, int error_code, const char *error_message);
+void a6o_error_set(a6o_error **error, int error_code, const char *error_message);
 
 /**
- * \fn void uhuru_error_free(uhuru_error *err);
- * \brief frees an uhuru_error structure
+ * \fn void a6o_error_free(a6o_error *err);
+ * \brief frees an a6o_error structure
  *
- * \param[in] err            a pointer to the uhuru_error struct, if NULL, function does nothing
+ * \param[in] err            a pointer to the a6o_error struct, if NULL, function does nothing
  */
-void uhuru_error_free(uhuru_error *err);
+void a6o_error_free(a6o_error *err);
 
 /**
- * \fn void uhuru_error_print(uhuru_error *err, FILE *out)
- * \brief prints an uhuru_error structure on `out`
+ * \fn void a6o_error_print(a6o_error *err, FILE *out)
+ * \brief prints an a6o_error structure on `out`
  *
- * \param[in] err            a pointer to the uhuru_error struct, if NULL, function does nothing
+ * \param[in] err            a pointer to the a6o_error struct, if NULL, function does nothing
  * \param[in] out            a pointer to the FILE output
  */
-void uhuru_error_print(uhuru_error *err, FILE *out);
+void a6o_error_print(a6o_error *err, FILE *out);
 
 /*
  * Error codes for module
  */
-#define UHURU_ERROR_MODULE                      100
-#define UHURU_ERROR_MODULE_INIT_FAILED          (UHURU_ERROR_MODULE + 1)
-#define UHURU_ERROR_MODULE_POST_INIT_FAILED     (UHURU_ERROR_MODULE + 2)
-#define UHURU_ERROR_MODULE_CLOSE_FAILED         (UHURU_ERROR_MODULE + 3)
-#define UHURU_ERROR_MODULE_SYMBOL_NOT_FOUND     (UHURU_ERROR_MODULE + 4)
+#define ARMADITO_ERROR_MODULE                      100
+#define ARMADITO_ERROR_MODULE_INIT_FAILED          (ARMADITO_ERROR_MODULE + 1)
+#define ARMADITO_ERROR_MODULE_POST_INIT_FAILED     (ARMADITO_ERROR_MODULE + 2)
+#define ARMADITO_ERROR_MODULE_CLOSE_FAILED         (ARMADITO_ERROR_MODULE + 3)
+#define ARMADITO_ERROR_MODULE_SYMBOL_NOT_FOUND     (ARMADITO_ERROR_MODULE + 4)
 
 /*
  * Error codes for scan
  */
-#define UHURU_ERROR_SCAN                        200
+#define ARMADITO_ERROR_SCAN                        200
 
 /*
  * Error codes for configuration
  */
-#define UHURU_ERROR_CONF                        300
-#define UHURU_ERROR_CONF_FILE_NOT_FOUND         (UHURU_ERROR_CONF + 1)
-#define UHURU_ERROR_CONF_SYNTAX_ERROR           (UHURU_ERROR_CONF + 1)
+#define ARMADITO_ERROR_CONF                        300
+#define ARMADITO_ERROR_CONF_FILE_NOT_FOUND         (ARMADITO_ERROR_CONF + 1)
+#define ARMADITO_ERROR_CONF_SYNTAX_ERROR           (ARMADITO_ERROR_CONF + 1)
 
 #endif

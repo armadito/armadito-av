@@ -1,1 +1,1 @@
-EXTRA_DIST=libuhuru-config.h libuhuru-config-win32.h
+EXTRA_DIST=libarmadito-config.h libarmadito-config-win32.h

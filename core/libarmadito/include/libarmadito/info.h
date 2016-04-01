@@ -1,54 +1,46 @@
-#ifndef _LIBUHURU_LIBCORE_INFO_H_
-#define _LIBUHURU_LIBCORE_INFO_H_
+#ifndef _LIBARMADITO_INFO_H_
+#define _LIBARMADITO_INFO_H_
 
-#include <libuhuru/common/status.h>
-#include <libuhuru/libcore/handle.h>
+#include <libarmadito/status.h>
+#include <libarmadito/handle.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-enum uhuru_update_status {
-  UHURU_UPDATE_OK,
-  UHURU_UPDATE_LATE,
-  UHURU_UPDATE_CRITICAL,
-  UHURU_UPDATE_NON_AVAILABLE,
+enum a6o_update_status {
+	ARMADITO_UPDATE_OK,
+	ARMADITO_UPDATE_LATE,
+	ARMADITO_UPDATE_CRITICAL,
+	ARMADITO_UPDATE_NON_AVAILABLE,
 };
 
-const char *uhuru_update_status_str(enum uhuru_update_status status);
+const char *a6o_update_status_str(enum a6o_update_status status);
 
-struct uhuru_base_info {
-  const char *name;
-  /* UTC and ISO 8601 date */
-  const char *date;
-  const char *version;
-  unsigned int signature_count;
-  const char *full_path;
+struct a6o_base_info {
+	const char *name;
+	/* UTC and ISO 8601 date */
+	const char *date;
+	const char *version;
+	unsigned int signature_count;
+	const char *full_path;
 };
 
-struct uhuru_module_info {
-  const char *name;
-  enum uhuru_update_status mod_status;
-  /* UTC and ISO 8601 date time */
-  const char *update_date;
-  /* NULL terminated array of pointers to struct base_info */
-  struct uhuru_base_info **base_infos;
+struct a6o_module_info {
+	const char *name;
+	enum a6o_update_status mod_status;
+	/* UTC and ISO 8601 date time */
+	const char *update_date;
+	/* NULL terminated array of pointers to struct base_info */
+	struct a6o_base_info **base_infos;
 };
 
-struct uhuru_info {
-  enum uhuru_update_status global_status;
-  /* NULL terminated array of pointers to struct uhuru_module_info */
-  struct uhuru_module_info **module_infos;
+struct a6o_info {
+	enum a6o_update_status global_status;
+	/* NULL terminated array of pointers to struct a6o_module_info */
+	struct a6o_module_info **module_infos;
 };
 
-struct uhuru_info *uhuru_info_new(struct uhuru *uhuru);
+struct a6o_info *a6o_info_new(struct armadito *armadito);
 
-void uhuru_info_to_stdout(struct uhuru_info *info);
+void a6o_info_to_stdout(struct a6o_info *info);
 
-void uhuru_info_free(struct uhuru_info *info);
-
-#ifdef __cplusplus
-}
-#endif
+void a6o_info_free(struct a6o_info *info);
 
 #endif
