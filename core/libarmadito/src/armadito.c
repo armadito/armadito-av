@@ -1,10 +1,10 @@
-#include "libuhuru-config.h"
+#include <libarmadito.h>
 
-#include <libuhuru/core.h>
+#include "libarmadito-config.h"
 
 #include "modulep.h"
 #include "statusp.h"
-#include "uhurup.h"
+#include "armaditop.h"
 #include "os/string.h"
 #include "os/mimetype.h"
 #include "os/string.h"
@@ -25,27 +25,27 @@
 #include <string.h>
 #include <stdio.h>
 
-struct uhuru {
+struct armadito {
 	struct module_manager *module_manager;
-	struct uhuru_conf *conf;
+	struct a6o_conf *conf;
 };
 
-static struct uhuru *uhuru_new(void)
+static struct armadito *a6o_new(void)
 {
-	struct uhuru *u = g_new(struct uhuru, 1);
+	struct armadito *u = g_new(struct armadito, 1);
 
 	u->module_manager = module_manager_new(u);
 
 	return u;
 }
 
-static void uhuru_free(struct uhuru *u)
+static void a6o_free(struct armadito *u)
 {
 	module_manager_free(u->module_manager);
 	g_free(u);
 }
 
-static void uhuru_add_builtin_modules(struct uhuru *u)
+static void a6o_add_builtin_modules(struct armadito *u)
 {
 	module_manager_add(u->module_manager, &on_demand_module);
 
@@ -60,9 +60,9 @@ static void uhuru_add_builtin_modules(struct uhuru *u)
 #endif
 }
 
-struct uhuru *uhuru_open(struct uhuru_conf *conf, uhuru_error **error)
+struct armadito *a6o_open(struct a6o_conf *conf, a6o_error **error)
 {
-	struct uhuru *u;
+	struct armadito *u;
 	const char *modules_dir;
 
 #ifdef HAVE_GTHREAD_INIT
@@ -70,11 +70,11 @@ struct uhuru *uhuru_open(struct uhuru_conf *conf, uhuru_error **error)
 #endif
 	os_mime_type_init();
 
-	u = uhuru_new();
+	u = a6o_new();
 	u->conf = conf;
-	uhuru_add_builtin_modules(u);
+	a6o_add_builtin_modules(u);
 
-	modules_dir = uhuru_std_path(MODULES_LOCATION);
+	modules_dir = a6o_std_path(MODULES_LOCATION);
 	if (modules_dir == NULL)
 		goto error;
 	if (module_manager_load_path(u->module_manager, modules_dir, error))
@@ -90,38 +90,38 @@ struct uhuru *uhuru_open(struct uhuru_conf *conf, uhuru_error **error)
 
 	return u;
 error:
-	uhuru_free(u);
+	a6o_free(u);
 	return NULL;
 }
 
-struct uhuru_conf *uhuru_get_conf(struct uhuru *u)
+struct a6o_conf *a6o_get_conf(struct armadito *u)
 {
 	return u->conf;
 }
 
-struct uhuru_module **uhuru_get_modules(struct uhuru *u)
+struct a6o_module **a6o_get_modules(struct armadito *u)
 {
 	return module_manager_get_modules(u->module_manager);
 }
 
-struct uhuru_module *uhuru_get_module_by_name(struct uhuru *u, const char *name)
+struct a6o_module *a6o_get_module_by_name(struct armadito *u, const char *name)
 {
 	return module_manager_get_module_by_name(u->module_manager, name);
 }
 
-int uhuru_close(struct uhuru *u, uhuru_error **error)
+int a6o_close(struct armadito *u, a6o_error **error)
 {
 	return module_manager_close_all(u->module_manager, error);
 }
 
 #ifdef DEBUG
-const char *uhuru_debug(struct uhuru *u)
+const char *a6o_debug(struct armadito *u)
 {
-	struct uhuru_module **modv;
+	struct a6o_module **modv;
 	GString *s = g_string_new("");
 	const char *ret;
 
-	g_string_append_printf(s, "uhuru:\n");
+	g_string_append_printf(s, "armadito:\n");
 
 	for (modv = module_manager_get_modules(u->module_manager); *modv != NULL; modv++)
 		g_string_append_printf(s, "%s\n", module_debug(*modv));

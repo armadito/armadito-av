@@ -1,6 +1,6 @@
-#include <libuhuru/core.h>
+#include <libarmadito.h>
 
-#include "libuhuru-config.h"
+#include "libarmadito-config.h"
 
 #include "confparser.h"
 #include "os/string.h"
@@ -199,7 +199,7 @@ static void scanner_free(struct scanner *s)
  * uses a simple recursive descent parser
  */
 
-struct uhuru_conf_parser {
+struct a6o_conf_parser {
 	const char *filename;
 	FILE *input;
 	struct scanner *scanner;
@@ -207,7 +207,7 @@ struct uhuru_conf_parser {
 	jmp_buf env;
 	char *current_section;
 	char *current_key;
-	enum uhuru_conf_value_type current_value_type;
+	enum a6o_conf_value_type current_value_type;
 	int current_value_int;
 	const char *current_value_string;
 	GPtrArray *current_value_list;
@@ -215,9 +215,9 @@ struct uhuru_conf_parser {
 	void *user_data;
 };
 
-struct uhuru_conf_parser *uhuru_conf_parser_new(const char *filename, conf_parser_callback_t callback, void *user_data)
+struct a6o_conf_parser *a6o_conf_parser_new(const char *filename, conf_parser_callback_t callback, void *user_data)
 {
-	struct uhuru_conf_parser *cp = malloc(sizeof(struct uhuru_conf_parser));
+	struct a6o_conf_parser *cp = malloc(sizeof(struct a6o_conf_parser));
 
 	cp->filename = os_strdup(filename);
 
@@ -228,7 +228,7 @@ struct uhuru_conf_parser *uhuru_conf_parser_new(const char *filename, conf_parse
 #endif
 
 	if (cp->input == NULL) {
-		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "cannot open conf file %s", filename);
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "cannot open conf file %s", filename);
 
 		return cp;
 	}
@@ -296,9 +296,9 @@ static const char *token_str(enum token_type token)
 	return "???";
 }
 
-static void syntax_error(struct uhuru_conf_parser *cp, guint token)
+static void syntax_error(struct a6o_conf_parser *cp, guint token)
 {
-	uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_ERROR, "syntax error: file %s line %d column %d expecting '%s' got '%s'",
+	a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "syntax error: file %s line %d column %d expecting '%s' got '%s'",
 		cp->filename,
 		scanner_current_line(cp->scanner),
 		scanner_current_column(cp->scanner),
@@ -308,7 +308,7 @@ static void syntax_error(struct uhuru_conf_parser *cp, guint token)
 	longjmp(cp->env, 1);
 }
 
-static void accept(struct uhuru_conf_parser *cp, guint token)
+static void accept(struct a6o_conf_parser *cp, guint token)
 {
 	if (cp->lookahead_token == token) {
 		if (cp->lookahead_token != TOKEN_EOF)
@@ -317,10 +317,10 @@ static void accept(struct uhuru_conf_parser *cp, guint token)
 		syntax_error(cp, token);
 }
 
-static void call_callback(struct uhuru_conf_parser *cp)
+static void call_callback(struct a6o_conf_parser *cp)
 {
 	int ret;
-	struct uhuru_conf_value value;
+	struct a6o_conf_value value;
 
 	value.type = cp->current_value_type;
 
@@ -349,7 +349,7 @@ static void call_callback(struct uhuru_conf_parser *cp)
 	cp->current_value_type = CONF_TYPE_VOID;
 
 	if (ret != 0) {
-		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_ERROR, "configuration file parser: callback return != 0 file %s line %d column %d",
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "configuration file parser: callback return != 0 file %s line %d column %d",
 			cp->filename,
 			scanner_current_line(cp->scanner),
 			scanner_current_column(cp->scanner));
@@ -361,19 +361,19 @@ static void call_callback(struct uhuru_conf_parser *cp)
   recursive descent parser functions:
   the grammar is given in conf.h
 */
-static void r_configuration(struct uhuru_conf_parser *cp);
-static void r_section_list(struct uhuru_conf_parser *cp);
-static void r_section(struct uhuru_conf_parser *cp);
-static void r_section_name(struct uhuru_conf_parser *cp);
-static void r_definition_list(struct uhuru_conf_parser *cp);
-static void r_definition(struct uhuru_conf_parser *cp);
-static void r_key(struct uhuru_conf_parser *cp);
-static void r_value(struct uhuru_conf_parser *cp);
-static void r_int_value(struct uhuru_conf_parser *cp);
-static void r_string_value(struct uhuru_conf_parser *cp);
-static void r_opt_string_list(struct uhuru_conf_parser *cp);
-static void r_list_string_value(struct uhuru_conf_parser *cp);
-static void r_list_sep(struct uhuru_conf_parser *cp);
+static void r_configuration(struct a6o_conf_parser *cp);
+static void r_section_list(struct a6o_conf_parser *cp);
+static void r_section(struct a6o_conf_parser *cp);
+static void r_section_name(struct a6o_conf_parser *cp);
+static void r_definition_list(struct a6o_conf_parser *cp);
+static void r_definition(struct a6o_conf_parser *cp);
+static void r_key(struct a6o_conf_parser *cp);
+static void r_value(struct a6o_conf_parser *cp);
+static void r_int_value(struct a6o_conf_parser *cp);
+static void r_string_value(struct a6o_conf_parser *cp);
+static void r_opt_string_list(struct a6o_conf_parser *cp);
+static void r_list_string_value(struct a6o_conf_parser *cp);
+static void r_list_sep(struct a6o_conf_parser *cp);
 
 static void free_and_set(char **old, char *new)
 {
@@ -384,13 +384,13 @@ static void free_and_set(char **old, char *new)
 }
 
 /* configuration : section_list */
-static void r_configuration(struct uhuru_conf_parser *cp)
+static void r_configuration(struct a6o_conf_parser *cp)
 {
 	r_section_list(cp);
 }
 
 /* section_list : section section_list | EMPTY */
-static void r_section_list(struct uhuru_conf_parser *cp)
+static void r_section_list(struct a6o_conf_parser *cp)
 {
 	if (cp->lookahead_token == TOKEN_LEFT_BRACE) {
 		r_section(cp);
@@ -399,7 +399,7 @@ static void r_section_list(struct uhuru_conf_parser *cp)
 }
 
 /* section : '[' STRING ']' definition_list */
-static void r_section(struct uhuru_conf_parser *cp)
+static void r_section(struct a6o_conf_parser *cp)
 {
 	accept(cp, TOKEN_LEFT_BRACE);
 	r_section_name(cp);
@@ -408,7 +408,7 @@ static void r_section(struct uhuru_conf_parser *cp)
 }
 
 /* section_name : STRING */
-static void r_section_name(struct uhuru_conf_parser *cp)
+static void r_section_name(struct a6o_conf_parser *cp)
 {
 	/* store current section */
 	free_and_set(&cp->current_section, scanner_token_text(cp->scanner));
@@ -417,7 +417,7 @@ static void r_section_name(struct uhuru_conf_parser *cp)
 }
 
 /* definition_list: definition definition_list | EMPTY */
-static void r_definition_list(struct uhuru_conf_parser *cp)
+static void r_definition_list(struct a6o_conf_parser *cp)
 {
 	if (cp->lookahead_token == TOKEN_STRING) {
 		r_definition(cp);
@@ -426,7 +426,7 @@ static void r_definition_list(struct uhuru_conf_parser *cp)
 }
 
 /* definition : key '=' value */
-static void r_definition(struct uhuru_conf_parser *cp)
+static void r_definition(struct a6o_conf_parser *cp)
 {
 	r_key(cp);
 	accept(cp, TOKEN_EQUAL_SIGN);
@@ -437,7 +437,7 @@ static void r_definition(struct uhuru_conf_parser *cp)
 }
 
 /* key : STRING */
-static void r_key(struct uhuru_conf_parser *cp)
+static void r_key(struct a6o_conf_parser *cp)
 {
 	/* store current key */
 	free_and_set(&cp->current_key, scanner_token_text(cp->scanner));
@@ -446,7 +446,7 @@ static void r_key(struct uhuru_conf_parser *cp)
 }
 
 /* value : int_value | string_value opt_string_list */
-static void r_value(struct uhuru_conf_parser *cp)
+static void r_value(struct a6o_conf_parser *cp)
 {
 	if (cp->lookahead_token == TOKEN_INTEGER)
 		r_int_value(cp);
@@ -457,7 +457,7 @@ static void r_value(struct uhuru_conf_parser *cp)
 }
 
 /* int_value: INT */
-static void r_int_value(struct uhuru_conf_parser *cp)
+static void r_int_value(struct a6o_conf_parser *cp)
 {
 	/* store current value */
 	cp->current_value_type = CONF_TYPE_INT;
@@ -467,7 +467,7 @@ static void r_int_value(struct uhuru_conf_parser *cp)
 }
 
 /* string_value: STRING */
-static void r_string_value(struct uhuru_conf_parser *cp)
+static void r_string_value(struct a6o_conf_parser *cp)
 {
 	/* store current value */
 	cp->current_value_type = CONF_TYPE_STRING;
@@ -477,7 +477,7 @@ static void r_string_value(struct uhuru_conf_parser *cp)
 }
 
 /* opt_string_list : list_sep list_string_value opt_string_list | EMPTY */
-static void r_opt_string_list(struct uhuru_conf_parser *cp)
+static void r_opt_string_list(struct a6o_conf_parser *cp)
 {
 	if (cp->lookahead_token == TOKEN_COMMA || cp->lookahead_token == TOKEN_SEMI_COLON) {
 		r_list_sep(cp);
@@ -487,7 +487,7 @@ static void r_opt_string_list(struct uhuru_conf_parser *cp)
 }
 
 /* list_string_value: STRING */
-static void r_list_string_value(struct uhuru_conf_parser *cp)
+static void r_list_string_value(struct a6o_conf_parser *cp)
 {
 	/* if cp->current_value_string is not NULL, it is the first element of the list */
 	if (cp->current_value_string != NULL) {
@@ -504,7 +504,7 @@ static void r_list_string_value(struct uhuru_conf_parser *cp)
 }
 
 /* list_sep : ',' | ';'  */
-static void r_list_sep(struct uhuru_conf_parser *cp)
+static void r_list_sep(struct a6o_conf_parser *cp)
 {
 	if (cp->lookahead_token == TOKEN_COMMA)
 		accept(cp, TOKEN_COMMA);
@@ -517,7 +517,7 @@ void arg_destroy_notify(gpointer data)
 	free(data);
 }
 
-int uhuru_conf_parser_parse(struct uhuru_conf_parser *cp)
+int a6o_conf_parser_parse(struct a6o_conf_parser *cp)
 {
 	int ret = -2;
 
@@ -541,7 +541,7 @@ int uhuru_conf_parser_parse(struct uhuru_conf_parser *cp)
 	return ret;
 }
 
-void uhuru_conf_parser_free(struct uhuru_conf_parser *cp)
+void a6o_conf_parser_free(struct a6o_conf_parser *cp)
 {
 	if (cp->input != NULL) {
 		fclose(cp->input);
