@@ -1,0 +1,61 @@
+#! /bin/bash
+### BEGIN INIT INFO
+# Provides:          armadito-scand
+# Required-Start:    $syslog $time $remote_fs
+# Required-Stop:     $syslog $time $remote_fs
+# Default-Start:     
+# Default-Stop:      0 1 2 3 4 5 6
+# Short-Description: Armadito antivirus scan daemon (test version)
+# Description:       Debian init script for the Armadito antivirus
+#                    scan daemon
+### END INIT INFO
+#
+# Author:	François Déchelle <fdechelle@teclib.com>
+#
+
+if [[ $EUID -ne 0 ]];
+then
+	echo "This script must be executed as root."
+	exit 1;
+fi
+
+DAEMON=/usr/sbin/armadito-scand
+PIDFILE=/var/run/armadito-scand.pid
+
+test -x $DAEMON || exit 0
+
+if test -f /etc/default/armadito-scand-def; then
+    . /etc/default/armadito-scand-def
+fi
+
+. /lib/lsb/init-functions
+
+set -e
+
+echo "Starting $DEAMON $DAEMON_OPTS..."
+
+case "$1" in
+  start)
+	log_daemon_msg "Starting Armadito antivirus scan daemon" "armadito-scand"
+	start_daemon -p $PIDFILE $DAEMON $DAEMON_OPTS
+	log_end_msg $?
+    ;;
+  stop)
+	log_daemon_msg "Stopping Armadito antivirus scan daemon" "armadito-scand"
+	killproc -p $PIDFILE $DAEMON
+	log_end_msg $?
+    ;;
+  force-reload|restart)
+    $0 stop
+    $0 start
+    ;;
+  status)
+    status_of_proc -p $PIDFILE $DAEMON armadito-scand && exit 0 || exit $?
+    ;;
+  *)
+    echo "Usage: /etc/init.d/armadito-scand {start|stop|restart|force-reload|status}"
+    exit 1
+    ;;
+esac
+
+exit 0
