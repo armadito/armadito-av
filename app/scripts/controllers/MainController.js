@@ -15,27 +15,30 @@ angular.module('tatouApp')
   			{ 
   				button : {
 		  			isActive : true,
-		  			tittle : "Information",
-		  			icon : "fa fa-desktop fa-2x",
-		  			view : 'Main.Information'
+		  			tittle : "GÉNÉRAL",
+		  			icon : "fa fa-tachometer fa-2x",
+		  			view : 'Main.Information',
+		  			backgroundColor: 'generalActive'
 		  		}
 	  		},
 	  		{
 	  			button : {
 		  			isActive : false,
-		  			tittle : 'Scan',
+		  			tittle : 'ANALYSE',
 		  			icon : 'fa fa-search fa-2x',
-		  			view : 'Main.Scan'
+		  			view : 'Main.Scan',
+		  			backgroundColor: 'analyseActive'
 		  		}
 	  		},
 	  		{
 	  			button : {
 		  			isActive : false,
-		  			tittle : "Journal",
+		  			tittle : "JOURNAL",
 		  			icon : "fa fa-newspaper-o fa-2x",
-		  			view : 'Main.Journal'
+		  			view : 'Main.Journal',
+		  			backgroundColor:  'journalActive'
 		  		}
-	  		},
+	  		}/*,
 	  		{
 	  			button : {
 		  			isActive : false,
@@ -43,7 +46,7 @@ angular.module('tatouApp')
 		  			icon : "fa fa-cogs fa-2x",
 		  			view : 'Main.Parameters'
 		  		}	
-	  		}
+	  		}*/
 	];
 
 	$scope.activeButton = function (button){

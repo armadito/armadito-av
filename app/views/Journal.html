@@ -1,122 +1,396 @@
-<div class="panel panel-primary panel-journal">
-  <div class="panel-body">
-  	<div class="row">
-	  <div class="col-md-10 col-md-offset-1">
-	  	<uib-tabset justified="true">
+<div class="container-fluid">
+	<div class="row">
+	<br>
+	<div class="col-md-10 col-md-offset-1">
+		<uib-tabset>
+			<uib-tab >
+				<uib-tab-heading>
+			    	JOURNAL
+			  	</uib-tab-heading>
+			  	<br/>
+			  	<div class="row">
+			  		<div class="col-md-12">
+				  		<div class="input-group">
+						  <input type="text" class="form-control formSearch" placeholder="Rechercher..." aria-describedby="basic-addon2">
+						  <span class="input-group-addon input-group-addon-search" id="basic-addon2"><i class="fa fa-search"></i></span>
+						</div>
+					</div>
+			  	</div>
+			  	<div class="row">
+					<div class="col-md-12">
+						<table class="table journal">
+						    <thead class="journal">
+						      <tr class="journal">
+						        <th class="journal" style="width:25%"><h4><i class="journalTitle">Date</i></h4></th>
+						        <th class="journal" style="width:25%"><h4><i class="journalTitle">Type</i></h4></th>
+						        <th class="journal" style="width:25%"><h4><i class="journalTitle">Status</i></h4></th>
+						        <th class="journal" style="width:25%"><h4><i class="journalTitle">User</i></h4></th>
+						      </tr>
+						    </thead>
+						    <tbody class="journal" id="ex3">
+						      <tr class="journal">
+						        <td style="width:25%"class="journal"><h7>04/01/2016</h7></td>
+						        <td style="width:25%"class="journal"><h7>Update</h7></td>
+						        <td style="width:25%"class="journal"><h7>Success</h7></td>
+						        <td style="width:25%"class="journal"><h7>Anais</h7></td>
+						      </tr>
+						      <tr class="journal">
+						        <td style="width:25%"class="journal"><h7>04/12/2015</h7></td>
+						        <td style="width:25%"class="journal"><h7>Update</h7></td>
+						        <td style="width:25%"class="journal"><h7>Success</h7></td>
+						        <td style="width:25%"class="journal"><h7>François</h7></td>
+						      </tr>
+						      <tr class="journal">
+						        <td style="width:25%"class="journal"><h7>03/12/2015</h7></td>
+						        <td style="width:25%"class="journal"><h7>Quarantaine</h7></td>
+						        <td style="width:25%"class="journal"><h7>Success</h7></td>
+						        <td style="width:25%"class="journal"><h7>Mohammed</h7></td>
+						      </tr>
+						      <tr class="journal">
+						        <td style="width:25%"class="journal"><h7>04/01/2016</h7></td>
+						        <td style="width:25%"class="journal"><h7>Stop svc</h7></td>
+						        <td style="width:25%"class="journal"><h7>Success</h7></td>
+						        <td style="width:25%"class="journal"><h7>Nelson</h7></td>
+						      </tr>
+						      <tr class="journal">
+						        <td style="width:25%"class="journal"><h7>01/06/2015</h7></td>
+						        <td style="width:25%"class="journal"><h7>Stop svc</h7></td>
+						        <td style="width:25%"class="journal"><h7>Success</h7></td>
+						        <td style="width:25%"class="journal"><h7>Sandra</h7></td>
+						      </tr>
+						      <tr class="journal">
+						        <td style="width:25%"class="journal"><h7>08/02/2016</h7></td>
+						        <td style="width:25%"class="journal"><h7>Update</h7></td>
+						        <td style="width:25%"class="journal"><h7>Success</h7></td>
+						        <td style="width:25%"class="journal"><h7>Ulrich</h7></td>
+						      </tr>
+						      <tr class="journal">
+						        <td style="width:25%"class="journal"><h7>04/15/2015</h7></td>
+						        <td style="width:25%"class="journal"><h7>Quarantaine</h7></td>
+						        <td style="width:25%"class="journal"><h7>Success</h7></td>
+						        <td style="width:25%"class="journal"><h7>Valentin</h7></td>
+						      </tr>
+						      <tr class="journal">
+						        <td style="width:25%"class="journal"><h7>07/19/2015</h7></td>
+						        <td style="width:25%"class="journal"><h7>Stop svc</h7></td>
+						        <td style="width:25%"class="journal"><h7>Success</h7></td>
+						        <td style="width:25%"class="journal"><h7>Fabien</h7></td>
+						      </tr>
+						       <tr class="journal">
+						        <td style="width:25%"class="journal"><h7>04/01/2016</h7></td>
+						        <td style="width:25%"class="journal"><h7>Stop svc</h7></td>
+						        <td style="width:25%"class="journal"><h7>Success</h7></td>
+						        <td style="width:25%"class="journal"><h7>Nelson</h7></td>
+						      </tr>
+						      <tr class="journal">
+						        <td style="width:25%"class="journal"><h7>04/03/2016</h7></td>
+						        <td style="width:25%"class="journal"><h7>Update</h7></td>
+						        <td style="width:25%"class="journal"><h7>Success</h7></td>
+						        <td style="width:25%"class="journal"><h7>Anais</h7></td>
+						      </tr>
+						      <tr class="journal">
+						        <td style="width:25%"class="journal"><h7>01/06/2015</h7></td>
+						        <td style="width:25%"class="journal"><h7>Stop svc</h7></td>
+						        <td style="width:25%"class="journal"><h7>Success</h7></td>
+						        <td style="width:25%"class="journal"><h7>Sandra</h7></td>
+						      </tr>
+						      <tr class="journal">
+						        <td style="width:25%"class="journal"><h7>08/02/2016</h7></td>
+						        <td style="width:25%"class="journal"><h7>Update</h7></td>
+						        <td style="width:25%"class="journal"><h7>Success</h7></td>
+						        <td style="width:25%"class="journal"><h7>Ulrich</h7></td>
+						      </tr>
+						    </tbody>
+						</table>
+					</div>
+				</div>
+			</uib-tab>
 			<uib-tab>
 				<uib-tab-heading>
-			    	<i class="fa fa-search-plus text-primary"></i> Analyse à la demande
+			    	ANALYSE À LA DEMANDE
 			  	</uib-tab-heading>
 			  	<br/>
 			  	<div class="row">
-				  <div class="col-md-10 col-md-offset-1">
-				  	<div class="panel panel-primary panel-default-journal-content">
-					  <div class="panel-heading text-center">Content</div>
-					  <div class="panel-body">
-						<div class="OverflowAccordion-analyseOnDemand">
-							<uib-accordion close-others="oneAtATime">
-							    <uib-accordion-group is-open="true" >
-							      <uib-accordion-heading>
-							       	Lundi 15 Décembre 2015
-							       </uib-accordion-heading>
+				  <div class="col-sm-12 col-md-12">
+						<uib-accordion close-others="true">
+						    <uib-accordion-group is-open="true" >
+						      <uib-accordion-heading>
+						       	<i>Aujourd'hui</i>
+						       </uib-accordion-heading>
+						       <div id="ex3" class="OverflowAccordion-analyseOnDemand">
 							       <div class="row">
-									  <div class="col-md-4">
-									  	<div class="list-group">
-										  <a href="" class="list-group-item" ng-click="open()">
-										    <h4 class="list-group-item-heading pull-right"><i class="fa fa-file-text-o fa-lg"></i></h4>
-										    <p class="list-group-item-text"> C:/Desktop/User/folder/..</p><br>
-										    <p>Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p>
-										  </a>
-										</div>
-									  </div>
-									  <div class="col-md-4">
-									  	<div class="list-group">
-										  <a href="" class="list-group-item" ng-click="open()">
-										    <h4 class="list-group-item-heading pull-right"><i class="fa fa-file-text-o fa-lg"></i></h4>
-										    <p class="list-group-item-text"> C:/Desktop/User/folder/..</p><br>
-										    <p>Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p>
-										  </a>
-										</div>
-									  </div>
-									  <div class="col-md-4">
-									  	<div class="list-group">
-										  <a href="" class="list-group-item" ng-click="open()">
-										    <h4 class="list-group-item-heading pull-right"><i class="fa fa-file-text-o fa-lg"></i></h4>
-										    <p class="list-group-item-text"> C:/Desktop/User/folder/..</p><br>
-										    <p>Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p>
-										  </a>
-										</div>
-									  </div>
+							       	  <div class="col-sm-12 col-md-12">
+							       	  	  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 1</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 2</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 3</button> 
+										  </div>
+							       	  </div>									 
 									</div>
-							    </uib-accordion-group>
-							    <uib-accordion-group is-open="false" >
-							      <uib-accordion-heading>
-							       	Mardi 18 Novembre 2015
-							       </uib-accordion-heading>
-							      <div class="row">
-									  <div class="col-md-4">
-									  	<div class="list-group">
-										  <a href="" class="list-group-item" ng-click="open()">
-										    <h4 class="list-group-item-heading pull-right"><i class="fa fa-file-text-o fa-lg"></i></h4>
-										    <p class="list-group-item-text"> C:/Desktop/User/folder/..</p><br>
-										    <p>Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p>
-										  </a>
-										</div>
-									  </div>
-									  <div class="col-md-4">
-									  	<div class="list-group">
-										  <a href="" class="list-group-item" ng-click="open()">
-										    <h4 class="list-group-item-heading pull-right"><i class="fa fa-file-text-o fa-lg"></i></h4>
-										    <p class="list-group-item-text"> C:/Desktop/User/folder/..</p><br>
-										    <p>Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p>
-										  </a>
-										</div>
-									  </div>
+									<br>
+									<div class="row">
+							       	  <div class="col-sm-12 col-md-12">
+							       	  	  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 4</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 5</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 6</button> 
+										  </div>
+							       	  </div>									 
 									</div>
-							    </uib-accordion-group>
-							    <uib-accordion-group is-open="false" >
-							       <uib-accordion-heading>
-							       	Mercredi 03 Septembre 2015
-							       </uib-accordion-heading>
-							      <div class="row">
-									  <div class="col-md-4">
-									  	<div class="list-group">
-										  <a href="" class="list-group-item" ng-click="open()">
-										    <h4 class="list-group-item-heading pull-right"><i class="fa fa-file-text-o fa-lg"></i></h4>
-										    <p class="list-group-item-text"> C:/Desktop/User/folder/..</p><br>
-										    <p>Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit.</p>
-										  </a>
-										</div>
-									  </div>
+									<br>
+									<div class="row">
+							       	  <div class="col-sm-12 col-md-12">
+							       	  	  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 7</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 8</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 9</button> 
+										  </div>
+							       	  </div>									 
 									</div>
-							    </uib-accordion-group>
-							</uib-accordion>
-						</div>				  
-					      
-					  </div>
-					</div>
+								</div>
+						    </uib-accordion-group>
+						    <uib-accordion-group is-open="false" >
+						      <uib-accordion-heading>
+						       	<i>Cette semaine</i>
+						       </uib-accordion-heading>
+						        <div id="ex3" class="OverflowAccordion-analyseOnDemand">
+							       <div class="row">
+							       	  <div class="col-sm-12 col-md-12">
+							       	  	  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 1</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 2</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 3</button> 
+										  </div>
+							       	  </div>									 
+									</div>
+									<br>
+									<div class="row">
+							       	  <div class="col-sm-12 col-md-12">
+							       	  	  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 4</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 5</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 6</button> 
+										  </div>
+							       	  </div>									 
+									</div>
+									<br>
+									<div class="row">
+							       	  <div class="col-sm-12 col-md-12">
+							       	  	  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 7</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 8</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 9</button> 
+										  </div>
+							       	  </div>									 
+									</div>
+								</div>
+						    </uib-accordion-group>
+						    <uib-accordion-group is-open="false" >
+						       <uib-accordion-heading>
+						       	<i>Ce mois-ci</i>
+						       </uib-accordion-heading>
+						        <div id="ex3" class="OverflowAccordion-analyseOnDemand">
+							       <div class="row">
+							       	  <div class="col-sm-12 col-md-12">
+							       	  	  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 1</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 2</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 3</button> 
+										  </div>
+							       	  </div>									 
+									</div>
+									<br>
+									<div class="row">
+							       	  <div class="col-sm-12 col-md-12">
+							       	  	  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 4</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 5</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 6</button> 
+										  </div>
+							       	  </div>									 
+									</div>
+									<br>
+									<div class="row">
+							       	  <div class="col-sm-12 col-md-12">
+							       	  	  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 7</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 8</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 9</button> 
+										  </div>
+							       	  </div>									 
+									</div>
+								</div>
+						    </uib-accordion-group>
+						    <uib-accordion-group is-open="false" >
+						       	<uib-accordion-heading>
+						       		<i>Cette année</i>
+						       	</uib-accordion-heading>
+						       	<div id="ex3" class="OverflowAccordion-analyseOnDemand">
+							       <div class="row">
+							       	  <div class="col-sm-12 col-md-12">
+							       	  	  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 1</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 2</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 3</button> 
+										  </div>
+							       	  </div>									 
+									</div>
+									<br>
+									<div class="row">
+							       	  <div class="col-sm-12 col-md-12">
+							       	  	  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 4</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 5</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 6</button> 
+										  </div>
+							       	  </div>									 
+									</div>
+									<br>
+									<div class="row">
+							       	  <div class="col-sm-12 col-md-12">
+							       	  	  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 7</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 8</button>
+										  </div>
+										  <div class="col-sm-4 col-md-4">
+										  	<button type="button" ng-click="openDetailRapport('sm')" class="btn btn-default scanReport">SCAN REPORT 9</button> 
+										  </div>
+							       	  </div>									 
+									</div>
+								</div>
+						    </uib-accordion-group>
+						</uib-accordion>
 				  </div>
 				</div>
 			</uib-tab>
 			<uib-tab >
 				<uib-tab-heading>
-			    	<i class="fa fa-bug text-danger"></i> Menaces détectées
+			    	MENACES DÉTECTÉES
 			  	</uib-tab-heading>
 			  	<br/>
 			  	<div class="row">
-				  <div class="col-md-10 col-md-offset-1">
-				  	<div class="panel panel-danger panel-default-journal-content">
-					  <div class="panel-heading text-center">Content</div>
-					  <div class="panel-body">
-					    Panel content
-					  </div>
+			  		<div class="col-md-12">
+				  		<div class="input-group">
+						  <input type="text" class="form-control formSearch" placeholder="Rechercher..." aria-describedby="basic-addon2">
+						  <span class="input-group-addon input-group-addon-search" id="basic-addon2"><i class="fa fa-search"></i></span>
+						</div>
 					</div>
-				  </div>
+			  	</div>
+			  	<div class="row">
+					<div class="col-md-12">
+						<table class="table journal-threats-detected">
+						    <thead class="journal-threats-detected">
+						      <tr class="journal-threats-detected">
+						        <th clas="journal-threats-detected" style="width:30%"><h4><i class="journal-threats-detectedTitle">Nom</i></h4></th>
+						        <th clas="journal-threats-detected" style="width:35%"><h4><i class="journal-threats-detectedTitle">Emplacement</i></h4></th>
+						        <th class="journal-threats-detected" style="width:30%"><h4><i class="journal-threats-detectedTitle">Date</i></h4></th>
+						      </tr>
+						    </thead>
+						    <tbody class="journal-threats-detected" id="ex3">
+						      <tr class="journal-threats-detected">
+						        <td style="width:30%" class="journal-threats-detected"><h7>Malware 1</h7></td>
+						        <td style="width:35%"class="journal-threats-detected"><h7>C:/Users/Bla/bla/bla</h7></td>
+						        <td style="width:30%"class="journal-threats-detected"><h7>04/15/2016</h7></td>
+						      </tr>
+						      <tr class="journal-threats-detected">
+						        <td style="width:30%" class="journal-threats-detected"><h7>Malware 2</h7></td>
+						        <td style="width:35%"class="journal-threats-detected"><h7>C:/Users/Bla/bla/bla</h7></td>
+						        <td style="width:30%"class="journal-threats-detected"><h7>04/15/2016</h7></td>
+						      </tr>
+						      <tr class="journal-threats-detected">
+						        <td style="width:30%" class="journal-threats-detected"><h7>Malware 3</h7></td>
+						        <td style="width:35%"class="journal-threats-detected"><h7>C:/Users/Bla/bla/bla</h7></td>
+						        <td style="width:30%"class="journal-threats-detected"><h7>04/15/2016</h7></td>
+						      </tr>
+						      <tr class="journal-threats-detected">
+						        <td style="width:30%" class="journal-threats-detected"><h7>Malware 4</h7></td>
+						        <td style="width:35%"class="journal-threats-detected"><h7>C:/Users/Bla/bla/bla</h7></td>
+						        <td style="width:30%"class="journal-threats-detected"><h7>04/15/2016</h7></td>
+						      </tr>
+						      <tr class="journal-threats-detected">
+						        <td style="width:30%" class="journal-threats-detected"><h7>Malware 5</h7></td>
+						        <td style="width:35%"class="journal-threats-detected"><h7>C:/Users/Bla/bla/bla</h7></td>
+						        <td style="width:30%"class="journal-threats-detected"><h7>04/15/2016</h7></td>
+						      </tr>
+						      <tr class="journal-threats-detected">
+						        <td style="width:30%" class="journal-threats-detected"><h7>Malware 6</h7></td>
+						        <td style="width:35%"class="journal-threats-detected"><h7>C:/Users/Bla/bla/bla</h7></td>
+						        <td style="width:30%"class="journal-threats-detected"><h7>04/15/2016</h7></td>
+						      </tr>
+						      <tr class="journal-threats-detected">
+						        <td style="width:30%" class="journal-threats-detected"><h7>Malware 7</h7></td>
+						        <td style="width:35%"class="journal-threats-detected"><h7>C:/Users/Bla/bla/bla</h7></td>
+						        <td style="width:30%"class="journal-threats-detected"><h7>04/15/2016</h7></td>
+						      </tr>
+						      <tr class="journal-threats-detected">
+						        <td style="width:30%" class="journal-threats-detected"><h7>Malware 8</h7></td>
+						        <td style="width:35%"class="journal-threats-detected"><h7>C:/Users/Bla/bla/bla</h7></td>
+						        <td style="width:30%"class="journal-threats-detected"><h7>04/15/2016</h7></td>
+						      </tr>
+						      <tr class="journal-threats-detected">
+						        <td style="width:30%" class="journal-threats-detected"><h7>Malware 9</h7></td>
+						        <td style="width:35%"class="journal-threats-detected"><h7>C:/Users/Bla/bla/bla</h7></td>
+						        <td style="width:30%"class="journal-threats-detected"><h7>04/15/2016</h7></td>
+						      </tr>
+						      <tr class="journal-threats-detected">
+						        <td style="width:30%" class="journal-threats-detected"><h7>Malware 10</h7></td>
+						        <td style="width:35%"class="journal-threats-detected"><h7>C:/Users/Bla/bla/bla</h7></td>
+						        <td style="width:30%"class="journal-threats-detected"><h7>04/15/2016</h7></td>
+						      </tr>
+						    </tbody>
+						</table>
+					</div>
 				</div>
-			</uib-tab>
+			</uib-tab>			
 			<uib-tab >
 				<uib-tab-heading ng-click="query_quarantine()">
-			    	<i class="fa fa-exclamation-triangle text-warning"></i> Quarantaine <i style="visibility: hidden;">Quarantaine</i>
+			    	QUARANTAINE 
 			  	</uib-tab-heading>
 			  	<br/>
 			  	<div class="row">
@@ -160,24 +434,7 @@
 				  </div>
 				</div>
 			</uib-tab>
-			<uib-tab >
-				<uib-tab-heading>
-			    	<i class="fa fa-list-alt text-success"></i> Journal d'évènements
-			  	</uib-tab-heading>
-			  	<br/>
-			  	<div class="row">
-				  <div class="col-md-10 col-md-offset-1">
-				  	<div class="panel panel-success">
-					  <div class="panel-heading text-center">Content</div>
-					  <div class="panel-body">
-					    Panel content
-					  </div>
-					</div>
-				  </div>
-				</div>
-			</uib-tab>
 		</uib-tabset>
-	  </div>
 	</div>
-  </div>
+</div>
 </div>

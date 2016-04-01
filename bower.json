@@ -15,7 +15,6 @@
     "bootswatch-dist": "yeti",
     "angular-ui-router": "~0.2.15",
     "font-awesome": "~4.5.0",
-    "angular-smart-table": "~2.1.6",
     "angular-bootstrap": "~0.14.3",
     "angular-timer": "~1.3.3",
     "angular-toastr": "^1.7.0"

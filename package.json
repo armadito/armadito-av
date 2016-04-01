@@ -32,7 +32,6 @@
   "engines": {
     "node": ">=0.10.0"
   },
-  //NWJS
   "name": "Armadito",
   "version": "0.0.1",
   "main": "app/index.html",
@@ -40,12 +39,12 @@
     "title": "Armadito",
     "toolbar": true,
     "frame": true,
-    "width": 800,
-    "height": 500,
+    "width": 900,
+    "height": 560,
     "position": "center",
-    "min_width": 800,
-    "min_height": 500,
-    "max_width": 800,
-    "max_height": 500
+    "min_width": 900,
+    "min_height": 560,
+    "max_width": 900,
+    "max_height": 560
   }
 }

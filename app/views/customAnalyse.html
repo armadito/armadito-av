@@ -1,0 +1,30 @@
+<div class="">
+	<div class="modal-header modal-header-analyse ">
+		<button type="button" ng-click="cancel()" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	    <span class="modal-title"><i><h3 class="analyseTitle">Analyse personnalisée</h3></span>
+	    <hr>
+	</div>
+	<div class="modal-body modal-body-analyse">
+		<div class="input-group">
+		  <input type="text" class="form-control form-control-modal"  ng-model="pathToScan" placeholder="Selectionnez un fichier ou un dossier">
+		  <span class="input-group-addon btn btn-default btn-file">
+		  	<i class="fa fa-angle-down fa-lg"></i> <input id="pathToScan" nwdirectory type="file">
+		  </span>
+		</div>
+		<h4 class="chooseOptionAnalyse">Choisissez vos options :</h4>
+		<form role="form" class="formOptionScan">
+		    <div class="radio">
+		      <label class="optionScan"><input class="text-danger" type="radio" name="optradio">&nbsp;&nbsp;Mode Heuristique</label>
+		    </div>
+		    <div class="radio">
+		      <label class="optionScan"><input type="radio" name="optradio">&nbsp;&nbsp;Scan archive</label>
+		    </div>
+		    <div class="radio">
+		      <label class="optionScan"><input type="radio" name="optradio">&nbsp;&nbsp;Exclude folders/files</label>
+		    </div>
+		</form>
+	</div>
+	<div class="modal-footer footerModal">
+	    <button type="button" class="btn startButtonModal" ng-click="ok()">START</button>
+	</div>
+</div>

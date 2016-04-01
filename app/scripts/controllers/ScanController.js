@@ -11,8 +11,8 @@
  var os = require('os');
  
 angular.module('tatouApp')
-  .controller('ScanController', ['$scope', '$interval', 'MockAvService', 'AntivirusService', 'EventService', 'toastr',
-        function ($scope,  $interval, MockAvService, AntivirusService, EventService, toastr) {
+  .controller('ScanController', ['$scope', '$interval', 'MockAvService', 'AntivirusService', 'EventService', 'toastr', '$uibModal', '$log',
+        function ($scope,  $interval, MockAvService, AntivirusService, EventService, toastr, $uibModal, $log) {
 			
 			$scope.HideInputFile = true;
 			
@@ -104,7 +104,7 @@ angular.module('tatouApp')
                 }, false);
               };
 
-              $scope.chooseFile('#pathToScan');
+              //$scope.chooseFile('#pathToScan');
 				
               $scope.startMe = function(){
                 if(($scope.pathToScan === "") || ($scope.pathToScan === undefined)){
@@ -146,5 +146,40 @@ angular.module('tatouApp')
               };
               
             /* Antivirus scan*/
+            $scope.type = "Choisissez un type d'analyse...";
+
+            $scope.analyseComplete = function () {
+              $scope.type = "COMPLÈTE";
+            };
+
+            $scope.analyseRapide = function () {
+              $scope.type = "RAPIDE";
+            };
+
+
+            $scope.items = ['item1', 'item2', 'item3'];
+
+            $scope.analysePersonnalisee = function () {
+              $scope.type = "PERSONALISÉE";
+               var size = 'sm';
+              var modalInstance = $uibModal.open({
+                animation: $scope.animationsEnabled,
+                templateUrl: 'views/customAnalyse.html',
+                controller: 'customAnalyseController',
+                size: size,
+                resolve: {
+                  items: function () {
+                    return $scope.items;
+                  }
+                }
+              });
+
+              modalInstance.result.then(function (selectedItem) {
+                $scope.selected = selectedItem;
+              }, function () {
+                $log.info('Modal dismissed at: ' + new Date());
+              });
+
+            };
 
   }]);

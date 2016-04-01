@@ -21,8 +21,8 @@ angular
     'ui.router',
     'ui.bootstrap',
     'armadito.services',
-	'armadito.svc',
-	'armadito.ipc',
+	  'armadito.svc',
+	  'armadito.ipc',
     'timer',
     'toastr'
   ])

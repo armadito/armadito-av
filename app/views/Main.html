@@ -1,40 +1,57 @@
 <div class="container-fluid">
-  <nav class="navbar navbar-default">
-        <div class="navbar-header">
-          <a class="navbar-brand" href="">
-            <img alt="Tatoo" src="images/armadito.png" class="img-responsive">
+  <div class="row">
+    <span class="topcorner">
+      <div class="btn-group topcorner" role="group" aria-label="...">
+         <button type="button" class="btn btn-default reduceButton" ><span class="reduceLetter">—</span></button>
+        <button type="button" class="btn btn-default closeButton" ><span class="closeLetter">x</span></button>
+      </div>
+    </span>
+  </div>
+  <nav class="navbar navbar-default information">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>    
+    </div>
+    <a class="navbar-brand" href="#"><img alt="Tatoo" src="images/armadito.png" class="img-responsive"></a>
+    <div class="navbar-collapse collapse">
+      <ul class="nav navbar-nav navbar-left">
+          <li><h4 class="status"><b >Votre ordinateur est protégé</b></h4></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a ui-sref="Main.Parameters" href=""><i class="fa fa-cog fa-lg"></i>&nbsp;Paramètres</a></li>
+        <li><a href=""><i class="fa fa-bar-chart fa-lg"></i>&nbsp;Statistiques</a></li>
+        <li>
+          <a href="">
+            <span class="fa-stack">
+              <i class="fa fa-circle fa-stack-2x circleInterrogation"></i>
+              <i class="fa fa-question fa-stack-1x interrogation"></i>
+            </span>
           </a>
-          <a class="navbar-brand align-text-information" href="">
-            <h4 class="text-success"><b>Votre système est protégé !</b></h4>
-          </a>
-        </div>
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse pull-right" id="bs-example-navbar-collapse-1">
-            <ul class="nav navbar-nav">
-                <li>
-                    <a href=""><h7 >A propos</h7></a>
-                </li>
-                <li>
-                    <a href=""><i class="fa fa-question-circle fa-lg"></i></a>
-                </li>
-            </ul>
-        </div>
+        </li>
+      </ul>
+    </div>
   </nav>
   <div class="row">
   	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 ">
   	    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 ahuru-tab-menu">
   	      <div class="list-group" ng-repeat="item in buttons">
-  	        <a ui-sref="{{item.button.view}}" ng-click="activeButton(item.button)" class="list-group-item text-center" ng-class="{'active': item.button.isActive }">
+  	        <a  ui-sref="{{item.button.view}}" style="height: 145px;"
+                ng-click="activeButton(item.button)" 
+                class="list-group-item backgroundColumn text-center {{item.button.backgroundColor}}" 
+                ng-class="{'active': item.button.isActive,  'list-group-item-firstChild' : $first, 'list-group-item-lastChild' : $last}">
+              <br>
   	          <h4 ng-class="item.button.icon"></h4>
-  	          <h6>{{item.button.tittle}}</h6>
+              <br>
+  	          <b class="titleGroupItem">{{item.button.tittle}}</b>
   	        </a>
   	      </div>
   	    </div>
-
   	    <div class="col-lg-10 col-md-10 col-sm-10 col-xs-10 ahuru-tab">
   	    	<div ui-view></div>
   	    </div>	
-
   	</div>
   </div>
-</div>  
+</div>   

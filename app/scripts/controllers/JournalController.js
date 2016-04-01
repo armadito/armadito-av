@@ -142,5 +142,26 @@ angular.module('tatouApp')
         $scope.animationsEnabled = !$scope.animationsEnabled;
       };
 
+       	$scope.openDetailRapport = function (size) {
+
+		    var modalInstance = $uibModal.open({
+		      animation: $scope.animationsEnabled,
+		      templateUrl: 'views/DetailRapportModal.html',
+		      controller: 'DetailRapportModalController',
+		      size: size,
+		      resolve: {
+		        items: function () {
+		          return $scope.items;
+		        }
+		      }
+		    });
+
+		    modalInstance.result.then(function (selectedItem) {
+		      $scope.selected = selectedItem;
+		    }, function () {
+		      $log.info('Modal dismissed at: ' + new Date());
+		    });
+		  };
+
 
   }]);
