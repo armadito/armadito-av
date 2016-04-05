@@ -10,7 +10,7 @@
 #                    scan daemon
 ### END INIT INFO
 #
-# Author:	François Déchelle <francois@dechelle.net>
+# Author:	François Déchelle <fdechelle@teclib.com>
 #
 
 if [[ $EUID -ne 0 ]];

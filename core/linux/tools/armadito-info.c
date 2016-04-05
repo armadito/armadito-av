@@ -1,12 +1,11 @@
 #include "libarmadito-config.h"
 
-#include "utils/getopt.h"
 #include "daemon/ipc.h"
-#include "net/tcpsockclient.h"
 #include "net/unixsockclient.h"
 #include "net/netdefaults.h"
 
 #include <assert.h>
+#include <getopt.h>
 #include <errno.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
@@ -21,13 +20,16 @@
 #define PROGRAM_VERSION PACKAGE_VERSION
 
 struct info_options {
-	enum {
-		TCP_SOCKET,
-		UNIX_SOCKET,
-	} socket_type;
 	const char *unix_path;
-	unsigned short port_number;
 	int output_xml;
+};
+
+static struct option info_option_defs[] = {
+	{"help",      no_argument,        0, 'h'},
+	{"version",   no_argument,        0, 'V'},
+	{"xml",       no_argument,        0, 'x'},
+	{"path",      required_argument,  0, 'a'},
+	{0, 0, 0, 0}
 };
 
 struct base_info {
@@ -56,17 +58,6 @@ struct info {
 	int alloc_modules;
 };
 
-static struct opt info_opt_defs[] = {
-	{ .long_form = "help", .short_form = 'h', .need_arg = 0, .is_set = 0, .value = NULL},
-	{ .long_form = "version", .short_form = 'V', .need_arg = 0, .is_set = 0, .value = NULL},
-	{ .long_form = "xml", .short_form = 'x', .need_arg = 0, .is_set = 0, .value = NULL},
-	{ .long_form = "tcp", .short_form = 't', .need_arg = 0, .is_set = 0, .value = NULL},
-	{ .long_form = "port", .short_form = 'p', .need_arg = 1, .is_set = 0, .value = NULL},
-	{ .long_form = "unix", .short_form = 'u', .need_arg = 0, .is_set = 0, .value = NULL},
-	{ .long_form = "path", .short_form = 'a', .need_arg = 1, .is_set = 0, .value = NULL},
-	{ .long_form = NULL, .short_form = 0, .need_arg = 0, .is_set = 0, .value = NULL},
-};
-
 static void version(void)
 {
 	printf("%s %s\n", PROGRAM_NAME, PROGRAM_VERSION);
@@ -82,8 +73,6 @@ static void usage(void)
 	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "  --help  -h                    print help and quit\n");
 	fprintf(stderr, "  --version -V                  print program version\n");
-	fprintf(stderr, "  --tcp -t | --unix -u          use TCP (--tcp) or unix (--unix) socket (default is " DEFAULT_SOCKET_TYPE ")\n");
-	fprintf(stderr, "  --port=PORT | -p PORT         TCP port number (default is " DEFAULT_SOCKET_PORT ")\n");
 	fprintf(stderr, "  --path=PATH | -a PATH         unix socket path (default is " DEFAULT_SOCKET_PATH ")\n");
 	fprintf(stderr, "  --xml -x                      output information as XML\n");
 	fprintf(stderr, "\n");
@@ -91,37 +80,52 @@ static void usage(void)
 	exit(1);
 }
 
-static void parse_options(int argc, const char *argv[], struct info_options *opts)
+static void parse_options(int argc, char **argv, struct info_options *opts)
 {
-	int r = opt_parse(info_opt_defs, argc, argv);
-	const char *s_port, *s_socket_type;
+	opts->unix_path = DEFAULT_SOCKET_PATH;
+	opts->output_xml = 0;
 
-	if (r < 0|| r > argc)
-		usage();
+	while (1) {
+		int c, option_index = 0;
 
-	if (opt_is_set(info_opt_defs, "help"))
-		usage();
+		c = getopt_long(argc, argv, "hVxa:", info_option_defs, &option_index);
 
-	if (opt_is_set(info_opt_defs, "version"))
-		version();
+		if (c == -1)
+			break;
 
-	if (opt_is_set(info_opt_defs, "tcp") && opt_is_set(info_opt_defs, "unix"))
-		usage();
+		switch (c) {
+		case 'h': /* help */
+			usage();
+			break;
+		case 'V': /* version */
+			version();
+			break;
+		case 'x': /* wml */
+			opts->output_xml = 1;
+			break;
+		case 'a': /* path */
+			opts->unix_path = strdup(optarg);
+			break;
+		case '?':
+			/* getopt_long already printed an error message. */
+			break;
+		default:
+			abort ();
+		}
+	}
 
-	s_socket_type = DEFAULT_SOCKET_TYPE;
-	if (opt_is_set(info_opt_defs, "tcp"))
-		s_socket_type = "tcp";
-	else if (opt_is_set(info_opt_defs, "unix"))
-		s_socket_type = "unix";
-	opts->socket_type = (!strcmp(s_socket_type, "unix")) ? UNIX_SOCKET : TCP_SOCKET;
+	/* Print any remaining command line arguments (not options). */
+	if (optind < argc) {
+		printf ("non-option ARGV-elements: ");
+		while (optind < argc)
+			printf ("%s ", argv[optind++]);
+		putchar ('\n');
+	}
 
-	s_port = opt_value(info_opt_defs, "port", DEFAULT_SOCKET_PORT);
-	opts->port_number = (unsigned short)atoi(s_port);
-
-	opts->unix_path = opt_value(info_opt_defs, "path", DEFAULT_SOCKET_PATH);
-
-	opts->output_xml = opt_is_set(info_opt_defs, "xml");
+	fprintf(stderr, "opts->output_xml %d\n", opts->output_xml);
+	fprintf(stderr, "opts->unix_path %s\n", opts->unix_path);
 }
+
 
 static struct info *info_new(void)
 {
@@ -356,17 +360,14 @@ static void do_info(struct info_options *opts, int client_sock)
 	info_free(info);
 }
 
-int main(int argc, const char **argv)
+int main(int argc, char **argv)
 {
 	struct info_options *opts = (struct info_options *)malloc(sizeof(struct info_options));
 	int client_sock;
 
 	parse_options(argc, argv, opts);
 
-	if (opts->socket_type == TCP_SOCKET)
-		client_sock = tcp_client_connect("127.0.0.1", opts->port_number, 10);
-	else
-		client_sock = unix_client_connect(opts->unix_path, 10);
+	client_sock = unix_client_connect(opts->unix_path, 10);
 
 	if (client_sock < 0) {
 		fprintf(stderr, "cannot open client socket (errno %d)\n", errno);
