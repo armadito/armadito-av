@@ -3,8 +3,8 @@ AUTOMAKE_OPTIONS=subdir-objects
 sbin_PROGRAMS=armadito-scand
 
 AM_CPPFLAGS= -DLOCALSTATEDIR=\"$(localstatedir)\"
-armadito_scand_CFLAGS=-I$(top_srcdir)/libarmadito/include -I$(top_srcdir)/libarmadito/include/config -I$(top_srcdir)/linux -I$(top_srcdir)/src/json/ui @GLIB2_CFLAGS@ @GIO2_CFLAGS@ @GTHREAD2_CFLAGS@ @LIBJSONC_CFLAGS@
-armadito_scand_LDADD=$(top_builddir)/src/libcore/libarmadito_core.la $(top_builddir)/src/json/ui/libarmadito_json.la @GLIB2_LIBS@ @GIO2_LIBS@ @GTHREAD2_LIBS@ @LIBJSONC_LIBS@ -lmagic
+armadito_scand_CFLAGS=-I$(top_srcdir)/libarmadito/include -I$(top_srcdir)/libarmadito/include/config -I$(top_srcdir)/linux -I$(top_srcdir)/json/ui @GLIB2_CFLAGS@ @GIO2_CFLAGS@ @GTHREAD2_CFLAGS@ @LIBJSONC_CFLAGS@
+armadito_scand_LDADD=$(top_builddir)/libarmadito/src/libarmadito.la $(top_builddir)/json/ui/libarmadito_json.la @GLIB2_LIBS@ @GIO2_LIBS@ @GTHREAD2_LIBS@ @LIBJSONC_LIBS@ -lmagic
 
 armadito_scand_SOURCES= \
 main.c \
@@ -22,11 +22,7 @@ daemonize.c \
 daemonize.h \
 unixsockserver.c \
 unixsockserver.h \
-tcpsockserver.c \
-tcpsockserver.h \
-../net/netdefaults.h \
-../../utils/getopt.c \
-../../utils/getopt.h 
+../net/netdefaults.h 
 
 install-exec-hook:
 	-mkdir -p $(DESTDIR)$(localstatedir)/run

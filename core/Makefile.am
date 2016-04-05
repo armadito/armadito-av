@@ -1,4 +1,4 @@
-SUBDIRS=libarmadito linux
+SUBDIRS=libarmadito json linux 
 
 TAGDIRS=\
 $(top_srcdir)/doc \
