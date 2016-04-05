@@ -1,5 +1,18 @@
 'use strict';
+/*Create NWJS TRAY*/
+// Create a tray icon
+/*var tray = new nw.Tray({ title: 'Tray', icon: 'img/icon.png' });
 
+// Give it a menu
+var menu = new nw.Menu();
+menu.append(new nw.MenuItem({ type: 'checkbox', label: 'box1' }));
+tray.menu = menu;*/
+
+// Remove the tray
+/*tray.remove();
+tray = null;*/
+
+/*Create NWJS TRAY*/
 /**
  * @ngdoc overview
  * @name tatouApp
@@ -63,7 +76,7 @@ angular
     .state('Main.Parameters', {
       url: '/Parameters',
       templateUrl: 'views/Parameters.html',
-      //controller: 'ParametersController'
+      controller: 'ParametersController'
     });
 });
 

@@ -8,7 +8,7 @@
  * Controller of the tatouApp
  */
 angular.module('tatouApp')
-  .controller('MainController', [ '$scope', '$state','toastr','ArmaditoSVC', function ($scope,  $state, toastr, ArmaditoSVC) {
+  .controller('MainController', [ '$rootScope', '$scope', '$state','toastr','ArmaditoSVC', function ($rootScope, $scope,  $state, toastr, ArmaditoSVC) {
 
   	//Buttons
   	$scope.buttons = [
@@ -48,6 +48,19 @@ angular.module('tatouApp')
 		  		}	
 	  		}*/
 	];
+
+
+	$rootScope.$on('$stateChangeStart', 
+		function(event, toState, toParams, fromState, fromParams){
+		    if(toState.url === '/Parameters'){
+		    	for (var i = 0; i < $scope.buttons.length; i++) {
+		    		$scope.buttons[i].button.isActive = false;
+		    		$scope.buttonParameters = true;
+		    	}
+		    }else{
+		    	$scope.buttonParameters = false;
+		    }
+		})
 
 	$scope.activeButton = function (button){
 		for (var i = 0; i < $scope.buttons.length; i++) {

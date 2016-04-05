@@ -1,7 +1,7 @@
 <div class="container-fluid">
 	<div class="row">
 	<br>
-	<div class="col-md-10 col-md-offset-1">
+	<div class="col-md-10 col-md-offset-1 journal">
 		<uib-tabset>
 			<uib-tab >
 				<uib-tab-heading>
@@ -12,7 +12,7 @@
 			  		<div class="col-md-12">
 				  		<div class="input-group">
 						  <input type="text" class="form-control formSearch" placeholder="Rechercher..." aria-describedby="basic-addon2">
-						  <span class="input-group-addon input-group-addon-search" id="basic-addon2"><i class="fa fa-search"></i></span>
+						  <span class="input-group-addon input-group-addon-searchJournal" id="basic-addon2"><i class="fa fa-search"></i></span>
 						</div>
 					</div>
 			  	</div>
@@ -102,6 +102,10 @@
 						      </tr>
 						    </tbody>
 						</table>
+						<span class="pull-right">
+							<button type="button" class="btn clearButton" ng-click="ok()">CLEAR</button>&nbsp;&nbsp;
+							<button type="button" class="btn refreshButton" ng-click="ok()">REFRESH</button>
+						</span>
 					</div>
 				</div>
 			</uib-tab>
@@ -113,9 +117,9 @@
 			  	<div class="row">
 				  <div class="col-sm-12 col-md-12">
 						<uib-accordion close-others="true">
-						    <uib-accordion-group is-open="true" >
+						    <uib-accordion-group is-open="status.openDay" >
 						      <uib-accordion-heading>
-						       	<i>Aujourd'hui</i>
+						       	<i>Aujourd'hui</i><i class="pull-right glyphicon" ng-class="{'fa fa-angle-down fa-2x': status.openDay, 'fa fa-angle-up fa-2x': !status.openDay}"></i>
 						       </uib-accordion-heading>
 						       <div id="ex3" class="OverflowAccordion-analyseOnDemand">
 							       <div class="row">
@@ -161,9 +165,9 @@
 									</div>
 								</div>
 						    </uib-accordion-group>
-						    <uib-accordion-group is-open="false" >
+						    <uib-accordion-group is-open="status.openWeek" >
 						      <uib-accordion-heading>
-						       	<i>Cette semaine</i>
+						       	<i>Cette semaine</i><i class="pull-right glyphicon" ng-class="{'fa fa-angle-down fa-2x': status.openWeek, 'fa fa-angle-up fa-2x': !status.openWeek}"></i>
 						       </uib-accordion-heading>
 						        <div id="ex3" class="OverflowAccordion-analyseOnDemand">
 							       <div class="row">
@@ -209,9 +213,9 @@
 									</div>
 								</div>
 						    </uib-accordion-group>
-						    <uib-accordion-group is-open="false" >
+						    <uib-accordion-group is-open="status.openMonth" >
 						       <uib-accordion-heading>
-						       	<i>Ce mois-ci</i>
+						       	<i>Ce mois-ci</i><i class="pull-right glyphicon" ng-class="{'fa fa-angle-down fa-2x': status.openMonth, 'fa fa-angle-up fa-2x': !status.openMonth}"></i>
 						       </uib-accordion-heading>
 						        <div id="ex3" class="OverflowAccordion-analyseOnDemand">
 							       <div class="row">
@@ -257,9 +261,9 @@
 									</div>
 								</div>
 						    </uib-accordion-group>
-						    <uib-accordion-group is-open="false" >
+						    <uib-accordion-group is-open="status.openYear" >
 						       	<uib-accordion-heading>
-						       		<i>Cette année</i>
+						       		<i>Cette année</i><i class="pull-right glyphicon" ng-class="{'fa fa-angle-down fa-2x': status.openYear, 'fa fa-angle-up fa-2x': !status.openYear}"></i>
 						       	</uib-accordion-heading>
 						       	<div id="ex3" class="OverflowAccordion-analyseOnDemand">
 							       <div class="row">
@@ -318,7 +322,7 @@
 			  		<div class="col-md-12">
 				  		<div class="input-group">
 						  <input type="text" class="form-control formSearch" placeholder="Rechercher..." aria-describedby="basic-addon2">
-						  <span class="input-group-addon input-group-addon-search" id="basic-addon2"><i class="fa fa-search"></i></span>
+						  <span class="input-group-addon input-group-addon-searchJournal" id="basic-addon2"><i class="fa fa-search"></i></span>
 						</div>
 					</div>
 			  	</div>
@@ -334,7 +338,7 @@
 						    </thead>
 						    <tbody class="journal-threats-detected" id="ex3">
 						      <tr class="journal-threats-detected">
-						        <td style="width:30%" class="journal-threats-detected"><h7>Malware 1</h7></td>
+						        <td style="width:30%" class="journal-threats-detected"><h7>malware</h7></td>
 						        <td style="width:35%"class="journal-threats-detected"><h7>C:/Users/Bla/bla/bla</h7></td>
 						        <td style="width:30%"class="journal-threats-detected"><h7>04/15/2016</h7></td>
 						      </tr>
@@ -379,7 +383,7 @@
 						        <td style="width:30%"class="journal-threats-detected"><h7>04/15/2016</h7></td>
 						      </tr>
 						      <tr class="journal-threats-detected">
-						        <td style="width:30%" class="journal-threats-detected"><h7>Malware 10</h7></td>
+						        <td style="width:30%" class="journal-threats-detected"><h7>malware0</h7></td>
 						        <td style="width:35%"class="journal-threats-detected"><h7>C:/Users/Bla/bla/bla</h7></td>
 						        <td style="width:30%"class="journal-threats-detected"><h7>04/15/2016</h7></td>
 						      </tr>
@@ -392,47 +396,112 @@
 				<uib-tab-heading ng-click="query_quarantine()">
 			    	QUARANTAINE 
 			  	</uib-tab-heading>
-			  	<br/>
-			  	<div class="row">
-				  <div class="col-md-10 col-md-offset-1">
-				  	<div class="panel panel-warning ">
-					  <div class="panel-heading text-center">Content</div>
-					  <div class="panel-body">
-
-					    <table st-table="displayedCollection" st-safe-src="rowCollection" class="table table-striped">
-							<thead>
-							<tr>
-								<th st-sort="Nom">Nom</th>
-								<th st-sort="Emplacement">Emplacement</th>
-								<th st-sort="Module">Module</th>
-								<th st-sort="Date">Date</th>
-							</tr>
-							</thead>
-							<tbody>
-							<tr ng-repeat="file in quarantine.files">
-								<td>{{file.desc}}</td>
-								<td>{{file.path}}</td>
-								<td>{{file.module}}</td>
-								<td>{{file.date}}</td>
-								<td>
-									<button type="button" ng-click="removeItem(row)" class="btn btn-sm btn-danger" title="Delete">
-										<i class="glyphicon glyphicon-remove-circle">
-										</i>
-									</button>
-								</td>
-								<td>
-									<button type="button" ng-click="restore_qurantine_file(file.fname)" class="btn btn-sm btn-success" title="Restore">
-										<i class="fa fa-reply">
-										</i>
-									</button>
-								</td>
-							</tr>
-							</tbody>
-						</table>
-					  </div>
+				<br/>
+				<div class="row">
+					<div class="col-md-12">
+			  		<div class="input-group">
+					  <input type="text" class="form-control formSearch" placeholder="Rechercher..." aria-describedby="basic-addon2">
+					  <span class="input-group-addon input-group-addon-searchJournal" id="basic-addon2"><i class="fa fa-search"></i></span>
 					</div>
-				  </div>
 				</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12">
+						<table class="table quarantine">
+						    <thead class="quarantine">
+						      <tr class="quarantine">
+						        <th class="quarantine" style="width:30%"><h4><i class="quarantineTitle">Nom</i></h4></th>
+						        <th class="quarantine" style="width:30%"><h4><i class="quarantineTitle">Emplacement</i></h4></th>
+						        <th class="quarantine" style="width:30%"><h4><i class="quarantineTitle">Date</i></h4></th>
+						        <th class="quarantine" style="width:5%"><h4><i class="quarantineTitle"></i></h4></th>
+						        <th class="quarantine" style="width:5%"><h4><i class="quarantineTitle"></i></h4></th>
+						      </tr>
+						    </thead>
+						    <tbody class="quarantine" id="ex3">
+						      <tr class="quarantine">
+						        <td style="width:30%"class="quarantine"><h7>malware</h7></td>
+						        <td style="width:30%"class="quarantine"><h7>C:/Users/Bla/bla/bla</h7></td>
+						        <td style="width:30%"class="quarantine"><h7>04/12/2015</h7></td>
+						        <td style="width:5%"class="quarantine"><h7><i class="fa fa-refresh"></i></h7></td>
+						        <td style="width:5%"class="quarantine"><h7><i class="text-danger fa fa-times"></i></h7></td>
+						      </tr>
+						      <tr class="quarantine">
+						        <td style="width:30%"class="quarantine"><h7>malware</h7></td>
+						        <td style="width:30%"class="quarantine"><h7>C:/Users/Bla/bla/bla</h7></td>
+						        <td style="width:30%"class="quarantine"><h7>04/12/2015</h7></td>
+						        <td style="width:5%"class="quarantine"><h7><i class="fa fa-refresh"></i></h7></td>
+						        <td style="width:5%"class="quarantine"><h7><i class="text-danger fa fa-times"></i></h7></td>
+						      </tr>
+						      <tr class="quarantine">
+						        <td style="width:30%"class="quarantine"><h7>malware</h7></td>
+						        <td style="width:30%"class="quarantine"><h7>C:/Users/Bla/bla/bla</h7></td>
+						        <td style="width:30%"class="quarantine"><h7>04/12/2015</h7></td>
+						        <td style="width:5%"class="quarantine"><h7><i class="fa fa-refresh"></i></h7></td>
+						        <td style="width:5%"class="quarantine"><h7><i class="text-danger fa fa-times"></i></h7></td>
+						      </tr>
+						      <tr class="quarantine">
+						        <td style="width:30%"class="quarantine"><h7>malware</h7></td>
+						        <td style="width:30%"class="quarantine"><h7>C:/Users/Bla/bla/bla</h7></td>
+						        <td style="width:30%"class="quarantine"><h7>04/12/2015</h7></td>
+						        <td style="width:5%"class="quarantine"><h7><i class="fa fa-refresh"></i></h7></td>
+						        <td style="width:5%"class="quarantine"><h7><i class="text-danger fa fa-times"></i></h7></td>
+						      </tr>
+						      <tr class="quarantine">
+						        <td style="width:30%"class="quarantine"><h7>malware</h7></td>
+						        <td style="width:30%"class="quarantine"><h7>C:/Users/Bla/bla/bla</h7></td>
+						        <td style="width:30%"class="quarantine"><h7>04/12/2015</h7></td>
+						        <td style="width:5%"class="quarantine"><h7><i class="fa fa-refresh"></i></h7></td>
+						        <td style="width:5%"class="quarantine"><h7><i class="text-danger fa fa-times"></i></h7></td>
+						      </tr>
+						      <tr class="quarantine">
+						        <td style="width:30%"class="quarantine"><h7>malware</h7></td>
+						        <td style="width:30%"class="quarantine"><h7>C:/Users/Bla/bla/bla</h7></td>
+						        <td style="width:30%"class="quarantine"><h7>04/12/2015</h7></td>
+						        <td style="width:5%"class="quarantine"><h7><i class="fa fa-refresh"></i></h7></td>
+						        <td style="width:5%"class="quarantine"><h7><i class="text-danger fa fa-times"></i></h7></td>
+						      </tr>
+						      <tr class="quarantine">
+						        <td style="width:30%"class="quarantine"><h7>malware</h7></td>
+						        <td style="width:30%"class="quarantine"><h7>C:/Users/Bla/bla/bla</h7></td>
+						        <td style="width:30%"class="quarantine"><h7>04/12/2015</h7></td>
+						        <td style="width:5%"class="quarantine"><h7><i class="fa fa-refresh"></i></h7></td>
+						        <td style="width:5%"class="quarantine"><h7><i class="text-danger fa fa-times"></i></h7></td>
+						      </tr>
+						      <tr class="quarantine">
+						        <td style="width:30%"class="quarantine"><h7>malware</h7></td>
+						        <td style="width:30%"class="quarantine"><h7>C:/Users/Bla/bla/bla</h7></td>
+						        <td style="width:30%"class="quarantine"><h7>04/12/2015</h7></td>
+						        <td style="width:5%"class="quarantine"><h7><i class="fa fa-refresh"></i></h7></td>
+						        <td style="width:5%"class="quarantine"><h7><i class="text-danger fa fa-times"></i></h7></td>
+						      </tr>
+						      <tr class="quarantine">
+						        <td style="width:30%"class="quarantine"><h7>malware</h7></td>
+						        <td style="width:30%"class="quarantine"><h7>C:/Users/Bla/bla/bla</h7></td>
+						        <td style="width:30%"class="quarantine"><h7>04/12/2015</h7></td>
+						        <td style="width:5%"class="quarantine"><h7><i class="fa fa-refresh"></i></h7></td>
+						        <td style="width:5%"class="quarantine"><h7><i class="text-danger fa fa-times"></i></h7></td>
+						      </tr>
+						      <tr class="quarantine">
+						        <td style="width:30%"class="quarantine"><h7>malware</h7></td>
+						        <td style="width:30%"class="quarantine"><h7>C:/Users/Bla/bla/bla</h7></td>
+						        <td style="width:30%"class="quarantine"><h7>04/12/2015</h7></td>
+						        <td style="width:5%"class="quarantine"><h7><i class="fa fa-refresh"></i></h7></td>
+						        <td style="width:5%"class="quarantine"><h7><i class="text-danger fa fa-times"></i></h7></td>
+						      </tr>
+						      <tr class="quarantine">
+						        <td style="width:30%"class="quarantine"><h7>malware</h7></td>
+						        <td style="width:30%"class="quarantine"><h7>C:/Users/Bla/bla/bla</h7></td>
+						        <td style="width:30%"class="quarantine"><h7>04/12/2015</h7></td>
+						        <td style="width:5%"class="quarantine"><h7><i class="fa fa-refresh"></i></h7></td>
+						        <td style="width:5%"class="quarantine"><h7><i class="text-danger fa fa-times"></i></h7></td>
+						      </tr>
+						    </tbody>
+						</table>
+						<span class="pull-right">
+							<button type="button" class="btn clearButton" ng-click="ok()">NETTOYER</button>
+						</span>
+					</div>
+				</div>	
 			</uib-tab>
 		</uib-tabset>
 	</div>

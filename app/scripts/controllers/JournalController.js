@@ -21,10 +21,15 @@ angular.module('tatouApp')
 		//files: []
 	};
 	
+
 	//$scope.quarantine.count = 0;
 	$scope.quarantine.files = [];
 	
-	
+	$scope.status = {}; 
+	$scope.status.openDay = true;
+	$scope.status.openWeek = false;
+	$scope.status.openMonth = false;
+	$scope.status.openYear = false;
 	$scope.threatDataFromAv = function(data){
 		
 		var json_obj;

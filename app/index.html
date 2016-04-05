@@ -60,10 +60,50 @@
         <script src="scripts/controllers/RapportDetailsController.js"></script>
         <script src="scripts/controllers/customAnalyseController.js"></script>
         <script src="scripts/controllers/DetailRapportModalController.js"></script>
+        <script src="scripts/controllers/ParametersController.js"></script>
 		
 		<script src="scripts/services/antivirus-ipc.js"></script>
 		<script src="scripts/services/antivirus-svc.js"></script>
         <script src="scripts/services/antivirus-service.js"></script>
         <!-- endbuild -->
+        <script type="text/javascript">
+           // TEST TRAY
+           var gui = require('nw.gui');
+            var win = gui.Window.get();
+            var tray =  new gui.Tray({ icon: 'app/images/favicon.ico' });
+            // reusing the custom tray menu (just hiding and showing)
+            var customTrayMenu = gui.Window.open('./custom-tray.html', {
+                width: 100, height: 120,
+                frame: false,
+                toolbar: false,
+                show: false
+            });
+            var iconWidth = 13;
+            var translate = require('os').platform() == 'darwin' ?
+                function (pos) {
+                    pos.x -= Math.floor(customTrayMenu.width/2-iconWidth);
+                } :
+                function (pos) {
+                    pos.x -= Math.floor(customTrayMenu.width/2);
+                    pos.y -= trayAreaIsTop(pos) ? 0 : customTrayMenu.height;
+                };
+            function trayAreaIsTop(pos) {
+                var screen;
+                if (gui.Screen.Init) gui.Screen.Init();
+                function posInBounds(s) {
+                    return pos.y > s.bounds.y && pos.y < (s.bounds.y + s.bounds.height) &&
+                        pos.x > s.bounds.x && pos.x < (s.bounds.x + s.bounds.width);
+                }
+                screen = gui.Screen.screens.filter(posInBounds)[0];
+                return pos.y < (screen.bounds.y + screen.bounds.height) / 2;
+            }
+            function showCustomTrayMenuAt(position) {
+                translate(position);
+                customTrayMenu.moveTo(position.x, position.y);
+                customTrayMenu.show();
+                customTrayMenu.focus();
+            }
+            tray.on('click', showCustomTrayMenuAt);
+        </script>
 </body>
 </html>
