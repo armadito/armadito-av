@@ -21,7 +21,14 @@
 #include <unistd.h>
 
 #define DEFAULT_LOG_LEVEL     "error"
-#define DEFAULT_IPC_TYPE      "old"
+#define DEFAULT_IPC_TYPE      OLD_IPC
+#if DEFAULT_IPC_TYPE == OLD_IPC
+#define S_DEFAULT_IPC_TYPE "old"
+#elif DEFAULT_IPC_TYPE == JSON_IPC
+#define S_DEFAULT_IPC_TYPE "json"
+#else
+#error "unknown IPC type!"
+#endif
 #define DEFAULT_PID_FILE      LOCALSTATEDIR "/run/armadito-scand.pid"
 
 #define PROGRAM_NAME "armadito-scand"
@@ -69,9 +76,9 @@ static void usage(void)
 	fprintf(stderr, "  --pidfile=PATH | -i PATH           create PID file at specified location\n");
 	fprintf(stderr, "                                     (default is : " DEFAULT_PID_FILE ")\n");
 	fprintf(stderr, "  --ipc=old|json | -c old|json       select IPC type for communication with the user interface\n");
-	fprintf(stderr, "                                     json: for new web interface\n");
+	fprintf(stderr, "                                     json: for web interface\n");
 	fprintf(stderr, "                                     old: for old Qt interface\n");
-	fprintf(stderr, "                                     (default is : " DEFAULT_IPC_TYPE ")\n");
+	fprintf(stderr, "                                     (default is : " S_DEFAULT_IPC_TYPE ")\n");
 	fprintf(stderr, "\n");
 
 	exit(EXIT_FAILURE);
@@ -85,15 +92,13 @@ static int check_log_level(const char *s_log_level)
 		&& strcmp(s_log_level,"debug");
 }
 
-static int check_ipc_type(const char *s_ipc_type)
-{
-	return strcmp(s_ipc_type, "old") && strcmp(s_ipc_type, "json");
-}
-
 static void parse_options(int argc, char **argv, struct a6o_daemon_options *opts)
 {
-	opts->pid_file = NULL;
 	opts->no_daemon = 0;
+	opts->unix_path = DEFAULT_SOCKET_PATH;
+	opts->s_log_level = DEFAULT_LOG_LEVEL;
+	opts->pid_file = DEFAULT_PID_FILE;
+	opts->ipc_type = DEFAULT_IPC_TYPE;
 
 	while (1) {
 		int c, option_index = 0;
@@ -111,15 +116,23 @@ static void parse_options(int argc, char **argv, struct a6o_daemon_options *opts
 			version();
 			break;
 		case 'n': /* no-daemon */
+			opts->no_daemon = 1;
 			break;
 		case 'l': /* log-level */
+			if (check_log_level(optarg))
+				usage();
+			opts->s_log_level = strdup(optarg);
 			break;
 		case 'a': /* path */
+			opts->unix_path = strdup(optarg);
 			break;
 		case 'i': /* pidfile */
+			opts->pid_file = strdup(optarg);
 			break;
 		case 'c': /* ipc */
-			printf ("option -c with value `%s'\n", optarg);
+			if (strcmp(optarg, "old") && strcmp(optarg, "json"))
+				usage();
+			opts->ipc_type = (!strcmp(optarg, "old")) ? OLD_IPC : JSON_IPC;
 			break;
 		case '?':
 			/* getopt_long already printed an error message. */
@@ -136,54 +149,13 @@ static void parse_options(int argc, char **argv, struct a6o_daemon_options *opts
 			printf ("%s ", argv[optind++]);
 		putchar ('\n');
 	}
+
+	fprintf(stderr, "opts->no_daemon %d\n", opts->no_daemon);
+	fprintf(stderr, "opts->unix_path %s\n", opts->unix_path);
+	fprintf(stderr, "opts->s_log_level %s\n", opts->s_log_level);
+	fprintf(stderr, "opts->pid_file %s\n", opts->pid_file);
+	fprintf(stderr, "opts->ipc_type %d\n", opts->ipc_type);
 }
-
-#if 0
-static void old_parse_options(int argc, const char **argv, struct a6o_daemon_options *opts)
-	int r = opt_parse(daemon_opt_defs, argc, argv);
-	const char *s_port, *s_ipc_type, *s_socket_type;
-
-	if (r < 0 || r > argc)
-		usage();
-
-	if (opt_is_set(daemon_opt_defs, "help"))
-		usage();
-
-	if (opt_is_set(daemon_opt_defs, "version"))
-		version();
-
-	if (opt_is_set(daemon_opt_defs, "tcp") && opt_is_set(daemon_opt_defs, "unix"))
-		usage();
-
-	opts->pid_file = NULL;
-
-	opts->no_daemon = opt_is_set(daemon_opt_defs, "no-daemon");
-
-	opts->s_log_level = opt_value(daemon_opt_defs, "log-level", DEFAULT_LOG_LEVEL);
-	if (check_log_level(opts->s_log_level))
-		usage();
-
-	s_socket_type = DEFAULT_SOCKET_TYPE;
-	if (opt_is_set(daemon_opt_defs, "tcp"))
-		s_socket_type = "tcp";
-	else if (opt_is_set(daemon_opt_defs, "unix"))
-		s_socket_type = "unix";
-	opts->socket_type = (!strcmp(s_socket_type, "unix")) ? UNIX_SOCKET : TCP_SOCKET;
-
-	s_port = opt_value(daemon_opt_defs, "port", DEFAULT_SOCKET_PORT);
-	opts->port_number = (unsigned short)atoi(s_port);
-
-	opts->unix_path = opt_value(daemon_opt_defs, "path", DEFAULT_SOCKET_PATH);
-
-	if (opt_is_set(daemon_opt_defs, "pidfile"))
-		opts->pid_file = opt_value(daemon_opt_defs, "pidfile", DEFAULT_PID_FILE);
-
-	s_ipc_type = opt_value(daemon_opt_defs, "ipc", DEFAULT_IPC_TYPE);
-	if (check_ipc_type(s_ipc_type))
-		usage();
-	opts->ipc_type = (!strcmp(s_ipc_type, "old")) ? OLD_IPC : JSON_IPC;
-}
-#endif
 
 static void create_pid_file(const char *pidfile)
 {

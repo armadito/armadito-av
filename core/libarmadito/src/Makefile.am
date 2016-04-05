@@ -38,7 +38,7 @@ linux/builtin-modules/quarantine.c \
 linux/builtin-modules/quarantine.h 
 
 AM_CPPFLAGS=-DUSE_FILE_DESCRIPTORS -DLIBARMADITO_MODULES_PATH='"$(pkglibdir)/modules"' -DLIBARMADITO_CONF_DIR='"$(sysconfdir)/armadito"' -DLIBARMADITO_BASES_DIR='"$(localstatedir)/lib/armadito/bases"' -DLIBARMADITO_TMP_DIR='"$(localstatedir)/lib/armadito/tmp"' 
-libarmadito_la_CFLAGS= -I$(top_srcdir)/libarmadito/include -I$(top_srcdir)/libarmadito/include/config -I$(top_srcdir)/libarmadito/src/linux
+libarmadito_la_CFLAGS=-I$(top_srcdir)/libarmadito/include -I$(top_srcdir)/libarmadito/include/config -I$(top_srcdir)/libarmadito/src/linux
 libarmadito_la_LIBADD= 
 
 libarmadito_la_CFLAGS+= @GLIB2_CFLAGS@
