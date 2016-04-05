@@ -122,6 +122,8 @@ AM_CONDITIONAL([COND_DOC], [test ! -z "$ASCIIDOC" -a ! -z "$A2X" ])
 # Output files
 AC_CONFIG_FILES([
 Makefile
+json/Makefile
+json/ui/Makefile
 libarmadito/Makefile
 libarmadito/conf/Makefile
 libarmadito/include/Makefile
