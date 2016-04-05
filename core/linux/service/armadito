@@ -1,5 +1,5 @@
 
-/var/log/armadito-av.log {
+/var/log/armadito.log {
   	size 50M
 	copytruncate
         create 700 root root

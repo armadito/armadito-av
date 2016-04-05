@@ -1,9 +1,9 @@
 SUBDIRS=config os
 
-pkginclude_HEADERS= \
+include_HEADERS= \
 libarmadito.h 
 
-nobase_pkginclude_HEADERS= \
+nobase_include_HEADERS= \
 libarmadito/action.h \
 libarmadito/conf.h \
 libarmadito/error.h \
