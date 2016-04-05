@@ -17,7 +17,7 @@ modules=clamav; module5_2
 
 [alert]
 
-alert-dir = "@localstatedir@/spool/uhuru"
+alert-dir = "@localstatedir@/spool/armadito"
 
 
 [quarantine]
@@ -30,6 +30,6 @@ enable = 0
 # non-readable
 # quarantine directory must be mode 333 octal. This is normaly managed by 
 # package installation scripts
-quarantine-dir = "@localstatedir@/lib/uhuru/quarantine"
+quarantine-dir = "@localstatedir@/lib/armadito/quarantine"
 
 
