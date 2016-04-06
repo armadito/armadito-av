@@ -1,9 +1,23 @@
-#include "libuhuru-config.h"
+#include "libarmadito-config.h"
 
 #include "os/file.h"
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+FILE * os_fopen(char * filename, char * mode) {
+
+	FILE * f = NULL;
+	errno_t err = 0;
+
+	err = fopen_s(&f,filename,mode);
+	if (err == 0) {
+		return NULL;
+	}
+
+	return f;
+
+}
 
 int os_file_stat(const char *path, struct os_file_stat *buf, int *pfile_errno)
 {

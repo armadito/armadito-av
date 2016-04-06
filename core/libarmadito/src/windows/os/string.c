@@ -1,4 +1,4 @@
-#include "libuhuru-config.h"
+#include "libarmadito-config.h"
 
 #include "os/string.h"
 
@@ -20,5 +20,3 @@ char *os_strerror(int errnum)
   
   return msg;
 }
-
-

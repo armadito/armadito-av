@@ -1,11 +1,9 @@
-#include "libuhuru-config.h"
-#include "libuhuru\libcore\log.h"
+#include <libarmadito.h>
+#include "libarmadito-config.h"
 #include "os/string.h"
 #include "os/dir.h"
 #include "Windows.h"
-#include <glib.h>
 #include <sys/types.h>
-#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -13,9 +11,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
-// cpp
-#include <string>
 
 static enum os_file_flag dirent_flags(DWORD fileAttributes)
 {
@@ -92,7 +87,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 
 	// Check parameters
 	if (path == NULL || dirent_cb == NULL) {
-		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "Error :: NULL parameter in function os_dir_map()");
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "Error :: NULL parameter in function os_dir_map()");
 		return;
 	}
 	
@@ -101,7 +96,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 
 	// Check if it is a directory
 	if (!(GetFileAttributesA(path) & FILE_ATTRIBUTE_DIRECTORY)) {
-		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "Warning :: os_dir_map() :: (%s) is not a directory. ", path);
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "Warning :: os_dir_map() :: (%s) is not a directory. ", path);
 		return;
 	}
 
@@ -109,8 +104,6 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 	sPath = (char*)calloc(size + 1, sizeof(char));
 	sPath[size] = '\0';
 	sprintf_s(sPath, size, "%s\\*", path);
-
-	//g_log(NULL, UHURU_LOG_LEVEL_WARNING, "os_dir_map() :: (%s)", sPath);
 
 	/*
 	FindFirstFile note
@@ -120,7 +113,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 
 	fh = FindFirstFile(sPath, &fdata);
 	if (fh == INVALID_HANDLE_VALUE) {
-		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "Warning :: os_dir_map() :: FindFirstFileA() failed ::  (%s) :: [%s]", os_strerror(errno),sPath);
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "Warning :: os_dir_map() :: FindFirstFileA() failed ::  (%s) :: [%s]", os_strerror(errno),sPath);
 		return;
 	}
 
@@ -155,7 +148,11 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 		free(entryPath);
 	}
 
-	free(sPath);
+	if (sPath != NULL) {
+		free(sPath);
+		sPath = NULL;
+	}
+	
 	FindClose(fh);
 
 	return;
@@ -194,14 +191,14 @@ char * GetBinaryDirectory( ) {
 	int len = 0;
 
 	if (!GetModuleFileNameA(NULL, (LPSTR)&filepath, MAX_PATH)) {		
-		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_ERROR, "[-] Error :: GetBinaryDirectory!GetModuleFileName() failed :: %d\n",GetLastError());
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "[-] Error :: GetBinaryDirectory!GetModuleFileName() failed :: %d\n",GetLastError());
 		return NULL;
 	}	
 
 	// get the file name from the complete file path
 	ptr = strrchr(filepath,'\\');
 	if (ptr == NULL) {		
-		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "[-] Error :: GetBinaryDirectory!strrchr() failed :: backslash not found in the path :: %s.\n",filepath);
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "[-] Error :: GetBinaryDirectory!strrchr() failed :: backslash not found in the path :: %s.\n",filepath);
 		return NULL;
 	}
 	

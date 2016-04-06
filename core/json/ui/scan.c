@@ -1,11 +1,11 @@
 #include <libarmadito.h>
 
-#include "libarmadito-config.h"
+#include "config/libarmadito-config.h"
 
 #include "jsonhandler.h"
 #include "scan.h"
 #include "ui.h"
-#include "debug.h"
+//#include "debug.h"
 
 #include "os/string.h"
 
@@ -30,8 +30,8 @@ static time_t get_milliseconds(void)
 }
 #endif
 
-#ifdef WIN32
-#error must implement get_milliseconds on windows
+#ifdef _WIN32
+//#error must implement get_milliseconds on windows
 #if 0
 Note: gettimeofday on windows:
 #include <time.h>
@@ -114,7 +114,8 @@ static void scan_callback(struct a6o_report *report, void *callback_data)
 	time_t now = 0;
 	enum a6o_json_status status = JSON_OK;
 
-	now = get_milliseconds();
+	//now = get_milliseconds();
+	now = 0;
 	if (report->status == ARMADITO_CLEAN
 		&& report->progress != 100
 		&& scan_data->last_send_progress != REPORT_PROGRESS_UNKNOWN
@@ -128,7 +129,7 @@ static void scan_callback(struct a6o_report *report, void *callback_data)
 	json_object_object_add(j_request, "id", json_object_new_int(report->scan_id));
 	json_object_object_add(j_request, "params", report_json(report));
 
-#ifndef WIN32
+#ifndef _WIN32
 	jobj_debug(j_request, "IHM request");
 #endif
 

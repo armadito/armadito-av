@@ -1,5 +1,5 @@
-#ifndef _QUARANTINE_H_
-#define _QUARANTINE_H_
+#ifndef __UI_QUARANTINE_H__
+#define __UI_QUARANTINE_H__
 
 #include "jsonhandlerp.h"
 

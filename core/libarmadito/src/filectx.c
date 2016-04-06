@@ -53,7 +53,7 @@ enum a6o_file_context_status a6o_file_context_get(struct a6o_file_context *ctx, 
 	/* open file if no fd given */
 	if (ctx->fd < 0) {
 
-#ifdef WIN32
+#ifdef _WIN32
 		/* open the file :: TODO write portable code for this function */
 		err = _sopen_s(&(ctx->fd), path, O_RDONLY, _SH_DENYNO, _S_IREAD);
 #else

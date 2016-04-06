@@ -1,12 +1,10 @@
-#include "libuhuru-config.h"
-#include "libuhuru/libcore/log.h"
+#include <libarmadito.h>
+#include "libarmadito-config.h"
 #include "os/mimetype.h"
 #include "os/string.h"
 #include "os/io.h"
-#include <glib.h>
-#include <windows.h>
+#include <Windows.h>
 #include <stdio.h>
-#include <tchar.h>
 
 
 #define MIME_SIZE 100
@@ -38,7 +36,7 @@ const char *os_mime_type_guess_fd(int fd)
 	}
 
 	if ((n_read = _read(fd, buf, BUF_SIZE)) < 0) {
-		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "Cannot read %d bytes from file descriptor %s", BUF_SIZE, fd);
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "Cannot read %d bytes from file descriptor %s", BUF_SIZE, fd);
 		printf("Cannot read %d bytes from file descriptor %s", BUF_SIZE, fd);
 		return NULL;
 	}
@@ -83,7 +81,7 @@ const char *os_mime_type_guess(const char *path)
 	bres = GetFileSizeEx(fh, &fileSize);
 	
 	if (bres == FALSE) {
-		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "Error :: os_mime_type_guess() :: GetFileSizeEx() failed :: %s :: err = %d (%s) :: ",path,GetLastError(),os_strerror(GetLastError()));
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "Error :: os_mime_type_guess() :: GetFileSizeEx() failed :: %s :: err = %d (%s) :: ",path,GetLastError(),os_strerror(GetLastError()));
 		return NULL;
 	}
 
@@ -97,7 +95,7 @@ const char *os_mime_type_guess(const char *path)
 	((char*)buf)[size] = '\0';
 
 	if (ReadFile(fh, buf, size, &read, NULL) == FALSE) {
-		uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "Error :: os_mime_type_guess() :: ReadFile() failed ::  (%s) ",os_strerror(GetLastError()));
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, " os_mime_type_guess() :: Read file failed ::  (%s) ",os_strerror(GetLastError()));
 		free(buf);
 		CloseHandle(fh);
 		return NULL; 
@@ -105,7 +103,7 @@ const char *os_mime_type_guess(const char *path)
 
 	HRESULT res = FindMimeFromData(NULL, NULL, buf, size, NULL, FMFD_DEFAULT, &mt, 0);
 	if ( res != S_OK) {	  
-		printf("Error :: FindMimeFromData failed :: %s \n", getHresError(res));
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR," FindMimeFromData failed :: %s \n", getHresError(res));
 		free(buf);
 		CloseHandle(fh);
 		return NULL;

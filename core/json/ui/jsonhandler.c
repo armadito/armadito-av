@@ -1,6 +1,6 @@
 #include <libarmadito.h>
 
-#include "libarmadito-config.h"
+#include "config/libarmadito-config.h"
 
 #include "jsonhandler.h"
 #include "jsonhandlerp.h"
@@ -160,7 +160,7 @@ enum a6o_json_status call_request_handler(struct a6o_json_handler *j, struct jso
 
 		j->process = p->process;
 
-#ifndef WIN32
+#ifndef _WIN32
 		if (av_response->info != NULL)
 			jobj_debug(av_response->info, "info");
 #endif
@@ -190,7 +190,7 @@ static enum a6o_json_status fill_response(struct json_response *av_response, cha
 			json_object_object_add(j_response, "error-message", json_object_new_string(av_response->error_message));
 	}
 
-#ifndef WIN32
+#ifndef _WIN32
 	jobj_debug(j_response, "AV response");
 #endif
 
@@ -227,7 +227,7 @@ enum a6o_json_status a6o_json_handler_get_response(struct a6o_json_handler *j, c
 	if (av_response.status)
 		goto get_out;
 
-#ifndef WIN32
+#ifndef _WIN32
 	jobj_debug(j_request, "AV request");
 #endif
 

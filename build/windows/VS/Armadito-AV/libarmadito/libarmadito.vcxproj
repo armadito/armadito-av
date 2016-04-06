@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{8A108A73-1029-45C1-AC8D-993025690CB2}</ProjectGuid>
+    <RootNamespace>libarmadito</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\core\libarmadito\include\config;$(SolutionDir)..\..\..\..\deps\glib\glib-2.47.6\glib;$(SolutionDir)..\..\..\..\deps\glib\glib-2.47.6\gmodule;$(SolutionDir)..\..\..\..\deps\glib\glib-2.47.6;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\..\..\deps\glib\glib-2.47.6\build\win32\vs12\Debug\Win32\bin;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>libarmadito.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ModuleDefinitionFile>libarmadito.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\action.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\armadito.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\conf.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\confparser.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\error.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\filectx.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\info.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\log.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\module.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\notify.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\ondemand.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\report.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\scan.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\scanconf.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\status.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\stdpaths.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\os\dir.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\os\file.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\os\mimetype.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\os\stdpaths_win.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\os\string.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\include\os\dir.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\include\os\file.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\include\os\io.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\include\os\mimetype.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\include\os\stdpaths.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\include\os\string.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\src\armaditop.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\src\confparser.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\src\modulep.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\src\ondemandp.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\src\reportp.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\src\scanp.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\src\statusp.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="libarmadito.def" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

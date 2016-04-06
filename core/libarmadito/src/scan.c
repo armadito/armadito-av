@@ -5,17 +5,17 @@
 #include "reportp.h"
 #include "scanp.h"
 #include "armaditop.h"
+#include "os/string.h"
+#include "os/io.h"
+#include "os/file.h"
+#include "os/mimetype.h"
+
 #ifdef HAVE_ALERT_MODULE
 #include "builtin-modules/alert.h"
 #endif
 #ifdef HAVE_QUARANTINE_MODULE
 #include "builtin-modules/quarantine.h"
 #endif
-#include "os/string.h"
-#include "os/io.h"
-#include "os/file.h"
-#include "os/mimetype.h"
-
 #ifdef HAVE_ON_ACCESS_WINDOWS_MODULE
 #include "builtin-modules/onaccess_windows.h"
 #endif
@@ -58,7 +58,7 @@ struct a6o_scan *a6o_scan_new(struct armadito *armadito, int scan_id)
 	struct a6o_scan *scan = (struct a6o_scan *)malloc(sizeof(struct a6o_scan));
 
 	/* use a GArray, and not a GPtrArray, because GArray can contain structs instead of pointers to struct */
-	scan->callbacks = g_array_new(FALSE, FALSE, sizeof(struct callback_entry));
+	scan->callbacks = g_array_new(0, 0, sizeof(struct callback_entry));
 	a6o_scan_add_builtin_callbacks(scan, armadito);
 
 	scan->scan_id = scan_id;
@@ -211,7 +211,7 @@ enum a6o_file_status a6o_scan_context(struct a6o_scan *scan, struct a6o_file_con
 /* just free the structure */
 void a6o_scan_free(struct a6o_scan *scan)
 {
-	g_array_free(scan->callbacks, TRUE);
+	g_array_free(scan->callbacks, 1);
 
 	free(scan);
 }
