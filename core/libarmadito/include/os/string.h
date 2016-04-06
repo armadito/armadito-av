@@ -1,7 +1,7 @@
 #ifndef _LIBARMADITO_OS_STRING_H_
 #define _LIBARMADITO_OS_STRING_H_
 
-#include "libarmadito-config.h"
+#include "config/libarmadito-config.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,6 +21,7 @@ extern "C" {
 #else
 char *os_strerror(int errnum);
 #endif
+
 
 #ifdef __cplusplus
 }

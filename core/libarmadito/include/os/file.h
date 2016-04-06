@@ -1,7 +1,14 @@
 #ifndef _LIBARMADITO_OS_FILE_H_
 #define _LIBARMADITO_OS_FILE_H_
 
+#include <stdio.h>
 #include <stddef.h>
+
+#ifdef _WIN32
+FILE * os_fopen(const char * filename,const char * mode);
+#else
+#define os_fopen fopen
+#endif
 
 enum os_file_flag {
 	FILE_FLAG_IS_ERROR       = 1 << 0,  /* entry is an error, error is given in file_errno */

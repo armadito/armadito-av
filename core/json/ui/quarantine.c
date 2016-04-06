@@ -1,17 +1,16 @@
-#include "jsonhandler.h"
+//#include "jsonhandler.h"
 #include "quarantine.h"
 #include <stdio.h>
-#include "libarmadito-config.h"
-#include <libarmadito/core.h>
-#include <json.h>
+#include <libarmadito.h>
+//#include "libarmadito-config.h"
+#include <Windows.h>
 #include "os\dir.h"
 #include "os\string.h"
 #include "os\file.h"
-#include <Windows.h>
-#include "others.h"
+
+#include "utils\others.h"
 
 typedef void (*dirent_cb_t)(const char *full_path, enum os_file_flag flags, int entry_errno, void *data);
-
 
 // libarmadito :: os/dir.h functions :: TODO :: quarantine in libarmadito.
 static enum os_file_flag dirent_flags(DWORD fileAttributes)
@@ -219,20 +218,31 @@ void qu_os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void * 
 	return;
 }
 
-
 //static void conf_load_dirent_cb(const char *full_path, enum os_file_flag flags, int entry_errno, void *data);
-json_object * quarantine_enum_files_cb( ) {
+json_object * quarantine_enum_files_cb(struct armadito *armadito) {
 
 	char * quarantine_dir = NULL;
 	json_object * jobj = NULL;
 	json_object * jinfo = NULL;
 	json_object * jfiles = NULL;
 	int ret = 0,count = 0;
+	struct a6o_conf * conf = NULL;
 
 	__try {
 
-		quarantine_dir = GetLocationCompletepath("Quarantine");
-
+		//quarantine_dir = GetLocationCompletepath("Quarantine");
+		conf = a6o_get_conf(armadito);
+		if (conf == NULL) {
+			printf("[-] Error :: quarantine_enum_files_cb :: can't get configuration!\n");
+			ret = -1;
+			__leave;
+		}
+		quarantine_dir = a6o_conf_get_string(conf,"Quarantine","quarantine_dir");
+		if (conf == NULL) {
+			printf("[-] Error :: quarantine_enum_files_cb :: can't get configuration!\n");
+			ret = -1;
+			__leave;
+		}
 
 		if ((jfiles = json_object_new_array( ))== NULL) {
 			printf("[-] Error :: quarantine_enum_files_cb :: can't create json object!\n");
@@ -281,8 +291,7 @@ json_object * quarantine_enum_files_cb( ) {
 
 }
 
-
-json_object * quarantine_restore_file_cb(char* filename) {
+json_object * quarantine_restore_file_cb(char* filename,struct armadito *armadito) {
 
 	json_object * jfiles = NULL;
 	char * quarantine_dir = NULL;
@@ -296,6 +305,7 @@ json_object * quarantine_restore_file_cb(char* filename) {
 
 	enum json_tokener_error jerr;
 	struct json_object  * jobj = NULL, * jobj_path = NULL;
+	struct a6o_conf * conf = NULL;
 
 	__try {
 
@@ -303,7 +313,19 @@ json_object * quarantine_restore_file_cb(char* filename) {
 			__leave;
 		}
 
-		quarantine_dir = GetLocationCompletepath("Quarantine");
+		//quarantine_dir = GetLocationCompletepath("Quarantine");
+		conf = a6o_get_conf(armadito);
+		if (conf == NULL) {
+			printf("[-] Error :: quarantine_enum_files_cb :: can't get configuration!\n");
+			ret = -1;
+			__leave;
+		}
+		quarantine_dir = a6o_conf_get_string(conf,"Quarantine","quarantine_dir");
+		if (conf == NULL) {
+			printf("[-] Error :: quarantine_enum_files_cb :: can't get configuration!\n");
+			ret = -1;
+			__leave;
+		}
 
 
 		// quarantine file complete path.
@@ -414,7 +436,7 @@ json_object * quarantine_restore_file_cb(char* filename) {
 	}
 
 	// return the new quarantine list.
-	jfiles = quarantine_enum_files_cb( );
+	jfiles = quarantine_enum_files_cb(armadito);
 
 	return jfiles;
 }
@@ -447,7 +469,7 @@ enum a6o_json_status quarantine_response_cb(struct armadito *armadito, struct js
 
 	if (json_object_to_json_string(jaction) != NULL && (strncmp(json_object_to_json_string(jaction),"\"enum\"",6) == 0)) {
 
-		resp->info = quarantine_enum_files_cb();
+		resp->info = quarantine_enum_files_cb(armadito);
 		if (resp->info == NULL) {
 			status = JSON_REQUEST_FAILED;
 		}
@@ -471,7 +493,7 @@ enum a6o_json_status quarantine_response_cb(struct armadito *armadito, struct js
 		//printf("[+] Debug :: quarantine_response_cb :: req parameters = %s\n",fname);
 		printf("[+] Debug :: quarantine_response_cb :: req parameters = %s\n",filename);
 
-		resp->info = quarantine_restore_file_cb(filename);
+		resp->info = quarantine_restore_file_cb(filename,armadito);
 		if (resp->info == NULL) {
 			status = JSON_REQUEST_FAILED;
 		}

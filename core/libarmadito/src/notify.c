@@ -1,4 +1,5 @@
-#include <libarmadito/core.h>
+#include <libarmadito.h>
+#include <stdlib.h>
 
 
 static a6o_notify_handler_t current_handler = a6o_notify_default_handler;

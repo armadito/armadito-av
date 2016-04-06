@@ -4,6 +4,7 @@
 
 #include "confparser.h"
 #include "os/dir.h"
+#include "os/file.h"
 #include "os/string.h"
 
 #include <assert.h>
@@ -300,13 +301,13 @@ static void conf_save_fun(const char *section, const char *key, struct a6o_conf_
 
 int a6o_conf_save_file(struct a6o_conf *conf, const char *path, a6o_error **error)
 {
-	FILE *f;
+	FILE *f = NULL;
 	struct conf_save_data data;
 
 	if (!strcmp(path, "-"))
 		f = stdout;
 	else
-		f = fopen(path, "w");
+		f = os_fopen(path, "w");
 
 	data.f = f;
 	data.p = NULL;
@@ -512,7 +513,6 @@ int a6o_conf_set_string(struct a6o_conf *conf, const char *section, const char *
 int a6o_conf_set_list(struct a6o_conf *conf, const char *section, const char *key, const char **val, size_t len)
 {
 	struct key_entry *k = key_entry_get(conf, section, key);
-	int i;
 
 	if (k == NULL)
 		return 1;
@@ -567,7 +567,6 @@ int a6o_conf_add_string(struct a6o_conf *conf, const char *section, const char *
 int a6o_conf_add_list(struct a6o_conf *conf, const char *section, const char *key, const char **val, size_t len)
 {
 	struct key_entry *k = key_entry_add(conf, section, key);
-	int i;
 
 	if (k == NULL)
 		return 1;

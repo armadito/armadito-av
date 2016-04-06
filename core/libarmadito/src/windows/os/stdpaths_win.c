@@ -1,5 +1,5 @@
-#include <libuhuru/core.h>
-#include "libuhuru-config.h"
+#include <libarmadito.h>
+#include "libarmadito-config.h"
 #include "os/stdpaths.h"
 #include "os/dir.h"
 
