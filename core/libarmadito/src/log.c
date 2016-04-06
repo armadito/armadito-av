@@ -25,7 +25,7 @@
 
 #define LOG_NAME "armadito"
 
-static enum a6o_log_level current_max_level = ARMADITO_LOG_LEVEL_ERROR;
+static enum a6o_log_level current_max_level = ARMADITO_LOG_LEVEL_WARNING;
 static a6o_log_handler_t current_handler = a6o_log_default_handler;
 static void *current_handler_user_data = NULL;
 
@@ -52,7 +52,7 @@ void a6o_log(enum a6o_log_domain domain, enum a6o_log_level level, const char *f
 
 	g_free(message);
 
-#ifndef WIN32
+#ifndef _WIN32
 	if (level & ARMADITO_LOG_LEVEL_ERROR)
 		abort();
 #endif

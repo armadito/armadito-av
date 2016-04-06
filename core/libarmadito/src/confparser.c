@@ -221,7 +221,7 @@ struct a6o_conf_parser *a6o_conf_parser_new(const char *filename, conf_parser_ca
 
 	cp->filename = os_strdup(filename);
 
-#ifdef WIN32
+#ifdef _WIN32
 	fopen_s(&cp->input,filename, "r");
 #else
 	cp->input = fopen(filename, "r");

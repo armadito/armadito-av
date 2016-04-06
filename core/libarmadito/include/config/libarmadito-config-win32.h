@@ -35,13 +35,13 @@
 
 /* modules */
 #undef HAVE_ALERT_MODULE
-#define HAVE_QUARANTINE_MODULE
-#define HAVE_ON_ACCESS_WINDOWS_MODULE
+#undef HAVE_QUARANTINE_MODULE
+#undef HAVE_ON_ACCESS_WINDOWS_MODULE
 //#define HAVE_ON_ACCESS_WINDOWS_MODULE
 /* glib (current version of glib on windows is 2.28.8, which had g_thread_create) */
-#undef HAVE_GTHREAD_NEW
-#define HAVE_GTHREAD_CREATE
-#define HAVE_GTHREAD_INIT
+#define HAVE_GTHREAD_NEW
+#undef HAVE_GTHREAD_CREATE
+#undef HAVE_GTHREAD_INIT
 
 
 

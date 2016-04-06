@@ -1,5 +1,5 @@
 #include <libarmadito.h>
-#include "libarmadito-config.h"
+#include "config/libarmadito-config.h"
 
 #include "debug.h"
 

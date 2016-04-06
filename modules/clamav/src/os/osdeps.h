@@ -3,13 +3,13 @@
 
 #include <stdio.h>
 
-#ifdef WIN32
-#include "clamav.h"
+#ifdef _WIN32
 FILE * os_fopen(const char * filename, const char * mode);
 #define os_strncpy strncpy_s
 #define os_strncat strncat_s
 #define os_strdup _strdup
 #define os_sscanf sscanf_s
+#define os_sprintf sprintf_s
 char * GetDBDirectory( );
 #define MODULE_CLAMAV_DBDIR "modules\\DB\\clamav"
 #else

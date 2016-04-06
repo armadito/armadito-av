@@ -30,4 +30,6 @@ VS/UhuruAV/modulePDF/Debug/*
 VS/dependencies/*
 out/
 documentation/specs-ihm/tatou-ihm/~$$tatouIHM.~vsdx
-
+deps/*
+build/Windows/VS/Armadito-AV/*/Debug
+build/Windows/VS/Armadito-AV/Debug/*
