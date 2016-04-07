@@ -37,7 +37,8 @@ angular
 	  'armadito.svc',
 	  'armadito.ipc',
     'timer',
-    'toastr'
+    'toastr',
+    'ngTagsInput'
   ])
   .config(function ($stateProvider, $urlRouterProvider, toastrConfig) {
 	  

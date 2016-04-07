@@ -11,6 +11,7 @@
     <!-- bower:css -->
     <link rel="stylesheet" href="../bower_components/bootswatch-dist/css/bootstrap.css" />
     <link rel="stylesheet" href="../bower_components/angular-toastr/dist/angular-toastr.css" />
+    <link rel="stylesheet" href="../bower_components/ng-tags-input/ng-tags-input.min.css" />
     <!-- endbower -->
     <!-- endbuild -->
     <!-- build:css(.tmp) styles/main.css -->
@@ -47,6 +48,8 @@
     <script src="../bower_components/humanize-duration/humanize-duration.js"></script>
     <script src="../bower_components/angular-timer/dist/angular-timer.js"></script>
     <script src="../bower_components/angular-toastr/dist/angular-toastr.tpls.js"></script>
+    <script src="../bower_components/ng-tags-input/ng-tags-input.min.js"></script>
+
     <!-- endbower -->
     <!-- endbuild -->
 
@@ -70,7 +73,7 @@
            // TEST TRAY
            var gui = require('nw.gui');
             var win = gui.Window.get();
-            var tray =  new gui.Tray({ icon: 'app/images/favicon.ico' });
+            var tray =  new gui.Tray({ icon: 'app/images/kimioslogoMini.png' });
             // reusing the custom tray menu (just hiding and showing)
             var customTrayMenu = gui.Window.open('./custom-tray.html', {
                 width: 100, height: 120,

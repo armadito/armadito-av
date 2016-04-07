@@ -49,7 +49,6 @@ angular.module('tatouApp')
 	  		}*/
 	];
 
-
 	$rootScope.$on('$stateChangeStart', 
 		function(event, toState, toParams, fromState, fromParams){
 		    if(toState.url === '/Parameters'){

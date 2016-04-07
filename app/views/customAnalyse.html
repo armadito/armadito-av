@@ -6,25 +6,28 @@
 	</div>
 	<div class="modal-body modal-body-analyse">
 		<div class="input-group">
-		  <input type="text" class="form-control form-control-modal"  ng-model="pathToScan" placeholder="Selectionnez un fichier ou un dossier">
-		  <span class="input-group-addon .input-group-addon-customAnalyse btn btn-default btn-file">
+		  <input type="text" class="form-control form-control-modal" ng-model="optionScan.pathToScan" placeholder="Selectionnez un fichier ou un dossier">
+		  <span class="input-group-addon .input-group-addon-customAnalyse btn btn-default btn-file" ng-click="chooseFile()">
 		  	<i class="fa fa-angle-down fa-lg"></i> <input id="pathToScan" nwdirectory type="file">
 		  </span>
 		</div>
 		<h4 class="chooseOptionAnalyse">Choisissez vos options :</h4>
 		<form role="form" class="formOptionScan">
 		    <div class="radio">
-		      <label class="optionScan"><input class="text-danger" type="radio" name="optradio">&nbsp;&nbsp;Mode Heuristique</label>
+		      <label class="optionScan"><input type="checkbox" name="optradio" ng-model="optionScan.heuristicMode" >&nbsp;&nbsp;Mode Heuristique</label>
 		    </div>
 		    <div class="radio">
-		      <label class="optionScan"><input type="radio" name="optradio">&nbsp;&nbsp;Scan archive</label>
+		      <label class="optionScan"><input type="checkbox" name="optradio" ng-model="optionScan.scanArchive">&nbsp;&nbsp;Scan archive</label>
 		    </div>
-		    <div class="radio">
-		      <label class="optionScan"><input type="radio" name="optradio">&nbsp;&nbsp;Exclude folders/files</label>
-		    </div>
+		    <span class="input-group-addon .input-group-addon-customAnalyse btn btn-default btn-file" ng-click="chooseFileToExclude()">
+		  		Add file to exlude <input id="fileToExclude" nwdirectory type="file">
+		  	</span>
+		    <tags-input ng-model="excludedFolders" display-property="pathToScan">
+		      <auto-complete source="loadTags($query)"></auto-complete>
+		    </tags-input>
 		</form>
 	</div>
 	<div class="modal-footer footerModal">
-	    <button type="button" class="btn startButtonModal" ng-click="ok()">START</button>
+	    <button type="button" class="btn startButtonModal" ng-click="ok();">START</button>
 	</div>
 </div>

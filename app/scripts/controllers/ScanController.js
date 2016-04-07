@@ -85,26 +85,17 @@ angular.module('tatouApp')
                   $scope.timerRunning = true;
               };
               
-              $scope.chooseFile = function (name) {
+              /*$scope.chooseFile = function (name) {
                 var chooser = document.querySelector(name);
                 chooser.addEventListener("change", function(evt) {
                   console.log("value", this.value);
                 }, false);
 
                 chooser.click();  
-              }
+              }*/
                 
-              $scope.chooseFile = function (name) {
-                var chooser = document.querySelector(name);
-                chooser.addEventListener("change", function(evt) {
-                  var path = this.value;
-                  $scope.$apply(function(){
-                    $scope.pathToScan = path;
-                  })
-                }, false);
-              };
 
-              //$scope.chooseFile('#pathToScan');
+              
 				
               $scope.startMe = function(){
                 if(($scope.pathToScan === "") || ($scope.pathToScan === undefined)){
@@ -174,8 +165,9 @@ angular.module('tatouApp')
                 }
               });
 
-              modalInstance.result.then(function (selectedItem) {
-                $scope.selected = selectedItem;
+              modalInstance.result.then(function (scanOptions) {
+                $scope.scanOptions = scanOptions;
+                console.log("Scan options : ", $scope.scanOptions);
               }, function () {
                 $log.info('Modal dismissed at: ' + new Date());
               });
