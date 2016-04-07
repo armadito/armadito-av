@@ -10,6 +10,8 @@ libuhuru_json_la_SOURCES= \
 jsonhandler.c \
 jsonhandler.h \
 jsonhandler_p.h \
+conf.c \
+conf.h \
 debug.c \
 debug.h \
 quarantine_dummy.c \
