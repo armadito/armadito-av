@@ -149,7 +149,7 @@
 	            </div>
 	            <div class="col-xs-3 col-sm-3 col-md-3">
 	            	<!--<button type="button" class="btn stopButton">STOP</button>-->
-	            	<button type="button" class="btn startButton">START</button>
+	            	<button type="button" class="btn startButton" ng-click="StartScan()">START</button>
 	            </div>
 	        </div>
 	    </form>
@@ -157,7 +157,7 @@
 	<br>
 	<div class="row" >
 	  	<div class="col-sm-offset-1 col-md-offset-1 col-xs-10 col-sm-10 col-md-10" >
-		    <uib-progressbar max="max" class="progressBar" value="pdata.scan_progress"><span class="progressBarPercent">{{pdata.scan_progress}}%</span>
+		    <uib-progressbar max="max" class="progressBar" value="scan_data.progress"><span class="progressBarPercent">{{scan_data.progress}}%</span>
 	    	</uib-progressbar>   
 	  	</div>
 	</div>

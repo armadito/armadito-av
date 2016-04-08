@@ -15,7 +15,7 @@ angular.module('tatouApp')
 
 		
 		$scope.rowCollection = [];
-		
+		$scope.test =  false;
 
 		//copy the references (you could clone ie angular.copy but then have to go through a dirty checking for the matches)
 		$scope.displayedCollection = [].concat($scope.rowCollection);
@@ -153,6 +153,17 @@ angular.module('tatouApp')
 		
 		
 		$scope.refresh_status();
+
+		//Real time activated or not 
+		/*$scope.$watch('state.realtime', function(newValue, oldValue) {
+			if( newValue){
+			    console.log("test : ", newValue);
+			}
+    	});*/
+
+    	$scope.testfunc = function () {
+    		console.log($scope.state.realtime);
+    	};
 
   }]);
 

@@ -14,7 +14,7 @@ angular.module('armadito.ipc', [])
 	var av_response;
 	var client_socket;
 	var client_sock;
-	var server;
+	//var server;
 	var net = require('net');	
 	
 	//var factory.client_sock;
@@ -72,7 +72,10 @@ angular.module('armadito.ipc', [])
 	// ----------------------------------------------
 	factory.createUIServer = function(ipc_path,callback){
 
-		server = net.createServer(function(server_sock){
+
+		console.log("[+] Debug :: Create server :::::: ", ipc_path);
+
+		var server = net.createServer(function(server_sock){
 
 			console.log("[+] Debug :: client connected!");
 
@@ -80,30 +83,56 @@ angular.module('armadito.ipc', [])
 				console.log("[+] Debug :: client disconnected from server.");
 			});
 
-
 			server_sock.on('error', function(err){
 				console.log("[-] Error :: server error :: ",err);
 			});
 
+			server.on( 'close', function (){
+          		console.log("[+] Debug :: closing ui socket server");
+        	});
+
 			server_sock.on('data', function(data){
-				//console.log("[+] Debug :: data received ::"+ data);
+				console.log("[+] Debug :: data received ::"+ data);
 				var response = { "ihm_response":"state", "id":0, "status":0 };
 				var buffer = new Buffer( JSON.stringify(response), 'ascii' );
 				server_sock.write(buffer);
 				callback(data);
 			});
 
+			
+
 
 		});
+
+		console.log(":::::::::::: SERVER >>>>>",server);
 
 		server.listen(ipc_path, function(){
 			console.log("[+] Debug :: server listening on ::", ipc_path);
 		});
 
+		console.log(":::::::::::: SERVER >>>>>",server);
+
+		/*server.on( 'close', function (){
+          console.log("-------------------- close\n");
+        });
+
+        server.on( 'closed', function (){
+          console.log("-------------------- closed\n");
+        });
+        */
 
 		return server;
 
 	};
+
+
+	factory.closeServer = function(server){
+
+		// Try to close the server.
+		console.log("[+] Debug :: Trying to stop the socket server...\n");
+		server.close();
+
+	}
 
 
 	return factory;
