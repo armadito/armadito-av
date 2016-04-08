@@ -62,7 +62,7 @@ angular.module('armadito.services', [])
 			//serverBuilder(scanData.scan_id, '/tmp/.uhuru-ihm', handler);
 			serverBuilder(scanData.scan_id, scanData.params.ui_ipc_path, handler);
 
-			$log.info('starting scan ' +  scanData);
+			$log.info('starting scan ' ,  scanData);
 			//var cli = socketClientBuilder(scanData.scan_id, 'mockavsocket');
 			// FIXME: idem
 	 

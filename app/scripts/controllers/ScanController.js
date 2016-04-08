@@ -30,11 +30,10 @@ angular.module('tatouApp')
                 scan_progress : 0
               };
 
-             EventService.onMessageReceived('scan_event', function(evt, data){
-                    //console.log('received data ' + data);
-
-		     $scope.pdata.scan_progress = data.params.progress;
-			 $scope.pdata.path = data.params.path;
+            EventService.onMessageReceived('scan_event', function(evt, data){
+                //console.log('received data ' + data);
+		            $scope.pdata.scan_progress = data.params.progress;
+			          $scope.pdata.path = data.params.path;
 
                   $scope.$apply(function () {                  
                     var threats;
@@ -55,18 +54,18 @@ angular.module('tatouApp')
                       ];
 
                       $scope.pdata =  data;
-					 // console.log('[+] Debug :: path = ' + $scope.pdata.params.path);
-					  //$scope.pdata.params.path = data.params.path;
-					  $scope.pdata.scan_progress = data.params.progress;
-
-                        threats = [
+					            // console.log('[+] Debug :: path = ' + $scope.pdata.params.path);
+					            //$scope.pdata.params.path = data.params.path;
+					            $scope.pdata.scan_progress = data.params.progress;
+                      console.log('progression scan : ', $scope.pdata.scan_progress);
+                      threats = [
                           { 
                               id: data.id,
                               Etat: data.params.scan_status,
                               Detail: data.params.mod_report,
                               Chemin : data.params.path
                           }
-                      ];
+                        ];
                     }
                     var selectedTreath = threats[Math.floor(Math.random() * threats.length)];
                     if(selectedTreath.id == 77){
@@ -75,7 +74,7 @@ angular.module('tatouApp')
                     $scope.showScanDetails = true;
                     //console.log($scope.displayedCollection);
                   });
-                }, $scope)
+              }, $scope)
               
               /* Timer */
               $scope.timerRunning = false;
@@ -98,10 +97,11 @@ angular.module('tatouApp')
               
 				
               $scope.startMe = function(){
-                if(($scope.pathToScan === "") || ($scope.pathToScan === undefined)){
+                console.log($scope.type);
+                /*if(($scope.pathToScan === "") || ($scope.pathToScan === undefined)){
                   toastr.warning('Veuillez choisir un dossier à analyser svp', '');
-                }else{
-				  $scope.HideInputFile = false;
+                }else{*/
+				        $scope.HideInputFile = false;
                   $scope.startTimer();
                   // FD
                   //AntivirusService.startScan({
@@ -121,11 +121,11 @@ angular.module('tatouApp')
                     av_request: 'scan',
                     id: 77,
                     params : {
-                      ui_ipc_path: $scope.ui_ipc_path,
-                      path_to_scan: $scope.pathToScan
+                      ui_ipc_path: '/tmp/.uhuru-ihm',
+                      path_to_scan:  $scope.pathToScan 
                     }
                   });
-                }
+                //}
 
               };
 
@@ -167,7 +167,8 @@ angular.module('tatouApp')
 
               modalInstance.result.then(function (scanOptions) {
                 $scope.scanOptions = scanOptions;
-                console.log("Scan options : ", $scope.scanOptions);
+                $scope.pathToScan = $scope.scanOptions.pathToScan;
+                $scope.startMe();
               }, function () {
                 $log.info('Modal dismissed at: ' + new Date());
               });

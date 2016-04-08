@@ -8,7 +8,7 @@
  * Controller of the tatouApp
  */
 angular.module('tatouApp')
-  .controller('JournalController', ['$scope', '$uibModal', '$log','ArmaditoSVC','ArmaditoIPC', function ($scope, $uibModal, $log,ArmaditoSVC,ArmaditoIPC) {
+  .controller('JournalController', ['$scope', '$uibModal', '$log','ArmaditoSVC','ArmaditoIPC','toastr', function ($scope, $uibModal, $log, ArmaditoSVC, ArmaditoIPC, toastr) {
 	  
     var Noms = ['Malware1', 'Malware2', 'Malware3', 'Malware4'];
     var Emplacements = ['/home/userName/...', '/home/Desktop/folder/...', '/home/userName/...', '/home/userName/...'];
@@ -21,6 +21,97 @@ angular.module('tatouApp')
 		//files: []
 	};
 	
+	$scope.quarantineObjects = [
+		{
+			name: 'malware',
+			path: 'C:/Users/Bla/bla/bla',
+			date: '04/12/2015',
+			refresh : '<i class="fa fa-refresh"></i>',
+			delete  : '<i class="text-danger fa fa-times"></i>'
+		},
+		{
+			name: 'malware',
+			path: 'C:/Users/Bla/bla/bla',
+			date: '04/12/2015',
+			refresh : '<i class="fa fa-refresh"></i>',
+			delete  : '<i class="text-danger fa fa-times"></i>'
+		},
+		{
+			name: 'malware',
+			path: 'C:/Users/Bla/bla/bla',
+			date: '04/12/2015',
+			refresh : '<i class="fa fa-refresh"></i>',
+			delete  : '<i class="text-danger fa fa-times"></i>'
+		},
+		{
+			name: 'malware',
+			path: 'C:/Users/Bla/bla/bla',
+			date: '04/12/2015',
+			refresh : '<i class="fa fa-refresh"></i>',
+			delete  : '<i class="text-danger fa fa-times"></i>'
+		},
+		{
+			name: 'malware',
+			path: 'C:/Users/Bla/bla/bla',
+			date: '04/12/2015',
+			refresh : '<i class="fa fa-refresh"></i>',
+			delete  : '<i class="text-danger fa fa-times"></i>'
+		},
+		{
+			name: 'malware',
+			path: 'C:/Users/Bla/bla/bla',
+			date: '04/12/2015',
+			refresh : '<i class="fa fa-refresh"></i>',
+			delete  : '<i class="text-danger fa fa-times"></i>'
+		},
+		{
+			name: 'malware',
+			path: 'C:/Users/Bla/bla/bla',
+			date: '04/12/2015',
+			refresh : '<i class="fa fa-refresh"></i>',
+			delete  : '<i class="text-danger fa fa-times"></i>'
+		},
+		{
+			name: 'malware',
+			path: 'C:/Users/Bla/bla/bla',
+			date: '04/12/2015',
+			refresh : '<i class="fa fa-refresh"></i>',
+			delete  : '<i class="text-danger fa fa-times"></i>'
+		}
+	];
+
+	$scope.refreshQuatantineObject = function (index){
+		$scope.quarantineObjects.splice(index, 1);
+		console.log("refreshed !");
+	};
+
+	$scope.deleteQuatantineObject = function (index){
+		$scope.quarantineObjects.splice(index, 1);
+		console.log("deleted !");
+	};
+
+	$scope.clearQuarantine = function (){
+      	$scope.QuarantineLength = $scope.quarantineObjects.length;
+      	var size = 'sm';
+      	var modalInstance = $uibModal.open({
+	        animation: $scope.animationsEnabled,
+	        templateUrl: 'views/Confirmation.html',
+	        controller: 'ConfirmationController',
+	        size: size,
+	        resolve: {
+	          items: function () {
+	            return $scope.QuarantineLength ;
+	          }
+	        }
+      	});
+
+      	modalInstance.result.then(function (scanOptions) {
+	        $scope.quarantineObjects = [];
+	        toastr.success('Suppression d\'objets en quarantaine effectuée avec succès.');
+	    }, function () {
+        	$log.info('Modal dismissed at: ' + new Date());
+      	});
+	};
 
 	//$scope.quarantine.count = 0;
 	$scope.quarantine.files = [];
