@@ -889,11 +889,22 @@
     }
     .progressBar {
       height: 33px !important;
-      padding: 5px !important;
+      padding: 0px !important;
       background-color: #FFFFFF !important;
-      border: 1px solid #FFF !important;
+      border: 0px solid #F2F2F2 !important;
       border-radius: 24px !important;
-      position: relative!important;
+      position: relative !important;
+    }
+    .progress-bar {
+        height: 33px !important;
+        border-radius: 24px !important;
+        color: #FFFFFF !important;
+        text-align: center !important;
+        -webkit-box-shadow: none !important;
+        box-shadow: none !important;
+        background-color: #CCCCCC !important;
+        -o-transition: width 0.6s ease !important;
+        transition: width 0.6s ease !important;
     }
     .progressBarPercent {
       color:#525659;
