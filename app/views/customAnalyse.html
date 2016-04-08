@@ -13,18 +13,26 @@
 		</div>
 		<h4 class="chooseOptionAnalyse">Choisissez vos options :</h4>
 		<form role="form" class="formOptionScan">
-		    <div class="radio">
-		      <label class="optionScan"><input type="checkbox" name="optradio" ng-model="optionScan.heuristicMode" >&nbsp;&nbsp;Mode Heuristique</label>
-		    </div>
-		    <div class="radio">
-		      <label class="optionScan"><input type="checkbox" name="optradio" ng-model="optionScan.scanArchive">&nbsp;&nbsp;Scan archive</label>
-		    </div>
-		    <span class="input-group-addon .input-group-addon-customAnalyse btn btn-default btn-file" ng-click="chooseFileToExclude()">
-		  		Add file to exlude <input id="fileToExclude" nwdirectory type="file">
-		  	</span>
-		    <tags-input ng-model="excludedFolders" display-property="pathToScan">
-		      <auto-complete source="loadTags($query)"></auto-complete>
-		    </tags-input>
+			<div class="row">
+				<div class="col-sm-12 col-md-12">
+					<div class="col-sm-6 col-md-6">
+						<div class="radio">
+					      <label class="optionScan"><input type="checkbox" name="optradio" ng-model="optionScan.heuristicMode" >&nbsp;&nbsp;Mode Heuristique</label>
+					    </div>
+					    <div class="radio">
+					      <label class="optionScan"><input type="checkbox" name="optradio" ng-model="optionScan.scanArchive">&nbsp;&nbsp;Scan archive</label>
+					    </div>
+					</div>
+					<div class="col-sm-6 col-md-6">
+						<span class="input-group-addon .input-group-addon-customAnalyse btn btn-default btn-file" ng-click="chooseFileToExclude()">
+					  		Add file to exlude <input id="fileToExclude" nwdirectory type="file">
+					  	</span>
+					    <tags-input ng-model="excludedFolders" display-property="pathToScan">
+					      <auto-complete source="loadTags($query)"></auto-complete>
+					    </tags-input>
+					</div>	
+				</div>
+			</div>		    
 		</form>
 	</div>
 	<div class="modal-footer footerModal">
