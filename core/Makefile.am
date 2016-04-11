@@ -1,4 +1,4 @@
-SUBDIRS=libarmadito json linux tests
+SUBDIRS=libarmadito json linux doc tests
 
 TAGDIRS=\
 $(top_srcdir)/doc \

@@ -1,22 +1,22 @@
-UHURU-SCAN(1)
-=============
+ARMADITO-SCAN(1)
+================
 :doctype: manpage
 
 NOM
 ---
-uhuru-scan - outil de scan en ligne de commande
+armadito-scan - outil de scan en ligne de commande
 
 
 SYNOPSIS
 --------
-*uhuru-scan* ['OPTIONS'] 'FILE|DIR'
+*armadito-scan* ['OPTIONS'] 'FILE|DIR'
 
 
 DESCRIPTION
 -----------
-La commande *uhuru-scan*(1) lance une recherche de malwares dans le fichier ou répertoire passé en argument et affiche les résultats sur sa sortie standard.
+La commande *armadito-scan*(1) lance une recherche de malwares dans le fichier ou répertoire passé en argument et affiche les résultats sur sa sortie standard.
 
-Cette commande utilise la librairie de scan *libuhuru*(3).
+Cette commande utilise la librairie de scan *libarmadito*(3).
 
 
 OPTIONS
@@ -49,12 +49,12 @@ EXIT STATUS
 
 AUTHOR
 ------
-uhuru-scan a été écrit par François Déchelle.
+armadito-scan a été écrit par François Déchelle.
 
 
 RESOURCES
 ---------
-Site web: <http://uhuru-solutions.com/>
+Site web: <http://armadito.org/>
 
 
 COPYING
