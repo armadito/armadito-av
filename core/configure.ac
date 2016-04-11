@@ -141,5 +141,6 @@ linux/service/Makefile
 linux/daemon/Makefile
 linux/tools/Makefile
 linux/net/Makefile
+tests/Makefile
 ])
 AC_OUTPUT

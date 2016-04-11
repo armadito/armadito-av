@@ -217,12 +217,10 @@ enum a6o_json_status a6o_json_handler_get_response(struct a6o_json_handler *j, c
 
 	// Check parameters
 	if (j == NULL || req == NULL || req_len <= 0) {
-		printf("[-] Error :: a6o_json_handler_get_response :: invalids parameters\n");
 		return JSON_UNEXPECTED_ERR;
 	}
 
 	av_response.status = parse_request(j, req, req_len, &j_request);
-	//printf("[+] Debug :: parse_request :: av_response.status = %d\n", av_response.status);
 
 	if (av_response.status)
 		goto get_out;
@@ -232,17 +230,14 @@ enum a6o_json_status a6o_json_handler_get_response(struct a6o_json_handler *j, c
 #endif
 
 	av_response.status = extract_request(j_request, &av_request);
-	//printf("[+] Debug :: extract_request :: av_response.status = %d\n", av_response.status);
 
 	if (av_response.status)
 		goto get_out;
 
 	av_response.response = os_strdup(av_request.request);
 	av_response.id = av_request.id;
-	//printf("[+] Debug :: ... :: av_response.response = %s :: av_response.id = %d\n", av_response.response, av_response.id);
+
 	av_response.status = call_request_handler(j, &av_request, &av_response);
-	//printf("[+] Debug :: call_request_handler :: av_response.status = %d\n", av_response.status);
-	//printf("[+] Debug :: ... :: av_response.error = %s ::\n", av_response.error_message);
 
 get_out:
 	fill_response(&av_response, p_resp, p_resp_len);

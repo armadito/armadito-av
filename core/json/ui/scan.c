@@ -5,7 +5,9 @@
 #include "jsonhandler.h"
 #include "scan.h"
 #include "ui.h"
-//#include "debug.h"
+#ifndef WIN32
+#include "debug.h"
+#endif
 
 #include "os/string.h"
 
@@ -31,7 +33,7 @@ static time_t get_milliseconds(void)
 #endif
 
 #ifdef _WIN32
-//#error must implement get_milliseconds on windows
+#error must implement get_milliseconds on windows
 #if 0
 Note: gettimeofday on windows:
 #include <time.h>
@@ -114,8 +116,8 @@ static void scan_callback(struct a6o_report *report, void *callback_data)
 	time_t now = 0;
 	enum a6o_json_status status = JSON_OK;
 
-	//now = get_milliseconds();
-	now = 0;
+	now = get_milliseconds();
+
 	if (report->status == ARMADITO_CLEAN
 		&& report->progress != 100
 		&& scan_data->last_send_progress != REPORT_PROGRESS_UNKNOWN
