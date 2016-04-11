@@ -122,6 +122,9 @@ AM_CONDITIONAL([COND_DOC], [test ! -z "$ASCIIDOC" -a ! -z "$A2X" ])
 # Output files
 AC_CONFIG_FILES([
 Makefile
+doc/Makefile
+doc/man/Makefile
+doc/man/fr/Makefile
 json/Makefile
 json/ui/Makefile
 libarmadito/Makefile
@@ -132,15 +135,15 @@ libarmadito/include/os/Makefile
 libarmadito/pkgconfig/Makefile
 libarmadito/src/Makefile
 linux/Makefile
+linux/daemon/Makefile
 linux/modules/Makefile
 linux/modules/on-access-linux/Makefile
 linux/modules/on-access-linux/conf/Makefile
 linux/modules/on-access-linux/src/Makefile
 linux/modules/on-access-linux/tests/Makefile
-linux/service/Makefile
-linux/daemon/Makefile
-linux/tools/Makefile
 linux/net/Makefile
+linux/service/Makefile
+linux/tools/Makefile
 tests/Makefile
 ])
 AC_OUTPUT

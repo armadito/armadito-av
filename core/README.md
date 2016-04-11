@@ -1,5 +1,5 @@
-libuhuru
-========
+Armadito core
+=============
 
 Copyright (c) NOV'IT/Teclib, 2014, 2015
 
@@ -9,7 +9,7 @@ Project home: http://www.somewhere.org
 What is it?
 -----------
 
-libuhuru is the support library for the Uhuru antivirus. It provides the following services:
+libarmadito is the support library for the Armadito antivirus. It provides the following services:
 
 - scanning of files or directory by scanning modules
 - dynamic loading of scanning modules
@@ -27,7 +27,7 @@ TBW
 Prerequisites
 -------------
 
-In order to compile libuhuru, you need the following tools:
+In order to compile libarmadito, you need the following tools:
 
 - automake/autoconf
 - GNU make
@@ -67,17 +67,17 @@ This will generate the `Makefile.in` files and the `configure` script.
 
 The `PREFIX` directory will be used by `make install`. Its use is mandatory, unless 
 building a package and installing in system directories, since compiling the
-scannning modules and the graphical user interface will need a libuhuru properly
+scannning modules and the graphical user interface will need a libarmadito properly
 installed.
 
 Building in a separate directory is highly recommended, unless you really want
 to clobber the source tree with objects, libraries, binaries and other stuff.
 
-    $ mkdir /home/joebar/build/libuhuru
+    $ mkdir /home/joebar/build/libarmadito
 
 Typical invocation of the configure script is:
 
-    $ /home/joebar/uhuru-av/libuhuru/configure --prefix=/home/joebar/install --enable-debug 
+    $ /home/joebar/armadito-av/libarmadito/configure --prefix=/home/joebar/install --enable-debug 
 
 
 Compiling
@@ -87,7 +87,7 @@ Once configured, compilation is easy:
 
     $ make
     make  all-recursive
-    make[1]: entrant dans le répertoire " /home/joebar/build/libuhuru "
+    make[1]: entrant dans le répertoire " /home/joebar/build/libarmadito "
     ...
 
 
