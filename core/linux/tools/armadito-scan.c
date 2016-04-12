@@ -123,13 +123,6 @@ static void parse_options(int argc, char **argv, struct scan_options *opts)
 		usage();
 
 	opts->path_to_scan = strdup(argv[optind]);
-
-	fprintf(stderr, "opts->unix_path %s\n", opts->unix_path);
-	fprintf(stderr, "opts->recursive %d\n", opts->recursive);
-	fprintf(stderr, "opts->threaded %d\n", opts->threaded);
-	fprintf(stderr, "opts->no_summary %d\n", opts->no_summary);
-	fprintf(stderr, "opts->print_clean %d\n", opts->print_clean);
-	fprintf(stderr, "opts->path_to_scan %s\n", opts->path_to_scan);
 }
 
 static void ipc_handler_scan_file(struct ipc_manager *m, void *data)

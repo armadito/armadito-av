@@ -142,18 +142,8 @@ static void parse_options(int argc, char **argv, struct a6o_daemon_options *opts
 	}
 
 	/* Print any remaining command line arguments (not options). */
-	if (optind < argc) {
-		printf ("non-option ARGV-elements: ");
-		while (optind < argc)
-			printf ("%s ", argv[optind++]);
-		putchar ('\n');
-	}
-
-	fprintf(stderr, "opts->no_daemon %d\n", opts->no_daemon);
-	fprintf(stderr, "opts->unix_path %s\n", opts->unix_path);
-	fprintf(stderr, "opts->s_log_level %s\n", opts->s_log_level);
-	fprintf(stderr, "opts->pid_file %s\n", opts->pid_file);
-	fprintf(stderr, "opts->ipc_type %d\n", opts->ipc_type);
+	if (optind < argc)
+		usage();
 }
 
 static void create_pid_file(const char *pidfile)

@@ -1,4 +1,4 @@
-modulesdir=$(libdir)/libarmadito/modules
+modulesdir=$(libdir)/armadito/modules
 modules_LTLIBRARIES=clamav.la
 
 clamav_la_SOURCES=clamav.c os/osdeps.h

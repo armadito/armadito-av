@@ -115,15 +115,8 @@ static void parse_options(int argc, char **argv, struct info_options *opts)
 	}
 
 	/* Print any remaining command line arguments (not options). */
-	if (optind < argc) {
-		printf ("non-option ARGV-elements: ");
-		while (optind < argc)
-			printf ("%s ", argv[optind++]);
-		putchar ('\n');
-	}
-
-	fprintf(stderr, "opts->output_xml %d\n", opts->output_xml);
-	fprintf(stderr, "opts->unix_path %s\n", opts->unix_path);
+	if (optind < argc)
+		usage();
 }
 
 
