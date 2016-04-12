@@ -7,7 +7,6 @@ armadito.c \
 armaditop.h \
 action.c \
 conf.c \
-conf.h \
 confparser.c \
 confparser.h \
 error.c \

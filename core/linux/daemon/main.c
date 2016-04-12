@@ -5,7 +5,6 @@
 #include "log.h"
 #include "server.h"
 #include "daemonize.h"
-#include "tcpsockserver.h"
 #include "unixsockserver.h"
 #include "net/netdefaults.h"
 
