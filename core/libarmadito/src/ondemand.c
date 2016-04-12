@@ -29,13 +29,7 @@ struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, int scan_id, 
 
 	/* in future, can have many scan configurations */
 	on_demand->scan_conf = a6o_scan_conf_on_demand();
-
-#ifdef DEBUG
-	a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_DEBUG, "scan configuration: %s", a6o_scan_conf_debug(on_demand->scan_conf));
-#endif
-
 	on_demand->scan = a6o_scan_new(armadito, scan_id);
-
 	on_demand->count_thread = NULL;
 
 #ifdef HAVE_REALPATH

@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS=subdir-objects
 
-modulesdir=$(libdir)/libarmadito/modules
+modulesdir=$(libdir)/armadito/modules
 modules_LTLIBRARIES=on-access-linux.la
 
 on_access_linux_la_SOURCES= \
