@@ -3,7 +3,8 @@ dir.h \
 file.h \
 io.h \
 mimetype.h \
-string.h 
+stdpaths.h \
+string.h
 
 #linux/dir.c \
 #linux/file.c \
