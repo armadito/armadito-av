@@ -1,66 +1,22 @@
 #include <libarmadito.h>
-#include <config\libarmadito-config.h>
-#include <clamav.h>
+
 #include <assert.h>
-#if 0
-#include <glib.h>
-#endif
+#include <clamav.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
-#define _XOPEN_SOURCE
 
+#define _XOPEN_SOURCE
 #include <time.h>
+
 #include "os/osdeps.h"
 
-//#include "os/string.h"
-
-#ifdef _WIN32
-char * GetDBDirectory( ) {
-
-	char * dirpath = NULL;
-	char filepath[MAX_PATH];
-	char * ptr = NULL;
-	int len = 0;
-	int size = 0;
-
-	if (!GetModuleFileNameA(NULL, &filepath, MAX_PATH)) {		
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR, "[-] Error :: GetBinaryDirectory!GetModuleFileName() failed :: %d\n",GetLastError());
-		return NULL;
-	}	
-
-	// get the file name from the complete file path
-	ptr = strrchr(filepath,'\\');
-	if (ptr == NULL) {		
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR, "[-] Error :: GetBinaryDirectory!strrchr() failed :: backslash not found in the path.\n");
-		return NULL;
-	}
-	
-	// calc the dir buffer length.
-	size = (int)(ptr - filepath);
-	len = size + strnlen_s(MODULE_CLAMAV_DBDIR, MAX_PATH) + 1;
-	//printf("[+] Debug :: GetBinaryDirectory :: ptr=%d :: filepath =%d :: len = %d :: strlen = %d\n",ptr,filepath,len,strlen(filepath));
-
-	dirpath = (char*)(calloc(len+1,sizeof(char)));
-	dirpath[len] = '\0';
-
-	memcpy_s(dirpath, len, filepath, size);
-	dirpath[size] = '\\';
-	memcpy_s(dirpath+size+1,len,MODULE_CLAMAV_DBDIR,strnlen_s(MODULE_CLAMAV_DBDIR, _MAX_PATH));
-
-
-	//g_log(NULL, G_LOG_LEVEL_WARNING, "[+] Debug :: GetBinaryDirectory :: dirpath = %s\n",dirpath);
-
-	return dirpath;
-}
-#endif
-
 struct clamav_data {
-  struct cl_engine *clamav_engine;
-  const char *db_dir;
-  const char *tmp_dir;
-  int late_days;
-  int critical_days;
+	struct cl_engine *clamav_engine;
+	const char *db_dir;
+	const char *tmp_dir;
+	int late_days;
+	int critical_days;
 };
 
 #define DEFAULT_LATE_DAYS (3)
@@ -70,35 +26,30 @@ static enum a6o_mod_status clamav_init(struct a6o_module *module)
 {
 	struct clamav_data *cl_data;
 	int ret;
+	const char *bases_location;
+	char *db_dir;
+	size_t len;
 
 	if ((ret = cl_init(CL_INIT_DEFAULT)) != CL_SUCCESS) {
 		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR, "ClamAV initialization failed: %s", cl_strerror(ret));
 		return ARMADITO_MOD_INIT_ERROR;
 	}
 
-	cl_data = (struct clamav_data *)calloc(1,sizeof(struct clamav_data));
-	assert(cl_data != NULL);
+	cl_data = malloc(sizeof(struct clamav_data));
 
-	cl_data->clamav_engine = NULL;
-
-	if(!(cl_data->clamav_engine = cl_engine_new())) {
+	cl_data->clamav_engine = cl_engine_new();
+	if(!cl_data->clamav_engine) {
 		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR, "ClamAV: can't create new engine");
 		return ARMADITO_MOD_INIT_ERROR;
 	}
 
-	#if 0
-	/* this if you want to use clamav bases from clamav standard directory */
-	cl_data->db_dir = cl_retdbdir();
-	#endif
-	//a6o_std_path
-	#ifdef WIN32
-	cl_data->db_dir = GetDBDirectory();
-	#else
-	cl_data->db_dir = os_strdup(MODULE_CLAMAV_DBDIR);
-	#endif
+	bases_location = a6o_std_path(BASES_LOCATION);
+	len = strlen(bases_location) + 1 + strlen("clamav");
+	db_dir = malloc(len);
+	sprintf(db_dir, "%s%cclamav", bases_location, a6o_path_sep());
 
+	cl_data->db_dir = db_dir;
 	cl_data->tmp_dir = NULL;
-  
 	cl_data->late_days = DEFAULT_LATE_DAYS;
 	cl_data->critical_days = DEFAULT_CRITICAL_DAYS;
 
@@ -109,378 +60,145 @@ static enum a6o_mod_status clamav_init(struct a6o_module *module)
 
 static enum a6o_mod_status clamav_conf_set_dbdir(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
 {
-  struct clamav_data *cl_data = (struct clamav_data *)module->data;
+	struct clamav_data *cl_data = (struct clamav_data *)module->data;
 
-  if (cl_data->db_dir != NULL)
-    free((char *)cl_data->db_dir);
+	if (cl_data->db_dir != NULL)
+		free((char *)cl_data->db_dir);
 
-  cl_data->db_dir = os_strdup(a6o_conf_value_get_string(value));
+	cl_data->db_dir = os_strdup(a6o_conf_value_get_string(value));
 
-  return ARMADITO_MOD_OK;
+	return ARMADITO_MOD_OK;
 }
 
 static enum a6o_mod_status clamav_conf_set_tmpdir(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
 {
-  struct clamav_data *cl_data = (struct clamav_data *)module->data;
+	struct clamav_data *cl_data = (struct clamav_data *)module->data;
 
-  if (cl_data->tmp_dir != NULL)
-    free((char *)cl_data->tmp_dir);
+	if (cl_data->tmp_dir != NULL)
+		free((char *)cl_data->tmp_dir);
 
-  cl_data->tmp_dir = os_strdup(a6o_conf_value_get_string(value));
+	cl_data->tmp_dir = os_strdup(a6o_conf_value_get_string(value));
 
-  return ARMADITO_MOD_OK;
+	return ARMADITO_MOD_OK;
 }
 
 static enum a6o_mod_status clamav_conf_set_late_days(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
 {
-  struct clamav_data *cl_data = (struct clamav_data *)module->data;
+	struct clamav_data *cl_data = (struct clamav_data *)module->data;
 
-  cl_data->late_days = a6o_conf_value_get_int(value);
+	cl_data->late_days = a6o_conf_value_get_int(value);
 
-  return ARMADITO_MOD_OK;
+	return ARMADITO_MOD_OK;
 }
 
 static enum a6o_mod_status clamav_conf_set_critical_days(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
 {
-  struct clamav_data *cl_data = (struct clamav_data *)module->data;
+	struct clamav_data *cl_data = (struct clamav_data *)module->data;
 
-  cl_data->critical_days = a6o_conf_value_get_int(value);
+	cl_data->critical_days = a6o_conf_value_get_int(value);
 
-  return ARMADITO_MOD_OK;
+	return ARMADITO_MOD_OK;
 }
 
 static enum a6o_mod_status clamav_post_init(struct a6o_module *module)
 {
-  struct clamav_data *cl_data = (struct clamav_data *)module->data;
-  int ret;
-  unsigned int signature_count = 0;
-  
-  if (cl_data->tmp_dir != NULL) {
+	struct clamav_data *cl_data = (struct clamav_data *)module->data;
+	int ret;
+	unsigned int signature_count = 0;
 
-	  if ((ret = cl_engine_set_str(cl_data->clamav_engine, CL_ENGINE_TMPDIR, cl_data->tmp_dir)) != CL_SUCCESS) {
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR, "ClamAV: error setting temporary directory: %s", cl_strerror(ret));
+	if (cl_data->tmp_dir != NULL) {
+		if ((ret = cl_engine_set_str(cl_data->clamav_engine, CL_ENGINE_TMPDIR, cl_data->tmp_dir)) != CL_SUCCESS) {
+			a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR, "ClamAV: error setting temporary directory: %s", cl_strerror(ret));
+			cl_engine_free(cl_data->clamav_engine);
+			cl_data->clamav_engine = NULL;
+			return ARMADITO_MOD_INIT_ERROR;
+		}
+	}
+
+	if ((ret = cl_load(cl_data->db_dir, cl_data->clamav_engine, &signature_count, CL_DB_STDOPT)) != CL_SUCCESS) {
+		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR, "ClamAV: error loading databases: %s", cl_strerror(ret));
 		cl_engine_free(cl_data->clamav_engine);
 		cl_data->clamav_engine = NULL;
 		return ARMADITO_MOD_INIT_ERROR;
-	  }
-  }
-	  
+	}
 
-  if ((ret = cl_load(cl_data->db_dir, cl_data->clamav_engine, &signature_count, CL_DB_STDOPT)) != CL_SUCCESS) {
-    a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR, "ClamAV: error loading databases: %s", cl_strerror(ret));
-    cl_engine_free(cl_data->clamav_engine);
-    cl_data->clamav_engine = NULL;
-    return ARMADITO_MOD_INIT_ERROR;
-  }
+	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, "ClamAV database loaded from %s, %d signatures", cl_data->db_dir, signature_count);
 
-  a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, "ClamAV database loaded from %s, %d signatures", cl_data->db_dir, signature_count);
+	if ((ret = cl_engine_compile(cl_data->clamav_engine)) != CL_SUCCESS) {
+		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR, "ClamAV: engine compilation error: %s", cl_strerror(ret));;
+		cl_engine_free(cl_data->clamav_engine);
+		cl_data->clamav_engine = NULL;
+		return ARMADITO_MOD_INIT_ERROR;
+	}
 
-  if ((ret = cl_engine_compile(cl_data->clamav_engine)) != CL_SUCCESS) {
-    a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR, "ClamAV: engine compilation error: %s", cl_strerror(ret));;
-    cl_engine_free(cl_data->clamav_engine);
-    cl_data->clamav_engine = NULL;
-    return ARMADITO_MOD_INIT_ERROR;
-  }
+	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, "ClamAV is initialized");
 
-  a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, "ClamAV is initialized");
-
-  return ARMADITO_MOD_OK;
+	return ARMADITO_MOD_OK;
 }
 
 static enum a6o_file_status clamav_scan(struct a6o_module *module, int fd, const char *path, const char *mime_type, char **pmod_report)
 {
-  struct clamav_data *cl_data = (struct clamav_data *)module->data;
-  const char *virus_name = NULL;
-  long unsigned int scanned = 0;
-  int cl_scan_status;
+	struct clamav_data *cl_data = (struct clamav_data *)module->data;
+	const char *virus_name = NULL;
+	long unsigned int scanned = 0;
+	int cl_scan_status;
 
-  if (cl_data ->clamav_engine == NULL)
-    return ARMADITO_IERROR;
+	if (cl_data ->clamav_engine == NULL)
+		return ARMADITO_IERROR;
 
-  cl_scan_status = cl_scandesc(fd, &virus_name, &scanned, cl_data->clamav_engine, CL_SCAN_STDOPT);
-  /* cl_scan_status = cl_scanfile(path, &virus_name, &scanned, cl_data->clamav_engine, CL_SCAN_STDOPT); */
+	cl_scan_status = cl_scandesc(fd, &virus_name, &scanned, cl_data->clamav_engine, CL_SCAN_STDOPT);
 
-  if (cl_scan_status == CL_VIRUS) {
-    *pmod_report = os_strdup(virus_name);
-	
-    return ARMADITO_MALWARE;
-  }
+	if (cl_scan_status == CL_VIRUS) {
+		*pmod_report = os_strdup(virus_name);
 
-  return ARMADITO_CLEAN;
+		return ARMADITO_MALWARE;
+	}
+
+	return ARMADITO_CLEAN;
 }
 
 static enum a6o_mod_status clamav_close(struct a6o_module *module)
 {
-  struct clamav_data *cl_data = (struct clamav_data *)module->data;
-  int ret;
-
-  
-  if ((ret = cl_engine_free(cl_data->clamav_engine)) != CL_SUCCESS) {
-    a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR, "ClamAV: can't free engine");
-    return ARMADITO_MOD_CLOSE_ERROR;
-  }
-
-  cl_data->clamav_engine = NULL;
-
-  // Ulrich add
-  cl_cleanup_crypto(); 
-
-  return ARMADITO_MOD_OK;
-}
-
-static int get_month(const char *month)
-{
-  static const char *months = "JanFebMarAprMayJunJulAugSepOctNovDec";
-  const char *ret;
-
-  if ((ret = strstr(months, month)) == NULL)
-    return -1;
-
-  return (ret - months) / 3 + 1;
-}
-
-#if 0
-static GDateTime *clamav_convert_datetime(const char *clamav_datetime)
-{
-  int day=0, year=0, hour=0, minute=0;
-  char s_month[4] = {0}, s_timezone[6] = {0};
-  GDateTime *datetime, *datetime_utc;
-  GTimeZone *timezone = NULL;
-
-  if (clamav_datetime == NULL) {	  
-	  return NULL;
-  }
-  
-  /* ClamAV format: 17 Sep 2013 10-57 -0400 */
-#ifdef WIN32
-  os_sscanf(clamav_datetime, "%d %3s %d %2d-%2d %5s", &day, s_month,sizeof(s_month), &year, &hour, &minute, s_timezone,sizeof(s_timezone));
-#else
-  os_sscanf(clamav_datetime, "%d %3s %d %2d-%2d %5s", &day, s_month, &year, &hour, &minute, s_timezone);
-#endif
-  timezone = g_time_zone_new(s_timezone);
-
-  datetime = g_date_time_new(timezone, year, get_month(s_month), day, hour, minute, 0);  
-
-  datetime_utc = g_date_time_to_utc(datetime);
-
-  g_date_time_unref(datetime);
-  if (timezone != NULL)
-    g_time_zone_unref(timezone);
-
-  return datetime_utc;
-}
-
-#else
-static time_t *clamav_convert_datetime(const char *clamav_datetime)
-{
-  int day=0, year=0, hour=0, minute=0;
-  char s_month[4] = {0}, s_timezone[6] = {0};
-  //GDateTime *datetime, *datetime_utc;
-  time_t * datetime_utc = NULL;
-  //GTimeZone *timezone = NULL;
-  long time_zone = 0;
-
-
-  if (clamav_datetime == NULL) {	  
-	  return NULL;
-  }
-  
-  /* ClamAV format: 17 Sep 2013 10-57 -0400 */
-#ifdef WIN32
-  os_sscanf(clamav_datetime, "%d %3s %d %2d-%2d %5s", &day, s_month,sizeof(s_month), &year, &hour, &minute, s_timezone,sizeof(s_timezone));
-#else
-  os_sscanf(clamav_datetime, "%d %3s %d %2d-%2d %5s", &day, s_month, &year, &hour, &minute, s_timezone);
-#endif
-  //timezone = g_time_zone_new(s_timezone);
-  //time_zone = _get_timezone( );
-  _get_timezone(&time_zone);
-
-  //datetime = g_date_time_new(timezone, year, get_month(s_month), day, hour, minute, 0);  
-
-  //datetime_utc = g_date_time_to_utc(datetime);
-
-  //g_date_time_unref(datetime);
-  //if (time_zone != NULL)
-    //g_time_zone_unref(timezone);
-
-  return datetime_utc;
-}
-#endif
-
-
-#if 0
-static enum a6o_update_status clamav_update_status_eval(GDateTime *curr, int late_days, int critical_days)
-{
-  GDateTime *now, *late, *critical;
-  enum a6o_update_status ret = ARMADITO_UPDATE_OK;
-
-  now = g_date_time_new_now_utc();
-  late = g_date_time_add_days(now, -late_days);
-  critical = g_date_time_add_days(now, -critical_days);
-
-  if (g_date_time_compare(curr, critical) < 0)
-    ret = ARMADITO_UPDATE_CRITICAL;
-  else if (g_date_time_compare(curr, late) < 0)
-    ret = ARMADITO_UPDATE_LATE;
-
-  g_date_time_unref(now);
-  g_date_time_unref(late);
-  g_date_time_unref(critical);
-
-  return ret;
-}
-
-#else
-static enum a6o_update_status clamav_update_status_eval(time_t *curr, int late_days, int critical_days)
-{
-  //GDateTime *now, *late, *critical;
-  enum a6o_update_status ret = ARMADITO_UPDATE_OK;
-
-  /*now = g_date_time_new_now_utc();
-  late = g_date_time_add_days(now, -late_days);
-  critical = g_date_time_add_days(now, -critical_days);
-
-  if (g_date_time_compare(curr, critical) < 0)
-    ret = ARMADITO_UPDATE_CRITICAL;
-  else if (g_date_time_compare(curr, late) < 0)
-    ret = ARMADITO_UPDATE_LATE;
-
-  g_date_time_unref(now);
-  g_date_time_unref(late);
-  g_date_time_unref(critical);
-  */
-
-  return ret;
-}
-#endif
-
-static enum a6o_update_status clamav_info(struct a6o_module *module, struct a6o_module_info *info)
-{
 	struct clamav_data *cl_data = (struct clamav_data *)module->data;
-	enum a6o_update_status ret_status = ARMADITO_UPDATE_OK;
-	char * full_path = NULL;
-	char * version = NULL;
-	//GString *full_path = g_string_new("");
-	//GString *version = g_string_new("");
-	//const char *names[] = { "daily.cld", "bytecode.cld", "main.cvd", };
-	const char *names[] = { "daily.cld", }; // require only daily for module info. #TODISCUSS...
-	//GDateTime *base_datetime;
-	time_t *base_datetime;
-	char * dir_separator = "\\";
-	int n =0, i=0, len = 0;
+	int ret;
 
-	n = sizeof(names) / sizeof(const char *);
-
-	//info->base_infos = g_new0(struct a6o_base_info *, n + 1);
-	info->base_infos = (struct a6o_base_info **)calloc(n+1,sizeof(struct a6o_base_info *));
-
-	for (i = 0; i < n; i++) {
-
-		struct cl_cvd *cvd;
-		struct a6o_base_info *base_info;
-		char *s_base_datetime = NULL;
-	
-		//g_string_printf(full_path, "%s%s%s", cl_data->db_dir, dir_separator, names[i]);
-		if (full_path != NULL) {
-			free(full_path);
-			full_path = NULL;
-		}
-
-		//len = strlen_s( );
-		len = 0;
-		os_sprintf(full_path,len,"%s%s%s", cl_data->db_dir, dir_separator, names[i]);		
-		printf("[+] Debug :: clamav_info :: db name = %s\n", names[i]);
-
-		//cvd = cl_cvdhead(full_path->str);
-		cvd = cl_cvdhead(full_path);
-		if (cvd == NULL)
-			return ARMADITO_UPDATE_NON_AVAILABLE;
-    
-		//base_info = g_new(struct a6o_base_info, 1);
-		base_info = (struct a6o_base_info *)calloc(1,sizeof(struct a6o_base_info));
-		base_info->name = os_strdup(names[i]);
-
-		//g_string_printf(version, "%d", cvd->version);
-		if (version != NULL) {
-			free(version);
-			version = NULL;
-		}
-
-		//sprintf(version,"%d",cvd->version);
-		// len = ;
-		len = 0;
-		os_sprintf(version,len,"%d",cvd->version);
-
-		//base_info->version = os_strdup(version->str);
-		base_info->version = os_strdup(version);
-
-		printf("[+] Debug :: clamav_info :: cvd->time = %s\n", cvd->time);
-		if (cvd->time != NULL)
-			base_datetime = clamav_convert_datetime(cvd->time);
-		else{
-			printf("[-] Error :: clamav_info :: cvd->time is invalid!\n");
-			continue;
-		}
-
-		if (base_datetime != NULL) {
-			///s_base_datetime = g_date_time_format(base_datetime, "%FT%H:%M:%SZ");
-		}
-		else {
-			printf("[-] Error :: clamav_info :: s_base_datetime is invalid!\n");
-			continue;
-		}
-    
-		base_info->date = os_strdup(s_base_datetime);
-		//g_free(s_base_datetime);
-
-		base_info->signature_count = cvd->sigs;
-		//base_info->full_path = os_strdup(full_path->str);
-		base_info->full_path = os_strdup(full_path);
-
-		/* 
-		daily.cld is the base to use to compute update status of module 
-		more sophisticated behaviour would be to have late and critical
-		offsets for each base, and take the min (or the max, depends) of
-		each base status
-		*/
-		if (!strcmp(base_info->name, "daily.cld")) {
-			ret_status = clamav_update_status_eval(base_datetime, cl_data->late_days, cl_data->critical_days);
-			info->update_date = os_strdup(base_info->date);
-		}
-
-		info->base_infos[i] = base_info;
-
-		//g_date_time_unref(base_datetime);
+	if ((ret = cl_engine_free(cl_data->clamav_engine)) != CL_SUCCESS) {
+		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR, "ClamAV: can't free engine");
+		return ARMADITO_MOD_CLOSE_ERROR;
 	}
 
-	//g_string_free(full_path, TRUE);
-	free(full_path);
-	full_path = NULL;
-	//g_string_free(version, TRUE);
-	free(version);
-	version = NULL;
-  
-	return ret_status;
+	cl_data->clamav_engine = NULL;
+
+	// Ulrich add
+	cl_cleanup_crypto();
+
+	return ARMADITO_MOD_OK;
+}
+
+/* under re-implementation */
+static enum a6o_update_status clamav_info(struct a6o_module *module, struct a6o_module_info *info)
+{
+	return ARMADITO_UPDATE_OK;
 }
 
 static struct a6o_conf_entry clamav_conf_table[] = {
-  { "dbdir", CONF_TYPE_STRING, clamav_conf_set_dbdir},
-  { "tmpdir", CONF_TYPE_STRING, clamav_conf_set_tmpdir},
-  { "late_days", CONF_TYPE_INT, clamav_conf_set_late_days},
-  { "critical_days", CONF_TYPE_INT, clamav_conf_set_critical_days},
-  { NULL, CONF_TYPE_VOID, NULL},
+	{ "critical_days", CONF_TYPE_INT, clamav_conf_set_critical_days},
+	{ "late_days", CONF_TYPE_INT, clamav_conf_set_late_days},
+	{ "dbdir", CONF_TYPE_STRING, clamav_conf_set_dbdir},
+	{ "tmpdir", CONF_TYPE_STRING, clamav_conf_set_tmpdir},
+	{ NULL, CONF_TYPE_VOID, NULL},
 };
 
 static const char *clamav_mime_types[] = { "*", NULL, };
 
 struct a6o_module module = {
-  .init_fun = clamav_init,
-  .conf_table = clamav_conf_table,
-  .post_init_fun = clamav_post_init,
-  .scan_fun = clamav_scan,
-  .close_fun = clamav_close,
-  .info_fun = clamav_info,
-  .supported_mime_types = clamav_mime_types,
-  .name = "clamav",
-  .size = sizeof(struct clamav_data),
+	.init_fun = clamav_init,
+	.conf_table = clamav_conf_table,
+	.post_init_fun = clamav_post_init,
+	.scan_fun = clamav_scan,
+	.close_fun = clamav_close,
+	.info_fun = clamav_info,
+	.supported_mime_types = clamav_mime_types,
+	.name = "clamav",
+	.size = sizeof(struct clamav_data),
 };

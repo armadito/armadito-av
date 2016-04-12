@@ -1,4 +1,4 @@
-AC_INIT(uhuru-mod-clamav,1.5.3,francois@dechelle.net)
+AC_INIT(armadito-mod-clamav,1.5.3,francois@dechelle.net)
 AM_INIT_AUTOMAKE
 
 # collect arguments
@@ -7,12 +7,6 @@ AC_ARG_ENABLE([debug],
 	AS_HELP_STRING([--enable-debug],[enable debugging @<:@default is yes@:>@]),
 	,
 	enable_debug="yes")
-
-# database directory
-AC_ARG_WITH([dbdir],
-	AS_HELP_STRING([--with-dbdir=DIR],[specify path to databases @<:@default is /var/lib/uhuru/bases/clamav@:>@]),
-	with_dbdir="$withval",
-	with_dbdir="no")
 
 # check for needed programs
 AC_PROG_CC([gcc])
@@ -32,10 +26,10 @@ fi
 
 PKG_PROG_PKG_CONFIG
 
-# check for libuhuru
-PKG_CHECK_MODULES(LIBUHURU, libuhuru, [HAVE_LIBUHURU=yes], [HAVE_LIBUHURU=no])
-if test "$HAVE_LIBUHURU" = "no"; then
-   AC_MSG_ERROR("cannot find UHURU library")
+# check for libarmadito
+PKG_CHECK_MODULES(LIBARMADITO, libarmadito, [HAVE_LIBARMADITO=yes], [HAVE_LIBARMADITO=no])
+if test "$HAVE_LIBARMADITO" = "no"; then
+   AC_MSG_ERROR("cannot find ARMADITO library")
 fi
 
 # check for libclamav
@@ -45,23 +39,10 @@ if test "$HAVE_LIBCLAMAV" = "no"; then
 fi
 
 # check for glib
-PKG_CHECK_MODULES(GLIB2, glib-2.0, [HAVE_GLIB2=yes], [HAVE_GLIB2=no])
-if test "$HAVE_GLIB2" = "no"; then
-   AC_MSG_ERROR("cannot find glib-2.0 library")
-fi
-
-# database directory
-AC_MSG_CHECKING(for databases directory)
-if test "$with_dbdir" = "no" ; then
-   MODULE_CLAMAV_DBDIR="$localstatedir/lib/uhuru/bases/clamav"
-else
-   MODULE_CLAMAV_DBDIR="$with_dbdir"
-fi
-AC_MSG_RESULT($MODULE_CLAMAV_DBDIR)
-if test ! -f "$MODULE_CLAMAV_DBDIR/daily.cld" ; then
-   AC_MSG_WARN("cannot find $MODULE_CLAMAV_DBDIR/daily.cld, continuing anyway")
-fi
-AC_SUBST(MODULE_CLAMAV_DBDIR)
+#PKG_CHECK_MODULES(GLIB2, glib-2.0, [HAVE_GLIB2=yes], [HAVE_GLIB2=no])
+#if test "$HAVE_GLIB2" = "no"; then
+#   AC_MSG_ERROR("cannot find glib-2.0 library")
+#fi
 
 # Output files
 AC_CONFIG_FILES([

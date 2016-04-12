@@ -1,5 +1,5 @@
-Uhuru ClamAV module
-===================
+Armadito ClamAV module
+======================
 
 Copyright (c) NOV'IT/Teclib, 2014, 2015
 
@@ -9,7 +9,7 @@ Project home: http://www.somewhere.org
 What is it?
 -----------
 
-Uhuru ClamAV module is the scan module based on ClamAV engine. It is based on the libuhuru
+Armadito ClamAV module is the scan module based on ClamAV engine. It is based on the libarmadito
 library.
 
 
@@ -22,7 +22,7 @@ TBW
 Prerequisites
 -------------
 
-In order to compile Uhuru ClamAV module, you need the following tools:
+In order to compile Armadito ClamAV module, you need the following tools:
 
 - automake/autoconf
 - GNU make
@@ -58,8 +58,8 @@ This will generate the `Makefile.in` files and the `configure` script.
 The `PREFIX` directory will be used by `make install`. Its use is mandatory, unless 
 building a package and installing in system directories.
 
-libuhuru use the `pkg-config` utility to specify compiling options relative to 
-libuhuru. Since the `libuhuru.pc` specification file for `pkg-config` is not located
+libarmadito use the `pkg-config` utility to specify compiling options relative to 
+libarmadito. Since the `libarmadito.pc` specification file for `pkg-config` is not located
 in standard directory (usual `/usr/lib/pkgconfig`), invoking the configure script 
 must use the PKG_CONFIG_PATH environment variable.
 
@@ -70,10 +70,10 @@ to clobber the source tree with objects, libraries, binaries and other stuff.
 
 Typical invocation of the configure script is:
 
-    $ /home/joebar/uhuru-av/modules/clamav/configure --prefix=/home/joebar/install --enable-debug PKG_CONFIG_PATH=/home/joebar/install/lib/pkgconfig
+    $ /home/joebar/armadito-av/modules/clamav/configure --prefix=/home/joebar/install --enable-debug PKG_CONFIG_PATH=/home/joebar/install/lib/pkgconfig
 
 Note that the path specified in the value of PKG_CONFIG_PATH must be coherent
-with the PREFIX used in libuhuru installation (see `libuhuru` README).
+with the PREFIX used in libarmadito installation (see `libarmadito` README).
 
 
 Compiling
