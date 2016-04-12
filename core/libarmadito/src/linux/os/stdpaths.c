@@ -34,3 +34,9 @@ const char *os_stdpath_tmp()
 {
 	return NULL;
 }
+
+char a6o_path_sep(void)
+{
+	return '/';
+}
+
