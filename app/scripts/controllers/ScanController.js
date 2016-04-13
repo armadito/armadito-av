@@ -117,15 +117,20 @@ angular.module('tatouApp')
       if($scope.type == "COMPLÈTE"){
         // only for test
         console.log("[+] Debug :: ANALYSE COMPLÈTE ::\n");
-        $scope.scan_data.path_to_scan = "/home/mohammed/Bureau/folderTest/bin";
+        $scope.scan_data.path_to_scan = "/home";
 
       }else if($scope.type == "RAPIDE"){
 
         // only for test
         console.log("[+] Debug :: ANALYSE RAPIDE ::\n");
-        $scope.scan_data.path_to_scan = "C:\\Users\\thibaut\\Desktop\\to_scan";
+        $scope.scan_data.path_to_scan = "/home";
 
-      }else{
+      }else if($scope.type == "PERSONALISÉE"){
+
+        // only for test
+        console.log("[+] Debug :: ANALYSE PERSONALISÉE ::\n");
+      }
+      else{
         // display a notif.
         console.log("[+] Debug :: Please enter an analysis type ::\n");
         return;
@@ -172,6 +177,8 @@ angular.module('tatouApp')
       modalInstance.result.then(function (scanOptions) {
         $scope.scanOptions = scanOptions;
         console.log("Scan options : ", $scope.scanOptions);
+        $scope.scan_data.path_to_scan = $scope.scanOptions.pathToScan;
+        $scope.StartScan();
       }, function () {
         $log.info('Modal dismissed at: ' + new Date());
       });

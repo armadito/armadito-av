@@ -49,6 +49,9 @@ angular
 			timeOut: 5000,
 			maxOpened: 1
 		  });
+     
+      //Enable a more secure variant escape 
+      $translateProvider.useSanitizeValueStrategy('escape');
 
       $translateProvider.useStaticFilesLoader({
         prefix: 'scripts/filters/languages/',

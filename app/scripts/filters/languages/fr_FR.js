@@ -1,11 +1,11 @@
 {
   "main_view" : {
     "Your_computer_is_protected" : "Votre ordinateur est protégé",
-    "Parameters" : "Parametres",
-    "Statistics" : "statistiques",
+    "Parameters" : "Paramètres",
+    "Statistics" : "Statistiques",
     "About" : "À propos",
-    "Close" : "Fermer l'application",
-    "Minimize" : "Réduire l'application",
+    "Close" : "Fermer",
+    "Minimize" : "Réduire",
     "Leave" : "Quitter",
     "Are_you_sur_you_want_to_leave_Armadito" : "Êtes-vous sûr de vouloir quitter Armadito ?"
   },
@@ -20,7 +20,8 @@
   	"Status" : "Statuts"
   },
   "analyse_view" : {
-  	"Analyse" : "Analyse"
+  	"Analyse" : "Analyse",
+    "Start" : "Start"
   },
   "history_view" : {
   	"History" : "Journal"
