@@ -8,10 +8,10 @@
  * Controller of the tatouApp
  */
 angular.module('tatouApp')
-  .controller('ConfirmationController',['$scope', '$uibModalInstance', 'items', function ($scope, $uibModalInstance, items) {
+  .controller('ConfirmationController',['$scope', '$uibModalInstance', 'data', function ($scope, $uibModalInstance, data) {
 
-  	$scope.quarantineLength = items;
-  	console.log("hoho", $scope.quarantineLength);
+  	$scope.sentence = data.sentence;
+  	$scope.title = data.title;
 
   	$scope.ok = function () {
 		$uibModalInstance.close($scope.quarantineLength);

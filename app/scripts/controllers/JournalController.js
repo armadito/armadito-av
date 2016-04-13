@@ -8,7 +8,7 @@
  * Controller of the tatouApp
  */
 angular.module('tatouApp')
-  .controller('JournalController', ['$scope', '$uibModal', '$log','ArmaditoSVC','ArmaditoIPC','toastr', function ($scope, $uibModal, $log, ArmaditoSVC, ArmaditoIPC, toastr) {
+  .controller('JournalController', ['$scope', '$uibModal', 'ArmaditoSVC','ArmaditoIPC','toastr', function ($scope, $uibModal, ArmaditoSVC, ArmaditoIPC, toastr) {
 	  
     var Noms = ['Malware1', 'Malware2', 'Malware3', 'Malware4'];
     var Emplacements = ['/home/userName/...', '/home/Desktop/folder/...', '/home/userName/...', '/home/userName/...'];
@@ -91,16 +91,19 @@ angular.module('tatouApp')
 	};
 
 	$scope.clearQuarantine = function (){
-      	$scope.QuarantineLength = $scope.quarantineObjects.length;
       	var size = 'sm';
+      	var item = {
+      		title : 'Confirmation de suppression',
+      		sentence : "Etes vous sûr de vouloir suprimer "+ $scope.quarantineObjects.length + " objets de la quarantaines ?"
+      	};
       	var modalInstance = $uibModal.open({
 	        animation: $scope.animationsEnabled,
 	        templateUrl: 'views/Confirmation.html',
 	        controller: 'ConfirmationController',
 	        size: size,
 	        resolve: {
-	          items: function () {
-	            return $scope.QuarantineLength ;
+	          data: function () {
+	            return  item;
 	          }
 	        }
       	});
@@ -109,7 +112,7 @@ angular.module('tatouApp')
 	        $scope.quarantineObjects = [];
 	        toastr.success('Suppression d\'objets en quarantaine effectuée avec succès.');
 	    }, function () {
-        	$log.info('Modal dismissed at: ' + new Date());
+        	console.log('Modal dismissed at: ' + new Date());
       	});
 	};
 

@@ -903,8 +903,8 @@
         -webkit-box-shadow: none !important;
         box-shadow: none !important;
         background-color: #CCCCCC !important;
-        -o-transition: width 0.6s ease !important;
-        transition: width 0.6s ease !important;
+        /*-o-transition: width 0.6s ease !important;
+        transition: width 0.6s ease !important;*/
     }
     .progressBarPercent {
       color:#525659;
@@ -1080,4 +1080,9 @@
       border: 1px solid #333333  !important;
       border-radius: 0;
     }
-
+     tags-input .tags .tag-item {
+        font: 12px "Helvetica Neue",Helvetica,Arial,sans-serif !important;
+        border: 1px solid #acacac !important;
+        border-radius: 24px !important;
+        background: linear-gradient(to bottom,#f0f9ff 0,#FFFFFF 47%,#FFFFFF 100%) !important;
+    }

@@ -89,10 +89,11 @@ angular.module('tatouApp')
 
           $scope.scan_data.progress = json_object.params.progress ;
           console.log("[+] Debug :: progress = ", $scope.scan_data.progress);
-
+          $scope.scan_data.files.push(json_object.params);
+          console.log("tableauuuuuuuuuuuuuuuuuuu", $scope.scan_data.files);
           // terminate scan.
           if($scope.scan_data.progress == 100){
-               $scope.scan_server.close();
+               //$scope.scan_server.close();
           }
 
           $scope.$apply();
@@ -109,18 +110,14 @@ angular.module('tatouApp')
 
 
     $scope.StartScan = function(){
-
       console.log("[+] Debug :: type d'analyse ::", $scope.type);
       // reset progress bar
       $scope.scan_data.progress = 0;
 
       if($scope.type == "COMPLÈTE"){
-
-
-
         // only for test
         console.log("[+] Debug :: ANALYSE COMPLÈTE ::\n");
-        $scope.scan_data.path_to_scan = "C:\\Users\\thibaut\\Desktop\\new";
+        $scope.scan_data.path_to_scan = "/home/mohammed/Bureau/folderTest/bin";
 
       }else if($scope.type == "RAPIDE"){
 
@@ -136,11 +133,15 @@ angular.module('tatouApp')
 
       ArmaditoSVC.launchScan($scope.scan_data.path_to_scan, $scope.threatDataFromAv);
 
+      console.log("[+] Debug :: flag 1\n");
+
       if($scope.scan_server){
         $scope.scan_server.close();
       }
 
+      console.log("[+] Debug :: flag 2\n");
       $scope.scan_server = ArmaditoSVC.receiveScanInfo($scope.threatDataFromAv);
+      console.log("[+] Debug :: flag 3\n");
 
     };
 

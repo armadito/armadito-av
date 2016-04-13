@@ -7,15 +7,62 @@
  * # MainController
  * Controller of the tatouApp
  */
+
+ // TEST TRAY
+// Load native UI library
+var gui = require('nw.gui');
+
+// Create a tray icon
+var tray = new gui.Tray({ title: 'Tray', icon: 'app/images/kimioslogoMini.png' });
+
+// Reference to window and tray
+var win = gui.Window.get();
+
+// show window on tray click
+tray.on('click', function() {
+  win.show();
+});
+
+
 angular.module('tatouApp')
-  .controller('MainController', [ '$rootScope', '$scope', '$state','toastr','ArmaditoSVC', function ($rootScope, $scope,  $state, toastr, ArmaditoSVC) {
+  .controller('MainController', [ '$rootScope', '$scope', '$state','$uibModal', 'toastr','ArmaditoSVC', function ($rootScope, $scope,  $state, $uibModal, toastr, ArmaditoSVC) {
+
+  	$scope.closeApp = function (){  		
+      	var size = 'sm';
+      	var item = {
+      		title : 'main_view.Leave',
+      		sentence : "main_view.Are_you_sur_you_want_to_leave_Armadito"
+      	};
+      	var modalInstance = $uibModal.open({
+	        animation: $scope.animationsEnabled,
+	        templateUrl: 'views/Confirmation.html',
+	        controller: 'ConfirmationController',
+	        size: size,
+	        resolve: {
+	          data: function () {
+	            return  item;
+	          }
+	        }
+      	});
+
+      	modalInstance.result.then(function (scanOptions) {
+      	 	window.close();
+	    }, function () {
+        	console.log('Modal dismissed at: ' + new Date());
+      	});
+  	};
+
+  	$scope.reduceApp = function (){
+  		win.minimize();
+  		console.log(navigator.language);
+  	};
 
   	//Buttons
   	$scope.buttons = [
   			{ 
   				button : {
 		  			isActive : true,
-		  			tittle : "GÉNÉRAL",
+		  			tittle : 'information_view.General',
 		  			icon : "fa fa-tachometer fa-2x",
 		  			view : 'Main.Information',
 		  			backgroundColor: 'generalActive'
@@ -24,7 +71,7 @@ angular.module('tatouApp')
 	  		{
 	  			button : {
 		  			isActive : false,
-		  			tittle : 'ANALYSE',
+		  			tittle : 'analyse_view.Analyse',
 		  			icon : 'fa fa-search fa-2x',
 		  			view : 'Main.Scan',
 		  			backgroundColor: 'analyseActive'
@@ -33,8 +80,8 @@ angular.module('tatouApp')
 	  		{
 	  			button : {
 		  			isActive : false,
-		  			tittle : "JOURNAL",
-		  			icon : "fa fa-newspaper-o fa-2x",
+		  			tittle : 'history_view.History',
+		  			icon : 'fa fa-newspaper-o fa-2x',
 		  			view : 'Main.Journal',
 		  			backgroundColor:  'journalActive'
 		  		}

@@ -17,6 +17,10 @@ angular.module('tatouApp')
 		$scope.rowCollection = [];
 		$scope.test =  false;
 
+		$scope.update = function (){
+			console.log("update !")
+		};
+
 		//copy the references (you could clone ie angular.copy but then have to go through a dirty checking for the matches)
 		$scope.displayedCollection = [].concat($scope.rowCollection);
 		

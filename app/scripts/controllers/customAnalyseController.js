@@ -56,7 +56,7 @@ angular.module('tatouApp')
           };
           $scope.excludedFolders.push(optionScan);
           console.log($scope.excludedFolders);
-        })
+        }) 
       }, false);
     };
 

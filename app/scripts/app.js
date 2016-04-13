@@ -38,9 +38,10 @@ angular
 	  'armadito.ipc',
     'timer',
     'toastr',
-    'ngTagsInput'
+    'ngTagsInput',
+    'pascalprecht.translate'
   ])
-  .config(function ($stateProvider, $urlRouterProvider, toastrConfig) {
+  .config(function ($stateProvider, $urlRouterProvider, toastrConfig, $translateProvider) {
 	  
 	   angular.extend(toastrConfig, {
 			progressBar: false,
@@ -48,6 +49,14 @@ angular
 			timeOut: 5000,
 			maxOpened: 1
 		  });
+
+      $translateProvider.useStaticFilesLoader({
+        prefix: 'scripts/filters/languages/',
+        suffix: '.js'
+      });
+      // Tell the module what language to use by default
+      $translateProvider.preferredLanguage('fr_FR');
+
    //
   // For any unmatched url, redirect to /main
   $urlRouterProvider.otherwise("/Main");

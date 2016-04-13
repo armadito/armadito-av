@@ -148,8 +148,8 @@
 				    </div>
 	            </div>
 	            <div class="col-xs-3 col-sm-3 col-md-3">
-	            	<!--<button type="button" class="btn stopButton">STOP</button>-->
-	            	<button type="button" class="btn startButton" ng-click="StartScan()">START</button>
+	            	<button type="button" class="btn stopButton" ng-if="scan_data.progress && scan_data.progress < 100" >STOP</button>
+	            	<button type="button" class="btn startButton" ng-click="StartScan()" ng-if="!scan_data.progress || scan_data.progress === 100 " >START</button>
 	            </div>
 	        </div>
 	    </form>
@@ -187,7 +187,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="row">	
+	<div class="row" ng-if="!scan_data.progress">	
 		<br>
 		<br>
 		<div class=" col-sm-4 col-md-4 col-sm-offset-4 col-md-offset-4">
@@ -195,51 +195,19 @@
 		</div>
 	</div>
 	<div class="row">
-		<!--
 		<div class="col-xs-1 col-sm-1 col-md-1">
 		
 		</div>
 		<div class="col-xs-11 col-sm-11 col-md-11">
 			<table class="table analyse">
 			    <tbody class="analyse" id="ex3">
-			      <tr class="analyse">
+			      <tr class="analyse" ng-repeat="file in scan_data.files">
 			      	<td style="width:10%" class="analyse redCircle"><h7><i class="fa fa-circle fa-lg"></i></h7></td>
-			        <td style="width:30%" class="analyse"><h7>pdf.nomdefichier</h7></td>
+			        <td style="width:30%" class="analyse" ><h7>{{$index}}</h7></td>
 			        <td style="width:60%"class="analyse"><h7>ZTE-2015-dd542fggh44e648dd545.pdf</h7></td>
-			      </tr>
-				  <tr class="analyse">
-			      	<td style="width:10%" class="analyse redCircle"><h7><i class="fa fa-circle fa-lg"></i></h7></td>
-			        <td style="width:30%" class="analyse"><h7>pdf.nomdefichier</h7></td>
-			        <td style="width:60%"class="analyse"><h7>OMD-2648-5154dfgggtdfr45.pdf</h7></td>
-			      </tr>
-			      <tr class="analyse">
-			      	<td style="width:10%" class="analyse yellowCircle"><h7><i class="fa fa-circle fa-lg"></i></h7></td>
-			        <td style="width:30%" class="analyse"><h7>pdf.nomdefichier</h7></td>
-			        <td style="width:60%"class="analyse"><h7>FRD-2013-dfggh44edd545.pdf</h7></td>
-			      </tr>
-			      <tr class="analyse">
-			      	<td style="width:10%" class="analyse yellowCircle"><h7><i class="fa fa-circle fa-lg"></i></h7></td>
-			        <td style="width:30%" class="analyse"><h7>pdf.nomdefichier</h7></td>
-			        <td style="width:60%"class="analyse"><h7>CVE-2011-26485154dfggh44edd545.pdf</h7></td>
-			      </tr>
-			       <tr class="analyse">
-			      	<td style="width:10%" class="analyse yellowCircle"><h7><i class="fa fa-circle fa-lg"></i></h7></td>
-			        <td style="width:30%" class="analyse"><h7>pdf.nomdefichier</h7></td>
-			        <td style="width:60%"class="analyse"><h7>CVE-2011-2648515444ed4s4e4g.pdf</h7></td>
-			      </tr>
-			       <tr class="analyse">
-			      	<td style="width:10%" class="analyse yellowCircle"><h7><i class="fa fa-circle fa-lg"></i></h7></td>
-			        <td style="width:30%" class="analyse"><h7>pdf.nomdefichier</h7></td>
-			        <td style="width:60%"class="analyse"><h7>CVE-2011-26485154dfggh44edd545.pdf</h7></td>
-			      </tr>
-			      <tr class="analyse">
-			      	<td style="width:10%" class="analyse redCircle"><h7><i class="fa fa-circle fa-lg"></i></h7></td>
-			        <td style="width:30%" class="analyse"><h7>pdf.nomdefichier</h7></td>
-			        <td style="width:60%"class="analyse"><h7>CVE-2011-ss4dfggh44eds45s.pdf</h7></td>
 			      </tr>
 			    </tbody>
 			</table>
 		</div>
-		-->
 	</div>
 </div>

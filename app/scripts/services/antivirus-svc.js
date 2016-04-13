@@ -33,7 +33,7 @@ angular.module('armadito.svc', [])
 		if(os.platform() == "win32"){
 			ipc_path = '\\\\.\\pipe\\armadito_ondemand';
 		}else{
-			ipc_path = '/tmp/.armadito_ondemand';
+			ipc_path = '/tmp/.uhuru-daemon';
 		}
 		return;		
 	};
@@ -94,6 +94,7 @@ angular.module('armadito.svc', [])
 		ArmaditoIPC.disconnect2_av();
 
 		// TODO close server.
+		//this.cleanALL();
 
 
 	}
@@ -103,6 +104,8 @@ angular.module('armadito.svc', [])
 		var scan_server;
 		// Set server ipc path.
 		this.setScanServerPath();
+
+		//this.cleanALL();
 
 		console.log("[+] Debug :: launchScan :: Launching server to receive data from av :", scan_server_ipc_path);
 		scan_server = ArmaditoIPC.createUIServer(scan_server_ipc_path, callback);
@@ -129,7 +132,7 @@ angular.module('armadito.svc', [])
 		ArmaditoIPC.write2_av(buffer);
 					
 		//
-		ArmaditoIPC.disconnect2_av();		
+		ArmaditoIPC.disconnect2_av();
 		
 		// send data
 		//var response = ArmaditoIPC.sendAndReceive(clientPath, request);
@@ -187,6 +190,20 @@ angular.module('armadito.svc', [])
 		
 		return ;	
 	};
+
+
+	factory.cleanALL = function(){
+		
+		// Set ipc path.
+		this.setScanServerPath();		
+
+		//this.setServerPath();
+		console.log(' scan_server_ipc_path: ', scan_server_ipc_path);
+		ArmaditoIPC.cleanSocket(scan_server_ipc_path);
+
+
+		return;
+	}
 	
 
 	return factory;
