@@ -148,7 +148,8 @@ angular.module('armadito.ipc', [])
   				console.log(err ? 'no socket file---------!' : 'file exists already!!------------');
   				if(!err) {
   					fs.unlinkSync(ipc_path);
-  					console.log("---------------------------------------------------------\n");
+
+				    console.log("---------------------------------------------------------\n");
   				}
 
 			});
@@ -195,7 +196,8 @@ angular.module('armadito.ipc', [])
 			fs.exists(ipc_path, function(exist){
 				if(exist){
 					console.log("---------------------------------------------------------\n");
-					fs.unlinkSync(ipc_path);
+
+				    fs.unlinkSync(ipc_path);
 					console.log("[+] Debug :: socket server path cleaned successfully !\n");	
 					return 1;
 				}

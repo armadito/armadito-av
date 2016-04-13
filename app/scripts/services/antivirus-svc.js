@@ -7,6 +7,23 @@
  * Provider in the tatooDesktopApp.
  */
 
+var fs = require('fs');
+
+function unlink_socket_if_exists(path) {
+    try  {
+	if (fs.statSync(path).isSocket())
+	    fs.unlinkSync(path);
+    }
+    catch (e) {
+	if (e.code == 'ENOENT') { // no such file or directory. File really does not exist
+	    console.log("socket ", path, " does not exist.");
+	    return;
+	}
+
+	console.log("Exception fs.statSync (" + path + "): " + e);
+	throw e; // something else went wrong, we don't have rights, ...
+    }
+}
  
 angular.module('armadito.svc', [])
 .service('ArmaditoSVC', ['ArmaditoIPC', function (ArmaditoIPC) {
@@ -16,10 +33,11 @@ angular.module('armadito.svc', [])
 	var server_ipc_path;
 	var scan_server_ipc_path;
 	var clientId;
-	var os = require('os');
 	var client_sock;
 	var av_response = 'none';
-	
+
+	var os = require('os');
+
 	factory.threatDataFromAv = function(data){
 		
 		console.log("[+] Debug :: threatDataFromAv :: Data received from AV :: " + data);
@@ -33,7 +51,7 @@ angular.module('armadito.svc', [])
 		if(os.platform() == "win32"){
 			ipc_path = '\\\\.\\pipe\\armadito_ondemand';
 		}else{
-			ipc_path = '/tmp/.uhuru-daemon';
+			ipc_path = '/tmp/.armadito-daemon';
 		}
 		return;		
 	};
@@ -44,6 +62,7 @@ angular.module('armadito.svc', [])
 			server_ipc_path = '\\\\.\\pipe\\armadito-UI';
 		}else{
 			server_ipc_path = '/tmp/.armadito-ui';
+		    unlink_socket_if_exists(server_ipc_path);
 		}
 		return;		
 	};
@@ -54,6 +73,7 @@ angular.module('armadito.svc', [])
 			scan_server_ipc_path = '\\\\.\\pipe\\armadito-ui-scan';
 		}else{
 			scan_server_ipc_path = '/tmp/.armadito-ui-scan';
+		    unlink_socket_if_exists(scan_server_ipc_path);
 		}
 		return;	
 

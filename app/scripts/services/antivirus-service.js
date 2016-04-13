@@ -25,6 +25,8 @@ angular.module('armadito.services', [])
     var clientPath;
     var clientId;
 	var os = require('os');
+	var fs = require('fs');
+
 
     this.setClientPath = function(clPath){
 		
@@ -32,7 +34,7 @@ angular.module('armadito.services', [])
 		{
 			clientPath = '\\\\.\\pipe\\armadito_ondemand';
 		}else{
-			clientPath = '/tmp/.uhuru-daemon';
+			clientPath = '/tmp/.armadito-daemon';
 		}
       //clientPath = clPath;
     }
@@ -57,9 +59,6 @@ angular.module('armadito.services', [])
 				EventService.sendMsg('scan_event', scanResult);
 			}
 			
-			// FD
-			// FIXME: must get the path from platform (unix socket vs. named pipe)
-			//serverBuilder(scanData.scan_id, '/tmp/.uhuru-ihm', handler);
 			serverBuilder(scanData.scan_id, scanData.params.ui_ipc_path, handler);
 
 			$log.info('starting scan ' ,  scanData);
@@ -71,10 +70,9 @@ angular.module('armadito.services', [])
 			{
 				clientPath = '\\\\.\\pipe\\armadito_ondemand';
 			}else{
-				clientPath = '/tmp/.uhuru-daemon';
+				clientPath = '/tmp/.armadito-daemon';
 			}
 
-			//var cli = socketClientBuilder(scanData.scan_id, '/tmp/.uhuru-daemon');
 			var cli = socketClientBuilder(scanData.scan_id, clientPath);
 			
 			var buff_to_write = new Buffer( JSON.stringify(scanData), 'ascii' );
