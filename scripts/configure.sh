@@ -5,16 +5,16 @@ function configure()
 	local DISTRIB=$2
 
 	set +e
-	mkdir -p $OUT_DIR/build/$OS_V/uhuru-av/$PACKAGE_NAME
+	mkdir -p $OUT_DIR/build/$OS_V/armadito-av/$PACKAGE_NAME
 
 	set -e
 	cd $SRC_DIR/$PACKAGE_NAME
 	sudo chmod +x autogen.sh
 	./autogen.sh	
 
-	cd $OUT_DIR/build/$OS_V/uhuru-av/$PACKAGE_NAME
+	cd $OUT_DIR/build/$OS_V/armadito-av/$PACKAGE_NAME
 	echo "-------CONFIGURE-------"
-	$SRC_DIR/$PACKAGE_NAME/configure --prefix=$OUT_DIR/install/$OS_V/uhuru-av PKG_CONFIG_PATH=$OUT_DIR/install/$OS_V/uhuru-av/lib/pkgconfig
+	$SRC_DIR/$PACKAGE_NAME/configure --prefix=$OUT_DIR/install/$OS_V/armadito-av PKG_CONFIG_PATH=$OUT_DIR/install/$OS_V/armadito-av/lib/pkgconfig
 	echo "-------CONFIGURE OKAY $PACKAGE_NAME-------"
 
 }
@@ -62,12 +62,4 @@ done
 shift $((OPTIND-1))
 
 configure $PACKAGE $DISTRIB
-
-# mkdir -p $OUT_DIR/build/$OS_V/uhuru-av/libuhuru/pkgconfig ??
-
-## On lui indique où trouver les bases
-#set +e
-#mkdir -p $OUT_DIR/install/$OS_V/uhuru-av/var/lib/uhuru/
-#ln -s /var/lib/uhuru/bases/ $OUT_DIR/install/$OS_V/uhuru-av/var/lib/uhuru/bases
-
 

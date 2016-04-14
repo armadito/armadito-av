@@ -1,4 +1,4 @@
-AC_INIT(uhuru-mod-module5-2, [1.5.3], francois@dechelle.net)
+AC_INIT(armadito-mod-module5-2, [1.5.3], francois@dechelle.net)
 AM_INIT_AUTOMAKE
 
 # collect arguments
@@ -10,7 +10,7 @@ AC_ARG_ENABLE([debug],
 
 # database directory
 AC_ARG_WITH([dbdir],
-	AS_HELP_STRING([--with-dbdir=DIR],[specify path to databases @<:@default is /var/lib/uhuru/bases/module5_2@:>@]),
+	AS_HELP_STRING([--with-dbdir=DIR],[specify path to databases @<:@default is /var/lib/armadito/bases/module5_2@:>@]),
 
 	with_dbdir="$withval",
 	with_dbdir="no")
@@ -38,16 +38,16 @@ fi
 
 PKG_PROG_PKG_CONFIG
 
-# check for libuhuru
-PKG_CHECK_MODULES(LIBUHURU, libuhuru, [HAVE_LIBUHURU=yes], [HAVE_LIBUHURU=no])
-if test "$HAVE_LIBUHURU" = "no"; then
-   AC_MSG_ERROR("cannot find UHURU library")
+# check for libarmadito
+PKG_CHECK_MODULES(LIBARMADITO, libarmadito, [HAVE_LIBARMADITO=yes], [HAVE_LIBARMADITO=no])
+if test "$HAVE_LIBARMADITO" = "no"; then
+   AC_MSG_ERROR("cannot find ARMADITO library")
 fi
 
 # database directory
 AC_MSG_CHECKING(for databases directory)
 if test "$with_dbdir" = "no" ; then
-   MODULE5_2_DBDIR="$localstatedir/lib/uhuru/bases/module5_2"
+   MODULE5_2_DBDIR="$localstatedir/lib/armadito/bases/module5_2"
 else
    MODULE5_2_DBDIR="$with_dbdir"
 fi
