@@ -67,19 +67,19 @@ cd $HOME/uhuru-linux-packaging
 ./configure --with-tarballdir=$OUT_DIR/sources
 
 # Clean BUILD dir and install packages needed for dependances
-if [[ $PACKAGE == "libuhuru" ]];
+if [[ $PACKAGE == "core" ]];
 then 
-	rm -r packages/ubuntu/libuhuru/BUILD/ 
-	make -C packages/ubuntu/libuhuru package
+	rm -r packages/ubuntu/libarmadito/BUILD/ 
+	make -C packages/ubuntu/libarmadito package
 
 
 	# We need to temporarly install libuhuru packages
-	sudo dpkg -i $(find . -iname libuhuru_*.deb)
-	sudo dpkg -i $(find . -iname libuhuru-dev_*.deb)
-	sudo dpkg -i $(find . -iname libuhuru-tools_*.deb)
+	sudo dpkg -i $(find . -iname libarmadito_*.deb)
+	sudo dpkg -i $(find . -iname libarmadito-dev_*.deb)
+	sudo dpkg -i $(find . -iname libarmadito-tools_*.deb)
 
 	#increment_version packages/ubuntu/libuhuru
-	make -C packages/ubuntu/libuhuru upload
+	make -C packages/ubuntu/libarmadito upload
 
 	echo "-------PACKAGING OKAY $PACKAGE-------"
 	exit 0
