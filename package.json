@@ -32,7 +32,6 @@
   "engines": {
     "node": ">=0.10.0"
   },
-  "name": "Armadito",
   "version": "0.0.1",
   "main": "app/index.html",
   "window": {
@@ -46,5 +45,8 @@
     "min_height": 560,
     "max_width": 900,
     "max_height": 560
+  },
+  "dependencies": {
+    "node-lang-info": "^0.2.1"
   }
 }
