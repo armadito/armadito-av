@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS=subdir-objects
 
-modulesdir=$(libdir)/libuhuru/modules
+modulesdir=$(libdir)/armadito/modules
 modules_LTLIBRARIES=module5_2.la
 
 module5_2_la_SOURCES= \
@@ -40,8 +40,8 @@ AM_CPPFLAGS= -DMODULE5_2_DBDIR='"@MODULE5_2_DBDIR@"'
 module5_2_la_LDFLAGS= -module -avoid-version
 module5_2_la_CFLAGS= -I$(srcdir)/lib/include
 module5_2_la_LIBADD=
-module5_2_la_CFLAGS+= @LIBUHURU_CFLAGS@
-module5_2_la_LIBADD+= @LIBUHURU_LIBS@
+module5_2_la_CFLAGS+= @LIBARMADITO_CFLAGS@
+module5_2_la_LIBADD+= @LIBARMADITO_LIBS@
 
 install-exec-hook:
 	-rm -f "$(DESTDIR)$(modulesdir)"/module5_2.la "$(DESTDIR)$(modulesdir)"/module5_2.a
