@@ -39,10 +39,10 @@ After cloning the repository, the source tree of the user interface must be conf
 
 #### Installing node web kit on Linux
 
-After downloading from http://nwjs.io/downloads/, untar the tarball:
+After downloading latest stable SDK (actually 0.14.0) from http://nwjs.io/downloads/, untar the tarball:
 
   cd SOMEWHEREELSE
-  tar xvzf nwjs-v0.13.3-linux-x64.tar.gz  ### adapt w.r.t. distribution, 32 or 64 bits
+  tar xvzf nwjs-v0.14.0-linux-x64.tar.gz  ### adapt w.r.t. distribution, 32 or 64 bits
 
 That's all
 
