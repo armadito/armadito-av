@@ -11,6 +11,7 @@ struct conf_reg_data{
 	char * prev_section;
 };
 
+void display_entry(const char *section, const char *key, struct a6o_conf_value *value, void *user_data);
 int save_conf_in_registry(struct a6o_conf * conf);
 int restore_conf_from_registry(struct a6o_conf * conf);
 
