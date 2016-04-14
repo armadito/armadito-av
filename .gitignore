@@ -3,7 +3,6 @@
 /.tmp
 /.sass-cache
 /bower_components
-/nwjs-v0.12.3-linux-x64
-/nwjs-v0.12.3-linux-ia32
-/nwjs-sdk-v0.13.3-linux-ia32
+/nwjs-v*
+/nwjs-sdk-*
 /test
