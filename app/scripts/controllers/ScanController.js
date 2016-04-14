@@ -11,7 +11,7 @@
  var os = require('os');
  
 angular.module('tatouApp')
-  .controller('ScanController', ['$scope','ArmaditoSVC','ArmaditoIPC','$uibModal', function ($scope,ArmaditoSVC,ArmaditoIPC, $uibModal) {
+  .controller('ScanController', ['$rootScope','$scope','ArmaditoSVC','ArmaditoIPC','$uibModal', function ($rootScope,$scope,ArmaditoSVC,ArmaditoIPC, $uibModal) {
 
     $scope.HideInputFile = true;
     $scope.type = "Choisissez un type d'analyse...";
@@ -61,6 +61,18 @@ angular.module('tatouApp')
     ];
     */
 
+    const EventEmitter = require('events');
+
+
+    //var myEmitter = EventEmitter.call(this);
+
+    $rootScope.myEmitter.on('scan_info', function(data){
+
+      console.log("[!] Event :: A [scan_info] event occured!\n");
+
+      $scope.threatDataFromAv(data);
+
+    });
 
     // This function refresh structure values from data receive from AV. 
     $scope.threatDataFromAv = function(data){
@@ -90,7 +102,7 @@ angular.module('tatouApp')
           $scope.scan_data.progress = json_object.params.progress ;
           console.log("[+] Debug :: progress = ", $scope.scan_data.progress);
           $scope.scan_data.files.push(json_object.params);
-          console.log("tableauuuuuuuuuuuuuuuuuuu", $scope.scan_data.files);
+          console.log("tableau", $scope.scan_data.files);
           // terminate scan.
           if($scope.scan_data.progress == 100){
                //$scope.scan_server.close();
@@ -117,13 +129,13 @@ angular.module('tatouApp')
       if($scope.type == "COMPLÈTE"){
         // only for test
         console.log("[+] Debug :: ANALYSE COMPLÈTE ::\n");
-        $scope.scan_data.path_to_scan = "/home";
+        $scope.scan_data.path_to_scan = "C:\\users\\david\\Desktop\\PDF_test";
 
       }else if($scope.type == "RAPIDE"){
 
         // only for test
         console.log("[+] Debug :: ANALYSE RAPIDE ::\n");
-        $scope.scan_data.path_to_scan = "/home";
+        $scope.scan_data.path_to_scan = "C:\\users\\david\\Desktop\\mof";
 
       }else if($scope.type == "PERSONALISÉE"){
 
@@ -137,16 +149,6 @@ angular.module('tatouApp')
       }
 
       ArmaditoSVC.launchScan($scope.scan_data.path_to_scan, $scope.threatDataFromAv);
-
-      console.log("[+] Debug :: flag 1\n");
-
-      if($scope.scan_server){
-        $scope.scan_server.close();
-      }
-
-      console.log("[+] Debug :: flag 2\n");
-      $scope.scan_server = ArmaditoSVC.receiveScanInfo($scope.threatDataFromAv);
-      console.log("[+] Debug :: flag 3\n");
 
     };
 

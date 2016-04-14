@@ -27,12 +27,15 @@ tray.on('click', function() {
 angular.module('tatouApp')
   .controller('MainController', [ '$rootScope', '$scope', '$state','$uibModal', 'toastr','ArmaditoSVC', function ($rootScope, $scope,  $state, $uibModal, toastr, ArmaditoSVC) {
 
-  	$scope.closeApp = function (){  		
+  	$scope.closeApp = function (){  
+
       	var size = 'sm';
       	var item = {
       		title : 'main_view.Leave',
       		sentence : "main_view.Are_you_sur_you_want_to_leave_Armadito"
       	};
+
+
       	var modalInstance = $uibModal.open({
 	        animation: $scope.animationsEnabled,
 	        templateUrl: 'views/Confirmation.html',
@@ -51,6 +54,7 @@ angular.module('tatouApp')
         	console.log('Modal dismissed at: ' + new Date());
       	});
   	};
+
 
   	$scope.reduceApp = function (){
   		win.minimize();
@@ -119,6 +123,68 @@ angular.module('tatouApp')
   		$state.go('Main.Information');
   	};
 
+
+  	// Event emitter
+  	const EventEmitter = require('events');
+  	const util = require('util');
+
+  	function MyEmitter(){
+  		EventEmitter.call(this);
+  	};
+
+  	$rootScope.myEmitter = new MyEmitter();
+
+  	util.inherits(MyEmitter,EventEmitter);
+
+
+  	$rootScope.myEmitter.on('notification', function(data){
+
+  		console.log("[!] Event :: A [notification] event occured!\n");
+
+  		$scope.displayNotification(data);
+
+  	});  	
+
+  	/* 
+  		This function process data coming from av service :: 
+  		- Notifications
+  		- scan information
+  	*/
+  	$scope.processDataFromAV = function(data){
+
+  		var json_object;  		
+
+  		console.log("[+] Debug :: processDataFromAV :: "+data);
+
+  		try{
+
+  			json_object = JSON.parse(data);
+  			
+  			if(json_object.ihm_request == "notification"){
+
+  				// Notifications.  				
+  				$rootScope.myEmitter.emit('notification',data);
+
+  			}else if(json_object.ihm_request == "scan"){
+
+  				// scan information.
+  				$rootScope.myEmitter.emit('scan_info',data);
+
+  			}else{
+  				console.log("[-] Error :: invalid request from av!\n");
+  				return -1;
+  			}
+
+  		}  	
+  		catch(e){
+  			console.error("[-] Error :: Parsing error:", e); 
+			return -1;
+  		}
+
+  		return 0;
+
+  	}
+
   	$scope.displayNotification = function(data){
 
   		console.log("[i] Info :: displayNotification :: "+data);
@@ -157,7 +223,7 @@ angular.module('tatouApp')
 
   	};
 
-  	ArmaditoSVC.startNotificationServer($scope.displayNotification);
+  	ArmaditoSVC.startNotificationServer($scope.processDataFromAV);
 
   	$scope.refresh();
 

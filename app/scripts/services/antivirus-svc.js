@@ -104,9 +104,9 @@ angular.module('armadito.svc', [])
 		this.setClientPath();
 
 		// Set server ipc path.
-		this.setScanServerPath();
+		this.setServerPath();
 
-		var request = { "av_request":"scan", "id":123, "params": {ui_ipc_path: scan_server_ipc_path , path_to_scan: path_to_scan}};
+		var request = { "av_request":"scan", "id":123, "params": {ui_ipc_path: server_ipc_path , path_to_scan: path_to_scan}};
 		var buffer = new Buffer( JSON.stringify(request), 'ascii' );
 
 		ArmaditoIPC.connect2_av(ipc_path,callback);
