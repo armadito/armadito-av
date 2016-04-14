@@ -60,14 +60,6 @@ The user interface can be launched with:
 
 ## Debugging the interface
 
-
-In order to activate Devtools, modify package.json :
-{
-  "window": {
-    "toolbar": true
-  }
-}
-
 Once the interface is launched:
 
 - right-click in the window to display debug menu and select "Inspect"
