@@ -20,13 +20,77 @@
   	"Status" : "Statuts"
   },
   "analyse_view" : {
-  	"Analyse" : "Analyse",
-    "Start" : "Start"
+  	"Scan" : "Analyse",
+    "Start" : "Analyser",
+    "Stop" : "Stop",
+    "Choose_analyse_type" : "Choisissez type d'analyse",
+    "Full_scan" : "COMPLÈTE",
+    "Quick_scan" : "RAPIDE",
+    "Custom_scan" : "PERSONALISÉE",
+    "Scanned" : "Analysés",
+    "Malicious" : "Malicieux",
+    "Suspects" : "Suspects",
+    "No_file_scanned_yet" : "Aucun fichier analysé",
+    "Custom_scan_title" : "Analyse personnalisée",
+    "Select_folder" : "Selectionnez un dossier",
+    "Choose_your_scan_option" : "Choisissez vos options :",
+    "Heuristic_mode" : "Mode heuristique",
+    "Scan_archive" : "Scan archive",
+    "Add_file_to_exclude" : "Selectionnez fichier à exclure",
+    "Excluded_files" : "Fichiers exclus"
   },
   "history_view" : {
-  	"History" : "Journal"
+  	"History" : "Journal",
+    "history_tab" : {
+      "History" : "JOURNAL",
+      "Search" : "Rechercher...",
+      "Date" : "Date",
+      "Type" : "Type",
+      "Status" : "Statut",
+      "User" : "Utilisateur",
+      "Clear" : "Nettoyer",
+      "Refresh" : "Rafraîchir"
+    },
+    "Scan_on_demand_tab" : {
+      "Scan_on_demand" : "ANALYSE À LA DEMANDE",
+      "Today": "Aujourd'hui",
+      "This_week" : "Cette semaine",
+      "This_month": "Ce mois-ci",
+      "This_year" : "Cette année",
+      "details" : {
+        "Scan_repport_details" : "Détails du rapport d'analyse"
+      }
+
+    },
+    "Threat_detected_tab" : {
+      "Threat_detected" : "MENACES DÉTECTÉES",
+      "Search" : "Rechercher...",
+      "Name" : "Nom",
+      "Path" : "Emplacement",
+      "Date" : "Date"
+    },
+    "Quarantine_tab" : {
+      "Quarantine" : "QUARANTAINE",
+      "Search" : "Rechercher",
+      "Name" : "Nom",
+      "Path" : "Emplacement",
+      "Date" : "Date",
+      "Remove" : "Supprimer",
+      "Restore" : "Restaurer",
+      "Clear" : "Nettoyer"
+    }
   },
   "parameters_view" : {
+    "General" : "GÉNÉRAL",
+    "Real_time" : "TEMPS RÉEL",
+    "Modules" : "MODULES",
+    "Updates" : "MAJ",
+    "Updates_title" : "Mise à jours",
+    "Updates_frequency" : "Fréquence mise à jour",
+    "Quarantine_repertory" : "Repertoire de quarantaine",
+    "Select_folder" : "Selectionnez un dossier",
+    "Cancel" : "Annuler",
+    "Apply" : "Valdier"
 
   },
   "statistics_view" : {

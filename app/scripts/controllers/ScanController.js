@@ -14,7 +14,7 @@ angular.module('tatouApp')
   .controller('ScanController', ['$scope','ArmaditoSVC','ArmaditoIPC','$uibModal', function ($scope,ArmaditoSVC,ArmaditoIPC, $uibModal) {
 
     $scope.HideInputFile = true;
-    $scope.type = "Choisissez un type d'analyse...";
+    $scope.type = "analyse_view.Choose_analyse_type";
     $scope.rowCollection = [];
     $scope.scan_server;
 
@@ -90,7 +90,6 @@ angular.module('tatouApp')
           $scope.scan_data.progress = json_object.params.progress ;
           console.log("[+] Debug :: progress = ", $scope.scan_data.progress);
           $scope.scan_data.files.push(json_object.params);
-          console.log("tableauuuuuuuuuuuuuuuuuuu", $scope.scan_data.files);
           // terminate scan.
           if($scope.scan_data.progress == 100){
                //$scope.scan_server.close();
@@ -110,22 +109,23 @@ angular.module('tatouApp')
 
 
     $scope.StartScan = function(){
+      console.log("typeeeeee :", $scope.type);
       console.log("[+] Debug :: type d'analyse ::", $scope.type);
       // reset progress bar
       $scope.scan_data.progress = 0;
 
-      if($scope.type == "COMPLÈTE"){
+      if($scope.type == "analyse_view.Full_scan"){
         // only for test
         console.log("[+] Debug :: ANALYSE COMPLÈTE ::\n");
         $scope.scan_data.path_to_scan = "/home";
 
-      }else if($scope.type == "RAPIDE"){
+      }else if($scope.type == "analyse_view.Quick_scan"){
 
         // only for test
         console.log("[+] Debug :: ANALYSE RAPIDE ::\n");
         $scope.scan_data.path_to_scan = "/home";
 
-      }else if($scope.type == "PERSONALISÉE"){
+      }else if($scope.type == "analyse_view.Custom_scan"){
 
         // only for test
         console.log("[+] Debug :: ANALYSE PERSONALISÉE ::\n");
@@ -151,16 +151,16 @@ angular.module('tatouApp')
     };
 
 
-    $scope.analyseComplete = function () {
-       $scope.type = "COMPLÈTE";
+    $scope.fullScan = function () {
+       $scope.type = "analyse_view.Full_scan";
     };
 
-    $scope.analyseRapide = function () {
-      $scope.type = "RAPIDE";
+    $scope.quickScan = function () {
+      $scope.type = "analyse_view.Quick_scan";
     };
 
-    $scope.analysePersonnalisee = function () {
-      $scope.type = "PERSONALISÉE";
+    $scope.customScan = function () {
+      $scope.type = "analyse_view.Custom_scan";
       var size = 'sm';
       var modalInstance = $uibModal.open({
         animation: $scope.animationsEnabled,
@@ -180,7 +180,7 @@ angular.module('tatouApp')
         $scope.scan_data.path_to_scan = $scope.scanOptions.pathToScan;
         $scope.StartScan();
       }, function () {
-        $log.info('Modal dismissed at: ' + new Date());
+        console.log('Modal dismissed at: ' + new Date());
       });
 
     };

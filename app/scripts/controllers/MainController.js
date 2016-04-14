@@ -11,7 +11,7 @@
  // TEST TRAY
 // Load native UI library
 var gui = require('nw.gui');
-
+var lang_info = require('node-lang-info');
 // Create a tray icon
 var tray = new gui.Tray({ title: 'Tray', icon: 'app/images/kimioslogoMini.png' });
 
@@ -23,9 +23,18 @@ tray.on('click', function() {
   win.show();
 });
 
-
 angular.module('tatouApp')
-  .controller('MainController', [ '$rootScope', '$scope', '$state','$uibModal', 'toastr','ArmaditoSVC', function ($rootScope, $scope,  $state, $uibModal, toastr, ArmaditoSVC) {
+  .controller('MainController', [ '$rootScope', '$scope', '$state','$uibModal', '$translate', 'toastr','ArmaditoSVC', function ($rootScope, $scope,  $state, $uibModal, $translate, toastr, ArmaditoSVC) {
+
+  	lang_info(function(err, lang) {
+    	if(err) {
+     		console.error(JSON.stringify(err, null, 2));
+    	}
+    	else {
+      		console.log('Current Locale:', lang);
+      		 $translate.use(lang);
+    	}
+ 	});
 
   	$scope.closeApp = function (){  		
       	var size = 'sm';
@@ -71,7 +80,7 @@ angular.module('tatouApp')
 	  		{
 	  			button : {
 		  			isActive : false,
-		  			tittle : 'analyse_view.Analyse',
+		  			tittle : 'analyse_view.Scan',
 		  			icon : 'fa fa-search fa-2x',
 		  			view : 'Main.Scan',
 		  			backgroundColor: 'analyseActive'

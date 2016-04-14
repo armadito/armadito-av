@@ -5,13 +5,13 @@
 		<uib-tabset>
 			<uib-tab >
 				<uib-tab-heading>
-			    	JOURNAL
+			    	{{'history_view.history_tab.History' | translate}}
 			  	</uib-tab-heading>
 			  	<br/>
 			  	<div class="row">
 			  		<div class="col-md-12">
 				  		<div class="input-group">
-						  <input type="text" class="form-control formSearch" placeholder="Rechercher..." aria-describedby="basic-addon2">
+						  <input type="text" class="form-control formSearch" translate translate-attr-placeholder="history_view.history_tab.Search" aria-describedby="basic-addon2">
 						  <span class="input-group-addon input-group-addon-searchJournal" id="basic-addon2"><i class="fa fa-search"></i></span>
 						</div>
 					</div>
@@ -21,10 +21,10 @@
 						<table class="table journal">
 						    <thead class="journal">
 						      <tr class="journal">
-						        <th class="journal" style="width:25%"><h4><i class="journalTitle">Date</i></h4></th>
-						        <th class="journal" style="width:25%"><h4><i class="journalTitle">Type</i></h4></th>
-						        <th class="journal" style="width:25%"><h4><i class="journalTitle">Status</i></h4></th>
-						        <th class="journal" style="width:25%"><h4><i class="journalTitle">User</i></h4></th>
+						        <th class="journal" style="width:25%"><h4><i class="journalTitle">{{'history_view.history_tab.Date' | translate}}</i></h4></th>
+						        <th class="journal" style="width:25%"><h4><i class="journalTitle">{{'history_view.history_tab.Type' | translate}}</i></h4></th>
+						        <th class="journal" style="width:25%"><h4><i class="journalTitle">{{'history_view.history_tab.Status' | translate}}</i></h4></th>
+						        <th class="journal" style="width:25%"><h4><i class="journalTitle">{{'history_view.history_tab.User' | translate}}</i></h4></th>
 						      </tr>
 						    </thead>
 						    <tbody class="journal" id="ex3">
@@ -111,7 +111,7 @@
 			</uib-tab>
 			<uib-tab>
 				<uib-tab-heading>
-			    	ANALYSE À LA DEMANDE
+			    	{{'history_view.Scan_on_demand_tab.Scan_on_demand' | translate}}
 			  	</uib-tab-heading>
 			  	<br/>
 			  	<div class="row">
@@ -119,7 +119,7 @@
 						<uib-accordion close-others="true">
 						    <uib-accordion-group is-open="status.openDay" >
 						      <uib-accordion-heading>
-						       	<i>Aujourd'hui</i><i class="pull-right glyphicon" ng-class="{'fa fa-angle-down fa-2x': status.openDay, 'fa fa-angle-up fa-2x': !status.openDay}"></i>
+						       	<i>{{'history_view.Scan_on_demand_tab.Today' | translate}}</i><i class="pull-right glyphicon" ng-class="{'fa fa-angle-down fa-2x': status.openDay, 'fa fa-angle-up fa-2x': !status.openDay}"></i>
 						       </uib-accordion-heading>
 						       <div id="ex3" class="OverflowAccordion-analyseOnDemand">
 							       <div class="row">
@@ -167,7 +167,7 @@
 						    </uib-accordion-group>
 						    <uib-accordion-group is-open="status.openWeek" >
 						      <uib-accordion-heading>
-						       	<i>Cette semaine</i><i class="pull-right glyphicon" ng-class="{'fa fa-angle-down fa-2x': status.openWeek, 'fa fa-angle-up fa-2x': !status.openWeek}"></i>
+						       	<i>{{'history_view.Scan_on_demand_tab.This_week' | translate}}</i><i class="pull-right glyphicon" ng-class="{'fa fa-angle-down fa-2x': status.openWeek, 'fa fa-angle-up fa-2x': !status.openWeek}"></i>
 						       </uib-accordion-heading>
 						        <div id="ex3" class="OverflowAccordion-analyseOnDemand">
 							       <div class="row">
@@ -215,7 +215,7 @@
 						    </uib-accordion-group>
 						    <uib-accordion-group is-open="status.openMonth" >
 						       <uib-accordion-heading>
-						       	<i>Ce mois-ci</i><i class="pull-right glyphicon" ng-class="{'fa fa-angle-down fa-2x': status.openMonth, 'fa fa-angle-up fa-2x': !status.openMonth}"></i>
+						       	<i>{{'history_view.Scan_on_demand_tab.This_month' | translate}}</i><i class="pull-right glyphicon" ng-class="{'fa fa-angle-down fa-2x': status.openMonth, 'fa fa-angle-up fa-2x': !status.openMonth}"></i>
 						       </uib-accordion-heading>
 						        <div id="ex3" class="OverflowAccordion-analyseOnDemand">
 							       <div class="row">
@@ -263,7 +263,7 @@
 						    </uib-accordion-group>
 						    <uib-accordion-group is-open="status.openYear" >
 						       	<uib-accordion-heading>
-						       		<i>Cette année</i><i class="pull-right glyphicon" ng-class="{'fa fa-angle-down fa-2x': status.openYear, 'fa fa-angle-up fa-2x': !status.openYear}"></i>
+						       		<i>{{'history_view.Scan_on_demand_tab.This_year' | translate}}</i><i class="pull-right glyphicon" ng-class="{'fa fa-angle-down fa-2x': status.openYear, 'fa fa-angle-up fa-2x': !status.openYear}"></i>
 						       	</uib-accordion-heading>
 						       	<div id="ex3" class="OverflowAccordion-analyseOnDemand">
 							       <div class="row">
@@ -315,13 +315,13 @@
 			</uib-tab>
 			<uib-tab >
 				<uib-tab-heading>
-			    	MENACES DÉTECTÉES
+			    	{{'history_view.Threat_detected_tab.Threat_detected' | translate}}
 			  	</uib-tab-heading>
 			  	<br/>
 			  	<div class="row">
 			  		<div class="col-md-12">
 				  		<div class="input-group">
-						  <input type="text" class="form-control formSearch" placeholder="Rechercher..." aria-describedby="basic-addon2">
+						  <input type="text" class="form-control formSearch" translate translate-attr-placeholder="history_view.Threat_detected_tab.Search" aria-describedby="basic-addon2">
 						  <span class="input-group-addon input-group-addon-searchJournal" id="basic-addon2"><i class="fa fa-search"></i></span>
 						</div>
 					</div>
@@ -331,9 +331,9 @@
 						<table class="table journal-threats-detected">
 						    <thead class="journal-threats-detected">
 						      <tr class="journal-threats-detected">
-						        <th clas="journal-threats-detected" style="width:30%"><h4><i class="journal-threats-detectedTitle">Nom</i></h4></th>
-						        <th clas="journal-threats-detected" style="width:35%"><h4><i class="journal-threats-detectedTitle">Emplacement</i></h4></th>
-						        <th class="journal-threats-detected" style="width:30%"><h4><i class="journal-threats-detectedTitle">Date</i></h4></th>
+						        <th clas="journal-threats-detected" style="width:30%"><h4><i class="journal-threats-detectedTitle">{{'history_view.Threat_detected_tab.Name' | translate}}</i></h4></th>
+						        <th clas="journal-threats-detected" style="width:35%"><h4><i class="journal-threats-detectedTitle">{{'history_view.Threat_detected_tab.Path' | translate}}</i></h4></th>
+						        <th class="journal-threats-detected" style="width:30%"><h4><i class="journal-threats-detectedTitle">{{'history_view.Threat_detected_tab.Date' | translate}}</i></h4></th>
 						      </tr>
 						    </thead>
 						    <tbody class="journal-threats-detected" id="ex3">
@@ -394,13 +394,13 @@
 			</uib-tab>			
 			<uib-tab >
 				<uib-tab-heading ng-click="query_quarantine()">
-			    	QUARANTAINE 
+			    	{{'history_view.Quarantine_tab.Quarantine' | translate}} 
 			  	</uib-tab-heading>
 				<br/>
 				<div class="row">
 					<div class="col-md-12">
 			  		<div class="input-group">
-					  <input type="text" class="form-control formSearch" placeholder="Rechercher..." aria-describedby="basic-addon2">
+					  <input type="text" class="form-control formSearch" translate translate-attr-placeholder="history_view.Quarantine_tab.Search" aria-describedby="basic-addon2">
 					  <span class="input-group-addon input-group-addon-searchJournal" id="basic-addon2"><i class="fa fa-search"></i></span>
 					</div>
 				</div>
@@ -410,9 +410,9 @@
 						<table class="table quarantine">
 						    <thead class="quarantine">
 						      <tr class="quarantine">
-						        <th class="quarantine" style="width:30%"><h4><i class="quarantineTitle">Nom</i></h4></th>
-						        <th class="quarantine" style="width:30%"><h4><i class="quarantineTitle">Emplacement</i></h4></th>
-						        <th class="quarantine" style="width:30%"><h4><i class="quarantineTitle">Date</i></h4></th>
+						        <th class="quarantine" style="width:30%"><h4><i class="quarantineTitle">{{'history_view.Quarantine_tab.Name' | translate}} </i></h4></th>
+						        <th class="quarantine" style="width:30%"><h4><i class="quarantineTitle">{{'history_view.Quarantine_tab.Path' | translate}} </i></h4></th>
+						        <th class="quarantine" style="width:30%"><h4><i class="quarantineTitle">{{'history_view.Quarantine_tab.Date' | translate}} </i></h4></th>
 						        <th class="quarantine" style="width:5%"><h4><i class="quarantineTitle"></i></h4></th>
 						        <th class="quarantine" style="width:5%"><h4><i class="quarantineTitle"></i></h4></th>
 						      </tr>
@@ -422,13 +422,13 @@
 						        <td style="width:30%"class="quarantine"><h7>{{obj.name}}</h7></td>
 						        <td style="width:30%"class="quarantine"><h7>{{obj.path}}</h7></td>
 						        <td style="width:30%"class="quarantine"><h7>{{obj.path}}</h7></td>
-						        <td style="width:5%"class="quarantine"><h7 ng-click="refreshQuatantineObject($index)" ng-bind-html="obj.refresh"></h7></td>
-						        <td style="width:5%"class="quarantine"><h7 ng-click="deleteQuatantineObject($index)" ng-bind-html="obj.delete"></h7></td>
+						        <td title="{{'history_view.Quarantine_tab.Restore' | translate}}" style="width:5%"class="quarantine"><h7 ng-click="refreshQuatantineObject($index)" ng-bind-html="obj.refresh"></h7></td>
+						        <td title="{{'history_view.Quarantine_tab.Remove' | translate}}"style="width:5%"class="quarantine"><h7 ng-click="deleteQuatantineObject($index)" ng-bind-html="obj.delete"></h7></td>
 						      </tr>
 						    </tbody>
 						</table>
 						<span class="pull-right">
-							<button type="button" class="btn clearButton" ng-click="clearQuarantine()" ng-if="quarantineObjects.length">NETTOYER</button>
+							<button type="button" class="btn clearButton" ng-click="clearQuarantine()" ng-if="quarantineObjects.length">{{'history_view.Quarantine_tab.Clear' | translate}} </button>
 						</span>
 					</div>
 				</div>	

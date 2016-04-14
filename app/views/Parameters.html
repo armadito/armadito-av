@@ -5,7 +5,7 @@
 	  	<uib-tabset justified="true">
 			<uib-tab>
 				<uib-tab-heading classes="test">
-			    	GÉNÉRAL
+			    	{{'parameters_view.General' | translate}}
 			  	</uib-tab-heading>
 			  	<br/>
 			  	<div class="row">
@@ -56,7 +56,7 @@
 						  <li class="parametersColumnTwo">
 						  	<form class="form-inline" role="form">
 							  <div class="form-group">
-							  	<label class="col-xs-8" for="pwd"><h5>Fréquence mise à jours</h5></label>
+							  	<label class="col-xs-8" for="pwd"><h5>{{'parameters_view.Updates_frequency' | translate}}</h5></label>
 							    <input class="col-xs-4" type="number" ng-model="myText" name="inputName">
 							  </div>
 							</form>
@@ -76,12 +76,12 @@
 							</h5>
 						  </li>
 						  <li class="parametersColumnTwo">
-						  	Répertoire de quarantaine
+						  	{{'parameters_view.Quarantine_repertory' | translate}}
 						  </li>
 						  <li class="parametersColumnTwo">
 						  	<h5>
 						  		<div class="input-group">
-								  <input type="text" class="form-control form-control-parameters"  ng-model="pathToScan" placeholder="Selectionnez un fichier ou un dossier">
+								  <input type="text" class="form-control form-control-parameters"  ng-model="pathToScan" translate translate-attr-placeholder="parameters_view.Select_folder">
 								  <span class="input-group-addon input-group-addon-parameters btn btn-default btn-file">
 								  	<i class="fa fa-angle-down fa-lg"></i> <input id="pathToScan" nwdirectory type="file">
 								  </span>
@@ -95,15 +95,15 @@
 				<div class="row">
 				  	<div class="col-sm-12  col-md-12">
 					  	<span class="pull-right">
-							<button type="button" class="btn cancelButton" ng-click="ok()">ANNULER</button>&nbsp;&nbsp;
-							<button type="button" class="btn submitButton" ng-click="ok()">VALIDER</button>
+							<button type="button" class="btn cancelButton" ng-click="ok()">{{'parameters_view.Cancel' | translate}}</button>&nbsp;&nbsp;
+							<button type="button" class="btn submitButton" ng-click="ok()">{{'parameters_view.Apply' | translate}}</button>
 						</span>
 					</div>
 				</div>
 			</uib-tab>
 			<uib-tab >
 				<uib-tab-heading>
-			    	TEMPS RÉEL
+			    	{{'parameters_view.Real_time' | translate}}
 			  	</uib-tab-heading>
 			  	<br/>
 			  	<div class="row">
@@ -112,7 +112,7 @@
 			</uib-tab>
 			<uib-tab >
 				<uib-tab-heading>
-			    	MODULES
+			    	{{'parameters_view.Modules' | translate}}
 			  	</uib-tab-heading>
 			  	<br/>
 			  	<div class="row">
@@ -121,7 +121,7 @@
 			</uib-tab>
 			<uib-tab >
 				<uib-tab-heading>
-			    	UPDATES
+			    	<span title="{{'parameters_view.Updates_title' | translate}}">{{'parameters_view.Updates' | translate}}</span>
 			  	</uib-tab-heading>
 			  	<br/>
 			  	<div class="row">
