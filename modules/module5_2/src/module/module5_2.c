@@ -1,17 +1,22 @@
-#include <libuhuru/core.h>
+#include <libarmadito.h>
 
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-#include "osdeps.h"
+#include "os/osdeps.h"
 #include "uh_errors.h"
 #include "UhuruStatic.h"
 
-/*
-  dirty module 5.2 code has no exported structure and uses only static data...
- */
+/* under re-implementation */
+
+struct module5_2_data {
+	const char *tmp_dir;
+	int late_days;
+	int critical_days;
+};
+
 static enum uhuru_mod_status module5_2_init(struct uhuru_module *module)
 {
   return UHURU_MOD_OK;
@@ -113,13 +118,14 @@ static const char *module5_2_mime_types[] = {
   NULL,
 };
 
-struct uhuru_module module = {
-  .init_fun = module5_2_init,
-  .conf_table= NULL,
-  .post_init_fun = module5_2_post_init,
-  .scan_fun = module5_2_scan,
-  .close_fun = module5_2_close,
-  .info_fun = module5_2_info,
-  .supported_mime_types = module5_2_mime_types,
-  .name = "module5_2",
+struct a6o_module module = {
+	.init_fun = module5_2_init,
+	.conf_table = NULL,
+	.post_init_fun = module5_2_post_init,
+	.scan_fun = module5_2_scan,
+	.close_fun = module5_2_close,
+	.info_fun = module5_2_info,
+	.supported_mime_types = module5_2_mime_types,
+	.name = "module5_2",
+	.size = sizeof(struct module5_2_data),
 };
