@@ -27,7 +27,7 @@ This script does everything, even rerepro update on the apt repository.
 
 If you want to prepare a single package :
 - cd scripts/
-- ./compile_all.sh <PACKAGE_NAME>
+- ./compile_all.sh PACKAGE_NAME
 
 PACKAGE_NAME could be one of the following : 
 - core (libarmadito)
