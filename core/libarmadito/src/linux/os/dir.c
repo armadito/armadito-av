@@ -142,5 +142,9 @@ int os_mkdir_p(const char *path)
 		token = end + 1;
 	} while (end != NULL && ret >= 0);
 
+        if(full != NULL){
+	   free(full);
+        }
+
 	return ret;
 }
