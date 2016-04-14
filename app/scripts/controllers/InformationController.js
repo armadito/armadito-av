@@ -33,9 +33,7 @@ angular.module('tatouApp')
 			last_update : "Il y a 3 jour",
 			version : 0.1				
 		};
-		
-		$scope.state.modules = [];
-		
+				
 		$scope.state.modules = 
 		[{
 			name : "clamav",
@@ -52,7 +50,7 @@ angular.module('tatouApp')
 			version: "1.0.1",
 			update: {"status": "not loaded", "last-update": "1970-01-01T06:13:00Z" }
 		 }
-		]
+		];
 		
 		
 

@@ -33,7 +33,7 @@
     "No_file_scanned_yet" : "Aucun fichier analysé",
     "Custom_scan_title" : "Analyse personnalisée",
     "Select_folder" : "Selectionnez un dossier",
-    "Choose_your_scan_option" : "Choisissez vos options :",
+    "Choose_scan_options" : "Choisissez vos options :",
     "Heuristic_mode" : "Mode heuristique",
     "Scan_archive" : "Scan archive",
     "Add_file_to_exclude" : "Selectionnez fichier à exclure",
@@ -48,8 +48,8 @@
       "Type" : "Type",
       "Status" : "Statut",
       "User" : "Utilisateur",
-      "Clear" : "Nettoyer",
-      "Refresh" : "Rafraîchir"
+      "Clear" : "NETTOYER",
+      "Refresh" : "RAFRAICHIR"
     },
     "Scan_on_demand_tab" : {
       "Scan_on_demand" : "ANALYSE À LA DEMANDE",
@@ -77,7 +77,7 @@
       "Date" : "Date",
       "Remove" : "Supprimer",
       "Restore" : "Restaurer",
-      "Clear" : "Nettoyer"
+      "Clear" : "NETTOYER"
     }
   },
   "parameters_view" : {

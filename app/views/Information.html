@@ -78,16 +78,11 @@
 			        <th class="information" style="width:60%"><h4><i class="informationTitle">{{ 'information_view.Status' | translate}}</i></h4></th>
 			      </tr>
 			    </thead>
-			    <tbody class="information" id="ex3" ng-repeat="module in state.modules">
-			      <tr class="information">
+			    <tbody class="information" id="ex3" >
+			      <tr class="information" ng-repeat="module in state.modules">
 			        <td style="width:40%" class="information"><h7>{{module.name}}</h7></td>
-			        <td style="width:60%"class="information"><h7>{{module.update['last-update']}}</h7></td>
+			        <td style="width:60%"class="information"><h7>{{module.update.last-update}}</h7></td>
 			        <td style="width:60%"class="information"><h7>{{module.update.status}}</h7></td>
-			      </tr>
-				  <tr class="information">
-			        <td style="width:40%" class="information"><h7>ModuleNOP</h7></td>
-			        <td style="width:60%"class="information"><h7>04/15/2017</h7></td>
-			        <td style="width:60%"class="information"><h7>On date</h7></td>
 			      </tr>
 			    </tbody>
 			</table>

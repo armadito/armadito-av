@@ -48,8 +48,8 @@
       "Type" : "Type",
       "Status" : "Status",
       "User" : "User",
-      "Clear" : "Clear",
-      "Refresh" : "Refresh"
+      "Clear" : "CLEAR",
+      "Refresh" : "REFRESH"
     },
     "Scan_on_demand_tab" : {
       "Scan_on_demand" : "SCAN ON DEMAND",
@@ -77,7 +77,7 @@
       "Date" : "Date",
       "Remove" : "Remove",
       "Restore" : "Restore",
-      "Clear" : "Clear"
+      "Clear" : "CLEAR"
     }
   },
   "parameters_view" : {
