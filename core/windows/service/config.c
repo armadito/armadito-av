@@ -106,11 +106,7 @@ int delete_app_registry( ) {
 			hRootKey = NULL;
 		}
 
-
-
 	}
-
-
 
 	return ret;
 }
@@ -668,7 +664,7 @@ int restore_conf_from_registry(struct a6o_conf * conf) {
 
 int conf_poc_windows( ) {
 
-	char * conf_file_path = "D:\\Novit\\a6o-av\\liba6o\\conf\\try\\a6o2.conf";
+	char * conf_file_path = "D:\\Novit\\uhuru-av\\liba6o\\conf\\try\\armadito.conf";
 	//char * conf_file_path = "D:\\Novit\\a6o-av\\liba6o\\conf\\a6o.conf";
 	struct a6o_conf * conf = NULL;
 	a6o_error * error = NULL;
@@ -790,3 +786,70 @@ int disable_onaccess() {
 
 }
 
+/*This function set the registry from the configuration file.*/
+int init_configuration( ) {
+
+	int ret = 0;
+	char * conf_file = NULL;
+	struct a6o_conf * conf = NULL;
+	a6o_error * error = NULL;
+
+	__try {		
+
+		// Create registry keys.
+		if (create_app_registry( ) != 0) {
+			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: init_configuration :: registry key creation failed!\n");
+			ret = -1;
+			__leave;
+		}
+
+		printf("[+] Debug :: init_configuration :: registry keys created successfully!\n");
+
+		// Load configuration from file.	
+		if ((conf = a6o_conf_new()) == NULL) {
+			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: init_configuration :: conf struct initialization failed!\n");
+			ret = -2;
+			__leave;
+		}
+
+		// get configuration file path.
+		conf_file = a6o_std_path(CONFIG_FILE_LOCATION);
+		if (conf_file == NULL) {
+			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: init_configuration :: get configuration file path failed !\n");
+			ret = -3;
+			__leave;
+		}
+
+		printf("[+] Debug :: init_configuration :: conf file = %s\n",conf_file);
+
+		// Load config from config file. a6o.conf
+		a6o_conf_load_file(conf, conf_file, &error);
+
+		printf("[+] Debug :: init_configuration :: configuration file loaded successfully!\n");
+
+
+		// save conf structure in registry.
+		save_conf_in_registry(conf);
+
+		printf("[+] Debug :: init_configuration :: configuration file saved successfully!\n");
+
+
+
+	}
+	__finally {
+
+		if (conf_file != NULL) {
+			free(conf_file);
+			conf_file = NULL;
+		}
+
+		if (conf != NULL) {
+			a6o_conf_free(conf);
+			conf = NULL;
+		}
+
+	}
+
+	return ret;
+
+}

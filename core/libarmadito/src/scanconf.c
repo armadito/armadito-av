@@ -165,7 +165,7 @@ struct a6o_module **a6o_scan_conf_get_applicable_modules(struct a6o_scan_conf *c
 	struct a6o_module **modules = get_applicable_modules(c, mime_type);
 
 	if (modules == NULL) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_DEBUG, "%s: mime-type '%s' -> NULL", c->name, mime_type);
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "%s: mime-type '%s' -> NULL", c->name, mime_type);
 	} else {
 		struct a6o_module **modv;
 		GString *s = g_string_new("");

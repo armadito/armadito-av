@@ -131,11 +131,16 @@ int ServiceLoadProcedure_cmd(cmd_mode mode) {
 	a6o_error * uh_error = NULL;
 	HRESULT hres = S_OK;
 	struct a6o_conf * conf = NULL;
+	a6o_error * error = NULL;
 	struct armadito * armadito = NULL;
 	int onaccess_enable = 0;
+	char * conffile = NULL;
+	struct conf_reg_data data = {0};
 
 	__try {
 
+
+#if 0
 		// Init configuration structure
 		conf = a6o_conf_new();
 
@@ -145,6 +150,32 @@ int ServiceLoadProcedure_cmd(cmd_mode mode) {
 			ret = -1;
 			__leave;
 		}
+#else
+
+		// Load configuration from file.	
+		if ((conf = a6o_conf_new()) == NULL) {
+			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: init_configuration :: conf struct initialization failed!\n");
+			ret = -2;
+			__leave;
+		}
+
+		// get configuration file path.
+		conffile = a6o_std_path(CONFIG_FILE_LOCATION);
+		if (conffile == NULL) {
+			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: init_configuration :: get configuration file path failed !\n");
+			ret = -3;
+			__leave;
+		}
+
+		printf("[+] Debug :: init_configuration :: conf file = %s\n",conffile);
+
+		// Load config from config file. a6o.conf
+		a6o_conf_load_file(conf, conffile, &error);
+
+		// display a6o_conf
+		a6o_conf_apply(conf,(a6o_conf_fun_t)display_entry, &data);
+#endif
+
 
 		printf("[+] Debug :: Configuration loaded successfully!\n");
 		
@@ -197,6 +228,11 @@ int ServiceLoadProcedure_cmd(cmd_mode mode) {
 
 	}
 	__finally {
+
+		if (conffile != NULL) {
+			free(conffile);
+			conffile = NULL;
+		}
 
 		// if failed
 		if (ret < 0) {

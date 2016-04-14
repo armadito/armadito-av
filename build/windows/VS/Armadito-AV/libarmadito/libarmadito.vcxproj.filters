@@ -90,6 +90,9 @@
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\os\string.c">
       <Filter>Fichiers sources\os</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\ondemandmod.c">
+      <Filter>Fichiers sources\builtin-modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\core\libarmadito\src\armaditop.h">
@@ -130,6 +133,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\core\libarmadito\include\os\string.h">
       <Filter>Fichiers d%27en-tête\os</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\include\libarmadito\stdpaths.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\ondemandmod.h">
+      <Filter>Fichiers d%27en-tête\builtin-modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

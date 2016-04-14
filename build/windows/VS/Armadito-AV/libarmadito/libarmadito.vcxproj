@@ -47,6 +47,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\..\core\libarmadito\src;$(SolutionDir)..\..\..\..\core\libarmadito\src\windows;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -86,6 +87,7 @@
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\scanconf.c" />
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\status.c" />
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\stdpaths.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\ondemandmod.c" />
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\os\dir.c" />
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\os\file.c" />
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\os\mimetype.c" />
@@ -93,6 +95,7 @@
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\os\string.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\include\libarmadito\stdpaths.h" />
     <ClInclude Include="..\..\..\..\..\core\libarmadito\include\os\dir.h" />
     <ClInclude Include="..\..\..\..\..\core\libarmadito\include\os\file.h" />
     <ClInclude Include="..\..\..\..\..\core\libarmadito\include\os\io.h" />
@@ -106,6 +109,7 @@
     <ClInclude Include="..\..\..\..\..\core\libarmadito\src\reportp.h" />
     <ClInclude Include="..\..\..\..\..\core\libarmadito\src\scanp.h" />
     <ClInclude Include="..\..\..\..\..\core\libarmadito\src\statusp.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\ondemandmod.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libarmadito.def" />

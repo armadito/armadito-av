@@ -7,6 +7,17 @@
 extern "C" {
 #endif
 
+#include <string.h>
+
+#ifdef _WIN32
+#define os_strdup _strdup
+char *os_strerror(int errnum);
+#else
+#define os_strdup strdup
+#define os_strerror strerror
+#endif
+
+#if 0
 #if defined(HAVE_STRDUP)
 #include <string.h>
 #define os_strdup strdup
@@ -20,6 +31,7 @@ extern "C" {
 #define os_strerror strerror
 #else
 char *os_strerror(int errnum);
+#endif
 #endif
 
 
