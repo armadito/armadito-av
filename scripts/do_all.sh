@@ -6,18 +6,6 @@ SRC_DIR=$DIR/../
 
 PACKAGE=$1
 
-## Used to locally purge from all uhuru-av-packages
-if [[ $PACKAGE == "purge" ]]
-then
-	 sudo apt-get --purge autoremove uhuru-desktop-test
-	 sudo apt-get --purge autoremove uhuru-desktop
-fi
-
-if [[ $PACKAGE == "install-test" ]]
-then
-	 sudo apt-get update && sudo apt-get install uhuru-desktop-test
-fi
-
 set -e
 
 if [[ $PACKAGE == "core" || $PACKAGE == "" ]];
@@ -27,12 +15,6 @@ then
 	#./package.sh -p core -d trusty
 fi
 
-if [[ $PACKAGE == "gui" || $PACKAGE == "" ]];
-then
-	./configure.sh -p gui -d trusty
-	./compile.sh -p gui -d trusty
-	#./package.sh -p uhuru-qt -d trusty
-fi
 
 if [[ $PACKAGE == "clamav" || $PACKAGE == "" ]];
 then
@@ -41,12 +23,12 @@ then
 	#./package.sh -p uhuru-mod-clamav -d trusty
 fi
 
-if [[ $PACKAGE == "module5_2" || $PACKAGE == "" ]];
-then
-	./configure.sh -p modules/module5_2 -d trusty
-	./compile.sh -p modules/module5_2 -d trusty
+#if [[ $PACKAGE == "module5_2" || $PACKAGE == "" ]];
+#then
+	#./configure.sh -p modules/module5_2 -d trusty
+	#./compile.sh -p modules/module5_2 -d trusty
 	#./package.sh -p uhuru-mod-module5-2 -d trusty
-fi
+#fi
 
 if [[ $PACKAGE == "fanotify" || $PACKAGE == "" ]];
 then
@@ -55,13 +37,23 @@ then
 	#./package.sh -p uhuru-mod-fanotify -d trusty
 fi
 
-if [[ $PACKAGE == "modulePDF" || $PACKAGE == "" ]];
-then
-	./configure.sh -p modules/modulePDF -d trusty
-	./compile.sh -p modules/modulePDF -d trusty
+#if [[ $PACKAGE == "modulePDF" || $PACKAGE == "" ]];
+#then
+#	./configure.sh -p modules/modulePDF -d trusty
+#	./compile.sh -p modules/modulePDF -d trusty
 	#./package.sh -p uhuru-mod-fanotify -d trusty
-fi
+#fi
 
+
+## Old Interface Human Machine in QT
+#if [[ $PACKAGE == "gui" || $PACKAGE == "" ]];
+#then
+#	./configure.sh -p gui -d trusty
+#	./compile.sh -p gui -d trusty
+	#./package.sh -p uhuru-qt -d trusty
+#fi
+
+## Old packaging calls
 #if [[ $PACKAGE == "desktop" || $PACKAGE == "" ]];
 #then
 #	./package.sh -p uhuru-desktop -d trusty
