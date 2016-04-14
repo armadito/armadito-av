@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "os/osdeps.h"
+#include "osdeps.h"
 #include "uh_errors.h"
 #include "UhuruStatic.h"
 
@@ -17,105 +17,105 @@ struct module5_2_data {
 	int critical_days;
 };
 
-static enum uhuru_mod_status module5_2_init(struct uhuru_module *module)
+static enum a6o_mod_status module5_2_init(struct a6o_module *module)
 {
-  return UHURU_MOD_OK;
+	return ARMADITO_MOD_OK;
 }
 
-static enum uhuru_mod_status module5_2_post_init(struct uhuru_module *module)
+static enum a6o_mod_status module5_2_post_init(struct a6o_module *module)
 {
 #ifndef WIN32
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, "loading module 5.2 ELF databases from " MODULE5_2_DBDIR "/linux");
+	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, "loading module 5.2 ELF databases from " MODULE5_2_DBDIR "/linux");
 
-  if (initDB(MODULE5_2_DBDIR "/linux/database.elfdata", 
-	     MODULE5_2_DBDIR "/linux/db_malicious.zip", 
-	     MODULE5_2_DBDIR "/linux/db_safe.zip",
-	     MODULE5_2_DBDIR "/linux/tfidf_m.dat",
-	     MODULE5_2_DBDIR "/linux/tfidf_s.dat") != 0)
-    return UHURU_MOD_INIT_ERROR;
+	if (initDB(MODULE5_2_DBDIR "/linux/database.elfdata",
+			MODULE5_2_DBDIR "/linux/db_malicious.zip",
+			MODULE5_2_DBDIR "/linux/db_safe.zip",
+			MODULE5_2_DBDIR "/linux/tfidf_m.dat",
+			MODULE5_2_DBDIR "/linux/tfidf_s.dat") != 0)
+		return ARMADITO_MOD_INIT_ERROR;
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, "module 5.2 ELF databases loaded from " MODULE5_2_DBDIR "/linux");
+	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, "module 5.2 ELF databases loaded from " MODULE5_2_DBDIR "/linux");
 #endif
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, "loading module 5.2 PE databases from " MODULE5_2_DBDIR "/windows");
-  if (initDatabases(MODULE5_2_DBDIR "/windows/Database_malsain_2.zip",
-		    MODULE5_2_DBDIR "/windows/Database_malsain_1.zip",
-		    MODULE5_2_DBDIR "/windows/Database_sain_2.zip",
-		    MODULE5_2_DBDIR "/windows/Database_sain_1.zip",
-		    MODULE5_2_DBDIR "/windows/database_2.dat",
-		    MODULE5_2_DBDIR "/windows/database_1.dat",
-		    MODULE5_2_DBDIR "/windows/DBI_inf.dat",
-		    MODULE5_2_DBDIR "/windows/DBI_sain.dat") != 0)
-    return UHURU_MOD_INIT_ERROR;
+	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, "loading module 5.2 PE databases from " MODULE5_2_DBDIR "/windows");
+	if (initDatabases(MODULE5_2_DBDIR "/windows/Database_malsain_2.zip",
+				MODULE5_2_DBDIR "/windows/Database_malsain_1.zip",
+				MODULE5_2_DBDIR "/windows/Database_sain_2.zip",
+				MODULE5_2_DBDIR "/windows/Database_sain_1.zip",
+				MODULE5_2_DBDIR "/windows/database_2.dat",
+				MODULE5_2_DBDIR "/windows/database_1.dat",
+				MODULE5_2_DBDIR "/windows/DBI_inf.dat",
+				MODULE5_2_DBDIR "/windows/DBI_sain.dat") != 0)
+		return ARMADITO_MOD_INIT_ERROR;
 
-  uhuru_log(UHURU_LOG_MODULE, UHURU_LOG_LEVEL_INFO, "module 5.2 PE databases loaded from " MODULE5_2_DBDIR "/windows");
+	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, "module 5.2 PE databases loaded from " MODULE5_2_DBDIR "/windows");
 
-  return UHURU_MOD_OK;
+	return ARMADITO_MOD_OK;
 }
 
 // We receive a file descriptor
-static enum uhuru_file_status module5_2_scan(struct uhuru_module *module, int fd, const char *path, const char *mime_type, char **pmod_report)
+static enum a6o_file_status module5_2_scan(struct a6o_module *module, int fd, const char *path, const char *mime_type, char **pmod_report)
 {
-  ERROR_CODE e = UH_NULL;
-  const char *virus_name = NULL;
+	ERROR_CODE e = UH_NULL;
+	const char *virus_name = NULL;
 
-  //printf("[i] Debug :: module 5_2_scan :: mime-type = %s\n",mime_type);
+	//printf("[i] Debug :: module 5_2_scan :: mime-type = %s\n",mime_type);
 
-  // TODO change strcmp by strncmp
-  // (FD) why????
-  if (!strcmp(mime_type, "application/x-sharedlib")
-      || !strcmp(mime_type, "application/x-object")
-      || !strcmp(mime_type, "application/x-executable")) {	  
-    e = analyseElfFile(fd, (char *)path);
-    if (e == UH_MALWARE)
-      virus_name = "Linux.Heuristic.Malware.Generic";
-  } else if (!strcmp(mime_type, "application/x-dosexec") 
-	     || !strcmp(mime_type, "application/x-msdownload")) {
-    e = fileAnalysis(fd, (char *)path);
-    if (e == UH_MALWARE)
-      virus_name = "Win.Heuristic.Malware.Generic";
-  }
+	// TODO change strcmp by strncmp
+	// (FD) why????
+	if (!strcmp(mime_type, "application/x-sharedlib")
+		|| !strcmp(mime_type, "application/x-object")
+		|| !strcmp(mime_type, "application/x-executable")) {
+		e = analyseElfFile(fd, (char *)path);
+		if (e == UH_MALWARE)
+			virus_name = "Linux.Heuristic.Malware.Generic";
+	} else if (!strcmp(mime_type, "application/x-dosexec")
+		|| !strcmp(mime_type, "application/x-msdownload")) {
+		e = fileAnalysis(fd, (char *)path);
+		if (e == UH_MALWARE)
+			virus_name = "Win.Heuristic.Malware.Generic";
+	}
 
-  switch(e) {
-  case UH_MALWARE:
-    /* even if virus_name is a statically allocated string, it must be returned in a dynamically allocated string */
-    /* because it will be free()d by the calling code */
-    *pmod_report = os_strdup(virus_name);
-    return UHURU_MALWARE;
-  case UH_NOT_MALWARE:
-    return UHURU_CLEAN;
-  case UH_NOT_DECIDED:
-  case UH_DOUBTFUL:
-    return UHURU_UNDECIDED;
-  }
+	switch(e) {
+	case UH_MALWARE:
+		/* even if virus_name is a statically allocated string, it must be returned in a dynamically allocated string */
+		/* because it will be free()d by the calling code */
+		*pmod_report = os_strdup(virus_name);
+		return ARMADITO_MALWARE;
+	case UH_NOT_MALWARE:
+		return ARMADITO_CLEAN;
+	case UH_NOT_DECIDED:
+	case UH_DOUBTFUL:
+		return ARMADITO_UNDECIDED;
+	}
 
-  return UHURU_IERROR;
+	return ARMADITO_IERROR;
 }
 
-static enum uhuru_mod_status module5_2_close(struct uhuru_module *module)
+static enum a6o_mod_status module5_2_close(struct a6o_module *module)
 {
-  return UHURU_MOD_OK;
+	return ARMADITO_MOD_OK;
 }
 
 /* FIXME: one day, add bases status */
-static enum uhuru_update_status module5_2_info(struct uhuru_module *module, struct uhuru_module_info *info)
+static enum a6o_update_status module5_2_info(struct a6o_module *module, struct a6o_module_info *info)
 {
-  info->base_infos = (struct uhuru_base_info **)malloc(sizeof(struct uhuru_base_info *));
-  info->base_infos[0] = NULL;
+	info->base_infos = (struct a6o_base_info **)malloc(sizeof(struct a6o_base_info *));
+	info->base_infos[0] = NULL;
 
-  info->update_date = os_strdup("2014-09-01T09:30:00Z");
+	info->update_date = os_strdup("2014-09-01T09:30:00Z");
 
-  return UHURU_UPDATE_OK;
+	return ARMADITO_UPDATE_OK;
 }
 
 static const char *module5_2_mime_types[] = {
-  "application/x-executable",
-  "application/x-object",
-  "application/x-sharedlib",
-  "application/x-dosexec",
-  "application/x-msdos-program",
-  "application/x-msdownload",
-  NULL,
+	"application/x-executable",
+	"application/x-object",
+	"application/x-sharedlib",
+	"application/x-dosexec",
+	"application/x-msdos-program",
+	"application/x-msdownload",
+	NULL,
 };
 
 struct a6o_module module = {

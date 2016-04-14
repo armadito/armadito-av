@@ -1,4 +1,4 @@
-Uhuru 5.2 module
+Armadito 5.2 module
 ================
 
 Copyright (c) NOV'IT/Teclib, 2014, 2015
@@ -9,8 +9,8 @@ Project home: http://www.somewhere.org
 What is it?
 -----------
 
-Uhuru 5.2 module is a scan module dedicated to binaries analysis (PE and ELF).
-It is based on the libuhuru library.
+Armadito 5.2 module is a scan module dedicated to binaries analysis (PE and ELF).
+It is based on the libarmadito library.
 
 
 Licensing
@@ -22,7 +22,7 @@ TBW
 Prerequisites
 -------------
 
-In order to compile Uhuru 5.2 module, you need the following tools:
+In order to compile Armadito 5.2 module, you need the following tools:
 
 - automake/autoconf
 - GNU make
@@ -36,7 +36,7 @@ Configuration
 The sources of the module 5.2 are divided into:
 
 - the analysis code, maintained in a separate git repo
-- this code, which acts as 'glue' between the analysis code and libuhuru
+- this code, which acts as 'glue' between the analysis code and libarmadito
 
 The analysis code repository must be cloned before running the configure 
 script. Once this clone done, a symbolic link must be created in the src/
@@ -72,8 +72,8 @@ This will generate the `Makefile.in` files and the `configure` script.
 The `PREFIX` directory will be used by `make install`. Its use is mandatory, unless 
 building a package and installing in system directories.
 
-libuhuru use the `pkg-config` utility to specify compiling options relative to 
-libuhuru. Since the `libuhuru.pc` specification file for `pkg-config` is not located
+libarmadito use the `pkg-config` utility to specify compiling options relative to 
+libarmadito. Since the `libarmadito.pc` specification file for `pkg-config` is not located
 in standard directory (usual `/usr/lib/pkgconfig`), invoking the configure script 
 must use the PKG_CONFIG_PATH environment variable.
 
@@ -84,10 +84,10 @@ to clobber the source tree with objects, libraries, binaries and other stuff.
 
 Typical invocation of the configure script is:
 
-    $ /home/joebar/uhuru-av/modules/module5_2/configure --prefix=/home/joebar/install --enable-debug PKG_CONFIG_PATH=/home/joebar/install/lib/pkgconfig
+    $ /home/joebar/armadito-av/modules/module5_2/configure --prefix=/home/joebar/install --enable-debug PKG_CONFIG_PATH=/home/joebar/install/lib/pkgconfig
 
 Note that the path specified in the value of PKG_CONFIG_PATH must be coherent
-with the PREFIX used in libuhuru installation (see `libuhuru` README).
+with the PREFIX used in libarmadito installation (see `libarmadito` README).
 
 
 Compiling
