@@ -19,6 +19,7 @@ char * GetDBDirectory( );
 #define os_sscanf sscanf
 char * os_strncpy(char * dest, size_t sizeDest, char * src, size_t count);
 char * os_strncat(char * dest, size_t sizeDest, char * src, size_t count);
+int os_sprintf(char * dest, size_t len, const char * fmt...); // To implement.
 #endif
 
 #endif

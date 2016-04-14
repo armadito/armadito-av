@@ -42,6 +42,9 @@ static struct json_object *update_json(enum a6o_update_status status, const char
 {
 	struct json_object *j_update;
 
+	if (update_date == NULL)
+		return NULL;
+
 	j_update = json_object_new_object();
 
 	json_object_object_add(j_update, "status", update_status_json(status));
