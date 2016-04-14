@@ -5,7 +5,7 @@ function compile()
 
 	set -e
 
-	cd $OUT_DIR/build/$OS_V/uhuru-av/$PACKAGE_NAME
+	cd $OUT_DIR/build/$OS_V/armadito-av/$PACKAGE_NAME
 	echo "-------MAKE-------"
 	make 
 	echo "-------MAKE INSTALL-------"
