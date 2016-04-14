@@ -6,5 +6,5 @@ OUT_DIR=$DIR/../out
 SRC_DIR=$DIR/../
 
 set -e
-PREFIX=$OUT_DIR/install/$OS_V/uhuru-av
+PREFIX=$OUT_DIR/install/$OS_V/armadito-av
 G_MESSAGES_DEBUG=all LD_LIBRARY_PATH=$PREFIX/lib PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig valgrind -leak-check=full $PREFIX/bin/uhuru-scand -n 
