@@ -44,7 +44,7 @@ static enum a6o_mod_status clamav_init(struct a6o_module *module)
 	}
 
 	bases_location = a6o_std_path(BASES_LOCATION);
-	len = strlen(bases_location) + 1 + strlen("clamav");
+	len = strlen(bases_location) + 1 + strlen("clamav") + 1;
 	db_dir = malloc(len);
 	sprintf(db_dir, "%s%cclamav", bases_location, a6o_path_sep());
 
