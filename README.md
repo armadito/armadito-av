@@ -68,9 +68,13 @@ Once the interface is launched:
 
 ## Build & development
 
+This section is may be obsolete?
+
 Run `grunt` for building and `grunt serve` for preview.
 
 ## Testing
+
+This section is may be obsolete?
 
 Running `grunt test` will run the unit tests with karma.
 
