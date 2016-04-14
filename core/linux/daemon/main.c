@@ -20,14 +20,8 @@
 #include <unistd.h>
 
 #define DEFAULT_LOG_LEVEL     "error"
-#define DEFAULT_IPC_TYPE      OLD_IPC
-#if DEFAULT_IPC_TYPE == OLD_IPC
-#define S_DEFAULT_IPC_TYPE "old"
-#elif DEFAULT_IPC_TYPE == JSON_IPC
-#define S_DEFAULT_IPC_TYPE "json"
-#else
-#error "unknown IPC type!"
-#endif
+#define DEFAULT_IPC_TYPE      JSON_IPC
+#define S_DEFAULT_IPC_TYPE    "json"
 #define DEFAULT_PID_FILE      LOCALSTATEDIR "/run/armadito-scand.pid"
 
 #define PROGRAM_NAME "armadito-scand"
@@ -70,14 +64,14 @@ static void usage(void)
 	fprintf(stderr, "  --no-daemon -n                     do not fork and go to background\n");
 	fprintf(stderr, "  --log-level=LEVEL | -l LEVEL       set log level\n");
 	fprintf(stderr, "                                     log level can be: error, warning, info, debug\n");
-	fprintf(stderr, "                                     (default is : " DEFAULT_LOG_LEVEL "\n");
+	fprintf(stderr, "                                     (default is: " DEFAULT_LOG_LEVEL "\n");
 	fprintf(stderr, "  --path=PATH | -a PATH              unix socket path (default is " DEFAULT_SOCKET_PATH ")\n");
 	fprintf(stderr, "  --pidfile=PATH | -i PATH           create PID file at specified location\n");
-	fprintf(stderr, "                                     (default is : " DEFAULT_PID_FILE ")\n");
+	fprintf(stderr, "                                     (default is: " DEFAULT_PID_FILE ")\n");
 	fprintf(stderr, "  --ipc=old|json | -c old|json       select IPC type for communication with the user interface\n");
 	fprintf(stderr, "                                     json: for web interface\n");
 	fprintf(stderr, "                                     old: for old Qt interface\n");
-	fprintf(stderr, "                                     (default is : " S_DEFAULT_IPC_TYPE ")\n");
+	fprintf(stderr, "                                     (default is: " S_DEFAULT_IPC_TYPE ")\n");
 	fprintf(stderr, "\n");
 
 	exit(EXIT_FAILURE);
