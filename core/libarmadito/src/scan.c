@@ -313,7 +313,6 @@ enum a6o_file_status a6o_scan_simple(struct armadito *armadito, const char *path
 	//a6o_file_context_free(&file_context);
 	a6o_file_context_destroy(&file_context);
 
-
 	a6o_scan_free(scan);
 
 	return status;

@@ -246,5 +246,8 @@ void a6o_on_demand_run(struct a6o_on_demand *on_demand)
 
 void a6o_on_demand_free(struct a6o_on_demand *on_demand)
 {
+   a6o_scan_conf_free(on_demand->scan_conf);
+   a6o_scan_free(on_demand->scan);
+   free(on_demand);
 }
 

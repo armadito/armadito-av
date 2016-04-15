@@ -108,7 +108,15 @@ struct module_manager *module_manager_new(struct armadito *armadito)
 
 void module_manager_free(struct module_manager *mm)
 {
+        struct a6o_module **modv;
+ 
+	for (modv = module_manager_get_modules(mm); *modv != NULL; modv++){
+	   module_free(*modv);
+	}
+
 	g_array_free(mm->modules, TRUE);
+
+	g_free(mm);
 }
 
 void module_manager_add(struct module_manager *mm, struct a6o_module *module)
