@@ -17,53 +17,11 @@ angular.module('tatouApp')
 	
 	$scope.quarantine = {
 		count : 0,
-		last_update : "1970"
-		//files: []
+		last_update : "1970",
+		files: []
 	};
 	
 	$scope.quarantineObjects = [
-		{
-			name: 'malware',
-			path: 'C:/Users/Bla/bla/bla',
-			date: '04/12/2015',
-			refresh : '<i class="fa fa-refresh"></i>',
-			delete  : '<i class="text-danger fa fa-times"></i>'
-		},
-		{
-			name: 'malware',
-			path: 'C:/Users/Bla/bla/bla',
-			date: '04/12/2015',
-			refresh : '<i class="fa fa-refresh"></i>',
-			delete  : '<i class="text-danger fa fa-times"></i>'
-		},
-		{
-			name: 'malware',
-			path: 'C:/Users/Bla/bla/bla',
-			date: '04/12/2015',
-			refresh : '<i class="fa fa-refresh"></i>',
-			delete  : '<i class="text-danger fa fa-times"></i>'
-		},
-		{
-			name: 'malware',
-			path: 'C:/Users/Bla/bla/bla',
-			date: '04/12/2015',
-			refresh : '<i class="fa fa-refresh"></i>',
-			delete  : '<i class="text-danger fa fa-times"></i>'
-		},
-		{
-			name: 'malware',
-			path: 'C:/Users/Bla/bla/bla',
-			date: '04/12/2015',
-			refresh : '<i class="fa fa-refresh"></i>',
-			delete  : '<i class="text-danger fa fa-times"></i>'
-		},
-		{
-			name: 'malware',
-			path: 'C:/Users/Bla/bla/bla',
-			date: '04/12/2015',
-			refresh : '<i class="fa fa-refresh"></i>',
-			delete  : '<i class="text-danger fa fa-times"></i>'
-		},
 		{
 			name: 'malware',
 			path: 'C:/Users/Bla/bla/bla',
@@ -157,6 +115,7 @@ angular.module('tatouApp')
 		return;
 	}
 	
+
 	$scope.query_quarantine = function(){
 			
 			console.log('[+] Debug :: Refreshing antivirus quarantine...');
@@ -167,10 +126,19 @@ angular.module('tatouApp')
 			return;
 	}
 	
-	$scope.restore_qurantine_file = function(filename){
+	$scope.restore_quarantine_file = function(filename){
 		
-		console.log('[+] Debug :: Restoring file : '+filename);
+		console.log('[+] Debug :: Restore quarantine file : '+filename);
 		ArmaditoSVC.requestAVrestore(filename,$scope.threatDataFromAv);
+		
+		return;
+		
+	}
+
+	$scope.delete_quarantine_file = function(filename){
+		
+		console.log('[+] Debug :: Delete quarantine file : '+filename);
+		ArmaditoSVC.requestAVdelete(filename,$scope.threatDataFromAv);
 		
 		return;
 		

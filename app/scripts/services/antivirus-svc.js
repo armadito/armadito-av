@@ -8,7 +8,7 @@
  */
 
 var fs = require('fs');
- 
+
 angular.module('armadito.svc', [])
 .service('ArmaditoSVC', ['ArmaditoIPC', function (ArmaditoIPC) {
 
@@ -50,6 +50,7 @@ angular.module('armadito.svc', [])
 		return;		
 	};
 
+
 	factory.setScanServerPath = function(){
 				
 		if(os.platform() == "win32"){
@@ -73,9 +74,10 @@ angular.module('armadito.svc', [])
 
 		server = ArmaditoIPC.createUIServer(server_ipc_path, callback);		
 
-	}
+	};
 
 
+	// Launch a scan.
 	factory.launchScan = function(path_to_scan, callback){
 
 		console.log("[+] Debug :: launchScan :: start scan on path", path_to_scan);
@@ -95,9 +97,7 @@ angular.module('armadito.svc', [])
 
 		// TODO close server.
 		//this.cleanALL();
-
-
-	}
+	};
 
 	factory.receiveScanInfo = function(callback){
 
@@ -111,10 +111,10 @@ angular.module('armadito.svc', [])
 		scan_server = ArmaditoIPC.createUIServer(scan_server_ipc_path, callback);
 
 		return scan_server;
-	}
+	};
 
 
-
+	// Request antivirus status.
 	factory.requestAVstatus = function(callback){
 		
 		console.log("[+] Debug :: requestAVstatus ::");
@@ -143,6 +143,8 @@ angular.module('armadito.svc', [])
 		return ;	
 	};
 	
+
+	// Enum quarantine files.
 	factory.requestAVquarantine = function(callback){
 		
 		console.log("[+] Debug :: requestAVqurantine ::");		
@@ -167,6 +169,7 @@ angular.module('armadito.svc', [])
 		return ;	
 	};
 	
+	// Restore file from quarantine.
 	factory.requestAVrestore = function(filename,callback){
 		
 		console.log("[+] Debug :: requestAVqurantine ::");		
@@ -182,11 +185,26 @@ angular.module('armadito.svc', [])
 		
 		ArmaditoIPC.disconnect2_av();		
 		
-		// send data
-		//var response = ArmaditoIPC.sendAndReceive(clientPath, request);
-		//console.log("[+] Debug :: requestAVstatus :: antivirus response = " + av_response);
 		
-		//console.log("[+] Debug :: requestAVstatus :: antivirus response = " + ArmaditoIPC.av_response);		
+		return ;	
+	};
+
+	// Delete file from quarantine.
+	factory.requestAVdelete = function(filename,callback){
+		
+		
+		var request = { "av_request":"quarantine", "id":123, "params": {"action":"delete", "fname":filename}};
+		var buffer = new Buffer( JSON.stringify(request), 'ascii' );
+		
+		// Set ipc path.
+		this.setClientPath();	
+
+		ArmaditoIPC.connect2_av(ipc_path,callback);
+		
+		ArmaditoIPC.write2_av(buffer);
+		
+		ArmaditoIPC.disconnect2_av();		
+				
 		
 		return ;	
 	};
@@ -201,7 +219,7 @@ angular.module('armadito.svc', [])
 		ArmaditoIPC.cleanSocket(scan_server_ipc_path);
 
 		return;
-	}
+	};
 	
 
 	return factory;
