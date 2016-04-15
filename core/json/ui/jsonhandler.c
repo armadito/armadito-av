@@ -9,6 +9,7 @@
 #include "scan.h"
 #include "conf.h"
 #include "quarantine.h"
+#include "update.h"
 #include "os/string.h"
 
 #include <assert.h>
@@ -46,6 +47,7 @@ static struct request_dispatch_entry {
 	{ "scan", scan_response_cb, scan_process_cb},
 	{ "quarantine", quarantine_response_cb, NULL},
 	{ "conf_set", conf_response_cb, NULL},
+	{ "updatedb", update_response_cb, NULL},
 	{ NULL, NULL, NULL},
 };
 

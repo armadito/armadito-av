@@ -50,7 +50,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libarmadito.lib;json-c.lib;FltLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libarmadito.lib;json-c.lib;FltLib.lib;Crypt32.lib;Urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -75,12 +75,14 @@
     <ClCompile Include="..\..\..\..\..\core\json\ui\state.c" />
     <ClCompile Include="..\..\..\..\..\core\json\ui\ui-win.c" />
     <ClCompile Include="..\..\..\..\..\core\json\ui\update.c" />
+    <ClCompile Include="..\..\..\..\..\core\json\updatedb\json_process.c" />
     <ClCompile Include="..\..\..\..\..\core\windows\service\config.c" />
     <ClCompile Include="..\..\..\..\..\core\windows\service\log.c" />
     <ClCompile Include="..\..\..\..\..\core\windows\service\notify.c" />
     <ClCompile Include="..\..\..\..\..\core\windows\service\scan_onaccess.c" />
     <ClCompile Include="..\..\..\..\..\core\windows\service\scan_ondemand.c" />
     <ClCompile Include="..\..\..\..\..\core\windows\service\service.c" />
+    <ClCompile Include="..\..\..\..\..\core\windows\utils\crypt.c" />
     <ClCompile Include="..\..\..\..\..\core\windows\utils\others.c" />
   </ItemGroup>
   <ItemGroup>
@@ -92,6 +94,7 @@
     <ClInclude Include="..\..\..\..\..\core\json\ui\state.h" />
     <ClInclude Include="..\..\..\..\..\core\json\ui\ui.h" />
     <ClInclude Include="..\..\..\..\..\core\json\ui\update.h" />
+    <ClInclude Include="..\..\..\..\..\core\json\updatedb\json_process.h" />
     <ClInclude Include="..\..\..\..\..\core\windows\service\config.h" />
     <ClInclude Include="..\..\..\..\..\core\windows\service\log.h" />
     <ClInclude Include="..\..\..\..\..\core\windows\service\notify.h" />
@@ -99,6 +102,7 @@
     <ClInclude Include="..\..\..\..\..\core\windows\service\scan_ondemand.h" />
     <ClInclude Include="..\..\..\..\..\core\windows\service\service.h" />
     <ClInclude Include="..\..\..\..\..\core\windows\service\structs.h" />
+    <ClInclude Include="..\..\..\..\..\core\windows\utils\crypt.h" />
     <ClInclude Include="..\..\..\..\..\core\windows\utils\others.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
