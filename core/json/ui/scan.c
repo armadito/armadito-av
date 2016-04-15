@@ -142,8 +142,6 @@ static void scan_callback(struct a6o_report *report, void *callback_data)
 
 	req = json_object_to_json_string(j_request);
 
-        // assert(json_object_put(j_request));
-
 	printf("[+] Debug :: scan_callback :: req to GUI = %s\n", req);
 
 	/* ui exchange using platform specific function */
@@ -156,6 +154,8 @@ static void scan_callback(struct a6o_report *report, void *callback_data)
 
 	scan_data->last_send_time = now;
 	scan_data->last_send_progress = report->progress;
+
+        assert(json_object_put(j_request));
 }
 
 enum a6o_json_status scan_response_cb(struct armadito *armadito, struct json_request *req, struct json_response *resp, void **request_data)
@@ -199,6 +199,8 @@ void scan_process_cb(struct armadito *armadito, void *request_data)
 	struct scan_data *scan_data = (struct scan_data *)request_data;
 
 	a6o_on_demand_run(scan_data->on_demand);
+
+        a6o_on_demand_free(scan_data->on_demand);
 
 	free(scan_data);
 }
