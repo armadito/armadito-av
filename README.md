@@ -26,7 +26,7 @@ Checking installation:
 Installing bower (must be done as root too):
 
   npm install -g bower
-
+ 
 
 #### Installing modules in source tree on Linux
 
@@ -35,7 +35,12 @@ After cloning the repository, the source tree of the user interface must be conf
   cd SOMEWHERE/ng-armadito
   bower install
   bower install angular-translate-loader-static-files --save    ## not sure this is still needed
+ 
 
+#### Installing node modules dependencies
+
+  cd SOMEWHERE/ng-armadito
+  npm install node-lang-info
 
 #### Installing node web kit on Linux
 
