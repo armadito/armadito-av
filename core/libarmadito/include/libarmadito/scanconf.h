@@ -19,4 +19,6 @@ struct a6o_module **a6o_scan_conf_get_applicable_modules(struct a6o_scan_conf *c
 
 void a6o_scan_conf_max_file_size(struct a6o_scan_conf *c, int max_file_size);
 
+void a6o_scan_conf_free(struct a6o_scan_conf *scan_conf);
+
 #endif
