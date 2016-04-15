@@ -418,17 +418,17 @@
 						      </tr>
 						    </thead>
 						    <tbody class="quarantine" id="ex3">
-						      <tr class="quarantine" ng-repeat="obj in quarantineObjects">
-						        <td style="width:30%"class="quarantine"><h7>{{obj.name}}</h7></td>
+						      <tr class="quarantine" ng-repeat="obj in quarantine.files">
+						        <td style="width:30%"class="quarantine"><h7>{{obj.fname}}</h7></td>
 						        <td style="width:30%"class="quarantine"><h7>{{obj.path}}</h7></td>
-						        <td style="width:30%"class="quarantine"><h7>{{obj.path}}</h7></td>
-						        <td title="{{'history_view.Quarantine_tab.Restore' | translate}}" style="width:5%"class="quarantine"><h7 ng-click="refreshQuatantineObject($index)" ng-bind-html="obj.refresh"></h7></td>
-						        <td title="{{'history_view.Quarantine_tab.Remove' | translate}}"style="width:5%"class="quarantine"><h7 ng-click="deleteQuatantineObject($index)" ng-bind-html="obj.delete"></h7></td>
+						        <td style="width:30%"class="quarantine"><h7>{{obj.date}}</h7></td>
+						        <td title="{{'history_view.Quarantine_tab.Restore' | translate}}" style="width:5%"class="quarantine"><h7 ng-click="restore_quarantine_file(obj.fname)" class="fa fa-refresh" ></h7></td>
+						        <td title="{{'history_view.Quarantine_tab.Remove' | translate}}"style="width:5%"class="quarantine"><h7 ng-click="delete_quarantine_file(obj.fname)" class="text-danger fa fa-times" ></h7></td>
 						      </tr>
 						    </tbody>
 						</table>
 						<span class="pull-right">
-							<button type="button" class="btn clearButton" ng-click="clearQuarantine()" ng-if="quarantineObjects.length">{{'history_view.Quarantine_tab.Clear' | translate}} </button>
+							<button type="button" class="btn clearButton" ng-click="clearQuarantine()" ng-if="quarantine.files.length">{{'history_view.Quarantine_tab.Clear' | translate}} </button>
 						</span>
 					</div>
 				</div>	
