@@ -11,6 +11,7 @@
 
 #include "os/string.h"
 
+#include <assert.h>
 #include <json.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -140,6 +141,9 @@ static void scan_callback(struct a6o_report *report, void *callback_data)
 #endif
 
 	req = json_object_to_json_string(j_request);
+
+        // assert(json_object_put(j_request));
+
 	printf("[+] Debug :: scan_callback :: req to GUI = %s\n", req);
 
 	/* ui exchange using platform specific function */
