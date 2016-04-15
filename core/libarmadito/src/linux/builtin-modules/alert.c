@@ -321,7 +321,7 @@ static void alert_send_via_file(struct alert *a, const char *alert_dir)
 	int fd;
 	char *alert_path;
 
-	asprintf(&alert_path, "%s/alertXXXXXX", alert_dir) ;
+	asprintf(&alert_path, "%s/alertXXXXXX", alert_dir);
 	assert(alert_path != NULL);
 
 	/* FIXME: signal error if cannot open file */
@@ -332,6 +332,8 @@ static void alert_send_via_file(struct alert *a, const char *alert_dir)
 		alert_doc_save_to_fd(a->xml_doc, fd);
 		close(fd);
 	}
+
+	free(alert_path);
 }
 
 #endif
