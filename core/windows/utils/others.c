@@ -63,6 +63,66 @@ char * GetFileContent(char * filename, int * retsize) {
 	return content;
 }
 
+BYTE * GetFileContent_b(char * filename, int * retsize) {
+
+	BYTE * content = NULL;
+	HANDLE hFile = INVALID_HANDLE_VALUE;
+	LARGE_INTEGER fileSize = {0};
+	int size = 0, read = 0, ret = 0;
+
+	if (filename == NULL || retsize == NULL) {
+		printf("[-] Error :: GetFileContent :: Invalid parameter\n");
+		return NULL;
+	}
+
+	__try {
+
+		hFile = CreateFileA(filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+		if (hFile == INVALID_HANDLE_VALUE) {
+			printf("[-] Error :: GetFileContent :: Opening the file failed! :: error = %d\n",GetLastError());
+			ret = -1;
+			__leave;
+		}
+
+		if (GetFileSizeEx(hFile, &fileSize) == FALSE) {
+			printf("[-] Error :: GetFileContent :: Get file size failed! :: error = %d\n",GetLastError());
+			ret = -2;
+			__leave;
+		}
+
+		size = fileSize.QuadPart;
+		*retsize = size;
+
+		//printf("[+] Debug :: GetFileContent :: file size = %d\n",size);
+
+		content = (char*)calloc(size+1,sizeof(char));
+		content[size]='\0';
+
+		if (ReadFile(hFile, content, size, &read, NULL) == FALSE) {
+			printf("[-] Error :: GetFileContent :: Read file content failed! :: error = %d\n",GetLastError());
+			ret = -4;
+			__leave;
+		}
+
+	}
+	__finally {
+
+		
+		if (hFile != INVALID_HANDLE_VALUE) {
+			CloseHandle(hFile);
+			hFile = NULL;
+		}
+
+		if (content != NULL && ret < 0) {
+			free(content);
+			content = NULL;
+		}
+
+	}
+
+	return content;
+}
+
 /*
 	This function returns the complete path of a location given in parameter
 	according to the installation path.

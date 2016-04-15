@@ -31,6 +31,12 @@
     <Filter Include="Fichiers d%27en-tête\utils">
       <UniqueIdentifier>{fe559646-46a4-4796-9fbe-6144bd71bc98}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers d%27en-tête\json\updatedb">
+      <UniqueIdentifier>{ece3719a-7b2d-480c-b296-8a9beebd8e5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\json\updatedb">
+      <UniqueIdentifier>{01bc20f6-e409-4ce5-9de5-560b1e0fb7b2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\..\core\windows\service\log.c">
@@ -74,6 +80,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\core\windows\service\config.c">
       <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\core\json\updatedb\json_process.c">
+      <Filter>Fichiers sources\json\updatedb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\core\windows\utils\crypt.c">
+      <Filter>Fichiers sources\utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -124,6 +136,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\core\windows\service\config.h">
       <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\json\updatedb\json_process.h">
+      <Filter>Fichiers d%27en-tête\json\updatedb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\windows\utils\crypt.h">
+      <Filter>Fichiers d%27en-tête\utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
