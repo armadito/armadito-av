@@ -138,6 +138,16 @@ angular.module('tatouApp')
 			$scope.$apply();
 			return;
 		}
+
+
+		$scope.update_db = function(){
+
+			console.log("[+] Debug :: update modules database\n");
+			ArmaditoSVC.updateDB();
+
+			// TODO :: refresh state.
+
+		}
 			
 		// refresh antivirus status.
 		$scope.refresh_status = function(){
