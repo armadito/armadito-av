@@ -63,6 +63,10 @@ static void get_ip_addr(char *ip_addr)
 	/* FIXME: do not exit on failure, but report error */
 	if (getifaddrs(&ifaddr) == -1) {
 		perror("getifaddrs");
+
+		if(ifaddr != NULL){
+		   freeifaddrs(ifaddr);
+                }
 		exit(EXIT_FAILURE);
 	}
 
@@ -80,6 +84,7 @@ static void get_ip_addr(char *ip_addr)
 					mask, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
 			if (s != 0) {
 				a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "getnameinfo() failed: %s", gai_strerror(s));
+				freeifaddrs(ifaddr);
 				exit(EXIT_FAILURE);
 			}
 
@@ -92,9 +97,11 @@ static void get_ip_addr(char *ip_addr)
 					ip_addr, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
 			if (s != 0) {
 				a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "getnameinfo() failed: %s\n", gai_strerror(s));
+				freeifaddrs(ifaddr);
 				exit(EXIT_FAILURE);
 			}
 
+			freeifaddrs(ifaddr);
 			return;
 		}
 	}
