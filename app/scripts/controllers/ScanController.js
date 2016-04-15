@@ -123,7 +123,7 @@ angular.module('tatouApp')
 
 
     $scope.StartScan = function(){
-      console.log("typeeeeee :", $scope.type);
+    
       console.log("[+] Debug :: type d'analyse ::", $scope.type);
       // reset progress bar
       $scope.scan_data.progress = 0;

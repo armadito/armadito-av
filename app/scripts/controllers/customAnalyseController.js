@@ -19,23 +19,22 @@ angular.module('tatouApp')
         excludeFolder : ''
     };
 
-  	$scope.ok = function () {
+   $scope.ok = function () {
     	$uibModalInstance.close($scope.optionScan);
-  	};
+    };
 
-  	$scope.cancel = function () {
+    $scope.cancel = function () {
     	$uibModalInstance.dismiss('cancel');
-  	};
+    };
 
     $scope.chooseFile = function () {
-      console.log("héhé");
       var name = '#pathToScan';
       var chooser = document.querySelector(name);
       chooser.addEventListener("change", function(evt) {
         var path = this.value;
         $scope.$apply(function(){
-          $scope.optionScan.pathToScan = path;
-          console.log("pathToScan", $scope.optionScan.pathToScan);
+           $scope.optionScan.pathToScan = path;
+           console.log("pathToScan", $scope.optionScan.pathToScan);
         })
       }, false);
     };
