@@ -9,22 +9,6 @@
 
 var fs = require('fs');
 
-function unlink_socket_if_exists(path) {
-    try  {
-		if (fs.statSync(path).isSocket())
-		    fs.unlinkSync(path);
-	    }
-    catch (e) {
-		if (e.code == 'ENOENT') { // no such file or directory. File really does not exist
-		    console.log("socket ", path, " does not exist.");
-		    return;
-		}
-
-		console.log("Exception fs.statSync (" + path + "): " + e);
-		throw e; // something else went wrong, we don't have rights, ...
-    }
-}
- 
 angular.module('armadito.svc', [])
 .service('ArmaditoSVC', ['ArmaditoIPC', function (ArmaditoIPC) {
 
@@ -62,7 +46,6 @@ angular.module('armadito.svc', [])
 			server_ipc_path = '\\\\.\\pipe\\armadito-UI';
 		}else{
 			server_ipc_path = '/tmp/.armadito-ui';
-		    unlink_socket_if_exists(server_ipc_path);
 		}
 		return;		
 	};
@@ -74,7 +57,6 @@ angular.module('armadito.svc', [])
 			scan_server_ipc_path = '\\\\.\\pipe\\armadito-ui-scan';
 		}else{
 			scan_server_ipc_path = '/tmp/.armadito-ui-scan';
-		    unlink_socket_if_exists(scan_server_ipc_path);
 		}
 		return;	
 
@@ -97,8 +79,6 @@ angular.module('armadito.svc', [])
 
 	// Launch a scan.
 	factory.launchScan = function(path_to_scan, callback){
-
-		
 
 		console.log("[+] Debug :: launchScan :: start scan on path", path_to_scan);
 
@@ -254,10 +234,8 @@ angular.module('armadito.svc', [])
 		// Set ipc path.
 		this.setScanServerPath();		
 
-		//this.setServerPath();
 		console.log(' scan_server_ipc_path: ', scan_server_ipc_path);
 		ArmaditoIPC.cleanSocket(scan_server_ipc_path);
-
 
 		return;
 	};

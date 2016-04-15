@@ -14,13 +14,11 @@ angular.module('armadito.ipc', [])
 	var av_response;
 	var client_socket;
 	var client_sock;
-	//var server;
 	var os = require('os');
 	var net = require('net');
 	var fs = require('fs');
 	
 	//var factory.client_sock;
-	
 	
 	// ----------------------------------------------
 	factory.connect2_av = function(ipc_path, callback){
@@ -74,34 +72,6 @@ angular.module('armadito.ipc', [])
 
 
 		//this.cleanSocket(ipc_path);
-		if(os.platform() == "win32"){			
-		}else{
-
-			/*console.log("[+] Debug :: CLeaning socket server path...\n");
-
-			fs.access(ipc_path, fs.F_OK, (err) => {
-
-  				console.log(err ? 'no socket file---------!' : 'file exists already!!------------');
-  				if(!err) {
-  					fs.unlinkSync(ipc_path);
-  					console.log("---------------------------------------------------------\n");
-  				}
-
-			});
-
-			/*fs.exists(ipc_path, function(exist){
-				if(exist){
-					console.log("---------------------------------------------------------\n");
-					fs.unlinkSync(ipc_path);
-					console.log("[+] Debug :: socket server path cleaned successfully !\n");	
-					//return 1;
-				}else{
-
-				}
-			});*/
-			
-		}
-
 
 		console.log("[+] Debug :: Create server :::::: ", ipc_path);
 
@@ -126,8 +96,8 @@ angular.module('armadito.ipc', [])
 
 
 			server_sock.on( 'close', function (){
-          		console.log("[+] Debug :: closing ui socket server");
-        	});
+          		   console.log("[+] Debug :: closing ui socket server");
+        	        });
 
 			server_sock.on('data', function(data){
 				console.log("[+] Debug :: data received ::"+ data);
@@ -143,31 +113,22 @@ angular.module('armadito.ipc', [])
 
 		console.log("[+] Debug :: CLeaning socket server path...\n");
 
-			fs.access(ipc_path, fs.F_OK, (err) => {
+		fs.access(ipc_path, fs.F_OK, (err) => {
 
-  				console.log(err ? 'no socket file---------!' : 'file exists already!!------------');
-  				if(!err) {
-  					fs.unlinkSync(ipc_path);
+			console.log(err ? 'no socket file---------!' : 'file exists already!!------------');
+			if(!err) {
+				fs.unlinkSync(ipc_path);
 
-				    console.log("---------------------------------------------------------\n");
-  				}
+			    console.log("---------------------------------------------------------\n");
+			}
 
-			});
+		});
 
 		server.listen(ipc_path, function(){
 			console.log("[+] Debug :: server listening on ::", ipc_path);
 		});
 
 		console.log(":::::::::::: SERVER >>>>>",server);
-
-		/*server.on( 'close', function (){
-          console.log("-------------------- close\n");
-        });
-
-        server.on( 'closed', function (){
-          console.log("-------------------- closed\n");
-        });
-        */
 
 		return server;
 
@@ -182,31 +143,20 @@ angular.module('armadito.ipc', [])
 
 	}
 
-	factory.cleanSocket = function(ipc_path){
-
-		// Try to close the server.
-		//console.log("[+] Debug :: CLeaning socket server path...\n");
-
-		// linux only :: remove socket file.
-		if(os.platform() == "win32"){			
-		}else{
-
-			console.log("[+] Debug :: CLeaning socket server path...\n");
-
-			fs.exists(ipc_path, function(exist){
-				if(exist){
-					console.log("---------------------------------------------------------\n");
-
-				    fs.unlinkSync(ipc_path);
-					console.log("[+] Debug :: socket server path cleaned successfully !\n");	
-					return 1;
-				}
-			});
-			
+	factory.cleanSocket = function(path) {
+	    try  {
+		if (fs.statSync(path).isSocket())
+		    fs.unlinkSync(path);
+	    }
+	    catch (e) {
+		if (e.code == 'ENOENT') { // no such file or directory. File really does not exist
+		    console.log("socket ", path, " does not exist.");
+		    return;
 		}
 
-		return 0;
-
+		console.log("Exception fs.statSync (" + path + "): " + e);
+		throw e; // something else went wrong, we don't have rights, ...
+	    }
 	}
 
 
