@@ -185,6 +185,15 @@ void a6o_scan_conf_max_file_size(struct a6o_scan_conf *c, int max_file_size)
 	c->max_file_size = max_file_size;
 }
 
+void a6o_scan_conf_free(struct a6o_scan_conf *scan_conf)
+{
+     g_array_free(scan_conf->directories_white_list, TRUE);
+     g_array_free(scan_conf->mime_types, TRUE);
+     g_array_free(scan_conf->modules, TRUE);
+ 
+     free(scan_conf);
+}
+
 #ifdef DEBUG
 static void mime_type_print(gpointer key, gpointer value, gpointer user_data)
 {
