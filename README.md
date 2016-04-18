@@ -16,33 +16,33 @@ Installations are done as root.
 
 Installing node.js:
 
-  apt-get install nodejs-legacy
+	   apt-get install nodejs-legacy
 
 Checking installation:
 
-  npm --version
-  1.4.21
+	 npm --version
+	 1.4.21
 
 Installing bower (must be done as root too):
 
-  npm install -g bower
+	npm install -g bower
 
 
 #### Installing modules in source tree on Linux
 
 After cloning the repository, the source tree of the user interface must be configured for node webkit:
 
-  cd SOMEWHERE/ng-armadito
-  bower install
-  npm install
+	cd SOMEWHERE/ng-armadito
+	bower install
+	npm install
 
 
 #### Installing node web kit on Linux
 
 After downloading latest stable SDK (actually 0.14.0) from http://nwjs.io/downloads/, untar the tarball:
 
-  cd SOMEWHEREELSE
-  tar xvzf nwjs-v0.14.0-linux-x64.tar.gz  ### adapt w.r.t. distribution, 32 or 64 bits
+	cd SOMEWHEREELSE
+	tar xvzf nwjs-v0.14.0-linux-x64.tar.gz  ### adapt w.r.t. distribution, 32 or 64 bits
 
 That's all
 
@@ -64,12 +64,12 @@ Once node is installed, launch a command line.
 
 Checking installation:
 
-  npm --version
-  2.15.1
+	npm --version
+	2.15.1
 
 Then install bower using:
 
-  npm install -g bower
+	npm install -g bower
 
 #### Install git on windows
 
@@ -79,7 +79,7 @@ git for windows is available here: https://git-for-windows.github.io/
 
 Checking installation:
 
-  git version 2.8.1.windows.1
+	git version 2.8.1.windows.1
 
 
 #### Installing modules in source tree on Windows
@@ -87,12 +87,12 @@ Checking installation:
 
 After cloning the sources:
 
-  git clone git@gitlab.teclib.infra:armadito/ng-armadito.git
+	git clone git@gitlab.teclib.infra:armadito/ng-armadito.git
 
 run bower to install the needed modules:
 
-  bower install
-  npm install
+	bower install
+	npm install
 
 This should output a lot of messages
 
@@ -114,8 +114,8 @@ First, the Armadito daemon must be launched. Refer to Armadito documentation for
 
 The user interface can be launched with:
 
-  cd SOMEWHERE/ng-armadito
-  SOMEWHEREELSE/nwjs-sdk-v0.13.4-linux-x64/nw .
+	cd SOMEWHERE/ng-armadito
+	SOMEWHEREELSE/nwjs-sdk-v0.13.4-linux-x64/nw .
 
 
 ### Running the interface on Windows
@@ -124,8 +124,8 @@ First, the Armadito service must be launched. Refer to Armadito documentation fo
 
 The user interface can be launched with:
 
-  cd SOMEWHERE\ng-armadito
-  SOMEWHEREELSE\nwjs-sdk-v0.14.0-win-x64\nw.exe .
+	cd SOMEWHERE\ng-armadito
+	SOMEWHEREELSE\nwjs-sdk-v0.14.0-win-x64\nw.exe .
 
 
 ## Debugging the interface
