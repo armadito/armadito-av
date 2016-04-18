@@ -1,1 +1,1 @@
-SUBDIRS=ui #updatedb
+SUBDIRS=ui
