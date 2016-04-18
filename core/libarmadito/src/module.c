@@ -57,6 +57,7 @@ static void module_free(struct a6o_module *mod)
 {
 	free((void *)mod->name);
 
+	/* shortcoming: module close() function should have been called before, otherwise module's internal data is not free'd correctly */
 	if (mod->data != NULL)
 		free(mod->data);
 
@@ -98,7 +99,7 @@ static int module_load(const char *filename, struct a6o_module **pmodule, a6o_er
 
 struct module_manager *module_manager_new(struct armadito *armadito)
 {
-	struct module_manager *mm = g_new(struct module_manager, 1);
+	struct module_manager *mm = malloc(sizeof(struct module_manager));
 
 	mm->modules = g_array_new(TRUE, TRUE, sizeof(struct a6o_module *));
 	mm->armadito = armadito;
@@ -109,14 +110,13 @@ struct module_manager *module_manager_new(struct armadito *armadito)
 void module_manager_free(struct module_manager *mm)
 {
         struct a6o_module **modv;
- 
-	for (modv = module_manager_get_modules(mm); *modv != NULL; modv++){
+
+	for (modv = module_manager_get_modules(mm); *modv != NULL; modv++)
 	   module_free(*modv);
-	}
 
 	g_array_free(mm->modules, TRUE);
 
-	g_free(mm);
+	free(mm);
 }
 
 void module_manager_add(struct module_manager *mm, struct a6o_module *module)
