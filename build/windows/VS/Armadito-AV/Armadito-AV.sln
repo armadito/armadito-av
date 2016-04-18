@@ -1,17 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libarmadito", "libarmadito\libarmadito.vcxproj", "{8A108A73-1029-45C1-AC8D-993025690CB2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{41E1D2ED-D643-4DE1-A5A6-172AC9918C57}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "clamav_a6o", "clamav_a6o\clamav_a6o.vcxproj", "{3B4B286E-47C6-4DCD-88B5-EBE2203FE061}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8A108A73-1029-45C1-AC8D-993025690CB2} = {8A108A73-1029-45C1-AC8D-993025690CB2}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Service", "Service", "{37F89F3B-C0FA-4ADC-9157-36DC5DDED7E2}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ArmaditoSvc", "ArmaditoSvc\ArmaditoSvc.vcxproj", "{B7A4D2B8-9E32-4007-9F90-9E4283E66208}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8A108A73-1029-45C1-AC8D-993025690CB2} = {8A108A73-1029-45C1-AC8D-993025690CB2}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lib-armadito", "Lib-armadito", "{46BC2CBC-FCEA-4970-BEC4-B08788136009}"
 EndProject
