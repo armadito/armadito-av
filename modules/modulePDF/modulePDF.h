@@ -1,4 +1,4 @@
-#include <libuhuru/core.h>
+#include <libarmadito.h>
 #include <string.h>
 
 #include <pdfAnalyzer.h>
