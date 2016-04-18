@@ -89,7 +89,7 @@ After cloning the sources:
 
 	git clone git@gitlab.teclib.infra:armadito/ng-armadito.git
 
-run bower to install the needed modules:
+run bower from ng-armadito directory to install the needed modules:
 
 	bower install
 	npm install
