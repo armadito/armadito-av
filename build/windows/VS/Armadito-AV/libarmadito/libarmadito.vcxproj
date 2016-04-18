@@ -54,6 +54,41 @@
       <AdditionalDependencies>glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>libarmadito.def</ModuleDefinitionFile>
     </Link>
+    <PostBuildEvent>
+      <Command>echo post-build step for $(ProjectName)
+
+echo Copying files from $(OutDir) to $(SolutionDir)out\$(Configuration)
+
+REM create target directory
+if not exist "$(SolutionDir)out\$(Configuration)" mkdir "$(SolutionDir)out\$(Configuration)"
+
+REM copy the DLL
+xcopy "$(OutDir)libarmadito.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM copy the glib DLLs
+REM should we take into accout the $(Configuration) ??? 
+xcopy "$(SolutionDir)..\..\..\..\deps\glib\glib-2.47.6\build\win32\vs12\Debug\Win32\bin\glib-2-vs12.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+xcopy "$(SolutionDir)..\..\..\..\deps\glib\glib-2.47.6\build\win32\vs12\Debug\Win32\bin\gmodule-2-vs12.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+xcopy "$(SolutionDir)..\..\..\..\deps\glib\glib-2.47.6\build\win32\vs12\Debug\Win32\bin\gthread-2-vs12.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM Exit properly because the build will not fail 
+REM unless the final step exits with an error code
+
+goto BuildEventOK
+
+:BuildEventFailed
+echo post-build step for $(ProjectName) FAILED
+exit 1
+
+:BuildEventOK
+echo post-build step for $(ProjectName) OK
+</Command>
+      <Message>this script will copy needed files (.dll, configuration, etc) to a target directory</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
