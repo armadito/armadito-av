@@ -54,9 +54,6 @@
     <ClCompile Include="..\..\..\..\..\core\windows\service\notify.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\core\json\ui\update.c">
-      <Filter>Fichiers sources\json\ui</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\..\core\json\ui\conf.c">
       <Filter>Fichiers sources\json\ui</Filter>
     </ClCompile>
@@ -86,6 +83,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\core\windows\utils\crypt.c">
       <Filter>Fichiers sources\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\core\json\ui\windows\update.c">
+      <Filter>Fichiers sources\json\ui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

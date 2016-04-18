@@ -1,13 +1,15 @@
-#include "update.h"
+#include "ui\update.h"
 #include <stdio.h>
 #include <libarmadito.h>
 //#include "libarmadito-config.h"
 #include <Windows.h>
 
 #include "service\service.h"
-#include "..\updatedb\json_process.h"
+#include "updatedb\json_process.h"
 #include "utils\crypt.h"
 #include "utils\others.h"
+
+#define DB_CACHE_PATH "modules\\DB\\dbcache"
 
 #define SVC_MODE 1
 #define CMD_MODE 2
