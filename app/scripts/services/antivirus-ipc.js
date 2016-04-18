@@ -94,7 +94,6 @@ angular.module('armadito.ipc', [])
 				}
 			});
 
-
 			server_sock.on( 'close', function (){
           		   console.log("[+] Debug :: closing ui socket server");
         	        });

@@ -62,8 +62,6 @@ angular.module('armadito.svc', [])
 
 	};
 
-	
-
 	factory.startNotificationServer = function(callback){
 
 		var server;
