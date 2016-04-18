@@ -43,7 +43,7 @@ ERROR_CODE ElfInit(int fd, CHAR* filename, PELF_CONTAINER elfOfFile){
 	/* file reading into *elf 
 		We read the whole file.
 	*/
-	if (read(fd, (PVOID)elfOfFile->buffer, elfOfFile->fileSize) == -1){
+	if (os_read(fd, (PVOID)elfOfFile->buffer, elfOfFile->fileSize) == -1){
 
 		free((ULONG_PTR*)elfOfFile->buffer);
 		elfOfFile->buffer = 0;

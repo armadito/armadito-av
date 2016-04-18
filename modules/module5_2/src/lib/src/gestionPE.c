@@ -178,7 +178,7 @@ ERROR_CODE PeInit(PPORTABLE_EXECUTABLE Pe, int fd, CHAR* filename){
 	}
 
 	/* file reading into Pe->BaseAddress */
-	if (read(fd, (PVOID)Pe->BaseAddress, Pe->FileSize) == -1){
+	if (os_read(fd, (PVOID)Pe->BaseAddress, Pe->FileSize) == -1){
 		return E_READING_ERROR;
 	}
 
