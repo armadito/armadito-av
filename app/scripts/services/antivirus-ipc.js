@@ -101,9 +101,14 @@ angular.module('armadito.ipc', [])
 			server_sock.on('data', function(data){
 				console.log("[+] Debug :: data received ::"+ data);
 				var response = { "ihm_response":"state", "id":0, "status":0 };
-				var buffer = new Buffer( JSON.stringify(response), 'ascii' );
-				server_sock.write(buffer);
-				callback(data);
+				try {
+				  var buffer = new Buffer( JSON.stringify(response), 'ascii' );
+				  server_sock.write(buffer);
+				  callback(data);
+				}
+				catch(e){
+				   console.log("Exception ondata JSON stringify :" + e);
+				}
 			});
 
 		});
