@@ -16,40 +16,95 @@ Installations are done as root.
 
 Installing node.js:
 
-  apt-get install nodejs-legacy
+	apt-get install nodejs-legacy
 
 Checking installation:
 
-  npm --version
-  1.4.21
+	npm --version
+	1.4.21
 
 Installing bower (must be done as root too):
 
-  npm install -g bower
- 
+	npm install -g bower
+
 
 #### Installing modules in source tree on Linux
 
 After cloning the repository, the source tree of the user interface must be configured for node webkit:
 
-  cd SOMEWHERE/ng-armadito
-  bower install
-  bower install angular-translate-loader-static-files --save    ## not sure this is still needed
- 
+	cd SOMEWHERE/ng-armadito
+	bower install
+	npm install
 
-#### Installing node modules dependencies
-
-  cd SOMEWHERE/ng-armadito
-  npm install node-lang-info
 
 #### Installing node web kit on Linux
 
 After downloading latest stable SDK (actually 0.14.0) from http://nwjs.io/downloads/, untar the tarball:
 
-  cd SOMEWHEREELSE
-  tar xvzf nwjs-v0.14.0-linux-x64.tar.gz  ### adapt w.r.t. distribution, 32 or 64 bits
+	cd SOMEWHEREELSE
+	tar xvzf nwjs-v0.14.0-linux-x64.tar.gz  ### adapt w.r.t. distribution, 32 or 64 bits
 
 That's all
+
+### Installing prerequisites on Windows
+
+The prerequisites are:
+
+* node.js
+* git (needed by bower)
+* bower
+
+#### Installing node and bower
+
+First, download node.js from https://nodejs.org/en/download/, using either the .msi or the .exe installer, at your choice.
+
+During installation, default configuration choices are OK.
+
+Once node is installed, launch a command line.
+
+Checking installation:
+
+	npm --version
+	2.15.1
+
+Then install bower using:
+
+	npm install -g bower
+
+#### Install git on windows
+
+To use bower, you must first install git.
+
+git for windows is available here: https://git-for-windows.github.io/
+
+Checking installation:
+
+	git version 2.8.1.windows.1
+
+
+#### Installing modules in source tree on Windows
+
+
+After cloning the sources:
+
+	git clone git@gitlab.teclib.infra:armadito/ng-armadito.git
+
+run bower to install the needed modules:
+
+	bower install
+	npm install
+
+This should output a lot of messages
+
+
+#### Installing node web kit on Windows
+
+Download the archive from: http://nwjs.io/downloads/
+
+Make sure to download the SDK.
+
+Extract the archive using Windows file explorer.
+
 
 ## Running the interface
 
@@ -59,8 +114,18 @@ First, the Armadito daemon must be launched. Refer to Armadito documentation for
 
 The user interface can be launched with:
 
-  cd SOMEWHERE/ng-armadito
-  SOMEWHEREELSE/nwjs-sdk-v0.13.4-linux-x64/nw .
+	cd SOMEWHERE/ng-armadito
+	SOMEWHEREELSE/nwjs-sdk-v0.13.4-linux-x64/nw .
+
+
+### Running the interface on Windows
+
+First, the Armadito service must be launched. Refer to Armadito documentation for instructions.
+
+The user interface can be launched with:
+
+	cd SOMEWHERE\ng-armadito
+	SOMEWHEREELSE\nwjs-sdk-v0.14.0-win-x64\nw.exe .
 
 
 ## Debugging the interface
@@ -76,7 +141,7 @@ Once the interface is launched:
 This section is may be obsolete?
 
 Run `grunt` for building and `grunt serve` for preview.
-
+p
 ## Testing
 
 This section is may be obsolete?
