@@ -66,12 +66,12 @@ angular.module('armadito.ipc', [])
 		client_sock.close;
 	};
 
-
 	// ----------------------------------------------
 	factory.createUIServer = function(ipc_path,callback){
 
-
-		//this.cleanSocket(ipc_path);
+		if(os.platform() != "win32"){ // linux only
+		   this.cleanSocket(ipc_path);
+		}
 
 		console.log("[+] Debug :: Create server :::::: ", ipc_path);
 
