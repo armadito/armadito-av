@@ -74,7 +74,7 @@
     <ClCompile Include="..\..\..\..\..\core\json\ui\scan.c" />
     <ClCompile Include="..\..\..\..\..\core\json\ui\state.c" />
     <ClCompile Include="..\..\..\..\..\core\json\ui\ui-win.c" />
-    <ClCompile Include="..\..\..\..\..\core\json\ui\update.c" />
+    <ClCompile Include="..\..\..\..\..\core\json\ui\windows\update.c" />
     <ClCompile Include="..\..\..\..\..\core\json\updatedb\json_process.c" />
     <ClCompile Include="..\..\..\..\..\core\windows\service\config.c" />
     <ClCompile Include="..\..\..\..\..\core\windows\service\log.c" />
