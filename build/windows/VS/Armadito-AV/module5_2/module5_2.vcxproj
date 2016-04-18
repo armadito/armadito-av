@@ -1,0 +1,112 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{6F7FCB67-F47F-43A9-A431-AF4192305385}</ProjectGuid>
+    <RootNamespace>module5_2</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\modules\module5_2\src\lib\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>libarmadito.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>module5_2.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\databases.c" />
+    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\distances.c" />
+    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\elfReader.c" />
+    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\gestionPE.c" />
+    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\kNN.c" />
+    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\miniz.c" />
+    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\model.c" />
+    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\table.c" />
+    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\tfidfDetection.c" />
+    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\UhuruStatic.c" />
+    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\uh_errors.c" />
+    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\utils.c" />
+    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\vector.c" />
+    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\windows\osdeps.c" />
+    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\module\module5_2.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\databases.h" />
+    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\distances.h" />
+    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\elfReader.h" />
+    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\gestionPE.h" />
+    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\kNN.h" />
+    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\miniz.h" />
+    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\model.h" />
+    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\osdeps.h" />
+    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\PEUtils.h" />
+    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\table.h" />
+    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\tfidfDetection.h" />
+    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\uh_errors.h" />
+    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\utils.h" />
+    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\vector.h" />
+    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\windowsTypes.h" />
+    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\module\UhuruStatic.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="module5_2.def" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
