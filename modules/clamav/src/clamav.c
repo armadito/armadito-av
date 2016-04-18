@@ -52,9 +52,7 @@ static enum a6o_mod_status clamav_init(struct a6o_module *module)
 #else
 	sprintf(db_dir, "%s%cclamav", bases_location, a6o_path_sep());
 #endif
-	if(bases_location != NULL){
-           free((void*)bases_location);
-        }
+	free((void*)bases_location);
 
 	cl_data->db_dir = db_dir;
 	cl_data->tmp_dir = NULL;
