@@ -90,7 +90,7 @@ angular.module('tatouApp')
 
         // Handle the first response of the av.
         if(json_object.av_response == "scan" && json_object.status == 0 ){
-          console.log("[+] Debug :: Scan order send successfully to av!\n");
+          console.log("[+] Debug :: Scan order send successfully to av!\n");          
           return;
         }
 
@@ -101,6 +101,7 @@ angular.module('tatouApp')
 
           $scope.scan_data.progress = json_object.params.progress ;
           console.log("[+] Debug :: progress = ", $scope.scan_data.progress);
+
           $scope.scan_data.files.push(json_object.params);
           //console.log("tableau", $scope.scan_data.files);
 
@@ -127,6 +128,7 @@ angular.module('tatouApp')
       console.log("[+] Debug :: type d'analyse ::", $scope.type);
       // reset progress bar
       $scope.scan_data.progress = 0;
+      $scope.scan_data.files = [];
 
       if($scope.type == "analyse_view.Full_scan"){
         // only for test
