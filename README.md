@@ -16,12 +16,12 @@ Installations are done as root.
 
 Installing node.js:
 
-	   apt-get install nodejs-legacy
+	apt-get install nodejs-legacy
 
 Checking installation:
 
-	 npm --version
-	 1.4.21
+	npm --version
+	1.4.21
 
 Installing bower (must be done as root too):
 
