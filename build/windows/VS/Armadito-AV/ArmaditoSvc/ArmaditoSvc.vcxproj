@@ -52,6 +52,39 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>libarmadito.lib;json-c.lib;FltLib.lib;Crypt32.lib;Urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>echo post-build step for $(ProjectName)
+
+echo Copying files from $(OutDir) to $(SolutionDir)out\$(Configuration)
+
+REM create target directory
+if not exist "$(SolutionDir)out\$(Configuration)" mkdir "$(SolutionDir)out\$(Configuration)"
+
+REM copy the EXE
+xcopy "$(OutDir)ArmaditoSvc.exe" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM copy the needed DLLs
+xcopy "$(SolutionDir)..\..\..\..\deps\pcre\pcre-7.0-bin\bin\pcre3.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+xcopy "$(SolutionDir)..\..\..\..\deps\libintl\libintl-0.14.4-bin\bin\libintl3.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+xcopy "$(SolutionDir)..\..\..\..\deps\libiconv\libiconv2.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM Exit properly because the build will not fail 
+REM unless the final step exits with an error code
+
+goto BuildEventOK
+
+:BuildEventFailed
+echo post-build step for $(ProjectName) FAILED
+exit 1
+
+:BuildEventOK
+echo post-build step for $(ProjectName) OK
+</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
