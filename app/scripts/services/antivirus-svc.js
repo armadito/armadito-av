@@ -207,6 +207,25 @@ angular.module('armadito.svc', [])
 		return ;	
 	};
 
+	// Update modules database files and reload the av service.
+	factory.updateDB = function(callback){
+
+		var request = { "av_request":"updatedb", "id":123, "params": {}};
+		var buffer = new Buffer( JSON.stringify(request), 'ascii' );
+
+		// Set ipc path.
+		this.setClientPath();
+
+		ArmaditoIPC.connect2_av(ipc_path,callback);
+		
+		ArmaditoIPC.write2_av(buffer);
+		
+		ArmaditoIPC.disconnect2_av();
+
+		return;
+
+	};
+
 
 	factory.cleanALL = function(){
 		
