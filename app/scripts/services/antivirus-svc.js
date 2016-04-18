@@ -97,6 +97,7 @@ angular.module('armadito.svc', [])
 		//this.cleanALL();
 	};
 
+	/*
 	factory.receiveScanInfo = function(callback){
 
 		var scan_server;
@@ -109,7 +110,7 @@ angular.module('armadito.svc', [])
 		scan_server = ArmaditoIPC.createUIServer(scan_server_ipc_path, callback);
 
 		return scan_server;
-	};
+	}; */
 
 
 	// Request antivirus status.
