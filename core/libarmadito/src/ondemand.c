@@ -248,7 +248,7 @@ void a6o_on_demand_free(struct a6o_on_demand *on_demand)
 {
 	/* (FD) NO!!!!! yet, scan_conf are allocated once for all and must NOT be freed, */
 	/* otherwise next on-demand scan will get a memory corruption */
-	a6o_scan_conf_free(on_demand->scan_conf);
+	// a6o_scan_conf_free(on_demand->scan_conf);
 
 	a6o_scan_free(on_demand->scan);
 
