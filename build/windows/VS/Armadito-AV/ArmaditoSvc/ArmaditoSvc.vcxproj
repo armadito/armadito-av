@@ -72,6 +72,10 @@ if errorlevel 1 goto BuildEventFailed
 xcopy "$(SolutionDir)..\..\..\..\deps\libiconv\libiconv2.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
+REM copy the configuration files
+if not exist "$(SolutionDir)out\$(Configuration)\conf" mkdir "$(SolutionDir)out\$(Configuration)\conf"
+xcopy "$(SolutionDir)..\..\..\..\core\libarmadito\conf\armadito.conf" "$(SolutionDir)out\$(Configuration)\conf" /D /I /Y
+
 REM Exit properly because the build will not fail 
 REM unless the final step exits with an error code
 
