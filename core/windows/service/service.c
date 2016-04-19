@@ -1479,6 +1479,9 @@ int main(int argc, char ** argv) {
 		if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {
 			return -1;
 		}
+
+		/* (FD) added to get all log messages */
+		a6o_log_set_handler(ARMADITO_LOG_LEVEL_DEBUG, a6o_log_default_handler, NULL);
 		
 		ret = LaunchCmdLineService(WITHOUT_DRIVER);
 
