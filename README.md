@@ -19,20 +19,33 @@ Packaging
 ---------------------
 On LINUX :
 
-In order to compile and prepare all packages for UhuruAV : 
-- cd scripts/
-- ./compile_all.sh
+Armadito AV sources are compiled using automake and autoconf to generate Makefiles.
+You can compile each part separately by ourself or use a single script to compile the whole project.
 
-This script does everything, even rerepro update on the apt repository.
+The first thing you need to do is setting OS_V variable inside "compile_all.sh".
+It corresponds to the out subdirectory name where will be stored build stuff.
 
-If you want to prepare a single package :
-- cd scripts/
-- ./compile_all.sh PACKAGE_NAME
+For example, in **compile_all.sh** :
 
-PACKAGE_NAME could be one of the following : 
-- core (libarmadito)
-- clamav (uhuru-mod-clamav)
-- module5_2 (uhuru-mod-module5-2)
+OS_V=ubuntu-14.04-64
+
+If you want to compile everything :
+
+* cd scripts/
+* ./compile_all.sh
+
+If you want to compile one module only, or core :
+
+* cd scripts/
+* ./compile_all.sh PACKAGE
+
+PACKAGE could be one of the following : 
+
+* core (libarmadito)
+* clamav (uhuru-mod-clamav)
+* module5_2 (uhuru-mod-module5-2)
+* modulePDF (uhuru-mod-PDF)
+
 
 On WINDOWS :
 

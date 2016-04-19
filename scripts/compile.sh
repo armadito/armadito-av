@@ -1,7 +1,7 @@
 function compile()
 {
 	local PACKAGE_NAME=$1
-	local DISTRIB=$2
+	local OS_V=$2
 
 	set -e
 
@@ -16,32 +16,31 @@ function compile()
 
 ## Build pour Unbutu-14.04-64
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-OS_V=ubuntu-14.04-64
 
 OUT_DIR=$DIR/../out
 SRC_DIR=$DIR/../
 
 function usage()
 {
-    echo "Usage: compile.sh -p PACKAGE -d DISTRIB"
-    echo "Compile package given for a specific distrib"
-    echo "Example: compile.sh -p modules/clamav -d trusty"
+    echo "Usage: compile.sh -p PACKAGE -o OS_V"
+    echo "Compile package given for a specific OS version"
+    echo "Example: compile.sh -p modules/clamav -o ubuntu-14.04-64"
     echo ""
     echo "Argument:"
     echo "  PACKAGE          Package subpath to compile"
-    echo "  DISTRIB          Distribution of the package"
+    echo "  OS_V          OS version out subdirectory name"
     echo ""
 
     exit 1
 }
 
-while getopts "p:d:h" opt; do
+while getopts "p:o:h" opt; do
     case $opt in
 	p)
 	    PACKAGE=$OPTARG
 	;;
-	d)
-	    DISTRIB=$OPTARG
+	o)
+	    OS_V=$OPTARG
 	;;
 	h)
 	    usage
@@ -56,5 +55,5 @@ while getopts "p:d:h" opt; do
 done
 shift $((OPTIND-1))
 
-compile $PACKAGE $DISTRIB
+compile $PACKAGE $OS_V
 
