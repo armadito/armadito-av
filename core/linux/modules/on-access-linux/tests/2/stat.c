@@ -8,34 +8,34 @@
 
 static dev_t get_dev_id(const char *path)
 {
-  struct stat buf;
+	struct stat buf;
 
-  if (stat(path, &buf) < 0) {
-    fprintf(stderr, "stat() failed (%s)\n", strerror(errno));
-    exit(EXIT_FAILURE);
-  }
+	if (stat(path, &buf) < 0) {
+		fprintf(stderr, "stat() failed (%s)\n", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
 
-  return buf.st_dev;
+	return buf.st_dev;
 }
 
 static void test(const char *path, dev_t slash_id)
 {
-  dev_t dev_id;
+	dev_t dev_id;
 
-  dev_id = get_dev_id(path);
+	dev_id = get_dev_id(path);
 
-  printf("%s (%d) vs / (%d): %s\n", path, (unsigned int)dev_id, (unsigned int)slash_id, dev_id == slash_id ? "same device" : "different device");
+	printf("%s (%d) vs / (%d): %s\n", path, (unsigned int)dev_id, (unsigned int)slash_id, dev_id == slash_id ? "same device" : "different device");
 }
 
 int main(int argc, char **argv)
 {
-  dev_t slash_id;
-  int i;
+	dev_t slash_id;
+	int i;
 
-  slash_id = get_dev_id("/");
+	slash_id = get_dev_id("/");
 
-  for (i = 1; i < argc; i++)
-    test(argv[i], slash_id);
+	for (i = 1; i < argc; i++)
+		test(argv[i], slash_id);
 
-  return 0;
+	return 0;
 }

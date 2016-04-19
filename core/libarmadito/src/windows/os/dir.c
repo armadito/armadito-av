@@ -211,7 +211,6 @@ char * GetBinaryDirectory( ) {
 
 	memcpy_s(dirpath, len, filepath, len);
 
-	//uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_DEBUG, "[+] Debug :: GetBinaryDirectory :: dirpath = %s\n",dirpath);
 	
 
 	return dirpath;

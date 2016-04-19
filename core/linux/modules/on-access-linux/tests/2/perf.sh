@@ -38,24 +38,24 @@ function stop_fanotify()
     kill -1 $FANOTIFY_PID
 }
 
-run_one without-fanotify make -C /home/francois/projects/uhuru/build/ubuntu-14.04-64/uhuru-linux-packaging ubuntu-local
+run_one without-fanotify make -C $HOME/projects/armadito/build/ubuntu-14.04-64/armadito-linux-packaging ubuntu-local
 
 start_fanotify -m / /home
-run_one with-fanotify-enable0 make -C /home/francois/projects/uhuru/build/ubuntu-14.04-64/uhuru-linux-packaging ubuntu-local
+run_one with-fanotify-enable0 make -C $HOME/projects/armadito/build/ubuntu-14.04-64/armadito-linux-packaging ubuntu-local
 stop_fanotify
 
 start_fanotify -m -a / /home
-run_one with-fanotify-enable1-log0-type0 make -C /home/francois/projects/uhuru/build/ubuntu-14.04-64/uhuru-linux-packaging ubuntu-local ; 
+run_one with-fanotify-enable1-log0-type0 make -C $HOME/projects/armadito/build/ubuntu-14.04-64/armadito-linux-packaging ubuntu-local ; 
 stop_fanotify
 
 start_fanotify -m -a -t / /home
-run_one with-fanotify-enable1-log0-type1 make -C /home/francois/projects/uhuru/build/ubuntu-14.04-64/uhuru-linux-packaging ubuntu-local ; 
+run_one with-fanotify-enable1-log0-type1 make -C $HOME/projects/armadito/build/ubuntu-14.04-64/armadito-linux-packaging ubuntu-local ; 
 stop_fanotify
 
 start_fanotify -m -a -l / /home
-run_one with-fanotify-enable1-log1-type0 make -C /home/francois/projects/uhuru/build/ubuntu-14.04-64/uhuru-linux-packaging ubuntu-local 
+run_one with-fanotify-enable1-log1-type0 make -C $HOME/projects/armadito/build/ubuntu-14.04-64/armadito-linux-packaging ubuntu-local 
 stop_fanotify
 
 start_fanotify -m -a -l -t / /home
-run_one with-fanotify-enable1-log1-type1 make -C /home/francois/projects/uhuru/build/ubuntu-14.04-64/uhuru-linux-packaging ubuntu-local 
+run_one with-fanotify-enable1-log1-type1 make -C $HOME/projects/armadito/build/ubuntu-14.04-64/armadito-linux-packaging ubuntu-local 
 stop_fanotify
