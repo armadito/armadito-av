@@ -1,20 +1,20 @@
 #include "fanotify.h"
 
 
-/* 
-This function create a fanotify fd for the path given in parameter.
+/*
+  This function create a fanotify fd for the path given in parameter.
 */
 int create_fanotify_fd(char * path){
 
 	int fd;
 
 	fd = fanotify_init(FAN_CLOEXEC | FAN_CLASS_CONTENT | FAN_NONBLOCK,
-	                  O_RDONLY | O_LARGEFILE );
+			O_RDONLY | O_LARGEFILE );
 
 	if (fd == -1) {
-	   perror("[-] create_fanotify_fd() :: fanotify_init failed");
+		perror("[-] create_fanotify_fd() :: fanotify_init failed");
 
-	   exit(EXIT_FAILURE);
+		exit(EXIT_FAILURE);
 	}
 
 	printf("[+] create_fanotify_fd() :: fanotify_init ... (fd = %d)[OK]\n",fd);
@@ -22,11 +22,11 @@ int create_fanotify_fd(char * path){
 
 	// FAN_OPEN_PERM temporarly removed
 	if (fanotify_mark(fd, FAN_MARK_ADD | FAN_MARK_MOUNT,
-	                 FAN_CLOSE_WRITE | FAN_OPEN | FAN_EVENT_ON_CHILD, AT_FDCWD,
-	                 path) == -1) {
-	   perror("[-] create_fanotify_fd() :: fanotify_mark");
+				FAN_CLOSE_WRITE | FAN_OPEN | FAN_EVENT_ON_CHILD, AT_FDCWD,
+				path) == -1) {
+		perror("[-] create_fanotify_fd() :: fanotify_mark");
 		close(fd); ///
-	   exit(EXIT_FAILURE);
+		exit(EXIT_FAILURE);
 	}
 
 	printf("[+] create_fanotify_fd() :: fanotify_mark on (%s) ... [OK]\n",path);
@@ -42,118 +42,118 @@ void fanotify_callback(GIOChannel * source, GIOCondition * condition, gpointer d
 	//printf("fa_notify_callback...\n");
 
 	const struct fanotify_event_metadata *metadata;
-   struct fanotify_event_metadata buf[200];
-   ssize_t len;
-   char path[PATH_MAX];
-   ssize_t path_len;
-   char procfd_path[PATH_MAX];
-   struct fanotify_response response;
-   int fd = data;
+	struct fanotify_event_metadata buf[200];
+	ssize_t len;
+	char path[PATH_MAX];
+	ssize_t path_len;
+	char procfd_path[PATH_MAX];
+	struct fanotify_response response;
+	int fd = data;
 
-   //printf("fd = %d\n",fd);
-   /* Loop while events can be read from fanotify file descriptor */
+	//printf("fd = %d\n",fd);
+	/* Loop while events can be read from fanotify file descriptor */
 
-   /* for(;;) { */
+	/* for(;;) { */
 
-       /* Read some events */
+	/* Read some events */
 
-       len = read(fd, (void *) &buf, sizeof(buf));
-       if (len == -1 && errno != EAGAIN) {
-           perror("read");
-           exit(EXIT_FAILURE);
-       }
+	len = read(fd, (void *) &buf, sizeof(buf));
+	if (len == -1 && errno != EAGAIN) {
+		perror("read");
+		exit(EXIT_FAILURE);
+	}
 
-       /* Check if end of available data reached */
+	/* Check if end of available data reached */
 
-       if (len <= 0)
-	 //break;
-	 return;
+	if (len <= 0)
+		//break;
+		return;
 
-       /* Point to the first event in the buffer */
+	/* Point to the first event in the buffer */
 
-       metadata = buf;
+	metadata = buf;
 
-       /* Loop over all events in the buffer */
+	/* Loop over all events in the buffer */
 
-       while (FAN_EVENT_OK(metadata, len)) {
+	while (FAN_EVENT_OK(metadata, len)) {
 
-           /* Check that run-time and compile-time structures match */
+		/* Check that run-time and compile-time structures match */
 
-           if (metadata->vers != FANOTIFY_METADATA_VERSION) {
-               fprintf(stderr,
-                       "Mismatch of fanotify metadata version.\n");
-               exit(EXIT_FAILURE);
-           }
+		if (metadata->vers != FANOTIFY_METADATA_VERSION) {
+			fprintf(stderr,
+				"Mismatch of fanotify metadata version.\n");
+			exit(EXIT_FAILURE);
+		}
 
-           /* metadata->fd contains either FAN_NOFD, indicating a
-              queue overflow, or a file descriptor (a nonnegative
-              integer). Here, we simply ignore queue overflow. */
+		/* metadata->fd contains either FAN_NOFD, indicating a
+		   queue overflow, or a file descriptor (a nonnegative
+		   integer). Here, we simply ignore queue overflow. */
 
-           if (metadata->fd >= 0) {
+		if (metadata->fd >= 0) {
 
-               /* Handle open permission event */
+			/* Handle open permission event */
 
-               if (metadata->mask & FAN_OPEN_PERM) {
-                   printf("FAN_OPEN_PERM: ");
+			if (metadata->mask & FAN_OPEN_PERM) {
+				printf("FAN_OPEN_PERM: ");
 
-                   /* Allow file to be opened */
+				/* Allow file to be opened */
 
-                   response.fd = metadata->fd;
-                   //response.response = FAN_DENY;
-                   response.response = FAN_ALLOW;
-                   write(fd, &response,
-                         sizeof(struct fanotify_response));
-               }
+				response.fd = metadata->fd;
+				//response.response = FAN_DENY;
+				response.response = FAN_ALLOW;
+				write(fd, &response,
+					sizeof(struct fanotify_response));
+			}
 
-               /* Handle closing of writable file event */
+			/* Handle closing of writable file event */
 
-               if (metadata->mask & FAN_CLOSE_WRITE)
-                   printf("FAN_CLOSE_WRITE: ");
+			if (metadata->mask & FAN_CLOSE_WRITE)
+				printf("FAN_CLOSE_WRITE: ");
 
-               if (metadata->mask & FAN_CLOSE_NOWRITE)
-                   printf("FAN_CLOSE_NOWRITE: ");               
+			if (metadata->mask & FAN_CLOSE_NOWRITE)
+				printf("FAN_CLOSE_NOWRITE: ");
 
-               if (metadata->mask & FAN_MODIFY)
-                   printf("FAN_MODIFY: ");
+			if (metadata->mask & FAN_MODIFY)
+				printf("FAN_MODIFY: ");
 
-               if (metadata->mask & FAN_ACCESS)
-                   printf("FAN_ACCESS: ");
+			if (metadata->mask & FAN_ACCESS)
+				printf("FAN_ACCESS: ");
 
-               if (metadata->mask & FAN_OPEN)
-                   printf("FAN_OPEN: ");
+			if (metadata->mask & FAN_OPEN)
+				printf("FAN_OPEN: ");
 
-               /* Retrieve and print pathname of the accessed file */
+			/* Retrieve and print pathname of the accessed file */
 
-               snprintf(procfd_path, sizeof(procfd_path),
-                        "/proc/self/fd/%d", metadata->fd);
+			snprintf(procfd_path, sizeof(procfd_path),
+				"/proc/self/fd/%d", metadata->fd);
 
-               //printf("[i] procfd_path = %s\n",procfd_path);
+			//printf("[i] procfd_path = %s\n",procfd_path);
 
-               path_len = readlink(procfd_path, path,
-                                   sizeof(path) - 1);
-               if (path_len == -1) {
-                   perror("readlink");
-                   exit(EXIT_FAILURE);
-               }
+			path_len = readlink(procfd_path, path,
+					sizeof(path) - 1);
+			if (path_len == -1) {
+				perror("readlink");
+				exit(EXIT_FAILURE);
+			}
 
-               path[path_len] = '\0';
-               printf("File %s :: Program PID %d\n", path, metadata->pid );
+			path[path_len] = '\0';
+			printf("File %s :: Program PID %d\n", path, metadata->pid );
 
-               // get the pid of the program that caused the event.
-               //printf("Program PID = %d\n",metadata->pid );
+			// get the pid of the program that caused the event.
+			//printf("Program PID = %d\n",metadata->pid );
 
 
-               /* Close the file descriptor of the event */
+			/* Close the file descriptor of the event */
 
-               close(metadata->fd);
+			close(metadata->fd);
 
-           }
+		}
 
-           /* Advance to next event */
+		/* Advance to next event */
 
-           metadata = FAN_EVENT_NEXT(metadata, len);
-       }
-   /* } */
+		metadata = FAN_EVENT_NEXT(metadata, len);
+	}
+	/* } */
 
 	return;
 
@@ -162,7 +162,7 @@ void fanotify_callback(GIOChannel * source, GIOCondition * condition, gpointer d
 
 
 /*
-This function add a new path to watch
+  This function add a new path to watch
 */
 int add_fanotify_watch(char * path){
 
@@ -173,7 +173,7 @@ int add_fanotify_watch(char * path){
 
 	fd = create_fanotify_fd(path);
 
-	channel = g_io_channel_unix_new(fd);	
+	channel = g_io_channel_unix_new(fd);
 
 	// g_io_add_watch (GIOChannel *channel, GIOCondition condition, GIOFunc func, gpointer user_data);
 	res = g_io_add_watch(channel, G_IO_IN, fanotify_callback, fd);

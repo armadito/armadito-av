@@ -73,13 +73,12 @@ const char *os_mime_type_guess(const char *path)
 
 	fh = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ , NULL,OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL,NULL );
 	if (fh == INVALID_HANDLE_VALUE) {
-		//uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_WARNING, "Error :: os_mime_type_guess() :: CreateFileA() failed :: %s :: err = %d (%s) :: ",path,GetLastError(),os_strerror(GetLastError()));
 		return NULL;
 	}
 
 	// get file content size in bytes.
 	bres = GetFileSizeEx(fh, &fileSize);
-	
+
 	if (bres == FALSE) {
 		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "Error :: os_mime_type_guess() :: GetFileSizeEx() failed :: %s :: err = %d (%s) :: ",path,GetLastError(),os_strerror(GetLastError()));
 		return NULL;
