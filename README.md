@@ -22,25 +22,22 @@ On LINUX :
 Armadito AV sources are compiled using automake and autoconf to generate Makefiles.
 You can compile each part separately by ourself or use a single script to compile the whole project.
 
-The first thing you need to do is setting OS_V variable inside "compile_all.sh". 
+The first thing you need to do is setting OS_V variable inside "compile_all.sh".
 It corresponds to the out subdirectory name where will be stored build stuff.
 
 For example, in **compile_all.sh** :
-::
 
-   OS_V=ubuntu-14.04-64
+OS_V=ubuntu-14.04-64
 
 If you want to compile everything :
-::
- 
-   cd scripts/
-  ./compile_all.sh
+
+* cd scripts/
+* ./compile_all.sh
 
 If you want to compile one module only, or core :
-::
 
-  cd scripts/
-  ./compile_all.sh PACKAGE
+* cd scripts/
+* ./compile_all.sh PACKAGE
 
 PACKAGE could be one of the following : 
 
