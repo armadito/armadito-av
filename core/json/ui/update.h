@@ -4,8 +4,8 @@
 #include "jsonhandlerp.h"
 
 
-#define DB_DESC_URL "http://uhuru.gendarmerie.fr/current/uhurudbvirus.json"
-#define DB_SIG_URL "http://uhuru.gendarmerie.fr/current/uhurudbvirus.json.sig"
+#define DB_DESC_URL "http://db.armadito.org/current/uhurudbvirus.json"
+#define DB_SIG_URL	"http://db.armadito.org//current/uhurudbvirus.json.sig"
 
 
 
