@@ -87,6 +87,7 @@
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\scanconf.c" />
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\status.c" />
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\stdpaths.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\onaccess_windows.c" />
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\ondemandmod.c" />
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\os\dir.c" />
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\os\file.c" />
@@ -109,6 +110,7 @@
     <ClInclude Include="..\..\..\..\..\core\libarmadito\src\reportp.h" />
     <ClInclude Include="..\..\..\..\..\core\libarmadito\src\scanp.h" />
     <ClInclude Include="..\..\..\..\..\core\libarmadito\src\statusp.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\onaccess_windows.h" />
     <ClInclude Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\ondemandmod.h" />
   </ItemGroup>
   <ItemGroup>

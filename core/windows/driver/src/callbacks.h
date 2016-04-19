@@ -4,8 +4,7 @@
 #include <fltKernel.h>
 #include <dontuse.h>
 #include <suppress.h>
-#include <Struct.h>
-//#include <io.h>
+#include "structs.h"
 
 
 FLT_PREOP_CALLBACK_STATUS

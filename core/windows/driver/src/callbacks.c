@@ -1,7 +1,6 @@
 #include "callbacks.h"
-#include "Struct.h"
 #include "communication.h"
-#include "UhuruGuard.h"
+#include "ArmaditoGuard.h"
 
 extern PFLT_PORT gClientComPort;
 //extern PEPROCESS gScanProcess;
@@ -13,29 +12,29 @@ const CHAR * PrintUhuruScanResult(SCAN_RESULT res) {
 			case NONE:
 				return "[NONE]";				
 				break;
-			case UHURU_UNDECIDED:
-				return "[UHURU_UNDECIDED]";				
+			case ARMADITO_UNDECIDED:
+				return "[ARMADITO_UNDECIDED]";				
 				break;
-			case UHURU_CLEAN:
-				return "[UHURU_CLEAN]";
+			case ARMADITO_CLEAN:
+				return "[ARMADITO_CLEAN]";
 				break;
-			case UHURU_UNKNOWN_FILE_TYPE:
-				return "[UHURU_UNKNOWN_FILE_TYPE]";
+			case ARMADITO_UNKNOWN_FILE_TYPE:
+				return "[ARMADITO_UNKNOWN_FILE_TYPE]";
 				break;
-			case UHURU_EINVAL:
-				return "[UHURU_EINVAL]";
+			case ARMADITO_EINVAL:
+				return "[ARMADITO_EINVAL]";
 				break;
-			case UHURU_IERROR:
-				return "[UHURU_IERROR]";
+			case ARMADITO_IERROR:
+				return "[ARMADITO_IERROR]";
 				break;
-			case UHURU_SUSPICIOUS:
-				return "[UHURU_SUSPICIOUS]";
+			case ARMADITO_SUSPICIOUS:
+				return "[ARMADITO_SUSPICIOUS]";
 				break;
-			case UHURU_WHITE_LISTED:
-				return "[UHURU_WHITE_LISTED]";
+			case ARMADITO_WHITE_LISTED:
+				return "[ARMADITO_WHITE_LISTED]";
 				break;
-			case UHURU_MALWARE:
-				return "[UHURU_MALWARE]";
+			case ARMADITO_MALWARE:
+				return "[ARMADITO_MALWARE]";
 				break;
 			case TIMEOUT:
 				return "[TIMEOUT]";
@@ -100,7 +99,7 @@ SCAN_RESULT LaunchFileAnalysis(_In_ PFLT_CALLBACK_DATA Data, _In_ PCFLT_RELATED_
 		// Deny access to Quarantine folder		
 		/*RtlInitUnicodeString(&quarantineDir,QUARANTINE_DIR); // Free unicode string.
 		if (RtlEqualUnicodeString(&FileNameInformation->ParentDir, &quarantineDir, FALSE) == TRUE) {
-			answer = UHURU_MALWARE;
+			answer = ARMADITO_MALWARE;
 			__leave;
 		}
 		*/
@@ -110,7 +109,7 @@ SCAN_RESULT LaunchFileAnalysis(_In_ PFLT_CALLBACK_DATA Data, _In_ PCFLT_RELATED_
 		ntStatus = SendScanOrder(FltObjects->Filter, &FileNameInformation->Name, &answer);
 		if (!NT_SUCCESS(ntStatus)) {			
 			DbgPrint("[-] Error :: UhuruGuard!LaunchFileAnalysis :: SendScanOrder() failed :: 0x%x \n", ntStatus);
-			answer = UHURU_IERROR;
+			answer = ARMADITO_IERROR;
 			__leave;			
 		}
 
@@ -118,10 +117,10 @@ SCAN_RESULT LaunchFileAnalysis(_In_ PFLT_CALLBACK_DATA Data, _In_ PCFLT_RELATED_
 		//-----------------------------------------
 		/* fake scan.
 		if ( RtlEqualUnicodeString(&FileNameInformation->FinalComponent,&malName,FALSE) == TRUE ) {	
-			res = UHURU_MALWARE;
+			res = ARMADITO_MALWARE;
 		}
 		else {
-			res = UHURU_CLEAN;
+			res = ARMADITO_CLEAN;
 		}
 		/************************************************/
 
@@ -196,7 +195,7 @@ NTSTATUS IsFileEncrypted (
 
 
 /*************************************************************************
-    MiniFilter callback routines.
+    ArmaditoGuard callback routines.
 *************************************************************************/
 
 
@@ -462,7 +461,7 @@ Return Value:
 
 			// For file creation, scan the file at cleanup.
 			if (FlagOn(Data->IoStatus.Information, FILE_CREATED) ) {
-				uhDbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCreate :: [%d] :: FILE_CREATED flag :: %wZ\n", FltGetRequestorProcessId(Data),FltObjects->FileObject->FileName);
+				a6oDbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCreate :: [%d] :: FILE_CREATED flag :: %wZ\n", FltGetRequestorProcessId(Data),FltObjects->FileObject->FileName);
 				__leave;
 			}
 
@@ -475,13 +474,13 @@ Return Value:
 			scanRes = LaunchFileAnalysis(Data,FltObjects);
 			FileContext->scanResult = scanRes;
 			// Print scan result:
-			if (FileContext->scanResult == UHURU_MALWARE || FileContext->scanResult == UHURU_CLEAN)
-				uhDbgPrint("[i] INFO :: UhuruGuard!PostOperationIrpCreate ::[%d]:: %wZ => %s\n",FltGetRequestorProcessId(Data), FltObjects->FileObject->FileName,PrintUhuruScanResult(FileContext->scanResult));
+			if (FileContext->scanResult == ARMADITO_MALWARE || FileContext->scanResult == ARMADITO_CLEAN)
+				a6oDbgPrint("[i] INFO :: UhuruGuard!PostOperationIrpCreate ::[%d]:: %wZ => %s\n",FltGetRequestorProcessId(Data), FltObjects->FileObject->FileName,PrintUhuruScanResult(FileContext->scanResult));
 		}
 		
 
 		/*
-		if (FileContext->scanResult == UHURU_IERROR) {
+		if (FileContext->scanResult == ARMADITO_IERROR) {
 			DbgPrint("[-] Error :: UhuruGuard!PostOperationIrpCreate :: LaunchFileAnalysis failed for file :: %wZ.\n",FltObjects->FileObject->FileName);	;
 			__leave;
 		}
@@ -497,7 +496,7 @@ Return Value:
 		*/
 
 		// If the file is detected as a malware, cancel file operation.
-		if (FileContext->scanResult == UHURU_MALWARE ) {
+		if (FileContext->scanResult == ARMADITO_MALWARE ) {
 
 			DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCreate :: [%d] :: MALWARE DETECTED :: %wZ.\n",FltGetRequestorProcessId(Data),FltObjects->FileObject->FileName);	
 		
@@ -648,17 +647,17 @@ Return Value:
 		}
 		else if (NT_SUCCESS(ntStatus)) {	// If a context is already set for this file.
 			
-			if (FileContext->scanResult == UHURU_CLEAN)
+			if (FileContext->scanResult == ARMADITO_CLEAN)
 				//DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpWrite :: Writing in MARKED file %s :: %wZ\n",PrintUhuruScanResult(FileContext->scanResult),FltObjects->FileObject->FileName);
 			
 			// If the file was no detected as a malware, then rescan it later.
-			if (FileContext->scanResult != UHURU_MALWARE) {
+			if (FileContext->scanResult != ARMADITO_MALWARE) {
 				FileContext->scanResult = NONE; // Reset the scan result.
 			}
 			else {
 				// Cancel operation. in the postoperation.
 				// TODO;
-				DbgPrint("[+] Debug :: UhuruGuard!PostOperationIrpWrite :: Writing in UHURU_MALWARE marked file :: %wZ\n",FltObjects->FileObject->FileName);
+				DbgPrint("[+] Debug :: UhuruGuard!PostOperationIrpWrite :: Writing in ARMADITO_MALWARE marked file :: %wZ\n",FltObjects->FileObject->FileName);
 				__leave;
 
 			}
@@ -751,7 +750,7 @@ _Flt_CompletionContext_Outptr_ PVOID *CompletionContext
 		}
 
 		// Test if the file has already been scanned.
-		if (FileContext->scanResult != NONE && FileContext->scanResult != TIMEOUT && FileContext->scanResult != UHURU_UNKNOWN_FILE_TYPE ) {
+		if (FileContext->scanResult != NONE && FileContext->scanResult != TIMEOUT && FileContext->scanResult != ARMADITO_UNKNOWN_FILE_TYPE ) {
 			//DbgPrint("[+] Debug :: UhuruGuard!PreOperationIrpCleanup :: File Already Scanned  :: %wZ :: %s\n", FltObjects->FileObject->FileName, PrintUhuruScanResult(FileContext->scanResult));
 			__leave;
 		}
@@ -761,12 +760,12 @@ _Flt_CompletionContext_Outptr_ PVOID *CompletionContext
 		scanResult = LaunchFileAnalysis(Data,FltObjects);
 		FileContext->scanResult = scanResult;
 
-		//if (FileContext->scanResult == UHURU_MALWARE || FileContext->scanResult == UHURU_CLEAN)
-		uhDbgPrint("[i] INFO :: UhuruGuard!PreOperationIrpCleanup ::[%d]:: %wZ => %s\n",FltGetRequestorProcessId(Data),FltObjects->FileObject->FileName,PrintUhuruScanResult(FileContext->scanResult));
+		//if (FileContext->scanResult == ARMADITO_MALWARE || FileContext->scanResult == ARMADITO_CLEAN)
+		a6oDbgPrint("[i] INFO :: UhuruGuard!PreOperationIrpCleanup ::[%d]:: %wZ => %s\n",FltGetRequestorProcessId(Data),FltObjects->FileObject->FileName,PrintUhuruScanResult(FileContext->scanResult));
 
 
 		// if the file has been detected has malware...
-		if (FileContext->scanResult == UHURU_MALWARE) {
+		if (FileContext->scanResult == ARMADITO_MALWARE) {
 			//status = FLT_PREOP_SUCCESS_WITH_CALLBACK;
 		}
 		
@@ -837,14 +836,14 @@ Return Value:
 			__leave; //return FLT_POSTOP_FINISHED_PROCESSING;
 		}
 
-		uhDbgPrint("[+] Debug :: UhuruGuard!PostOperationIrpCleanup :: Cleaning File Context :: %wZ => %s\n", FltObjects->FileObject->FileName,PrintUhuruScanResult(FileContext->scanResult));
+		a6oDbgPrint("[+] Debug :: UhuruGuard!PostOperationIrpCleanup :: Cleaning File Context :: %wZ => %s\n", FltObjects->FileObject->FileName,PrintUhuruScanResult(FileContext->scanResult));
 		
 		
 		//DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCleanup :: ::Context realeased for file %wZ\n",FltObjects->FileObject->FileName);
 
 		// maybe use FltDeleteFileContext( ) instead of FltDeleteContext();		
 			
-		if (FileContext != NULL && FileContext->scanResult != UHURU_MALWARE ) {
+		if (FileContext != NULL && FileContext->scanResult != ARMADITO_MALWARE ) {
 			FltReleaseContext((PFLT_CONTEXT)FileContext);
 			FltDeleteContext((PFLT_CONTEXT)FileContext);
 			FileContext = NULL;
