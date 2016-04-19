@@ -10,12 +10,12 @@ int main(int argc, char ** argv){
 	GMainLoop * loop;
 
 	printf("-------------------------------\n");
-	printf("---- UHURU-AV REAL TIME POC ---\n");
+	printf("---- ARMADITO-AV REAL TIME POC ---\n");
 	printf("-------------------------------\n");
 
 
 	//printf("argc = %d\n",argc);
-	
+
 	if(argc < 2 ){
 		printf("USAGE : ./rtime [init_path]\n");
 		return -1;

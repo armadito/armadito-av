@@ -19,16 +19,16 @@ static gchar * query_mounted_dev(GDBusConnection * conn, gchar * device_path){
 	}
 
 	ret = g_dbus_connection_call_sync (conn,
-                        "org.freedesktop.UDisks", // bus_name
-                        device_path,//"/org/freedesktop/UDisks/devices/sdd1", // object path
-                        "org.freedesktop.DBus.Properties", // interface name
-                        "Get", // method
-                        g_variant_new("(ss)","","DeviceMountPaths"), // parameters
-                        G_VARIANT_TYPE_ANY,		// reply type
-                        G_DBUS_CALL_FLAGS_NONE,		// flag
-                        -1,		// timeout
-                        NULL,	// cancellable                        
-                        &error);
+					"org.freedesktop.UDisks", // bus_name
+					device_path,//"/org/freedesktop/UDisks/devices/sdd1", // object path
+					"org.freedesktop.DBus.Properties", // interface name
+					"Get", // method
+					g_variant_new("(ss)","","DeviceMountPaths"), // parameters
+					G_VARIANT_TYPE_ANY,		// reply type
+					G_DBUS_CALL_FLAGS_NONE,		// flag
+					-1,		// timeout
+					NULL,	// cancellable
+					&error);
 
 	//g_variant_new("(ss)","org.freedesktop.devices.sdd1","DeviceMountPaths")
 	if(ret == NULL){
@@ -36,9 +36,9 @@ static gchar * query_mounted_dev(GDBusConnection * conn, gchar * device_path){
 		return NULL;
 	}
 
-	#ifdef DEBUG
-		printf("[+] g_dbus_connection_call_sync() succeeded\n");
-	#endif
+#ifdef DEBUG
+	printf("[+] g_dbus_connection_call_sync() succeeded\n");
+#endif
 
 
 	if(g_variant_n_children(ret) <1){
@@ -46,15 +46,14 @@ static gchar * query_mounted_dev(GDBusConnection * conn, gchar * device_path){
 		return NULL;
 	}
 
-	#ifdef DEBUG
-		printf("\tparameter type : %s > with %ld sub parameters\n",g_variant_get_type_string(ret),g_variant_n_children(ret) );
-	#endif
+#ifdef DEBUG
+	printf("\tparameter type : %s > with %ld sub parameters\n",g_variant_get_type_string(ret),g_variant_n_children(ret) );
+#endif
 	//printf("ret got %ld parameters\n", g_variant_n_children(ret));
 
 	i = 0;
 	j = 1;
 	tmp = g_variant_get_child_value(ret,i);
-	
 
 
 	while(g_variant_is_of_type(tmp,G_VARIANT_TYPE_VARIANT) || g_variant_is_of_type(tmp,G_VARIANT_TYPE_STRING_ARRAY) ){
@@ -71,7 +70,6 @@ static gchar * query_mounted_dev(GDBusConnection * conn, gchar * device_path){
 				fprintf(stderr, "%ld parameters???\n",g_variant_n_children(tmp) );
 			}
 
-			
 			return NULL;
 		}
 
@@ -128,16 +126,16 @@ static void mount_callback(GDBusConnection * conn, const gchar* sender_name, con
 
 	if(g_variant_n_children(parameters) <1){
 
-		#ifdef DEBUG
-			fprintf(stderr, "[i] %ld child parameters???\n",g_variant_n_children(parameters) );
-		#endif
+#ifdef DEBUG
+		fprintf(stderr, "[i] %ld child parameters???\n",g_variant_n_children(parameters) );
+#endif
 
 		return;
 	}
 
-	#ifdef DEBUG
-		printf("parameters type %s :: with >> %ld sub parameters\n", g_variant_get_type_string(parameters), g_variant_n_children(parameters));
-	#endif
+#ifdef DEBUG
+	printf("parameters type %s :: with >> %ld sub parameters\n", g_variant_get_type_string(parameters), g_variant_n_children(parameters));
+#endif
 	//printf(" got %ld sub parameters\n", g_variant_n_children(parameters));
 
 
@@ -168,13 +166,13 @@ static void mount_callback(GDBusConnection * conn, const gchar* sender_name, con
 				printf("[+] Adding fanotify on mount point ::  %s\n", mount_dir);
 				add_fanotify_watch(mount_dir);
 			}
-				
+
 			// TODO ...
 
 		}else{
 			printf("\n");
 		}
-		
+
 		g_variant_unref(argv);
 	}
 
@@ -189,19 +187,19 @@ static void subscribe_sig_mount(GDBusConnection * conn){
 
 
 	sig_sub_id = g_dbus_connection_signal_subscribe(conn,NULL,
-		MOUNT_INTERFACE,//MOUNT_INTERFACE, // interface_name : D-Bus interface name to match on or NULL to match on all interfaces
-		 NULL, // member : D-Bus signal name to match on or NULL to match on all signals
-		 NULL, // object_path : Object path to match on or NULL to match on all object paths
-		 NULL, // arg0 : Contents of first string argument to match on or NULL to match on all kinds of arguments
-		 0,	// flag : Flags describing how to subscribe to the signal (currently unused).
-		 mount_callback, //  callback : Callback to invoke when there is a signal matching the requested data.
-		 &mount_cb_data, // user_data : User data to pass to callback.
-		 NULL // user_data_free_func : Function to free user_data with when subscription is removed or NULL.
-		 );
+							MOUNT_INTERFACE,//MOUNT_INTERFACE, // interface_name : D-Bus interface name to match on or NULL to match on all interfaces
+							NULL, // member : D-Bus signal name to match on or NULL to match on all signals
+							NULL, // object_path : Object path to match on or NULL to match on all object paths
+							NULL, // arg0 : Contents of first string argument to match on or NULL to match on all kinds of arguments
+							0,	// flag : Flags describing how to subscribe to the signal (currently unused).
+							mount_callback, //  callback : Callback to invoke when there is a signal matching the requested data.
+							&mount_cb_data, // user_data : User data to pass to callback.
+							NULL // user_data_free_func : Function to free user_data with when subscription is removed or NULL.
+		);
 
-	#ifdef DEBUG
-		printf("[i] g_dbus_connection_signal_subscribe :: signal_id =  %d\n",sig_sub_id );
-	#endif
+#ifdef DEBUG
+	printf("[i] g_dbus_connection_signal_subscribe :: signal_id =  %d\n",sig_sub_id );
+#endif
 
 	return;
 
@@ -221,7 +219,7 @@ int add_mount_watch(){
 	}
 	printf("[+] add_mount_watch() :: g_bus_get_sync() succeeded\n");
 
-	// subscribe to mount signal	
+	// subscribe to mount signal
 	subscribe_sig_mount(gd_conn);
 
 	return 0;

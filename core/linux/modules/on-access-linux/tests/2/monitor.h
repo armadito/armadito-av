@@ -4,11 +4,11 @@
 struct access_monitor;
 
 enum access_monitor_flags {
-  MONITOR_MOUNT        = 1 << 0,
-  MONITOR_RECURSIVE    = 1 << 1,
-  MONITOR_TYPE_CHECK   = 1 << 2,
-  MONITOR_LOG_EVENT    = 1 << 3,
-  MONITOR_ENABLE_PERM  = 1 << 4,
+	MONITOR_MOUNT        = 1 << 0,
+	MONITOR_RECURSIVE    = 1 << 1,
+	MONITOR_TYPE_CHECK   = 1 << 2,
+	MONITOR_LOG_EVENT    = 1 << 3,
+	MONITOR_ENABLE_PERM  = 1 << 4,
 };
 
 struct access_monitor *access_monitor_new(enum access_monitor_flags flags);
