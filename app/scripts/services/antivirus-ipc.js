@@ -117,7 +117,7 @@ angular.module('armadito.ipc', [])
 
 		console.log("[+] Debug :: CLeaning socket server path...\n");
 
-		fs.access(ipc_path, fs.F_OK, (err) => {
+		fs.access(ipc_path, fs.F_OK, function(err){
 
 			console.log(err ? 'no socket file---------!' : 'file exists already!!------------');
 			if(!err) {
