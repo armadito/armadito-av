@@ -19,6 +19,7 @@ a6o_action_pretty_str
 a6o_report_init
 a6o_log_set_handler
 a6o_log
+a6o_log_default_handler
 a6o_notify_set_handler
 a6o_notify
 a6o_conf_load_file
