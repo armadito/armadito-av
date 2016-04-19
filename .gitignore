@@ -31,5 +31,8 @@ VS/dependencies/*
 out/
 documentation/specs-ihm/tatou-ihm/~$$tatouIHM.~vsdx
 deps/*
-build/Windows/VS/Armadito-AV/*/Debug
-build/Windows/VS/Armadito-AV/Debug/*
+build/windows/VS/Armadito-AV/*/Debug
+build/windows/VS/Armadito-AV/Debug/*
+build/windows/VS/Armadito-AV/x64/*
+build/windows/VS/Armadito-AV/ArmaditoGuard/x64/*
+core/windows/driver/signature/*

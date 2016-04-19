@@ -2,11 +2,11 @@
 
 Module Name:
 
-    UhuruGuard.c
+    ArmaditoGuard.c
 
 Abstract:
 
-    This is the main module of the UhuruGuard miniFilter driver.
+    This is the main module of the ArmaditoGuard miniFilter driver.
 
 Environment:
 
@@ -18,9 +18,8 @@ Environment:
 #include <dontuse.h>
 #include <suppress.h>
 #include "callbacks.h"
-#include "Struct.h"
 #include "communication.h"
-#include "UhuruGuard.h"
+#include "ArmaditoGuard.h"
 
 #pragma prefast(disable:__WARNING_ENCODE_MEMBER_FUNCTION_POINTER, "Not valid for kernel mode drivers")
 
@@ -57,7 +56,7 @@ DriverEntry (
 VOID CleanupFileContext(_In_ PFLT_CONTEXT Context, _In_ FLT_CONTEXT_TYPE ContextType);
 
 NTSTATUS
-UhuruGuardInstanceSetup (
+ArmaditoGuardInstanceSetup (
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_ FLT_INSTANCE_SETUP_FLAGS Flags,
     _In_ DEVICE_TYPE VolumeDeviceType,
@@ -65,37 +64,37 @@ UhuruGuardInstanceSetup (
     );
 
 VOID
-UhuruGuardInstanceTeardownStart (
+ArmaditoGuardInstanceTeardownStart (
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_ FLT_INSTANCE_TEARDOWN_FLAGS Flags
     );
 
 VOID
-UhuruGuardInstanceTeardownComplete (
+ArmaditoGuardInstanceTeardownComplete (
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_ FLT_INSTANCE_TEARDOWN_FLAGS Flags
     );
 
 NTSTATUS
-UhuruGuardUnload (
+ArmaditoGuardUnload (
     _In_ FLT_FILTER_UNLOAD_FLAGS Flags
     );
 
 NTSTATUS
-UhuruGuardInstanceQueryTeardown (
+ArmaditoGuardInstanceQueryTeardown (
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_ FLT_INSTANCE_QUERY_TEARDOWN_FLAGS Flags
     );
 
 FLT_PREOP_CALLBACK_STATUS
-UhuruGuardPreOperation (
+ArmaditoGuardPreOperation (
     _Inout_ PFLT_CALLBACK_DATA Data,
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _Flt_CompletionContext_Outptr_ PVOID *CompletionContext
     );
 
 VOID
-UhuruGuardOperationStatusCallback (
+ArmaditoGuardOperationStatusCallback (
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_ PFLT_IO_PARAMETER_BLOCK ParameterSnapshot,
     _In_ NTSTATUS OperationStatus,
@@ -103,7 +102,7 @@ UhuruGuardOperationStatusCallback (
     );
 
 FLT_POSTOP_CALLBACK_STATUS
-UhuruGuardPostOperation (
+ArmaditoGuardPostOperation (
     _Inout_ PFLT_CALLBACK_DATA Data,
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_opt_ PVOID CompletionContext,
@@ -111,14 +110,14 @@ UhuruGuardPostOperation (
     );
 
 FLT_PREOP_CALLBACK_STATUS
-UhuruGuardPreOperationNoPostOperation (
+ArmaditoGuardPreOperationNoPostOperation (
     _Inout_ PFLT_CALLBACK_DATA Data,
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _Flt_CompletionContext_Outptr_ PVOID *CompletionContext
     );
 
 BOOLEAN
-UhuruGuardDoRequestOperationStatus(
+ArmaditoGuardDoRequestOperationStatus(
     _In_ PFLT_CALLBACK_DATA Data
     );
 
@@ -128,11 +127,11 @@ UhuruGuardDoRequestOperationStatus(
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text(INIT, DriverEntry)
-#pragma alloc_text(PAGE, UhuruGuardUnload)
-#pragma alloc_text(PAGE, UhuruGuardInstanceQueryTeardown)
-#pragma alloc_text(PAGE, UhuruGuardInstanceSetup)
-#pragma alloc_text(PAGE, UhuruGuardInstanceTeardownStart)
-#pragma alloc_text(PAGE, UhuruGuardInstanceTeardownComplete)
+#pragma alloc_text(PAGE, ArmaditoGuardUnload)
+#pragma alloc_text(PAGE, ArmaditoGuardInstanceQueryTeardown)
+#pragma alloc_text(PAGE, ArmaditoGuardInstanceSetup)
+#pragma alloc_text(PAGE, ArmaditoGuardInstanceTeardownStart)
+#pragma alloc_text(PAGE, ArmaditoGuardInstanceTeardownComplete)
 #endif
 
 //
@@ -159,198 +158,198 @@ CONST FLT_OPERATION_REGISTRATION Callbacks[] = {
 #if 0 // TODO - List all of the requests to filter.
     { IRP_MJ_CREATE,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_CREATE_NAMED_PIPE,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_CLOSE,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_READ,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_WRITE,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_QUERY_INFORMATION,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_SET_INFORMATION,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_QUERY_EA,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_SET_EA,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_FLUSH_BUFFERS,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_QUERY_VOLUME_INFORMATION,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_SET_VOLUME_INFORMATION,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_DIRECTORY_CONTROL,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_FILE_SYSTEM_CONTROL,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_DEVICE_CONTROL,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_INTERNAL_DEVICE_CONTROL,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_SHUTDOWN,
       0,
-      UhuruGuardPreOperationNoPostOperation,
+      ArmaditoGuardPreOperationNoPostOperation,
       NULL },                               //post operations not supported
 
     { IRP_MJ_LOCK_CONTROL,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_CLEANUP,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_CREATE_MAILSLOT,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_QUERY_SECURITY,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_SET_SECURITY,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_QUERY_QUOTA,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_SET_QUOTA,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_PNP,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_ACQUIRE_FOR_SECTION_SYNCHRONIZATION,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_RELEASE_FOR_SECTION_SYNCHRONIZATION,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_ACQUIRE_FOR_MOD_WRITE,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_RELEASE_FOR_MOD_WRITE,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_ACQUIRE_FOR_CC_FLUSH,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_RELEASE_FOR_CC_FLUSH,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_FAST_IO_CHECK_IF_POSSIBLE,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_NETWORK_QUERY_OPEN,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_MDL_READ,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_MDL_READ_COMPLETE,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_PREPARE_MDL_WRITE,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_MDL_WRITE_COMPLETE,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_VOLUME_MOUNT,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
     { IRP_MJ_VOLUME_DISMOUNT,
       0,
-      UhuruGuardPreOperation,
-      UhuruGuardPostOperation },
+      ArmaditoGuardPreOperation,
+      ArmaditoGuardPostOperation },
 
 #endif // TODO
 
@@ -386,12 +385,12 @@ CONST FLT_REGISTRATION FilterRegistration = {
     ContextRegistration,                               //  Context
     Callbacks,                          //  Operation callbacks
 
-    UhuruGuardUnload,                           //  MiniFilterUnload
+    ArmaditoGuardUnload,                           //  MiniFilterUnload
 
-    UhuruGuardInstanceSetup,                    //  InstanceSetup
-    UhuruGuardInstanceQueryTeardown,            //  InstanceQueryTeardown
-    UhuruGuardInstanceTeardownStart,            //  InstanceTeardownStart
-    UhuruGuardInstanceTeardownComplete,         //  InstanceTeardownComplete
+    ArmaditoGuardInstanceSetup,                    //  InstanceSetup
+    ArmaditoGuardInstanceQueryTeardown,            //  InstanceQueryTeardown
+    ArmaditoGuardInstanceTeardownStart,            //  InstanceTeardownStart
+    ArmaditoGuardInstanceTeardownComplete,         //  InstanceTeardownComplete
 
     NULL,                               //  GenerateFileName
     NULL,                               //  GenerateDestinationFileName
@@ -426,7 +425,7 @@ VOID CleanupFileContext(_In_ PFLT_CONTEXT Context, _In_ FLT_CONTEXT_TYPE Context
     UNREFERENCED_PARAMETER( ContextType );
 	UNREFERENCED_PARAMETER( Context );
 
-	DbgPrint("[-] Debug :: UhuruGuard!CleanupFileContext :: CleanupFileContext!!\n");
+	DbgPrint("[-] Debug :: ArmaditoGuard!CleanupFileContext :: CleanupFileContext!!\n");
 
 	//FLT_ASSERT(ContextType == FLT_FILE_CONTEXT);
 
@@ -440,7 +439,7 @@ VOID CleanupFileContext(_In_ PFLT_CONTEXT Context, _In_ FLT_CONTEXT_TYPE Context
 
 
 NTSTATUS
-UhuruGuardInstanceSetup (
+ArmaditoGuardInstanceSetup (
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_ FLT_INSTANCE_SETUP_FLAGS Flags,
     _In_ DEVICE_TYPE VolumeDeviceType,
@@ -478,16 +477,16 @@ Return Value:
     PAGED_CODE();
 
     PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-                  ("UhuruGuard!UhuruGuardInstanceSetup: Entered\n") );
+                  ("ArmaditoGuard!ArmaditoGuardInstanceSetup: Entered\n") );
 
-	DbgPrint("[i] Debug :: UhuruGuard!UhuruGuardInstanceSetup :: New Volume mounted\n");
+	DbgPrint("[i] Debug :: ArmaditoGuard!ArmaditoGuardInstanceSetup :: New Volume mounted\n");
 
     return STATUS_SUCCESS;
 }
 
 
 NTSTATUS
-UhuruGuardInstanceQueryTeardown (
+ArmaditoGuardInstanceQueryTeardown (
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_ FLT_INSTANCE_QUERY_TEARDOWN_FLAGS Flags
     )
@@ -522,14 +521,14 @@ Return Value:
     PAGED_CODE();
 
     PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-                  ("UhuruGuard!UhuruGuardInstanceQueryTeardown: Entered\n") );
+                  ("ArmaditoGuard!ArmaditoGuardInstanceQueryTeardown: Entered\n") );
 
     return STATUS_SUCCESS;
 }
 
 
 VOID
-UhuruGuardInstanceTeardownStart (
+ArmaditoGuardInstanceTeardownStart (
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_ FLT_INSTANCE_TEARDOWN_FLAGS Flags
     )
@@ -558,12 +557,12 @@ Return Value:
     PAGED_CODE();
 
     PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-                  ("UhuruGuard!UhuruGuardInstanceTeardownStart: Entered\n") );
+                  ("ArmaditoGuard!ArmaditoGuardInstanceTeardownStart: Entered\n") );
 }
 
 
 VOID
-UhuruGuardInstanceTeardownComplete (
+ArmaditoGuardInstanceTeardownComplete (
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_ FLT_INSTANCE_TEARDOWN_FLAGS Flags
     )
@@ -592,7 +591,7 @@ Return Value:
     PAGED_CODE();
 
     PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-                  ("UhuruGuard!UhuruGuardInstanceTeardownComplete: Entered\n") );
+                  ("ArmaditoGuard!ArmaditoGuardInstanceTeardownComplete: Entered\n") );
 }
 
 
@@ -636,7 +635,7 @@ Return Value:
     UNREFERENCED_PARAMETER( RegistryPath );
 
     PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-                  ("UhuruGuard!DriverEntry: Entered\n") );
+                  ("ArmaditoGuard!DriverEntry: Entered\n") );
 
     //
     //  Register with FltMgr to tell it our callback routines
@@ -660,11 +659,11 @@ Return Value:
         //
         //  Start filtering i/o
         //
-		DbgPrint("[+] Debug :: UhuruGuard!DriverEntry :: FltRegisterFilter succeeded !\n");
+		DbgPrint("[+] Debug :: ArmaditoGuard!DriverEntry :: FltRegisterFilter succeeded !\n");
         status = FltStartFiltering( gFilterHandle );
 
         if (!NT_SUCCESS( status )) {
-			DbgPrint("[-] Error :: UhuruGuard!DriverEntry :: FltStartFiltering() failed!\n");
+			DbgPrint("[-] Error :: ArmaditoGuard!DriverEntry :: FltStartFiltering() failed!\n");
 
 			if (gFilterComPort != NULL) {
 				 FltCloseCommunicationPort( gFilterComPort );
@@ -673,7 +672,7 @@ Return Value:
             FltUnregisterFilter( gFilterHandle );
 		
 		} else 
-			DbgPrint("[+] Debug :: UhuruGuard!DriverEntry :: FltStartFiltering succeeded \n");
+			DbgPrint("[+] Debug :: ArmaditoGuard!DriverEntry :: FltStartFiltering succeeded \n");
 
 		/*if (gFilterComPort != NULL) {
 			 FltCloseCommunicationPort( gFilterComPort );
@@ -684,7 +683,7 @@ Return Value:
 }
 
 NTSTATUS
-UhuruGuardUnload (
+ArmaditoGuardUnload (
     _In_ FLT_FILTER_UNLOAD_FLAGS Flags
     )
 /*++
@@ -711,16 +710,16 @@ Return Value:
     PAGED_CODE();
 
     //PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-     //             ("UhuruGuard!UhuruGuardUnload: Entered\n") );
+     //             ("ArmaditoGuard!ArmaditoGuardUnload: Entered\n") );
 
 	if (gFilterComPort != NULL) {
 		 FltCloseCommunicationPort( gFilterComPort );
 	}
-	DbgPrint("[+] Debug :: UhuruGuard!UhuruGuardUnload :: communication port closed successfully !\n");
+	DbgPrint("[+] Debug :: ArmaditoGuard!ArmaditoGuardUnload :: communication port closed successfully !\n");
 
     FltUnregisterFilter( gFilterHandle );
 
-	DbgPrint("[+] Debug :: UhuruGuard!UhuruGuardUnload :: Driver unloaded successfully !\n");
+	DbgPrint("[+] Debug :: ArmaditoGuard!ArmaditoGuardUnload :: Driver unloaded successfully !\n");
 
 
     return STATUS_SUCCESS;
@@ -731,7 +730,7 @@ Return Value:
     MiniFilter callback routines.
 *************************************************************************/
 FLT_PREOP_CALLBACK_STATUS
-UhuruGuardPreOperation (
+ArmaditoGuardPreOperation (
     _Inout_ PFLT_CALLBACK_DATA Data,
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _Flt_CompletionContext_Outptr_ PVOID *CompletionContext
@@ -767,7 +766,7 @@ Return Value:
     UNREFERENCED_PARAMETER( CompletionContext );
 
     PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-                  ("UhuruGuard!UhuruGuardPreOperation: Entered\n") );
+                  ("ArmaditoGuard!ArmaditoGuardPreOperation: Entered\n") );
 
     //
     //  See if this is an operation we would like the operation status
@@ -778,15 +777,15 @@ Return Value:
     //        actually granted.
     //
 
-    if (UhuruGuardDoRequestOperationStatus( Data )) {
+    if (ArmaditoGuardDoRequestOperationStatus( Data )) {
 
         status = FltRequestOperationStatusCallback( Data,
-                                                    UhuruGuardOperationStatusCallback,
+                                                    ArmaditoGuardOperationStatusCallback,
                                                     (PVOID)(++OperationStatusCtx) );
         if (!NT_SUCCESS(status)) {
 
             PT_DBG_PRINT( PTDBG_TRACE_OPERATION_STATUS,
-                          ("UhuruGuard!UhuruGuardPreOperation: FltRequestOperationStatusCallback Failed, status=%08x\n",
+                          ("ArmaditoGuard!ArmaditoGuardPreOperation: FltRequestOperationStatusCallback Failed, status=%08x\n",
                            status) );
         }
     }
@@ -801,7 +800,7 @@ Return Value:
 
 
 VOID
-UhuruGuardOperationStatusCallback (
+ArmaditoGuardOperationStatusCallback (
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_ PFLT_IO_PARAMETER_BLOCK ParameterSnapshot,
     _In_ NTSTATUS OperationStatus,
@@ -843,10 +842,10 @@ Return Value:
     UNREFERENCED_PARAMETER( FltObjects );
 
     PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-                  ("UhuruGuard!UhuruGuardOperationStatusCallback: Entered\n") );
+                  ("ArmaditoGuard!ArmaditoGuardOperationStatusCallback: Entered\n") );
 
     PT_DBG_PRINT( PTDBG_TRACE_OPERATION_STATUS,
-                  ("UhuruGuard!UhuruGuardOperationStatusCallback: Status=%08x ctx=%p IrpMj=%02x.%02x \"%s\"\n",
+                  ("ArmaditoGuard!ArmaditoGuardOperationStatusCallback: Status=%08x ctx=%p IrpMj=%02x.%02x \"%s\"\n",
                    OperationStatus,
                    RequesterContext,
                    ParameterSnapshot->MajorFunction,
@@ -856,7 +855,7 @@ Return Value:
 
 
 FLT_POSTOP_CALLBACK_STATUS
-UhuruGuardPostOperation (
+ArmaditoGuardPostOperation (
     _Inout_ PFLT_CALLBACK_DATA Data,
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_opt_ PVOID CompletionContext,
@@ -895,14 +894,14 @@ Return Value:
     UNREFERENCED_PARAMETER( Flags );
 
     PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-                  ("UhuruGuard!UhuruGuardPostOperation: Entered\n") );
+                  ("ArmaditoGuard!ArmaditoGuardPostOperation: Entered\n") );
 
     return FLT_POSTOP_FINISHED_PROCESSING;
 }
 
 
 FLT_PREOP_CALLBACK_STATUS
-UhuruGuardPreOperationNoPostOperation (
+ArmaditoGuardPreOperationNoPostOperation (
     _Inout_ PFLT_CALLBACK_DATA Data,
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _Flt_CompletionContext_Outptr_ PVOID *CompletionContext
@@ -937,7 +936,7 @@ Return Value:
     UNREFERENCED_PARAMETER( CompletionContext );
 
     PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-                  ("UhuruGuard!UhuruGuardPreOperationNoPostOperation: Entered\n") );
+                  ("ArmaditoGuard!ArmaditoGuardPreOperationNoPostOperation: Entered\n") );
 
     // This template code does not do anything with the callbackData, but
     // rather returns FLT_PREOP_SUCCESS_NO_CALLBACK.
@@ -948,7 +947,7 @@ Return Value:
 
 
 BOOLEAN
-UhuruGuardDoRequestOperationStatus(
+ArmaditoGuardDoRequestOperationStatus(
     _In_ PFLT_CALLBACK_DATA Data
     )
 /*++
