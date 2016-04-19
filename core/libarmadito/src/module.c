@@ -69,11 +69,15 @@ static int module_load(const char *filename, struct a6o_module **pmodule, a6o_er
 	struct a6o_module *mod_loaded;
 	GModule *g_mod;
 
+	a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_DEBUG, "trying to load module object file %s", filename);
+
 	g_mod = g_module_open(filename, G_MODULE_BIND_LAZY);
 
 	/* this is not considered as an error: the module load path may contain */
 	/* files that are not dynamic libraries, we simply ignore them */
 	if (!g_mod) {
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "loading module object file %s failed", filename);
+
 		*pmodule = NULL;
 		return 0;
 	}
@@ -128,6 +132,8 @@ void module_manager_add(struct module_manager *mm, struct a6o_module *module)
 
 static void module_load_dirent_cb(const char *full_path, enum os_file_flag flags, int entry_errno, void *data)
 {
+	a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_DEBUG, "loading module from path %s flags %d", full_path, flags);
+
 	/* FIXME: must return an error */
 	if (flags & FILE_FLAG_IS_PLAIN_FILE) {
 		struct a6o_module *mod_loaded;
@@ -136,11 +142,15 @@ static void module_load_dirent_cb(const char *full_path, enum os_file_flag flags
 		if (!module_load(full_path, &mod_loaded, &error) && mod_loaded != NULL)
 			module_manager_add((struct module_manager *)data, mod_loaded);
 	}
+	else
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "loading module: path %s is not a plain file", full_path);
 }
 
 int module_manager_load_path(struct module_manager *mm, const char *path, a6o_error **error)
 {
 	/* FIXME: for now, dirty stuff, do nothing with error */
+
+	a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_DEBUG, "loading modules from directory %s", path);
 
 	os_dir_map(path, 0, module_load_dirent_cb, mm);
 
