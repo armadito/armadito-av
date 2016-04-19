@@ -6,6 +6,8 @@
 #include <SetupAPI.h>
 
 
+#define INF_FILE "\\ArmaditoGuard.inf"
+
 char * GetBinaryDirectory( ) {
 
 	char * dirpath = NULL;
@@ -27,7 +29,6 @@ char * GetBinaryDirectory( ) {
 	
 	// calc the dir buffer length.
 	len = (int)(ptr - filepath);
-	//printf("[+] Debug :: GetBinaryDirectory :: ptr=%d :: filepath =%d :: len = %d :: strlen = %d\n",ptr,filepath,len,strlen(filepath));
 
 	dirpath = (char*)(calloc(len+1,sizeof(char)));
 	dirpath[len] = '\0';
@@ -57,23 +58,20 @@ char * BuildInfCmd(char * pre_command ) {
 			__leave;
 		}
 		//printf("[+] Debug :: binpath = %s\n", binpath);
+		binpath_len = strnlen_s(binpath,MAX_PATH);		
 
-		binpath_len = strnlen_s(binpath,MAX_PATH);
-		//printf("[+] Debug :: binpath len = %d\n", binpath_len);
+		// DefaultInstall 132 [inf_file_path]	
+		// DefaultUninstall 132 [inf_file_path]
 
-		// DefaultInstall 132 D:\Novit\uhuru-av\VS\UhuruAV\Debug\UhuruGuard.inf
-		
-
-		//pre_len = 19; // "DefaultInstall 132 "
 		pre_len = strnlen_s(pre_command,MAX_PATH);
-		post_len = 15; // "\\UhuruGuard.inf"
+		post_len = strnlen_s(INF_FILE,MAX_PATH);		
 		cmd_len = pre_len + binpath_len + post_len +1 ;
 		//printf("[+] Debug :: binpath len = %d\n", len);
 		cmd = (char*)calloc(cmd_len+1,sizeof(char));
 		cmd[cmd_len] = '\0';		
 		strncat_s(cmd,cmd_len,pre_command,pre_len);
 		strncat_s(cmd,cmd_len,binpath,binpath_len);
-		strncat_s(cmd,cmd_len,"\\UhuruGuard.inf",post_len);
+		strncat_s(cmd,cmd_len,INF_FILE,post_len);
 		printf("[+] Debug :: cmd = %s\n", cmd);
 		
 
@@ -183,7 +181,7 @@ int stop( ) {
 }
 
 void Help( ) {
-	printf("USAGE :: uhuruGuardSetup --[install|start|stop|uninstall]\n" );
+	printf("USAGE :: ArmaditoGuard-setup.exe --[install|start|stop|uninstall]\n" );
 	return;
 }
 
@@ -200,7 +198,7 @@ int main(int argc, char ** argv) {
 	if (strncmp(argv[1],"--install",9) == 0) {
 
 		if (install( ) < 0) {
-			printf("[-] Error :: UhuruGuard installation failed!\n" );
+			printf("[-] Error :: ArmaditoGuard installation failed!\n" );
 			return ERROR_INSTALL_FAILURE;
 		}
 
@@ -208,7 +206,7 @@ int main(int argc, char ** argv) {
 	else if (strncmp(argv[1],"--start",7) == 0) {
 
 		if (start( ) < 0) {
-			printf("[-] Error :: UhuruGuard start failed!\n" );
+			printf("[-] Error :: ArmaditoGuard start failed!\n" );
 			return -1;
 
 		}
@@ -217,7 +215,7 @@ int main(int argc, char ** argv) {
 	else if (strncmp(argv[1],"--stop",6) == 0) {
 
 		if (stop( ) < 0) {
-			printf("[-] Error :: UhuruGuard stop failed!\n" );
+			printf("[-] Error :: ArmaditoGuard stop failed!\n" );
 			return -1;
 		}
 
@@ -225,7 +223,7 @@ int main(int argc, char ** argv) {
 	else if (strncmp(argv[1],"--uninstall",11) == 0) {
 
 		if (uninstall( ) < 0) {
-			printf("[-] Error :: UhuruGuard uninstallation failed!\n" );
+			printf("[-] Error :: ArmaditoGuard uninstallation failed!\n" );
 			return -1;
 		}
 
