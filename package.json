@@ -33,7 +33,7 @@
     "node": ">=0.10.0"
   },
   "version": "0.0.1",
-  "main": "app/index.html",
+  "main": "dist/index.html",
   "window": {
     "title": "Armadito",
     "toolbar": false,
