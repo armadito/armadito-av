@@ -20,7 +20,7 @@
   	"Status" : "Statuts"
   },
   "analyse_view" : {
-  	"Scan" : "Analyse",
+    "Scan" : "Analyse",
     "Start" : "Analyser",
     "Stop" : "Stop",
     "Choose_analyse_type" : "Choisissez type d'analyse",
@@ -85,7 +85,7 @@
     "Real_time" : "TEMPS RÉEL",
     "Modules" : "MODULES",
     "Updates" : "MAJ",
-    "Updates_title" : "Mise à jours",
+    "Updates_title" : "Mise à jour",
     "Updates_frequency" : "Fréquence mise à jour",
     "Quarantine_repertory" : "Repertoire de quarantaine",
     "Select_folder" : "Selectionnez un dossier",
