@@ -35,4 +35,10 @@ build/windows/VS/Armadito-AV/*/Debug
 build/windows/VS/Armadito-AV/Debug/*
 build/windows/VS/Armadito-AV/x64/*
 build/windows/VS/Armadito-AV/ArmaditoGuard/x64/*
+build/windows/VS/Armadito-AV/ArmaditoGuard Package/x64/*
+build/windows/VS/Armadito-AV/Armadito-AV.opensdf
+build/windows/VS/Armadito-AV/Armadito-AV.sdf
+build/windows/VS/Armadito-AV/Armadito-AV.v12.suo
 core/windows/driver/signature/*
+
+
