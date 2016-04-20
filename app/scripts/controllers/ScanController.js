@@ -75,6 +75,7 @@ angular.module('tatouApp')
     });
 
     // This function refresh structure values from data receive from AV. 
+    // callback function
     $scope.threatDataFromAv = function(data){
 
       var json_object;
