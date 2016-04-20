@@ -15,7 +15,7 @@ DriverVer= 19/04/2016,1.0.0.0; TODO: set DriverVer in stampinf property pages
 
 [DestinationDirs]
 DefaultDestDir = 12 ; %windir%\system32\drivers
-Armadito.DriverFiles  = 12
+ArmaditoGuard.DriverFiles  = 12
 
 ; ================= Default install section =====================
 
@@ -65,7 +65,7 @@ HKR,"Instances\"%Instance1.Name%,"Flags",0x00010001,%Instance1.Flags%
 
 ; ================= Copy Files =====================
 
-[MiniFilter.DriverFiles]
+[ArmaditoGuard.DriverFiles]
 %DriverName%.sys
 
 [SourceDisksNames]
