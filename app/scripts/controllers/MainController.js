@@ -10,6 +10,7 @@
 
  // TEST TRAY
 // Load native UI library
+var osLocale = require('os-locale');
 var gui = require('nw.gui');
 var lang_info = require('node-lang-info');
 // Create a tray icon
@@ -26,16 +27,11 @@ tray.on('click', function() {
 angular.module('tatouApp')
   .controller('MainController', [ '$rootScope', '$scope', '$state','$uibModal', '$translate', 'toastr','ArmaditoSVC', function ($rootScope, $scope,  $state, $uibModal, $translate, toastr, ArmaditoSVC) {
 
-  	lang_info(function(err, lang) {
-    	if(err) {
-     		console.error(JSON.stringify(err, null, 2));
-    	}
-    	else {
-          var language = lang.split(".")[0];
-      		console.log('Current Locale:', language);
-      		 $translate.use(language);
-    	}
- 	});
+	osLocale(function (err, locale) {
+	    console.log(locale);
+	     $translate.use(locale);
+	    //=> 'en_US'
+	});
 
   	$scope.closeApp = function (){  
 
