@@ -130,7 +130,6 @@ angular.module('armadito.svc', [])
 		
 		ArmaditoIPC.write2_av(buffer);
 					
-		//
 		ArmaditoIPC.disconnect2_av();
 		
 		// send data
