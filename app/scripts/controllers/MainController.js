@@ -31,8 +31,9 @@ angular.module('tatouApp')
      		console.error(JSON.stringify(err, null, 2));
     	}
     	else {
-      		console.log('Current Locale:', lang);
-      		 $translate.use(lang);
+          var language = lang.split(".")[0];
+      		console.log('Current Locale:', language);
+      		 $translate.use(language);
     	}
  	});
 
