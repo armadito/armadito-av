@@ -30,11 +30,11 @@ angular.module('tatouApp')
 			service : false,
 			realtime : false,
 			update : "critical",
-			last_update : "Il y a 3 jour",
-			version : 0.1				
+			last_update : "Not determined",
+			version : "Not determined"
 		};
 				
-		$scope.state.modules = 
+		/*$scope.state.modules = 
 		[{
 			name : "clamav",
 			version: "0.0.0",
@@ -50,8 +50,10 @@ angular.module('tatouApp')
 			version: "1.0.1",
 			update: {"status": "not loaded", "last-update": "1970-01-01T06:13:00Z" }
 		 }
-		];
-		
+		];*/
+
+
+		$scope.state.modules = [];
 		
 
 		$scope.threatDataFromAv = function(data){
@@ -81,6 +83,9 @@ angular.module('tatouApp')
 				
 				
 				$scope.state.version = json_object.info.antivirus.version;
+
+				$scope.state.last_update = json_object.info.update['last-update'];
+				console.log('[+] Debug :: threatDataFromAv :: av last-update :: ',json_object.info.update['last-update']);
 				
 				// modules infos.
 				console.log('------- module tab obj = ',json_object.info.modules);
@@ -98,30 +103,6 @@ angular.module('tatouApp')
 					//$scope.modules[];					
 				}
 				
-				/*for (var i = 0; i< json_object.info.modules.length ; i++){
-					
-					console.log('[+] Debug :: threatDataFromAv :: module name :: ',json_object.info.modules[i].name);
-					
-					for (var j = 0; j< $scope.modules.length ; j++){
-						
-						if( json_object.info.modules[i].name == $scope.modules[j].name){
-							console.log('[+] Debug :: threatDataFromAv :: module found :: ');	
-							$scope.modules[j] = json_object.info.modules[i];
-						}
-						
-					}					
-				}
-				
-				for (var i = 0; i< $scope.modules.length ; i++){
-					//console.log('[+] Debug :: threatDataFromAv :: module name :: ',json_object.info.modules[i].name);
-					console.log('[+] Debug :: threatDataFromAv :: module name :: ',$scope.modules[i].name);
-					//$scope.modules[];					
-				}
-				
-				//
-				
-				*/
-				
 				
 				//$scope.state.version = json_object.info.antivirus.version;
 				//$scope.state.service = json_object.info.antivirus.version;
@@ -135,6 +116,7 @@ angular.module('tatouApp')
 			//console.log('[+] Debug :: In callback refresh object with data :: ' + data);
 						
 			//$scope.state.service = 3;
+			console.log("[+]");
 			$scope.$apply();
 			return;
 		}
