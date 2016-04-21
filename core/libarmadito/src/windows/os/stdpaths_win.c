@@ -115,7 +115,7 @@ const char *os_stdpath_bases()
 	off++;
 	memcpy_s(dbdir + off, len, LIBARMADITO_MODULES_DB_PATH, strnlen_s(LIBARMADITO_MODULES_DB_PATH, _MAX_PATH));
 
-	printf("DEBUG :: dbdir == [%s]\n", dbdir);
+	//printf("DEBUG :: dbdir == [%s]\n", dbdir);
 
 	free(dirpath);
 	dirpath = NULL;
