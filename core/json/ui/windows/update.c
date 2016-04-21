@@ -3,11 +3,12 @@
 #include <libarmadito.h>
 //#include "libarmadito-config.h"
 #include <Windows.h>
-
+#include <libarmadito/stdpaths.h>
 #include "service\service.h"
 #include "updatedb\json_process.h"
 #include "utils\crypt.h"
 #include "utils\others.h"
+
 
 #define DB_CACHE_PATH "modules\\DB\\dbcache"
 
@@ -16,169 +17,73 @@
 #define TEST_MODE 3
 
 
-char * BuildCompleteDBpath(char * filename, char * module) {
 
-	char * dirpath = NULL;
+char * get_db_module_path(char * filename, char * module) {
+
 	char * completePath = NULL;
-	char filepath[MAX_PATH];	
-	char * ptr = NULL;
-	int dir_len = 0, len= 0;
-	int ret = 0;
-	char * module_db_dir = NULL;
-	char * module_dir = NULL;
-	int module_db_len = 0;
-
-	
+	char * dbdir = NULL;
+	int dbdir_len = 0;
+	int len = 0;
+	int off = 0;
+	char path_sep = '\0';
 
 	if (filename == NULL || module == NULL) {
-		printf("[-] Error :: BuildCompleteDBpath :: Invalids parameters\n");
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: get_db_module_path :: Invalids parameters\n");
 		return NULL;
 	}
 
-	__try {
-
-		if (!GetModuleFileNameA(NULL, (LPSTR)&filepath, MAX_PATH)) {	
-			printf("[-] Error :: BuildCompleteDBpath :: GetModuleFilename failed :: GLE = %d\n",GetLastError());
-			return NULL;
-		}
-
-		// Remove the module filename from the complete file path
-		ptr = strrchr(filepath,'\\');
-		if (ptr == NULL) {
-			printf("[-] Error :: BuildCompleteDBpath :: No backslash found in the path\n");
-			return NULL;
-		}
-
-		// calc the dir buffer length.
-		dir_len = (int)(ptr - filepath);
-		dirpath = (char*)(calloc(dir_len+1,sizeof(char)));
-		dirpath[dir_len] = '\0';
-
-		memcpy_s(dirpath, dir_len, filepath, dir_len);
-		//printf("[+] Debug :: BuildCompleteDBpath :: dirpath = %s\n",dirpath);
-
-
-		if (strncmp(module, "clamav", 6) == 0) {
-
-			module_db_dir = "DB\\clamav\\";
-
-		}
-		else if (strncmp(module,"module5_2_win",9) == 0) { //instead of strncmp(module,"module5_2_win",13
-
-			module_db_dir = "DB\\module5_2\\";
-
-		}
-		else if (strncmp(module,"module5_2_lin",13) == 0) {
-			// linux version...
-		}
-		else {
-			printf("[-] Warning :: BuildCompleteDBpath :: Module not supported for database update\n",module);				
-			//__leave; // leave or not ? 
-		}
-
-		// TODO: :get module path from configuration.
-		//module_dir = uhuru_std_path(MODULES_LOCATION);
-		module_dir = "modules";
-
-
-		len = dir_len + strnlen(module_dir, MAX_PATH) + strnlen(filename, MAX_PATH) + strnlen(module_db_dir, MAX_PATH) + 3;
-		
-		completePath = (char*)calloc(len+1,sizeof(char));
-		completePath[len] = '\0';
-
-		strncat_s(completePath, len, dirpath, dir_len);
-		strncat_s(completePath, len, "\\", 1);
-		strncat_s(completePath, len, module_dir, strnlen(module_dir, MAX_PATH));
-		strncat_s(completePath, len, "\\", 1);
-		strncat_s(completePath, len, module_db_dir, strnlen(module_db_dir, MAX_PATH));
-		strncat_s(completePath, len, filename, strnlen(filename, MAX_PATH));
-
-		printf("[+] Debug :: BuildCompleteDBpath :: completePath = %s\n",completePath);
-
-
-	}
-	__finally {
-
-		if (dirpath != NULL) {
-			free(dirpath);
-			dirpath = NULL;
-		}
-
-		/*if (module_db_dir == NULL) {
-			free(module_db_dir);
-			module_db_dir = NULL;
-		}*/
-
+	dbdir = a6o_std_path(BASES_LOCATION);
+	if (dbdir == NULL) {
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: get_db_module_path :: Can't get database directory!\n");
+		return NULL;
 	}
 
-
-	//uhuru_log(UHURU_LOG_LIB, UHURU_LOG_LEVEL_DEBUG, "[+] Debug :: GetBinaryDirectory :: dirpath = %s\n",dirpath);
+	// get path separator.
+	path_sep = a6o_path_sep( );
 	
+	len = strnlen_s(dbdir,MAX_PATH) + strnlen_s(module,MAX_PATH) + strnlen_s(filename,MAX_PATH) + 2;	
+	completePath = (char*)calloc(len+1,sizeof(char));
+	completePath[len] = '\0';
+
+	memcpy_s(completePath, len, dbdir, strnlen_s(dbdir, _MAX_PATH));	
+	off += strnlen_s(dbdir, _MAX_PATH);
+	completePath[off] = path_sep;
+	off++;	
+	memcpy_s(completePath + off, len, module, strnlen_s(module, _MAX_PATH));
+	off += strnlen_s(module, _MAX_PATH);
+	completePath[off] = path_sep;
+	off++;
+	memcpy_s(completePath + off, len, filename, strnlen_s(filename, _MAX_PATH));
+
+	printf("[+] Debug :: get_db_module_path :: completePath = %s\n", completePath);
 
 	return completePath;
+
 }
 
-/*
 // This function copy the databases files in corresponding the modules database directories.
-*/
-int CopyModulesDatabaseFiles(Package ** pkgList, int nbPackages) {
+int copy_modules_db_files(Package ** pkgList, int nbPackages ) {
 
-	int ret = 0, i =1;
+	int ret = 0, i =0;
 	char * dbfilepath = NULL;
 
-
 	if (pkgList == NULL || nbPackages <= 0) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: CopyModulesDatabaseFiles :: Invalids parameters\n");
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: copy_modules_db_files :: Invalids parameters\n");
 		return -1;
 	}
 
-	__try {
 
-		for (i = 0; i < nbPackages; i++) {
+	for (i = 0; i < nbPackages; i++) {
 
-			// Get the destination directory according to the module.
-			if (strncmp(pkgList[i]->licence,"clamav",3) == 0) {
-
-				dbfilepath = BuildCompleteDBpath(pkgList[i]->displayname,pkgList[i]->licence);
-				//printf("[+] Debug :: CopyModulesDatabaseFiles :: Clamav DB directory = %s\n",LIBUHURU_MODULES_PATH);
-
-				if (CopyFileA(pkgList[i]->cachefilename,dbfilepath,FALSE) == FALSE) {
-					a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: CopyModulesDatabaseFiles :: Copying file [%s] failed! :: GLE = %d\n",pkgList[i]->displayname ,GetLastError());
-					__leave;
-				}
-				
-			}
-			else if (strncmp(pkgList[i]->licence,"module5_2_win",13) == 0) {
-
-				dbfilepath = BuildCompleteDBpath(pkgList[i]->displayname,pkgList[i]->licence);
-				//printf("[+] Debug :: CopyModulesDatabaseFiles :: Module5_2 DB directory = %s\n",NULL);
-
-				if (CopyFileA(pkgList[i]->cachefilename,dbfilepath,FALSE) == FALSE) {
-					a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: CopyModulesDatabaseFiles :: Copying file [%s] failed! :: GLE = %d\n",pkgList[i]->displayname ,GetLastError());
-					__leave;
-				}
-				
-
-			}
-			else if (strncmp(pkgList[i]->licence,"module5_2_lin",3) == 0) {
-				// linux version...
-			}
-			else {
-				a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING,"[-] Warning :: CopyModulesDatabaseFiles :: Module not supported for database update\n",pkgList[i]->licence);				
-				//__leave; // leave or not ? 
-			}
-
-
-			// clean
-			if (dbfilepath != NULL) {
-				free(dbfilepath);
-				dbfilepath = NULL;
-			}
-
+		dbfilepath = get_db_module_path(pkgList[i]->displayname, pkgList[i]->licence);
+		if (dbfilepath == NULL) {
+			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "[-] Warning :: copy_modules_db_files :: Can't get db file complete file path :: filename = %s :: licence = %s\n",pkgList[i]->displayname,pkgList[i]->licence);
+			continue;
 		}
 
-	}
-	__finally {
+		if (CopyFileA(pkgList[i]->cachefilename,dbfilepath,FALSE) == FALSE) {
+			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING,"[-] Warning :: CopyModulesDatabaseFiles :: Copying db file [%s] failed! :: GLE = %d\n",pkgList[i]->displayname ,GetLastError());			
+		}
 
 		if (dbfilepath != NULL) {
 			free(dbfilepath);
@@ -186,10 +91,10 @@ int CopyModulesDatabaseFiles(Package ** pkgList, int nbPackages) {
 		}
 
 	}
-	
+
+
 	return ret;
 }
-
 
 void FreePackageList(Package ** pkgList, int nbPackages) {
 	
@@ -330,7 +235,7 @@ int DownloadPackageFiles(Package ** packageList, int nbPackages) {
 				algo = CALG_SHA_256;
 			}
 			else {
-				printf("[-] Error :: DownloadPackageFiles :: Checksum type not supported :: %s!\n",packageList[i]->controltype);
+				a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: DownloadPackageFiles :: Checksum type not supported :: %s!\n",packageList[i]->controltype);
 				ret = -4;
 				__leave;
 			}
@@ -663,10 +568,6 @@ int update_modules_db(struct armadito * armadito) {
 	int mode = CMD_MODE;
 
 
-	if (armadito == NULL) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR, " Invalid parameters!\n");
-		return -1;
-	}
 
 	__try {
 
@@ -781,11 +682,9 @@ int update_modules_db(struct armadito * armadito) {
 
 		printf("\n\n");
 		// Copy databases files to the right places.
-		if (CopyModulesDatabaseFiles(packageList, nbPackages) < 0) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: UpdateModulesDB :: Copy Databases files failed!\n");
-			res = -9;
-			__leave;
-		}
+		if (copy_modules_db_files(packageList, nbPackages) != 0) {
+			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: UpdateModulesDB :: Copy Databases files finished with errors!\n");
+		}		
 
 
 		if (mode == SVC_MODE) {
