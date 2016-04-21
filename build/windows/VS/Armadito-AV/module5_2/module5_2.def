@@ -1,0 +1,4 @@
+LIBRARY module5_2.dll
+
+EXPORTS
+module

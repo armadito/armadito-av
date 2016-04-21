@@ -16,6 +16,28 @@ void print_hexa(BYTE* data, int size) {
 	return;
 }
 
+char * download_pub_key( ) {
+
+	int ret = 0, len= 0;
+	char * pubkey_path = NULL;
+	HRESULT hres = S_OK;
+
+	len = MAX_PATH;
+	pubkey_path = (char*)calloc(len +1, sizeof(char));
+	pubkey_path[len] = '\0';
+	
+	hres = URLDownloadToCacheFileA(NULL, A6O_PUB_KEY, pubkey_path,MAX_PATH, 0,NULL);
+	if (FAILED(hres)) {
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: download_pub_key :: URLDownloadToCacheFileA failed :: error = 0x%x\n",hres);
+		free(pubkey_path);
+		pubkey_path = NULL;
+		return pubkey_path;
+	}
+
+	printf("[+] Debug :: URLDownloadToCacheFileA ::  pubkey_path = %s\n", pubkey_path);
+
+	return pubkey_path;
+}
 
 BYTE * GetFileHash(char * data, int len, ALG_ID algo ) {
 
@@ -277,7 +299,7 @@ int verify_file_signature(char *filename, char *sigfile){
 	int fsize = 0;
 
 	if (filename == NULL || sigfile == NULL) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: uh_verify_file_signature :: invalid parameters\n");
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: invalid parameters\n");
 		return -1;
 	}
 
@@ -285,14 +307,14 @@ int verify_file_signature(char *filename, char *sigfile){
 
 		// Acquire crypt context
 		if (CryptAcquireContextA(&hProv,NULL, MS_ENHANCED_PROV,PROV_RSA_FULL,CRYPT_VERIFYCONTEXT) == FALSE) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: import_public_key :: Acquire crypt context failed. :: GLE = 0x%x\n",GetLastError());
+			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: Acquire crypt context failed. :: GLE = 0x%x\n",GetLastError());
 			__leave;
 		}
 
 		// get pub key file path.
-		pubkeyfile = GetLocationCompletepath(A6O_PUBKEY);
+		pubkeyfile = download_pub_key();
 		if (pubkeyfile == NULL) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: import_public_key :: Can't get public key complete file path !\n");
+			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: Can't download public key from armadito server!\n");
 			__leave;
 		}
 		
@@ -300,7 +322,7 @@ int verify_file_signature(char *filename, char *sigfile){
 		// import public key from file.
 		hPubKey = import_public_key(pubkeyfile,hProv);
 		if (hPubKey == 0) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: uh_verify_file_signature :: import public key failed\n");
+			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: import public key failed\n");
 			ret = -2;
 			__leave;
 		}
@@ -308,7 +330,7 @@ int verify_file_signature(char *filename, char *sigfile){
 		// calc hash for the file.
 		hHash = calc_file_hash(filename,hProv, CALG_SHA1);
 		if (hHash == 0) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: uh_verify_file_signature :: calc file hash failed\n");
+			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: calc file hash failed\n");
 			ret = -3;
 			__leave;
 		}
@@ -316,7 +338,7 @@ int verify_file_signature(char *filename, char *sigfile){
 		// get file signature. (bytes)
 		signature = GetFileContent_b(sigfile, &sig_size);
 		if (signature == NULL) {
-			printf("[-] Error :: uh_verify_file_signature :: Get signature content failed\n");
+			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: Get signature content failed\n");
 			ret = -4;
 			__leave;
 		}
@@ -343,7 +365,7 @@ int verify_file_signature(char *filename, char *sigfile){
 
 		// verify signature
 		if (CryptVerifySignature(hHash, invert, sig_size, hPubKey, NULL, 0) == FALSE) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: uh_verify_file_signature :: Crypt verify Signature failed. :: GLE = %d :: 0x%x\n",GetLastError(),GetLastError());
+			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: Crypt verify Signature failed. :: GLE = %d :: 0x%x\n",GetLastError(),GetLastError());
 			ret = -9;
 			__leave;
 		}
@@ -356,6 +378,11 @@ int verify_file_signature(char *filename, char *sigfile){
 		if (signature != NULL) {
 			free(signature);
 			signature = NULL;
+		}
+
+		if (pubkeyfile != NULL) {
+			free(pubkeyfile);
+			pubkeyfile = NULL;
 		}
 
 		if (invert != NULL) {

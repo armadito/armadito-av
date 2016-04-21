@@ -4,7 +4,7 @@
 #include <fltKernel.h>
 #include <dontuse.h>
 #include <suppress.h>
-#include "Struct.h"
+#include "structs.h"
 
 #define MAX_PATH_SIZE 512
 #define MESSAGE_CONTEXT_BUF 'bgsm'
