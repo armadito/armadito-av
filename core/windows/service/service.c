@@ -1598,14 +1598,7 @@ int main(int argc, char ** argv) {
 	if ( argc >=2 && strncmp(argv[1],"--updatedb",10) == 0 ){
 
 		DisplayBanner( );
-#if 0
-		// 0 : do not reload service (for test)
-		// 1 : reload service.
-		ret = UpdateModulesDB(0);
-		if (ret < 0) {
-			return EXIT_FAILURE;
-		}
-#endif
+		update_modules_db(NULL);
 		return EXIT_SUCCESS;
 	}
 
