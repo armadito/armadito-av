@@ -4,26 +4,23 @@
 #include <Windows.h>
 
 
-#define SVCNAME TEXT("UhuruSvc")
-#define SVCDISPLAY TEXT("Uhuru Scan Service")
+#define SVCNAME TEXT("ArmaditoSvc")
+#define SVCDISPLAY TEXT("Armadito AV Service")
 
 #define ROOT_KEY_PATH "SYSTEM\\CurrentControlSet\\services\\eventlog\\Application"
-#define APPS_KEY_NAME "UhuruAV"
-#define APP_DLL_PATH "%%systemRoot%%\\System32\\uhEventProvider.dll"
+#define APPS_KEY_NAME "Armadito-av"
+#define APP_DLL_PATH "%%systemRoot%%\\System32\\a6oEventProvider.dll"
 
 #define ROOT_CRASH_KEY_PATH "SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting"
 #define ROOT_CRASH_KEY_PATH_LOCAL_DUMPS "SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting\\LocalDumps"
 #define ROOT_DRIVER_CRASH_KEY_PATH "SYSTEM\\CurrentControlSet\\Control\\CrashControl"
-#define SVC_KEY_NAME "UhuruSvc.exe"
+#define SVC_KEY_NAME "ArmaditoSvc.exe"
 
-// c:\Users\[username]\AppData\Local\CrashDumps\UhuruSvc
-#define DUMP_FOLDER "%%LocalAppData%%\\CrashDumps\\UhuruSvc"
+// c:\Users\[username]\AppData\Local\CrashDumps\ArmaditoSvc
+#define DUMP_FOLDER "%%LocalAppData%%\\CrashDumps\\ArmaditoSvc"
 
 // 0: Custom Dump - 1: Mini dump - 2: Full dump.
-#define DUMP_TYPE 1 
-
-// If the real time analysis is enabled or not.
-#define REAL_TIME_ENABLED 1
+#define DUMP_TYPE 1
 
 typedef enum cmd_mode {
 	WITHOUT_DRIVER = 1,
