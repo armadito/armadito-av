@@ -24,8 +24,8 @@ Compile everything
 If you want to compile everything :
 ::
 
-   cd armadito-av/scripts/
-   ./compile_all.sh
+   $ cd armadito-av/scripts/
+   $ ./compile_all.sh
 
 
 Compile module by module
@@ -34,10 +34,10 @@ Compile module by module
 If you want to compile one module only, or core :
 ::
 
-   cd armadito-av/scripts/
-   ./compile_all.sh PACKAGE
+   $ cd armadito-av/scripts/
+   $ ./compile_all.sh PACKAGE
 
-PACKAGE could be one of the following : 
+**PACKAGE** could be one of the following : 
 
 * core (libarmadito)
 * clamav (uhuru-mod-clamav)
