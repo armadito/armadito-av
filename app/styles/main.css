@@ -1090,3 +1090,14 @@
         border-radius: 24px !important;
         background: linear-gradient(to bottom,#f0f9ff 0,#FFFFFF 47%,#FFFFFF 100%) !important;
     }
+
+    .numberOfScannedFiles{
+      top: -30px !important;
+    }
+
+    .typeOfScannedFiles {
+      top: -40px !important;
+    }
+    .tableOfScannedFiles {
+      top: -40px !important;
+    }

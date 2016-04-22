@@ -25,16 +25,8 @@
 	        </div>
 	    </form>
 	</div>
-	<br>
-	<div class="row" >
-	  	<div class="col-sm-offset-1 col-md-offset-1 col-xs-10 col-sm-10 col-md-10" >
-	  		<h6  ng-if="scan_data.files.length"> &nbsp;&nbsp;&nbsp;&nbsp;{{ 'analyse_view.Scanning_file' | translate}} : <b title="{{file.path}}" ng-repeat="file in scan_data.files track by $index"><span ng-if="$last">{{file.path | characters: 50}}</span></b></h6>
-		    <uib-progressbar max="max" class="progressBar" value="scan_data.progress"><span class="progressBarPercent"><span ng-if="scan_data.progress > 0 || scan_data.progress === 0">{{scan_data.progress}}%</span></span>
-	    	</uib-progressbar>   
-	  	</div>
-	</div>
 	<div class="row">
-		<div class="col-sm-offset-1 col-md-offset-1 col-xs-12 col-sm-10 col-md-10 text-center">
+		<div class="col-sm-offset-1 col-md-offset-1 col-xs-12 col-sm-10 col-md-10 text-center ">
 			<div class="col-xs-4 col-sm-4 col-md-4">
 				<h1><b class="fileAnalyse">0</b></h1>
 			</div>
@@ -47,7 +39,7 @@
 		</div>
 	</div>
 	<div class="row">
-		<div class="col-sm-offset-1 col-md-offset-1 col-xs-12 col-sm-10 col-md-10 text-center">
+		<div class="col-sm-offset-1 col-md-offset-1 col-xs-12 col-sm-10 col-md-10 text-center ">
 			<div class="col-xs-4 col-sm-4 col-md-4">
 				<h5 class="numberOfAnalyseFile">{{ 'analyse_view.Scanned' | translate}}</h5>
 			</div>
@@ -59,26 +51,39 @@
 			</div>
 		</div>
 	</div>
-	<div class="row" ng-if="!scan_data.progress">	
+	<div class="row" >
+	  	<div class="col-sm-offset-1 col-md-offset-1 col-xs-10 col-sm-10 col-md-10" >
+	  		<h6  ng-if="scan_data.files.length"> &nbsp;&nbsp;&nbsp;&nbsp;{{ 'analyse_view.Scanning_file' | translate}} : <b title="{{file.path}}" ng-repeat="file in scan_data.files track by $index"><span ng-if="$last">{{file.path | characters: 50}}</span></b></h6>
+		    <uib-progressbar max="max" class="progressBar" value="scan_data.progress"><span class="progressBarPercent"><span ng-if="scan_data.progress > 0 || scan_data.progress === 0">{{scan_data.progress}}%</span></span>
+	    	</uib-progressbar>   
+	  	</div>
+	</div>
+	<!--<div class="row" ng-if="!scan_data.progress">	
 		<br>
 		<br>
 		<div class=" col-sm-4 col-md-4 col-sm-offset-4 col-md-offset-4">
 			{{ 'analyse_view.No_file_scanned_yet' | translate}}
 		</div>
-	</div>
+	</div>-->
 	<div class="row">
 		<div class="col-xs-1 col-sm-1 col-md-1">
 		
 		</div>
 		<div class="col-xs-11 col-sm-11 col-md-11">
 			<table class="table analyse" >
+				<thead class="analyse">
+				  <tr class="analyse">
+				     <th class="analyse" style="width:10%"></th>
+				     <th class="analyse" style="width:30%"><h4><i>Menaces</i></h4></th>
+				     <th class="analyse" style="width:60%"><h4><i>Fichiers</i></h4></th>
+				  </tr>
+				 </thead>
 			    <tbody class="analyse" id="ex3" schroll-bottom="scan_data.files">
 			      <tr class="analyse" ng-repeat="file in scan_data.files">
 			      	<td style="width:10%" ng-if="file.scan_status === 'malware'" class="analyse redCircle"><h7><i class="fa fa-circle fa-lg"></i></h7></td>
 			      	<td style="width:10%" ng-if="file.scan_status === 'suspicious'"class="analyse orangeCircle"><h7><i class="fa fa-circle fa-lg"></i></h7></td>
-			        <td style="width:10%" ng-if="file.scan_status === 'suspicious' || file.scan_status === 'malware'" class="analyse" ><h7>{{$index}}</h7></td>
-			        <td style="width:20%" ng-if="file.scan_status === 'suspicious' || file.scan_status === 'malware'" class="analyse" ><h7>{{file.scan_status}}</h7></td>
-			        <td style="width:60%" ng-if="file.scan_status === 'suspicious' || file.scan_status === 'malware'" class="analyse"><h7>{{file.path}}</h7></td>
+			        <td style="width:30%" title="{{file.mod_report}}" ng-if="file.scan_status === 'suspicious' || file.scan_status === 'malware'" class="analyse" ><h7>{{file.mod_report | characters: 17}}</h7></td>
+			        <td style="width:60%" title="{{file.path}}" ng-if="file.scan_status === 'suspicious' || file.scan_status === 'malware'" class="analyse"><h7>{{file.path | characters: 40}}</h7></td>
 			      </tr>
 			    </tbody>
 			</table>
