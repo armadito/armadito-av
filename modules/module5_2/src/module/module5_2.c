@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <time.h>
 #include "osdeps.h"
 #include "uh_errors.h"
 #include "UhuruStatic.h"
@@ -100,10 +100,16 @@ static enum a6o_mod_status module5_2_close(struct a6o_module *module)
 /* FIXME: one day, add bases status */
 static enum a6o_update_status module5_2_info(struct a6o_module *module, struct a6o_module_info *info)
 {
+	time_t ts = 0;
+	struct tm timeptr = {0, 30, 8, 1, 8, 114}; // 01/09/2014 9:30
+	
 	info->base_infos = (struct a6o_base_info **)malloc(sizeof(struct a6o_base_info *));
 	info->base_infos[0] = NULL;
-
+	
 	info->update_date = os_strdup("2014-09-01T09:30:00Z");
+
+	ts = mktime(&timeptr);
+	info->timestamp = ts;
 
 	return ARMADITO_UPDATE_OK;
 }
