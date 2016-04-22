@@ -1,5 +1,11 @@
 #include "modulePDF.h"
 
+struct modulePDF_data {
+	const char *tmp_dir;
+	int late_days;
+	int critical_days;
+};
+
 static enum a6o_mod_status modulePDF_init(struct a6o_module *module) {
 
 	// This module doesn't need initialization.
@@ -52,12 +58,19 @@ static enum a6o_file_status modulePDF_scan(struct a6o_module *module, int fd, co
 }
 
 
+static const char *modulePDF_mime_types[] = {
+	"application/pdf",
+	NULL,
+};
+
 struct a6o_module module = {
 	.init_fun = modulePDF_init,
-	.conf_table= NULL,
+	.conf_table = NULL,
 	.post_init_fun = NULL,
 	.scan_fun = modulePDF_scan,
 	.close_fun = modulePDF_close,
 	.info_fun = modulePDF_info,
+	.supported_mime_types = modulePDF_mime_types,
 	.name = "modulePDF",
+	.size = sizeof(struct modulePDF_data),
 };
