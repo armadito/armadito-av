@@ -253,7 +253,6 @@ time_t get_timestamp(char * cvd_time) {
 	char s_month[4] = {0}, s_timezone[6] = {0};
 	char tmpbuf[128] = {'\0'}, timebuf[26] = {0};
 	int year=0;
-	errno_t err;
 
 #ifdef _WIN32
 	sscanf_s(cvd_time, "%d %3s %d %2d-%2d %5s",&timeptr.tm_mday, s_month,sizeof(s_month), &year, &timeptr.tm_hour, &timeptr.tm_min, s_timezone,sizeof(s_timezone));
@@ -272,15 +271,6 @@ time_t get_timestamp(char * cvd_time) {
 		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: get_timestamp :: mktime failed :: bad time format!\n");
 		return cvd_timestamp;
 	}
-
-	/*err = ctime_s(tmpbuf, 26, &cvd_timestamp);
-	if (err) {
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: get_timestamp :: ctime_s failed due to an invalid argument.");
-		return cvd_timestamp;
-	}
-
-	printf( "[+] Debug :: get_timestamp :: cvd time:\t\t\t%s\n\n", tmpbuf);
-	*/
 
 
 	return cvd_timestamp;
