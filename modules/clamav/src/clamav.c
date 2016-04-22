@@ -203,7 +203,7 @@ int get_late_days(time_t date) {
 	return late_days;
 }
 
-static enum uhuru_update_status clamav_update_status_eval(time_t timestamp, int late_days, int critical_days)
+static enum a6o_update_status clamav_update_status_eval(time_t timestamp, int late_days, int critical_days)
 {	
 
 	int late = 0;
