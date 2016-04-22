@@ -5,8 +5,8 @@
 #include <string.h>
 #include "osdeps.h"
 
-#ifdef WIN32
-#include "dirent.h"
+#ifdef _WIN32
+#include <windows/dirent.h>
 #else
 #include <dirent.h>
 #endif
