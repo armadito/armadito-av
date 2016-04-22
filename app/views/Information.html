@@ -20,8 +20,8 @@
 		  </li>
 		  <li class="information2"><h5><i ng-class="state.service ? 'fa fa-check checkIcon' : 'fa fa-exclamation-triangle text-danger'"></i></h5></li>
 		  
-		  <li class="information2"><h5><i class="fa fa-check checkIcon"></i>&nbsp;&nbsp;&nbsp;<i ng-click="update_db()" class="fa fa-refresh"></i></li></h5></li>
-		  <li class="information2"><h5>{{state.last_update}}</h5></li>
+		  <li class="information2"><h5><i ng-class="state.upToDate ? 'fa fa-check checkIcon' : 'fa fa-exclamation-triangle text-danger'"></i>&nbsp;&nbsp;&nbsp;<i ng-click="update_db()" class="fa fa-refresh"></i></li></h5></li>
+		  <li class="information2"><h5>{{state.last_update}} ({{state.timestamp}})</h5></li>
 		</ul>
 	  </div>
 	</div>
@@ -38,7 +38,7 @@
 			    <tbody class="information" id="ex3" >
 			      <tr class="information" ng-repeat="module in state.modules">
 			        <td style="width:40%" class="information"><h7>{{module.name}}</h7></td>
-			        <td style="width:60%"class="information"><h7>{{module.update.last-update}}</h7></td>
+			        <td style="width:60%"class="information"><h7>{{module.update.timestamp}}</h7></td>
 			        <td style="width:60%"class="information"><h7>{{module.update.status}}</h7></td>
 			      </tr>
 			    </tbody>

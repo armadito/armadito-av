@@ -25,17 +25,16 @@ angular.module('tatouApp')
 		$scope.displayedCollection = [].concat($scope.rowCollection);
 		
 		// Initialize state.
-		if(!$scope.state){
-			$scope.state = {
-				status : 0,
-				service : false,
-				realtime : true,
-				update : "critical",
-				last_update : "Not determined",
-				version : "Not determined"
-			};	
-		}
-		
+		$scope.state = {
+			status : 0,
+			service : false,
+			realtime : false,
+			upToDate : false,
+			update : "critical",
+			last_update : "Not determined",
+			timestamp : 0,
+			version : "Not determined"
+		};
 				
 		/*$scope.state.modules = 
 		[{
@@ -81,13 +80,24 @@ angular.module('tatouApp')
 				}else{
 					$scope.state.realtime = false;
 				}
+
+				if(json_object.info.update.status  == 'up-to-date'){
+					$scope.state.upToDate = true;
+				}else{
+					$scope.state.upToDate = false;
+				}
+				
 								
 				$scope.state.update = json_object.info.update;
+
 				
 				
 				$scope.state.version = json_object.info.antivirus.version;
 
 				$scope.state.last_update = json_object.info.update['last-update'];
+				$scope.state.timestamp = json_object.info.update.timestamp;
+
+
 				console.log('[+] Debug :: threatDataFromAv :: av last-update :: ',json_object.info.update['last-update']);
 				
 				// modules infos.
@@ -145,7 +155,7 @@ angular.module('tatouApp')
 			ArmaditoSVC.requestAVstatus($scope.threatDataFromAv);
 			
 			console.log('[+] Debug :: Refreshing antivirus status ::' + ArmaditoIPC.client_socket);
-		}		
+		}
 		
 		
 		$scope.refresh_status();
