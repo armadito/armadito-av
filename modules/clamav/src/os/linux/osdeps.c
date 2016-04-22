@@ -1,4 +1,4 @@
-#include "..\osdeps.h"
+#include "../osdeps.h"
 #include <libarmadito.h>
 
 #define MAX_PATH 260
