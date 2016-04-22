@@ -21,7 +21,8 @@
     "angular-translate": "^2.11.0",
     "angular-translate-loader-url": "^2.11.0",
     "angular-translate-loader-static-files": "^2.11.0",
-    "font-awesome": "fontawesome#^4.6.1"
+    "font-awesome": "fontawesome#^4.6.1",
+    "angular-truncate-2": "^0.4.2"
   },
   "devDependencies": {
     "angular-mocks": "^1.4.0"

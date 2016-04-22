@@ -22,6 +22,7 @@
   "analyse_view" : {
   	"Scan" : "Scan",
     "Start" : "Start",
+    "Scanning_file" : "Scanning file",
     "Stop" : "Stop",
     "Choose_analyse_type" : "Choose analyse type",
     "Full_scan" : "FULL",

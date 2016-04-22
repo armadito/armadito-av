@@ -316,7 +316,7 @@
         display: flex;
         flex-direction: column;
         align-items: stretch;
-        max-height: 150px; /* this can vary */
+        max-height: 130px; /* this can vary */
         font-size: 13px;
         color: #525659;
     }
@@ -916,6 +916,7 @@
       position: absolute;
       left: 50%;
       margin-left: -35px;
+      top : 5px;
     }
     .fileAnalyse {
       color: #32BEF0;
@@ -928,6 +929,9 @@
     }
     .redCircle {
       color : #D94A3A;
+    }
+    .orangeCircle {
+      color : #F8AA00;
     }
     .yellowCircle {
       color : #F8AA00;

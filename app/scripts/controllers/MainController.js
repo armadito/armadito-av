@@ -12,7 +12,6 @@
 // Load native UI library
 var osLocale = require('os-locale');
 var gui = require('nw.gui');
-var lang_info = require('node-lang-info');
 // Create a tray icon
 var tray = new gui.Tray({ title: 'Tray', icon: 'app/images/kimioslogoMini.png' });
 

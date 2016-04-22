@@ -25,14 +25,17 @@ angular.module('tatouApp')
 		$scope.displayedCollection = [].concat($scope.rowCollection);
 		
 		// Initialize state.
-		$scope.state = {
-			status : 0,
-			service : false,
-			realtime : false,
-			update : "critical",
-			last_update : "Not determined",
-			version : "Not determined"
-		};
+		if(!$scope.state){
+			$scope.state = {
+				status : 0,
+				service : false,
+				realtime : true,
+				update : "critical",
+				last_update : "Not determined",
+				version : "Not determined"
+			};	
+		}
+		
 				
 		/*$scope.state.modules = 
 		[{
@@ -92,7 +95,7 @@ angular.module('tatouApp')
 				console.log('[+] Debug :: threatDataFromAv :: Number of modules :: ',json_object.info.modules.length);
 				//console.log('[+] Debug :: threatDataFromAv :: module name :: ',json_object.info.modules[i].name);
 				$scope.state.modules = json_object.info.modules;				
-				for (var i = 0; i< $scope.state.modules.length ; i++){
+				/*for (var i = 0; i< $scope.state.modules.length ; i++){
 					
 					console.log('[+] Debug :: threatDataFromAv :: module name :: ',$scope.state.modules[i].name);
 					console.log('[+] Debug :: threatDataFromAv :: module date :: ',$scope.state.modules[i].update['last-update']);
@@ -101,12 +104,11 @@ angular.module('tatouApp')
 					//console.log('[+] Debug :: threatDataFromAv :: rsult:: ',ret);
 					
 					//$scope.modules[];					
-				}
+				}*/
 				
 				
 				//$scope.state.version = json_object.info.antivirus.version;
 				//$scope.state.service = json_object.info.antivirus.version;
-				
 			}
 			catch(e){
 				console.error("Parsing error:", e); 

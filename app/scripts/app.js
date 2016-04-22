@@ -25,7 +25,8 @@ angular
     'timer',
     'toastr',
     'ngTagsInput',
-    'pascalprecht.translate'
+    'pascalprecht.translate',
+    'truncate'
   ])
   .config(function ($stateProvider, $urlRouterProvider, toastrConfig, $translateProvider) {
 	  

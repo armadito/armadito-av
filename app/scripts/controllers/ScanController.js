@@ -97,13 +97,17 @@ angular.module('tatouApp')
 
         console.log("[+] Debug :: Data received from av :: ihm_request =  " + json_object.ihm_request);
 
-        // Handle progress information from av
+        // Handle progress  information from av
         if(json_object.ihm_request == "scan"){
 
           $scope.scan_data.progress = json_object.params.progress ;
           console.log("[+] Debug :: progress = ", $scope.scan_data.progress);
 
-          $scope.scan_data.files.push(json_object.params);
+          console.error("PATH : ", json_object.params);
+
+          if(json_object.params.scan_status != 'undecided'){
+            $scope.scan_data.files.push(json_object.params);
+          }
           //console.log("tableau", $scope.scan_data.files);
 
           // terminate scan.

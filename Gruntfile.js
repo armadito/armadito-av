@@ -35,7 +35,7 @@ module.exports = function (grunt) {
     watch: {
       bower: {
         files: ['bower.json'],
-        tasks: ['wiredep']
+        tasks: ['mohammed']
       },
       js: {
         files: ['<%= yeoman.app %>/scripts/{,*/}*.js'],
@@ -199,10 +199,18 @@ module.exports = function (grunt) {
     },
 
     // Automatically inject Bower components into the app
-    wiredep: {
+    mohammed: {
       app: {
         src: ['<%= yeoman.app %>/index.html'],
-        ignorePath:  /\.\.\//
+        ignorePath:  /\.\.\//,
+        /*fileTypes: {
+          html: {
+            replace: {
+              js: '<script src="../{{filePath}}"></script>',
+              css: '<link rel="stylesheet" href="../{{filePath}}" />'
+            }
+          }
+        }*/
       },
       test: {
         devDependencies: true,
@@ -381,7 +389,7 @@ module.exports = function (grunt) {
             '*.html',
             'images/{,*/}*.{webp}',
             'styles/fonts/{,*/}*.*',
-	    'scripts/filters/languages/*.js'
+            'scripts/filters/languages/*.js'
           ]
         }, {
           expand: true,
@@ -440,7 +448,7 @@ module.exports = function (grunt) {
 
     grunt.task.run([
       'clean:server',
-      'wiredep',
+      'mohammed',
       'concurrent:server',
       'postcss:server',
       'connect:livereload',
@@ -455,7 +463,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test', [
     'clean:server',
-    'wiredep',
+    'mohammed',
     'concurrent:test',
     'postcss',
     'connect:test',
@@ -464,7 +472,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', [
     'clean:dist',
-    'wiredep',
+    'mohammed',
     'useminPrepare',
     'concurrent:dist',
     'postcss',

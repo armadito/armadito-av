@@ -1,132 +1,3 @@
-<!--
-<div class="row">
-  <div class="col-xs-4 col-sm-4 col-md-4">
-  	<div class="panel panel-primary panel-option-scan">
-	  <div class="panel-heading">Scan</div>
-	  <div class="panel-body">
-	    <form class="form-horizontal">
-		  <fieldset>
-		    <div class="form-group">
-		      <div class="col-lg-10">
-		        <div class="radio">
-		          <label>
-		            <input type="radio" name="optionsRadios" id="optionsRadios1" value="option1" checked="">
-		            Rapide
-		          </label>
-		        </div>
-		        <div class="radio">
-		          <label>
-		            <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2">
-		            Complet
-		          </label>
-		        </div>
-		        <div class="radio">
-		          <label>
-		            <input type="radio" name="optionsRadios" id="optionsRadios3" value="option3">
-		            Personnalisé
-		          </label>
-		        </div>
-		      </div>
-		    </div>
-		    <div class="panel panel-success panel-advanced-option-scan">
-			  <div class="panel-heading">Avancées</div>
-			  <div class="panel-body">
-			    <div class="form-group">
-			      <div class="col-lg-10">
-			        <div class="checkbox">
-			          <label>
-			            <input type="checkbox"> Mode heuristique
-			          </label>
-			        </div>
-			      </div>
-			      <div class="col-lg-10">
-			        <div class="checkbox">
-			          <label>
-			            <input type="checkbox"> Scan archives
-			          </label>
-			        </div>
-			      </div>
-			      <div class="col-lg-10">
-			        <div class="checkbox">
-			          <label>
-			            <input type="checkbox"> Exclude folders/files
-			          </label>
-			        </div>
-			      </div>
-			    </div>
-			  </div>
-			</div>
-		    <div class="form-group">
-		      <div class="col-lg-10 col-lg-offset-2">
-		        <button type="submit" ng-click="startMe()" class="btn btn-primary">Start</button>
-		        <button ng-show="pdata.scan_progress > 0" type="submit" ng-click="stopMe()" class="btn btn-danger">Stop</button>
-		      </div>
-		    </div>
-		  </fieldset>
-		</form>
-	  </div>
-    </div>
-  </div>
-  <div class="col-xs-8 col-sm-8 col-md-8">
-  	<div class="panel panel-primary panel-scanProgression">
-	  <div class="panel-body">
-		<span ng-show="HideInputFile">
-			<div class="col-xs-12">
-				<div class="form-group">
-				  <label for="usr">Dossier à analyser:</label>
-				  <input type="text" ng-model="pathToScan" class="form-control" id="usr">
-				</div>
-			  <span class="btn btn-default btn-file">
-				Parcourir <input id="pathToScan" nwdirectory type="file">
-			   </span>
-			</div>
-		</span>
-	    <div class="row" ng-if="pdata.scan_progress > 0" >
-    	  	<div class="col-xs-12 col-sm-12 col-md-12" >
-	    	  	<label class="control-label">Scan progression</label>
-			    <uib-progressbar max="max" value="pdata.scan_progress"><span style="color:black; white-space:nowrap;">{{pdata.scan_progress}}%</span>
-		    	</uib-progressbar>   
-    	  	</div>
-	    </div>
-	    <div ng-if="pdata.scan_progress > 0" >
-	    	<table class="table borderless">
-			  <tbody ng-repeat="obj in tableScan">
-			  	<tr>
-			      <td><i class="fa fa-clipboard"></i> {{obj.title}}</td>
-			      <td>{{obj.data}}</td>
-			    </tr>
-			  </tbody>
-			</table> 
-			<div class="panel panel-danger" ng-show="displayedCollection.length > 0">
-			  <div class="panel-heading">
-			  	<b> Menaces trouvées : {{displayedCollection.length}}</b>
-			  </div>
-			  <div class="panel-body">
-			  	<div class="OverflowTableThreats">
-			  		<table st-table="displayedCollection" st-safe-src="rowCollection" class="table table-striped">
-						<thead>
-						<tr>
-							<th st-sort="Etat">Etat</th>
-							<th st-sort="Detail">Detail</th>
-							<th st-sort="Chemin">Chemin</th>
-						</tr>
-						</thead>
-						<tbody>
-						<tr ng-repeat="row in displayedCollection">
-							<td>{{row.Etat}}</td>
-							<td>{{row.Detail}}</td>
-							<td>{{row.Chemin}}</td>
-						</tr>
-						</tbody>
-					</table>
-			  	</div>
-			  </div>
-			</div>
-	    </div>
-	  </div>
-	</div>
-  </div>
-</div>-->
 <br>
 <div class="container-fluid">
 	<div class="row">
@@ -157,7 +28,8 @@
 	<br>
 	<div class="row" >
 	  	<div class="col-sm-offset-1 col-md-offset-1 col-xs-10 col-sm-10 col-md-10" >
-		    <uib-progressbar max="max" class="progressBar" value="scan_data.progress"><span class="progressBarPercent">{{scan_data.progress}}%</span>
+	  		<h6  ng-if="scan_data.files.length"> &nbsp;&nbsp;&nbsp;&nbsp;{{ 'analyse_view.Scanning_file' | translate}} : <b title="{{file.path}}" ng-repeat="file in scan_data.files track by $index"><span ng-if="$last">{{file.path | characters: 50}}</span></b></h6>
+		    <uib-progressbar max="max" class="progressBar" value="scan_data.progress"><span class="progressBarPercent"><span ng-if="scan_data.progress > 0 || scan_data.progress === 0">{{scan_data.progress}}%</span></span>
 	    	</uib-progressbar>   
 	  	</div>
 	</div>
@@ -199,13 +71,14 @@
 		
 		</div>
 		<div class="col-xs-11 col-sm-11 col-md-11">
-			<table class="table analyse">
-			    <tbody class="analyse" id="ex3">
+			<table class="table analyse" >
+			    <tbody class="analyse" id="ex3" schroll-bottom="scan_data.files">
 			      <tr class="analyse" ng-repeat="file in scan_data.files">
-			      	<td style="width:10%" class="analyse redCircle"><h7><i class="fa fa-circle fa-lg"></i></h7></td>
-			        <td style="width:10%" class="analyse" ><h7>{{$index}}</h7></td>
-			        <td style="width:20%" class="analyse" ><h7>{{file.scan_status}}</h7></td>
-			        <td style="width:60%"class="analyse"><h7>{{file.path}}</h7></td>
+			      	<td style="width:10%" ng-if="file.scan_status === 'malicious'" class="analyse redCircle"><h7><i class="fa fa-circle fa-lg"></i></h7></td>
+			      	<td style="width:10%" ng-if="file.scan_status === 'suspicious'"class="analyse orangeCircle"><h7><i class="fa fa-circle fa-lg"></i></h7></td>
+			        <td style="width:10%" ng-if="file.scan_status === 'suspicious' || file.scan_status === 'malicious'" class="analyse" ><h7>{{$index}}</h7></td>
+			        <td style="width:20%" ng-if="file.scan_status === 'suspicious' || file.scan_status === 'malicious'" class="analyse" ><h7>{{file.scan_status}}</h7></td>
+			        <td style="width:60%" ng-if="file.scan_status === 'suspicious' || file.scan_status === 'malicious'" class="analyse"><h7>{{file.path}}</h7></td>
 			      </tr>
 			    </tbody>
 			</table>
