@@ -9,6 +9,7 @@
 #define _XOPEN_SOURCE
 #include <time.h>
 
+
 #include "os/osdeps.h"
 #include <libarmadito/stdpaths.h>
 
@@ -203,7 +204,7 @@ int get_late_days(time_t date) {
 	return late_days;
 }
 
-static enum uhuru_update_status clamav_update_status_eval(time_t timestamp, int late_days, int critical_days)
+static enum a6o_update_status clamav_update_status_eval(time_t timestamp, int late_days, int critical_days)
 {	
 
 	int late = 0;
@@ -253,7 +254,7 @@ time_t get_timestamp(char * cvd_time) {
 	char s_month[4] = {0}, s_timezone[6] = {0};
 	char tmpbuf[128] = {'\0'}, timebuf[26] = {0};
 	int year=0;
-	errno_t err;
+	//errno_t err;
 
 #ifdef _WIN32
 	sscanf_s(cvd_time, "%d %3s %d %2d-%2d %5s",&timeptr.tm_mday, s_month,sizeof(s_month), &year, &timeptr.tm_hour, &timeptr.tm_min, s_timezone,sizeof(s_timezone));
