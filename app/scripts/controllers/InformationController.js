@@ -29,8 +29,10 @@ angular.module('tatouApp')
 			status : 0,
 			service : false,
 			realtime : false,
+			upToDate : false,
 			update : "critical",
 			last_update : "Not determined",
+			timestamp : 0,
 			version : "Not determined"
 		};
 				
@@ -78,13 +80,24 @@ angular.module('tatouApp')
 				}else{
 					$scope.state.realtime = false;
 				}
+
+				if(json_object.info.update.status  == 'up-to-date'){
+					$scope.state.upToDate = true;
+				}else{
+					$scope.state.upToDate = false;
+				}
+				
 								
 				$scope.state.update = json_object.info.update;
+
 				
 				
 				$scope.state.version = json_object.info.antivirus.version;
 
 				$scope.state.last_update = json_object.info.update['last-update'];
+				$scope.state.timestamp = json_object.info.update.timestamp;
+
+
 				console.log('[+] Debug :: threatDataFromAv :: av last-update :: ',json_object.info.update['last-update']);
 				
 				// modules infos.
@@ -92,7 +105,7 @@ angular.module('tatouApp')
 				console.log('[+] Debug :: threatDataFromAv :: Number of modules :: ',json_object.info.modules.length);
 				//console.log('[+] Debug :: threatDataFromAv :: module name :: ',json_object.info.modules[i].name);
 				$scope.state.modules = json_object.info.modules;				
-				for (var i = 0; i< $scope.state.modules.length ; i++){
+				/*for (var i = 0; i< $scope.state.modules.length ; i++){
 					
 					console.log('[+] Debug :: threatDataFromAv :: module name :: ',$scope.state.modules[i].name);
 					console.log('[+] Debug :: threatDataFromAv :: module date :: ',$scope.state.modules[i].update['last-update']);
@@ -101,7 +114,7 @@ angular.module('tatouApp')
 					//console.log('[+] Debug :: threatDataFromAv :: rsult:: ',ret);
 					
 					//$scope.modules[];					
-				}
+				}*/
 				
 				
 				//$scope.state.version = json_object.info.antivirus.version;
@@ -143,7 +156,7 @@ angular.module('tatouApp')
 			ArmaditoSVC.requestAVstatus($scope.threatDataFromAv);
 			
 			console.log('[+] Debug :: Refreshing antivirus status ::' + ArmaditoIPC.client_socket);
-		}		
+		}
 		
 		
 		$scope.refresh_status();
