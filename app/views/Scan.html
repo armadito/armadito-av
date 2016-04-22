@@ -74,11 +74,11 @@
 			<table class="table analyse" >
 			    <tbody class="analyse" id="ex3" schroll-bottom="scan_data.files">
 			      <tr class="analyse" ng-repeat="file in scan_data.files">
-			      	<td style="width:10%" ng-if="file.scan_status === 'malicious'" class="analyse redCircle"><h7><i class="fa fa-circle fa-lg"></i></h7></td>
+			      	<td style="width:10%" ng-if="file.scan_status === 'malware'" class="analyse redCircle"><h7><i class="fa fa-circle fa-lg"></i></h7></td>
 			      	<td style="width:10%" ng-if="file.scan_status === 'suspicious'"class="analyse orangeCircle"><h7><i class="fa fa-circle fa-lg"></i></h7></td>
-			        <td style="width:10%" ng-if="file.scan_status === 'suspicious' || file.scan_status === 'malicious'" class="analyse" ><h7>{{$index}}</h7></td>
-			        <td style="width:20%" ng-if="file.scan_status === 'suspicious' || file.scan_status === 'malicious'" class="analyse" ><h7>{{file.scan_status}}</h7></td>
-			        <td style="width:60%" ng-if="file.scan_status === 'suspicious' || file.scan_status === 'malicious'" class="analyse"><h7>{{file.path}}</h7></td>
+			        <td style="width:10%" ng-if="file.scan_status === 'suspicious' || file.scan_status === 'malware'" class="analyse" ><h7>{{$index}}</h7></td>
+			        <td style="width:20%" ng-if="file.scan_status === 'suspicious' || file.scan_status === 'malware'" class="analyse" ><h7>{{file.scan_status}}</h7></td>
+			        <td style="width:60%" ng-if="file.scan_status === 'suspicious' || file.scan_status === 'malware'" class="analyse"><h7>{{file.path}}</h7></td>
 			      </tr>
 			    </tbody>
 			</table>
