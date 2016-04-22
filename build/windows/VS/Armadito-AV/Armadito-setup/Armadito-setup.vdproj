@@ -15,30 +15,6 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_108F44D3A9D94DB7BEA9C7D49D5BF6C3"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_34D5CF69D18DB775AF24A36A24565F27"
-        "OwnerKey" = "8:_108F44D3A9D94DB7BEA9C7D49D5BF6C3"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_34D5CF69D18DB775AF24A36A24565F27"
-        "OwnerKey" = "8:_B9FDBC9E18AF4D9AB70AE8E109D5AF74"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_49725122A9AF9050B971806C3D82DF3C"
-        "OwnerKey" = "8:_108F44D3A9D94DB7BEA9C7D49D5BF6C3"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_77AD3D56EA784BD6852FD04AA691DFD4"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -51,56 +27,8 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_A235D296CC5824DD7630067EB5D19574"
-        "OwnerKey" = "8:_108F44D3A9D94DB7BEA9C7D49D5BF6C3"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_B5EE4C81CD9F4C2CAD7E693EF877CDE4"
         "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_B9FDBC9E18AF4D9AB70AE8E109D5AF74"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_F34FD7C256444DA3B3833BAAA6F2551A"
-        "OwnerKey" = "8:_108F44D3A9D94DB7BEA9C7D49D5BF6C3"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_F34FD7C256444DA3B3833BAAA6F2551A"
-        "OwnerKey" = "8:_77AD3D56EA784BD6852FD04AA691DFD4"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_F34FD7C256444DA3B3833BAAA6F2551A"
-        "OwnerKey" = "8:_B5EE4C81CD9F4C2CAD7E693EF877CDE4"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_F34FD7C256444DA3B3833BAAA6F2551A"
-        "OwnerKey" = "8:_91D9061B85384E439C7A7E9785C4EE95"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_F34FD7C256444DA3B3833BAAA6F2551A"
-        "OwnerKey" = "8:_B9FDBC9E18AF4D9AB70AE8E109D5AF74"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_FA1AA037B85E45EAB189626CBE39DE68"
-        "OwnerKey" = "8:_108F44D3A9D94DB7BEA9C7D49D5BF6C3"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -121,6 +49,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
         "Release"
         {
@@ -137,6 +73,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
     }
     "Deployable"
@@ -158,66 +102,6 @@
         }
         "File"
         {
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_34D5CF69D18DB775AF24A36A24565F27"
-            {
-            "SourcePath" = "8:urlmon.dll"
-            "TargetName" = "8:urlmon.dll"
-            "Tag" = "8:"
-            "Folder" = "8:_93AE649AF8DA4D24B5C52546E2401D4C"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:4"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_49725122A9AF9050B971806C3D82DF3C"
-            {
-            "SourcePath" = "8:FLTLIB.DLL"
-            "TargetName" = "8:FLTLIB.DLL"
-            "Tag" = "8:"
-            "Folder" = "8:_93AE649AF8DA4D24B5C52546E2401D4C"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_A235D296CC5824DD7630067EB5D19574"
-            {
-            "SourcePath" = "8:CRYPT32.dll"
-            "TargetName" = "8:CRYPT32.dll"
-            "Tag" = "8:"
-            "Folder" = "8:_93AE649AF8DA4D24B5C52546E2401D4C"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
         }
         "FileType"
         {
@@ -846,65 +730,9 @@
         }
         "MergeModule"
         {
-            "{CEE29DC0-9FBA-4B99-8D47-5BC643D9B626}:_F34FD7C256444DA3B3833BAAA6F2551A"
-            {
-            "UseDynamicProperties" = "11:TRUE"
-            "IsDependency" = "11:TRUE"
-            "SourcePath" = "8:microsoft_vc120_debugcrt_x86.msm"
-                "Properties"
-                {
-                }
-            "LanguageId" = "3:0"
-            "Exclude" = "11:FALSE"
-            "Folder" = "8:"
-            "Feature" = "8:"
-            "IsolateTo" = "8:"
-            }
-            "{CEE29DC0-9FBA-4B99-8D47-5BC643D9B626}:_FA1AA037B85E45EAB189626CBE39DE68"
-            {
-            "UseDynamicProperties" = "11:TRUE"
-            "IsDependency" = "11:TRUE"
-            "SourcePath" = "8:microsoft_vc120_crt_x86.msm"
-                "Properties"
-                {
-                }
-            "LanguageId" = "3:0"
-            "Exclude" = "11:FALSE"
-            "Folder" = "8:"
-            "Feature" = "8:"
-            "IsolateTo" = "8:"
-            }
         }
         "ProjectOutput"
         {
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_108F44D3A9D94DB7BEA9C7D49D5BF6C3"
-            {
-            "SourcePath" = "8:..\\Debug\\ArmaditoSvc.exe"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_93AE649AF8DA4D24B5C52546E2401D4C"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            "ProjectOutputGroupRegister" = "3:1"
-            "OutputConfiguration" = "8:"
-            "OutputGroupCanonicalName" = "8:Built"
-            "OutputProjectGuid" = "8:{B7A4D2B8-9E32-4007-9F90-9E4283E66208}"
-            "ShowKeyOutput" = "11:TRUE"
-                "ExcludeFilters"
-                {
-                }
-            }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_77AD3D56EA784BD6852FD04AA691DFD4"
             {
             "SourcePath" = "8:..\\Debug\\modulePDF.dll"
@@ -984,34 +812,6 @@
             "OutputConfiguration" = "8:"
             "OutputGroupCanonicalName" = "8:Built"
             "OutputProjectGuid" = "8:{6F7FCB67-F47F-43A9-A431-AF4192305385}"
-            "ShowKeyOutput" = "11:TRUE"
-                "ExcludeFilters"
-                {
-                }
-            }
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_B9FDBC9E18AF4D9AB70AE8E109D5AF74"
-            {
-            "SourcePath" = "8:..\\Debug\\libarmadito.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_93AE649AF8DA4D24B5C52546E2401D4C"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            "ProjectOutputGroupRegister" = "3:1"
-            "OutputConfiguration" = "8:"
-            "OutputGroupCanonicalName" = "8:Built"
-            "OutputProjectGuid" = "8:{8A108A73-1029-45C1-AC8D-993025690CB2}"
             "ShowKeyOutput" = "11:TRUE"
                 "ExcludeFilters"
                 {

@@ -87,6 +87,9 @@
     <ClCompile Include="..\..\..\..\..\core\json\ui\windows\update.c">
       <Filter>Fichiers sources\json\ui</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\..\core\windows\utils\tools.c">
+      <Filter>Fichiers sources\utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\core\windows\service\log.h">
@@ -141,6 +144,9 @@
       <Filter>Fichiers d%27en-tête\json\updatedb</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\core\windows\utils\crypt.h">
+      <Filter>Fichiers d%27en-tête\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\windows\utils\tools.h">
       <Filter>Fichiers d%27en-tête\utils</Filter>
     </ClInclude>
   </ItemGroup>

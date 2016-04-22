@@ -12,6 +12,7 @@ FILE * os_fopen(const char * filename, const char * mode);
 #define os_sprintf sprintf_s
 char * GetDBDirectory( );
 #define MODULE_CLAMAV_DBDIR "modules\\DB\\clamav"
+char * get_db_module_path(char * filename, char * module);
 #else
 #include <clamav.h>
 #define os_fopen fopen
@@ -20,6 +21,7 @@ char * GetDBDirectory( );
 char * os_strncpy(char * dest, size_t sizeDest, char * src, size_t count);
 char * os_strncat(char * dest, size_t sizeDest, char * src, size_t count);
 //int os_sprintf(char * dest, size_t len, const char * fmt...); // To implement.
+char * get_db_module_path(char * filename, char * module);
 #endif
 
 #endif

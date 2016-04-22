@@ -121,6 +121,7 @@ echo post-build step for $(ProjectName) OK
     <ClCompile Include="..\..\..\..\..\core\windows\service\service.c" />
     <ClCompile Include="..\..\..\..\..\core\windows\utils\crypt.c" />
     <ClCompile Include="..\..\..\..\..\core\windows\utils\others.c" />
+    <ClCompile Include="..\..\..\..\..\core\windows\utils\tools.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\core\json\ui\conf.h" />
@@ -141,6 +142,7 @@ echo post-build step for $(ProjectName) OK
     <ClInclude Include="..\..\..\..\..\core\windows\service\structs.h" />
     <ClInclude Include="..\..\..\..\..\core\windows\utils\crypt.h" />
     <ClInclude Include="..\..\..\..\..\core\windows\utils\others.h" />
+    <ClInclude Include="..\..\..\..\..\core\windows\utils\tools.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

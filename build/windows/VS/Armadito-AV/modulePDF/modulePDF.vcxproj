@@ -40,6 +40,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\..\uhurupdf\module7\includes;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -50,7 +51,34 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>modulePDF.def</ModuleDefinitionFile>
+      <AdditionalDependencies>libarmadito.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>echo post-build step for $(ProjectName)
+
+echo Copying files from $(OutDir) to $(SolutionDir)out\$(Configuration)
+
+REM create target directory
+if not exist "$(SolutionDir)out\$(Configuration)" mkdir "$(SolutionDir)out\$(Configuration)"
+if not exist "$(SolutionDir)out\$(Configuration)\modules" mkdir "$(SolutionDir)out\$(Configuration)\modules"
+
+REM copy the DLL into the modules directory
+xcopy "$(OutDir)modulePDF.dll" "$(SolutionDir)out\$(Configuration)\modules" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM Exit properly because the build will not fail 
+REM unless the final step exits with an error code
+
+goto BuildEventOK
+
+:BuildEventFailed
+echo post-build step for $(ProjectName) FAILED
+exit 1
+
+:BuildEventOK
+echo post-build step for $(ProjectName) OK
+</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>

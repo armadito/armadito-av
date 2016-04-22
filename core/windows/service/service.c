@@ -11,6 +11,10 @@
 //#include "register.h"
 //#include "uh_info.h"
 //#include "uh_quarantine.h"
+#include <utils\tools.h>
+#include <time.h>
+#include <sys/timeb.h>
+#include <sys/types.h>
 
 
 // Msdn documentation: 
@@ -1438,7 +1442,6 @@ void DisplayBanner( ) {
 
 
 
-
 int main(int argc, char ** argv) {
 
 	int ret = 0;
@@ -1603,14 +1606,10 @@ int main(int argc, char ** argv) {
 	}
 
 	if ( argc >=2 && strncmp(argv[1],"--info",6) == 0 ){
-
-#if 0
-		ret = get_av_info();
-		if (ret < 0) {
+		
+		if (get_av_info() < 0) {
 			return EXIT_FAILURE;
 		}
-
-#endif
 		return EXIT_SUCCESS;
 	}
 
