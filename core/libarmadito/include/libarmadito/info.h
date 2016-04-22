@@ -3,6 +3,7 @@
 
 #include <libarmadito/status.h>
 #include <libarmadito/handle.h>
+#include <time.h>
 
 enum a6o_update_status {
 	ARMADITO_UPDATE_OK,
