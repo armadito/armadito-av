@@ -51,6 +51,25 @@ static struct json_object *update_json(enum a6o_update_status status, const char
 	if (update_date != NULL)
 		json_object_object_add(j_update, "last-update", json_object_new_string(update_date));
 
+
+	return j_update;
+}
+
+static struct json_object *update_json_ex(enum a6o_update_status status, const char *update_date, time_t timestamp)
+{
+	struct json_object *j_update;
+
+	if (update_date == NULL)
+		return NULL;
+
+	j_update = json_object_new_object();
+
+	json_object_object_add(j_update, "status", update_status_json(status));
+	if (update_date != NULL)
+		json_object_object_add(j_update, "last-update", json_object_new_string(update_date));
+
+	json_object_object_add(j_update,"timestamp",json_object_new_int64(timestamp));
+
 	return j_update;
 }
 
@@ -58,11 +77,14 @@ static struct json_object *state_json(struct a6o_info *info)
 {
 	struct json_object *j_state, *j_mod_array;
 	struct a6o_module_info **m;
+	time_t timestamp = 0;
+	char * last_update = NULL;
+
 
 	j_state = json_object_new_object();
 
 	json_object_object_add(j_state, "antivirus", antivirus_json(info));
-	json_object_object_add(j_state, "update", update_json(info->global_status, "1970-01-01 00:00"));
+	//json_object_object_add(j_state, "update", update_json(info->global_status, "1970-01-01 00:00"));
 
 	j_mod_array = json_object_new_array();
 
@@ -71,11 +93,17 @@ static struct json_object *state_json(struct a6o_info *info)
 
 		json_object_object_add(j_mod, "name", json_object_new_string((*m)->name));
 		json_object_object_add(j_mod, "version", json_object_new_string("0.0.0"));
-		json_object_object_add(j_mod, "update", update_json((*m)->mod_status, (*m)->update_date));
+		json_object_object_add(j_mod, "update", update_json_ex((*m)->mod_status, (*m)->update_date, (*m)->timestamp));
+
+		if ( (*m)->timestamp > timestamp) {
+			timestamp = (*m)->timestamp;
+			last_update = (*m)->update_date;
+		}
 
 		json_object_array_add(j_mod_array, j_mod);
 	}
 
+	json_object_object_add(j_state, "update", update_json_ex(info->global_status, last_update,timestamp));
 	json_object_object_add(j_state, "modules", j_mod_array);
 
 	return j_state;

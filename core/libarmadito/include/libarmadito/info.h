@@ -17,6 +17,7 @@ struct a6o_base_info {
 	const char *name;
 	/* UTC and ISO 8601 date */
 	const char *date;
+	time_t timestamp;
 	const char *version;
 	unsigned int signature_count;
 	const char *full_path;
@@ -27,6 +28,7 @@ struct a6o_module_info {
 	enum a6o_update_status mod_status;
 	/* UTC and ISO 8601 date time */
 	const char *update_date;
+	time_t timestamp;
 	/* NULL terminated array of pointers to struct base_info */
 	struct a6o_base_info **base_infos;
 };
