@@ -9,6 +9,8 @@ struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, int scan_id, 
 
 struct a6o_scan *a6o_on_demand_get_scan(struct a6o_on_demand *on_demand);
 
+void a6o_on_demand_cancel(struct a6o_on_demand *on_demand);
+
 void a6o_on_demand_run(struct a6o_on_demand *on_demand);
 
 void a6o_on_demand_free(struct a6o_on_demand *on_demand);
