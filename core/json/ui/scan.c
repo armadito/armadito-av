@@ -204,7 +204,7 @@ void scan_process_cb(struct armadito *armadito, void *request_data)
 enum a6o_json_status scan_cancel_response_cb(struct armadito *armadito, struct json_request *req, struct json_response *resp, void **request_data)
 {
 #ifdef DEBUG
-  a6o_log(UHURU_LOG_SERVICE, UHURU_LOG_LEVEL_DEBUG, "JSON: scan cancel cb called");
+  a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_DEBUG, "JSON: scan cancel cb called");
 #endif
 
   a6o_on_demand_cancel(NULL);
