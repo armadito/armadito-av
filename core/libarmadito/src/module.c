@@ -130,7 +130,7 @@ void module_manager_add(struct module_manager *mm, struct a6o_module *module)
 	g_array_append_val(mm->modules, clone);
 }
 
-static void module_load_dirent_cb(const char *full_path, enum os_file_flag flags, int entry_errno, void *data)
+static in module_load_dirent_cb(const char *full_path, enum os_file_flag flags, int entry_errno, void *data)
 {
 	a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_DEBUG, "loading module from path %s flags %d", full_path, flags);
 
@@ -144,6 +144,7 @@ static void module_load_dirent_cb(const char *full_path, enum os_file_flag flags
 	}
 	else
 		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "loading module: path %s is not a plain file", full_path);
+	return 0;
 }
 
 int module_manager_load_path(struct module_manager *mm, const char *path, a6o_error **error)
