@@ -37,8 +37,7 @@
 #define HAVE_ONDEMAND_MODULE
 #undef HAVE_ALERT_MODULE
 #undef HAVE_QUARANTINE_MODULE
-#undef HAVE_ON_ACCESS_WINDOWS_MODULE
-//#define HAVE_ON_ACCESS_WINDOWS_MODULE
+#define HAVE_ON_ACCESS_WINDOWS_MODULE
 /* glib (current version of glib on windows is 2.28.8, which had g_thread_create) */
 #define HAVE_GTHREAD_NEW
 #undef HAVE_GTHREAD_CREATE

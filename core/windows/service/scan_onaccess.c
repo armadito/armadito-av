@@ -243,18 +243,16 @@ HRESULT UserScanWorker( _In_  PGLOBAL_SCAN_CONTEXT Context )
 			else if (strstr(msDosFilename,"UH_MALWARE") != NULL) {				
 				scan_result = ARMADITO_MALWARE;
 			}
-			else if (strstr(msDosFilename,"ARMADITO.TXT") != NULL) {  // Do not scan the log file.
+			else if (strstr(msDosFilename,"ARMADITO.TXT") != NULL) {  // Do not scan the log file. (debug only)
 				scan_result = ARMADITO_WHITE_LISTED;
 			}
-			/*else if (strstr(msDosFilename,"UH_EICAR") != NULL) {  // Do not scan the log file.
-				//printf("[+] Debug :: UserScanWorker :: [%d] :: a6o_scan :: [%s] \n",ThreadId,msDosFilename);				
-				scan_result = a6o_scan_simple(a6o, msDosFilename, &report);				
-			}*/
 			else {
 
 				// launch a simple file scan
 				//printf("[+] Debug :: UserScanWorker :: [%d] :: a6o_scan :: [%s] \n",ThreadId,msDosFilename);
-				scan_result = a6o_scan_simple(Context->armadito, msDosFilename, &report);				
+				scan_result = a6o_scan_simple(Context->armadito, msDosFilename, &report);
+				a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "[+] Debug :: UserScanWorker :: [%d] :: %s :: %s\n", ThreadId, msDosFilename, ScanResultToStr(scan_result));
+				printf("[+] Debug :: UserScanWorker :: [%d] :: %s :: %s\n", ThreadId, msDosFilename, ScanResultToStr(scan_result));
 
 			}
 
@@ -266,9 +264,8 @@ HRESULT UserScanWorker( _In_  PGLOBAL_SCAN_CONTEXT Context )
 			// Send a reply message to the driver.
 			hres = FilterReplyMessage(Context->onAccessCtx->ConnectionPort,&reply.ReplyHeader,SCANNER_REPLY_MESSAGE_SIZE);			
 
-			if(FAILED(hres)){
-				//uhLog("[-] Error :: UserScanWorker :: Thread %d :: FilterReplyMessage failed :: hres = 0x%x.\n",ThreadId, hres);
-				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: [%d] :: FilterReplyMessage failed :: hres = 0x%x.\n",ThreadId, hres);
+			if(FAILED(hres)){				
+				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_WARNING, " UserScanWorker :: [%d] :: FilterReplyMessage failed :: hres = 0x%x.\n",ThreadId, hres);
 			}
 			else {
 				if (scan_result == ARMADITO_MALWARE) {
