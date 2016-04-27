@@ -161,6 +161,13 @@ angular.module('tatouApp')
 
     };
 
+    $scope.CancelScan = function(){
+    
+      console.log("[+] Debug :: type d'analyse ::", $scope.type);
+      ArmaditoSVC.cancelScan($scope.threatDataFromAv);
+
+    };
+
 
     $scope.fullScan = function () {
        $scope.type = "analyse_view.Full_scan";

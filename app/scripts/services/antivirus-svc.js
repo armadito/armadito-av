@@ -93,8 +93,21 @@ angular.module('armadito.svc', [])
 		ArmaditoIPC.write2_av(buffer);
 		ArmaditoIPC.disconnect2_av();
 
-		// TODO close server.
+		// TODO close server ?
 		//this.cleanALL();
+	};
+
+	// Cancel current scan (if any).
+	factory.cancelScan = function(callback){
+
+		console.log("[+] Debug :: cancelScan ");
+
+		var request = { "av_request":"scan_cancel", "id":123, "params": {}};
+		var buffer = new Buffer( JSON.stringify(request), 'ascii' );
+
+		ArmaditoIPC.connect2_av(ipc_path,callback);
+		ArmaditoIPC.write2_av(buffer);
+		ArmaditoIPC.disconnect2_av();
 	};
 
 	/*
@@ -111,7 +124,6 @@ angular.module('armadito.svc', [])
 
 		return scan_server;
 	}; */
-
 
 	// Request antivirus status.
 	factory.requestAVstatus = function(callback){
