@@ -41,20 +41,43 @@ int ServiceLoadProcedure( ) {
 	a6o_error * uh_error = NULL;
 	HRESULT hres = S_OK;
 	struct a6o_conf * conf = NULL;
+	a6o_error * error = NULL;
 	struct armadito * armadito = NULL;
 	int onaccess_enable = 0;
+	char * conffile = NULL;
 
 	__try {
 
-		// Init configuration structure
-		conf = a6o_conf_new();
+		// Load configuration from file.	
+		if ((conf = a6o_conf_new()) == NULL) {
+			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: init_configuration :: conf struct initialization failed!\n");
+			ret = -2;
+			__leave;
+		}
 
+#if 0
 		// Load configuration from registry.
 		if (restore_conf_from_registry(conf) < 0) {			
 			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR," [-] Error :: fail to load the configuration!\n");
 			ret = -1;
 			__leave;
 		}
+#else
+		// get configuration file path.
+		conffile = a6o_std_path(CONFIG_FILE_LOCATION);
+		if (conffile == NULL) {
+			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: init_configuration :: get configuration file path failed !\n");
+			ret = -3;
+			__leave;
+		}
+
+		printf("[+] Debug :: init_configuration :: conf file = %s\n",conffile);
+
+		// Load config from config file. a6o.conf
+		a6o_conf_load_file(conf, conffile, &error);
+#endif
+
+		
 
 		printf("[+] Debug :: Configuration loaded successfully!\n");
 		
