@@ -86,9 +86,10 @@ int os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data)
 		if (entry->d_type == DT_DIR && (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")))
 			continue;
 
-		if (asprintf(&entry_path, "%s/%s", path, entry->d_name) == -1)
+		if (asprintf(&entry_path, "%s/%s", path, entry->d_name) == -1){
 			ret = -1;
 			break;
+		}
 
 		if (entry->d_type == DT_DIR && recurse) {
 		      ret = os_dir_map(entry_path, recurse, dirent_cb, data);
