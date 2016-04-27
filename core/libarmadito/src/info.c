@@ -98,10 +98,10 @@ void a6o_info_free(struct a6o_info *info)
 					free((void *)(*b)->version);
 					free((void *)(*b)->full_path);
 
-					g_free(*b);
+					free(*b);
 				}
 
-				g_free((*m)->base_infos);
+				free((*m)->base_infos);
 			}
 
 			g_free(*m);
