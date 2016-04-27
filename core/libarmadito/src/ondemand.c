@@ -60,13 +60,13 @@ static int cancel = 0;
 
 void a6o_on_demand_cancel(struct a6o_on_demand *on_demand)
 {
+  a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "-- on_demand_cancel call !");
   cancel = 1;
 }
 
 static int a6o_on_demand_is_canceled(struct a6o_on_demand *on_demand)
 {
-  a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "cancel = %d", cancel);
-
+ // a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "cancel = %d", cancel);
   return cancel;
 }
 
