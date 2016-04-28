@@ -1,4 +1,4 @@
-#include <libuhuru/core.h>
+#include <libarmadito.h>
 #include "os/dir.h"
 #include "quarantine.h"
 #include "os\string.h"
@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <Windows.h>
-//#include <json\ui\ui.h>
 #include <json.h>
 
 
@@ -17,7 +16,6 @@ struct quarantine_data {
   char *quarantine_dir;
   int enable;
 };
-
 
 // Windows version.
 
@@ -37,14 +35,14 @@ char * GetLocationCompletepath(char * specialDir) {
 	__try {
 
 		if (!GetModuleFileNameA(NULL, (LPSTR)&filepath, MAX_PATH)) {	
-			printf("[-] Error :: GetLocationCompletepath :: GetModuleFilename failed :: GLE = %d\n",GetLastError());
+			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: GetLocationCompletepath :: GetModuleFilename failed :: GLE = %d\n",GetLastError());
 			return NULL;
 		}
 
 		// Remove the module filename from the complete file path
 		ptr = strrchr(filepath,'\\');
 		if (ptr == NULL) {
-			printf("[-] Error :: GetLocationCompletepath :: No backslash found in the path\n");
+			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: GetLocationCompletepath :: No backslash found in the path\n");
 			return NULL;
 		}
 
@@ -107,9 +105,8 @@ char * BuildLocationFilePath(char * filepath, char * specialDir) {
 	char * location_dir = NULL;
 
 
-	if (filepath == NULL) {
-		printf("[-] Error :: BuildLocationFilePath :: Invalid file path!\n");
-		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," BuildLocationFilePath :: Invalid file path!\n");
+	if (filepath == NULL || specialDir == NULL) {
+		a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," BuildLocationFilePath :: Invalid parameter!\n");
 		return NULL;
 	}
 
@@ -117,8 +114,7 @@ char * BuildLocationFilePath(char * filepath, char * specialDir) {
 
 		location_dir = GetLocationCompletepath(specialDir);
 		if (location_dir == NULL) {
-			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR,"Get Location complete path failed\n");
-			printf("[-] Error :: BuildLocationFilePath :: Get Location complete path failed\n");
+			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," BuildLocationFilePath :: Get Location complete path failed\n");			
 			return NULL;
 		}
 
@@ -126,8 +122,7 @@ char * BuildLocationFilePath(char * filepath, char * specialDir) {
 		// Get the file name from the complete file path
 		filename = strrchr(filepath,'\\');
 		if (filename == NULL) {
-			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," BuildQuarantineFilePath!strrchr() failed :: backslash not found in the path :: %s.\n",filepath);
-			printf("[-] Error :: BuildLocationFilePath!strrchr() failed :: backslash not found in the path :: %s.\n",filepath);
+			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," BuildQuarantineFilePath!strrchr() failed :: backslash not found in the path :: %s.\n",filepath);			
 			return NULL;
 		}
 
@@ -183,8 +178,7 @@ char * GetFilenameFromPath(char * path) {
 
 		filename = strrchr(path,'\\');
 		if (filename == NULL) {
-			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," GetFilenameFromPath!strrchr() failed :: backslash not found in the path :: %s.\n",path);
-			printf("[-] Error :: GetFilenameFromPath!strrchr() failed :: backslash not found in the path :: %s.\n",path);
+			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," GetFilenameFromPath!strrchr() failed :: backslash not found in the path :: %s.\n",path);			
 			return NULL;
 		}
 
@@ -196,7 +190,7 @@ char * GetFilenameFromPath(char * path) {
 	return filename;
 }
 
-int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct uhuru_report * uh_report) {
+int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct a6o_report * uh_report) {
 
 	int ret = 0;
 	char * info_path = NULL;
@@ -211,7 +205,7 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct uh
 	
 
 	if (oldfilepath == NULL || quarantinePath == NULL ) {
-		printf("[-] Error :: WriteQuarantineInfoFile :: invalid parameter\n");
+		a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: WriteQuarantineInfoFile :: invalid parameter\n");
 		return -1;
 	}
 
@@ -225,7 +219,7 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct uh
 		strncat_s(info_path, len, quarantinePath, strnlen_s(quarantinePath ,MAX_PATH));
 		strncat_s(info_path, len, ".info", strnlen_s(".info" ,MAX_PATH));
 
-		printf("[+] Debug :: WriteQuarantineInfoFile :: info file path = %s\n",info_path);
+		a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_INFO,"[+] Debug :: WriteQuarantineInfoFile :: info file path = %s\n",info_path);
 
 		// build information file path for quarantine.
 		alert_tmp = BuildLocationFilePath(oldfilepath, ALERT_DIR);
@@ -271,7 +265,7 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct uh
 		
 		content = json_object_to_json_string(jobj);
 		if (content == NULL) {
-			printf("[-] Error :: WriteQuarantineInfoFile :: can't build info content\n");
+			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: WriteQuarantineInfoFile :: can't build info content\n");
 			ret = -2;
 			__leave;
 		}
@@ -287,7 +281,7 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct uh
 		fh = CreateFile(info_path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (fh == INVALID_HANDLE_VALUE) {
 			ret = -3;
-			printf("[-] Error :: WriteQuarantineInfoFile :: can't open the info file [%s] :: GLE = %d\n",info_path,GetLastError());
+			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: WriteQuarantineInfoFile :: can't open the info file [%s] :: GLE = %d\n",info_path,GetLastError());
 			__leave;
 		}
 
@@ -295,7 +289,7 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct uh
 
 		if (WriteFile(fh, content, len, &written, NULL) == FALSE) {
 			ret = -3;
-			printf("[-] Error :: WriteQuarantineInfoFile :: write failed :: GLE = %d\n",GetLastError());
+			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: WriteQuarantineInfoFile :: write failed :: GLE = %d\n",GetLastError());
 			__leave;
 		}
 
@@ -307,7 +301,7 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct uh
 		// copy info file in alert
 		if (CopyFile(info_path,alert_path,TRUE)  == FALSE){
 			//ret = -4;
-			printf("[-] Error :: WriteQuarantineInfoFile :: Copy info file in alert dir failed :: GLE = %d\n",GetLastError());
+			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: WriteQuarantineInfoFile :: Copy info file in alert dir failed :: GLE = %d\n",GetLastError());
 			//__leave;
 		}
 
@@ -344,8 +338,7 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct uh
 
 }
 
-
-static int quarantine_do(struct quarantine_data *qu_data, const char *path, struct uhuru_report * report)
+static int quarantine_do(struct quarantine_data *qu_data, const char *path, struct a6o_report * report)
 {
 	int ret = 0;
 	char * quarantineFilepath = NULL;
@@ -354,9 +347,8 @@ static int quarantine_do(struct quarantine_data *qu_data, const char *path, stru
 	//printf("[+] Debug :: quarantine_do path= %s -----------------\n",path);	
 
 
-	if (path == NULL) {
-		printf("[-] Error :: quarantine_do :: Invalid file path!\n");
-		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," quarantine_do :: Invalid file path!\n");
+	if (path == NULL) {		
+		a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," quarantine_do :: Invalid file path!\n");
 		return -1;
 	}
 
@@ -364,9 +356,8 @@ static int quarantine_do(struct quarantine_data *qu_data, const char *path, stru
 
 		// build quarantine file path.
 		quarantineFilepath = BuildLocationFilePath(path,qu_data->quarantine_dir);
-		if (quarantineFilepath == NULL) {
-			printf("[-] Error :: MoveFileInQuarantine :: Build Quarantine FilePath failed !\n");
-			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," Build Quarantine FilePath failed ! :: [%s]\n",path);
+		if (quarantineFilepath == NULL) {			
+			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," Build Quarantine FilePath failed ! :: [%s]\n",path);
 			ret = -2;
 			__leave;
 		}
@@ -375,7 +366,7 @@ static int quarantine_do(struct quarantine_data *qu_data, const char *path, stru
 		if (WriteQuarantineInfoFile(path, quarantineFilepath, report) != 0) {
 			ret = -3;
 			printf("[-] Error :: MoveFileInQuarantine :: Write Quarantine Information File failed!\n");
-			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," Write Quarantine Information File failed! :: [%s] :: [%s]\n",path, quarantineFilepath);
+			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," Write Quarantine Information File failed! :: [%s] :: [%s]\n",path, quarantineFilepath);
 			__leave;
 		}
 
@@ -390,16 +381,15 @@ static int quarantine_do(struct quarantine_data *qu_data, const char *path, stru
 		CloseHandle(fh);
 		*/
 
-		// Test if the quarantine folder is present.		
-		if (MoveFileEx(path,quarantineFilepath,MOVEFILE_REPLACE_EXISTING|MOVEFILE_FAIL_IF_NOT_TRACKABLE|MOVEFILE_COPY_ALLOWED|MOVEFILE_WRITE_THROUGH) == FALSE){
-			printf("[-] Error :: MoveFileInQuarantine :: Move file [%s] to quarantine failed ! :: GLE = %d\n",path,GetLastError());
-			uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_ERROR," Move file [%s] to quarantine folder failed !\n",path);
+		// TODO :: Test if the quarantine folder is present.		
+		if (MoveFileEx(path,quarantineFilepath,MOVEFILE_REPLACE_EXISTING|MOVEFILE_FAIL_IF_NOT_TRACKABLE|MOVEFILE_COPY_ALLOWED|MOVEFILE_WRITE_THROUGH) == FALSE){			
+			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," Move file [%s] to quarantine folder failed ! :: GLE =%d\n",path,GetLastError());
 			ret = -4;
 			__leave;
 		}
 
 		printf("[+] Debug :: File [%s] moved to quarantine folder successfully !\n", path);	
-		uhuru_log(UHURU_LOG_SERVICE,UHURU_LOG_LEVEL_INFO," File [%s] moved to quarantine folder successfully !\n",path );
+		a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_INFO," File [%s] moved to quarantine folder successfully !\n",path );
 
 
 	}
@@ -416,34 +406,32 @@ static int quarantine_do(struct quarantine_data *qu_data, const char *path, stru
 	return ret;
 }
 
-void quarantine_callback(struct uhuru_report *report, void *callback_data)
+void quarantine_callback(struct a6o_report *report, void *callback_data)
 {
   struct quarantine_data *qu_data = (struct quarantine_data *)callback_data;
   
   //printf("[+] Debug :: quarantine_callback :: enable = %d :: dir = %s :: status = %d \n", qu_data->enable, qu_data->quarantine_dir, report->status);
-  //uhuru_log(UHURU_LOG_LIB,UHURU_LOG_LEVEL_INFO, "[+] Debug :: quarantine_callback :: enable = %d :: dir = %s :: status = %d\n", qu_data->enable, qu_data->quarantine_dir, report->status);
+  //a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_INFO, "[+] Debug :: quarantine_callback :: enable = %d :: dir = %s :: status = %d\n", qu_data->enable, qu_data->quarantine_dir, report->status);
 
   if (!qu_data->enable)
     return;
 
   switch(report->status) {
-  case UHURU_UNDECIDED:
-  case UHURU_CLEAN:
-  case UHURU_UNKNOWN_FILE_TYPE:
-  case UHURU_EINVAL:
-  case UHURU_IERROR:
-  case UHURU_SUSPICIOUS:
-  case UHURU_WHITE_LISTED:
+  case ARMADITO_UNDECIDED:
+  case ARMADITO_CLEAN:
+  case ARMADITO_UNKNOWN_FILE_TYPE:
+  case ARMADITO_EINVAL:
+  case ARMADITO_IERROR:
+  case ARMADITO_SUSPICIOUS:
+  case ARMADITO_WHITE_LISTED:
     return;
   }
 
   if (quarantine_do(qu_data, report->path, report) == 0)
-    report->action |= UHURU_ACTION_QUARANTINE;
+    report->action |= ARMADITO_ACTION_QUARANTINE;
 }
 
-
-
-static enum uhuru_mod_status quarantine_init(struct uhuru_module *module)
+static enum a6o_mod_status quarantine_init(struct a6o_module *module)
 {
   struct quarantine_data *qu_data = calloc(1, sizeof(struct quarantine_data));
 
@@ -452,55 +440,43 @@ static enum uhuru_mod_status quarantine_init(struct uhuru_module *module)
 
   module->data = qu_data;
 
-  return UHURU_MOD_OK;
+  return ARMADITO_MOD_OK;
 
 
 }
 
-static enum uhuru_mod_status quarantine_conf_quarantine_dir(struct uhuru_module *module, const char *key, struct uhuru_conf_value *value)
+static enum a6o_mod_status quarantine_conf_quarantine_dir(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
 {
 	struct quarantine_data *qu_data = (struct quarantine_data *)module->data;
 
-	qu_data->quarantine_dir = os_strdup(uhuru_conf_value_get_string(value));
+	qu_data->quarantine_dir = os_strdup(a6o_conf_value_get_string(value));
 
-	return UHURU_MOD_OK;
+	return ARMADITO_MOD_OK;
 
 }
 
-static enum uhuru_mod_status quarantine_conf_enable(struct uhuru_module *module, const char *key, struct uhuru_conf_value *value)
+static enum a6o_mod_status quarantine_conf_enable(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
 {
 	struct quarantine_data *qu_data = (struct quarantine_data *)module->data;
 
-	qu_data->enable = uhuru_conf_value_get_int(value);
+	qu_data->enable = a6o_conf_value_get_int(value);
 
-	return UHURU_MOD_OK;
+	return ARMADITO_MOD_OK;
 }
 
-static struct uhuru_conf_entry quarantine_conf_table[] = {
-  { 
-    .key = "quarantine-dir", 
-    .type = CONF_TYPE_STRING,
-    .conf_fun = quarantine_conf_quarantine_dir, 
-  },
-  { 
-    .key = "enable", 
-    .type = CONF_TYPE_INT,
-    .conf_fun = quarantine_conf_enable, 
-  },
-  { 
-    .key = NULL, 
-    .type = 0,
-    .conf_fun = NULL, 
-  },
+
+struct a6o_conf_entry quarantine_conf_table[] = {
+	{ "enable", CONF_TYPE_INT, quarantine_conf_enable},
+	{ "quarantine-dir", CONF_TYPE_STRING, quarantine_conf_quarantine_dir},
+	{ NULL, 0, NULL},
 };
 
-struct uhuru_module quarantine_module = {
-  .init_fun = quarantine_init,
-  .conf_table = quarantine_conf_table,
-  .post_init_fun = NULL,
-  .scan_fun = NULL,
-  .close_fun = NULL,
-  .supported_mime_types = NULL,
-  .name = "quarantine",
-  .size = sizeof(struct quarantine_data),
+struct a6o_module quarantine_module = {
+	.init_fun = quarantine_init,
+	.conf_table = quarantine_conf_table,
+	.post_init_fun = NULL,
+	.scan_fun = NULL,
+	.close_fun = NULL,
+	.supported_mime_types = NULL,
+	.name = "quarantine",
 };
