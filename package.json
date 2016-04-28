@@ -47,6 +47,7 @@
     "max_height": 560
   },
   "dependencies": {
-    "os-locale": "^1.4.0"
+    "os-locale": "^1.4.0",
+    "sprintf-js": "^1.0.3"
   }
 }

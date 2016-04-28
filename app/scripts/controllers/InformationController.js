@@ -9,7 +9,8 @@
  */
  
  var os = require('os');
- 
+ var sprintf = require("sprintf-js").sprintf;
+
 angular.module('tatouApp')
   .controller('InformationController', ['$scope','ArmaditoSVC','ArmaditoIPC', function ($scope,ArmaditoSVC,ArmaditoIPC) {
 
@@ -32,10 +33,24 @@ angular.module('tatouApp')
 			upToDate : false,
 			update : "critical",
 			last_update : "Not determined",
-			timestamp : 0,
+			last_update_timestamp : 0,
 			version : "Not determined"
 		};
-				
+			
+
+		$scope.timeConverter = function(timestamp){
+		  var a = new Date(timestamp * 1000);
+		  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+		  var year = a.getFullYear();
+		  var month = months[a.getMonth()];
+		  var date = a.getDate();
+		  var hour = a.getHours();
+		  var min = a.getMinutes();
+		  var sec = a.getSeconds();
+
+		  return sprintf("%02d %s %d %02d:%02d:%02d", date, month, year, hour, min, sec);
+		}
+	
 		/*$scope.state.modules = 
 		[{
 			name : "clamav",
@@ -90,35 +105,30 @@ angular.module('tatouApp')
 								
 				$scope.state.update = json_object.info.update;
 
-				
-				
 				$scope.state.version = json_object.info.antivirus.version;
 
-				$scope.state.last_update = json_object.info.update['last-update'];
-				$scope.state.timestamp = json_object.info.update.timestamp;
-
+				// unused : json_object.info.update['last-update'];
+				
+				$scope.state.last_update_timestamp = json_object.info.update.timestamp;
+				$scope.state.last_update = $scope.timeConverter(json_object.info.update.timestamp);
+				
 
 				console.log('[+] Debug :: threatDataFromAv :: av last-update :: ',json_object.info.update['last-update']);
 				
 				// modules infos.
 				console.log('------- module tab obj = ',json_object.info.modules);
 				console.log('[+] Debug :: threatDataFromAv :: Number of modules :: ',json_object.info.modules.length);
-				//console.log('[+] Debug :: threatDataFromAv :: module name :: ',json_object.info.modules[i].name);
+
 				$scope.state.modules = json_object.info.modules;				
-				/*for (var i = 0; i< $scope.state.modules.length ; i++){
+				for (var i = 0; i< $scope.state.modules.length ; i++){
+
+					$scope.state.modules[i].update['date'] = $scope.timeConverter($scope.state.modules[i].update['timestamp']);
 					
 					console.log('[+] Debug :: threatDataFromAv :: module name :: ',$scope.state.modules[i].name);
-					console.log('[+] Debug :: threatDataFromAv :: module date :: ',$scope.state.modules[i].update['last-update']);
-					
-					//var ret = date - $scope.state.modules[i].update['last-update'];
-					//console.log('[+] Debug :: threatDataFromAv :: rsult:: ',ret);
-					
-					//$scope.modules[];					
-				}*/
-				
-				
-				//$scope.state.version = json_object.info.antivirus.version;
-				//$scope.state.service = json_object.info.antivirus.version;
+					console.log('[+] Debug :: threatDataFromAv :: module timestamp :: ',$scope.state.modules[i].update['timestamp']);	
+					console.log('[+] Debug :: threatDataFromAv :: module date :: ',$scope.state.modules[i].update['date']);				
+				}
+
 			}
 			catch(e){
 				console.error("Parsing error:", e); 
