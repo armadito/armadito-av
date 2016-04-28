@@ -152,7 +152,7 @@ static int scan_entry(const char *full_path, enum os_file_flag flags, int entry_
 
 	/* if scan is multi thread, just queue the scan to the thread pool, otherwise do it here */
 	if (on_demand->flags & ARMADITO_SCAN_THREADED){
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "Push thread on pool for scan of : %s", full_path);
+		
 		if(full_path != NULL)
 		   g_thread_pool_push(on_demand->thread_pool, (gpointer)os_strdup(full_path), NULL);
 		/* 
