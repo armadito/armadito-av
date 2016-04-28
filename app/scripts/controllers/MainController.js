@@ -8,7 +8,6 @@
  * Controller of the tatouApp
  */
 
- // TEST TRAY
 // Load native UI library
 var osLocale = require('os-locale');
 var gui = require('nw.gui');
@@ -22,6 +21,9 @@ var win = gui.Window.get();
 tray.on('click', function() {
   win.show();
 });
+
+//var scan_in_progress = 0;
+global.scan_in_progress = 0;
 
 angular.module('tatouApp')
   .controller('MainController', [ '$rootScope', '$scope', '$state','$uibModal', '$translate', 'toastr','ArmaditoSVC', function ($rootScope, $scope,  $state, $uibModal, $translate, toastr, ArmaditoSVC) {

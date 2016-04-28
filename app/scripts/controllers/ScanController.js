@@ -91,7 +91,8 @@ angular.module('tatouApp')
 
         // Handle the first response of the av.
         if(json_object.av_response == "scan" && json_object.status == 0 ){
-          console.log("[+] Debug :: Scan order send successfully to av!\n");          
+          console.log("[+] Debug :: Scan order send successfully to av!\n");      
+	  global.scan_in_progress = 1;    
           return;
         }
 
@@ -113,6 +114,7 @@ angular.module('tatouApp')
           // terminate scan.
           if($scope.scan_data.progress == 100){
                console.log("[+] Debug :: Scan finished!");
+	       global.scan_in_progress = 0;
           }
 
           $scope.$apply();

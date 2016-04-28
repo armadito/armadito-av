@@ -7,7 +7,8 @@
     "Close" : "Fermer",
     "Minimize" : "Réduire",
     "Leave" : "Quitter",
-    "Are_you_sur_you_want_to_leave_Armadito" : "Êtes-vous sûr de vouloir quitter Armadito ?"
+    "Are_you_sur_you_want_to_leave_Armadito" : "Êtes-vous sûr de vouloir quitter Armadito ?",
+    "Scan_in_progress" : "Un scan est en cours. Souhaitez-vous tout de même quitter Armadito ?" 
   },
   "information_view" : {
   	"General" : "Général",
