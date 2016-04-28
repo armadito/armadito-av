@@ -39,8 +39,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\core\libarmadito\include\config;$(SolutionDir)..\..\..\..\deps\glib\glib-2.47.6\glib;$(SolutionDir)..\..\..\..\deps\glib\glib-2.47.6\gmodule;$(SolutionDir)..\..\..\..\deps\glib\glib-2.47.6;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)..\..\..\..\deps\glib\glib-2.47.6\build\win32\vs12\Debug\Win32\bin;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\core\libarmadito\include\config;$(SolutionDir)..\..\..\..\deps\glib\glib-2.47.6\glib;$(SolutionDir)..\..\..\..\deps\glib\glib-2.47.6\gmodule;$(SolutionDir)..\..\..\..\deps\glib\glib-2.47.6;$(SolutionDir)..\..\..\..\deps\json\json-c;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\..\..\deps\glib\glib-2.47.6\build\win32\vs12\Debug\Win32\bin;$(SolutionDir)..\..\..\..\deps\json\json-c\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -51,7 +51,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;urlmon.lib;json-c.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>libarmadito.def</ModuleDefinitionFile>
     </Link>
     <PostBuildEvent>
@@ -128,6 +128,7 @@ echo post-build step for $(ProjectName) OK
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\stdpaths.c" />
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\onaccess_windows.c" />
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\ondemandmod.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\quarantine_windows.c" />
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\os\dir.c" />
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\os\file.c" />
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\os\mimetype.c" />
@@ -151,6 +152,7 @@ echo post-build step for $(ProjectName) OK
     <ClInclude Include="..\..\..\..\..\core\libarmadito\src\statusp.h" />
     <ClInclude Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\onaccess_windows.h" />
     <ClInclude Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\ondemandmod.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\quarantine.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libarmadito.def" />
