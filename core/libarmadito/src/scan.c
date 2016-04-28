@@ -188,20 +188,8 @@ enum a6o_file_status a6o_scan_context(struct a6o_scan *scan, struct a6o_file_con
 	/* compute progress if have one */
 	scan_progress(scan, &report);
 
-#ifdef _WIN32
-	// toFIX :: check the scan type :: on-demand or on-access.
-	// UF :: only for test :: if malware callback is called in the second call of a6o_scan_simple.
-	if (status != ARMADITO_MALWARE && report.status != ARMADITO_MALWARE) {
-		/* once done, call the callbacks */
-		a6o_scan_call_callbacks(scan, &report);
-
-	}
-#else
-
 	/* once done, call the callbacks */
 	a6o_scan_call_callbacks(scan, &report);
-
-#endif
 
 	/* and free the report (it may contain a strdup'ed string) */
 	a6o_report_destroy(&report);
