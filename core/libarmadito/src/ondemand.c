@@ -67,6 +67,8 @@ void a6o_on_demand_cancel(struct a6o_on_demand *on_demand)
 static int a6o_on_demand_is_canceled(struct a6o_on_demand *on_demand)
 {
  // a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "cancel = %d", cancel);
+  
+
   return cancel;
 }
 
@@ -97,8 +99,9 @@ static void scan_entry_thread_fun(gpointer data, gpointer user_data)
 		return;
 	}
 #endif
+	if(!cancel)
+	   scan_file(on_demand, path);
 
-	scan_file(on_demand, path);
 	/* path was strdup'ed, so free it */
 	free(path);
 
@@ -148,8 +151,10 @@ static int scan_entry(const char *full_path, enum os_file_flag flags, int entry_
                 return 1;
 
 	/* if scan is multi thread, just queue the scan to the thread pool, otherwise do it here */
-	if (on_demand->flags & ARMADITO_SCAN_THREADED)
+	if (on_demand->flags & ARMADITO_SCAN_THREADED){
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "Push thread on pool for scan of : %s", full_path);
 		g_thread_pool_push(on_demand->thread_pool, (gpointer)os_strdup(full_path), NULL);
+	}
 	else
 		scan_file(on_demand, full_path);
 
@@ -275,6 +280,8 @@ void a6o_on_demand_free(struct a6o_on_demand *on_demand)
 	/* (FD) NO!!!!! yet, scan_conf are allocated once for all and must NOT be freed, */
 	/* otherwise next on-demand scan will get a memory corruption */
 	// a6o_scan_conf_free(on_demand->scan_conf);
+
+	cancel = 0;
 
 	a6o_scan_free(on_demand->scan);
 
