@@ -153,7 +153,12 @@ static int scan_entry(const char *full_path, enum os_file_flag flags, int entry_
 	/* if scan is multi thread, just queue the scan to the thread pool, otherwise do it here */
 	if (on_demand->flags & ARMADITO_SCAN_THREADED){
 		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "Push thread on pool for scan of : %s", full_path);
-		g_thread_pool_push(on_demand->thread_pool, (gpointer)os_strdup(full_path), NULL);
+		if(full_path != NULL)
+		   g_thread_pool_push(on_demand->thread_pool, (gpointer)os_strdup(full_path), NULL);
+		/* 
+		   full_path can be NULL if AV is launched as normal user and file rights are 700 for example.
+		   In this case, we just skip these files to avoid segfault. To be improved.
+		*/
 	}
 	else
 		scan_file(on_demand, full_path);
