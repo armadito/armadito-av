@@ -10,7 +10,7 @@
 
 #include "utils\others.h"
 
-typedef void (*dirent_cb_t)(const char *full_path, enum os_file_flag flags, int entry_errno, void *data);
+typedef int (*dirent_cb_t)(const char *full_path, enum os_file_flag flags, int entry_errno, void *data);
 
 // libarmadito :: os/dir.h functions :: TODO :: quarantine in libarmadito.
 static enum os_file_flag dirent_flags(DWORD fileAttributes)
@@ -131,7 +131,7 @@ int process_info(const char * full_path,enum os_file_flag flags, int entry_errno
 	return ret;
 }
 
-void qu_os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void * data ) {
+int qu_os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void * data ) {
 
 	char * sPath = NULL, *entryPath= NULL;
 	char * escapedPath = NULL;
@@ -146,7 +146,7 @@ void qu_os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void * 
 	// Check parameters
 	if (path == NULL || dirent_cb == NULL) {
 		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "Error :: NULL parameter in function os_dir_map()");
-		return;
+		return 1;
 	}
 
 	// We escape ? and * characters
@@ -155,7 +155,7 @@ void qu_os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void * 
 	// Check if it is a directory
 	if (!(GetFileAttributesA(path) & FILE_ATTRIBUTE_DIRECTORY)) {
 		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "Warning :: os_dir_map() :: (%s) is not a directory. ", path);
-		return;
+		return 1;
 	}
 
 	size = strlen(path) + 3;
@@ -177,7 +177,7 @@ void qu_os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void * 
 	fh = FindFirstFile(sPath, &fdata);
 	if (fh == INVALID_HANDLE_VALUE) {
 		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "Warning :: os_dir_map() :: FindFirstFileA() failed ::  (%s) :: [%s]", os_strerror(errno),sPath);
-		return;
+		return 1;
 	}
 
 	while (FindNextFile(fh, &tmp) != FALSE) {
@@ -215,7 +215,7 @@ void qu_os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void * 
 	free(sPath);
 	FindClose(fh);
 
-	return;
+	return 0;
 }
 
 //static void conf_load_dirent_cb(const char *full_path, enum os_file_flag flags, int entry_errno, void *data);
