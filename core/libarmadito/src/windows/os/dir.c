@@ -70,10 +70,11 @@ static BOOL DirectoryExists(LPCTSTR szPath)
   */
 
 
-void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data) {
+int os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data) {
 
 	char * sPath = NULL, *entryPath = NULL;
 	char * escapedPath = NULL;
+	int ret = 0;
 
 	HANDLE fh = NULL;
 	int size = 0;
@@ -84,7 +85,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 	// Check parameters
 	if (path == NULL || dirent_cb == NULL) {
 		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "Error :: NULL parameter in function os_dir_map()");
-		return;
+		return 1;
 	}
 
 	// We escape ? and * characters
@@ -93,7 +94,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 	// Check if it is a directory
 	if (!(GetFileAttributesA(path) & FILE_ATTRIBUTE_DIRECTORY)) {
 		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "Warning :: os_dir_map() :: (%s) is not a directory. ", path);
-		return;
+		return 1;
 	}
 
 	size = strlen(path) + 3;
@@ -110,7 +111,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 	fh = FindFirstFile(sPath, &fdata);
 	if (fh == INVALID_HANDLE_VALUE) {
 		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "Warning :: os_dir_map() :: FindFirstFileA() failed ::  (%s) :: [%s]", os_strerror(errno), sPath);
-		return;
+		return 1;
 	}
 
 	while (FindNextFile(fh, &tmp) != FALSE) {
@@ -144,7 +145,7 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 
 	FindClose(fh);
 
-	return;
+	return 0;
 }
 
 /*
