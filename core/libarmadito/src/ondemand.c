@@ -136,19 +136,18 @@ static int scan_entry(const char *full_path, enum os_file_flag flags, int entry_
 	struct a6o_on_demand *on_demand = (struct a6o_on_demand *)data;
         int canceled = a6o_on_demand_is_canceled(on_demand);
 
-        if (canceled)
+        if (canceled){
                 a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "scan canceled on path %s", full_path);
+		return 1;
+	}
 
 	if (flags & FILE_FLAG_IS_ERROR) {
 		process_error(on_demand->scan, full_path, entry_errno);
-		return canceled;
+		return 1;
 	}
 
 	if (!(flags & FILE_FLAG_IS_PLAIN_FILE))
-		return canceled;
-
-	if (canceled)
-                return 1;
+		return 1;
 
 	/* if scan is multi thread, just queue the scan to the thread pool, otherwise do it here */
 	if (on_demand->flags & ARMADITO_SCAN_THREADED){
