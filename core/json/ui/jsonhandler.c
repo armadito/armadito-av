@@ -48,6 +48,7 @@ static struct request_dispatch_entry {
 	{ "quarantine", quarantine_response_cb, NULL},
 	{ "conf_set", conf_response_cb, NULL},
 	{ "updatedb", update_response_cb, NULL},
+        { "scan_cancel", scan_cancel_response_cb, NULL},
 	{ NULL, NULL, NULL},
 };
 
