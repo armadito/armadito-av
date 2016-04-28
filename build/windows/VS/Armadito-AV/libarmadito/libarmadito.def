@@ -11,6 +11,7 @@ a6o_on_demand_run
 a6o_on_demand_free
 a6o_on_demand_new
 a6o_on_demand_get_scan
+a6o_on_demand_cancel
 a6o_info_new
 a6o_info_free
 a6o_info_to_stdout
