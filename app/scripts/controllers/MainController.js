@@ -30,7 +30,7 @@ angular.module('tatouApp')
 
 	osLocale(function (err, locale) {
 	    console.log(locale);
-	     $translate.use(locale);
+	    $translate.use(locale);
 	    //=> 'en_US'
 	});
 

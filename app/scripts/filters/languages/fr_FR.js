@@ -16,33 +16,33 @@
   	"Analyse_service" : "Service d'analyse",
   	"Update_bases" : "Mise à jour des bases",
   	"Last_update" : "Dernière mise à jour",
-  	"Modules" : "Modules",
+  	"Modules" : "Module",
   	"Date" : "Date",
-  	"Status" : "Statuts"
+  	"Status" : "Statut"
   },
   "analyse_view" : {
     "Scan" : "Analyse",
     "Start" : "Analyser",
     "Scanning_file" : "Fichier analysé",
-    "Stop" : "Stop",
-    "Choose_analyse_type" : "Choisissez type d'analyse",
+    "Stop" : "Annuler",
+    "Choose_analyse_type" : "Choisissez le type d'analyse",
     "Full_scan" : "COMPLÈTE",
     "Quick_scan" : "RAPIDE",
-    "Custom_scan" : "PERSONALISÉE",
+    "Custom_scan" : "PERSONNALISÉE",
     "Scanned" : "Analysés",
     "Malicious" : "Malveillants",
     "Suspects" : "Suspects",
     "No_file_scanned_yet" : "Aucun fichier analysé",
     "Custom_scan_title" : "Analyse personnalisée",
-    "Select_folder" : "Selectionnez un dossier",
+    "Select_folder" : "Sélectionnez un dossier",
     "Choose_scan_options" : "Choisissez vos options :",
     "Heuristic_mode" : "Mode heuristique",
-    "Scan_archive" : "Scan archive",
+    "Scan_archive" : "Scan d'archives",
     "Add_file_to_exclude" : "Selectionnez fichier à exclure",
     "Excluded_files" : "Fichiers exclus"
   },
   "history_view" : {
-  	"History" : "Journal",
+    "History" : "Journal",
     "history_tab" : {
       "History" : "JOURNAL",
       "Search" : "Rechercher...",
@@ -92,7 +92,7 @@
     "Quarantine_repertory" : "Repertoire de quarantaine",
     "Select_folder" : "Selectionnez un dossier",
     "Cancel" : "Annuler",
-    "Apply" : "Valdier"
+    "Apply" : "Valider"
 
   },
   "statistics_view" : {

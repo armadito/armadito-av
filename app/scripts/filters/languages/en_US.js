@@ -12,19 +12,19 @@
   },
   "information_view" : {
   	"General" : "General",
-  	"Real_time_analyse" : "Real time analyse",
-  	"Analyse_service" : "Analyse service",
-  	"Update_bases" : "Update bases",
+  	"Real_time_analyse" : "Real time analysis",
+  	"Analyse_service" : "Analysis service",
+  	"Update_bases" : "Databases Update",
   	"Last_update" : "Last update",
-  	"Modules" : "Modules",
+  	"Modules" : "Module",
   	"Date" : "Date",
   	"Status" : "Status"
   },
   "analyse_view" : {
-  	"Scan" : "Scan",
+    "Scan" : "Scan",
     "Start" : "Start",
     "Scanning_file" : "Scanning file",
-    "Stop" : "Stop",
+    "Stop" : "Cancel",
     "Choose_analyse_type" : "Choose analyse type",
     "Full_scan" : "FULL",
     "Quick_scan" : "QUICK",
@@ -54,13 +54,13 @@
       "Refresh" : "REFRESH"
     },
     "Scan_on_demand_tab" : {
-      "Scan_on_demand" : "SCAN ON DEMAND",
+      "Scan_on_demand" : "ON DEMAND SCAN",
       "Today": "Today",
       "This_week" : "This week",
       "This_month": "This month",
       "This_year" : "This year",
       "details" : {
-        "Scan_repport_details" : "Scan repport details"
+        "Scan_repport_details" : "Scan report details"
       }
 
     },
@@ -89,7 +89,7 @@
     "Updates" : "UPDATES",
     "Updates_title" : "Updates",
     "Updates_frequency" : "Updates frequency",
-    "Quarantine_repertory" : "Quarantine repertory",
+    "Quarantine_repertory" : "Quarantine folder",
     "Select_folder" : "Select folder",
     "Cancel" : "Cancel",
     "Apply" : "Apply"
