@@ -39,8 +39,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\core\libarmadito\include\config;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\include;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\include\glib-2.0;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\lib\glib-2.0\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\core\libarmadito\include\config;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\include;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\include\glib-2.0;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\lib\glib-2.0\include;$(SolutionDir)..\..\..\..\deps\json-c\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\lib;$(SolutionDir)..\..\..\..\deps\json-c\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -51,7 +51,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;urlmon.lib;json-c.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>libarmadito.def</ModuleDefinitionFile>
     </Link>
     <PostBuildEvent>
@@ -64,6 +64,10 @@ if not exist "$(SolutionDir)out\$(Configuration)" mkdir "$(SolutionDir)out\$(Con
 
 REM copy the DLL
 xcopy "$(OutDir)libarmadito.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM copy the conf file
+xcopy "$(SolutionDir)..\..\..\..\core\libarmadito\conf\armadito.conf"  "$(SolutionDir)out\$(Configuration)\conf" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
 REM copy the glib DLLs
@@ -124,6 +128,7 @@ echo post-build step for $(ProjectName) OK
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\stdpaths.c" />
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\onaccess_windows.c" />
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\ondemandmod.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\quarantine_windows.c" />
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\os\dir.c" />
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\os\file.c" />
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\os\mimetype.c" />
@@ -147,6 +152,7 @@ echo post-build step for $(ProjectName) OK
     <ClInclude Include="..\..\..\..\..\core\libarmadito\src\statusp.h" />
     <ClInclude Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\onaccess_windows.h" />
     <ClInclude Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\ondemandmod.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\quarantine.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libarmadito.def" />
