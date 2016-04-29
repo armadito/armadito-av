@@ -128,11 +128,15 @@ int os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data)
 
 		// If it is a directory and we do recursive scan
 		if ((GetFileAttributesA(entryPath) & FILE_ATTRIBUTE_DIRECTORY) && recurse >= 1) {
-			os_dir_map(entryPath, recurse, dirent_cb, data);
+			ret = os_dir_map(entryPath, recurse, dirent_cb, data);
+			if (ret != 0){
+				free(entryPath);
+				break;
+			}
 		}
 		else {
 			flags = dirent_flags(tmp.dwFileAttributes);
-			(*dirent_cb)(entryPath, flags, 0, data);
+			ret = (*dirent_cb)(entryPath, flags, 0, data);
 		}
 
 		free(entryPath);
