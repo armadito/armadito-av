@@ -62,6 +62,7 @@ void a6o_on_demand_cancel(struct a6o_on_demand *on_demand)
 {
   a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "-- on_demand_cancel call !");
   cancel = 1;
+
 }
 
 static int a6o_on_demand_is_canceled(struct a6o_on_demand *on_demand)
@@ -137,7 +138,7 @@ static int scan_entry(const char *full_path, enum os_file_flag flags, int entry_
 
         if (canceled){
                 a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "scan canceled on path %s", full_path);
-		return 1;
+		return 2;
 	}
 
 	if (flags & FILE_FLAG_IS_ERROR) {
