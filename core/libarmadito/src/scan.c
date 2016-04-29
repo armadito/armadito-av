@@ -149,14 +149,14 @@ static void scan_progress(struct a6o_scan *scan, struct a6o_report *report)
 {
 	int progress;
 
+	/* update the progress */
+	/* may be not thread safe, but who cares about precise values? */
+	scan->scanned_count++;
+
 	if (scan->to_scan_count == 0) {
 		report->progress = REPORT_PROGRESS_UNKNOWN;
 		return;
 	}
-
-	/* update the progress */
-	/* may be not thread safe, but who cares about precise values? */
-	scan->scanned_count++;
 
 	progress = (int)((100.0 * scan->scanned_count) / scan->to_scan_count);
 
