@@ -96,6 +96,9 @@
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\onaccess_windows.c">
       <Filter>Fichiers sources\builtin-modules</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\quarantine_windows.c">
+      <Filter>Fichiers sources\builtin-modules</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\core\libarmadito\src\armaditop.h">
@@ -144,6 +147,9 @@
       <Filter>Fichiers d%27en-tête\builtin-modules</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\onaccess_windows.h">
+      <Filter>Fichiers d%27en-tête\builtin-modules</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\quarantine.h">
       <Filter>Fichiers d%27en-tête\builtin-modules</Filter>
     </ClInclude>
   </ItemGroup>

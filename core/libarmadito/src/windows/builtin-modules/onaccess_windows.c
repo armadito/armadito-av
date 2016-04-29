@@ -60,6 +60,22 @@ static enum a6o_mod_status mod_onaccess_conf_max_size(struct a6o_module *module,
 	return ARMADITO_MOD_OK;
 }
 
+static enum a6o_mod_status mod_onaccess_conf_mime_types(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
+{
+	struct a6o_scan_conf *on_access_conf = a6o_scan_conf_on_access();
+
+	if (a6o_conf_value_is_string(value))
+		a6o_scan_conf_add_mime_type(on_access_conf, a6o_conf_value_get_string(value));
+	else {
+		const char **p;
+
+		for (p = a6o_conf_value_get_list(value); *p != NULL; p++)
+			a6o_scan_conf_add_mime_type(on_access_conf, *p);
+	}
+
+	return ARMADITO_MOD_OK;
+}
+
 static enum a6o_mod_status mod_onaccess_close(struct a6o_module *module)
 {
 	struct onaccess_data *fa_data = (struct onaccess_data *)module->data;
@@ -72,8 +88,9 @@ static enum a6o_mod_status mod_onaccess_close(struct a6o_module *module)
 }
 
 struct a6o_conf_entry mod_onaccess_conf_table[] = {
-	{ "enable-on-access", CONF_TYPE_INT, mod_onaccess_conf_set_enable_on_access},
+	{ "enable", CONF_TYPE_INT, mod_onaccess_conf_set_enable_on_access},
 	{ "modules", CONF_TYPE_STRING | CONF_TYPE_LIST, mod_onaccess_conf_modules},
+	{ "mime-types", CONF_TYPE_STRING | CONF_TYPE_LIST, mod_onaccess_conf_mime_types},
 	{ "max-size", CONF_TYPE_INT, mod_onaccess_conf_max_size},
 	{ NULL, 0, NULL},
 };
