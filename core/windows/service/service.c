@@ -41,20 +41,43 @@ int ServiceLoadProcedure( ) {
 	a6o_error * uh_error = NULL;
 	HRESULT hres = S_OK;
 	struct a6o_conf * conf = NULL;
+	a6o_error * error = NULL;
 	struct armadito * armadito = NULL;
 	int onaccess_enable = 0;
+	char * conffile = NULL;
 
 	__try {
 
-		// Init configuration structure
-		conf = a6o_conf_new();
+		// Load configuration from file.	
+		if ((conf = a6o_conf_new()) == NULL) {
+			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: init_configuration :: conf struct initialization failed!\n");
+			ret = -2;
+			__leave;
+		}
 
+#if 0
 		// Load configuration from registry.
 		if (restore_conf_from_registry(conf) < 0) {			
 			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR," [-] Error :: fail to load the configuration!\n");
 			ret = -1;
 			__leave;
 		}
+#else
+		// get configuration file path.
+		conffile = a6o_std_path(CONFIG_FILE_LOCATION);
+		if (conffile == NULL) {
+			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: init_configuration :: get configuration file path failed !\n");
+			ret = -3;
+			__leave;
+		}
+
+		printf("[+] Debug :: init_configuration :: conf file = %s\n",conffile);
+
+		// Load config from config file. a6o.conf
+		a6o_conf_load_file(conf, conffile, &error);
+#endif
+
+		
 
 		printf("[+] Debug :: Configuration loaded successfully!\n");
 		
@@ -631,8 +654,8 @@ int ServiceInstall( ) {
 		
 
 		ret = 0;
-		printf("[+] Debug :: Service installed successfully!\n");
-		uhLog("[+] Debug :: Service installed successfully!\n");		
+		printf("[+] Debug :: Service installed successfully!\n");		
+		
 
 	}
 	__finally {
@@ -769,12 +792,10 @@ void WINAPI ServiceCtrlHandler( DWORD dwCtrl ) {
 			// Unload service.
 			ret = ServiceUnloadProcedure( );
 			if (ret != 0) {
-				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service unloaded with errors during pause.\n");
-				uhLog("[-] Error :: Service unloaded with errors\n");
+				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service unloaded with errors during pause.\n");				
 			}
 
-			ReportSvcStatus(SERVICE_PAUSED, NO_ERROR, 0);
-			uhLog("[i] DEBUG :: SERVICE PAUSE !!!\n");
+			ReportSvcStatus(SERVICE_PAUSED, NO_ERROR, 0);			
 			break;
 
 		case SERVICE_CONTROL_CONTINUE:
@@ -783,12 +804,10 @@ void WINAPI ServiceCtrlHandler( DWORD dwCtrl ) {
 			ReportSvcStatus(SERVICE_RUNNING, NO_ERROR, 0);
 			ret = ServiceLoadProcedure( );
 			if (ret < 0) {
-				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service Initialization failed during continue \n");
-				uhLog("[+] Error :: Service Initialization failed\n");
+				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service Initialization failed during continue \n");				
 				// Stop the service on error.
 				ServiceStop( );
-			}
-			uhLog("[i] DEBUG :: SERVICE CONTINUE !!!\n");
+			}			
 			break;
 
 		case SERVICE_CONTROL_STOP:
@@ -797,8 +816,7 @@ void WINAPI ServiceCtrlHandler( DWORD dwCtrl ) {
 
 			ret = ServiceUnloadProcedure( );
 			if (ret != 0) {
-				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service unloaded with errors\n");
-				uhLog("[-] Error :: Service unloaded with errors\n");
+				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service unloaded with errors\n");				
 			}			
 
 			 // Signal the service to stop.
@@ -833,15 +851,13 @@ void PerformServiceAction( ) {
 
 	ret = ServiceLoadProcedure( );
 	if (ret < 0) {
-		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service Initialization failed \n");
-		uhLog("[+] Error :: Service Initialization failed\n");
+		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service Initialization failed \n");		
 		// Stop the service on error.
 		ServiceStop( );
 
 	}
 	else {
-		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_INFO, " Service Initializaed successfully!\n");
-		uhLog("[+] Debug :: a6o struct initialized successfully\n");
+		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_INFO, " Service Initializaed successfully!\n");		
 	}
 	
 	return;
@@ -1135,7 +1151,6 @@ void ServiceStop( ) {
 	ret = ServiceUnloadProcedure( );
 	if (ret != 0) {
 		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service unloaded with errors\n");
-		uhLog("[-] Error :: Service unloaded with errors\n");
 	}	
 
 	// Send a stop code to the service.

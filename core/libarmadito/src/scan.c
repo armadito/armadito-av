@@ -188,19 +188,8 @@ enum a6o_file_status a6o_scan_context(struct a6o_scan *scan, struct a6o_file_con
 	/* compute progress if have one */
 	scan_progress(scan, &report);
 
-#ifdef WIN32
-	// UF :: only for test :: if malware callback is called in the second call of a6o_scan_simple.
-	if (status != ARMADITO_MALWARE && report.status != ARMADITO_MALWARE) {
-		/* once done, call the callbacks */
-		a6o_scan_call_callbacks(scan, &report);
-
-	}
-#else
-
 	/* once done, call the callbacks */
 	a6o_scan_call_callbacks(scan, &report);
-
-#endif
 
 	/* and free the report (it may contain a strdup'ed string) */
 	a6o_report_destroy(&report);
@@ -270,7 +259,7 @@ enum a6o_file_status a6o_scan_simple(struct armadito *armadito, const char *path
 	enum a6o_file_context_status context_status;
 	enum a6o_file_status status;
 
-#ifdef WIN32
+#ifdef _WIN32
 	// only for test purpose :: TODO :: separate a6o_scan from callbacks.
 	if (report->status == ARMADITO_MALWARE) {
 		//printf("[+] Info :: a6o_scan_simple :: %d\n",report->status);
