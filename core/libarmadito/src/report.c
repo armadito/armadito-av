@@ -22,6 +22,9 @@ void a6o_report_init(struct a6o_report *report, int scan_id, const char *path, i
 	report->action = ARMADITO_ACTION_NONE;
 	report->mod_name = NULL;
 	report->mod_report = NULL;
+	report->suspicious_count = 0;
+        report->malware_count = 0;
+	report->scanned_count = 0;
 }
 
 void a6o_report_destroy(struct a6o_report *report)
