@@ -45,6 +45,9 @@ struct a6o_report {
 	enum a6o_action action;             /*!< the action that was executed on this file (alert, quarantine, etc) */
 	char *mod_name;                       /*!< name of the module that decided the file scan status               */
 	char *mod_report;                     /*!< the report of this module, usually a malware name                  */
+	int malware_count;                   /*!<  number of malwares detected since scan started                     */
+	int suspicious_count;                 /*!< number of suspicious files detected since scan started            */
+	int scanned_count;                    /*!< number of scanned files */ 
 };
 
 /**
