@@ -65,6 +65,9 @@ struct a6o_scan *a6o_scan_new(struct armadito *armadito, int scan_id)
 
 	scan->to_scan_count = 0;
 	scan->scanned_count = 0;
+        scan->malware_count = 0;
+        scan->suspicious_count = 0;
+        
 
 	return scan;
 }
@@ -146,14 +149,14 @@ static void scan_progress(struct a6o_scan *scan, struct a6o_report *report)
 {
 	int progress;
 
+	/* update the progress */
+	/* may be not thread safe, but who cares about precise values? */
+	scan->scanned_count++;
+
 	if (scan->to_scan_count == 0) {
 		report->progress = REPORT_PROGRESS_UNKNOWN;
 		return;
 	}
-
-	/* update the progress */
-	/* may be not thread safe, but who cares about precise values? */
-	scan->scanned_count++;
 
 	progress = (int)((100.0 * scan->scanned_count) / scan->to_scan_count);
 
@@ -161,6 +164,27 @@ static void scan_progress(struct a6o_scan *scan, struct a6o_report *report)
 		progress = 100;
 
 	report->progress = progress;
+	report->scanned_count = scan->scanned_count;
+}
+
+static void update_counters (struct a6o_scan *scan, struct a6o_report *report, enum a6o_file_status status )
+{
+       switch(status) {
+	case ARMADITO_UNDECIDED:
+	case ARMADITO_CLEAN:
+	case ARMADITO_UNKNOWN_FILE_TYPE:
+	case ARMADITO_EINVAL:
+	case ARMADITO_IERROR:
+	case ARMADITO_SUSPICIOUS:
+		scan->suspicious_count++;
+		report->suspicious_count = scan->suspicious_count;
+		break;
+	case ARMADITO_WHITE_LISTED:
+	case ARMADITO_MALWARE:
+		scan->malware_count++;
+		report->malware_count = scan->malware_count;
+		break;
+      }     
 }
 
 /* scan a file context: */
@@ -187,6 +211,8 @@ enum a6o_file_status a6o_scan_context(struct a6o_scan *scan, struct a6o_file_con
 
 	/* compute progress if have one */
 	scan_progress(scan, &report);
+
+	update_counters(scan, &report, status);
 
 	/* once done, call the callbacks */
 	a6o_scan_call_callbacks(scan, &report);
