@@ -2,14 +2,14 @@
 
 /**
  * @ngdoc overview
- * @name tatouApp
+ * @name armaditoApp
  * @description
- * # tatouApp
+ * # armaditoApp
  *
  * Main module of the application.
  */
 angular
-  .module('tatouApp', [
+  .module('armaditoApp', [
     'ngAnimate',
     'ngAria',
     'ngCookies',

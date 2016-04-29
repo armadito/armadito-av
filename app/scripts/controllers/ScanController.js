@@ -2,7 +2,7 @@
 
 /**
  * @ngdoc function
- * @name tatouApp.controller:ScanController
+ * @name armaditoApp.controller:ScanController
  * @description
  * # ScanController
  * Controller of the Armadito-av
@@ -10,7 +10,7 @@
  
  var os = require('os');
  
-angular.module('tatouApp')
+angular.module('armaditoApp')
   .controller('ScanController', ['$rootScope','$scope','ArmaditoSVC','ArmaditoIPC','$uibModal', function ($rootScope,$scope,ArmaditoSVC,ArmaditoIPC, $uibModal) {
 
     $scope.HideInputFile = true;

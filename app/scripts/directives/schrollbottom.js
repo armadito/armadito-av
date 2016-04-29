@@ -2,11 +2,11 @@
 
 /**
  * @ngdoc directive
- * @name tatouApp.directive:schrollBottom
+ * @name armaditoApp.directive:schrollBottom
  * @description
  * # schrollBottom
  */
-angular.module('tatouApp')
+angular.module('armaditoApp')
   .directive('schrollBottom', function () {
      return {
 	    scope: {

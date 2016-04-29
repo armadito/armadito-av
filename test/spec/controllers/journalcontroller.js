@@ -3,7 +3,7 @@
 describe('Controller: JournalcontrollerCtrl', function () {
 
   // load the controller's module
-  beforeEach(module('tatouApp'));
+  beforeEach(module('armaditoApp'));
 
   var JournalcontrollerCtrl,
     scope;

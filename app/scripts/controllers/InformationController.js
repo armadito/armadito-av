@@ -2,16 +2,16 @@
 
 /**
  * @ngdoc function
- * @name tatouApp.controller:InformationController
+ * @name armaditoApp.controller:InformationController
  * @description
  * # InformationController
- * Controller of the tatouApp
+ * Controller of the armaditoApp
  */
  
  var os = require('os');
  var sprintf = require("sprintf-js").sprintf;
 
-angular.module('tatouApp')
+angular.module('armaditoApp')
   .controller('InformationController', ['$scope','ArmaditoSVC','ArmaditoIPC', function ($scope,ArmaditoSVC,ArmaditoIPC) {
 
 		

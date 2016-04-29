@@ -2,12 +2,12 @@
 
 /**
  * @ngdoc function
- * @name tatouApp.controller:ParametersController
+ * @name armaditoApp.controller:ParametersController
  * @description
  * # ParametersController
- * Controller of the tatouApp
+ * Controller of the armaditoApp
  */
-angular.module('tatouApp')
+angular.module('armaditoApp')
   .controller('ParametersController',['$scope', function ($scope) {
     
     

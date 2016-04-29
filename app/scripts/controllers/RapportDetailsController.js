@@ -2,12 +2,12 @@
 
 /**
  * @ngdoc function
- * @name tatouApp.controller:RapportDetailsController
+ * @name armaditoApp.controller:RapportDetailsController
  * @description
  * # RapportDetailsController
- * Controller of the tatouApp
+ * Controller of the armaditoApp
  */
-angular.module('tatouApp')
+angular.module('armaditoApp')
   .controller('RapportDetailsController', ['$scope', '$uibModalInstance', 'items' ,
   		function ($scope, $uibModalInstance, items) {
 	   	  $scope.items = items;

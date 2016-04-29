@@ -2,12 +2,12 @@
 
 /**
  * @ngdoc function
- * @name tatouApp.controller:JournalController
+ * @name armaditoApp.controller:JournalController
  * @description
  * # JournalController
- * Controller of the tatouApp
+ * Controller of the armaditoApp
  */
-angular.module('tatouApp')
+angular.module('armaditoApp')
   .controller('JournalController', ['$scope', '$uibModal', 'ArmaditoSVC','ArmaditoIPC','toastr', function ($scope, $uibModal, ArmaditoSVC, ArmaditoIPC, toastr) {
 	  
     var Noms = ['Malware1', 'Malware2', 'Malware3', 'Malware4'];

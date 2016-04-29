@@ -2,12 +2,12 @@
 
 /**
  * @ngdoc function
- * @name tatouApp.controller:ConfirmationController
+ * @name armaditoApp.controller:ConfirmationController
  * @description
  * # ConfirmationController
- * Controller of the tatouApp
+ * Controller of the armaditoApp
  */
-angular.module('tatouApp')
+angular.module('armaditoApp')
   .controller('ConfirmationController',['$scope', '$uibModalInstance', 'data', 'ArmaditoSVC', function ($scope, $uibModalInstance, data, ArmaditoSVC) {
 
          $scope.threatDataFromAv = function(data){

@@ -2,10 +2,10 @@
 
 /**
  * @ngdoc function
- * @name tatouApp.controller:MainController
+ * @name armaditoApp.controller:MainController
  * @description
  * # MainController
- * Controller of the tatouApp
+ * Controller of the armaditoApp
  */
 
 // Load native UI library
@@ -25,7 +25,7 @@ tray.on('click', function() {
 //var scan_in_progress = 0;
 global.scan_in_progress = 0;
 
-angular.module('tatouApp')
+angular.module('armaditoApp')
   .controller('MainController', [ '$rootScope', '$scope', '$state','$uibModal', '$translate', 'toastr','ArmaditoSVC', function ($rootScope, $scope,  $state, $uibModal, $translate, toastr, ArmaditoSVC) {
 
 	osLocale(function (err, locale) {
