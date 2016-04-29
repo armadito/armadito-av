@@ -17,6 +17,9 @@ angular.module('armaditoApp')
     $scope.type = "analyse_view.Choose_analyse_type";
     $scope.rowCollection = [];
     $scope.scan_server;
+    $scope.malware_count = 0;
+    $scope.suspicious_count = 0;
+    $scope.scanned_count = 0;
 
     //copy the references (you could clone ie angular.copy but then have to go through a dirty checking for the matches)
     $scope.displayedCollection = [].concat($scope.rowCollection);
@@ -109,6 +112,19 @@ angular.module('armaditoApp')
           if(json_object.params.scan_status != 'undecided'){
             $scope.scan_data.files.push(json_object.params);
           }
+
+	  if(json_object.params.malware_count){
+	     $scope.malware_count = json_object.params.malware_count;
+	  }
+	
+          if(json_object.params.suspicious_count){
+	     $scope.suspicious_count = json_object.params.suspicious_count;
+          }	
+	
+          if(json_object.params.scanned_count){
+	     $scope.scanned_count = json_object.params.scanned_count;
+          }	
+
           //console.log("tableau", $scope.scan_data.files);
 
           // terminate scan.

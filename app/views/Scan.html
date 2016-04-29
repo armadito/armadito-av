@@ -28,13 +28,13 @@
 	<div class="row">
 		<div class="col-sm-offset-1 col-md-offset-1 col-xs-12 col-sm-10 col-md-10 text-center ">
 			<div class="col-xs-4 col-sm-4 col-md-4">
-				<h1><b class="fileAnalyse">0</b></h1>
+				<h1><b class="fileAnalyse" ng-bind="scanned_count" ></b></h1>
 			</div>
 			<div class="col-xs-4 col-sm-4 col-md-4">
-				<h1><b class="fileMalicious">0</b></h1>
+				<h1><b class="fileMalicious" ng-bind="malware_count" ></b></h1>
 			</div>
 			<div class="col-xs-4 col-sm-4 col-md-4">
-				<h1><b class="fileSuspect">0</b></h1>
+				<h1><b class="fileSuspect" ng-bind="suspicious_count"></b></h1>
 			</div>
 		</div>
 	</div>
