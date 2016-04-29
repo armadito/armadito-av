@@ -196,7 +196,7 @@ void scan_process_cb(struct armadito *armadito, void *request_data)
 
 	a6o_on_demand_run(scan_data->on_demand);
 
-        a6o_on_demand_free(scan_data->on_demand);
+	a6o_on_demand_free(scan_data->on_demand);
 
 	free(scan_data);
 }
