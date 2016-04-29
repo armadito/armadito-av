@@ -56,6 +56,10 @@ int gettimeofday (struct timeval *tp, void *tz)
 /*
   JSON object fields examples:
 
+  "progress": "70",
+  "malware_count": "22",
+  "suspicious_count": "10",
+  "scanned_count : "40",
   "path": "C://cygwin64//home//malware.exe",
   "scan_status": "malware",
   "scan_action": "alert+quarantine",
@@ -70,6 +74,9 @@ static struct json_object *report_json(struct a6o_report *report)
 	j_report = json_object_new_object();
 
 	json_object_object_add(j_report, "progress", json_object_new_int(report->progress));
+	json_object_object_add(j_report, "malware_count", json_object_new_int(report->malware_count));
+	json_object_object_add(j_report, "suspicious_count", json_object_new_int(report->suspicious_count));
+	json_object_object_add(j_report, "scanned_count", json_object_new_int(report->scanned_count));
 
 	if (report->path != NULL)
 		json_object_object_add(j_report, "path", json_object_new_string(report->path));
@@ -91,6 +98,9 @@ static struct json_object *report_json(struct a6o_report *report)
   "id":123,
   "params": {
   "progress": "70",
+  "malware_count": "22",
+  "suspicious_count": "10",
+  "scanned_count : "40",
   "path": "C://cygwin64//home//malware.exe",
   "scan_status": "malware",
   "scan_action": "alert+quarantine",
