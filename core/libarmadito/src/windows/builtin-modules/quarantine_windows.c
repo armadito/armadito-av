@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <Windows.h>
+#include <Shlwapi.h>
 #include <json.h>
 
 
@@ -338,10 +339,56 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct a6
 
 }
 
+int CreateAvDirectory( char * dir) {
+
+	int ret = 0;
+	char * completePath = NULL;
+
+	if (dir == NULL) {
+		a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," CreateAvDirectory :: Invalid parameter!\n");
+		return -1;
+	}
+
+	__try {
+
+		completePath = GetLocationCompletepath(dir);
+		if (completePath == NULL) {
+			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," CreateAvDirectory :: Get Complete path failed!\n");
+			ret = -2;
+			__leave;
+		}
+
+
+		if (PathFileExistsA(completePath) == 1) {
+			ret = 1;
+			__leave;
+		}
+
+		if (!CreateDirectoryA(completePath, NULL)) {
+			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," CreateAvDirectory :: Directory creation failed! :: GLE = %d\n",GetLastError());
+			ret = -3;
+			__leave;
+		}
+
+	}
+	__finally {
+
+		if (completePath != NULL) {
+			free(completePath);
+			completePath = NULL;
+		}
+
+	}
+
+	return ret;
+}
+
+
 static int quarantine_do(struct quarantine_data *qu_data, const char *path, struct a6o_report * report)
 {
 	int ret = 0;
 	char * quarantineFilepath = NULL;
+	char * quarantineDir = NULL;
 	HANDLE fh = INVALID_HANDLE_VALUE;
 
 	//printf("[+] Debug :: quarantine_do path= %s -----------------\n",path);	
@@ -361,6 +408,14 @@ static int quarantine_do(struct quarantine_data *qu_data, const char *path, stru
 			ret = -2;
 			__leave;
 		}
+
+		// create quarantine folder if needed.
+		if (CreateAvDirectory(qu_data->quarantine_dir) < 0) {			
+			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," Quarantine folder creation failed!\n");
+			ret = -2;
+			__leave;
+		}
+		
 
 		// Write quarantine .info file
 		if (WriteQuarantineInfoFile(path, quarantineFilepath, report) != 0) {
@@ -398,7 +453,7 @@ static int quarantine_do(struct quarantine_data *qu_data, const char *path, stru
 		if (quarantineFilepath != NULL) {
 			free(quarantineFilepath);
 			quarantineFilepath = NULL;
-		}
+		}		
 
 	}	
 
