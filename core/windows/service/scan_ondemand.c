@@ -121,7 +121,8 @@ int WINAPI ScanThreadWork(PGLOBAL_SCAN_CONTEXT Context) {
 
 	// Disables file system redirection for the calling thread.
 	if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {
-		return S_FALSE;
+		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " ScanThreadWork :: Disabling file Wow64 file redirection failed!\n");
+		return -3;
 	}
 
 	__try {
@@ -133,8 +134,7 @@ int WINAPI ScanThreadWork(PGLOBAL_SCAN_CONTEXT Context) {
 		}
 		
 		if (threadCtx->hPipeInst == NULL) {
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " ScanThreadWork :: Thread pipe instance is invalid (NULL) !\n");
-			printf("[-] Error :: ScanThreadWork :: Thread pipe instance is NULL\n");
+			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " ScanThreadWork :: Thread pipe instance is invalid (NULL) !\n");			
 			ret = -3;
 			__leave;
 		}		
@@ -142,8 +142,7 @@ int WINAPI ScanThreadWork(PGLOBAL_SCAN_CONTEXT Context) {
 		// allocate request buffer
 		request = (char*)calloc(BUFSIZE,sizeof(char));
 		if (request == NULL) {
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " ScanThreadWork :: Request Buffer Allocation failed! :: GLE= %d \n",GetLastError());
-			printf("[-] Error :: ScanThreadWork :: Request buffer Allocation failed with error :: %d \n",GetLastError());
+			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " ScanThreadWork :: Request Buffer Allocation failed! :: GLE= %d \n",GetLastError());			
 			ret = -4;
 			__leave;
 		}		
@@ -158,7 +157,7 @@ int WINAPI ScanThreadWork(PGLOBAL_SCAN_CONTEXT Context) {
 
 			// Read GUI request from the pipe.
 			if ((ReadFile(threadCtx->hPipeInst, request, BUFSIZE,&cbBytesRead,NULL) == FALSE) || cbBytesRead <=0) {
-				printf("[-] Error :: ScanThreadWork :: Read in pipe failed with error :: %d \n",GetLastError());
+				//a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_WARNING,"[-] Error :: ScanThreadWork :: Read in pipe failed with error :: %d \n",GetLastError());
 				ret = -6;
 				__leave;
 			}
@@ -168,7 +167,7 @@ int WINAPI ScanThreadWork(PGLOBAL_SCAN_CONTEXT Context) {
 			// intialize json_handler.
 			json_handler =  a6o_json_handler_new(Context->armadito);
 			if (json_handler == NULL) {
-				printf("[-] Error :: ScanThreadWork :: a6o_json_handler_new failed! \n");
+				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: ScanThreadWork :: a6o_json_handler_new failed! \n");
 				ret = -7;
 				__leave;
 			}
@@ -177,7 +176,7 @@ int WINAPI ScanThreadWork(PGLOBAL_SCAN_CONTEXT Context) {
 
 			status = a6o_json_handler_get_response(json_handler, request, req_len, &response, &resp_len);
 			if (status != JSON_OK) {
-				printf("[-] Error :: ScanThreadWork :: a6o json handler get response failed :: status = %d\n",status);
+				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: ScanThreadWork :: a6o json handler get response failed :: status = %d\n",status);
 				ret = -8;
 				break;
 			}
@@ -186,7 +185,7 @@ int WINAPI ScanThreadWork(PGLOBAL_SCAN_CONTEXT Context) {
 
 			// write answer to GUI.
 			if ( (WriteFile(threadCtx->hPipeInst, response, resp_len, &cbWritten, NULL) == FALSE ) || cbWritten <= 0) {
-				printf("[-] Error :: ScanThreadWork :: Write in pipe failed with error :: %d \n",GetLastError());
+				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, "[-] Error :: ScanThreadWork :: Write in pipe failed with error :: %d \n",GetLastError());
 				ret = -9;
 				break;
 			}
@@ -211,7 +210,7 @@ int WINAPI ScanThreadWork(PGLOBAL_SCAN_CONTEXT Context) {
 
 		// Re enable FS redirection for this thread.
 		if (Wow64RevertWow64FsRedirection(OldValue) == FALSE ){
-			printf("[-] Error :: ScanThreadWork :: can't revert file system redirection !\n");
+			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: ScanThreadWork :: can't revert file system redirection !\n");
 		}
 
 		FlushFileBuffers(threadCtx->hPipeInst);
@@ -236,7 +235,7 @@ int WINAPI ScanThreadWork(PGLOBAL_SCAN_CONTEXT Context) {
 
 		// Close the pipe instance.
 		if (!CloseHandle(threadCtx->hPipeInst)) {
-			printf("[-] Error :: ScanThreadWork :: [%d] :: CloseHandle failed with error :: %d\n",index,GetLastError());
+			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: ScanThreadWork :: [%d] :: CloseHandle failed with error :: %d\n",index,GetLastError());
 		}
 
 		// remove the thread from the scan thread pool.		
@@ -264,9 +263,8 @@ int WINAPI MainThreadWork(PGLOBAL_SCAN_CONTEXT Context) {
 	SECURITY_ATTRIBUTES securityAttributes = {0};
 	int i = 0, index = 0;
 
-	if (Context == NULL) {
-		printf("[-] Error :: ScanThreadWork :: NULL Context\n" );
-		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Request Buffer Allocation failed! :: GLE= %d \n",GetLastError());
+	if (Context == NULL) {		
+		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " MainThreadWork :: Invalid parameter !\n");
 		return -1;
 	}	
 
@@ -285,8 +283,7 @@ int WINAPI MainThreadWork(PGLOBAL_SCAN_CONTEXT Context) {
 		}*/
 		
 		// Create and Initialize security descriptor
-		if (CreatePipeSecurityAttributes(&securityAttributes) < 0) {
-			printf("[-] Error :: MainThreadWork :: CreateSecurityAttributtes() failed!\n");
+		if (CreatePipeSecurityAttributes(&securityAttributes) < 0) {			
 			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR," MainThreadWork :: CreateSecurityAttributtes() failed!\n");
 			ret = -2;
 			__leave;
@@ -321,7 +318,6 @@ int WINAPI MainThreadWork(PGLOBAL_SCAN_CONTEXT Context) {
 
 			if (hPipe == INVALID_HANDLE_VALUE) {
 				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " MainThreadWork :: Pipe creation failed! :: GLE= %d \n",GetLastError());
-				printf("[-] Error :: MainThreadWork :: CreateNamedPipeA failed :: %d\n",GetLastError());
 				ret = -3;
 				__leave;
 			}
@@ -332,8 +328,7 @@ int WINAPI MainThreadWork(PGLOBAL_SCAN_CONTEXT Context) {
 			TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
 
 			if (!bConnected) {
-				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " MainThreadWork :: Pipe connection failed! :: GLE= %d \n",GetLastError());
-				printf("[-] Error :: MainThreadWork :: ConnectNamedPipe failed :: %d\n",GetLastError());
+				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " MainThreadWork :: Pipe connection failed! :: GLE= %d \n",GetLastError());				
 				ret = -4;
 				__leave;
 			}
@@ -360,15 +355,13 @@ int WINAPI MainThreadWork(PGLOBAL_SCAN_CONTEXT Context) {
 					&Context->onDemandCtx->ScanThreadCtx[index].ThreadId);      // returns thread ID
 
 			if (Context->onDemandCtx->ScanThreadCtx[index].Handle == NULL) {
-				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " MainThreadWork :: Scan Thread creation failed! :: GLE= %d \n",GetLastError());
-				printf("[-] Error :: MainThreadWork :: CreateThread failed :: %d\n",GetLastError());
+				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " MainThreadWork :: Scan Thread creation failed! :: GLE= %d \n",GetLastError());				
 				ret = -5;
 				__leave;
 			}
 
 			if (ResumeThread(Context->onDemandCtx->ScanThreadCtx[index].Handle) == -1) {
-				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " MainThreadWork :: Resume Scan thread failed! :: GLE= %d \n",GetLastError());
-				printf("[-] Error :: MainThreadWork :: ResumeThread failed :: %d\n",GetLastError());
+				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " MainThreadWork :: Resume Scan thread failed! :: GLE= %d \n",GetLastError());				
 				ret = -6;
 
 				__leave;
@@ -395,14 +388,14 @@ int WINAPI MainThreadWork(PGLOBAL_SCAN_CONTEXT Context) {
 			// Free allocated memory
 			if (Context->onDemandCtx->ScanThreadCtx != NULL) {
 				if (!(HeapFree(GetProcessHeap( ), 0, Context->onDemandCtx->ScanThreadCtx)) ) {
-					printf("[-] Error :: MainThreadWork :: HeapFree failed with error :: %d\n",GetLastError());
+					a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: MainThreadWork :: HeapFree failed with error :: %d\n",GetLastError());
 				}
 			}
 			
 			// Free allocated memory
 			if (Context->onDemandCtx->MainThreadCtx != NULL) {
 				if (!(HeapFree(GetProcessHeap( ), 0, Context->onDemandCtx->MainThreadCtx)) ) {
-					printf("[-] Error :: MainThreadWork :: HeapFree failed with error :: %d\n",GetLastError());
+					a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: MainThreadWork :: HeapFree failed with error :: %d\n",GetLastError());
 				}
 			}
 			Context->onDemandCtx->MainThreadCtx = NULL;
@@ -450,8 +443,7 @@ int Start_IHM_Connection(_Inout_ PGLOBAL_SCAN_CONTEXT Context) {
 		// Create and Initialize main thread contexts. (containing threadID, handle to the thread, 
 		mainThreadCtx = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(ONDEMAND_THREAD_CONTEXT) * 1);
 		if (mainThreadCtx == NULL) {
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Main Thread heap allocation failed! :: GLE= %d \n",GetLastError());
-			printf("[-] Error :: Start_IHM_Connection :: HeapAlloc failed! with errror :: %d\n", GetLastError());
+			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Main Thread heap allocation failed! :: GLE= %d \n",GetLastError());			
 			ret = -2;			
 			__leave;
 		}
@@ -466,8 +458,7 @@ int Start_IHM_Connection(_Inout_ PGLOBAL_SCAN_CONTEXT Context) {
 				&dwThreadId);      // returns thread ID
 
 		if (mainThreadCtx->Handle == INVALID_HANDLE_VALUE) {
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Main thread creation failed! :: GLE= %d \n",GetLastError());
-			printf("[-] Error :: start_IHM_Connection :: CreateThread failed :: %d\n",GetLastError());
+			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Main thread creation failed! :: GLE= %d \n",GetLastError());			
 			ret = -3;
 			__leave;
 		}
@@ -481,8 +472,7 @@ int Start_IHM_Connection(_Inout_ PGLOBAL_SCAN_CONTEXT Context) {
 
 		// Resuming the main thread.
 		if (ResumeThread(Context->onDemandCtx->MainThreadCtx->Handle) == -1) {
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Resuming main thread failed! :: GLE= %d \n",GetLastError());
-			printf("[-] Error :: start_IHM_Connection :: ResumeThread failed :: %d\n",GetLastError());
+			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Resuming main thread failed! :: GLE= %d \n",GetLastError());			
 			ret = -4;
 			__leave;
 		}
@@ -526,7 +516,7 @@ int Close_IHM_Connection(_In_ PGLOBAL_SCAN_CONTEXT Context ) {
 	HANDLE hPipe = NULL;
 
 	if (Context == NULL) {
-		printf("[-] Error :: close_IHM_Connection :: NULL Context\n" );
+		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, "[-] Error :: close_IHM_Connection :: Invalid parmeter\n");
 		return -1;
 	}
 
@@ -538,7 +528,7 @@ int Close_IHM_Connection(_In_ PGLOBAL_SCAN_CONTEXT Context ) {
 				Context->onDemandCtx->PipeHandle = NULL;
 			}
 			else {
-				printf("[-] Error :: close_IHM_Connection :: CloseHandle failed with error :: %d\n",GetLastError());
+				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: close_IHM_Connection :: CloseHandle failed with error :: %d\n",GetLastError());
 			}
 			
 		}
@@ -551,7 +541,7 @@ int Close_IHM_Connection(_In_ PGLOBAL_SCAN_CONTEXT Context ) {
 
 			// Terminate the main thread.
 			if (!TerminateThread(Context->onDemandCtx->MainThreadCtx->Handle, 0)) {
-				printf("[-] Error :: close_IHM_Connection :: TerminateThread failed with error :: %d\n",GetLastError());
+				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: close_IHM_Connection :: TerminateThread failed with error :: %d\n",GetLastError());
 			}
 			printf("[+] Debug :: close_IHM_Connection :: Terminating Main thread...[OK]\n");
 
@@ -569,7 +559,7 @@ int Close_IHM_Connection(_In_ PGLOBAL_SCAN_CONTEXT Context ) {
 		// Free allocated memory
 		if (Context->onDemandCtx->MainThreadCtx != NULL) {
 			if (!(HeapFree(GetProcessHeap( ), 0, Context->onDemandCtx->MainThreadCtx)) ) {
-				printf("[-] Error :: start_IHM_Connection :: HeapFree failed with error :: %d\n",GetLastError());
+				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: start_IHM_Connection :: HeapFree failed with error :: %d\n",GetLastError());
 			}
 			Context->onDemandCtx->MainThreadCtx = NULL;
 		}
