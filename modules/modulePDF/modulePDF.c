@@ -52,6 +52,8 @@ static enum a6o_file_status modulePDF_scan(struct a6o_module *module, int fd, co
 	}
 	else if (ret >= MALICIOUS_COEF) {
 		status = ARMADITO_MALWARE;
+		
+		*pmod_report = os_strdup("ModulePDF!SuspiciousPDF");
 	}
 
 	return status;
