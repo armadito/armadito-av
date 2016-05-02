@@ -16,12 +16,13 @@ uhurupdf/module7/includes/filters.h \
 uhurupdf/module7/includes/osdeps.h \
 uhurupdf/module7/includes/pdfAnalyzer.h
 
-AM_CPPFLAGS=
-modulePDF_la_LDFLAGS= -module -avoid-version
+AM_CPPFLAGS= 
+modulePDF_la_LDFLAGS= -module -avoid-version -export-symbols "$(srcdir)/modulePDF.sym"
 modulePDF_la_CFLAGS= -I$(srcdir)/uhurupdf/module7/includes
 modulePDF_la_LIBADD=
-modulePDF_la_CFLAGS+= @LIBARMADITO_CFLAGS@
+modulePDF_la_CFLAGS+= @LIBARMADITO_CFLAGS@ 
 modulePDF_la_LIBADD+= @LIBARMADITO_LIBS@
+
 
 install-exec-hook:
 	-rm -f "$(DESTDIR)$(modulesdir)"/modulePDF.la "$(DESTDIR)$(modulesdir)"/modulePDF.a
