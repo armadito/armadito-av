@@ -177,14 +177,15 @@ static void update_counters (struct a6o_scan *scan, struct a6o_report *report, e
 	case ARMADITO_IERROR:
 	case ARMADITO_SUSPICIOUS:
 		scan->suspicious_count++;
-		report->suspicious_count = scan->suspicious_count;
 		break;
 	case ARMADITO_WHITE_LISTED:
 	case ARMADITO_MALWARE:
 		scan->malware_count++;
-		report->malware_count = scan->malware_count;
 		break;
-      }     
+      }
+
+      report->suspicious_count = scan->suspicious_count;	
+      report->malware_count = scan->malware_count;
 }
 
 /* scan a file context: */
