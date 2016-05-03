@@ -37,7 +37,7 @@ lib/src/utils.c \
 lib/src/vector.c 
 
 AM_CPPFLAGS= -DMODULE5_2_DBDIR='"@MODULE5_2_DBDIR@"'
-module5_2_la_LDFLAGS= -module -avoid-version
+module5_2_la_LDFLAGS= -module -avoid-version -export-symbols "$(srcdir)/module5_2.sym"
 module5_2_la_CFLAGS= -I$(srcdir)/lib/include
 module5_2_la_LIBADD=
 module5_2_la_CFLAGS+= @LIBARMADITO_CFLAGS@
