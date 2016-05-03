@@ -18,7 +18,11 @@
   	"Last_update" : "Dernière mise à jour",
   	"Modules" : "Module",
   	"Date" : "Date",
-  	"Status" : "Statut"
+  	"Status" : "Statut",        
+	"Status_up_to_date" : "à jour",
+	"Status_critical" : "critique",
+	"Status_late" : "tardif",
+	"Status_unavailable" : "indisponible"
   },
   "analyse_view" : {
     "Scan" : "Analyse",

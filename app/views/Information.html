@@ -39,7 +39,12 @@
 			      <tr class="information" ng-repeat="module in state.modules">
 			        <td style="width:40%" class="information"><h7>{{module.name}}</h7></td>
 			        <td style="width:60%"class="information"><h7>{{module.update.date}}</h7></td>
-			        <td style="width:60%"class="information"><h7>{{module.update.status}}</h7></td>
+			        <td style="width:60%"class="information">
+				  <h7 ng-if="module.update.status==='up-to-date'" >{{'information_view.Status_up_to_date' | translate}}</h7>
+				  <h7 ng-if="module.update.status==='critical'" >{{'information_view.Status_critical' | translate}}</h7>
+				  <h7 ng-if="module.update.status==='late'" >{{'information_view.Status_late' | translate}}</h7>
+				  <h7 ng-if="module.update.status==='unavailable'" >{{'information_view.Status_unavailable' | translate}}</h7>
+				</td>
 			      </tr>
 			    </tbody>
 			</table>
