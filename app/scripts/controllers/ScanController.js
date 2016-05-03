@@ -175,6 +175,11 @@ angular.module('armaditoApp')
         return;
       }
 
+      // reset counters
+      $scope.malware_count = 0;
+      $scope.suspicious_count = 0;
+      $scope.scanned_count = 0;
+
       ArmaditoSVC.launchScan($scope.scan_data.path_to_scan, $scope.threatDataFromAv);
 
     };
