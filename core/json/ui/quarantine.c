@@ -1,8 +1,6 @@
-//#include "jsonhandler.h"
 #include "quarantine.h"
 #include <stdio.h>
 #include <libarmadito.h>
-//#include "libarmadito-config.h"
 #include <Windows.h>
 #include "os\dir.h"
 #include "os\string.h"
@@ -12,7 +10,6 @@
 
 typedef int (*dirent_cb_t)(const char *full_path, enum os_file_flag flags, int entry_errno, void *data);
 
-// libarmadito :: os/dir.h functions :: TODO :: quarantine in libarmadito.
 static enum os_file_flag dirent_flags(DWORD fileAttributes)
 {
 	switch(fileAttributes) {
@@ -218,7 +215,6 @@ int qu_os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void * d
 	return 0;
 }
 
-//static void conf_load_dirent_cb(const char *full_path, enum os_file_flag flags, int entry_errno, void *data);
 json_object * quarantine_enum_files_cb(struct armadito *armadito) {
 
 	char * quarantine_dir = NULL;
