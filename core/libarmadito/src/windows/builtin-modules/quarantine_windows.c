@@ -412,18 +412,9 @@ static int quarantine_do(struct quarantine_data *qu_data, const char *path, stru
 		// create quarantine folder if needed.
 		if (CreateAvDirectory(qu_data->quarantine_dir) < 0) {			
 			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," Quarantine folder creation failed!\n");
-			ret = -2;
-			__leave;
-		}
-		
-
-		// Write quarantine .info file
-		if (WriteQuarantineInfoFile(path, quarantineFilepath, report) != 0) {
 			ret = -3;
-			printf("[-] Error :: MoveFileInQuarantine :: Write Quarantine Information File failed!\n");
-			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," Write Quarantine Information File failed! :: [%s] :: [%s]\n",path, quarantineFilepath);
 			__leave;
-		}
+		}		
 
 		// try to open the file.
 		/*fh = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE, 0, OPEN_EXISTING, 0, NULL);
@@ -436,15 +427,23 @@ static int quarantine_do(struct quarantine_data *qu_data, const char *path, stru
 		CloseHandle(fh);
 		*/
 
-		// TODO :: Test if the quarantine folder is present.		
+		// Move file to quarantine directory.		
 		if (MoveFileEx(path,quarantineFilepath,MOVEFILE_REPLACE_EXISTING|MOVEFILE_FAIL_IF_NOT_TRACKABLE|MOVEFILE_COPY_ALLOWED|MOVEFILE_WRITE_THROUGH) == FALSE){			
 			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," Move file [%s] to quarantine folder failed ! :: GLE =%d\n",path,GetLastError());
 			ret = -4;
 			__leave;
 		}
 
+		// Write quarantine .info file
+		if (WriteQuarantineInfoFile(path, quarantineFilepath, report) != 0) {
+			ret = -5;			
+			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," Write Quarantine Information File failed! :: [%s] :: [%s]\n",path, quarantineFilepath);
+			__leave;
+		}
+
 		printf("[+] Debug :: File [%s] moved to quarantine folder successfully !\n", path);	
 		a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_INFO," File [%s] moved to quarantine folder successfully !\n",path );
+		a6o_notify(NOTIF_WARNING,"File [%s] moved to quarantine!\n");
 
 
 	}

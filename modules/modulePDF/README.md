@@ -1,9 +1,9 @@
 Build Instructions
 ==================
 
-Firstly, get uhurupdf sources : 
+Firstly, get armaditopdf sources : 
    $ cd SOMEWHERE/armadito-av/modules/modulePDF/
-   $ git clone http://gitlab.teclib.infra/armadito/uhurupdf.git -b DEV
+   $ git clone http://gitlab.teclib.infra/armadito/armaditopdf.git -b DEV
    
 On Windows
 ==========

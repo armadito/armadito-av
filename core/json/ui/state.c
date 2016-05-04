@@ -9,15 +9,45 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+#ifdef _WIN32
+#include "service/structs.h"
+
+int get_on_access_state(struct a6o_info *info) {
+
+	int ret = 0;
+	struct a6o_module_info **m;
+	
+	for(m = info->module_infos; *m != NULL; m++) {		
+
+		if ( (strncmp( (*m)->name, "on-access", 9) == 0) && ((*m)->mod_status == ARMADITO_UPDATE_OK) ) {			
+			return 1;
+		}
+
+	}
+
+	return ret;
+}
+#else
+int get_on_access_state(void* user_data) {	
+	//TODO linux version.
+	return 0;
+}
+#endif
+
 static struct json_object *antivirus_json(struct a6o_info *info)
 {
 	struct json_object *j_antivirus;
-
 	j_antivirus = json_object_new_object();
 
 	json_object_object_add(j_antivirus, "version", json_object_new_string("3.14"));
 	json_object_object_add(j_antivirus, "service", json_object_new_string("on"));
-	json_object_object_add(j_antivirus, "real-time-protection", json_object_new_string("on"));
+
+	// on-access module state.
+	if (get_on_access_state(info))
+		json_object_object_add(j_antivirus, "real-time-protection", json_object_new_string("on"));
+	else
+		json_object_object_add(j_antivirus, "real-time-protection", json_object_new_string("off"));
 
 	return j_antivirus;
 }
