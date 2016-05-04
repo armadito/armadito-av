@@ -1,8 +1,9 @@
 #include "scan_onaccess.h"
 #include "log.h"
+#include <../src/armaditop.h> //core/libarmadito/src/armaditop.h
+#include <../src/windows/builtin-modules/onaccess_windows.h>
 
-
-int toggle_onaccess_state( PGLOBAL_SCAN_CONTEXT Context ) {
+int toggle_onaccess_state_deprecated( PGLOBAL_SCAN_CONTEXT Context ) {
 	
 	int ret = 0, onaccess_enable = 0;
 	struct a6o_conf * conf = NULL;
@@ -62,6 +63,31 @@ int toggle_onaccess_state( PGLOBAL_SCAN_CONTEXT Context ) {
 
 	}
 	
+	return ret;
+}
+
+int toggle_onaccess_state(PGLOBAL_SCAN_CONTEXT Context) {
+
+	int ret = 0;
+	struct a6o_module * onaccess_mod = NULL;
+	struct onaccess_data * data = NULL;
+
+	if (Context == NULL || Context->onAccessCtx == NULL) {
+		return -1;
+	}
+
+	// set on-access state flag
+	onaccess_mod = a6o_get_module_by_name(Context->armadito,"on-access");
+	if (onaccess_mod == NULL) {
+		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: Can't get on-access module\n");
+		return -1;
+	}
+
+	data = onaccess_mod->data;
+	//printf("[+] Debug :: toggle_onaccess_state :: state_flag (old) = %d\n",data->state_flag);
+	data->state_flag = (data->state_flag == 1) ? 0 : 1;
+	//printf("[+] Debug :: toggle_onaccess_state :: state_flag (new) = %d\n",data->state_flag);
+
 	return ret;
 }
 
@@ -471,6 +497,9 @@ HRESULT UserScanInit(_Inout_  PGLOBAL_SCAN_CONTEXT Context) {
 			}
 		}
 
+		// set on-access state flag to enable 
+		toggle_onaccess_state(Context);
+
 
 	}
 	__finally{
@@ -594,7 +623,8 @@ HRESULT UserScanFinalize(_In_  PGLOBAL_SCAN_CONTEXT Context) {
 	HeapFree(GetProcessHeap(), 0, Context->onAccessCtx->ScanThreadCtxes);
 	Context->onAccessCtx->ScanThreadCtxes = NULL;
 
-
+	// set on-access state flag to disable 
+	toggle_onaccess_state(Context);
 
 	return hres; 
 }
