@@ -13,7 +13,7 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Fichiers sources\PDFAnalyzer">
+    <Filter Include="Fichiers sources\ArmaditoPDF">
       <UniqueIdentifier>{9809be57-2264-485d-b12e-a05da6dbe81f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -21,26 +21,26 @@
     <ClCompile Include="..\..\..\..\..\modules\modulePDF\modulePDF.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\uhurupdf\module7\src\filters.c">
-      <Filter>Fichiers sources\PDFAnalyzer</Filter>
+    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armaditopdf\module7\src\filters.c">
+      <Filter>Fichiers sources\ArmaditoPDF</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\uhurupdf\module7\src\osdeps.c">
-      <Filter>Fichiers sources\PDFAnalyzer</Filter>
+    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armaditopdf\module7\src\osdeps.c">
+      <Filter>Fichiers sources\ArmaditoPDF</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\uhurupdf\module7\src\pdfAnalysis.c">
-      <Filter>Fichiers sources\PDFAnalyzer</Filter>
+    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armaditopdf\module7\src\pdfAnalysis.c">
+      <Filter>Fichiers sources\ArmaditoPDF</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\uhurupdf\module7\src\pdfObjectsAnalysis.c">
-      <Filter>Fichiers sources\PDFAnalyzer</Filter>
+    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armaditopdf\module7\src\pdfObjectsAnalysis.c">
+      <Filter>Fichiers sources\ArmaditoPDF</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\uhurupdf\module7\src\pdfParsing.c">
-      <Filter>Fichiers sources\PDFAnalyzer</Filter>
+    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armaditopdf\module7\src\pdfParsing.c">
+      <Filter>Fichiers sources\ArmaditoPDF</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\uhurupdf\module7\src\pdfStructAnalysis.c">
-      <Filter>Fichiers sources\PDFAnalyzer</Filter>
+    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armaditopdf\module7\src\pdfStructAnalysis.c">
+      <Filter>Fichiers sources\ArmaditoPDF</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\uhurupdf\module7\src\utils.c">
-      <Filter>Fichiers sources\PDFAnalyzer</Filter>
+    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armaditopdf\module7\src\utils.c">
+      <Filter>Fichiers sources\ArmaditoPDF</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
