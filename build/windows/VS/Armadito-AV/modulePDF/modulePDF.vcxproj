@@ -39,7 +39,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\modules\modulePDF\uhurupdf\module7\includes;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\modules\modulePDF\armaditopdf\module7\includes;$(IncludePath)</IncludePath>
     <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -95,13 +95,13 @@ echo post-build step for $(ProjectName) OK
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\modules\modulePDF\uhurupdf\module7\src\filters.c" />
-    <ClCompile Include="..\..\..\..\..\modules\modulePDF\uhurupdf\module7\src\osdeps.c" />
-    <ClCompile Include="..\..\..\..\..\modules\modulePDF\uhurupdf\module7\src\pdfAnalysis.c" />
-    <ClCompile Include="..\..\..\..\..\modules\modulePDF\uhurupdf\module7\src\pdfObjectsAnalysis.c" />
-    <ClCompile Include="..\..\..\..\..\modules\modulePDF\uhurupdf\module7\src\pdfParsing.c" />
-    <ClCompile Include="..\..\..\..\..\modules\modulePDF\uhurupdf\module7\src\pdfStructAnalysis.c" />
-    <ClCompile Include="..\..\..\..\..\modules\modulePDF\uhurupdf\module7\src\utils.c" />
+    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armaditopdf\module7\src\filters.c" />
+    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armaditopdf\module7\src\osdeps.c" />
+    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armaditopdf\module7\src\pdfAnalysis.c" />
+    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armaditopdf\module7\src\pdfObjectsAnalysis.c" />
+    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armaditopdf\module7\src\pdfParsing.c" />
+    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armaditopdf\module7\src\pdfStructAnalysis.c" />
+    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armaditopdf\module7\src\utils.c" />
     <ClCompile Include="..\..\..\..\..\modules\modulePDF\modulePDF.c" />
   </ItemGroup>
   <ItemGroup>
