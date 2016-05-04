@@ -69,13 +69,13 @@ NTSTATUS InitCommunicationPort(_In_ PFLT_FILTER FilterHandle, _Out_ PFLT_PORT *S
 		//Builds a default security descriptor for use with FltCreateCommunicationPort.
 		ntStatus = FltBuildDefaultSecurityDescriptor(&SecurityDescriptor, FLT_PORT_ALL_ACCESS);
 		if (!NT_SUCCESS(ntStatus)) {
-			DbgPrint("[-] Error :: UhuruGuard!InitCommunicationPort :: FltBuildDefaultSecurityDescriptor() routine failed !! \n");
+			DbgPrint("[-] Error :: ArmaditoGuard!InitCommunicationPort :: FltBuildDefaultSecurityDescriptor() routine failed !! \n");
 			__leave;
 		}
 
 		ntStatus = RtlSetDaclSecurityDescriptor(SecurityDescriptor, TRUE, NULL, FALSE);
 		if(!NT_SUCCESS(ntStatus)){
-			DbgPrint("[-] Error :: UhuruGuard!InitCommunicationPort :: RtlSetDaclSecurityDescriptor() routine failed !! \n");
+			DbgPrint("[-] Error :: ArmaditoGuard!InitCommunicationPort :: RtlSetDaclSecurityDescriptor() routine failed !! \n");
 			__leave;
 		}
 		
@@ -96,7 +96,7 @@ NTSTATUS InitCommunicationPort(_In_ PFLT_FILTER FilterHandle, _Out_ PFLT_PORT *S
 	
 
 		if (!NT_SUCCESS(ntStatus)) {
-			DbgPrint("[-] Error :: UhuruGuard!InitCommunicationPort :: FltCreateCommunicationPort() routine failed !! \n");
+			DbgPrint("[-] Error :: ArmaditoGuard!InitCommunicationPort :: FltCreateCommunicationPort() routine failed !! \n");
 			__leave;
 		}
 
@@ -107,7 +107,7 @@ NTSTATUS InitCommunicationPort(_In_ PFLT_FILTER FilterHandle, _Out_ PFLT_PORT *S
 
 		(*ServerPort) = LocalServerPort;
 
-		DbgPrint("[+] Debug :: UhuruGuard!InitCommunicationPort :: FltCreateCommunicationPort() has succeded :: serverPort = 0x%p. \n",(PVOID)(*ServerPort));
+		DbgPrint("[+] Debug :: ArmaditoGuard!InitCommunicationPort :: FltCreateCommunicationPort() has succeded :: serverPort = 0x%p. \n",(PVOID)(*ServerPort));
 		
 		/*
 		if(SecurityDescriptor != NULL){
@@ -115,7 +115,7 @@ NTSTATUS InitCommunicationPort(_In_ PFLT_FILTER FilterHandle, _Out_ PFLT_PORT *S
 		}		
 		/*
 		
-		DbgPrint("[+] Debug :: UhuruGuard!InitCommunicationPort :: FltCreateCommunicationPort() has succeded :: serverPort = 0x%p. \n",(PVOID)(*ServerPort));
+		DbgPrint("[+] Debug :: ArmaditoGuard!InitCommunicationPort :: FltCreateCommunicationPort() has succeded :: serverPort = 0x%p. \n",(PVOID)(*ServerPort));
 		*/
 
 
@@ -126,7 +126,7 @@ NTSTATUS InitCommunicationPort(_In_ PFLT_FILTER FilterHandle, _Out_ PFLT_PORT *S
 		//
 		if(SecurityDescriptor != NULL){
 			FltFreeSecurityDescriptor(SecurityDescriptor);
-			DbgPrint("[+] Debug :: UhuruGuard!InitCommunicationPort :: Free SecurityDescriptor !!\n");
+			DbgPrint("[+] Debug :: ArmaditoGuard!InitCommunicationPort :: Free SecurityDescriptor !!\n");
 		}
 
 	}
@@ -152,7 +152,7 @@ NTSTATUS ConnectNotifyCallback(
 		return STATUS_INVALID_PARAMETER;
 	}
 
-	DbgPrint("[+] Debug :: UhuruGuard!ConnectNotifyCallback :: Client connected to the Driver !!\n");
+	DbgPrint("[+] Debug :: ArmaditoGuard!ConnectNotifyCallback :: Client connected to the Driver !!\n");
 
 
 	// init global varible for the Client Port handle.
@@ -168,7 +168,7 @@ NTSTATUS ConnectNotifyCallback(
 VOID DisconnectNotifyCallback(IN PVOID ConnectionCookie) {
 
 	UNREFERENCED_PARAMETER(ConnectionCookie );
-	DbgPrint("[+] Debug :: UhuruGuard!DisconnectNotifyCallback :: Callback DisconnectNotifyCallback !! \n");
+	DbgPrint("[+] Debug :: ArmaditoGuard!DisconnectNotifyCallback :: Callback DisconnectNotifyCallback !! \n");
 
 	if (gClientComPort != NULL && gFilterHandle != NULL) {
 		FltCloseClientPort(gFilterHandle,&gClientComPort);
@@ -197,7 +197,7 @@ OUT PULONG ReturnOutputBufferLength
 	UNREFERENCED_PARAMETER(OutputBufferLength );
 	UNREFERENCED_PARAMETER(ReturnOutputBufferLength );
 	
-	DbgPrint("[-] Debug :: UhuruGuard!MessageNotifyCallback :: Message received from user-mode app!! \n");
+	DbgPrint("[-] Debug :: ArmaditoGuard!MessageNotifyCallback :: Message received from user-mode app!! \n");
 
 
 	return STATUS_SUCCESS;
@@ -222,22 +222,22 @@ NTSTATUS SendScanOrder( _In_ PFLT_FILTER FilterHandle, PUNICODE_STRING FilePath 
 	
 	// Check parameters.
 	if (FilterHandle == NULL) {
-		DbgPrint("[-] Error :: UhuruGuard!SendScanOrder :: Invalid filter handle parameter !! \n");
+		DbgPrint("[-] Error :: ArmaditoGuard!SendScanOrder :: Invalid filter handle parameter !! \n");
 		return STATUS_INVALID_PARAMETER;
 	}
 
 	if (gClientComPort == NULL) {
-		DbgPrint("[-] Error :: UhuruGuard!SendScanOrder :: Scan service not connected yet !! \n");
+		DbgPrint("[-] Error :: ArmaditoGuard!SendScanOrder :: Scan service not connected yet !! \n");
 		return STATUS_INVALID_PARAMETER;
 	}
 
 	if (FilePath == NULL) {
-		DbgPrint("[-] Error :: UhuruGuard!SendScanOrder :: Invalid FilePath parameter !! \n");
+		DbgPrint("[-] Error :: ArmaditoGuard!SendScanOrder :: Invalid FilePath parameter !! \n");
 		return STATUS_INVALID_PARAMETER;
 	}
 
 	if (AnswerMessage == NULL) {
-		DbgPrint("[-] Error :: UhuruGuard!SendScanOrder :: Invalid AnswerMessage parameter !! \n");
+		DbgPrint("[-] Error :: ArmaditoGuard!SendScanOrder :: Invalid AnswerMessage parameter !! \n");
 		return STATUS_INVALID_PARAMETER;
 	}
 
@@ -255,7 +255,7 @@ NTSTATUS SendScanOrder( _In_ PFLT_FILTER FilterHandle, PUNICODE_STRING FilePath 
 		// Convert unicode string to ansi string for ring 3 process.		
 		ntStatus = RtlUnicodeStringToAnsiString(&AnsiString, (PCUNICODE_STRING)FilePath, TRUE);
 		if(!NT_SUCCESS(ntStatus)){
-			DbgPrint("[-] Error :: UhuruGuard!SendScanOrder :: RtlUnicodeStringToAnsiString() routine failed !! \n");
+			DbgPrint("[-] Error :: ArmaditoGuard!SendScanOrder :: RtlUnicodeStringToAnsiString() routine failed !! \n");
 			__leave;
 		}
 
@@ -277,23 +277,23 @@ NTSTATUS SendScanOrder( _In_ PFLT_FILTER FilterHandle, PUNICODE_STRING FilePath 
 		// Send message to the scan process throught the communication port.
 		ntStatus = FltSendMessage(FilterHandle, &gClientComPort, (PVOID)scanMessage, sizeof(MESSAGE_CONTEXT), (PVOID)&replyMessage, &replyLength, &timeOut);
 		if (!NT_SUCCESS(ntStatus)) {
-			DbgPrint("[-] Error :: UhuruGuard!SendScanOrder :: FltSendMessage() routine failed !! \n");
+			DbgPrint("[-] Error :: ArmaditoGuard!SendScanOrder :: FltSendMessage() routine failed !! \n");
 			__leave;
 		}
 
 
 		if(ntStatus == STATUS_TIMEOUT){
-			//DbgPrint("[-] Warning :: UhuruGuard!SendScanOrder :: FltSendMessage() returned with timeout status !! \n");
+			//DbgPrint("[-] Warning :: ArmaditoGuard!SendScanOrder :: FltSendMessage() returned with timeout status !! \n");
 			*AnswerMessage = TIMEOUT;
 		}
 		else {
 			*AnswerMessage = replyMessage;
-			//DbgPrint("[+] Debug :: UhuruGuard!SendScanOrder :: FltSendMessage() executed successfully !! :: Scan Result = [TODO] \n");
+			//DbgPrint("[+] Debug :: ArmaditoGuard!SendScanOrder :: FltSendMessage() executed successfully !! :: Scan Result = [TODO] \n");
 			if (replyMessage != NONE) {
-				;//DbgPrint("[+] DEBUG :: UhuruGuard!SendScanOrder :: Reply message received successfully from the scan service :: Scan Result = [DBG_FLAG] \n");
+				;//DbgPrint("[+] DEBUG :: ArmaditoGuard!SendScanOrder :: Reply message received successfully from the scan service :: Scan Result = [DBG_FLAG] \n");
 			}
 			else {
-				DbgPrint("[+] Warning :: UhuruGuard!SendScanOrder :: Reply message not received completly...\n");
+				DbgPrint("[+] Warning :: ArmaditoGuard!SendScanOrder :: Reply message not received completly...\n");
 			}
 		}
 		
