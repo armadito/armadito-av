@@ -6,15 +6,6 @@
 #include "ui\jsonhandler.h"
 
 
-/*
-	int do_apply_conf( )
-	This function apply changes made in configuration (...)
-
-*/
-int do_apply_conf( ) {
-	return 0;
-}
-
 int CreatePipeSecurityAttributes(SECURITY_ATTRIBUTES * pSa) {
 
 	int ret = 0;
@@ -96,7 +87,7 @@ int WINAPI ScanThreadWork(PGLOBAL_SCAN_CONTEXT Context) {
 	
 
 	if (Context == NULL) {
-		printf("[-] Error :: ScanThreadWork :: NULL Context\n" );
+		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: ScanThreadWork :: Invalid parameter\n");
 		return -1;
 	}
 
@@ -114,8 +105,7 @@ int WINAPI ScanThreadWork(PGLOBAL_SCAN_CONTEXT Context) {
 	}
 
 	if (threadCtx == NULL) {
-		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " ScanThreadWork :: Thread context not found!\n");
-		printf("[-] Error :: ScanThreadWork :: Thread Context not found\n");
+		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " ScanThreadWork :: Thread context not found!\n");		
 		return -2;
 	}
 
@@ -164,15 +154,14 @@ int WINAPI ScanThreadWork(PGLOBAL_SCAN_CONTEXT Context) {
 			req_len = cbBytesRead;
 			printf("[+] Debug :: ScanThreadWork :: len = %d ::  GUI request = %s ::\n",req_len, request);
 			
-			// intialize json_handler.
+			// intialize json_handler.			
 			json_handler =  a6o_json_handler_new(Context->armadito);
 			if (json_handler == NULL) {
 				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: ScanThreadWork :: a6o_json_handler_new failed! \n");
 				ret = -7;
 				__leave;
 			}
-
-			//json_handler = (struct a6o_json_handler *)calloc(1,sizeof(struct a6o_json_handler));
+			
 
 			status = a6o_json_handler_get_response(json_handler, request, req_len, &response, &resp_len);
 			if (status != JSON_OK) {
