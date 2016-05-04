@@ -6,11 +6,6 @@
 #include "scan_onaccess.h"
 #include "structs.h"
 #include "config.h"
-//#include "uh_crypt.h"
-//#include "update.h"
-//#include "register.h"
-//#include "uh_info.h"
-//#include "uh_quarantine.h"
 #include <utils\tools.h>
 #include <time.h>
 #include <sys/timeb.h>
@@ -162,7 +157,7 @@ int ServiceLoadProcedure_cmd(cmd_mode mode) {
 	struct armadito * armadito = NULL;
 	int onaccess_enable = 0;
 	char * conffile = NULL;
-	struct conf_reg_data data = {0};
+	struct conf_reg_data data = {0};	
 
 	__try {
 
@@ -263,9 +258,7 @@ int ServiceLoadProcedure_cmd(cmd_mode mode) {
 
 		// if failed
 		if (ret < 0) {
-
-			ServiceUnloadProcedure( );
-			
+			ServiceUnloadProcedure( );			
 		}
 
 	}
@@ -311,8 +304,7 @@ int ServiceUnloadProcedure( ) {
 // RegistryInitialization()
 int RegistryKeysInitialization( ) {
 
-	//char * subkey = "SYSTEM\\CurrentControlSet\\services\\eventlog\\Application\\Tatou";
-	
+		
 	LONG res = 0;
 	INT ret = -1;
 	HKEY hRootkey = NULL;
