@@ -268,15 +268,22 @@
       <WppKernelMode>true</WppKernelMode>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Fltmgr.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>FltMgr.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Release|x64'">
     <ClCompile>
-      <WppEnabled>true</WppEnabled>
+      <WppEnabled>false</WppEnabled>
       <WppScanConfigurationData Condition="'%(ClCompile. ScanConfigurationData)'  == ''">trace.h</WppScanConfigurationData>
       <WppKernelMode>true</WppKernelMode>
     </ClCompile>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>FltMgr.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Inf Include="ArmaditoGuard.inf" />

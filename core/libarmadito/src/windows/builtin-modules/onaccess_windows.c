@@ -1,27 +1,19 @@
 #include <libarmadito.h>
 #include "onaccess_windows.h"
 #include <armaditop.h>
-
-#include <glib.h>
 #include <stdlib.h>
 #include <string.h>
+#include "os/string.h"
 
-struct onaccess_data {
-	int enable_permission;
-};
-
-void path_destroy_notify(gpointer data)
-{
-	free(data);
-}
 
 static enum a6o_mod_status mod_onaccess_init(struct a6o_module *module)
 {
-	struct onaccess_data *fa_data = g_new(struct onaccess_data, 1);
+	struct onaccess_data *fa_data = (struct onaccess_data *)calloc(1,sizeof(struct onaccess_data));
 
 	module->data = fa_data;
 
 	fa_data->enable_permission = 0;
+	fa_data->state_flag = 0;
 
 	return ARMADITO_MOD_OK;
 }
@@ -80,11 +72,30 @@ static enum a6o_mod_status mod_onaccess_close(struct a6o_module *module)
 {
 	struct onaccess_data *fa_data = (struct onaccess_data *)module->data;
 
-#ifdef HAVE_LIBNOTIFY
-	notify_uninit();
-#endif
+	if (fa_data != NULL) {
+		free(fa_data);
+		fa_data = NULL;
+	}
 
 	return ARMADITO_MOD_OK;
+}
+
+static enum a6o_update_status mod_onaccess_info(struct a6o_module *module, struct a6o_module_info *info){
+  
+	time_t ts = 0;
+	struct tm timeptr = {0, 30, 8, 1, 2, 116}; // 01/03/2016 9:30
+	struct onaccess_data * data = NULL;
+
+	info->update_date = os_strdup("2016-01-26T09:30:00Z");	
+	ts=mktime(&timeptr);
+	info->timestamp = ts;
+
+	data = module->data;
+	if (data->state_flag == 0) {
+		return ARMADITO_UPDATE_NON_AVAILABLE;
+	}
+
+	return ARMADITO_UPDATE_OK;
 }
 
 struct a6o_conf_entry mod_onaccess_conf_table[] = {
@@ -101,7 +112,7 @@ struct a6o_module on_access_win_module = {
 	.post_init_fun = NULL,
 	.scan_fun = NULL,
 	.close_fun = mod_onaccess_close,
-	.info_fun = NULL,
+	.info_fun = mod_onaccess_info,
 	.supported_mime_types = NULL,
 	.name = "on-access",
 	.size = sizeof(struct onaccess_data),
