@@ -24,5 +24,7 @@ enum a6o_json_status a6o_json_handler_get_response(struct a6o_json_handler *jh, 
 
 void a6o_json_handler_process(struct a6o_json_handler *j);
 
+static const char *status_2_error(enum a6o_json_status status);
+
 #endif
 
