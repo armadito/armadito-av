@@ -45,12 +45,13 @@ angular.module('armaditoApp')
 	}
 
   	$scope.ok = function () {
-		$uibModalInstance.close($scope.quarantineLength);
 
 		// Send cancel_scan to AV if needed
 		if(global.scan_in_progress){ 
 		    ArmaditoSVC.cancelScan($scope.threatDataFromAv);
                 }
+	
+		$uibModalInstance.close($scope.quarantineLength);
 	};
 
 	$scope.cancel = function () {
