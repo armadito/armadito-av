@@ -155,7 +155,10 @@ static void scan_callback(struct a6o_report *report, void *callback_data)
 	/* ui exchange using platform specific function */
 	status = json_handler_ui_request(scan_data->ui_ipc_path, req, strlen(req), resp, sizeof(resp));
 	if (status != JSON_OK) {
-		printf("[-] Error :: scan_callback :: fail to send request to GUI = %s\n\n", req);
+		printf("[-] Error :: scan_callback :: fail to send request to GUI");
+		if(req != NULL)
+		   printf("= %s", req);
+		printf("\n\n");
 	}
 
 	scan_data->last_send_time = now;
