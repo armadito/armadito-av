@@ -170,15 +170,15 @@ static void scan_progress(struct a6o_scan *scan, struct a6o_report *report)
 static void update_counters (struct a6o_scan *scan, struct a6o_report *report, enum a6o_file_status status )
 {
        switch(status) {
-	case ARMADITO_UNDECIDED:
-	case ARMADITO_CLEAN:
-	case ARMADITO_UNKNOWN_FILE_TYPE:
-	case ARMADITO_EINVAL:
-	case ARMADITO_IERROR:
+	case ARMADITO_UNDECIDED: break;
+	case ARMADITO_CLEAN: break;
+	case ARMADITO_UNKNOWN_FILE_TYPE: break;
+	case ARMADITO_EINVAL: break;
+	case ARMADITO_IERROR: break;
 	case ARMADITO_SUSPICIOUS:
 		scan->suspicious_count++;
 		break;
-	case ARMADITO_WHITE_LISTED:
+	case ARMADITO_WHITE_LISTED: break;
 	case ARMADITO_MALWARE:
 		scan->malware_count++;
 		break;
