@@ -61,8 +61,6 @@ static enum a6o_file_status module5_2_scan(struct a6o_module *module, int fd, co
 
 	//printf("[i] Debug :: module 5_2_scan :: mime-type = %s\n",mime_type);
 
-	// TODO change strcmp by strncmp
-	// (FD) why????
 	if (!strcmp(mime_type, "application/x-sharedlib")
 		|| !strcmp(mime_type, "application/x-object")
 		|| !strcmp(mime_type, "application/x-executable")) {
@@ -89,6 +87,7 @@ static enum a6o_file_status module5_2_scan(struct a6o_module *module, int fd, co
 		return ARMADITO_UNDECIDED;
 	}
 
+	printf("module5_2 internal error : %s \n", error_code_str(e));
 	return ARMADITO_IERROR;
 }
 
@@ -97,7 +96,7 @@ static enum a6o_mod_status module5_2_close(struct a6o_module *module)
 	return ARMADITO_MOD_OK;
 }
 
-/* FIXME: one day, add bases status */
+/* FIXME: add bases status */
 static enum a6o_update_status module5_2_info(struct a6o_module *module, struct a6o_module_info *info)
 {
 	time_t ts = 0;
