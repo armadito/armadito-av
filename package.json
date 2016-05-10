@@ -48,6 +48,26 @@
   },
   "dependencies": {
     "os-locale": "^1.4.0",
+    "platform-dependent-modules": "0.0.13",
     "sprintf-js": "^1.0.3"
+  },
+  "config": {
+    "platformDependentModules": {
+      "linux": [
+        "abstract-socket"
+      ],
+      "win32": [
+      ],
+      "darwin": [
+      ],
+      "freebsd": [
+      ],
+      "sunos": [
+      ]
+    }
+  },
+  "scripts": {
+    "_postinstall": "node ./node_modules/platform-dependent-modules/cli.js",
+    "postinstall": "npm run _postinstall"
   }
 }
