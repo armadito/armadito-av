@@ -63,9 +63,6 @@
     <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\UhuruStatic.c">
       <Filter>Fichiers sources\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\utils.c">
-      <Filter>Fichiers sources\lib</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\vector.c">
       <Filter>Fichiers sources\lib</Filter>
     </ClCompile>

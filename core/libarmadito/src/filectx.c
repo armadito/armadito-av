@@ -55,7 +55,7 @@ enum a6o_file_context_status a6o_file_context_get(struct a6o_file_context *ctx, 
 
 #ifdef _WIN32
 		/* open the file :: TODO write portable code for this function */
-		err = _sopen_s(&(ctx->fd), path, O_RDONLY, _SH_DENYNO, _S_IREAD);
+		err = _sopen_s(&(ctx->fd), path, O_RDONLY | _O_BINARY, _SH_DENYNO, _S_IREAD);
 #else
 		/* open the file */
 		ctx->fd = os_open(path, O_RDONLY);
