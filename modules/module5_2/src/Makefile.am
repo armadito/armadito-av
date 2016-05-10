@@ -13,11 +13,11 @@ lib/include/elfReader.h \
 lib/include/gestionPE.h \
 lib/include/kNN.h \
 lib/include/miniz.h \
+lib/include/util.h \
 lib/include/model.h \
 lib/include/table.h \
 lib/include/tfidfDetection.h \
 lib/include/uh_errors.h \
-lib/include/utils.h \
 lib/include/vector.h \
 lib/include/windowsTypes.h \
 lib/include/osdeps.h \
@@ -33,11 +33,10 @@ lib/src/table.c \
 lib/src/linux/osdeps.c \
 lib/src/tfidfDetection.c \
 lib/src/uh_errors.c \
-lib/src/utils.c \
 lib/src/vector.c 
 
 AM_CPPFLAGS= -DMODULE5_2_DBDIR='"@MODULE5_2_DBDIR@"'
-module5_2_la_LDFLAGS= -module -avoid-version
+module5_2_la_LDFLAGS= -module -avoid-version -export-symbols "$(srcdir)/module5_2.sym"
 module5_2_la_CFLAGS= -I$(srcdir)/lib/include
 module5_2_la_LIBADD=
 module5_2_la_CFLAGS+= @LIBARMADITO_CFLAGS@

@@ -65,6 +65,9 @@ struct a6o_scan *a6o_scan_new(struct armadito *armadito, int scan_id)
 
 	scan->to_scan_count = 0;
 	scan->scanned_count = 0;
+        scan->malware_count = 0;
+        scan->suspicious_count = 0;
+        
 
 	return scan;
 }
@@ -146,14 +149,14 @@ static void scan_progress(struct a6o_scan *scan, struct a6o_report *report)
 {
 	int progress;
 
+	/* update the progress */
+	/* may be not thread safe, but who cares about precise values? */
+	scan->scanned_count++;
+
 	if (scan->to_scan_count == 0) {
 		report->progress = REPORT_PROGRESS_UNKNOWN;
 		return;
 	}
-
-	/* update the progress */
-	/* may be not thread safe, but who cares about precise values? */
-	scan->scanned_count++;
 
 	progress = (int)((100.0 * scan->scanned_count) / scan->to_scan_count);
 
@@ -161,6 +164,28 @@ static void scan_progress(struct a6o_scan *scan, struct a6o_report *report)
 		progress = 100;
 
 	report->progress = progress;
+	report->scanned_count = scan->scanned_count;
+}
+
+static void update_counters (struct a6o_scan *scan, struct a6o_report *report, enum a6o_file_status status )
+{
+       switch(status) {
+	case ARMADITO_UNDECIDED: break;
+	case ARMADITO_CLEAN: break;
+	case ARMADITO_UNKNOWN_FILE_TYPE: break;
+	case ARMADITO_EINVAL: break;
+	case ARMADITO_IERROR: break;
+	case ARMADITO_SUSPICIOUS:
+		scan->suspicious_count++;
+		break;
+	case ARMADITO_WHITE_LISTED: break;
+	case ARMADITO_MALWARE:
+		scan->malware_count++;
+		break;
+      }
+
+      report->suspicious_count = scan->suspicious_count;	
+      report->malware_count = scan->malware_count;
 }
 
 /* scan a file context: */
@@ -188,19 +213,10 @@ enum a6o_file_status a6o_scan_context(struct a6o_scan *scan, struct a6o_file_con
 	/* compute progress if have one */
 	scan_progress(scan, &report);
 
-#ifdef WIN32
-	// UF :: only for test :: if malware callback is called in the second call of a6o_scan_simple.
-	if (status != ARMADITO_MALWARE && report.status != ARMADITO_MALWARE) {
-		/* once done, call the callbacks */
-		a6o_scan_call_callbacks(scan, &report);
-
-	}
-#else
+	update_counters(scan, &report, status);
 
 	/* once done, call the callbacks */
 	a6o_scan_call_callbacks(scan, &report);
-
-#endif
 
 	/* and free the report (it may contain a strdup'ed string) */
 	a6o_report_destroy(&report);
@@ -270,7 +286,7 @@ enum a6o_file_status a6o_scan_simple(struct armadito *armadito, const char *path
 	enum a6o_file_context_status context_status;
 	enum a6o_file_status status;
 
-#ifdef WIN32
+#ifdef _WIN32
 	// only for test purpose :: TODO :: separate a6o_scan from callbacks.
 	if (report->status == ARMADITO_MALWARE) {
 		//printf("[+] Info :: a6o_scan_simple :: %d\n",report->status);

@@ -11,7 +11,7 @@ FILE * os_fopen(char * filename, char * mode) {
 	errno_t err = 0;
 
 	err = fopen_s(&f,filename,mode);
-	if (err == 0) {
+	if (err != 0) {
 		return NULL;
 	}
 

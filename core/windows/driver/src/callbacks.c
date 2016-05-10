@@ -65,7 +65,7 @@ SCAN_RESULT LaunchFileAnalysis(_In_ PFLT_CALLBACK_DATA Data, _In_ PCFLT_RELATED_
 	UNREFERENCED_PARAMETER( quarantineDir );
 
 	if (gClientComPort == NULL) {
-		//DbgPrint("[-] Warning :: UhuruGuard!LaunchFileAnalysis :: Scan service not connected yet !! \n");
+		//DbgPrint("[-] Warning :: ArmaditoGuard!LaunchFileAnalysis :: Scan service not connected yet !! \n");
 		return NOT_CONNECTED;
 	}
 
@@ -80,7 +80,7 @@ SCAN_RESULT LaunchFileAnalysis(_In_ PFLT_CALLBACK_DATA Data, _In_ PCFLT_RELATED_
 		// Retrieve file name informations.
 		ntStatus = FltGetFileNameInformation(Data,FLT_FILE_NAME_NORMALIZED|FLT_FILE_NAME_QUERY_DEFAULT, &FileNameInformation);
 		if (!NT_SUCCESS(ntStatus)) {
-			DbgPrint("[-] Error :: UhuruGuard!LaunchFileAnalysis :: FltGetFileNameInformation() routine failed :: 0x%x \n",ntStatus);
+			DbgPrint("[-] Error :: ArmaditoGuard!LaunchFileAnalysis :: FltGetFileNameInformation() routine failed :: 0x%x \n",ntStatus);
 			//answer = NONE;
 			__leave;			
 		}
@@ -88,7 +88,7 @@ SCAN_RESULT LaunchFileAnalysis(_In_ PFLT_CALLBACK_DATA Data, _In_ PCFLT_RELATED_
 		ntStatus = FltParseFileNameInformation(FileNameInformation);
 		if (!NT_SUCCESS(ntStatus)) {
 			
-			DbgPrint("[-] Error :: UhuruGuard!LaunchFileAnalysis :: FltParseFileNameInformation() routine failed :: 0x%x \n", ntStatus);
+			DbgPrint("[-] Error :: ArmaditoGuard!LaunchFileAnalysis :: FltParseFileNameInformation() routine failed :: 0x%x \n", ntStatus);
 			//res = NONE;
 			__leave;
 			//FltReleaseFileNameInformation(FileNameInformation);
@@ -108,7 +108,7 @@ SCAN_RESULT LaunchFileAnalysis(_In_ PFLT_CALLBACK_DATA Data, _In_ PCFLT_RELATED_
 		// Send scan order to the scan service.
 		ntStatus = SendScanOrder(FltObjects->Filter, &FileNameInformation->Name, &answer);
 		if (!NT_SUCCESS(ntStatus)) {			
-			DbgPrint("[-] Error :: UhuruGuard!LaunchFileAnalysis :: SendScanOrder() failed :: 0x%x \n", ntStatus);
+			DbgPrint("[-] Error :: ArmaditoGuard!LaunchFileAnalysis :: SendScanOrder() failed :: 0x%x \n", ntStatus);
 			answer = ARMADITO_IERROR;
 			__leave;			
 		}
@@ -241,13 +241,13 @@ Return Value:
 	// Check if the request come from the scan process.
 	status = IsFromTheAnalysisProcess(FltGetRequestorProcess(Data),&bIsScanProcess);
 	if (!NT_SUCCESS(status)){
-		//DbgPrint("[i] Error :: UhuruGuard!PreOperationIrpCreate :: IsFromTheAnalysisProcess failed :: status = 0x%x :: %d\n", status,status);
+		//DbgPrint("[i] Error :: ArmaditoGuard!PreOperationIrpCreate :: IsFromTheAnalysisProcess failed :: status = 0x%x :: %d\n", status,status);
 		return FLT_PREOP_SUCCESS_NO_CALLBACK;
 	}
 
 	if (bIsScanProcess == TRUE) {
 		//ProcessId = FltGetRequestorProcessId(Data);
-		//DbgPrint("[-] Warning :: UhuruGuard!PreOperationIrpCreate :: [%d] Ignoring Analysis process request !! :: %wZ\n",ProcessId,FltObjects->FileObject->FileName);
+		//DbgPrint("[-] Warning :: ArmaditoGuard!PreOperationIrpCreate :: [%d] Ignoring Analysis process request !! :: %wZ\n",ProcessId,FltObjects->FileObject->FileName);
 		return FLT_PREOP_SUCCESS_NO_CALLBACK;
 	}
 
@@ -256,7 +256,7 @@ Return Value:
 
 	// If the caller thread is a system thread, do not call the post operation callback.
 	if (PsIsSystemThread(Data->Thread) == TRUE) {
-		//DbgPrint("[i] Debug :: UhuruGuard!PreOperationIrpCreate :: System thread caller\n");
+		//DbgPrint("[i] Debug :: ArmaditoGuard!PreOperationIrpCreate :: System thread caller\n");
 		return FLT_PREOP_SUCCESS_NO_CALLBACK ;
 	}
     
@@ -364,7 +364,7 @@ Return Value:
 
 	// Ignore Volume Requests.
 	if (FlagOn(FltObjects->FileObject->Flags, FO_VOLUME_OPEN)) {
-		DbgPrint("[-] Warning :: UhuruGuard!PostOperationIrpCreate :: Ignore VOLUME_OPEN requests.\n");
+		DbgPrint("[-] Warning :: ArmaditoGuard!PostOperationIrpCreate :: Ignore VOLUME_OPEN requests.\n");
 		return FLT_POSTOP_FINISHED_PROCESSING;			
 	}
 
@@ -375,24 +375,24 @@ Return Value:
 		/*
 		ntStatus = IsFromTheAnalysisProcess(FltGetRequestorProcess(Data),&bIsScanProcess);
 		if (!NT_SUCCESS(ntStatus)){
-			DbgPrint("[i] Error :: UhuruGuard!PostOperationIrpCreate :: IsFromTheAnalysisProcess failed :: status = 0x%x :: %d\n", ntStatus,ntStatus);
+			DbgPrint("[i] Error :: ArmaditoGuard!PostOperationIrpCreate :: IsFromTheAnalysisProcess failed :: status = 0x%x :: %d\n", ntStatus,ntStatus);
 			__leave;
 		}
 
 		if (bIsScanProcess == TRUE) {
-			DbgPrint("[-] Warning :: UhuruGuard!PosOperationIrpCreate :: !! Ignoring Analysis process request !! :: %wZ\n",FltObjects->FileObject->FileName);
+			DbgPrint("[-] Warning :: ArmaditoGuard!PosOperationIrpCreate :: !! Ignoring Analysis process request !! :: %wZ\n",FltObjects->FileObject->FileName);
 			__leave;
 		}*/
 
 		// Ignore Directory Open Creation.
 		ntStatus = FltIsDirectory(FltObjects->FileObject, FltObjects->Instance, &bIsDir);
 		if (!NT_SUCCESS(Data->IoStatus.Status)) {
-			DbgPrint("[-] Error :: UhuruGuard!PostOperationIrpCreate :: FltIsDirectory() routine failed !! \n");
+			DbgPrint("[-] Error :: ArmaditoGuard!PostOperationIrpCreate :: FltIsDirectory() routine failed !! \n");
 			__leave;
 		}
 
 		if (bIsDir == TRUE) {
-			//DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCreate :: Ignoring Directory file operation \n");
+			//DbgPrint("[i] Debug :: ArmaditoGuard!PostOperationIrpCreate :: Ignoring Directory file operation \n");
 			__leave;
 		}
 
@@ -406,11 +406,11 @@ Return Value:
 										 &encrypted );
 			if (!NT_SUCCESS( ntStatus )) {
 
-				DbgPrint("[-] Error :: UhuruGuard!PostOperationIrpCreate :: AvGetFileEncrypted routine failed :: status = 0x%x\n",ntStatus);
+				DbgPrint("[-] Error :: ArmaditoGuard!PostOperationIrpCreate :: AvGetFileEncrypted routine failed :: status = 0x%x\n",ntStatus);
 				__leave;
 			}
 			if (encrypted) {
-				DbgPrint("[i] Info :: UhuruGuard!PostOperationIrpCreate :: skip encrypted file :: [%wZ]\n",FltObjects->FileObject->FileName);
+				DbgPrint("[i] Info :: ArmaditoGuard!PostOperationIrpCreate :: skip encrypted file :: [%wZ]\n",FltObjects->FileObject->FileName);
 				return FLT_POSTOP_FINISHED_PROCESSING;
 			}
 		}
@@ -443,11 +443,11 @@ Return Value:
 
 			ntStatus = FltAllocateContext(FltObjects->Filter, FLT_FILE_CONTEXT, sizeof(FILE_CONTEXT), NonPagedPool, (PFLT_CONTEXT)&FileContext);
 			if (!NT_SUCCESS(ntStatus)) {
-				DbgPrint("[-] Error :: UhuruGuard!PostOperationIrpCreate :: FltAllocateContext routine failed\n");
+				DbgPrint("[-] Error :: ArmaditoGuard!PostOperationIrpCreate :: FltAllocateContext routine failed\n");
 				__leave;
 			}
 
-			//DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCreate :: Context allocated :: %wZ.\n",FltObjects->FileObject->FileName);
+			//DbgPrint("[i] Debug :: ArmaditoGuard!PostOperationIrpCreate :: Context allocated :: %wZ.\n",FltObjects->FileObject->FileName);
 			RtlZeroMemory(FileContext, sizeof(FILE_CONTEXT));
 
 			// init scan result.
@@ -455,13 +455,13 @@ Return Value:
 
 			ntStatus = FltSetFileContext(FltObjects->Instance,FltObjects->FileObject,FLT_SET_CONTEXT_KEEP_IF_EXISTS, FileContext, NULL );
 			if (!NT_SUCCESS(ntStatus)) {
-				DbgPrint("[-] Error :: UhuruGuard!PostOperationIrpCreate :: FltSetFileContext routine failed\n");
+				DbgPrint("[-] Error :: ArmaditoGuard!PostOperationIrpCreate :: FltSetFileContext routine failed\n");
 				__leave;
 			}
 
 			// For file creation, scan the file at cleanup.
 			if (FlagOn(Data->IoStatus.Information, FILE_CREATED) ) {
-				a6oDbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCreate :: [%d] :: FILE_CREATED flag :: %wZ\n", FltGetRequestorProcessId(Data),FltObjects->FileObject->FileName);
+				a6oDbgPrint("[i] Debug :: ArmaditoGuard!PostOperationIrpCreate :: [%d] :: FILE_CREATED flag :: %wZ\n", FltGetRequestorProcessId(Data),FltObjects->FileObject->FileName);
 				__leave;
 			}
 
@@ -475,30 +475,30 @@ Return Value:
 			FileContext->scanResult = scanRes;
 			// Print scan result:
 			if (FileContext->scanResult == ARMADITO_MALWARE || FileContext->scanResult == ARMADITO_CLEAN)
-				a6oDbgPrint("[i] INFO :: UhuruGuard!PostOperationIrpCreate ::[%d]:: %wZ => %s\n",FltGetRequestorProcessId(Data), FltObjects->FileObject->FileName,PrintUhuruScanResult(FileContext->scanResult));
+				a6oDbgPrint("[i] INFO :: ArmaditoGuard!PostOperationIrpCreate ::[%d]:: %wZ => %s\n",FltGetRequestorProcessId(Data), FltObjects->FileObject->FileName,PrintUhuruScanResult(FileContext->scanResult));
 		}
 		
 
 		/*
 		if (FileContext->scanResult == ARMADITO_IERROR) {
-			DbgPrint("[-] Error :: UhuruGuard!PostOperationIrpCreate :: LaunchFileAnalysis failed for file :: %wZ.\n",FltObjects->FileObject->FileName);	;
+			DbgPrint("[-] Error :: ArmaditoGuard!PostOperationIrpCreate :: LaunchFileAnalysis failed for file :: %wZ.\n",FltObjects->FileObject->FileName);	;
 			__leave;
 		}
 		*/
 
 		/*
 		// Display filename informations.
-		DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCreate :: Volume = %wZ \n",FileNameInformation->Volume);
-		DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCreate :: ParentDir = %wZ \n",FileNameInformation->ParentDir);
-		DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCreate :: Name = %wZ \n",FileNameInformation->Name);
-		DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCreate :: FinalComponent = %wZ \n",FileNameInformation->FinalComponent);	
-		DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCreate :: File created :: %wZ.\n",FltObjects->FileObject->FileName);
+		DbgPrint("[i] Debug :: ArmaditoGuard!PostOperationIrpCreate :: Volume = %wZ \n",FileNameInformation->Volume);
+		DbgPrint("[i] Debug :: ArmaditoGuard!PostOperationIrpCreate :: ParentDir = %wZ \n",FileNameInformation->ParentDir);
+		DbgPrint("[i] Debug :: ArmaditoGuard!PostOperationIrpCreate :: Name = %wZ \n",FileNameInformation->Name);
+		DbgPrint("[i] Debug :: ArmaditoGuard!PostOperationIrpCreate :: FinalComponent = %wZ \n",FileNameInformation->FinalComponent);	
+		DbgPrint("[i] Debug :: ArmaditoGuard!PostOperationIrpCreate :: File created :: %wZ.\n",FltObjects->FileObject->FileName);
 		*/
 
 		// If the file is detected as a malware, cancel file operation.
 		if (FileContext->scanResult == ARMADITO_MALWARE ) {
 
-			DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCreate :: [%d] :: MALWARE DETECTED :: %wZ.\n",FltGetRequestorProcessId(Data),FltObjects->FileObject->FileName);	
+			DbgPrint("[i] Debug :: ArmaditoGuard!PostOperationIrpCreate :: [%d] :: MALWARE DETECTED :: %wZ.\n",FltGetRequestorProcessId(Data),FltObjects->FileObject->FileName);	
 		
 			// Cancel file operation.
 			// https://msdn.microsoft.com/en-us/library/windows/hardware/ff540223%28v=vs.85%29.aspx
@@ -538,8 +538,9 @@ Return Value:
     return retStatus;
 }
 
-_IRQL_requires_same_
+
 _IRQL_requires_max_(APC_LEVEL)
+_IRQL_requires_same_
 FLT_POSTOP_CALLBACK_STATUS
 PostOperationIrpWrite(
 _Inout_ PFLT_CALLBACK_DATA Data,
@@ -581,6 +582,7 @@ Return Value:
     //UNREFERENCED_PARAMETER( FltObjects );
     UNREFERENCED_PARAMETER( CompletionContext );
 
+	
 	__try {
 
 		// If the size the content to write is NULL, then leave.
@@ -590,31 +592,37 @@ Return Value:
 
 		if (!NT_SUCCESS(Data->IoStatus.Status) ) {
 			if (!FLT_IS_FASTIO_OPERATION(Data))
-				DbgPrint("[-] Error :: UhuruGuard!PostOperationIrpWrite :: WRITE OPERATION failed !! 0x%x :: %wZ \n",Data->IoStatus.Status,FltObjects->FileObject->FileName);
+				DbgPrint("[-] Error :: ArmaditoGuard!PostOperationIrpWrite :: WRITE OPERATION failed !! 0x%x :: %wZ \n",Data->IoStatus.Status,FltObjects->FileObject->FileName);
 			__leave;
 		}
 
 		// Test if the requestor process is the analysis service.
 		ntStatus = IsFromTheAnalysisProcess(FltGetRequestorProcess(Data),&bIsScanProcess);
 		if (!NT_SUCCESS(ntStatus)){
-			//DbgPrint("[i] Error :: UhuruGuard!PreOperationIrpCleanup :: IsFromTheAnalysisProcess failed :: status = 0x%x :: %d\n", status,status);
+			//DbgPrint("[i] Error :: ArmaditoGuard!PreOperationIrpCleanup :: IsFromTheAnalysisProcess failed :: status = 0x%x :: %d\n", status,status);
 			__leave;
 		}
 
 		if (bIsScanProcess == TRUE) {
-			//DbgPrint("[+] Debug :: UhuruGuard!PostOperationIrpWrite :: !! Ignoring Analysis process request !! :: %wZ\n",FltObjects->FileObject->FileName);
+			//DbgPrint("[+] Debug :: ArmaditoGuard!PostOperationIrpWrite :: !! Ignoring Analysis process request !! :: %wZ\n",FltObjects->FileObject->FileName);
+			__leave;
+		}
+
+		// Check IRQL Level to avoid unexpected crash.
+		if (KeGetCurrentIrql( ) > APC_LEVEL) {
+			DbgPrint("[-] Error :: ArmaditoGuard!PostOperationIrpWrite :: Bad IRQL level!\n");
 			__leave;
 		}
 
 		// Ignore Directory Open Creation.
 		ntStatus = FltIsDirectory(FltObjects->FileObject, FltObjects->Instance, &bIsDir);
 		if (!NT_SUCCESS(ntStatus)) {
-			DbgPrint("[-] Error :: UhuruGuard!PostOperationIrpWrite :: FltIsDirectory() routine failed !! 0x%x ::\n",ntStatus);
+			DbgPrint("[-] Error :: ArmaditoGuard!PostOperationIrpWrite :: FltIsDirectory() routine failed !! 0x%x ::\n",ntStatus);
 			__leave;
 		}
 
 		if (bIsDir == TRUE) {
-			//DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCreate :: Ignoring Directory file operation \n");
+			//DbgPrint("[i] Debug :: ArmaditoGuard!PostOperationIrpCreate :: Ignoring Directory file operation \n");
 			__leave;
 		}
 
@@ -628,11 +636,11 @@ Return Value:
 			// If there is no context found, then set a context to this file.
 			ntStatus = FltAllocateContext(FltObjects->Filter, FLT_FILE_CONTEXT, sizeof(FILE_CONTEXT), NonPagedPool, (PFLT_CONTEXT)&FileContext);
 			if (!NT_SUCCESS(ntStatus)) {
-				DbgPrint("[-] Error :: UhuruGuard!PostOperationIrpWrite :: FltAllocateContext routine failed\n");
+				DbgPrint("[-] Error :: ArmaditoGuard!PostOperationIrpWrite :: FltAllocateContext routine failed\n");
 				__leave;
 			}
 
-			//DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCreate :: Context allocated :: %wZ.\n",FltObjects->FileObject->FileName);
+			//DbgPrint("[i] Debug :: ArmaditoGuard!PostOperationIrpCreate :: Context allocated :: %wZ.\n",FltObjects->FileObject->FileName);
 			RtlZeroMemory(FileContext, sizeof(FILE_CONTEXT));
 
 			// init scan result.
@@ -640,7 +648,7 @@ Return Value:
 
 			ntStatus = FltSetFileContext(FltObjects->Instance,FltObjects->FileObject,FLT_SET_CONTEXT_KEEP_IF_EXISTS, FileContext, NULL );
 			if (!NT_SUCCESS(ntStatus)) {
-				DbgPrint("[-] Error :: UhuruGuard!PostOperationIrpWrite :: FltSetFileContext routine failed\n");
+				DbgPrint("[-] Error :: ArmaditoGuard!PostOperationIrpWrite :: FltSetFileContext routine failed\n");
 				__leave;
 			}
 
@@ -648,7 +656,7 @@ Return Value:
 		else if (NT_SUCCESS(ntStatus)) {	// If a context is already set for this file.
 			
 			if (FileContext->scanResult == ARMADITO_CLEAN)
-				//DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpWrite :: Writing in MARKED file %s :: %wZ\n",PrintUhuruScanResult(FileContext->scanResult),FltObjects->FileObject->FileName);
+				//DbgPrint("[i] Debug :: ArmaditoGuard!PostOperationIrpWrite :: Writing in MARKED file %s :: %wZ\n",PrintUhuruScanResult(FileContext->scanResult),FltObjects->FileObject->FileName);
 			
 			// If the file was no detected as a malware, then rescan it later.
 			if (FileContext->scanResult != ARMADITO_MALWARE) {
@@ -657,7 +665,7 @@ Return Value:
 			else {
 				// Cancel operation. in the postoperation.
 				// TODO;
-				DbgPrint("[+] Debug :: UhuruGuard!PostOperationIrpWrite :: Writing in ARMADITO_MALWARE marked file :: %wZ\n",FltObjects->FileObject->FileName);
+				DbgPrint("[+] Debug :: ArmaditoGuard!PostOperationIrpWrite :: Writing in ARMADITO_MALWARE marked file :: %wZ\n",FltObjects->FileObject->FileName);
 				__leave;
 
 			}
@@ -668,14 +676,14 @@ Return Value:
 		
 		
 		//FltReleaseContext((PFLT_CONTEXT)FileContext);
-		//DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCleanup :: ::Context realeased for file %wZ\n",FltObjects->FileObject->FileName);
+		//DbgPrint("[i] Debug :: ArmaditoGuard!PostOperationIrpCleanup :: ::Context realeased for file %wZ\n",FltObjects->FileObject->FileName);
 
 
 	}
 	__finally {
 
 		if (FileContext != NULL) {
-			//DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpWrite :: Freeing context in Write callback :: %wZ\n",FltObjects->FileObject->FileName);
+			//DbgPrint("[i] Debug :: ArmaditoGuard!PostOperationIrpWrite :: Freeing context in Write callback :: %wZ\n",FltObjects->FileObject->FileName);
 			FltReleaseContext((PFLT_CONTEXT)FileContext);			
 		}
 
@@ -711,19 +719,19 @@ _Flt_CompletionContext_Outptr_ PVOID *CompletionContext
 		// Test if the requestor process is the analysis service.
 		ntStatus = IsFromTheAnalysisProcess(FltGetRequestorProcess(Data),&bIsScanProcess);
 		if (!NT_SUCCESS(ntStatus)){
-			//DbgPrint("[i] Error :: UhuruGuard!PreOperationIrpCleanup :: IsFromTheAnalysisProcess failed :: status = 0x%x :: %d\n", status,status);
+			//DbgPrint("[i] Error :: ArmaditoGuard!PreOperationIrpCleanup :: IsFromTheAnalysisProcess failed :: status = 0x%x :: %d\n", status,status);
 			__leave;
 		}
 
 		if (bIsScanProcess == TRUE) {
-			//DbgPrint("[+] Debug :: UhuruGuard!PreOperationIrpCleanup :: !! Ignoring Analysis process request !! :: %wZ\n",FltObjects->FileObject->FileName);
+			//DbgPrint("[+] Debug :: ArmaditoGuard!PreOperationIrpCleanup :: !! Ignoring Analysis process request !! :: %wZ\n",FltObjects->FileObject->FileName);
 			__leave;
 		}
 
 		// Ignore directories
 		ntStatus = FltIsDirectory(FltObjects->FileObject, FltObjects->Instance, &bIsDirectory);
 		if (!NT_SUCCESS(Data->IoStatus.Status)) {
-			DbgPrint("[-] Error :: UhuruGuard!PostOperationIrpCleanup :: FltIsDirectory() routine failed !! \n");
+			DbgPrint("[-] Error :: ArmaditoGuard!PostOperationIrpCleanup :: FltIsDirectory() routine failed !! \n");
 			__leave;
 		}
 
@@ -737,7 +745,7 @@ _Flt_CompletionContext_Outptr_ PVOID *CompletionContext
 				
 
 		
-		//DbgPrint("[+] Debug :: UhuruGuard!PreOperationIrpCleanup :: %wZ\n", FltObjects->FileObject->FileName);
+		//DbgPrint("[+] Debug :: ArmaditoGuard!PreOperationIrpCleanup :: %wZ\n", FltObjects->FileObject->FileName);
 		// Get the file context.
 		ntStatus = FltGetFileContext(Data->Iopb->TargetInstance, Data->Iopb->TargetFileObject, (PFLT_CONTEXT *)&FileContext);
 		if (!NT_SUCCESS(ntStatus)){			
@@ -751,7 +759,7 @@ _Flt_CompletionContext_Outptr_ PVOID *CompletionContext
 
 		// Test if the file has already been scanned.
 		if (FileContext->scanResult != NONE && FileContext->scanResult != TIMEOUT && FileContext->scanResult != ARMADITO_UNKNOWN_FILE_TYPE ) {
-			//DbgPrint("[+] Debug :: UhuruGuard!PreOperationIrpCleanup :: File Already Scanned  :: %wZ :: %s\n", FltObjects->FileObject->FileName, PrintUhuruScanResult(FileContext->scanResult));
+			//DbgPrint("[+] Debug :: ArmaditoGuard!PreOperationIrpCleanup :: File Already Scanned  :: %wZ :: %s\n", FltObjects->FileObject->FileName, PrintUhuruScanResult(FileContext->scanResult));
 			__leave;
 		}
 			
@@ -761,7 +769,7 @@ _Flt_CompletionContext_Outptr_ PVOID *CompletionContext
 		FileContext->scanResult = scanResult;
 
 		//if (FileContext->scanResult == ARMADITO_MALWARE || FileContext->scanResult == ARMADITO_CLEAN)
-		a6oDbgPrint("[i] INFO :: UhuruGuard!PreOperationIrpCleanup ::[%d]:: %wZ => %s\n",FltGetRequestorProcessId(Data),FltObjects->FileObject->FileName,PrintUhuruScanResult(FileContext->scanResult));
+		a6oDbgPrint("[i] INFO :: ArmaditoGuard!PreOperationIrpCleanup ::[%d]:: %wZ => %s\n",FltGetRequestorProcessId(Data),FltObjects->FileObject->FileName,PrintUhuruScanResult(FileContext->scanResult));
 
 
 		// if the file has been detected has malware...
@@ -836,10 +844,10 @@ Return Value:
 			__leave; //return FLT_POSTOP_FINISHED_PROCESSING;
 		}
 
-		a6oDbgPrint("[+] Debug :: UhuruGuard!PostOperationIrpCleanup :: Cleaning File Context :: %wZ => %s\n", FltObjects->FileObject->FileName,PrintUhuruScanResult(FileContext->scanResult));
+		a6oDbgPrint("[+] Debug :: ArmaditoGuard!PostOperationIrpCleanup :: Cleaning File Context :: %wZ => %s\n", FltObjects->FileObject->FileName,PrintUhuruScanResult(FileContext->scanResult));
 		
 		
-		//DbgPrint("[i] Debug :: UhuruGuard!PostOperationIrpCleanup :: ::Context realeased for file %wZ\n",FltObjects->FileObject->FileName);
+		//DbgPrint("[i] Debug :: ArmaditoGuard!PostOperationIrpCleanup :: ::Context realeased for file %wZ\n",FltObjects->FileObject->FileName);
 
 		// maybe use FltDeleteFileContext( ) instead of FltDeleteContext();		
 			
