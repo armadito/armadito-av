@@ -12,7 +12,7 @@
 var osLocale = require('os-locale');
 var gui = require('nw.gui');
 // Create a tray icon
-var tray = new gui.Tray({ title: 'Tray', icon: 'app/images/kimioslogoMini.png' });
+var tray = new gui.Tray({ title: 'Tray', icon: 'app/images/armadito.jpg' });
 
 // Reference to window and tray
 var win = gui.Window.get();

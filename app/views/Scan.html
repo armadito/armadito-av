@@ -1,6 +1,6 @@
 <br>
 <div class="container-fluid">
-	<div class="row">
+	<div class="row pullTop">
 		<form class="form-horizontal">
 	        <div class="col-xs-12 col-sm-12 col-md-12 form-group">
 	            <label class="control-label col-xs-3 col-sm-3 col-md-3"><i class="analyseTitle">{{ 'analyse_view.Scan' | translate}} </i></label>
@@ -25,7 +25,7 @@
 	        </div>
 	    </form>
 	</div>
-	<div class="row">
+	<div class="row pullTop">
 		<div class="col-sm-offset-1 col-md-offset-1 col-xs-12 col-sm-10 col-md-10 text-center ">
 			<div class="col-xs-4 col-sm-4 col-md-4">
 				<h1><b class="fileAnalyse" ng-bind="scanned_count" ></b></h1>
@@ -38,7 +38,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="row">
+	<div class="row pullTop">
 		<div class="col-sm-offset-1 col-md-offset-1 col-xs-12 col-sm-10 col-md-10 text-center ">
 			<div class="col-xs-4 col-sm-4 col-md-4">
 				<h5 class="numberOfAnalyseFile">{{ 'analyse_view.Scanned' | translate}}</h5>
@@ -51,9 +51,9 @@
 			</div>
 		</div>
 	</div>
-	<div class="row" >
+	<div class="row pullTop" >
 	  	<div class="col-sm-offset-1 col-md-offset-1 col-xs-10 col-sm-10 col-md-10" >
-	  		<h6  ng-if="scan_data.files.length"> &nbsp;&nbsp;&nbsp;&nbsp;{{ 'analyse_view.Scanning_file' | translate}} : <b title="{{file.path}}" ng-repeat="file in scan_data.files track by $index"><span ng-if="$last">{{file.path | characters: 50}}</span></b></h6>
+	  		<h6  ng-if="scan_data.files.length"> &nbsp;&nbsp;&nbsp;&nbsp;{{ 'analyse_view.Scanning_file' | translate}} : <b title="{{file.path}}" ng-repeat="file in scan_data.files track by $index"><span ng-if="$last">{{truncate(file.path,50)}}</span></b></h6>
 		    <uib-progressbar max="max" class="progressBar" value="scan_data.progress"><span class="progressBarPercent"><span ng-if="scan_data.progress > 0 || scan_data.progress === 0">{{scan_data.progress}}%</span></span>
 	    	</uib-progressbar>   
 	  	</div>
@@ -65,11 +65,8 @@
 			{{ 'analyse_view.No_file_scanned_yet' | translate}}
 		</div>
 	</div>-->
-	<div class="row">
-		<div class="col-xs-1 col-sm-1 col-md-1">
-		
-		</div>
-		<div class="col-xs-11 col-sm-11 col-md-11">
+	<div class="row pullBottom">
+		<div class="col-xs-offset-1 col-sm-offset-1 col-md-offset-1 col-xs-11 col-sm-11 col-md-11">
 			<table class="table analyse" >
 				<thead class="analyse">
 				  <tr class="analyse">
