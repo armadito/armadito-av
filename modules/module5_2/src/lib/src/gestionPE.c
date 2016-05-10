@@ -177,7 +177,7 @@ ERROR_CODE PeInit(PPORTABLE_EXECUTABLE Pe, int fd, CHAR* filename){
 
 	/* creation of the ULONG_PTR used to store the file */
 	Pe->BaseAddress = (ULONG_PTR)calloc(Pe->FileSize + 1, sizeof(UCHAR));
-	if (Pe->BaseAddress == 0){
+	if (Pe->BaseAddress == NULL){
 		return E_CALLOC_ERROR;
 	}
 
