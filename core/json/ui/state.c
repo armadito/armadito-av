@@ -108,8 +108,7 @@ static struct json_object *state_json(struct a6o_info *info)
 	struct json_object *j_state, *j_mod_array;
 	struct a6o_module_info **m;
 	time_t timestamp = 0;
-	char * last_update = NULL;
-
+	const char *last_update = NULL;
 
 	j_state = json_object_new_object();
 
