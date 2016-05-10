@@ -1,3 +1,5 @@
+AUTOMAKE_OPTIONS=subdir-objects
+
 modulesdir=$(libdir)/armadito/modules
 modules_LTLIBRARIES=clamav.la
 
