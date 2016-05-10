@@ -662,10 +662,8 @@ int restore_conf_from_registry(struct a6o_conf * conf) {
 	return ret;
 }
 
-int conf_poc_windows( ) {
-
-	char * conf_file_path = "D:\\Novit\\uhuru-av\\liba6o\\conf\\try\\armadito.conf";
-	//char * conf_file_path = "D:\\Novit\\a6o-av\\liba6o\\conf\\a6o.conf";
+int conf_poc_windows(char * conf_file_path ) {
+	
 	struct a6o_conf * conf = NULL;
 	a6o_error * error = NULL;
 	int ret = 0;

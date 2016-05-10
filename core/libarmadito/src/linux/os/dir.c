@@ -41,23 +41,25 @@ static enum os_file_flag dirent_flags(struct dirent *entry)
 	return FILE_FLAG_IS_UNKNOWN;
 }
 
-void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data)
+int os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data)
 {
 	DIR *d;
+	int ret = 0;
 
 	d = opendir(path);
 	if (d == NULL) {
 		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "error opening directory %s (%s)", path, strerror(errno));
 
 		// Call to scan_entry()
-		(*dirent_cb)(path, FILE_FLAG_IS_ERROR, errno, data);
+		 ret = (*dirent_cb)(path, FILE_FLAG_IS_ERROR, errno, data);
 
 #if 0
 		if (errno != EACCES && errno != ENOENT && errno != ENOTDIR)
 			ret = 1;
 #endif
 
-		goto cleanup;
+		// goto cleanup;
+		return ret;
 	}
 
 	while(1) {
@@ -77,30 +79,38 @@ void os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data
 			a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "error reading directory entry in directory %s (error %s)", path, strerror(saved_errno));
 
 			// Call to scan_entry()
-			(*dirent_cb)(path, FILE_FLAG_IS_ERROR, saved_errno, data);
-
-			goto cleanup;
+			ret = (*dirent_cb)(path, FILE_FLAG_IS_ERROR, saved_errno, data);
+			break;
 		}
 
 		if (entry->d_type == DT_DIR && (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")))
 			continue;
 
-		if (asprintf(&entry_path, "%s/%s", path, entry->d_name) == -1)
-			goto cleanup;
+		if (asprintf(&entry_path, "%s/%s", path, entry->d_name) == -1){
+			ret = -1;
+			break;
+		}
 
-		if (entry->d_type == DT_DIR && recurse)
-			os_dir_map(entry_path, recurse, dirent_cb, data);
+		if (entry->d_type == DT_DIR && recurse) {
+		      ret = os_dir_map(entry_path, recurse, dirent_cb, data);
+		      if (ret != 0) {
+			free(entry_path);
+			break;
+		      }
+		}
 
 		// Call to scan_entry()
 		real_entry_path = realpath(entry_path, NULL);
-		(*dirent_cb)(real_entry_path, dirent_flags(entry), 0, data);
+		ret = (*dirent_cb)(real_entry_path, dirent_flags(entry), 0, data);
 
 		free(entry_path);
 		free(real_entry_path);
 	}
 
-cleanup:
-	closedir(d);
+        if (closedir(d) < 0)
+        	a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "error closing directory %s (%s)", path, strerror(errno));
+
+        return ret;
 }
 
 /*

@@ -20,9 +20,10 @@ static const char *flag_str(enum os_file_flag flag)
 	return "arghhh";
 }
 
-static void test_dirent_cb(const char *full_path, enum os_file_flag flags, int entry_errno, void *data)
+static int test_dirent_cb(const char *full_path, enum os_file_flag flags, int entry_errno, void *data)
 {
 	printf("path: %s flags: %s errno: %d (%s)\n", full_path, flag_str(flags), entry_errno, strerror(entry_errno));
+	return 0;
 }
 
 int main(int argc, char **argv)

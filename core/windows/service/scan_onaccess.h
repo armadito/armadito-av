@@ -17,8 +17,8 @@
 
 #define SCANNER_REPLY_MESSAGE_SIZE  sizeof(FILTER_REPLY_HEADER) + sizeof(SCAN_RESULT)
 
-typedef enum uhuru_file_status  SCAN_RESULT;
-typedef enum uhuru_file_status*  PSCAN_RESULT;
+typedef enum a6o_file_status  SCAN_RESULT;
+typedef enum a6o_file_status*  PSCAN_RESULT;
 
 typedef struct _COMMUNICATION_PORT_CONTEXT {
 	
