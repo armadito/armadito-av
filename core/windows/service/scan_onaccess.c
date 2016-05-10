@@ -1,8 +1,9 @@
 #include "scan_onaccess.h"
 #include "log.h"
+#include <../src/armaditop.h> //core/libarmadito/src/armaditop.h
+#include <../src/windows/builtin-modules/onaccess_windows.h>
 
-
-int toggle_onaccess_state( PGLOBAL_SCAN_CONTEXT Context ) {
+int toggle_onaccess_state_deprecated( PGLOBAL_SCAN_CONTEXT Context ) {
 	
 	int ret = 0, onaccess_enable = 0;
 	struct a6o_conf * conf = NULL;
@@ -62,6 +63,31 @@ int toggle_onaccess_state( PGLOBAL_SCAN_CONTEXT Context ) {
 
 	}
 	
+	return ret;
+}
+
+int toggle_onaccess_state(PGLOBAL_SCAN_CONTEXT Context) {
+
+	int ret = 0;
+	struct a6o_module * onaccess_mod = NULL;
+	struct onaccess_data * data = NULL;
+
+	if (Context == NULL || Context->onAccessCtx == NULL) {
+		return -1;
+	}
+
+	// set on-access state flag
+	onaccess_mod = a6o_get_module_by_name(Context->armadito,"on-access");
+	if (onaccess_mod == NULL) {
+		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: Can't get on-access module\n");
+		return -1;
+	}
+
+	data = onaccess_mod->data;
+	//printf("[+] Debug :: toggle_onaccess_state :: state_flag (old) = %d\n",data->state_flag);
+	data->state_flag = (data->state_flag == 1) ? 0 : 1;
+	//printf("[+] Debug :: toggle_onaccess_state :: state_flag (new) = %d\n",data->state_flag);
+
 	return ret;
 }
 
@@ -144,8 +170,7 @@ HRESULT UserScanWorker( _In_  PGLOBAL_SCAN_CONTEXT Context )
 
 	//printf("\n[i] In thread worker routine...:: Thread ID : %d :: Context :: %d :: Finalize = %d\n",ThreadId, Context, Context->Finalized);
 	
-	a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_DEBUG, " [i] In thread worker routine...:: Thread ID : %d :: Finalize = %d\n",ThreadId, Context->onAccessCtx->Finalized);
-	uhLog("\n[i] In thread worker routine...:: Thread ID : %d :: Finalize = %d\n",ThreadId, Context->onAccessCtx->Finalized);
+	a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_DEBUG, " [i] In thread worker routine...:: Thread ID : %d :: Finalize = %d\n",ThreadId, Context->onAccessCtx->Finalized);	
 	
 	for (i = 0; i < USER_SCAN_THREAD_COUNT; i++) {
 
@@ -205,8 +230,7 @@ HRESULT UserScanWorker( _In_  PGLOBAL_SCAN_CONTEXT Context )
                 
             } else if (hres == HRESULT_FROM_WIN32(ERROR_ABANDONED_WAIT_0)) {
 				
-				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " UhuruSvc!UserScanWorker :: Completion port closed unexpectedly.\n");
-				uhLog("[-] Error :: UserScanWorker :: Completion port was closed.\n");
+				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " UhuruSvc!UserScanWorker :: Completion port closed unexpectedly.\n");				
                 hres = S_OK;
             }
 
@@ -235,26 +259,23 @@ HRESULT UserScanWorker( _In_  PGLOBAL_SCAN_CONTEXT Context )
 			report.status = ARMADITO_CLEAN;
 
 			if (msDosFilename == NULL) {
-				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: [%d] :: ConvertDeviceNameToMsDosName failed :: \n",ThreadId);
-				uhLog("[-] Error :: UserScanWorker :: [%d] :: ConvertDeviceNameToMsDosName failed :: \n",ThreadId);
+				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: [%d] :: ConvertDeviceNameToMsDosName failed :: \n",ThreadId);				
 				scan_result = ARMADITO_EINVAL;
 			}
 			// fake scan example			
-			else if (strstr(msDosFilename,"UH_MALWARE") != NULL) {				
+			/*else if (strstr(msDosFilename,"UH_MALWARE") != NULL) {				
 				scan_result = ARMADITO_MALWARE;
-			}
-			else if (strstr(msDosFilename,"ARMADITO.TXT") != NULL) {  // Do not scan the log file.
+			}*/
+			else if (strstr(msDosFilename,"ARMADITO.TXT") != NULL) {  // Do not scan the log file. (debug only)
 				scan_result = ARMADITO_WHITE_LISTED;
 			}
-			/*else if (strstr(msDosFilename,"UH_EICAR") != NULL) {  // Do not scan the log file.
-				//printf("[+] Debug :: UserScanWorker :: [%d] :: a6o_scan :: [%s] \n",ThreadId,msDosFilename);				
-				scan_result = a6o_scan_simple(a6o, msDosFilename, &report);				
-			}*/
 			else {
 
 				// launch a simple file scan
 				//printf("[+] Debug :: UserScanWorker :: [%d] :: a6o_scan :: [%s] \n",ThreadId,msDosFilename);
-				scan_result = a6o_scan_simple(Context->armadito, msDosFilename, &report);				
+				scan_result = a6o_scan_simple(Context->armadito, msDosFilename, &report);
+				a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "[+] Debug :: UserScanWorker :: [%d] :: %s :: %s\n", ThreadId, msDosFilename, ScanResultToStr(scan_result));
+				printf("[+] Debug :: UserScanWorker :: [%d] :: %s :: %s\n", ThreadId, msDosFilename, ScanResultToStr(scan_result));
 
 			}
 
@@ -266,9 +287,8 @@ HRESULT UserScanWorker( _In_  PGLOBAL_SCAN_CONTEXT Context )
 			// Send a reply message to the driver.
 			hres = FilterReplyMessage(Context->onAccessCtx->ConnectionPort,&reply.ReplyHeader,SCANNER_REPLY_MESSAGE_SIZE);			
 
-			if(FAILED(hres)){
-				//uhLog("[-] Error :: UserScanWorker :: Thread %d :: FilterReplyMessage failed :: hres = 0x%x.\n",ThreadId, hres);
-				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: [%d] :: FilterReplyMessage failed :: hres = 0x%x.\n",ThreadId, hres);
+			if(FAILED(hres)){				
+				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_WARNING, " UserScanWorker :: [%d] :: FilterReplyMessage failed :: hres = 0x%x.\n",ThreadId, hres);
 			}
 			else {
 				if (scan_result == ARMADITO_MALWARE) {
@@ -281,7 +301,7 @@ HRESULT UserScanWorker( _In_  PGLOBAL_SCAN_CONTEXT Context )
 				}
 					
 				
-				uhLog("[+] Debug :: UserScanWorker :: [%d] :: %s :: %s\n",ThreadId,msDosFilename,ScanResultToStr(scan_result));
+				//a6oLogFile("[+] Debug :: UserScanWorker :: [%d] :: %s :: %s\n",ThreadId,msDosFilename,ScanResultToStr(scan_result));
 			}
 			
 			if (msDosFilename != NULL) {
@@ -295,7 +315,7 @@ HRESULT UserScanWorker( _In_  PGLOBAL_SCAN_CONTEXT Context )
 
 		// If the finalized flag is set from the main thread.		
 		if (Context->onAccessCtx->Finalized == 1) {			
-			uhLog("\n[i] Debug  :: UserScanWorker :: Finalized flag set in the main thread !\n");
+			printf("\n[+] Debug  :: UserScanWorker :: Finalized flag set in the main thread !\n");
             break;
         }
 		
@@ -307,14 +327,12 @@ HRESULT UserScanWorker( _In_  PGLOBAL_SCAN_CONTEXT Context )
 
         if (hres == HRESULT_FROM_WIN32(ERROR_OPERATION_ABORTED)) {
             			
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " UhuruSvc!UserScanWorker :: FilterGetMessage aborted unexpectedly");
-            uhLog("[-] Warning :: UserScanWorker :: FilterGetMessage aborted.\n");
+			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " UhuruSvc!UserScanWorker :: FilterGetMessage aborted unexpectedly");            
             break;
             
         } else if (hres != HRESULT_FROM_WIN32( ERROR_IO_PENDING )) {
 			
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: [%d] :: FilterGetMessage failed :: hres = 0x%x.\n",ThreadId, hres);
-			uhLog("[-] Warning :: UserScanWorker :: Thread %d :: FilterGetMessage failed :: hres = 0x%x.\n",ThreadId, hres);                       
+			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_WARNING, " UhuruSvc!UserScanWorker :: [%d] :: FilterGetMessage failed :: hres = 0x%x.\n",ThreadId, hres);			           
             break;
         }
 		
@@ -337,7 +355,7 @@ HRESULT UserScanWorker( _In_  PGLOBAL_SCAN_CONTEXT Context )
         HeapFree(GetProcessHeap(), 0, message);
     }
 
-	uhLog("\n[i] Debug  :: UserScanWorker :: Thread id %d exiting\n",ThreadId);
+	printf("\n[i] Debug  :: UserScanWorker :: Thread id %d exiting\n",ThreadId);
 
 	// Re enable FS redirection for this thread.
 	if (Wow64RevertWow64FsRedirection(OldValue) == FALSE ){
@@ -414,7 +432,7 @@ HRESULT UserScanInit(_Inout_  PGLOBAL_SCAN_CONTEXT Context) {
 										 &Context->onAccessCtx->ConnectionPort);
 
 		if (FAILED(hRes)) {
-			uhLog("[-] Error :: FilterConnectCommunicationPort() failed :: errcode = 0x%x\n",hRes);
+			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: FilterConnectCommunicationPort() failed :: errcode = 0x%x\n",hRes);
 			__leave;
 		}
 		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_INFO, " Service connected to the driver communication port\n");
@@ -479,6 +497,9 @@ HRESULT UserScanInit(_Inout_  PGLOBAL_SCAN_CONTEXT Context) {
 			}
 		}
 
+		// set on-access state flag to enable 
+		toggle_onaccess_state(Context);
+
 
 	}
 	__finally{
@@ -541,17 +562,16 @@ HRESULT UserScanFinalize(_In_  PGLOBAL_SCAN_CONTEXT Context) {
 	int i = 0;
 	
 	if (Context->onAccessCtx->ScanThreadCtxes == NULL) {
-		uhLog("[-] Warning :: UserScanFinalize :: NULL Scan Thread Contexts\n");
+		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_WARNING,"[-] Warning :: UserScanFinalize :: NULL Scan Thread Contexts\n");
 		//hres = E_POINTER;
 		return hres;
 	}
 
-	uhLog("[+] Debug :: UserScanFinalize :: Finalizing threads....\n");
+	a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_INFO,"[+] Debug :: UserScanFinalize :: Finalizing threads....\n");
 
 	// Tell all scannig threads that the program is going to exit.	
 	Context->onAccessCtx->Finalized = TRUE;
-	
-	uhLog("[DEBUG1]...\n");
+		
 	for (i = 0; i < USER_SCAN_THREAD_COUNT; i++) {
 		//printf("Thread id : %d\n", Context->ScanThreadCtxes[i].ThreadId);		
 		Context->onAccessCtx->ScanThreadCtxes[i].Aborted = TRUE;			 
@@ -563,26 +583,26 @@ HRESULT UserScanFinalize(_In_  PGLOBAL_SCAN_CONTEXT Context) {
 	// Wait for all scan threads to complete cancellation, so we will able to close the connection port.
 	for (i = 0; i < USER_SCAN_THREAD_COUNT; i++) {
 		if (Context->onAccessCtx->ScanThreadCtxes[i].Handle == INVALID_HANDLE_VALUE || Context->onAccessCtx->ScanThreadCtxes[i].Handle == NULL ) {
-			uhLog("[Error] :: UserScanFinalize :: NULL Thread Handle\n");
+			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[Error] :: UserScanFinalize :: NULL Thread Handle\n");
 		}
 		hScanThreads[i] = Context->onAccessCtx->ScanThreadCtxes[i].Handle;
 	}
 
 	WaitForMultipleObjects(USER_SCAN_THREAD_COUNT,hScanThreads,TRUE,INFINITE );	
 	
-	uhLog("[+] Debug :: UserScanFinalize :: Closing connection port.\n");
+	a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_INFO,"[+] Debug :: UserScanFinalize :: Closing connection port.\n");
 
 
 	// close all scan ports.
 
 	if ( (Context->onAccessCtx->ConnectionPort != INVALID_HANDLE_VALUE && Context->onAccessCtx->ConnectionPort != NULL ) && !CloseHandle(Context->onAccessCtx->ConnectionPort)) {
-		uhLog("[-] Error :: UserScanFinalize :: Closehandle connection port failed !\n");
+		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: UserScanFinalize :: Closehandle connection port failed !\n");
 		hres = HRESULT_FROM_WIN32(GetLastError());		
 	}
 	Context->onAccessCtx->ConnectionPort = NULL;
 
 	if (!CloseHandle(Context->onAccessCtx->Completion)) {
-		uhLog("[-] Error :: UserScanFinalize :: CloseHandle completion port failed !\n");
+		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: UserScanFinalize :: CloseHandle completion port failed !\n");
 		hres = HRESULT_FROM_WIN32(GetLastError());
 	}
 
@@ -592,7 +612,7 @@ HRESULT UserScanFinalize(_In_  PGLOBAL_SCAN_CONTEXT Context) {
 	for (i = 0; i < USER_SCAN_THREAD_COUNT; i++) {
 
 		if (Context->onAccessCtx->ScanThreadCtxes[i].Handle != INVALID_HANDLE_VALUE && Context->onAccessCtx->ScanThreadCtxes[i].Handle != NULL && CloseHandle(Context->onAccessCtx->ScanThreadCtxes[i].Handle) == FALSE ) {
-			uhLog("[-] Error :: UhuruSvc!UserScanFinalize :: CloseHandle failed for thread %d :: GLE=%03d. \n",i,GetLastError());
+			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: UhuruSvc!UserScanFinalize :: CloseHandle failed for thread %d :: GLE=%03d. \n",i,GetLastError());
 			DeleteCriticalSection(&(Context->onAccessCtx->ScanThreadCtxes[i].Lock));
 			Context->onAccessCtx->ScanThreadCtxes[i].Handle = NULL;
 		}
@@ -603,7 +623,8 @@ HRESULT UserScanFinalize(_In_  PGLOBAL_SCAN_CONTEXT Context) {
 	HeapFree(GetProcessHeap(), 0, Context->onAccessCtx->ScanThreadCtxes);
 	Context->onAccessCtx->ScanThreadCtxes = NULL;
 
-
+	// set on-access state flag to disable 
+	toggle_onaccess_state(Context);
 
 	return hres; 
 }
@@ -621,16 +642,14 @@ char * ConvertDeviceNameToMsDosName(LPSTR DeviceFileName) {
 	char * tmp;
 	
 
-	if (DeviceFileName == NULL) {
-		uhLog("[-] Error :: ConvertDeviceNameToMsDosName :: invalid parameter DeviceName\n");
+	if (DeviceFileName == NULL) {		
 		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_WARNING, " [-] Error :: ConvertDeviceNameToMsDosName :: invalid parameter DeviceName\n");
 		return NULL;
 	}
 	
 	// Get the list of the logical drives.
 	len = GetLogicalDriveStringsA(BUFSIZE,deviceDosName);
-	if (len == 0) {
-		uhLog("[-] Error :: ConvertDeviceNameToMsDosName!GetLogicalDriveStrings() failed ::  error code = 0x%03d\n",GetLastError());
+	if (len == 0) {		
 		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_WARNING, "[-] Error :: ConvertDeviceNameToMsDosName!GetLogicalDriveStrings() failed ::  error code = 0x%03d",GetLastError());
 		return NULL;
 	}
@@ -645,14 +664,12 @@ char * ConvertDeviceNameToMsDosName(LPSTR DeviceFileName) {
 		// Get the device letter without the backslash (Ex: C:).
 		memcpy_s(deviceLetter,2,tmp,2);
 		
-		if (!QueryDosDeviceA(deviceLetter, deviceNameQuery, BUFSIZE)) {
-			uhLog("[-] Error :: QueryDosDeviceA() failed ::  error code = 0x%03d\n",GetLastError());
+		if (!QueryDosDeviceA(deviceLetter, deviceNameQuery, BUFSIZE)) {			
 			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_WARNING,"[-] Error :: QueryDosDeviceA() failed ::  error code = 0x%03d\n",GetLastError());
 			return NULL;
 		}
 		//printf("[+] Debug :: DeviceName = %s ==> %s\n",deviceNameQuery,deviceLetter);
-		if (deviceNameQuery == NULL) {
-			uhLog("[-] Error :: ConvertDeviceNameToMsDosName :: QueryDosDeviceA() failed ::  deviceNameQuery is NULL\n",GetLastError());
+		if (deviceNameQuery == NULL) {			
 			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_WARNING,"[-] Error :: ConvertDeviceNameToMsDosName :: QueryDosDeviceA() failed ::  deviceNameQuery is NULL\n",GetLastError());
 		}
 

@@ -5,7 +5,7 @@ modules_LTLIBRARIES=clamav.la
 
 clamav_la_SOURCES=clamav.c os/linux/osdeps.c os/osdeps.h
 
-clamav_la_LDFLAGS= -module -avoid-version
+clamav_la_LDFLAGS= -module -avoid-version -export-symbols "$(srcdir)/clamav.sym"
 clamav_la_CFLAGS= @LIBARMADITO_CFLAGS@
 clamav_la_LIBADD= @LIBARMADITO_LIBS@
 clamav_la_CFLAGS+= @LIBCLAMAV_CFLAGS@

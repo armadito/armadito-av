@@ -10,8 +10,8 @@ white-list-dir = "/boot"; "/dev"; "/etc"; "/proc"; "/run"; "/sys"; "/var"
 # scanned mime types: scan everything
 mime-types="*"
 
-# scan modules: scan with clamav and module5_2
-modules=clamav; module5_2
+# scan modules: scan with clamav, modulePDF and module5_2
+modules=clamav; module5_2; modulePDF
 
 # 1M, must support units
 #max-size = 1048576 

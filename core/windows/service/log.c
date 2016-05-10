@@ -4,7 +4,7 @@
 
 int gfirst_time = 1;
 
-void uhLog(const char *fmt, ... )
+void a6oLogFile(const char *fmt, ... )
 {
 	//static int first_time = 1;
 	FILE * f = NULL;
@@ -28,7 +28,7 @@ void uhLog(const char *fmt, ... )
 	return;
 }
 
-void winEventHandler(enum uhuru_log_domain domain, enum uhuru_log_level log_level, const char *message, void *user_data){
+void winEventHandler(enum a6o_log_domain domain, enum a6o_log_level log_level, const char *message, void *user_data){
 
 	HANDLE hevent = NULL;
 	char ** msg[1];
@@ -39,7 +39,7 @@ void winEventHandler(enum uhuru_log_domain domain, enum uhuru_log_level log_leve
 	WORD eventLogType = 0;
 
 
-	hevent = RegisterEventSourceA(NULL, "UhuruAV" );
+	hevent = RegisterEventSourceA(NULL, "Armadito-av" );
 	if (hevent == NULL) {
 		printf("[-] Error :: SvcReportEvent!RegisterEventSourceA() failed with error :: %d\n", GetLastError( ));
 		return;

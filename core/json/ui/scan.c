@@ -56,6 +56,10 @@ int gettimeofday (struct timeval *tp, void *tz)
 /*
   JSON object fields examples:
 
+  "progress": "70",
+  "malware_count": "22",
+  "suspicious_count": "10",
+  "scanned_count : "40",
   "path": "C://cygwin64//home//malware.exe",
   "scan_status": "malware",
   "scan_action": "alert+quarantine",
@@ -70,6 +74,9 @@ static struct json_object *report_json(struct a6o_report *report)
 	j_report = json_object_new_object();
 
 	json_object_object_add(j_report, "progress", json_object_new_int(report->progress));
+	json_object_object_add(j_report, "malware_count", json_object_new_int(report->malware_count));
+	json_object_object_add(j_report, "suspicious_count", json_object_new_int(report->suspicious_count));
+	json_object_object_add(j_report, "scanned_count", json_object_new_int(report->scanned_count));
 
 	if (report->path != NULL)
 		json_object_object_add(j_report, "path", json_object_new_string(report->path));
@@ -91,6 +98,9 @@ static struct json_object *report_json(struct a6o_report *report)
   "id":123,
   "params": {
   "progress": "70",
+  "malware_count": "22",
+  "suspicious_count": "10",
+  "scanned_count : "40",
   "path": "C://cygwin64//home//malware.exe",
   "scan_status": "malware",
   "scan_action": "alert+quarantine",
@@ -145,7 +155,10 @@ static void scan_callback(struct a6o_report *report, void *callback_data)
 	/* ui exchange using platform specific function */
 	status = json_handler_ui_request(scan_data->ui_ipc_path, req, strlen(req), resp, sizeof(resp));
 	if (status != JSON_OK) {
-		printf("[-] Error :: scan_callback :: fail to send request to GUI = %s\n\n", req);
+		printf("[-] Error :: scan_callback :: fail to send request to GUI");
+		if(req != NULL)
+		   printf("= %s", req);
+		printf("\n\n");
 	}
 
 	scan_data->last_send_time = now;
@@ -196,8 +209,20 @@ void scan_process_cb(struct armadito *armadito, void *request_data)
 
 	a6o_on_demand_run(scan_data->on_demand);
 
-        a6o_on_demand_free(scan_data->on_demand);
+	a6o_on_demand_free(scan_data->on_demand);
 
 	free(scan_data);
 }
+
+enum a6o_json_status scan_cancel_response_cb(struct armadito *armadito, struct json_request *req, struct json_response *resp, void **request_data)
+{
+#ifdef DEBUG
+  a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_DEBUG, "JSON: scan cancel cb called");
+#endif
+
+  a6o_on_demand_cancel(NULL);
+
+  return JSON_OK;
+}
+
 

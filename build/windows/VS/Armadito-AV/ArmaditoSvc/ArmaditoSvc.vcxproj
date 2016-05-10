@@ -39,8 +39,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\core\json;$(SolutionDir)..\..\..\..\deps\json\json-c;$(SolutionDir)..\..\..\..\core\windows;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)..\..\..\..\deps\json\json-c\Debug;$(OutDir);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\core\json;$(SolutionDir)..\..\..\..\deps\json-c\include;$(SolutionDir)..\..\..\..\core\windows;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\..\..\deps\json-c\lib;$(OutDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -65,11 +65,11 @@ xcopy "$(OutDir)ArmaditoSvc.exe" "$(SolutionDir)out\$(Configuration)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
 REM copy the needed DLLs
-xcopy "$(SolutionDir)..\..\..\..\deps\pcre\pcre-7.0-bin\bin\pcre3.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+xcopy "$(SolutionDir)..\..\..\..\deps\pcre\lib\pcre3.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
-xcopy "$(SolutionDir)..\..\..\..\deps\libintl\libintl-0.14.4-bin\bin\libintl3.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+xcopy "$(SolutionDir)..\..\..\..\deps\libintl\lib\libintl3.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
-xcopy "$(SolutionDir)..\..\..\..\deps\libiconv\libiconv2.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+xcopy "$(SolutionDir)..\..\..\..\deps\libiconv\lib\libiconv2.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
 REM copy the configuration files

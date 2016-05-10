@@ -48,6 +48,7 @@ static struct request_dispatch_entry {
 	{ "quarantine", quarantine_response_cb, NULL},
 	{ "conf_set", conf_response_cb, NULL},
 	{ "updatedb", update_response_cb, NULL},
+	{ "scan_cancel", scan_cancel_response_cb, NULL},
 	{ NULL, NULL, NULL},
 };
 
@@ -56,6 +57,7 @@ struct a6o_json_handler {
 	struct armadito *armadito;
 	process_cb_t process;
 	void *request_data;
+	//void *user_data; TODO... for change on-access state.
 };
 
 struct a6o_json_handler *a6o_json_handler_new(struct armadito *armadito)
@@ -72,7 +74,7 @@ struct a6o_json_handler *a6o_json_handler_new(struct armadito *armadito)
 	j->armadito = armadito;
 
 	j->process = NULL;
-	j->request_data = NULL;
+	j->request_data = NULL;	
 
 	return j;
 }

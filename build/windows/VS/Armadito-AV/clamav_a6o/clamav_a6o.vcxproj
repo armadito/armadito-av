@@ -39,8 +39,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\deps\libclamav\clamav-0.98.7\libclamav;$(SolutionDir)..\..\..\..\deps\libclamav\clamdeps\win32\openssl\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)..\..\..\..\deps\libclamav\clamav-0.98.7\win32\Win32\Debug;$(OutDir);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\deps\libclamav\include;$(SolutionDir)..\..\..\..\deps\libopenssl\include\32bit;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\..\..\deps\libclamav\lib\32bit;$(OutDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -68,13 +68,13 @@ if errorlevel 1 goto BuildEventFailed
 
 REM copy the ClamAV DLLs
 REM should we take into accout the $(Configuration) ??? 
-xcopy "$(SolutionDir)..\..\..\..\deps\\libclamav\clamav-0.98.7\win32\Win32\Debug\libclamav.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
+xcopy "$(SolutionDir)..\..\..\..\deps\libclamav\lib\32bit\libclamav.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
 REM copy the openssl DLLs
-xcopy "$(SolutionDir)..\..\..\..\deps\libopenssl\libeay32.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
+xcopy "$(SolutionDir)..\..\..\..\deps\libopenssl\lib\32bit\libeay32.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
-xcopy "$(SolutionDir)..\..\..\..\deps\libopenssl\ssleay32.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
+xcopy "$(SolutionDir)..\..\..\..\deps\libopenssl\lib\32bit\ssleay32.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
 REM Exit properly because the build will not fail 
