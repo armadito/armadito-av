@@ -35,6 +35,7 @@
   "version": "0.0.1",
   "main": "app/index.html",
   "window": {
+    "icon": "app/images/armadito.jpg",
     "title": "Armadito",
     "toolbar": false,
     "frame": true,
