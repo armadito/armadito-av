@@ -18,7 +18,7 @@
  * @param  Pe       a pointer on an empty PORTABLE_EXECUTABLE
  * @param  filename the file to read
  * @return          an ERROR_CODE value between :
- *                     E_FILE_NOT_FOUND, E_FILE_EMPTY, E_CALLOC_ERROR, E_READING_ERROR, E_NOT_MZ, E_NOT_PE, E_BAD_ARCHITECTURE and UH_SUCCESS
+ *                     E_FILE_NOT_FOUND, E_FILE_EMPTY, E_CALLOC_ERROR, E_READING_ERROR, E_NOT_MZ, E_NOT_PE, E_BAD_ARCHITECTURE, E_FSTAT_ERROR and UH_SUCCESS
  */
 ERROR_CODE PeInit(PPORTABLE_EXECUTABLE Pe, int fd, CHAR *filename);
 

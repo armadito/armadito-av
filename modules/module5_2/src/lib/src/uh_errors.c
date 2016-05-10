@@ -32,6 +32,7 @@ const char *error_code_str(ERROR_CODE e)
     M(E_CALLOC_ERROR);
     M(E_FILE_NOT_FOUND);
     M(E_FILE_EMPTY);
+    M(E_FSTAT_ERROR);
     M(E_NOT_MZ);
     M(E_NOT_PE);
     M(E_BAD_ARCHITECTURE);
@@ -120,6 +121,9 @@ CHAR* GetErrorCodeMsg(ERROR_CODE error){
 
 	case E_FILE_EMPTY:
 		return "The file is empty";
+
+	case E_FSTAT_ERROR:
+                return "Fstat error";
 
 	case E_NOT_MZ:
 		return "The file is not a MZ file";
