@@ -113,6 +113,4 @@ Message : "Etiam nisl nibh, porta a."
 
 #include "windowsTypes.h"
 
-QWORD SizeOfFile(int fd);
-
 #endif /* UTILS_H */
