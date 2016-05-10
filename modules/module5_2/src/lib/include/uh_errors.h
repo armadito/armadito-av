@@ -31,6 +31,7 @@ typedef enum _ERROR_CODE{
 	E_CALLOC_ERROR = 205,
 	E_FILE_NOT_FOUND = 206,
 	E_FILE_EMPTY = 207,
+	E_FSTAT_ERROR = 208,
 	/* pe errors :             3xx */
 
 	E_NOT_MZ = 300,

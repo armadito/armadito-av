@@ -27,11 +27,15 @@ BYTE ElfIsAValidOffset(PELF_CONTAINER elfOfFile, QWORD offset){
 ERROR_CODE ElfInit(int fd, CHAR* filename, PELF_CONTAINER elfOfFile){
 	WORD i = 0;
 	DWORD signature = 0;
+	int stat_errno;
 
 	/* computation of the file size */
-	elfOfFile->fileSize = SizeOfFile(fd);
+	elfOfFile->fileSize = os_file_size(fd, &stat_errno);
 	if (elfOfFile->fileSize == 0){
 		return E_FILE_EMPTY;
+	}
+	else if(elfOfFile->fileSize == -1){
+		return E_FSTAT_ERROR;
 	}
 
 	/* creation of the ULONG_PTR used to store the file */

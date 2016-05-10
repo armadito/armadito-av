@@ -158,14 +158,18 @@ BOOLEAN PeIsValidAddress(PPORTABLE_EXECUTABLE Pe, ULONG_PTR address){
 ERROR_CODE PeInit(PPORTABLE_EXECUTABLE Pe, int fd, CHAR* filename){
 	DWORD MagicWord = 0;
 	ULONG_PTR Offset = 0;
+	int stat_errno;
 
 	Pe->ImagesSectionHeader = NULL;
 
 	/* computation of the file size */
-	Pe->FileSize = (DWORD)SizeOfFile(fd);
+	Pe->FileSize = (DWORD)os_file_size(fd, &stat_errno);
 	if (Pe->FileSize == 0){
 		return E_FILE_EMPTY;
 	}
+	else if(Pe->FileSize == -1){
+		return E_FSTAT_ERROR;
+	}	
 
 	if (Pe->FileSize < sizeof(PIMAGE_DOS_HEADER)){
 		return E_INVALID_FILE_SIZE;
@@ -524,7 +528,7 @@ ERROR_CODE PeFileHeaderHasGoodSizeOfOptionalHeader(PPORTABLE_EXECUTABLE Pe){
 * FileAlignment :
 *		The alignment factor (in bytes) that is used to align the raw data of sections in the image file.
 *		The value should be a power of 2 between 512 and 64 K, inclusive. The default is 512. If the SectionAlignment
-*		is less than the architecture’s page size, then FileAlignment must match SectionAlignment.
+*		is less than the architectures page size, then FileAlignment must match SectionAlignment.
 * @param  Pe the PORTABLE_EXECUTABLE representing the file
 * @return    an ERROR_CODE value between : E_INVALID_S_F_ALIGNMENT if the value is incorrect
 *               							UH_SUCCESS if the value is correct
@@ -813,8 +817,8 @@ ERROR_CODE PeHasEntryPoint(PPORTABLE_EXECUTABLE Pe) {
 }
 
 TODO;
-// faire en sorte de prende en compte le image->base pour les ordinaux, afin d'avoir les véritables ordinaux
-// car pour le moment, deux ordinaux peuvent être égaux dans deux eat différents alors que leur base n'est pas la même
+// faire en sorte de prende en compte le image->base pour les ordinaux, afin d'avoir les vÃ©ritables ordinaux
+// car pour le moment, deux ordinaux peuvent Ãªtre Ã©gaux dans deux eat diffÃ©rents alors que leur base n'est pas la mÃªme
 // ce qui fait que deux eat peuvent sembler identiques alors que non
 /**
  * discussion about empty export tables : http://sourceware.org/ml/binutils/2008-08/msg00065.html

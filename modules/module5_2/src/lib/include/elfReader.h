@@ -150,7 +150,8 @@ typedef struct _ELF_CONTAINER{
  *                      E_NOT_ELF          if the file is not an elf file,
  *                      E_BAD_ARCHITECTURE if the file is neither an i386 file nor an amd64 file,
  *                      E_BAD_FORMAT       if the file contains errors,
- *                      E_SUCCESS          if no errors occurs
+ *                      E_SUCCESS          if no errors occurs,
+ *                      E_FSTAT_ERROR      if fstat failed
  */
 ERROR_CODE ElfInit(int fd,  CHAR* filename, PELF_CONTAINER elfOfFile);
 
