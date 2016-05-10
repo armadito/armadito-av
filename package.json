@@ -65,5 +65,9 @@
       "sunos": [
       ]
     }
+  },
+  "scripts": {
+    "_postinstall": "node ./node_modules/platform-dependent-modules/cli.js",
+    "postinstall": "npm run _postinstall"
   }
 }
