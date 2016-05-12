@@ -160,6 +160,8 @@ static void scan_progress(struct a6o_scan *scan, struct a6o_report *report)
 
 	progress = (int)((100.0 * scan->scanned_count) / scan->to_scan_count);
 
+        // a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "Progress = %d = ( 100 * %d / %d ) ", progress, scan->scanned_count, scan->to_scan_count );
+
 	if (progress > 100)
 		progress = 100;
 
@@ -333,4 +335,3 @@ enum a6o_file_status a6o_scan_simple(struct armadito *armadito, const char *path
 
 	return status;
 }
-
