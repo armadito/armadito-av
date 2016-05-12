@@ -20,7 +20,7 @@
 		  </li>
 		  <li class="information2"><h5><i ng-class="state.service ? 'fa fa-check checkIcon' : 'fa fa-exclamation-triangle text-danger'"></i></h5></li>
 		  
-		  <li class="information2"><h5><i ng-class="state.upToDate ? 'fa fa-check checkIcon' : 'fa fa-exclamation-triangle text-danger'"></i>&nbsp;&nbsp;&nbsp;<i ng-click="update_db()" class="fa fa-refresh"></i></li></h5></li>
+		  <li class="information2"><h5><i ng-class="state.upToDate ? 'fa fa-check checkIcon' : 'fa fa-exclamation-triangle text-danger'"></i>&nbsp;&nbsp;&nbsp;<i style="-webkit-app-region: no-drag;" ng-click="update_db()" class="fa fa-refresh"></i></li></h5></li>
 		  <li class="information2"><h5>{{state.last_update}}</h5></li>
 		</ul>
 	  </div>
@@ -40,11 +40,11 @@
 			        <td style="width:40%" class="information"><h7>{{module.name}}</h7></td>
 			        <td style="width:60%"class="information"><h7>{{module.update.date}}</h7></td>
 			        <td style="width:60%"class="information">
-				  <h7 ng-if="module.update.status==='up-to-date'" >{{'information_view.Status_up_to_date' | translate}}</h7>
-				  <h7 ng-if="module.update.status==='critical'" >{{'information_view.Status_critical' | translate}}</h7>
-				  <h7 ng-if="module.update.status==='late'" >{{'information_view.Status_late' | translate}}</h7>
-				  <h7 ng-if="module.update.status==='unavailable'" >{{'information_view.Status_unavailable' | translate}}</h7>
-				</td>
+					  <h7 ng-if="module.update.status==='up-to-date'" >{{'information_view.Status_up_to_date' | translate}}</h7>
+					  <h7 ng-if="module.update.status==='critical'" >{{'information_view.Status_critical' | translate}}</h7>
+					  <h7 ng-if="module.update.status==='late'" >{{'information_view.Status_late' | translate}}</h7>
+					  <h7 ng-if="module.update.status==='unavailable'" >{{'information_view.Status_unavailable' | translate}}</h7>
+					</td>
 			      </tr>
 			    </tbody>
 			</table>

@@ -49,7 +49,7 @@ angular.module('armaditoApp')
 		  var sec = a.getSeconds();
 
 		  return sprintf("%02d %s %d %02d:%02d:%02d", date, month, year, hour, min, sec);
-		}
+		};
 	
 		/*$scope.state.modules = 
 		[{

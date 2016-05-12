@@ -3,24 +3,24 @@
 	<div class="row pullTop">
 		<form class="form-horizontal">
 	        <div class="col-xs-12 col-sm-12 col-md-12 form-group">
-	            <label class="control-label col-xs-3 col-sm-3 col-md-3"><i class="analyseTitle">{{ 'analyse_view.Scan' | translate}} </i></label>
+	            <label class="control-label col-xs-3 col-sm-3 col-md-3"><i class="analyseTitle">{{ 'analyse_view.Scan_title' | translate}} </i></label>
 	            <div class="col-xs-6 col-sm-6 col-md-6">
 	               <div class="btn-group btn-block" uib-dropdown>
 				      <button id="split-button" type="button" class="btn analyseChoice" ng-model="type">{{type | translate}}</button>
-				      <button type="button" class="btn analyseChoice" uib-dropdown-toggle>
+				      <button style="-webkit-app-region: no-drag;" type="button" class="btn analyseChoice" uib-dropdown-toggle>
 				        <span class="fa fa-angle-down fa-lg"></span>
 				      </button>
 				      <ul uib-dropdown-menu role="menu" aria-labelledby="split-button">
-				        <li role="menuitem" ng-model="type"><a href="" ng-click="fullScan()"><i class="fa fa-hdd-o"></i>&nbsp;&nbsp;{{ 'analyse_view.Full_scan' | translate}}</a></li>
-				        <li role="menuitem" ng-model="type"><a href="" ng-click="quickScan()"><i class="fa fa-bolt"></i>&nbsp;&nbsp;{{ 'analyse_view.Quick_scan' | translate}} </a></li>
+				        <li style="-webkit-app-region: no-drag;" role="menuitem" ng-model="type"><a href="" ng-click="fullScan()"><i class="fa fa-hdd-o"></i>&nbsp;&nbsp;{{ 'analyse_view.Full_scan' | translate}}</a></li>
+				        <li style="-webkit-app-region: no-drag;" role="menuitem" ng-model="type"><a href="" ng-click="quickScan()"><i class="fa fa-bolt"></i>&nbsp;&nbsp;{{ 'analyse_view.Quick_scan' | translate}} </a></li>
 				        <li class="divider" ></li>
-				        <li role="menuitem" ng-model="type"><a href="" ng-click="customScan()"><i class="fa fa-plus"></i>&nbsp;&nbsp;{{ 'analyse_view.Custom_scan' | translate}}</a></li>
+				        <li style="-webkit-app-region: no-drag;" role="menuitem" ng-model="type"><a href="" ng-click="customScan()"><i class="fa fa-plus"></i>&nbsp;&nbsp;{{ 'analyse_view.Custom_scan' | translate}}</a></li>
 				      </ul>
 				    </div>
 	            </div>
 	            <div class="col-xs-3 col-sm-3 col-md-3">
-	            	<button type="button" class="btn stopButton" ng-click="CancelScan()" ng-if="scan_data.progress && scan_data.progress < 100" >{{ 'analyse_view.Stop' | translate}}</button>
-	            	<button type="button" class="btn startButton" ng-click="StartScan()" ng-if="!scan_data.progress || scan_data.progress === 100 " >{{ 'analyse_view.Start' | translate}}</button>
+	            	<button style="-webkit-app-region: no-drag;" type="button" class="btn stopButton" ng-click="CancelScan()" ng-if="scan_data.progress && scan_data.progress < 100" >{{ 'analyse_view.Stop' | translate}}</button>
+	            	<button style="-webkit-app-region: no-drag;" type="button" class="btn startButton" ng-click="StartScan()" ng-if="!scan_data.progress || scan_data.progress === 100 " >{{ 'analyse_view.Start' | translate}}</button>
 	            </div>
 	        </div>
 	    </form>
