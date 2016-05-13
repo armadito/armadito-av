@@ -1,4 +1,4 @@
-AC_INIT([uhuru-qt], [1.5.0], [f.dechelle@uhuru-solutions.com])
+AC_INIT([uhuru-qt], [0.9.0], [fdechelle@teclib.com])
 AM_INIT_AUTOMAKE
 
 # debug
