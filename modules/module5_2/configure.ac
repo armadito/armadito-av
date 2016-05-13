@@ -1,4 +1,4 @@
-AC_INIT(armadito-mod-module5-2, [1.5.3], francois@dechelle.net)
+AC_INIT(armadito-mod-module5-2, [0.9.0], fdechelle@teclib.com)
 AM_INIT_AUTOMAKE
 
 # collect arguments
