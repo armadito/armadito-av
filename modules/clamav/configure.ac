@@ -1,4 +1,4 @@
-AC_INIT(armadito-mod-clamav,1.5.3,francois@dechelle.net)
+AC_INIT(armadito-mod-clamav, 0.9.0, fdechelle@teclib.com)
 AM_INIT_AUTOMAKE
 
 # collect arguments

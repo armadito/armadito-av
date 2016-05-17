@@ -169,14 +169,14 @@ int uninstall( ) {
 int start( ) {
 
 	int ret = 0;
-	system("sc query start ArmaditoGuard");
+	system("sc start ArmaditoGuard");
 	return ret;
 }
 
 int stop( ) {
 
 	int ret = 0;
-	system("sc query stop ArmaditoGuard");
+	system("sc stop ArmaditoGuard");
 	return ret;
 }
 
