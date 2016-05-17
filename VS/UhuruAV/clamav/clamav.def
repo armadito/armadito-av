@@ -1,4 +1,0 @@
-LIBRARY clamav.dll
-
-EXPORTS
-module
