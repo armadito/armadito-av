@@ -26,6 +26,7 @@
   },
   "analyse_view" : {
     "Scan" : "Scan",
+    "Scan_title" : "Analyse",
     "Start" : "Start",
     "Scanning_file" : "Scanning file",
     "Stop" : "Cancel",

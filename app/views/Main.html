@@ -2,8 +2,8 @@
   <div class="row">
     <span class="topcorner">
       <div class="btn-group topcorner" role="group" aria-label="...">
-         <button type="button" class="btn btn-default reduceButton" title="{{'main_view.Minimize' | translate }}"ng-click="reduceApp()"><span class="reduceLetter">—</span></button>
-        <button type="button" class="btn btn-default closeButton" title="{{ 'main_view.Close' | translate }}" ng-click="closeApp()"><span class="closeLetter">x</span></button>
+         <button style="-webkit-app-region: no-drag;" type="button" class="btn btn-default reduceButton" title="{{'main_view.Minimize' | translate }}"ng-click="reduceApp()"><span class="reduceLetter">—</span></button>
+        <button style="-webkit-app-region: no-drag;" type="button" class="btn btn-default closeButton" title="{{ 'main_view.Close' | translate }}" ng-click="closeApp()"><span class="closeLetter">x</span></button>
       </div>
     </span>
   </div>
@@ -18,13 +18,14 @@
     <a class="navbar-brand" href="#"><img alt="Tatoo" src="images/armadito.png" class="img-responsive"></a>
     <div class="navbar-collapse collapse">
       <ul class="nav navbar-nav navbar-left">
-          <li><h4 class="status"><b >{{'main_view.Your_computer_is_protected' | translate}}</b></h4></li>
+	  <li><img alt="Tatoo" src="images/navbarOk_.png" class="img-responsive"></li>
+          <li><h4 class="status">{{'main_view.Your_computer_is_protected' | translate}}</h4></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
 	<!-- ui-sref="Main.Parameters" -->
-        <li ><a ui-sref="" href=""><i class="fa fa-cog fa-lg" ng-class="{'buttonParameters' : buttonParameters}"></i>&nbsp;<span ng-class="{'buttonParameters' : buttonParameters}">{{'main_view.Parameters' | translate}}</span></a></li>
-        <li><a href=""><i class="fa fa-bar-chart fa-lg"></i>&nbsp;{{'main_view.Statistics' | translate}}</a></li>
-        <li>
+        <li style="-webkit-app-region: no-drag;" ><a ui-sref="" href=""><i class="fa fa-cog fa-lg" ng-class="{'buttonParameters' : buttonParameters}"></i>&nbsp;<span ng-class="{'buttonParameters' : buttonParameters}">{{'main_view.Parameters' | translate}}</span></a></li>
+        <li style="-webkit-app-region: no-drag;" ><a href=""><i class="fa fa-bar-chart fa-lg"></i>&nbsp;{{'main_view.Statistics' | translate}}</a></li>
+        <li style="-webkit-app-region: no-drag;">
           <a href="">
             <span class="fa-stack" title="{{ 'main_view.About' | translate }}">
               <i class="fa fa-circle fa-stack-2x circleInterrogation"></i>
@@ -38,7 +39,7 @@
   <div class="row">
   	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 ">
   	    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2 ahuru-tab-menu">
-  	      <div class="list-group" ng-repeat="item in buttons">
+  	      <div class="list-group" ng-repeat="item in buttons" style="-webkit-app-region: no-drag;">
   	        <a  ui-sref="{{item.button.view}}" style="height: 145px;"
                 ng-click="activeButton(item.button)" 
                 class="list-group-item backgroundColumn text-center {{item.button.backgroundColor}}" 
