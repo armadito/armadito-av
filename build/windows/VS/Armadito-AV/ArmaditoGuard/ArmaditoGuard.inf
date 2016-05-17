@@ -11,7 +11,7 @@ Class="AntiVirus"
 ClassGuid={b1d1a169-c54f-4379-81db-bee7d88d7454}
 Provider=%ManufacturerName%
 CatalogFile=ArmaditoGuard.cat
-DriverVer= 19/04/2016,1.0.0.0; TODO: set DriverVer in stampinf property pages
+DriverVer= 04/19/2016,1.0.0.0; TODO: set DriverVer in stampinf property pages
 
 [DestinationDirs]
 DefaultDestDir = 12 ; %windir%\system32\drivers
