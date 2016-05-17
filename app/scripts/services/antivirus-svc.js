@@ -109,27 +109,12 @@ angular.module('armadito.svc', [])
 		ArmaditoIPC.write2_av(buffer);
 		ArmaditoIPC.disconnect2_av();
 	};
-
-	/*
-	factory.receiveScanInfo = function(callback){
-
-		var scan_server;
-		// Set server ipc path.
-		this.setScanServerPath();
-
-		//this.cleanALL();
-
-		console.log("[+] Debug :: launchScan :: Launching server to receive data from av :", scan_server_ipc_path);
-		scan_server = ArmaditoIPC.createUIServer(scan_server_ipc_path, callback);
-
-		return scan_server;
-	}; */
+		
 
 	// Request antivirus status.
 	factory.requestAVstatus = function(callback){
 		
-		console.log("[+] Debug :: requestAVstatus ::");
-		//var request = '{ "av_request":"state", "id":123, "params": {}}';
+		console.log("[+] Debug :: requestAVstatus ::");		
 		var request = { "av_request":"state", "id":123, "params": {}};
 		var buffer = new Buffer( JSON.stringify(request), 'ascii' );
 		
@@ -142,7 +127,7 @@ angular.module('armadito.svc', [])
 		
 		ArmaditoIPC.write2_av(buffer);
 					
-		ArmaditoIPC.disconnect2_av();
+		//ArmaditoIPC.disconnect2_av();
 		
 		// send data
 		//var response = ArmaditoIPC.sendAndReceive(clientPath, request);
@@ -168,7 +153,7 @@ angular.module('armadito.svc', [])
 		
 		ArmaditoIPC.write2_av(buffer);
 		
-		ArmaditoIPC.disconnect2_av();		
+		//ArmaditoIPC.disconnect2_av();
 		
 		// send data
 		//var response = ArmaditoIPC.sendAndReceive(clientPath, request);

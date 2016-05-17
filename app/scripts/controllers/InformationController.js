@@ -79,10 +79,13 @@ angular.module('armaditoApp')
 			var jobj_modules;
 			var date = new Date().toISOString();
 			
-			console.log('------- current date = ',date);
+			//console.log('------- current date = ',date);
+
 			
 			try {
 				json_object = JSON.parse(data);
+
+				console.log("[+] Debug :: data from av ::",json_object);
 				
 				if(json_object.info.antivirus.service == 'on'){
 					$scope.state.service = true;					
@@ -113,20 +116,20 @@ angular.module('armaditoApp')
 				$scope.state.last_update = $scope.timeConverter(json_object.info.update.timestamp);
 				
 
-				console.log('[+] Debug :: threatDataFromAv :: av last-update :: ',json_object.info.update['last-update']);
+				//console.log('[+] Debug :: threatDataFromAv :: av last-update :: ',json_object.info.update['last-update']);
 				
 				// modules infos.
-				console.log('------- module tab obj = ',json_object.info.modules);
-				console.log('[+] Debug :: threatDataFromAv :: Number of modules :: ',json_object.info.modules.length);
+				//console.log('------- module tab obj = ',json_object.info.modules);
+				//console.log('[+] Debug :: threatDataFromAv :: Number of modules :: ',json_object.info.modules.length);
 
 				$scope.state.modules = json_object.info.modules;				
 				for (var i = 0; i< $scope.state.modules.length ; i++){
 
 					$scope.state.modules[i].update['date'] = $scope.timeConverter($scope.state.modules[i].update['timestamp']);
 					
-					console.log('[+] Debug :: threatDataFromAv :: module name :: ',$scope.state.modules[i].name);
+					//console.log('[+] Debug :: threatDataFromAv :: module name :: ',$scope.state.modules[i].name);
 					console.log('[+] Debug :: threatDataFromAv :: module timestamp :: ',$scope.state.modules[i].update['timestamp']);	
-					console.log('[+] Debug :: threatDataFromAv :: module date :: ',$scope.state.modules[i].update['date']);				
+					//console.log('[+] Debug :: threatDataFromAv :: module date :: ',$scope.state.modules[i].update['date']);				
 				}
 
 			}
@@ -137,8 +140,7 @@ angular.module('armaditoApp')
 			
 			//console.log('[+] Debug :: In callback refresh object with data :: ' + data);
 						
-			//$scope.state.service = 3;
-			console.log("[+]");
+			//$scope.state.service = 3;			
 			$scope.$apply();
 			return;
 		}

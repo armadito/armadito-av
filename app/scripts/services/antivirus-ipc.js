@@ -39,8 +39,10 @@ angular.module('armadito.ipc', [])
 		
 		client_sock.on('data',function(data){
 			//console.log("dans la fonction connect_AV : "+ data);			
-			
-			return callback(data);
+			callback(data);
+			//close socket
+			client_sock.end();
+			return 1;
 		});
 		
 		client_sock.on('close',function(){
@@ -56,8 +58,8 @@ angular.module('armadito.ipc', [])
 	factory.write2_av = function(data2send){
 		
 		client_sock.write(data2send, 'ascii',function(){
-			console.log("[+] Debug :: write2_av :: data send to av ::" + client_sock);
-		});		
+			console.log("[+] Debug :: write2_av :: data sent to av");
+		});
 		return;
 	};
 	
