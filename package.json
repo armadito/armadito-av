@@ -38,7 +38,7 @@
     "icon": "app/images/armadito.jpg",
     "title": "Armadito",
     "toolbar": false,
-    "frame": true,
+    "frame": false,
     "width": 900,
     "height": 560,
     "position": "center",
