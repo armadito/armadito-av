@@ -1,8 +1,9 @@
 Compilation on Windows
 ====================
 
-On windows, Armadito AV sources are compiled using Visual Studio projects.
-
+On windows, you can compile Armadito AV sources with Visual Studio.
+This has been tested in Visual Studio 2013. 
+You might have to apply some modifications regarding to which Visual Studio's version you use. 
 
 Prepare compilation
 *******************
