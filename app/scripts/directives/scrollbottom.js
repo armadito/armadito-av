@@ -2,18 +2,18 @@
 
 /**
  * @ngdoc directive
- * @name armaditoApp.directive:schrollBottom
+ * @name armaditoApp.directive:scrollBottom
  * @description
  * # schrollBottom
  */
 angular.module('armaditoApp')
-  .directive('schrollBottom', function () {
+  .directive('scrollBottom', function () {
      return {
 	    scope: {
-	      schrollBottom: "="
+	      scrollBottom: "="
 	    },
 	    link: function (scope, element) {
-	      scope.$watchCollection('schrollBottom', function (newValue) {
+	      scope.$watchCollection('scrollBottom', function (newValue) {
 	        if (newValue)
 	        {
 	          $(element).scrollTop($(element)[0].scrollHeight);
