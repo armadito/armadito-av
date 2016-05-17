@@ -391,7 +391,7 @@ HRESULT UserScanInit(_Inout_  PGLOBAL_SCAN_CONTEXT Context) {
 		//ZeroMemory(Context->onAccessCtx, sizeof(ONACCESS_SCAN_CONTEXT));
 
 		// Initialize scan thread contexts. (containing threadID, handle to the thread, 
-		scanThreadCtxes = HeapAlloc(GetProcessHeap(), 0, sizeof(ONACCESS_THREAD_CONTEXT) * USER_SCAN_THREAD_COUNT);
+		scanThreadCtxes = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(ONACCESS_THREAD_CONTEXT) * USER_SCAN_THREAD_COUNT);
 		if (NULL == scanThreadCtxes) {    
 			hRes = MAKE_HRESULT(SEVERITY_ERROR, 0, E_OUTOFMEMORY);
 			__leave;

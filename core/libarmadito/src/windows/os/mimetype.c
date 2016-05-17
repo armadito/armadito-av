@@ -31,13 +31,13 @@ const char *os_mime_type_guess_fd(int fd)
 	LPCWSTR defaultMime = L"*";
 
 	if (fd < 0){
-		printf("Invalid file descriptor %s",  fd);
+		printf("Invalid file descriptor %d",  fd);
 		return NULL;
 	}
 
 	if ((n_read = _read(fd, buf, BUF_SIZE)) < 0) {
 		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "Cannot read %d bytes from file descriptor %s", BUF_SIZE, fd);
-		printf("Cannot read %d bytes from file descriptor %s", BUF_SIZE, fd);
+		printf("Cannot read %d bytes from file descriptor %d", BUF_SIZE, fd);
 		return NULL;
 	}
 
@@ -52,7 +52,7 @@ const char *os_mime_type_guess_fd(int fd)
 	mime_type[MIME_SIZE] = '\0';
 	wcstombs_s(&i, mime_type, MIME_SIZE, (wchar_t*)mt, MIME_SIZE);
 
-	printf("mime_type = %s \n", mime_type);
+	// printf("mime_type = %s \n", mime_type);
 
 	return mime_type;
 }
