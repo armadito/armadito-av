@@ -111,10 +111,10 @@ int os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data)
 	fh = FindFirstFile(sPath, &fdata);
 	if (fh == INVALID_HANDLE_VALUE) {
 		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "Warning :: os_dir_map() :: FindFirstFileA() failed ::  (%s) :: [%s]", os_strerror(errno), sPath);
-		return 1;
+		//return 1;
 	}
 
-	while (FindNextFile(fh, &tmp) != FALSE) {
+	while (fh != INVALID_HANDLE_VALUE && FindNextFile(fh, &tmp) != FALSE) {
 		// exclude paths "." and ".."
 		if (!strcmp(tmp.cFileName, ".") || !strcmp(tmp.cFileName, ".."))
 			continue;
@@ -124,7 +124,7 @@ int os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data)
 
 		entryPath = (char*)calloc(size + 1, sizeof(char));
 		entryPath[size] = '\0';
-		sprintf_s(entryPath, size, "%s\\%s", path, tmp.cFileName);
+		sprintf_s(entryPath, size, "%s\\%s", path, tmp.cFileName);		
 
 		// If it is a directory and we do recursive scan
 		if ((GetFileAttributesA(entryPath) & FILE_ATTRIBUTE_DIRECTORY) && recurse >= 1) {
