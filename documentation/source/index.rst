@@ -20,7 +20,7 @@ Armadito Antivirus is an open-source antivirus that protects your computers and 
    compilation/index.rst
    installation/index.rst
    configuration/index.rst
-   faq/index.rst
    contribute/index.rst
-   screenshots/index.rst
+..   faq/index.rst
+..   screenshots/index.rst
    
