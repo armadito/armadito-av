@@ -52,7 +52,7 @@ const char *os_mime_type_guess_fd(int fd)
 	mime_type[MIME_SIZE] = '\0';
 	wcstombs_s(&i, mime_type, MIME_SIZE, (wchar_t*)mt, MIME_SIZE);
 
-	printf("mime_type = %s \n", mime_type);
+	// printf("mime_type = %s \n", mime_type);
 
 	return mime_type;
 }
