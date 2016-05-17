@@ -1,4 +1,4 @@
-AC_INIT(armadito-core,1.6.0,fdechelle@teclib.com)
+AC_INIT(armadito-core,0.9.0,fdechelle@teclib.com)
 AM_INIT_AUTOMAKE([subdir-objects])
 
 # collect arguments

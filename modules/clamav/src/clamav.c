@@ -184,42 +184,29 @@ static enum a6o_mod_status clamav_close(struct a6o_module *module)
 
 /* under re-implementation */
 
-int get_late_days(time_t date) {
-
-	int late_days = 0;
+int get_late_days(time_t date)
+{
+	int late_days;
 	time_t now = 0;
-	double diffsec = 0;
+	double diffsec;
 
 	time(&now);
-	//printf("[+] Debug :: get_late_days :: Time in seconds since UTC 1/1/70:\t%ld\n", now);
-
 	diffsec = difftime(now,date);
-	//printf("[+] Debug :: get_late_days :: diffsec = %6.0f seconds\n",diffsec);
-
 	late_days = (diffsec / (double)86400);
-	//printf("[+] Debug :: get_late_days :: late_days = %d days\n",late_days);
-
 
 	return late_days;
 }
 
 static enum a6o_update_status clamav_update_status_eval(time_t timestamp, int late_days, int critical_days)
-{	
-
-	int late = 0;
-	int res = 0;
-	enum a6o_update_status ret = ARMADITO_UPDATE_OK;
-
+{
+	int late;
 
 	late = get_late_days(timestamp);
-	printf("[+] Debug :: clamav_update_status_eval :: late days = %d\n", late);
 
-	if (late >= critical_days) {
+	if (late >= critical_days)
 		return ARMADITO_UPDATE_CRITICAL;
-	}
-	else if (late >= late_days) {
+	else if (late >= late_days)
 		return ARMADITO_UPDATE_LATE;
-	}
 
 	return ARMADITO_UPDATE_OK;
 }
@@ -230,7 +217,7 @@ static int get_month(const char *month){
 	const char *ret;
 
 	if ((ret = strstr(months, month)) == NULL)
-	return -1;
+	  return -1;
 
 	return (ret - months) / 3;
 }
@@ -241,8 +228,6 @@ static int get_year(int year){
 	int ret = year - 1900;
 
 	return (ret < 70 ? 70 : ret);
-
-	return ret;
 }
 
 
@@ -252,7 +237,7 @@ time_t get_timestamp(char * cvd_time) {
 	struct tm timeptr = {0};
 	char s_month[4] = {0}, s_timezone[6] = {0};
 	char tmpbuf[128] = {'\0'}, timebuf[26] = {0};
-	int year=0;
+	int year = 0;
 
 #ifdef _WIN32
 	sscanf_s(cvd_time, "%d %3s %d %2d-%2d %5s",&timeptr.tm_mday, s_month,sizeof(s_month), &year, &timeptr.tm_hour, &timeptr.tm_min, s_timezone,sizeof(s_timezone));
@@ -265,55 +250,46 @@ time_t get_timestamp(char * cvd_time) {
 	timeptr.tm_sec = 0;
 	timeptr.tm_year = get_year(year);
 
-
 	cvd_timestamp = mktime(&timeptr);
 	if (cvd_timestamp == (time_t)-1) {
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: get_timestamp :: mktime failed :: bad time format!\n");
+		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR,"get_timestamp :: mktime failed :: bad time format!\n");
 		return cvd_timestamp;
 	}
 
-
 	return cvd_timestamp;
 }
-
-
-
 
 static enum a6o_update_status clamav_info(struct a6o_module *module, struct a6o_module_info *info)
 {
 	enum a6o_update_status status = ARMADITO_UPDATE_OK;
 	struct clamav_data *cl_data = (struct clamav_data *)module->data;
-	char * dbnames[] = {"daily.cld","main.cvd","bytecode.cld"};
-	int i = 0, n = 0;
-	char * dbpath = NULL;
-	char * fullpath = NULL;
-	char * update_date = NULL;
+	char *dbnames[] = {"daily.cld","main.cvd","bytecode.cld"};
+	int i, n;
+	char *fullpath;
+	const char *update_date = NULL;
 	time_t module_timestamp = 0;
-	struct cl_cvd *cvd = NULL;
-	time_t timestamp = 0;
 
-	
 	n = sizeof(dbnames) / sizeof(const char *);
 
-	info->base_infos = (struct a6o_base_info *)calloc(n+1, sizeof(struct a6o_base_info));
-
+	info->base_infos = (struct a6o_base_info **)calloc(n+1, sizeof(struct a6o_base_info));
 
 	for (i = 0; i < n; i++) {
-
 		struct a6o_base_info *base_info = NULL;
+		struct cl_cvd *cvd = NULL;
+		time_t timestamp;
 
 		fullpath = get_db_module_path(dbnames[i], "clamav");
 		if (fullpath == NULL) {
-			a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: can't get module db complete file path!\n");
+			a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR,"can't get module db complete file path!\n");
 			status = ARMADITO_UPDATE_NON_AVAILABLE;
 			goto clean;
 		}
-		
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG,"[+] Debug :: clamav_info :: fullpath = %s\n", fullpath);
+
+		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG,"clamav_info :: fullpath = %s\n", fullpath);
 
 		cvd = cl_cvdhead(fullpath);
 		if (cvd == NULL) {
-			a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_WARNING,"[-] WARNING :: clamav_info :: can't open cvd file! :: file = [%s]\n",fullpath);
+			a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_WARNING,"clamav_info :: can't open cvd file! :: file = [%s]\n",fullpath);
 			status = ARMADITO_UPDATE_NON_AVAILABLE;
 			goto clean;
 		}
@@ -329,18 +305,15 @@ static enum a6o_update_status clamav_info(struct a6o_module *module, struct a6o_
 		base_info->date = os_strdup(cvd->time);
 		base_info->timestamp = (time_t)cvd->stime;
 		base_info->signature_count = cvd->sigs;
-		//base_info->version = ;
-		
 
 		// display infos.
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG,"[+] Debug :: clamav_info :: name = %s\n",base_info->name);
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG,"[+] Debug :: clamav_info :: fullpath = %s\n",base_info->full_path);
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG,"[+] Debug :: clamav_info :: date = %s\n",base_info->date);
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG,"[+] Debug :: clamav_info :: timestamp = %d\n",base_info->timestamp);
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG,"[+] Debug :: clamav_info :: signatures = %d\n",base_info->signature_count);		
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG,"[+] Debug :: clamav_info :: version = %s\n",base_info->version);
+		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG,"clamav_info :: name = %s\n",base_info->name);
+		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG,"clamav_info :: fullpath = %s\n",base_info->full_path);
+		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG,"clamav_info :: date = %s\n",base_info->date);
+		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG,"clamav_info :: timestamp = %d\n",base_info->timestamp);
+		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG,"clamav_info :: signatures = %d\n",base_info->signature_count);
+		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG,"clamav_info :: version = %s\n",base_info->version);
 		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG,"\n\n");
-		
 
 		// module update date :: take the date of the most recent db file.
 		if (base_info->timestamp > module_timestamp) {
@@ -348,10 +321,7 @@ static enum a6o_update_status clamav_info(struct a6o_module *module, struct a6o_
 			update_date = base_info->date;
 		}
 
-
 		info->base_infos[i] = base_info;
-		
-	
 
 clean:
 		if (fullpath != NULL) {
@@ -363,20 +333,14 @@ clean:
 			cl_cvdfree(cvd);
 			cvd = NULL;
 		}
-
-
 	}
-
 
 	info->update_date = os_strdup(update_date);
 	info->timestamp = module_timestamp;
 
-	// get module status according to db timestamp.	
+	// get module status according to db timestamp.
 	status = clamav_update_status_eval(info->timestamp, cl_data->late_days, cl_data->critical_days);
 
-
-
-	
 	return status;
 }
 
