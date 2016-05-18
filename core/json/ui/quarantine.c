@@ -53,12 +53,12 @@ int process_info(const char * full_path,enum os_file_flag flags, int entry_errno
 	char * jfilecontent = NULL;
 	int len = 0;
 
-        if(strlen(str) < 5){
+        if(strlen(full_path) < 5){
 	   printf("[+] Debug :: Invalid full_path : %s\n",full_path);
 	   return 1;
 	}
 
-	if(strcmp(str + strlen(str) - 5, ".info") != 0)
+	if(strcmp(full_path + strlen(full_path) - 5, ".info") != 0)
 	  return 1;
 
 	// open the file.
