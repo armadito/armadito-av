@@ -32,7 +32,7 @@ struct module_manager {
 */
 static struct a6o_module *module_new(struct a6o_module *src, struct armadito *armadito)
 {
-	struct a6o_module *mod = g_new0(struct a6o_module, 1);
+	struct a6o_module *mod = (struct a6o_module *)calloc(1,sizeof(struct a6o_module));
 
 	mod->init_fun = src->init_fun;
 	mod->conf_table = src->conf_table;
@@ -48,7 +48,7 @@ static struct a6o_module *module_new(struct a6o_module *src, struct armadito *ar
 	mod->armadito = armadito;
 
 	if (mod->size > 0)
-		mod->data = g_malloc(mod->size);
+		mod->data = calloc(1,mod->size);
 
 	return mod;
 }
