@@ -24,7 +24,101 @@ static enum a6o_mod_status module5_2_init(struct a6o_module *module)
 
 static enum a6o_mod_status module5_2_post_init(struct a6o_module *module)
 {
-#ifndef WIN32
+
+
+#ifdef _WIN32
+
+	const char * bases_location = NULL;
+	int len;
+
+	char* modelMalwareEat = NULL;
+	char* modelMalwareIat = NULL;
+	char* modelNotMalwareEat = NULL;
+	char* modelNotMalwareIat = NULL;
+	char* databaseEat = NULL;
+	char* databaseIat = NULL;
+	char* databaseTFIDFInf = NULL;
+	char* databaseTFIDFSain = NULL;
+
+	/*build db directory complete path*/
+	bases_location = a6o_std_path(BASES_LOCATION);
+
+	// modelMalwareEat
+	len = strlen(bases_location) + 1 + strlen("module5_2\\windows\\Database_malsain_2.zip") + 1;
+	modelMalwareEat = calloc(len + 1, sizeof(char));
+	modelMalwareEat[len] = '\0';
+	sprintf_s(modelMalwareEat, len, "%s%cmodule5_2\\windows\\Database_malsain_2.zip", bases_location, a6o_path_sep());
+
+	// modelMalwareIat
+	len = strlen(bases_location) + 1 + strlen("module5_2\\windows\\Database_malsain_1.zip") + 1;
+	modelMalwareIat = calloc(len + 1, sizeof(char));
+	modelMalwareIat[len] = '\0';
+	sprintf_s(modelMalwareIat, len, "%s%cmodule5_2\\windows\\Database_malsain_1.zip", bases_location, a6o_path_sep());	
+
+	// modelNotMalwareEat
+	len = strlen(bases_location) + 1 + strlen("module5_2\\windows\\Database_sain_2.zip") + 1;
+	modelNotMalwareEat = calloc(len + 1, sizeof(char));
+	modelNotMalwareEat[len] = '\0';
+	sprintf_s(modelNotMalwareEat, len, "%s%cmodule5_2\\windows\\Database_sain_2.zip", bases_location, a6o_path_sep());	
+
+	// modelNotMalwareIat
+	len = strlen(bases_location) + 1 + strlen("module5_2\\windows\\Database_sain_1.zip") + 1;
+	modelNotMalwareIat = calloc(len + 1, sizeof(char));
+	modelNotMalwareIat[len] = '\0';
+	sprintf_s(modelNotMalwareIat, len, "%s%cmodule5_2\\windows\\Database_sain_1.zip", bases_location, a6o_path_sep());
+
+	// databaseEat
+	len = strlen(bases_location) + 1 + strlen("module5_2\\windows\\database_2.dat") + 1;
+	databaseEat = calloc(len + 1, sizeof(char));
+	databaseEat[len] = '\0';
+	sprintf_s(databaseEat, len, "%s%cmodule5_2\\windows\\database_2.dat", bases_location, a6o_path_sep());
+
+	// databaseIat
+	len = strlen(bases_location) + 1 + strlen("module5_2\\windows\\database_1.dat") + 1;
+	databaseIat = calloc(len + 1, sizeof(char));
+	databaseIat[len] = '\0';
+	sprintf_s(databaseIat, len, "%s%cmodule5_2\\windows\\database_1.dat", bases_location, a6o_path_sep());
+
+	// databaseTFIDFInf
+	len = strlen(bases_location) + 1 + strlen("module5_2\\windows\\DBI_inf.dat") + 1;
+	databaseTFIDFInf = calloc(len + 1, sizeof(char));
+	databaseTFIDFInf[len] = '\0';
+	sprintf_s(databaseTFIDFInf, len, "%s%cmodule5_2\\windows\\DBI_inf.dat", bases_location, a6o_path_sep());
+
+	// databaseTFIDFSain
+	len = strlen(bases_location) + 1 + strlen("module5_2\\windows\\DBI_sain.dat") + 1;
+	databaseTFIDFSain = calloc(len + 1, sizeof(char));
+	databaseTFIDFSain[len] = '\0';
+	sprintf_s(databaseTFIDFSain, len, "%s%cmodule5_2\\windows\\DBI_sain.dat", bases_location, a6o_path_sep());
+
+	//printf("[+] Debug :: module 5.2 database file = [%s]\n", databaseEat);
+
+	/* initDatabase function extension :: add db location as first parameter */
+	if (initDatabases(modelMalwareEat,
+			modelMalwareIat,
+			modelNotMalwareEat,
+			modelNotMalwareIat,
+			databaseEat,
+			databaseIat,
+			databaseTFIDFInf,
+			databaseTFIDFSain) != 0)
+		return ARMADITO_MOD_INIT_ERROR;
+
+	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, "module 5.2 PE databases loaded from %s\\module5_2\\windows \n", bases_location);
+
+	free(modelMalwareEat);
+	free(modelMalwareIat);
+	free(modelNotMalwareEat);
+	free(modelNotMalwareIat);
+	free(databaseEat);
+	free(databaseIat);
+	free(databaseTFIDFInf);
+	free(databaseTFIDFSain);
+	free(bases_location);
+	
+
+#else
+
 	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, "loading module 5.2 ELF databases from " MODULE5_2_DBDIR "/linux");
 
 	if (initDB(MODULE5_2_DBDIR "/linux/database.elfdata",
@@ -35,20 +129,23 @@ static enum a6o_mod_status module5_2_post_init(struct a6o_module *module)
 		return ARMADITO_MOD_INIT_ERROR;
 
 	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, "module 5.2 ELF databases loaded from " MODULE5_2_DBDIR "/linux");
-#endif
 
 	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, "loading module 5.2 PE databases from " MODULE5_2_DBDIR "/windows");
 	if (initDatabases(MODULE5_2_DBDIR "/windows/Database_malsain_2.zip",
-				MODULE5_2_DBDIR "/windows/Database_malsain_1.zip",
-				MODULE5_2_DBDIR "/windows/Database_sain_2.zip",
-				MODULE5_2_DBDIR "/windows/Database_sain_1.zip",
-				MODULE5_2_DBDIR "/windows/database_2.dat",
-				MODULE5_2_DBDIR "/windows/database_1.dat",
-				MODULE5_2_DBDIR "/windows/DBI_inf.dat",
-				MODULE5_2_DBDIR "/windows/DBI_sain.dat") != 0)
+			MODULE5_2_DBDIR "/windows/Database_malsain_1.zip",
+			MODULE5_2_DBDIR "/windows/Database_sain_2.zip",
+			MODULE5_2_DBDIR "/windows/Database_sain_1.zip",
+			MODULE5_2_DBDIR "/windows/database_2.dat",
+			MODULE5_2_DBDIR "/windows/database_1.dat",
+			MODULE5_2_DBDIR "/windows/DBI_inf.dat",
+			MODULE5_2_DBDIR "/windows/DBI_sain.dat") != 0)
 		return ARMADITO_MOD_INIT_ERROR;
 
-	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, "module 5.2 PE databases loaded from " MODULE5_2_DBDIR "/windows");
+	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, "module 5.2 PE databases loaded from %s " MODULE5_2_DBDIR "/windows");
+	
+#endif
+
+
 
 	return ARMADITO_MOD_OK;
 }
