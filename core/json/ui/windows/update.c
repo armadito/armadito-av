@@ -678,7 +678,7 @@ int update_modules_db(struct armadito * armadito) {
 
 		}		
 
-		printf("[+] Debug :: UpdateModulesDB :: Uhuru service suspended successfully!\n");
+		printf("[+] Debug :: UpdateModulesDB :: Armadito service suspended successfully!\n");
 
 		printf("\n\n");
 		// Copy databases files to the right places.
@@ -700,7 +700,7 @@ int update_modules_db(struct armadito * armadito) {
 		else if (mode == CMD_MODE) {
 
 			// reload the av service.
-			ret = ServiceLoadProcedure( );
+			ret = ServiceLoadProcedure(SVC_MODE);
 			if (ret != 0) {
 				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service loaded with errors during pause.\n");
 				ret = -10;
@@ -708,7 +708,7 @@ int update_modules_db(struct armadito * armadito) {
 
 		}
 
-		printf("[+] Debug :: UpdateModulesDB :: Uhuru service resumed successfully!\n");
+		printf("[+] Debug :: UpdateModulesDB :: Armadito service resumed successfully!\n");
 
 		// Save hash in cache file.
 		res = SaveHashInCacheFile(hash);

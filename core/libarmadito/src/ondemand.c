@@ -134,10 +134,10 @@ static void process_error(struct a6o_scan *scan, const char *full_path, int entr
 static int scan_entry(const char *full_path, enum os_file_flag flags, int entry_errno, void *data)
 {
 	struct a6o_on_demand *on_demand = (struct a6o_on_demand *)data;
-        int canceled = a6o_on_demand_is_canceled(on_demand);
+	int canceled = a6o_on_demand_is_canceled(on_demand);
 
-        if (canceled){
-                a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "scan canceled on path %s", full_path);
+	if (canceled){
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "scan canceled on path %s", full_path);
 		return 2;
 	}
 

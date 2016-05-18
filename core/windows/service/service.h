@@ -22,10 +22,10 @@
 // 0: Custom Dump - 1: Mini dump - 2: Full dump.
 #define DUMP_TYPE 1
 
-typedef enum cmd_mode {
-	WITHOUT_DRIVER = 1,
-	WITH_DRIVER = 2
-}cmd_mode;
+typedef enum start_mode {
+	SVC_MODE = 1,
+	GUI_ONLY = 2
+}start_mode;
 
 
 
@@ -44,8 +44,8 @@ int ServicePause( );
 int ServiceContinue();
 
 
-int ServiceLoadProcedure( );
-int ServiceLoadProcedure_cmd(cmd_mode mode);
+int ServiceLoadProcedure(start_mode mode);
+//int ServiceLoadProcedure_cmd(cmd_mode mode);
 int ServiceUnloadProcedure( );
 
 
