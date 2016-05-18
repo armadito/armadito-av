@@ -29,8 +29,8 @@ GLOBAL_SCAN_CONTEXT gScanContext = {0};
 	Service Load and unload procedures functions
 --------------------------------------------------*/
 
-
-int ServiceLoadProcedure( ) {
+/* deprecated function :: prototypes changes*/
+int ServiceLoadProcedure_deprecated( ) {
 
 	int ret = 0;
 	a6o_error * uh_error = NULL;
@@ -147,7 +147,7 @@ int ServiceLoadProcedure( ) {
 	return ret;
 }
 
-int ServiceLoadProcedure_cmd(cmd_mode mode) {
+int ServiceLoadProcedure(start_mode mode) {
 
 	int ret = 0;
 	a6o_error * uh_error = NULL;
@@ -220,7 +220,7 @@ int ServiceLoadProcedure_cmd(cmd_mode mode) {
 		// Initialize scan listening threads. and Connect to the driver communication port. (Only if real time is enabled)				
 		// Get on-access configuration.
 
-		if (mode == WITH_DRIVER) {
+		if (mode == SVC_MODE) {
 
 			//gScanContext.onAccessCtx = &onAccessCtx;
 			hres = UserScanInit(&gScanContext);
@@ -257,9 +257,9 @@ int ServiceLoadProcedure_cmd(cmd_mode mode) {
 		}
 
 		// if failed
-		if (ret < 0) {
-			ServiceUnloadProcedure( );			
-		}
+		//if (ret < 0) {
+		//	ServiceUnloadProcedure( );			
+		//}
 
 	}
 
@@ -286,7 +286,7 @@ int ServiceUnloadProcedure( ) {
 	}
 		
 
-	// Close Uhuru structure
+	// Close Armadito structure
 	if (gScanContext.armadito != NULL) {
 		a6o_close(gScanContext.armadito,&uh_error);
 	}
@@ -315,6 +315,9 @@ int RegistryKeysInitialization( ) {
 	LPSTR dumpfolder = DUMP_FOLDER;
 	DWORD dwDumpType = DUMP_TYPE;
 	DWORD size = 0;
+
+
+	// TODO :: disable registry SYSWOW redirection
 
 	__try {
 
@@ -454,7 +457,9 @@ int RegistryKeysInitialization( ) {
 			__leave;
 		}
 
-		printf("[+] Debug :: RegistryKeysInitialization :: UhuruAV event log keys values created successfully\n" );
+
+		printf("[+] Debug :: Armadito-av registry keys created successfully\n");
+		
 		ret = 0;
 
 	}
@@ -504,6 +509,7 @@ int RegistryKeysInitialization( ) {
 	}
 	*/
 
+	
 
 	return ret;
 }
@@ -782,7 +788,7 @@ void WINAPI ServiceCtrlHandler( DWORD dwCtrl ) {
 			ReportSvcStatus(SERVICE_PAUSE_PENDING, NO_ERROR, 0);
 			
 			// Unload service.
-			ret = ServiceUnloadProcedure( );
+			ret = ServiceUnloadProcedure();
 			if (ret != 0) {
 				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service unloaded with errors during pause.\n");				
 			}
@@ -794,7 +800,7 @@ void WINAPI ServiceCtrlHandler( DWORD dwCtrl ) {
 
 			ReportSvcStatus(SERVICE_START_PENDING, NO_ERROR, 0);
 			ReportSvcStatus(SERVICE_RUNNING, NO_ERROR, 0);
-			ret = ServiceLoadProcedure( );
+			ret = ServiceLoadProcedure(SVC_MODE);
 			if (ret < 0) {
 				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service Initialization failed during continue \n");				
 				// Stop the service on error.
@@ -806,7 +812,7 @@ void WINAPI ServiceCtrlHandler( DWORD dwCtrl ) {
 
 			ReportSvcStatus(SERVICE_STOP_PENDING, NO_ERROR, 0);
 
-			ret = ServiceUnloadProcedure( );
+			ret = ServiceUnloadProcedure();
 			if (ret != 0) {
 				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service unloaded with errors\n");				
 			}			
@@ -841,12 +847,11 @@ void PerformServiceAction( ) {
 
 	a6o_notify_set_handler((a6o_notify_handler_t)send_notif);
 
-	ret = ServiceLoadProcedure( );
+	ret = ServiceLoadProcedure(SVC_MODE);
 	if (ret < 0) {
 		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service Initialization failed \n");		
 		// Stop the service on error.
 		ServiceStop( );
-
 	}
 	else {
 		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_INFO, " Service Initializaed successfully!\n");		
@@ -1374,7 +1379,7 @@ int ServiceContinue( ) {
 }
 
 
-int LaunchCmdLineService(cmd_mode mode) {
+int LaunchCmdLineService(start_mode mode) {
 
 	int ret = 0;
 	unsigned char c = '\0';
@@ -1383,9 +1388,8 @@ int LaunchCmdLineService(cmd_mode mode) {
 
 	__try {
 		
-		if (ServiceLoadProcedure_cmd(mode) < 0) {
+		if (ServiceLoadProcedure(mode) < 0) {
 			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service Initialization failed:\n");
-			printf("[-] Error :: Service Load Procedure failed! :: %d\n", ret);
 			__leave;
 		}
 
@@ -1402,8 +1406,7 @@ int LaunchCmdLineService(cmd_mode mode) {
 
 				// pause.				
 				if (ServiceUnloadProcedure( ) != 0) {
-					//a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service unloaded with errors during pause.\n");
-					printf("[-] Error :: Service Unload Procedure failed! ::\n");
+					a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service unloaded with errors during pause.\n");					
 					break;
 				}
 			
@@ -1412,23 +1415,18 @@ int LaunchCmdLineService(cmd_mode mode) {
 			else if (c == 'c') {
 
 				// continue.							
-				if (ServiceLoadProcedure_cmd(mode) < 0) {
+				if (ServiceLoadProcedure(mode) < 0) {
 					a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service Initialization failed during continue \n");
-					printf("[-] Error :: Service Load Procedure failed! ::\n");
 				}
-
 			}
 
 		}
-
-
-
 
 	}
 	__finally {
 
 		if (ServiceUnloadProcedure( ) != 0) {
-			printf("[-] Error :: Service Unload Procedure failed! ::\n");
+			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR, "[-] Error :: Service Unload Procedure failed! ::\n");
 		}
 
 	}
@@ -1440,9 +1438,9 @@ int LaunchCmdLineService(cmd_mode mode) {
 
 void DisplayBanner( ) {
 
-	printf("------------------------------\n");
-	printf("----- Uhuru Scan service -----\n");
-	printf("------------------------------\n");
+	printf("---------------------------------\n");
+	printf("----- Armadito Scan service -----\n");
+	printf("---------------------------------\n");
 
 	return;
 }
@@ -1493,7 +1491,7 @@ int main(int argc, char ** argv) {
 		/* (FD) added to get all log messages */
 		a6o_log_set_handler(ARMADITO_LOG_LEVEL_DEBUG, a6o_log_default_handler, NULL);
 		
-		ret = LaunchCmdLineService(WITHOUT_DRIVER);
+		ret = LaunchCmdLineService(GUI_ONLY);
 
 		if (Wow64RevertWow64FsRedirection(OldValue) == FALSE ){
 			//  Failure to re-enable redirection should be considered
@@ -1516,7 +1514,7 @@ int main(int argc, char ** argv) {
 
 		a6o_notify_set_handler((a6o_notify_handler_t)send_notif);
 
-		ret = LaunchCmdLineService(WITH_DRIVER);
+		ret = LaunchCmdLineService(SVC_MODE);
 		if (ret < 0) {
 			return EXIT_FAILURE;
 		}
@@ -1631,6 +1629,7 @@ int main(int argc, char ** argv) {
 		if (ret < 0) {
 			return EXIT_FAILURE;
 		}
+
 		return EXIT_SUCCESS;
 
 	}
@@ -1645,7 +1644,9 @@ int main(int argc, char ** argv) {
 	// command line parameter "--uninstall", uninstall the service.
 	if ( argc >=2 && strncmp(argv[1],"--uninstall",11) == 0 ){
 		DisplayBanner( );
+
 		ret = ServiceRemove( );
+
 		return EXIT_SUCCESS;
 	}
 
