@@ -152,7 +152,7 @@ int qu_os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void * d
 	// Check if it is a directory
 	if (!(GetFileAttributesA(path) & FILE_ATTRIBUTE_DIRECTORY)) {
 		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "Warning :: os_dir_map() :: (%s) is not a directory. ", path);
-		return 1;
+		// return 1;
 	}
 
 	size = strlen(path) + 3;
@@ -177,7 +177,7 @@ int qu_os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void * d
 		return 1;
 	}
 
-	while (FindNextFile(fh, &tmp) != FALSE) {
+	while (fh != INVALID_HANDLE_VALUE && FindNextFile(fh, &tmp) != FALSE) {
 
 
 		//printf("qu_os_dir_map :::: file = %s--------------\n",tmp.cFileName);
