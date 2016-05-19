@@ -1619,8 +1619,19 @@ int main(int argc, char ** argv) {
 		return EXIT_SUCCESS;
 	}
 
+	if (argc >= 2 && strncmp(argv[1], "--installboot", 13) == 0){
 
-	
+		DisplayBanner();
+
+		ret = ServiceInstall(SERVICE_AUTO_START);
+		if (ret < 0) {
+			return EXIT_FAILURE;
+		}
+
+		return EXIT_SUCCESS;
+
+	}
+
 	// command line parameter "--install", install the service.
 	if ( argc >=2 && strncmp(argv[1],"--install",9) == 0 ){
 
@@ -1635,18 +1646,7 @@ int main(int argc, char ** argv) {
 
 	}
 
-	if ( argc >=2 && strncmp(argv[1],"--installboot",13) == 0 ){
-
-		DisplayBanner();
-
-		ret = ServiceInstall(SERVICE_AUTO_START);
-		if (ret < 0) {
-			return EXIT_FAILURE;
-		}
-		
-		return EXIT_SUCCESS;
-
-	}
+	
 
 	// command line parameter "--uninstall", uninstall the service.
 	if ( argc >=2 && strncmp(argv[1],"--uninstall",11) == 0 ){
