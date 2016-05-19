@@ -15,15 +15,10 @@ angular.module('armaditoApp')
 
     $scope.HideInputFile = true;
     $scope.type = "analyse_view.Choose_analyse_type";
-    $scope.rowCollection = [];
     $scope.scan_server;
     $scope.malware_count = 0;
     $scope.suspicious_count = 0;
     $scope.scanned_count = 0;
-
-    //copy the references (you could clone ie angular.copy but then have to go through a dirty checking for the matches)
-    $scope.displayedCollection = [].concat($scope.rowCollection);
-
 
     // Scan data :: Path to scan and progress
     $scope.scan_data = {
@@ -37,32 +32,13 @@ angular.module('armaditoApp')
       service : false,
       realtime : false,
       update : "critical",
-      last_update : "Il y a 3 jour",
+      last_update : "Il y a 3 jours",
       version : 0.1       
     };
 
     $scope.scan_data.files = [];
-    
     $scope.state.modules = [];
-    
-    /*$scope.state.modules = 
-    [{
-      name : "clamav",
-      version: "0.0.0",
-      update: {"status": "not loaded", "last-update": "1970-01-01T06:13:00Z" }
-     },
-     {
-      name : "module5.2",
-      version: "0.0.0",
-      update: {"status": "not loaded", "last-update": "1970-01-01T06:13:00Z" }
-     },
-     {
-      name : "modulePDF",
-      version: "1.0.1",
-      update: {"status": "not loaded", "last-update": "1970-01-01T06:13:00Z" }
-     }
-    ];
-    */
+ 
 
     // This function refresh structure values from data receive from AV. 
     // callback function
@@ -76,8 +52,7 @@ angular.module('armaditoApp')
 
         json_object = JSON.parse(data);
 
-        console.log("[+] Debug :: Data received from av :: ", json_object);
-
+        console.log("[+] Debug :: Data received from av :: "); //, json_object);
 
         // Handle the first response of the av.
         if(json_object.av_response == "scan" && json_object.status == 0 ){
@@ -86,13 +61,13 @@ angular.module('armaditoApp')
           return;
         }
 
-        console.log("[+] Debug :: Data received from av :: ihm_request =  " + json_object.ihm_request);
+        console.log("[+] Debug :: Data received from av :: ihm_request "); // + json_object.ihm_request);
 
         // Handle progress  information from av
         if(json_object.ihm_request == "scan"){
 
           $scope.scan_data.progress = json_object.params.progress ;
-          console.log("[+] Debug :: progress = ", $scope.scan_data.progress);
+          //console.log("[+] Debug :: progress = ", $scope.scan_data.progress);
 
           console.error("PATH : ", json_object.params);
 
@@ -126,7 +101,6 @@ angular.module('armaditoApp')
           $scope.$apply();
         }
         
-        
       }
       catch(e){
         console.error("Parsing error:", e); 
@@ -138,8 +112,9 @@ angular.module('armaditoApp')
 
     $scope.StartScan = function(){
     
-      console.log("[+] Debug :: type d'analyse ::", $scope.type);
-      // reset progress bar
+     // console.log("[+] Debug :: type d'analyse ::", $scope.type);
+ 
+     // reset progress bar
       $scope.scan_data.progress = 0;
       $scope.scan_data.files = [];
 
@@ -180,7 +155,7 @@ angular.module('armaditoApp')
 
     $scope.CancelScan = function(){
     
-      console.log("[+] Debug :: cancel scan ::", $scope.type);
+      //console.log("[+] Debug :: cancel scan ::", $scope.type);
       ArmaditoSVC.cancelScan($scope.threatDataFromAv);
     };
 
@@ -210,7 +185,7 @@ angular.module('armaditoApp')
 
       modalInstance.result.then(function (scanOptions) {
         $scope.scanOptions = scanOptions;
-        console.log("Scan options : ", $scope.scanOptions);
+        //console.log("Scan options : ", $scope.scanOptions);
         $scope.scan_data.path_to_scan = $scope.scanOptions.pathToScan;
         $scope.StartScan();
       }, function () {
