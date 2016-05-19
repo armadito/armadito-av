@@ -64,19 +64,6 @@ angular.module('armaditoApp')
     ];
     */
 
-    const EventEmitter = require('events');
-
-
-    //var myEmitter = EventEmitter.call(this);
-
-    $rootScope.myEmitter.on('scan_info', function(data){
-
-      console.log("[!] Event :: A [scan_info] event occured!\n");
-
-      $scope.threatDataFromAv(data);
-
-    });
-
     // This function refresh structure values from data receive from AV. 
     // callback function
     $scope.threatDataFromAv = function(data){
@@ -131,6 +118,9 @@ angular.module('armaditoApp')
           if($scope.scan_data.progress == 100){
                console.log("[+] Debug :: Scan finished!");
 	       global.scan_in_progress = 0;
+
+	       // Scan is finished, we remove listener
+	       $rootScope.myEmitter.removeListener('scan_info', $scope.threatDataFromAv);
           }
 
           $scope.$apply();
@@ -180,15 +170,18 @@ angular.module('armaditoApp')
       $scope.suspicious_count = 0;
       $scope.scanned_count = 0;
 
+
+      // register emitter only when starting a new scan
+      $rootScope.myEmitter.addListener('scan_info', $scope.threatDataFromAv);
+
       ArmaditoSVC.launchScan($scope.scan_data.path_to_scan, $scope.threatDataFromAv);
 
     };
 
     $scope.CancelScan = function(){
     
-      console.log("[+] Debug :: type d'analyse ::", $scope.type);
+      console.log("[+] Debug :: cancel scan ::", $scope.type);
       ArmaditoSVC.cancelScan($scope.threatDataFromAv);
-
     };
 
 
