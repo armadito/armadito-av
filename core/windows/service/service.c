@@ -155,7 +155,7 @@ int ServiceLoadProcedure(start_mode mode) {
 	struct a6o_conf * conf = NULL;
 	a6o_error * error = NULL;
 	struct armadito * armadito = NULL;
-	int onaccess_enable = 0;
+	unsigned int onaccess_enable = 0;
 	char * conffile = NULL;
 	struct conf_reg_data data = {0};	
 
@@ -217,10 +217,11 @@ int ServiceLoadProcedure(start_mode mode) {
 		gScanContext.onAccessCtx = NULL;
 		gScanContext.FinalizeAll = 0;
 
-		// Initialize scan listening threads. and Connect to the driver communication port. (Only if real time is enabled)				
+		// Initialize scan listening threads. and Connect to the driver communication port. (Only if real time is enabled)
 		// Get on-access configuration.
+		onaccess_enable = a6o_conf_get_uint(conf, "on-access", "enable");
 
-		if (mode == SVC_MODE) {
+		if (onaccess_enable && mode == SVC_MODE) {
 
 			//gScanContext.onAccessCtx = &onAccessCtx;
 			hres = UserScanInit(&gScanContext);
@@ -598,7 +599,7 @@ int DeleteRegistryKeys( ) {
  https://msdn.microsoft.com/en-us/library/windows/desktop/ms683500%28v=vs.85%29.aspx
 
 */
-int ServiceInstall( ) {
+int ServiceInstall(DWORD startType) {
 
 	SC_HANDLE schSCManager;
 	SC_HANDLE schService;
@@ -631,7 +632,7 @@ int ServiceInstall( ) {
 			SVCDISPLAY,					// service name to display 
 			SERVICE_ALL_ACCESS,			// desired access 
 			SERVICE_WIN32_OWN_PROCESS,	// service type 
-			SERVICE_DEMAND_START,		// start type
+			startType,					// start type
 			SERVICE_ERROR_NORMAL,		// error control type 
 			binaryPath,					// path to service's binary 
 			NULL,						// no load ordering group 
@@ -1625,7 +1626,7 @@ int main(int argc, char ** argv) {
 
 		DisplayBanner( );
 
-		ret = ServiceInstall( );
+		ret = ServiceInstall(SERVICE_DEMAND_START);
 		if (ret < 0) {
 			return EXIT_FAILURE;
 		}
@@ -1636,7 +1637,13 @@ int main(int argc, char ** argv) {
 
 	if ( argc >=2 && strncmp(argv[1],"--installboot",13) == 0 ){
 
-		printf("[TODO] :: InstallBoot not implemented yet!\n" );
+		DisplayBanner();
+
+		ret = ServiceInstall(SERVICE_AUTO_START);
+		if (ret < 0) {
+			return EXIT_FAILURE;
+		}
+		
 		return EXIT_SUCCESS;
 
 	}
