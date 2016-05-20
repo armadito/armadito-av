@@ -149,7 +149,7 @@ int os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data)
 
 	FindClose(fh);
 
-	return ret;
+	return 0;
 }
 
 /*
