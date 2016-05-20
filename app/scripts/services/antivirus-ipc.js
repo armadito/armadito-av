@@ -98,15 +98,16 @@ angular.module('armadito.ipc', [])
 
 			server_sock.on( 'close', function (){
           		   console.log("[+] Debug :: closing ui socket server");
-        	        });
+        	});
 
 			server_sock.on('data', function(data){
-				console.log("[+] Debug :: data received ::"+ data);
+				//console.log("[+] Debug :: data received ::"+ data);
 				var response = { "ihm_response":"state", "id":0, "status":0 };
 				try {
 				  var buffer = new Buffer( JSON.stringify(response), 'ascii' );
 				  server_sock.write(buffer);
 				  callback(data);
+				  buffer = null;
 				}
 				catch(e){
 				   console.log("Exception ondata JSON stringify :" + e);
@@ -115,9 +116,9 @@ angular.module('armadito.ipc', [])
 
 		});
 
-		console.log(":::::::::::: SERVER >>>>>",server);
+		// console.log(":::::::::::: SERVER >>>>>",server);
 
-		console.log("[+] Debug :: CLeaning socket server path...\n");
+		// console.log("[+] Debug :: CLeaning socket server path...\n");
 
 		fs.access(ipc_path, fs.F_OK, function(err){
 
@@ -134,7 +135,7 @@ angular.module('armadito.ipc', [])
 			console.log("[+] Debug :: server listening on ::", ipc_path);
 		});
 
-		console.log(":::::::::::: SERVER >>>>>",server);
+		// console.log(":::::::::::: SERVER >>>>>",server);
 
 		return server;
 

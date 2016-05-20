@@ -24,10 +24,10 @@ angular.module('armadito.svc', [])
 
 	factory.threatDataFromAv = function(data){
 		
-		console.log("[+] Debug :: threatDataFromAv :: Data received from AV :: " + data);
+		//console.log("[+] Debug :: threatDataFromAv :: Data received from AV :: " + data);
 		av_response = 'OK';
+		data = null;
 		return av_response;
-		
 	};
 	
 	factory.setClientPath = function(){
@@ -131,7 +131,7 @@ angular.module('armadito.svc', [])
 		
 		// send data
 		//var response = ArmaditoIPC.sendAndReceive(clientPath, request);
-		console.log("[+] Debug :: requestAVstatus :: antivirus response = " + av_response);
+		// console.log("[+] Debug :: requestAVstatus :: antivirus response = " + av_response);
 		
 		//console.log("[+] Debug :: requestAVstatus :: antivirus response = " + ArmaditoIPC.av_response);		
 		

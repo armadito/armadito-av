@@ -50,25 +50,6 @@ angular.module('armaditoApp')
 
 		  return sprintf("%02d %s %d %02d:%02d:%02d", date, month, year, hour, min, sec);
 		};
-	
-		/*$scope.state.modules = 
-		[{
-			name : "clamav",
-			version: "0.0.0",
-			update: {"status": "not loaded", "last-update": "1970-01-01T06:13:00Z" }
-		 },
-		 {
-			name : "module5.2",
-			version: "0.0.0",
-			update: {"status": "not loaded", "last-update": "1970-01-01T06:13:00Z" }
-		 },
-		 {
-			name : "modulePDF",
-			version: "1.0.1",
-			update: {"status": "not loaded", "last-update": "1970-01-01T06:13:00Z" }
-		 }
-		];*/
-
 
 		$scope.state.modules = [];
 		
@@ -80,12 +61,11 @@ angular.module('armaditoApp')
 			var date = new Date().toISOString();
 			
 			//console.log('------- current date = ',date);
-
-			
+		
 			try {
 				json_object = JSON.parse(data);
 
-				console.log("[+] Debug :: data from av ::",json_object);
+				//console.log("[+] Debug :: data from av ::",json_object);
 				
 				if(json_object.info.antivirus.service == 'on'){
 					$scope.state.service = true;					
@@ -128,13 +108,14 @@ angular.module('armaditoApp')
 					$scope.state.modules[i].update['date'] = $scope.timeConverter($scope.state.modules[i].update['timestamp']);
 					
 					//console.log('[+] Debug :: threatDataFromAv :: module name :: ',$scope.state.modules[i].name);
-					console.log('[+] Debug :: threatDataFromAv :: module timestamp :: ',$scope.state.modules[i].update['timestamp']);	
+					//console.log('[+] Debug :: threatDataFromAv :: module timestamp :: ',$scope.state.modules[i].update['timestamp']);	
 					//console.log('[+] Debug :: threatDataFromAv :: module date :: ',$scope.state.modules[i].update['date']);				
 				}
 
 			}
 			catch(e){
 				console.error("Parsing error:", e); 
+				json_object = null;
 				return null;
 			}
 			
@@ -142,6 +123,7 @@ angular.module('armaditoApp')
 						
 			//$scope.state.service = 3;			
 			$scope.$apply();
+			json_object = null;
 			return;
 		}
 
@@ -150,9 +132,7 @@ angular.module('armaditoApp')
 
 			console.log("[+] Debug :: update modules database\n");
 			ArmaditoSVC.updateDB();
-
 			// TODO :: refresh state.
-
 		}
 			
 		// refresh antivirus status.
@@ -166,7 +146,7 @@ angular.module('armaditoApp')
 			//$scope.state.last_update = ArmaditoIPC.av_response;
 			ArmaditoSVC.requestAVstatus($scope.threatDataFromAv);
 			
-			console.log('[+] Debug :: Refreshing antivirus status ::' + ArmaditoIPC.client_socket);
+			// console.log('[+] Debug :: Refreshing antivirus status ::' + ArmaditoIPC.client_socket);
 		}
 		
 		
