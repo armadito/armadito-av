@@ -389,6 +389,9 @@ exit 1
 :BuildEventOK
 echo post-build step for $(ProjectName) OK</Command>
     </PostBuildEvent>
+    <Inf>
+      <CatalogFileName>ArmaditoGuard.cat</CatalogFileName>
+    </Inf>
   </ItemDefinitionGroup>
   <ItemGroup>
     <FilesToPackage Include="@(Inf->'%(CopyOutput)')" Condition="'@(Inf)'!=''" />
