@@ -137,7 +137,7 @@ static int scan_entry(const char *full_path, enum os_file_flag flags, int entry_
 	int canceled = a6o_on_demand_is_canceled(on_demand);
 
 	if (canceled){
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "scan canceled on path %s", full_path);
+		//a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "scan canceled on path %s", full_path);
 		return 2;
 	}
 
