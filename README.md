@@ -135,16 +135,17 @@ Once the interface is launched:
 - right-click in the window to display debug menu and select "Inspect"
 - in the inspector window, select the "console" tab
 
+## Build with grunt
 
-## Build & development
+Install grunt :
 
-This section is may be obsolete?
+$ npm install -g grunt-cli
 
 Run `grunt` for building and `grunt serve` for preview.
-p
-## Testing
 
-This section is may be obsolete?
+You can use "--force" if you want to build with warnings.
+
+## Testing
 
 Running `grunt test` will run the unit tests with karma.
 
