@@ -263,7 +263,7 @@ static enum a6o_update_status clamav_info(struct a6o_module *module, struct a6o_
 {
 	enum a6o_update_status status = ARMADITO_UPDATE_OK;
 	struct clamav_data *cl_data = (struct clamav_data *)module->data;
-	char *dbnames[] = {"daily.cld","main.cvd","bytecode.cld"};
+	char *dbnames[] = {"daily.cld","daily.cvd","main.cvd","bytecode.cld","bytecode.cvd"};
 	int i, n;
 	char *fullpath;
 	const char *update_date = NULL;
