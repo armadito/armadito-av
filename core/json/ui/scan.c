@@ -5,8 +5,10 @@
 #include "jsonhandler.h"
 #include "scan.h"
 #include "ui.h"
-#ifndef WIN32
+#ifndef _WIN32
 #include "debug.h"
+#else
+#include <sys/timeb.h>
 #endif
 
 #include "os/string.h"
@@ -34,10 +36,23 @@ static time_t get_milliseconds(void)
 #endif
 
 #ifdef _WIN32
-//#error must implement get_milliseconds on windows
+// get_milliseconds on windows
 time_t get_milliseconds( ) {
-	// TODO... 
-	return 0;
+
+	time_t ms = 0;
+	struct _timeb tb;
+
+	_ftime64_s(&tb);		
+	ms = tb.time * 1000 + tb.millitm;
+	
+	/*
+	//Debug print
+	printf("[+] Debug :: tb.time = %d\n", tb.time);
+	printf("[+] Debug :: tb.millitm = %u\n", tb.millitm);
+	printf("[+] Debug :: ms = %u milliseconds\n", ms);
+	*/
+
+	return ms;
 }
 #if 0
 Note: gettimeofday on windows:
