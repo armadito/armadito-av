@@ -29,7 +29,7 @@ typedef enum start_mode {
 
 
 
-int ServiceInstall( );
+int ServiceInstall(DWORD startType);
 int ServiceRemove( );
 VOID ReportSvcStatus(DWORD dwCurrentState, DWORD dwWin32ExitCode, DWORD dwWaitHint);
 void WINAPI ServiceCtrlHandler(DWORD dwCtrl);
