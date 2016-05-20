@@ -75,6 +75,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_19A00E53B33D4250822C69D0C6713602"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_1CDBCD6E4237475D9D6C909414FB0575"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -645,12 +651,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_E49632C716324E8EB06C2A8570E93F26"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_E9D49DD6E3F3479487BA6082EE9660D3"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -711,7 +711,7 @@
         "DisplayName" = "8:Debug"
         "IsDebugOnly" = "11:TRUE"
         "IsReleaseOnly" = "11:FALSE"
-        "OutputFilename" = "8:Debug\\Armadito-setup.msi"
+        "OutputFilename" = "8:Debug\\Armadito-setup-0.9.0.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -789,6 +789,20 @@
             "InstallerClass" = "11:FALSE"
             "CustomActionData" = "8:"
             }
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_4BC07703FC664404BBFFE39568B04B38"
+            {
+            "Name" = "8:Primary Output from ArmaditoSvc (Active)"
+            "Condition" = "8:"
+            "Object" = "8:_C3C49575AE2A4C2D975E93DDFE1920F7"
+            "FileType" = "3:2"
+            "InstallAction" = "3:1"
+            "Arguments" = "8:--start"
+            "EntryPoint" = "8:"
+            "Sequence" = "3:3"
+            "Identifier" = "8:_7C37BAC6_5441_4842_BBD0_3996B413CBFC"
+            "InstallerClass" = "11:FALSE"
+            "CustomActionData" = "8:"
+            }
             "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_5683C16D44A74ED79C271547E7B2B3F0"
             {
             "Name" = "8:Primary Output from ArmaditoSvc (Active)"
@@ -831,7 +845,7 @@
             "InstallerClass" = "11:FALSE"
             "CustomActionData" = "8:"
             }
-            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_B8D4EC8E15394399A4BE553443E16B14"
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_712832AC6F354CA6894EB907AE32A831"
             {
             "Name" = "8:Primary Output from ArmaditoGuard-setup (Active)"
             "Condition" = "8:"
@@ -840,8 +854,22 @@
             "InstallAction" = "3:3"
             "Arguments" = "8:--uninstall"
             "EntryPoint" = "8:"
-            "Sequence" = "3:1"
+            "Sequence" = "3:2"
             "Identifier" = "8:_85493929_6209_48B8_AFE2_E13A93DDD2C8"
+            "InstallerClass" = "11:FALSE"
+            "CustomActionData" = "8:"
+            }
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_9FE2F64A28534CED84FD43D9BB451CDD"
+            {
+            "Name" = "8:Primary Output from ArmaditoSvc (Active)"
+            "Condition" = "8:"
+            "Object" = "8:_C3C49575AE2A4C2D975E93DDFE1920F7"
+            "FileType" = "3:2"
+            "InstallAction" = "3:3"
+            "Arguments" = "8:--uninstall"
+            "EntryPoint" = "8:"
+            "Sequence" = "3:1"
+            "Identifier" = "8:_68DFEC4B_BF54_4E17_B9C1_7B0045E6A61D"
             "InstallerClass" = "11:FALSE"
             "CustomActionData" = "8:"
             }
@@ -1058,6 +1086,26 @@
             {
             "SourcePath" = "8:..\\..\\..\\..\\..\\..\\nwjs\\nwjs-sdk-v0.13.4-win-x64\\chromedriver.exe"
             "TargetName" = "8:chromedriver.exe"
+            "Tag" = "8:"
+            "Folder" = "8:_ED4DE712081748ABB8C5F03B9C5F0C9C"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_19A00E53B33D4250822C69D0C6713602"
+            {
+            "SourcePath" = "8:..\\..\\..\\..\\..\\..\\nwjs\\nwjs-sdk-v0.13.4-win-x64\\ui-armadito.exe"
+            "TargetName" = "8:ui-armadito.exe"
             "Tag" = "8:"
             "Folder" = "8:_ED4DE712081748ABB8C5F03B9C5F0C9C"
             "Condition" = "8:"
@@ -2854,26 +2902,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_E49632C716324E8EB06C2A8570E93F26"
-            {
-            "SourcePath" = "8:..\\..\\..\\..\\..\\..\\nwjs\\nwjs-sdk-v0.13.4-win-x64\\ui-armadito.exe"
-            "TargetName" = "8:ui-armadito.exe"
-            "Tag" = "8:"
-            "Folder" = "8:_ED4DE712081748ABB8C5F03B9C5F0C9C"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_E9D49DD6E3F3479487BA6082EE9660D3"
             {
             "SourcePath" = "8:..\\..\\..\\..\\..\\..\\nwjs\\nwjs-sdk-v0.13.4-win-x64\\pnacl\\pnacl_public_pnacl_json"
@@ -3069,6 +3097,28 @@
             "Property" = "8:ProgramMenuFolder"
                 "Folders"
                 {
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_C659F5A3766E4FB9B4415ABB70A5B216"
+                    {
+                    "Name" = "8:Armadito-av"
+                    "AlwaysCreate" = "11:FALSE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_94C842080D50496C82E2D60317C48228"
+                        "Folders"
+                        {
+                        }
+                    }
+                }
+            }
+            "{1525181F-901A-416C-8A58-119130FE478E}:_2B7908D2E6F24ADA9B0D6E90F36116EE"
+            {
+            "Name" = "8:#1921"
+            "AlwaysCreate" = "11:FALSE"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Property" = "8:StartMenuFolder"
+                "Folders"
+                {
                 }
             }
             "{3C67513D-01DD-4637-8A68-80971EB9504F}:_93AE649AF8DA4D24B5C52546E2401D4C"
@@ -3187,23 +3237,23 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Armadito-av"
-        "ProductCode" = "8:{2E9E0D41-A501-4C56-B13D-30E8CD27FE8D}"
-        "PackageCode" = "8:{EC778D3A-296B-49C5-AEE5-D6D4239FFAC5}"
+        "ProductCode" = "8:{F0960F1F-7950-408E-8BBD-2946EBD9F9A0}"
+        "PackageCode" = "8:{6AA23E2B-D71B-4406-94C4-05A98D3F380D}"
         "UpgradeCode" = "8:{8FF60D97-FAB5-42D5-8BC1-1924AD47EA25}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
-        "RemovePreviousVersions" = "11:FALSE"
+        "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.0.0"
-        "Manufacturer" = "8:Novit"
+        "ProductVersion" = "8:0.9.0"
+        "Manufacturer" = "8:Teclib"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
         "Title" = "8:Armadito-setup"
         "Subject" = "8:"
-        "ARPCONTACT" = "8:Novit"
-        "Keywords" = "8:"
-        "ARPCOMMENTS" = "8:"
+        "ARPCONTACT" = "8:Teclib'/Novit"
+        "Keywords" = "8:antivirus"
+        "ARPCOMMENTS" = "8:Armadito antivirus"
         "ARPURLINFOABOUT" = "8:"
         "ARPPRODUCTICON" = "8:"
         "ARPIconIndex" = "3:0"
@@ -3308,7 +3358,7 @@
         }
         "Shortcut"
         {
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_97977D6FAF474C94AC6F54BD59FAC616"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_0E8F3E9A16114887B8ABA4BC9A9D6B10"
             {
             "Name" = "8:ui-armadito.exe"
             "Arguments" = "8:"
@@ -3316,8 +3366,36 @@
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_E49632C716324E8EB06C2A8570E93F26"
+            "Target" = "8:_19A00E53B33D4250822C69D0C6713602"
             "Folder" = "8:_D0AB748B3E154F448D42353B0CD6FA40"
+            "WorkingFolder" = "8:_ED4DE712081748ABB8C5F03B9C5F0C9C"
+            "Icon" = "8:"
+            "Feature" = "8:"
+            }
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_B6A377D51BF04EB19A57B85D1E9B6EA1"
+            {
+            "Name" = "8:ui-armadito.exe"
+            "Arguments" = "8:"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_19A00E53B33D4250822C69D0C6713602"
+            "Folder" = "8:_C659F5A3766E4FB9B4415ABB70A5B216"
+            "WorkingFolder" = "8:_ED4DE712081748ABB8C5F03B9C5F0C9C"
+            "Icon" = "8:"
+            "Feature" = "8:"
+            }
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_C7DFA4E57CAD45A0A7DC7B112F4C4539"
+            {
+            "Name" = "8:ui-armadito.exe"
+            "Arguments" = "8:"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_19A00E53B33D4250822C69D0C6713602"
+            "Folder" = "8:_2B7908D2E6F24ADA9B0D6E90F36116EE"
             "WorkingFolder" = "8:_ED4DE712081748ABB8C5F03B9C5F0C9C"
             "Icon" = "8:"
             "Feature" = "8:"
