@@ -142,7 +142,10 @@ angular.module('armaditoApp')
         console.log("[+] Debug :: ANALYSE RAPIDE ::\n");
 
         if(os.platform() == "win32"){
-           $scope.scan_data.path_to_scan = "C:\\Users";
+           
+		   var userpath = process.env['USERPROFILE'];
+		   userpath = userpath.replace(/\\/g, "\\\\");
+		   $scope.scan_data.path_to_scan =  userpath ;
 	}
 	else {
 	   $scope.scan_data.path_to_scan = "/home";	
