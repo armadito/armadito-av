@@ -38,7 +38,8 @@ angular.module('armaditoApp')
 
     $scope.scan_data.files = [];
     $scope.state.modules = [];
- 
+
+    
 
     // This function refresh structure values from data receive from AV. 
     // callback function
@@ -111,7 +112,7 @@ angular.module('armaditoApp')
     // we remove last listener
     $rootScope.myEmitter.removeListener('scan_info', $scope.threatDataFromAv);
 
-    // register emitter only when starting a new scan
+    // register emitter 
     $rootScope.myEmitter.addListener('scan_info', $scope.threatDataFromAv);
 
 
@@ -149,6 +150,13 @@ angular.module('armaditoApp')
       $scope.malware_count = 0;
       $scope.suspicious_count = 0;
       $scope.scanned_count = 0;
+
+       
+      // we remove last listener
+      $rootScope.myEmitter.removeListener('scan_info', $scope.threatDataFromAv);
+
+      // register emitter 
+      $rootScope.myEmitter.addListener('scan_info', $scope.threatDataFromAv);
 
       ArmaditoSVC.launchScan($scope.scan_data.path_to_scan, $scope.threatDataFromAv);
 
