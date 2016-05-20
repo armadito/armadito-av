@@ -129,13 +129,24 @@ angular.module('armaditoApp')
       if($scope.type == "analyse_view.Full_scan"){
         // only for test
         console.log("[+] Debug :: ANALYSE COMPLÈTE ::\n");
-        $scope.scan_data.path_to_scan = "C:\\users\\david\\Desktop\\PDF_test";
+        if(os.platform() == "win32"){
+           $scope.scan_data.path_to_scan = "C:\\";
+	}
+	else {
+	   $scope.scan_data.path_to_scan = "/";	
+	}
 
       }else if($scope.type == "analyse_view.Quick_scan"){
 
         // only for test
         console.log("[+] Debug :: ANALYSE RAPIDE ::\n");
-        $scope.scan_data.path_to_scan = "C:\\users\\david\\Desktop\\mof";
+
+        if(os.platform() == "win32"){
+           $scope.scan_data.path_to_scan = "C:\\Users";
+	}
+	else {
+	   $scope.scan_data.path_to_scan = "/home";	
+	}
 
       }else if($scope.type == "analyse_view.Custom_scan"){
 
