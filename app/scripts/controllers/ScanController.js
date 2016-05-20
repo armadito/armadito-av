@@ -103,9 +103,11 @@ angular.module('armaditoApp')
       }
       catch(e){
         console.error("Parsing error:", e); 
+	json_object = null;
         return null;
       }
 
+      json_object = null;
     }
 
 
@@ -151,7 +153,6 @@ angular.module('armaditoApp')
       $scope.suspicious_count = 0;
       $scope.scanned_count = 0;
 
-       
       // we remove last listener
       $rootScope.myEmitter.removeListener('scan_info', $scope.threatDataFromAv);
 
