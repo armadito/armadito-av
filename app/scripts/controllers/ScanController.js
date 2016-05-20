@@ -69,8 +69,6 @@ angular.module('armaditoApp')
           $scope.scan_data.progress = json_object.params.progress ;
           //console.log("[+] Debug :: progress = ", $scope.scan_data.progress);
 
-          console.error("PATH : ", json_object.params);
-
           if(json_object.params.scan_status != 'undecided'){
             $scope.scan_data.files.push(json_object.params);
           }
@@ -110,6 +108,13 @@ angular.module('armaditoApp')
     }
 
 
+    // we remove last listener
+    $rootScope.myEmitter.removeListener('scan_info', $scope.threatDataFromAv);
+
+    // register emitter only when starting a new scan
+    $rootScope.myEmitter.addListener('scan_info', $scope.threatDataFromAv);
+
+
     $scope.StartScan = function(){
     
      // console.log("[+] Debug :: type d'analyse ::", $scope.type);
@@ -144,10 +149,6 @@ angular.module('armaditoApp')
       $scope.malware_count = 0;
       $scope.suspicious_count = 0;
       $scope.scanned_count = 0;
-
-
-      // register emitter only when starting a new scan
-      $rootScope.myEmitter.addListener('scan_info', $scope.threatDataFromAv);
 
       ArmaditoSVC.launchScan($scope.scan_data.path_to_scan, $scope.threatDataFromAv);
 
