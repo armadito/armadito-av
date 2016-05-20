@@ -70,7 +70,7 @@ angular.module('armaditoApp')
           $scope.scan_data.progress = json_object.params.progress ;
           //console.log("[+] Debug :: progress = ", $scope.scan_data.progress);
 
-          if(json_object.params.scan_status != 'undecided'){
+          if(json_object.params.scan_status === 'malware' || json_object.params.scan_status === 'suspicious'){
             $scope.scan_data.files.push(json_object.params);
           }
 
