@@ -1,8 +1,0 @@
-compile
-config.log
-config.status
-**/.deps/
-src/ui/glade_*.[ch]
-src/model/*-marshall.[ch]
-src/clock_gtk
-**/.dirstamp
