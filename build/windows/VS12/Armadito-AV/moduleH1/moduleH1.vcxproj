@@ -12,7 +12,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6F7FCB67-F47F-43A9-A431-AF4192305385}</ProjectGuid>
-    <RootNamespace>module5_2</RootNamespace>
+    <RootNamespace>moduleH1</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -39,7 +39,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\modules\module5_2\src\lib\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\modules\moduleH1\src\lib\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -51,7 +51,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>libarmadito.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>module5_2.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>moduleH1.def</ModuleDefinitionFile>
     </Link>
     <PostBuildEvent>
       <Command>echo post-build step for $(ProjectName)
@@ -63,7 +63,7 @@ if not exist "$(SolutionDir)out\$(Configuration)" mkdir "$(SolutionDir)out\$(Con
 if not exist "$(SolutionDir)out\$(Configuration)\modules" mkdir "$(SolutionDir)out\$(Configuration)\modules"
 
 REM copy the DLL into the modules directory
-xcopy "$(OutDir)module5_2.dll" "$(SolutionDir)out\$(Configuration)\modules" /D /I /Y
+xcopy "$(OutDir)moduleH1.dll" "$(SolutionDir)out\$(Configuration)\modules" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
 REM Exit properly because the build will not fail 
@@ -95,41 +95,41 @@ echo post-build step for $(ProjectName) OK
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\databases.c" />
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\distances.c" />
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\elfReader.c" />
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\gestionPE.c" />
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\kNN.c" />
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\miniz.c" />
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\model.c" />
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\table.c" />
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\tfidfDetection.c" />
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\UhuruStatic.c" />
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\uh_errors.c" />
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\vector.c" />
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\windows\osdeps.c" />
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\module\module5_2.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\databases.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\distances.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\elfReader.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\gestionPE.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\kNN.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\miniz.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\model.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\table.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\tfidfDetection.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\UhuruStatic.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\uh_errors.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\vector.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\windows\osdeps.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\module\moduleH1.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\databases.h" />
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\distances.h" />
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\elfReader.h" />
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\gestionPE.h" />
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\kNN.h" />
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\miniz.h" />
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\model.h" />
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\osdeps.h" />
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\PEUtils.h" />
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\table.h" />
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\tfidfDetection.h" />
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\uh_errors.h" />
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\utils.h" />
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\vector.h" />
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\windowsTypes.h" />
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\module\UhuruStatic.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\databases.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\distances.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\elfReader.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\gestionPE.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\kNN.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\miniz.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\model.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\osdeps.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\PEUtils.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\table.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\tfidfDetection.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\uh_errors.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\utils.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\vector.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\windowsTypes.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\module\UhuruStatic.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="module5_2.def" />
+    <None Include="moduleH1.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
