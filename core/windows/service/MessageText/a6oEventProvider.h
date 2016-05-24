@@ -1,5 +1,5 @@
- // Message Text File for libuhuru.
- // uhEventProvider.mc
+ // Message Text File for armadito.
+ // a6oEventProvider.mc
  // Header section
  // The following are the categories of events.
 //
@@ -43,13 +43,13 @@
 
 
 //
-// MessageId: LIBUHURU_CATEGORY
+// MessageId: LIBARMADITO_CATEGORY
 //
 // MessageText:
 //
-// Libuhuru
+// Libarmadito
 //
-#define LIBUHURU_CATEGORY                ((WORD)0x00000001L)
+#define LIBARMADITO_CATEGORY             ((WORD)0x00000001L)
 
 //
 // MessageId: MODULES_CATEGORY
@@ -76,7 +76,7 @@
 //
 // MessageText:
 //
-// UhuruAV :: Error :: %1
+// Armadito-av :: Error :: %1
 //
 #define MSG_ERROR                        ((DWORD)0xC0000100L)
 
@@ -86,7 +86,7 @@
 //
 // MessageText:
 //
-// UhuruAV :: Warning :: %1
+// Armadito-av :: Warning :: %1
 //
 #define MSG_WARNING                      ((DWORD)0x80000200L)
 
@@ -96,7 +96,7 @@
 //
 // MessageText:
 //
-// UhuruAV :: Information :: %1
+// Armadito-av :: Information :: %1
 //
 #define MSG_INFO                         ((DWORD)0x40000300L)
 
@@ -106,7 +106,7 @@
 //
 // MessageText:
 //
-// UhuruAV :: Success :: %1
+// Armadito-av :: Success :: %1
 //
 #define MSG_SUCCESS                      ((DWORD)0x00000400L)
 
