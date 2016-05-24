@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\core\windows\driver\install\setup.c">
+    <ClCompile Include="..\..\..\..\..\windows-driver\install\setup.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
