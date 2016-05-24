@@ -48,7 +48,7 @@ DWORD TotalSizeElfDataBaseTFIDFInf = 0, elfNbDocsTFIDFInf = 0, TotalSizeElfDataB
  */
 ERROR_CODE fileAnalysis(int fd, char *fileName){
 
-	//DBG_PRNT(" 5_2 DOS analysis : %s \n", fileName);
+	//DBG_PRNT(" H1 DOS analysis : %s \n", fileName);
 
 	/*variable initialization*/
 	PVECTOR testFileEat = NULL, testFileIat = NULL;
@@ -519,7 +519,7 @@ void freeDB(void){
 ERROR_CODE analyseElfFile(int fd, char* fileName){
 
 	// We take the file_path correspondinf to fd
-	//DBG_PRNT(" 5_2 analysisELF : %s \n", fileName);
+	//DBG_PRNT(" H1 analysisELF : %s \n", fileName);
 
 	ELF_CONTAINER elfOfFile;
 	ERROR_CODE retvalue;
