@@ -41,7 +41,7 @@ DWORD TotalSizeElfDataBaseTFIDFInf = 0, elfNbDocsTFIDFInf = 0, TotalSizeElfDataB
 /**
  * this function is for testing a file and deciding if it is a malicious file, a benign file, or something else
  * @param  	    fd the file descriptor, fileName the realpath of the file
- * @return          an ERROR_CODE value between : ARMADITO_NOT_DECIDED, E_CALLOC_ERROR, ARMADITO_MALWARE and ARMADITO_NOT_MALWARE.
+ * @return          an ERROR_CODE value between : ARMADITO_NOT_DECIDED, E_CALLOC_ERROR, ARMADITO_IS_MALWARE and ARMADITO_NOT_MALWARE.
  */
 ERROR_CODE fileAnalysis(int fd, char *fileName){
 
@@ -85,7 +85,7 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 	if (infosArray[3] == E_INVALID_ENTRY_POINT){
 		PeDestroy(&Pe);
 		DBG_PRNT("> %s",error_code_str(infosArray[3]));
-		return ARMADITO_MALWARE;
+		return ARMADITO_IS_MALWARE;
 	}
 
 	// if the file does not have an IAT and an EAT, it is the entry point which is the deciding parameter
@@ -93,7 +93,7 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 		PeDestroy(&Pe);
 		if (infosArray[3] == ARMADITO_SUCCESS){
 			DBG_PRNT("> %s", error_code_str(infosArray[3]));
-			return ARMADITO_MALWARE;
+			return ARMADITO_IS_MALWARE;
 		}
 		else{
 			//DBG_PRNT("> %s\ninfosArray[1] == E_NO_ENTRY && infosArray[2] == E_NO_ENTRY && infosArray[3] != ARMADITO_SUCCESS\n", fileName);
@@ -104,7 +104,7 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 	if (PeHasValidStructure(&Pe) == E_INVALID_STRUCTURE){
 		DBG_PRNT("> %s", error_code_str(E_INVALID_STRUCTURE));
 		PeDestroy(&Pe);
-		return ARMADITO_MALWARE;
+		return ARMADITO_IS_MALWARE;
 	}
 
 	// uncomment in order to only test the structure of the file
@@ -132,7 +132,7 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 				PeDestroy(&Pe);
 				if (infosArray[3] == ARMADITO_SUCCESS){
 					DBG_PRNT("> %s", error_code_str(infosArray[3]));
-					return ARMADITO_MALWARE;
+					return ARMADITO_IS_MALWARE;
 				}
 				else{
 					return ARMADITO_NOT_DECIDED;
@@ -142,7 +142,7 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 		else if (infosArray[4] != ARMADITO_SUCCESS){
 			PeDestroy(&Pe);
 			DBG_PRNT("> %s",  error_code_str(infosArray[4]));
-			return ARMADITO_MALWARE;
+			return ARMADITO_IS_MALWARE;
 		}
 		else { /*tests on the EAT*/
 			infosArray[4] = ARMADITO_SUCCESS;
@@ -150,10 +150,10 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 
 			vectorDelete(testFileEat);
 
-			if (infosArray[6] == ARMADITO_MALWARE){
+			if (infosArray[6] == ARMADITO_IS_MALWARE){
 				PeDestroy(&Pe);
 				DBG_PRNT("> %s", error_code_str(infosArray[6]));
-				return ARMADITO_MALWARE;
+				return ARMADITO_IS_MALWARE;
 			}
 			if (infosArray[2] == E_NO_ENTRY && infosArray[6] == ARMADITO_NOT_MALWARE){
 				PeDestroy(&Pe);
@@ -179,7 +179,7 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 		if (infosArray[5] != ARMADITO_SUCCESS){
 			PeDestroy(&Pe);
 			//DBG_PRNT("> %s\ninfosArray[5] != ARMADITO_SUCCESS : %s\n", fileName, GetErrorCodeMsg(infosArray[5]));
-			return ARMADITO_MALWARE;
+			return ARMADITO_IS_MALWARE;
 		}
 		else{ /*tests on the IAT*/
 
@@ -194,11 +194,11 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 				return ARMADITO_NOT_MALWARE;
 			}
 
-			if (infosArray[7] == ARMADITO_MALWARE){
+			if (infosArray[7] == ARMADITO_IS_MALWARE){
 				PeDestroy(&Pe);
 				vectorDelete(testFileIat);
-				//DBG_PRNT("> %s\ninfosArray[8] == ARMADITO_MALWARE\n", fileName);
-				return ARMADITO_MALWARE;
+				//DBG_PRNT("> %s\ninfosArray[8] == ARMADITO_IS_MALWARE\n", fileName);
+				return ARMADITO_IS_MALWARE;
 			}
 
 			infosArray[8] = tfidfTest(testFileIat,
@@ -215,11 +215,11 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 				vectorDelete(testFileIat);
 				return ARMADITO_NOT_MALWARE;
 			}
-			if (infosArray[8] == ARMADITO_MALWARE){
+			if (infosArray[8] == ARMADITO_IS_MALWARE){
 				PeDestroy(&Pe);
 				vectorDelete(testFileIat);
-				DBG_PRNT("> %s\ninfosArray[8] == ARMADITO_MALWARE\n", fileName);
-				return ARMADITO_MALWARE;
+				DBG_PRNT("> %s\ninfosArray[8] == ARMADITO_IS_MALWARE\n", fileName);
+				return ARMADITO_IS_MALWARE;
 			}*/
 
 			
@@ -229,12 +229,12 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 
 	PeDestroy(&Pe);
 
-	if (infosArray[8] == ARMADITO_MALWARE){
-		//DBG_PRNT("> %s\ninfosArray[7] == ARMADITO_MALWARE\n", fileName);
-		return ARMADITO_MALWARE;
+	if (infosArray[8] == ARMADITO_IS_MALWARE){
+		//DBG_PRNT("> %s\ninfosArray[7] == ARMADITO_IS_MALWARE\n", fileName);
+		return ARMADITO_IS_MALWARE;
 	}
 
-	if ((infosArray[8] == ARMADITO_NOT_MALWARE && infosArray[6] != ARMADITO_MALWARE) || (infosArray[6] == ARMADITO_NOT_MALWARE && infosArray[8] != ARMADITO_MALWARE)){
+	if ((infosArray[8] == ARMADITO_NOT_MALWARE && infosArray[6] != ARMADITO_IS_MALWARE) || (infosArray[6] == ARMADITO_NOT_MALWARE && infosArray[8] != ARMADITO_IS_MALWARE)){
 		return ARMADITO_NOT_MALWARE;
 	}
 

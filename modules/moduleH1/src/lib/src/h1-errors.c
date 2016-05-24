@@ -18,7 +18,7 @@ const char *error_code_str(ERROR_CODE e)
 #define M(E) case E: return #E
     M(ARMADITO_NULL);
     M(ARMADITO_SUCCESS);
-    M(ARMADITO_MALWARE);
+    M(ARMADITO_IS_MALWARE);
     M(ARMADITO_NOT_MALWARE);
     M(ARMADITO_EAT_UNKNOWN);
     M(ARMADITO_TFIDF_UNKNOWN);
@@ -83,8 +83,8 @@ CHAR* GetErrorCodeMsg(ERROR_CODE error){
 	case ARMADITO_SUCCESS:
 		return "--ARMADITO_SUCCESS--";
 
-	case ARMADITO_MALWARE:
-		return "--ARMADITO_MALWARE--";
+	case ARMADITO_IS_MALWARE:
+		return "--ARMADITO_IS_MALWARE--";
 
 	case ARMADITO_NOT_MALWARE:
 		return "--ARMADITO_NOT_MALWARE--";
