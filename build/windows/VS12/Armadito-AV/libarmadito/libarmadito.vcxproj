@@ -66,6 +66,9 @@ REM copy the DLL
 xcopy "$(OutDir)libarmadito.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
+REM create confdirectory
+if not exist "$(SolutionDir)out\$(Configuration)\conf" mkdir "$(SolutionDir)out\$(Configuration)\conf"
+
 REM copy the conf file
 xcopy "$(SolutionDir)..\..\..\..\core\libarmadito\conf\armadito.conf"  "$(SolutionDir)out\$(Configuration)\conf" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
