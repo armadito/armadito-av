@@ -643,7 +643,7 @@ int restore_conf_from_registry(struct a6o_conf * conf) {
 		registry_walker(hAppKey,NULL,conf);
 
 
-		//printf("\n\n UHURU_CONF :::\n\n");		
+		//printf("\n\n Armadito_CONF :::\n\n");		
 		// display a6o_conf
 		//a6o_conf_apply(conf,(a6o_conf_fun_t)display_entry, &data);
 		
