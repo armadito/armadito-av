@@ -20,14 +20,14 @@
 
 /* style of the debug log */
 /**
-===================== DBG_PRNT_MACRO_UHURU_STATIC =====================
+===================== DBG_PRNT_MACRO_H1_STATIC =====================
 Function : "In at elit justo. Sed. "
 File : "Nulla nisl arcu, congue ac"
 Line : "Suspendisse id ligula dictum, efficitur."
 Last modification : "Donec consequat ante id lacinia."
 Last compilation : "Nam dolor turpis, porttitor vitae."
 Message : "Etiam nisl nibh, porta a."
-===================== DBG_PRNT_MACRO_UHURU_STATIC =====================
+===================== DBG_PRNT_MACRO_H1_STATIC =====================
 **/
 
 #if defined(IN_DEBUG_MODE)
@@ -36,7 +36,7 @@ Message : "Etiam nisl nibh, porta a."
 #define DBG_MACRO_ENABLED 0
 #endif
 #define DBG_HEADER		"===================== %s =====================\n"
-#define DBG_HEADER_MSG	"DBG_PRNT_MACRO_UHURU_STATIC"
+#define DBG_HEADER_MSG	"DBG_PRNT_MACRO_H1_STATIC"
 #define DBG_FILE_INFO	"File : \"%s\"\nLine : %d\n"
 #define DBG_MODIF		"Last modification : %s\n"
 #define DBG_COMPILE		"Last compilation : %s at %s\n"

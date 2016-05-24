@@ -17,7 +17,7 @@ AC_ARG_WITH([dbdir],
 
 # check for analysis module sources
 AC_MSG_CHECKING(for analysis module sources)
-AC_CONFIG_SRCDIR(src/lib/src/UhuruStatic.c)
+AC_CONFIG_SRCDIR(src/lib/src/h1-static.c)
 AC_MSG_RESULT(yes)
 
 # check for needed programs
