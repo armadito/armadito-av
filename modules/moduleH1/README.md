@@ -1,4 +1,4 @@
-Armadito 5.2 module
+Armadito H1 module
 ================
 
 Copyright (c) NOV'IT/Teclib, 2014, 2015
@@ -9,7 +9,7 @@ Project home: http://www.somewhere.org
 What is it?
 -----------
 
-Armadito 5.2 module is a scan module dedicated to binaries analysis (PE and ELF).
+Armadito H1 module is a scan module dedicated to binaries analysis (PE and ELF).
 It is based on the libarmadito library.
 
 
@@ -22,33 +22,33 @@ TBW
 Prerequisites
 -------------
 
-In order to compile Armadito 5.2 module, you need the following tools:
+In order to compile Armadito H1 module, you need the following tools:
 
 - automake/autoconf
 - GNU make
 - C compiler
-- 5.2 original sources
+- H1 original sources
 
 
 Configuration
 -------------
 
-The sources of the module 5.2 are divided into:
+The sources of the module H1 are divided into:
 
 - the analysis code, maintained in a separate git repo
 - this code, which acts as 'glue' between the analysis code and libarmadito
 
 The analysis code repository must be cloned before running the configure 
 script. Once this clone done, a symbolic link must be created in the src/
-subdirectory of this directory, named `module5_2_sources` (this name is
+subdirectory of this directory, named `moduleH1_sources` (this name is
 mandatory).
 
     $ cd src/
-    $ ln -s /home/joebar/module5.2 ./module5_2_sources
+    $ ln -s /home/joebar/moduleH1 ./moduleH1_sources
 
 If `configure` script fails with a message like:
 
-    configure: error: cannot find sources (src/module5_2_sources/UhuruStatic/resources/UhuruStatic.h) in /home/joebar/uhuru-av/modules/module5_2 or ..
+    configure: error: cannot find sources (src/moduleH1_sources/UhuruStatic/resources/UhuruStatic.h) in /home/joebar/uhuru-av/modules/moduleH1 or ..
 
 it means that the symbolic link was not properly created.
 
@@ -80,11 +80,11 @@ must use the PKG_CONFIG_PATH environment variable.
 Building in a separate directory is highly recommended, unless you really want
 to clobber the source tree with objects, libraries, binaries and other stuff.
 
-    $ mkdir -p /home/joebar/build/modules/module5_2
+    $ mkdir -p /home/joebar/build/modules/moduleH1
 
 Typical invocation of the configure script is:
 
-    $ /home/joebar/armadito-av/modules/module5_2/configure --prefix=/home/joebar/install --enable-debug PKG_CONFIG_PATH=/home/joebar/install/lib/pkgconfig
+    $ /home/joebar/armadito-av/modules/moduleH1/configure --prefix=/home/joebar/install --enable-debug PKG_CONFIG_PATH=/home/joebar/install/lib/pkgconfig
 
 Note that the path specified in the value of PKG_CONFIG_PATH must be coherent
 with the PREFIX used in libarmadito installation (see `libarmadito` README).
@@ -97,7 +97,7 @@ Once configured, compilation is easy:
 
     $ make
     make  all-recursive
-    make[1]: entrant dans le répertoire " /home/joebar/build/modules/module5_2 "
+    make[1]: entrant dans le répertoire " /home/joebar/build/modules/moduleH1 "
     ...
 
 
