@@ -156,7 +156,7 @@ static enum a6o_file_status moduleH1_scan(struct a6o_module *module, int fd, con
 	ERROR_CODE e = UH_NULL;
 	const char *virus_name = NULL;
 
-	//printf("[i] Debug :: module 5_2_scan :: mime-type = %s\n",mime_type);
+	//printf("[i] Debug :: module H1 scan :: mime-type = %s\n",mime_type);
 
 	if (!strcmp(mime_type, "application/x-sharedlib")
 		|| !strcmp(mime_type, "application/x-object")
