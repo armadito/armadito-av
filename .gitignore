@@ -1,49 +1,7 @@
-VS/glib/*
-VS/clamav/*
-VS/UhuruAV/libuhuru_core/Debug/*
-VS/UhuruAV/libuhuru_ipc/Debug/*
-VS/UhuruAV/uhuru_scan/Debug/*
-VS/UhuruAV/scand/Debug/*
-VS/UhuruAV/module_5_2/Debug/*
-VS/UhuruAV/UhuruAV/Debug/
-VS/UhuruAV/UhuruScanCommandLine/Debug/
-VS/UhuruAV/libuhuru/Debug/
-VS/UhuruAV/clamav/Debug/*
-VS/UhuruAV/Debug/*
-VS/UhuruAV/UhuruAV.opensdf
-VS/UhuruAV/UhuruAV.sdf
-VS/UhuruAV/UhuruAV.v12.suo
-VS/UhuruAV/UhuruGuard Package/x64/Win7Debug/*
-VS/UhuruAV/UhuruGuard Package/x64/Win7Release/*
-VS/UhuruAV/UhuruGuard/x64/*
-VS/UhuruAV/x64/*
-VS/UhuruAV/UhuruSvc/Debug/*
-VS/UhuruAV/UhuruGuard/Win7Debug/*
-VS/UhuruAV/ScanClient/Debug/*
-VS/UhuruAV/ScanClient/x64/*
-VS/UhuruAV/UhuruGuard Package/Win7Debug/*
-VS/UhuruAV/Win7Debug/*
-VS/json-c/json-c/json-c.v12.suo
-VS/UhuruAV/UhuruAV_setup/Debug/*
-VS/UhuruAV/UhuruGuardSetup/Debug/*
-VS/UhuruAV/modulePDF/Debug/*
-VS/dependencies/*
-out/
-documentation/specs-ihm/tatou-ihm/~$$tatouIHM.~vsdx
 deps/*
-build/windows/VS/Armadito-AV/*/Debug
-build/windows/VS/Armadito-AV/Debug/*
-build/windows/VS/Armadito-AV/x64/*
-build/windows/VS/Armadito-AV/ArmaditoGuard/x64/*
-build/windows/VS/Armadito-AV/ArmaditoGuard Package/x64/*
-build/windows/VS/Armadito-AV/Armadito-AV.opensdf
-build/windows/VS/Armadito-AV/Armadito-AV.sdf
-build/windows/VS/Armadito-AV/Armadito-AV.v12.suo
 core/windows/driver/signature/*
 *.zip
 *.vcxproj.user
 databases/*
 windows-driver/signature/*
-
-
-
+out/*

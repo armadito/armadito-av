@@ -1,130 +1,155 @@
-Uhuru GUI
-=========
+# Armadito user interface
 
-Copyright (c) NOV'IT/Teclib, 2014, 2015
+## Prerequisites
 
-Project home: http://www.somewhere.org
+To run Armadito graphical user interface, you need:
 
+- node webkit SDK
+- bower
+- node.js
 
-What is it?
------------
+### Installing prerequisites on Linux
 
-Uhuru GUI is the graphical user interface for the Uhuru antivirus. It provides the following services:
+#### Installing node and bower
 
-- scanning of files or directory on demand
-- notification of automatic scans
-- past analysis and events
-- notification of databases updates
-- antivirus state (running services, alerts...)
+Installations are done as root.
 
+Installing node.js:
 
-Licensing
----------
+	apt-get install nodejs-legacy
 
-TBW
+Checking installation:
 
+	npm --version
+	1.4.21
 
-Prerequisites
--------------
+Installing bower (must be done as root too):
 
-In order to compile Uhuru GUI, you need the following tools:
-
-- automake/autoconf
-- GNU make
-- C++ compiler
-- libuhuru library and headers
-- Qt dev tools
-
-To install the needed packages:
-
-- Ubuntu: `apt-get install g++ libqt4-dev libqt4-svg qt4-designer qt4-dev-tools`
-- CentOS: ...
+	npm install -g bower
 
 
-Configuration
--------------
+#### Installing modules in source tree on Linux
 
-Once git repo cloned, you need to initialize the build using automake, autoconf and tools.
-A shell script `autogen.sh` is provided to ease this step:
+After cloning the repository, the source tree of the user interface must be configured for node webkit:
 
-    $ ./autogen.sh 
-    + aclocal --force
-    + autoheader --force
-    + automake --foreign --add-missing --force-missing --copy
-    + autoconf --force
-
-This will generate the `Makefile.in` files and the `configure` script.
-
-`configure` script takes the following useful options:
-
-    --prefix=PREFIX         install architecture-independent files in PREFIX
-                            [/usr/local]
-    --enable-debug          enable debugging [default is yes]
-
-The `PREFIX` directory will be used by `make install`. Its use is mandatory,
-since running the GUI from the build tree is not yet supported.
-
-Building in a separate directory is highly recommended, unless you really want
-to clobber the source tree with objects, libraries, binaries and other stuff.
-
-    $ mkdir /home/joebar/build/gui
-
-Typical invocation of the configure script is:
-
-    $ /home/joebar/uhuru-av/gui/configure --prefix=/home/joebar/install --enable-debug 
+	cd SOMEWHERE/ng-armadito
+	bower install
+	npm install
 
 
-Compiling
----------
+#### Installing node web kit on Linux
 
-Once configured, compilation is easy:
+After downloading latest stable SDK (actually 0.14.0) from http://nwjs.io/downloads/, untar the tarball:
 
-    $ make
-    make  all-recursive
-    make[1]: entrant dans le répertoire " /home/joebar/build/gui "
-    ...
+	cd SOMEWHEREELSE
+	tar xvzf nwjs-v0.14.0-linux-x64.tar.gz  ### adapt w.r.t. distribution, 32 or 64 bits
 
+That's all
 
-Installing
-----------
+### Installing prerequisites on Windows
 
-After compiling, installation is done by:
+The prerequisites are:
 
-    $ make install
-    ...
+* node.js
+* git (needed by bower)
+* bower
 
-This will install libraries, tools, icons... in the subdirectories of the PREFIX
-directory defined at configure time.
+#### Installing node and bower
 
+First, download node.js from https://nodejs.org/en/download/, using either the .msi or the .exe installer, at your choice.
 
-Running
--------
+During installation, default configuration choices are OK.
 
-If Uhuru is not installed in standard directories (and this is highly *not* recommended),
-running the Uhuru tools requires first to use the LD_LIBRARY_PATH environment variable
-to specify install location of libuhuru. This can be done either:
+Once node is installed, launch a command line.
 
-- for the shell session:
-    $ export LD_LIBRARY_PATH=/home/joebar/install/lib
+Checking installation:
 
-- or for each command:
-    $ LD_LIBRARY_PATH=/home/joebar/install/lib /home/joebar/install/bin/uhuru-qt
+	npm --version
+	2.15.1
 
-Running the GUI requires first to launch the Uhuru scan daemon, which is compiled
-and installed with libuhuru.
+Then install bower using:
 
-To run the Uhuru scan daemon:
+	npm install -g bower
 
-    $ LD_LIBRARY_PATH=/home/joebar/install/lib /home/joebar/install/bin/uhuru-scan-daemon -n
+#### Install git on windows
 
-Then GUI can be launched with:
+To use bower, you must first install git.
 
-    $ LD_LIBRARY_PATH=/home/joebar/install/lib /home/joebar/install/bin/uhuru-qt
+git for windows is available here: https://git-for-windows.github.io/
+
+Checking installation:
+
+	git version 2.8.1.windows.1
 
 
-Documentation
--------------
+#### Installing modules in source tree on Windows
 
-TBW
 
+After cloning the sources:
+
+	git clone git@gitlab.teclib.infra:armadito/ng-armadito.git
+
+run bower from ng-armadito directory to install the needed modules:
+
+	bower install
+	npm install
+
+This should output a lot of messages
+
+
+#### Installing node web kit on Windows
+
+Download the archive from: http://nwjs.io/downloads/
+
+Make sure to download the SDK.
+
+Extract the archive using Windows file explorer.
+
+
+## Running the interface
+
+### Running the interface on Linux
+
+First, the Armadito daemon must be launched. Refer to Armadito documentation for instructions.
+
+The user interface can be launched with:
+
+	cd SOMEWHERE/ng-armadito
+	SOMEWHEREELSE/nwjs-sdk-v0.13.4-linux-x64/nw .
+
+
+### Running the interface on Windows
+
+First, the Armadito service must be launched. Refer to Armadito documentation for instructions.
+
+The user interface can be launched with:
+
+	cd SOMEWHERE\ng-armadito
+	SOMEWHEREELSE\nwjs-sdk-v0.14.0-win-x64\nw.exe .
+
+
+## Debugging the interface
+
+Once the interface is launched:
+
+- right-click in the window to display debug menu and select "Inspect"
+- in the inspector window, select the "console" tab
+
+## Build with grunt
+
+Install grunt :
+
+$ npm install -g grunt-cli
+
+Run `grunt` for building and `grunt serve` for preview.
+
+You can use "--force" if you want to build with warnings.
+
+## Testing
+
+Running `grunt test` will run the unit tests with karma.
+
+## Note
+
+This project is generated with [yo angular generator](https://github.com/yeoman/generator-angular) version 0.15.1.
 

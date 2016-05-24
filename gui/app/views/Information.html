@@ -1,0 +1,53 @@
+<div class="container-fluid informationBackground">
+	<br>
+	<div class="row">
+	  <div class="col-xs-4 col-sm-4 col-md-4">
+	  <img alt="Tatoo" src="images/screenOk.png" class="img-responsive">
+	  </div>
+	  <div class="col-xs-4 col-sm-4 col-md-4">
+	  	<ul class="information">
+		  <li class="information"><h5><span class="informationLi">{{ 'information_view.Real_time_analyse' | translate}}</span></h5></li>
+		  <li class="information"><h5><span class="informationLi">{{ 'information_view.Analyse_service' | translate}}</span></h5></li>
+		  <li class="information"><h5><span class="informationLi">{{ 'information_view.Update_bases' | translate}}</span></li></h5></li>
+		  <li class="information"><h5><span class="informationLi">{{ 'information_view.Last_update' | translate}} :</span></h5></li>
+		</ul>
+	  </div>
+	  <div class="col-xs-4 col-sm-4 col-md-4">
+	  	<ul class="information">
+		  <li class="information2" style="-webkit-app-region: no-drag;">
+		  	<input type="checkbox"  ng-model="state.realtime" disabled ng-change="testfunc()" name="checkbox1" id="checkbox1" class="ios-toggle" checked/>
+			<label for="checkbox1" class="checkbox-label"></label>
+		  </li>
+		  <li class="information2"><h5><i ng-class="state.service ? 'fa fa-check checkIcon' : 'fa fa-exclamation-triangle text-danger'"></i></h5></li>
+		  
+		  <li class="information2"><h5><i ng-class="state.upToDate ? 'fa fa-check checkIcon' : 'fa fa-exclamation-triangle text-danger'"></i>&nbsp;&nbsp;&nbsp;<i style="-webkit-app-region: no-drag;" ng-click="update_db()" class="fa fa-refresh"></i></li></h5></li>
+		  <li class="information2"><h5>{{state.last_update}}</h5></li>
+		</ul>
+	  </div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<table class="table information">
+			    <thead class="information">
+			      <tr class="information">
+			        <th clas="information" style="width:40%"><h4><i class="informationTitle">{{ 'information_view.Modules' | translate}}</i></h4></th>
+			        <th class="information" style="width:60%"><h4><i class="informationTitle">{{ 'information_view.Date' | translate}}</i></h4></th>
+			        <th class="information" style="width:60%"><h4><i class="informationTitle">{{ 'information_view.Status' | translate}}</i></h4></th>
+			      </tr>
+			    </thead>
+			    <tbody class="information" id="ex3" >
+			      <tr class="information" ng-repeat="module in state.modules">
+			        <td style="width:40%" class="information"><h7>{{module.name}}</h7></td>
+			        <td style="width:60%"class="information"><h7>{{module.update.date}}</h7></td>
+			        <td style="width:60%"class="information">
+					  <h7 ng-if="module.update.status==='up-to-date'" >{{'information_view.Status_up_to_date' | translate}}</h7>
+					  <h7 ng-if="module.update.status==='critical'" >{{'information_view.Status_critical' | translate}}</h7>
+					  <h7 ng-if="module.update.status==='late'" >{{'information_view.Status_late' | translate}}</h7>
+					  <h7 ng-if="module.update.status==='unavailable'" >{{'information_view.Status_unavailable' | translate}}</h7>
+					</td>
+			      </tr>
+			    </tbody>
+			</table>
+		</div>
+	</div>
+</div>
