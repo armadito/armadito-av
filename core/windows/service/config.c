@@ -1,9 +1,9 @@
 #include "config.h"
 #include <ui\ui.h>
 
-#define APP_ROOT_KEY_PATH "SOFTWARE\\Novit\\Armadito"
-#define COMPAGNY_NAME "Novit"
-#define PRODUCT_NAME "Armadito"
+#define APP_ROOT_KEY_PATH "SOFTWARE\\Teclib\\Armadito"
+#define COMPAGNY_NAME "Teclib"
+#define PRODUCT_NAME "Armadito-av"
 
 #define SVC_IPC_PATH "\\\\.\\pipe\\Armadito_ondemand"
 
