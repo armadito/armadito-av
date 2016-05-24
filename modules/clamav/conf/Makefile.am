@@ -1,4 +1,4 @@
-confdir=$(sysconfdir)/uhuru/conf.d
+confdir=$(sysconfdir)/armadito/conf.d
 conf_DATA=clamav.conf
 
 EDIT = sed \
