@@ -42,6 +42,8 @@ build/windows/VS/Armadito-AV/Armadito-AV.v12.suo
 core/windows/driver/signature/*
 *.zip
 *.vcxproj.user
+databases/*
+windows-driver/signature/*
 
 
 
