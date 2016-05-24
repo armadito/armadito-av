@@ -1,4 +1,4 @@
-Uhuru
+Armadito
 =====
 
 Copyright (C) Teclib', 2015, 2016
@@ -8,7 +8,7 @@ Project home: http://www.somewhere.org
 What is it?
 -----------
 
-Uhuru is an open-source antivirus.
+Armadito is an open-source antivirus.
 
 Dépendances
 -----------
@@ -49,8 +49,7 @@ PACKAGE could be one of the following :
 
 On WINDOWS :
 
-Firstly, open VS/UhuruAV/UhuruAV.sln in Visual Studio (2013).
-( # TO BE CONTINUED )
+#TODO
 
 Licensing
 ---------

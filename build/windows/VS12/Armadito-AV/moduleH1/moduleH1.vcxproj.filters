@@ -60,7 +60,7 @@
     <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\uh_errors.c">
       <Filter>Fichiers sources\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\UhuruStatic.c">
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\h1-static.c">
       <Filter>Fichiers sources\lib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\vector.c">
@@ -71,7 +71,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\module\UhuruStatic.h">
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\module\h1-static.h">
       <Filter>Fichiers d%27en-tête\module</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\databases.h">
