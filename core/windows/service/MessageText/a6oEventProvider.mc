@@ -1,5 +1,5 @@
-; // Message Text File for libuhuru.
-; // uhEventProvider.mc
+; // Message Text File for armadito.
+; // a6oEventProvider.mc
 
 ; // Header section
 
@@ -16,9 +16,9 @@ LanguageNames=(English=0x409:MSG00409)
 MessageIdTypedef=WORD
 
 MessageId=0x1
-SymbolicName=LIBUHURU_CATEGORY
+SymbolicName=LIBARMADITO_CATEGORY
 Language=English
-Libuhuru
+Libarmadito
 .
 
 MessageId=0x2
@@ -43,7 +43,7 @@ Severity=Error
 Facility=Application
 SymbolicName=MSG_ERROR
 Language=English
-UhuruAV :: Error :: %1
+Armadito-av :: Error :: %1
 .
 
 ; // Warning messages
@@ -52,7 +52,7 @@ Severity=Warning
 Facility=Application
 SymbolicName=MSG_WARNING
 Language=English
-UhuruAV :: Warning :: %1
+Armadito-av :: Warning :: %1
 .
 
 ; // Information messages
@@ -61,7 +61,7 @@ Severity=Informational
 Facility=Application
 SymbolicName=MSG_INFO
 Language=English
-UhuruAV :: Information :: %1
+Armadito-av :: Information :: %1
 .
 
 ; // Success messages
@@ -70,5 +70,5 @@ Severity=Success
 Facility=Application
 SymbolicName=MSG_SUCCESS
 Language=English
-UhuruAV :: Success :: %1
+Armadito-av :: Success :: %1
 .
