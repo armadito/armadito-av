@@ -1,5 +1,7 @@
 @echo off
 
+REM -- deprecated ?
+
 set mc_bin="C:\Program Files (x86)\Windows Kits\8.1\bin\x64\mc.exe"
 set rc_bin="C:\Program Files (x86)\Windows Kits\8.1\bin\x64\rc.exe"
 set mypath="D:\Novit\uhuru-av\libuhuru\src\windows\service\MessageText"

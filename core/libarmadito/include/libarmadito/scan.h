@@ -5,7 +5,7 @@
  *
  * The scan API allows to scan files or directories, possibly using a pool of thread.
  *
- * A scan assigns a a6o_file_status to a file or to each file located under a directory, by calling the scan function of the Uhuru modules.
+ * A scan assigns a a6o_file_status to a file or to each file located under a directory, by calling the scan function of the Armadito modules.
  * During the scan, callbacks are used
  *
  * Basic operations are:

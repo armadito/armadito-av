@@ -118,7 +118,7 @@ void a6o_info_to_stdout(struct a6o_info *info)
 	struct a6o_module_info **m;
 	struct a6o_base_info **b;
 
-	fprintf(stdout, "--- Uhuru_info --- \n");
+	fprintf(stdout, "--- Armadito_info --- \n");
 	fprintf(stdout, "Update global status : %d\n", info->global_status);
 	if (info->module_infos != NULL) {
 		for(m = info->module_infos; *m != NULL; m++){

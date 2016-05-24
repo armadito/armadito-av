@@ -85,7 +85,7 @@ const char *os_mime_type_guess(const char *path)
 	}
 
 	size = fileSize.QuadPart;
-	//g_log(NULL, UHURU_LOG_LEVEL_WARNING, "Debug :: os_mime_type_guess() :: (%s) FILE SIZE = %d  \n",path,size);
+
 	if (size > BUF_SIZE) {		
 		size = BUF_SIZE;
 	}

@@ -1,4 +1,4 @@
- // Message Text File for libuhuru.
+ // Message Text File for libarmadito.
  // uhEventProvider.mc
  // Header section
  // The following are the categories of events.
@@ -43,13 +43,13 @@
 
 
 //
-// MessageId: LIBUHURU_CATEGORY
+// MessageId: LIBARMADITO_CATEGORY
 //
 // MessageText:
 //
-// Libuhuru
+// Libarmadito
 //
-#define LIBUHURU_CATEGORY                ((WORD)0x00000001L)
+#define LIBARMADITO_CATEGORY                ((WORD)0x00000001L)
 
 //
 // MessageId: MODULES_CATEGORY
