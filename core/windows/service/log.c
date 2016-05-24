@@ -52,7 +52,7 @@ void winEventHandler(enum a6o_log_domain domain, enum a6o_log_level log_level, c
 	// Define Log Category
 	switch(domain) {
 		case ARMADITO_LOG_LIB:
-			eventCategory = LIBUHURU_CATEGORY;
+			eventCategory = LIBARMADITO_CATEGORY;
 			break;
 		case ARMADITO_LOG_MODULE:
 			eventCategory = MODULES_CATEGORY;
