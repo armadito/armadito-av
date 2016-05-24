@@ -27,101 +27,101 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\module\module5_2.c">
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\module\moduleH1.c">
       <Filter>Fichiers sources\module</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\databases.c">
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\databases.c">
       <Filter>Fichiers sources\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\distances.c">
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\distances.c">
       <Filter>Fichiers sources\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\elfReader.c">
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\elfReader.c">
       <Filter>Fichiers sources\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\gestionPE.c">
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\gestionPE.c">
       <Filter>Fichiers sources\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\kNN.c">
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\kNN.c">
       <Filter>Fichiers sources\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\miniz.c">
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\miniz.c">
       <Filter>Fichiers sources\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\model.c">
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\model.c">
       <Filter>Fichiers sources\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\table.c">
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\table.c">
       <Filter>Fichiers sources\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\tfidfDetection.c">
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\tfidfDetection.c">
       <Filter>Fichiers sources\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\uh_errors.c">
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\uh_errors.c">
       <Filter>Fichiers sources\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\UhuruStatic.c">
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\UhuruStatic.c">
       <Filter>Fichiers sources\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\vector.c">
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\vector.c">
       <Filter>Fichiers sources\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\module5_2\src\lib\src\windows\osdeps.c">
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\windows\osdeps.c">
       <Filter>Fichiers sources\lib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\module\UhuruStatic.h">
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\module\UhuruStatic.h">
       <Filter>Fichiers d%27en-tête\module</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\databases.h">
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\databases.h">
       <Filter>Fichiers d%27en-tête\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\distances.h">
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\distances.h">
       <Filter>Fichiers d%27en-tête\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\elfReader.h">
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\elfReader.h">
       <Filter>Fichiers d%27en-tête\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\gestionPE.h">
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\gestionPE.h">
       <Filter>Fichiers d%27en-tête\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\kNN.h">
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\kNN.h">
       <Filter>Fichiers d%27en-tête\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\miniz.h">
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\miniz.h">
       <Filter>Fichiers d%27en-tête\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\model.h">
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\model.h">
       <Filter>Fichiers d%27en-tête\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\osdeps.h">
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\osdeps.h">
       <Filter>Fichiers d%27en-tête\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\PEUtils.h">
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\PEUtils.h">
       <Filter>Fichiers d%27en-tête\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\table.h">
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\table.h">
       <Filter>Fichiers d%27en-tête\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\tfidfDetection.h">
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\tfidfDetection.h">
       <Filter>Fichiers d%27en-tête\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\uh_errors.h">
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\uh_errors.h">
       <Filter>Fichiers d%27en-tête\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\utils.h">
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\utils.h">
       <Filter>Fichiers d%27en-tête\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\vector.h">
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\vector.h">
       <Filter>Fichiers d%27en-tête\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\modules\module5_2\src\lib\include\windowsTypes.h">
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\windowsTypes.h">
       <Filter>Fichiers d%27en-tête\lib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="module5_2.def">
+    <None Include="moduleH1.def">
       <Filter>Fichiers d%27en-tête\module</Filter>
     </None>
   </ItemGroup>
