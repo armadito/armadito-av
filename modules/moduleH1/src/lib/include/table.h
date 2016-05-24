@@ -48,7 +48,7 @@ PTABLE tableNew(DWORD n);
  * @param  t     the table where we want to add an element
  * @param  dist  the dist field of the element we want to add
  * @param  model the model field of the element we want to add
- * @return       UH_SUCCESS or E_FAILURE
+ * @return       ARMADITO_SUCCESS or E_FAILURE
  */
 ERROR_CODE tableAddElement(PTABLE t, DOUBLE dist, CHAR model);
 

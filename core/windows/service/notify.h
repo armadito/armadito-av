@@ -1,5 +1,5 @@
-#ifndef __UH_NOTIFY_H__
-#define __UH_NOTIFY_H__
+#ifndef __ARMADITO_NOTIFY_H__
+#define __ARMADITO_NOTIFY_H__
 
 #include <libarmadito.h>
 #include <ui\ui.h>

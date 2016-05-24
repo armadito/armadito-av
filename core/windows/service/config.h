@@ -1,5 +1,5 @@
-#ifndef __UH_CONF_H__
-#define __UH_CONF_H__
+#ifndef __ARMADITO_CONF_H__
+#define __ARMADITO_CONF_H__
 
 #include <libarmadito.h>
 #include <Windows.h>

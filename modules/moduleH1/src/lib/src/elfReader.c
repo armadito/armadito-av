@@ -122,7 +122,7 @@ ERROR_CODE ElfInit(int fd, CHAR* filename, PELF_CONTAINER elfOfFile){
 		return E_BAD_ARCHITECTURE;
 	}
 
-	return UH_SUCCESS;
+	return ARMADITO_SUCCESS;
 }
 
 VOID ElfDestroy(PELF_CONTAINER elfOfFile){
@@ -300,7 +300,7 @@ ERROR_CODE ElfReadSymbolTable(PELF_CONTAINER elfOfFile, WORD sectionIndex, QWORD
 		return E_BAD_ARCHITECTURE;
 	}
 
-	return UH_SUCCESS;
+	return ARMADITO_SUCCESS;
 }
 
 /**
@@ -351,7 +351,7 @@ ERROR_CODE ElfSymbolTable(PELF_CONTAINER elfOfFile, PVECTOR *symbolVector, PDATA
 		for (i = 0; i < elfOfFile->PElfN_Ehdr.ehdr64->e_shnum; i++) {
 			if (elfOfFile->PElfN_Shdr.shdr64[i].sh_name < elfOfFile->fileSize){
 				if ((elfOfFile->PElfN_Shdr.shdr64[i].sh_type == SHT_SYMTAB) || (elfOfFile->PElfN_Shdr.shdr64[i].sh_type == SHT_DYNSYM)) {
-					if (ElfReadSymbolTable(elfOfFile, i, &pqwSymbols, &currentPqwSymbolsIndex, db, db_size) != UH_SUCCESS){
+					if (ElfReadSymbolTable(elfOfFile, i, &pqwSymbols, &currentPqwSymbolsIndex, db, db_size) != ARMADITO_SUCCESS){
 						free(pqwSymbols);
 						pqwSymbols = NULL;
 						return E_BAD_FORMAT;
@@ -364,7 +364,7 @@ ERROR_CODE ElfSymbolTable(PELF_CONTAINER elfOfFile, PVECTOR *symbolVector, PDATA
 		for (i = 0; i < elfOfFile->PElfN_Ehdr.ehdr32->e_shnum; i++) {
 			if (elfOfFile->PElfN_Shdr.shdr32[i].sh_name < elfOfFile->fileSize){
 				if ((elfOfFile->PElfN_Shdr.shdr32[i].sh_type == SHT_SYMTAB) || (elfOfFile->PElfN_Shdr.shdr32[i].sh_type == SHT_DYNSYM)) {
-					if (ElfReadSymbolTable(elfOfFile, i, &pqwSymbols, &currentPqwSymbolsIndex, db, db_size) != UH_SUCCESS){
+					if (ElfReadSymbolTable(elfOfFile, i, &pqwSymbols, &currentPqwSymbolsIndex, db, db_size) != ARMADITO_SUCCESS){
 						free(pqwSymbols);
 						pqwSymbols = NULL;
 						return E_BAD_FORMAT;
@@ -394,5 +394,5 @@ ERROR_CODE ElfSymbolTable(PELF_CONTAINER elfOfFile, PVECTOR *symbolVector, PDATA
 		return E_CALLOC_ERROR;
 	}
 
-	return UH_SUCCESS;
+	return ARMADITO_SUCCESS;
 }

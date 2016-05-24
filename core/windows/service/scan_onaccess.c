@@ -262,10 +262,6 @@ HRESULT UserScanWorker( _In_  PGLOBAL_SCAN_CONTEXT Context )
 				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_WARNING, " ArmaditoSvc!UserScanWorker :: [%d] :: ConvertDeviceNameToMsDosName failed :: \n",ThreadId);				
 				scan_result = ARMADITO_EINVAL;
 			}
-			// fake scan example			
-			/*else if (strstr(msDosFilename,"UH_MALWARE") != NULL) {				
-				scan_result = ARMADITO_MALWARE;
-			}*/
 			else if (strstr(msDosFilename,"ARMADITO.TXT") != NULL) {  // Do not scan the log file. (debug only)
 				scan_result = ARMADITO_WHITE_LISTED;
 			}
