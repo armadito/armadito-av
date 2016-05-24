@@ -47,9 +47,9 @@ fi
 # database directory
 AC_MSG_CHECKING(for databases directory)
 if test "$with_dbdir" = "no" ; then
-   MODULE5_2_DBDIR="$localstatedir/lib/armadito/bases/moduleH1"
+   MODULEH1_DBDIR="$localstatedir/lib/armadito/bases/moduleH1"1
 else
-   MODULE5_2_DBDIR="$with_dbdir"
+   MODULEH1_DBDIR="$with_dbdir"
 fi
 AC_MSG_RESULT($MODULEH1_DBDIR)
 if test ! -f "$MODULEH1_DBDIR/linux/database.elfdata" ; then
