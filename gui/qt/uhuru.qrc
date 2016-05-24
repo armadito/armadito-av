@@ -1,9 +1,0 @@
-<!DOCTYPE RCC>
-<RCC version="1.0">
-<qresource prefix="/">
-  <file>icons/uhuru_grey.svg</file>
-  <file>icons/uhuru_white.svg</file>
-  <file>icons/clamav.ico</file>
-  <file>icons/uhuru_am.png</file>
-</qresource>
-</RCC>
