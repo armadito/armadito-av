@@ -11,7 +11,7 @@ FILE * os_fopen(const char * filename, const char * mode);
 #define os_strdup _strdup
 #define os_fdopen _fdopen
 #define os_read _read
-#define MODULE5_2_DBDIR "modules/DB/module5_2"
+#define MODULEH1_DBDIR "modules/DB/moduleH1"
 #else
 #define os_fopen fopen
 #define os_fdopen fdopen
