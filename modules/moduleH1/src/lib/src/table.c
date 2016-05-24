@@ -65,7 +65,7 @@ ERROR_CODE tableAddElement(PTABLE t, DOUBLE dist, CHAR model){
 		t->e[i].model = model;
 	}
 
-	return UH_SUCCESS;
+	return ARMADITO_SUCCESS;
 }
 
 VOID tableDelete(PTABLE t){

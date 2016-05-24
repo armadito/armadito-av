@@ -153,7 +153,7 @@ static enum a6o_mod_status moduleH1_post_init(struct a6o_module *module)
 // We receive a file descriptor
 static enum a6o_file_status moduleH1_scan(struct a6o_module *module, int fd, const char *path, const char *mime_type, char **pmod_report)
 {
-	ERROR_CODE e = UH_NULL;
+	ERROR_CODE e = ARMADITO_NULL;
 	const char *virus_name = NULL;
 
 	//printf("[i] Debug :: module H1 scan :: mime-type = %s\n",mime_type);
@@ -162,25 +162,25 @@ static enum a6o_file_status moduleH1_scan(struct a6o_module *module, int fd, con
 		|| !strcmp(mime_type, "application/x-object")
 		|| !strcmp(mime_type, "application/x-executable")) {
 		e = analyseElfFile(fd, (char *)path);
-		if (e == UH_MALWARE)
+		if (e == ARMADITO_MALWARE)
 			virus_name = "Linux.Heuristic.Malware.Generic";
 	} else if (!strcmp(mime_type, "application/x-dosexec")
 		|| !strcmp(mime_type, "application/x-msdownload")) {
 		e = fileAnalysis(fd, (char *)path);
-		if (e == UH_MALWARE)
+		if (e == ARMADITO_MALWARE)
 			virus_name = "Win.Heuristic.Malware.Generic";
 	}
 
 	switch(e) {
-	case UH_MALWARE:
+	case ARMADITO_MALWARE:
 		/* even if virus_name is a statically allocated string, it must be returned in a dynamically allocated string */
 		/* because it will be free()d by the calling code */
 		*pmod_report = os_strdup(virus_name);
 		return ARMADITO_MALWARE;
-	case UH_NOT_MALWARE:
+	case ARMADITO_NOT_MALWARE:
 		return ARMADITO_CLEAN;
-	case UH_NOT_DECIDED:
-	case UH_DOUBTFUL:
+	case ARMADITO_NOT_DECIDED:
+	case ARMADITO_DOUBTFUL:
 		return ARMADITO_UNDECIDED;
 	}
 

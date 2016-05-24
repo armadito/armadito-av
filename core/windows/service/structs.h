@@ -1,5 +1,5 @@
-#ifndef __UH_STRUCTS_H__
-#define __UH_STRUCTS_H__
+#ifndef __ARMADITO_STRUCTS_H__
+#define __ARMADITO_STRUCTS_H__
 
 #include <Windows.h>
 
