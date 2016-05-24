@@ -46,5 +46,5 @@ void a6o_error_print(a6o_error *err, FILE *out)
 	if (err == NULL)
 		return;
 
-	fprintf(out, "** Uhuru: ERROR: %s\n", err->error_message);
+	fprintf(out, "** Armadito: ERROR: %s\n", err->error_message);
 }
