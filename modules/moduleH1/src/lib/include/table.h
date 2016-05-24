@@ -7,7 +7,7 @@
 #define TABLE_H
 
 #include "windowsTypes.h"
-#include "uh_errors.h"
+#include "h1-errors.h"
 
 /* these defines are used in order to characterize the model of an element */
 #define 	ELEMENT_NO_MODEL 			 0

@@ -57,7 +57,7 @@
     <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\tfidfDetection.c">
       <Filter>Fichiers sources\lib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\uh_errors.c">
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\h1-errors.c">
       <Filter>Fichiers sources\lib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\h1-static.c">
@@ -107,7 +107,7 @@
     <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\tfidfDetection.h">
       <Filter>Fichiers d%27en-tête\lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\uh_errors.h">
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\h1-errors.h">
       <Filter>Fichiers d%27en-tête\lib</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\utils.h">
