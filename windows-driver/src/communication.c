@@ -1,6 +1,6 @@
 #include "communication.h"
 
-#define SCAN_PORT_NAME L"\\UhuruPortScanFilter"
+#define SCAN_PORT_NAME L"\\A6oPortScanFilter"
 /***********************************************************************
 	InitCommunicationPort(gFilterHandle, &gFilterComPort)
 ************************************************************************/
