@@ -6,7 +6,7 @@
 #include <string.h>
 #include <time.h>
 #include "osdeps.h"
-#include "uh_errors.h"
+#include "h1-errors.h"
 #include "h1-tatic.h"
 
 /* under re-implementation */

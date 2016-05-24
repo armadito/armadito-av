@@ -105,7 +105,7 @@ echo post-build step for $(ProjectName) OK
     <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\table.c" />
     <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\tfidfDetection.c" />
     <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\h1-static.c" />
-    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\uh_errors.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\h1-errors.c" />
     <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\vector.c" />
     <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\windows\osdeps.c" />
     <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\module\moduleH1.c" />
@@ -122,7 +122,7 @@ echo post-build step for $(ProjectName) OK
     <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\PEUtils.h" />
     <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\table.h" />
     <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\tfidfDetection.h" />
-    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\uh_errors.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\h1-errors.h" />
     <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\utils.h" />
     <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\vector.h" />
     <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\windowsTypes.h" />

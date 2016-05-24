@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 #include "distances.h"
-#include "uh_errors.h"
+#include "h1-errors.h"
 
 DOUBLE distanceDFG(PVECTOR a, PVECTOR b){
 	DWORD i = 0, j = 0, m = 0, n = 0;

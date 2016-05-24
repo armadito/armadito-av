@@ -1,7 +1,7 @@
 #ifndef __H1_STATIC__
 #define __H1_STATIC__
 
-#include "uh_errors.h"
+#include "h1-errors.h"
 
 ERROR_CODE fileAnalysis(int fd, char *fileName);
 
