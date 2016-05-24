@@ -1,10 +1,10 @@
 AUTOMAKE_OPTIONS=subdir-objects
 
 modulesdir=$(libdir)/armadito/modules
-modules_LTLIBRARIES=module5_2.la
+modules_LTLIBRARIES=moduleH1.la
 
-module5_2_la_SOURCES= \
-module/module5_2.c \
+moduleH1_la_SOURCES= \
+module/moduleH1.c \
 module/UhuruStatic.h \
 lib/include/PEUtils.h \
 lib/include/databases.h \
@@ -35,15 +35,15 @@ lib/src/tfidfDetection.c \
 lib/src/uh_errors.c \
 lib/src/vector.c 
 
-AM_CPPFLAGS= -DMODULE5_2_DBDIR='"@MODULE5_2_DBDIR@"'
-module5_2_la_LDFLAGS= -module -avoid-version -export-symbols "$(srcdir)/module5_2.sym"
-module5_2_la_CFLAGS= -I$(srcdir)/lib/include
-module5_2_la_LIBADD=
-module5_2_la_CFLAGS+= @LIBARMADITO_CFLAGS@
-module5_2_la_LIBADD+= @LIBARMADITO_LIBS@
+AM_CPPFLAGS= -DMODULEH1_DBDIR='"@MODULEH1_DBDIR@"'
+moduleH1_la_LDFLAGS= -module -avoid-version -export-symbols "$(srcdir)/moduleH1.sym"
+moduleH1_la_CFLAGS= -I$(srcdir)/lib/include
+moduleH1_la_LIBADD=
+moduleH1_la_CFLAGS+= @LIBARMADITO_CFLAGS@
+moduleH1_la_LIBADD+= @LIBARMADITO_LIBS@
 
 install-exec-hook:
-	-rm -f "$(DESTDIR)$(modulesdir)"/module5_2.la "$(DESTDIR)$(modulesdir)"/module5_2.a
+	-rm -f "$(DESTDIR)$(modulesdir)"/moduleH1.la "$(DESTDIR)$(modulesdir)"/moduleH1.a
 
 install-data-hook:
-	-rm -f "$(DESTDIR)$(modulesdir)"/module5_2.la "$(DESTDIR)$(modulesdir)"/module5_2.a
+	-rm -f "$(DESTDIR)$(modulesdir)"/moduleH1.la "$(DESTDIR)$(modulesdir)"/moduleH1.a
