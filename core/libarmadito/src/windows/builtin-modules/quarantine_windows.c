@@ -191,7 +191,7 @@ char * GetFilenameFromPath(char * path) {
 	return filename;
 }
 
-int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct a6o_report * uh_report) {
+int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct a6o_report * report) {
 
 	int ret = 0;
 	char * info_path = NULL;
@@ -250,15 +250,15 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct a6
 		
 		json_object_object_add(jobj, "path", json_object_new_string(oldfilepath));
 
-		if (uh_report != NULL && uh_report->mod_name != NULL) {
-			json_object_object_add(jobj, "module", json_object_new_string(uh_report->mod_name));
+		if (report != NULL && report->mod_name != NULL) {
+			json_object_object_add(jobj, "module", json_object_new_string(report->mod_name));
 		}
 		else {
 			json_object_object_add(jobj, "module", json_object_new_string("black_list"));
 		}
 
-		if (uh_report != NULL && uh_report->mod_report != NULL) {
-			json_object_object_add(jobj, "desc", json_object_new_string(uh_report->mod_report));
+		if (report != NULL && report->mod_report != NULL) {
+			json_object_object_add(jobj, "desc", json_object_new_string(report->mod_report));
 		}
 		else {
 			json_object_object_add(jobj, "desc", json_object_new_string("uh_malware"));
