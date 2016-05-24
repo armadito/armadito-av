@@ -7,7 +7,7 @@
 #include <time.h>
 #include "osdeps.h"
 #include "h1-errors.h"
-#include "h1-tatic.h"
+#include "h1-static.h"
 
 /* under re-implementation */
 
@@ -162,17 +162,17 @@ static enum a6o_file_status moduleH1_scan(struct a6o_module *module, int fd, con
 		|| !strcmp(mime_type, "application/x-object")
 		|| !strcmp(mime_type, "application/x-executable")) {
 		e = analyseElfFile(fd, (char *)path);
-		if (e == ARMADITO_MALWARE)
+		if (e == ARMADITO_IS_MALWARE)
 			virus_name = "Linux.Heuristic.Malware.Generic";
 	} else if (!strcmp(mime_type, "application/x-dosexec")
 		|| !strcmp(mime_type, "application/x-msdownload")) {
 		e = fileAnalysis(fd, (char *)path);
-		if (e == ARMADITO_MALWARE)
+		if (e == ARMADITO_IS_MALWARE)
 			virus_name = "Win.Heuristic.Malware.Generic";
 	}
 
 	switch(e) {
-	case ARMADITO_MALWARE:
+	case ARMADITO_IS_MALWARE:
 		/* even if virus_name is a statically allocated string, it must be returned in a dynamically allocated string */
 		/* because it will be free()d by the calling code */
 		*pmod_report = os_strdup(virus_name);

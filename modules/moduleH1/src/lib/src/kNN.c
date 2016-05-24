@@ -29,7 +29,7 @@ ERROR_CODE tableStateDecide(PTABLE table){
 	}
 	if (score == NUMBER_OF_N_N*ELEMENT_MALWARE_MODEL){
 		//printf("%6.2f%%\n", 100);
-		return ARMADITO_MALWARE;
+		return ARMADITO_IS_MALWARE;
 	}
 	if (score == NUMBER_OF_N_N*ELEMENT_NOT_MALWARE_MODEL){
 		//printf("%6.2f%%\n", 0);
@@ -158,7 +158,7 @@ ERROR_CODE hasMalwareIAT(PVECTOR testFile, PMODEL modelArrayMalware, PMODEL mode
 		}
 		if (dist == 0){
 			tableDelete(bestTable);
-			return ARMADITO_MALWARE;
+			return ARMADITO_IS_MALWARE;
 		}
 	}
 
@@ -201,7 +201,7 @@ ERROR_CODE hasMalwareIAT(PVECTOR testFile, PMODEL modelArrayMalware, PMODEL mode
 		
 
 		/* we decide based on the majority */
-		//return (nbMalwareElements >= (NUMBER_OF_N_N / 2) + 1 ? ARMADITO_MALWARE : ARMADITO_NOT_MALWARE);
+		//return (nbMalwareElements >= (NUMBER_OF_N_N / 2) + 1 ? ARMADITO_IS_MALWARE : ARMADITO_NOT_MALWARE);
 
 		// if the iat are not enough relevant to take a decision.
 		DBG_PRNT("> IAT_UNDECIDED (%d)", score);  
@@ -212,7 +212,7 @@ ERROR_CODE hasMalwareIAT(PVECTOR testFile, PMODEL modelArrayMalware, PMODEL mode
 		/* a positive score means that the file is closer to the malware model, a negative means that it is closer to the not malware model */
 		//tableShow(bestTable);
 		tableDelete(bestTable);
-		return (score > 0 ? ARMADITO_MALWARE : ARMADITO_NOT_MALWARE);
+		return (score > 0 ? ARMADITO_IS_MALWARE : ARMADITO_NOT_MALWARE);
 	}
 }
 
@@ -244,11 +244,11 @@ ERROR_CODE isKnownEAT(PVECTOR testFile, PMODEL modelArrayMalware, PMODEL modelAr
 			return E_TEST_ERROR;
 		}
 		if (dist == 0){ /* if the eat is known in the model */
-			return ARMADITO_MALWARE;
+			return ARMADITO_IS_MALWARE;
 		}
 		if (dist <= EAT_KNN_THRESHOLD && dist < minDist){
 			minDist = dist;
-			result = ARMADITO_MALWARE;
+			result = ARMADITO_IS_MALWARE;
 		}
 	}
 

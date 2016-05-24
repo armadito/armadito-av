@@ -18,7 +18,7 @@
  * @param  testFile 			the file we want to test the IAT
  * @param  modelArrayMalware 	the first model
  * @param  modelArrayNotMalware the second model
- * @return             			ARMADITO_MALWARE, ARMADITO_NOT_MALWARE or E_TEST_ERROR
+ * @return             			ARMADITO_IS_MALWARE, ARMADITO_NOT_MALWARE or E_TEST_ERROR
  */
 ERROR_CODE hasMalwareIAT(PVECTOR testFile, PMODEL modelArrayMalware, PMODEL modelArrayNotMalware);
 
@@ -27,7 +27,7 @@ ERROR_CODE hasMalwareIAT(PVECTOR testFile, PMODEL modelArrayMalware, PMODEL mode
  * @param  testFile 			the file we want to test the EAT
  * @param  modelArrayMalware 	the first model
  * @param  modelArrayNotMalware the second model
- * @return             			ARMADITO_MALWARE, ARMADITO_NOT_MALWARE, ARMADITO_EAT_UNKNOWN or E_TEST_ERROR
+ * @return             			ARMADITO_IS_MALWARE, ARMADITO_NOT_MALWARE, ARMADITO_EAT_UNKNOWN or E_TEST_ERROR
  */
 ERROR_CODE isKnownEAT(PVECTOR testFile, PMODEL modelArrayMalware, PMODEL modelArrayNotMalware);
 
