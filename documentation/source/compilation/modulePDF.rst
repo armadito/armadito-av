@@ -67,11 +67,11 @@ must use the PKG_CONFIG_PATH environment variable.
 Building in a separate directory is highly recommended, unless you really want
 to clobber the source tree with objects, libraries, binaries and other stuff.
 
-    $ mkdir -p /home/joebar/build/modules/module5_2
+    $ mkdir -p /home/joebar/build/modules/moduleH1
 
 Typical invocation of the configure script is:
 
-    $ /home/joebar/armadito-av/modules/module5_2/configure --prefix=/home/joebar/install --enable-debug PKG_CONFIG_PATH=/home/joebar/install/lib/pkgconfig
+    $ /home/joebar/armadito-av/modules/moduleH1/configure --prefix=/home/joebar/install --enable-debug PKG_CONFIG_PATH=/home/joebar/install/lib/pkgconfig
 
 Note that the path specified in the value of PKG_CONFIG_PATH must be coherent
 with the PREFIX used in libarmadito installation (see `libarmadito` README).
@@ -84,7 +84,7 @@ Once configured, compilation is easy:
 
     $ make
     make  all-recursive
-    make[1]: entrant dans le répertoire " /home/joebar/build/modules/module5_2 "
+    make[1]: entrant dans le répertoire " /home/joebar/build/modules/moduleH1 "
     ...
 
 
