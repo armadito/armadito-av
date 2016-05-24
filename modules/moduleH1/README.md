@@ -33,25 +33,6 @@ In order to compile Armadito H1 module, you need the following tools:
 Configuration
 -------------
 
-The sources of the module H1 are divided into:
-
-- the analysis code, maintained in a separate git repo
-- this code, which acts as 'glue' between the analysis code and libarmadito
-
-The analysis code repository must be cloned before running the configure 
-script. Once this clone done, a symbolic link must be created in the src/
-subdirectory of this directory, named `moduleH1_sources` (this name is
-mandatory).
-
-    $ cd src/
-    $ ln -s /home/joebar/moduleH1 ./moduleH1_sources
-
-If `configure` script fails with a message like:
-
-    configure: error: cannot find sources (src/moduleH1_sources/UhuruStatic/resources/UhuruStatic.h) in /home/joebar/uhuru-av/modules/moduleH1 or ..
-
-it means that the symbolic link was not properly created.
-
 To initialize the build using automake, autoconf and tools, a shell script 
 `autogen.sh` is provided to ease this step:
 

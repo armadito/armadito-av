@@ -5,7 +5,7 @@ modules_LTLIBRARIES=moduleH1.la
 
 moduleH1_la_SOURCES= \
 module/moduleH1.c \
-module/UhuruStatic.h \
+module/h1-static.h \
 lib/include/PEUtils.h \
 lib/include/databases.h \
 lib/include/distances.h \
@@ -21,7 +21,7 @@ lib/include/uh_errors.h \
 lib/include/vector.h \
 lib/include/windowsTypes.h \
 lib/include/osdeps.h \
-lib/src/UhuruStatic.c \
+lib/src/h1-static.c \
 lib/src/databases.c \
 lib/src/distances.c \
 lib/src/elfReader.c \

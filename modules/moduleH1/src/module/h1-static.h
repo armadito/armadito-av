@@ -1,5 +1,5 @@
-#ifndef __UHURU_STATIC__
-#define __UHURU_STATIC__
+#ifndef __H1_STATIC__
+#define __H1_STATIC__
 
 #include "uh_errors.h"
 
