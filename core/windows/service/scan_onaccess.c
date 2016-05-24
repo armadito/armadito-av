@@ -185,7 +185,6 @@ HRESULT UserScanWorker( _In_  PGLOBAL_SCAN_CONTEXT Context )
 		if (Wow64RevertWow64FsRedirection(OldValue) == FALSE ){
 			return S_FALSE;
 		}
-		//uhLog("[-] Error :: UserScanWorker :: Thread Not found\n");
 		return S_FALSE;
 	}	
 
@@ -224,7 +223,6 @@ HRESULT UserScanWorker( _In_  PGLOBAL_SCAN_CONTEXT Context )
             
             if (hres == E_HANDLE) {
             
-                //uhLog("[-] Error :: UserScanWorker :: Completion port becomes unavailable.\n");
 				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " ArmaditoSvc!UserScanWorker :: Completion port becomes unavailable.\n");
                 hres = S_OK;
                 
@@ -249,7 +247,6 @@ HRESULT UserScanWorker( _In_  PGLOBAL_SCAN_CONTEXT Context )
 
 		if (message == NULL) {
 			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_WARNING, " ArmaditoSvc!UserScanWorker :: [%d] :: Get message from driver failed :: hres = 0x%x.\n",ThreadId, hres);
-			//uhLog("[-] Warning :: UserScanWorker :: [%d] :: Get message from driver failed :: hres = 0x%x.\n",ThreadId, hres);
 		}		
         
         if (message != NULL && message->msg.FileName != NULL) {			
@@ -432,7 +429,6 @@ HRESULT UserScanInit(_Inout_  PGLOBAL_SCAN_CONTEXT Context) {
 			__leave;
 		}
 		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_INFO, " Service connected to the driver communication port\n");
-		//uhLog("[+] Debug :: UserScanInit :: Client connected to the driver communication port !!\n");
 
 		
 		//  Create the IO completion port for asynchronous message passing. // Why ?? // try to remove this line to see cons
@@ -524,7 +520,6 @@ HRESULT UserScanInit(_Inout_  PGLOBAL_SCAN_CONTEXT Context) {
 
 					if (scanThreadCtxes[i].Handle && CloseHandle(scanThreadCtxes[i].Handle) == FALSE ) {
 						a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, "  ArmaditoSvc!UserScanInit :: CloseHandle failed for thread %d :: GLE=%03d. \n",i,GetLastError());
-						//uhLog("[-] Error :: ArmaditoSvc!UserScanInit :: CloseHandle failed for thread %d :: GLE=%03d. \n",i,GetLastError());
 						DeleteCriticalSection(&(scanThreadCtxes[i].Lock));
 					}
 
