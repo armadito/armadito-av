@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-static ERROR_CODE currentError = UH_NULL;
+static ERROR_CODE currentError = ARMADITO_NULL;
 
 VOID SetCurrentError(ERROR_CODE error) {
 	currentError = error;
@@ -16,15 +16,15 @@ const char *error_code_str(ERROR_CODE e)
 {
   switch(e) {
 #define M(E) case E: return #E
-    M(UH_NULL);
-    M(UH_SUCCESS);
-    M(UH_MALWARE);
-    M(UH_NOT_MALWARE);
-    M(UH_EAT_UNKNOWN);
-    M(UH_TFIDF_UNKNOWN);
-    M(UH_NOT_DECIDED);
-    M(UH_DOUBTFUL);
-    M(UH_UNSUPPORTED_FILE);
+    M(ARMADITO_NULL);
+    M(ARMADITO_SUCCESS);
+    M(ARMADITO_MALWARE);
+    M(ARMADITO_NOT_MALWARE);
+    M(ARMADITO_EAT_UNKNOWN);
+    M(ARMADITO_TFIDF_UNKNOWN);
+    M(ARMADITO_NOT_DECIDED);
+    M(ARMADITO_DOUBTFUL);
+    M(ARMADITO_UNSUPPORTED_FILE);
     M(E_READING_ERROR);
     M(E_TEST_ERROR);
     M(E_DISTANCE_ERROR);
@@ -36,7 +36,7 @@ const char *error_code_str(ERROR_CODE e)
     M(E_NOT_MZ);
     M(E_NOT_PE);
     M(E_BAD_ARCHITECTURE);
-    M(UH_NO_SECTIONS);
+    M(ARMADITO_NO_SECTIONS);
     M(E_NO_ENTRY_POINT);
     M(E_EAT_EMPTY);
     M(E_IAT_EMPTY);
@@ -48,7 +48,7 @@ const char *error_code_str(ERROR_CODE e)
     M(E_EAT_NOT_GOOD);
     M(E_FUNCTION_NAME_ERROR);
     M(E_NO_ENTRY);
-    M(UH_INVALID_SECTION_NAME);
+    M(ARMADITO_INVALID_SECTION_NAME);
     M(E_INVALID_ENTRY_POINT);
     M(E_INVALID_STUB);
     M(E_INVALID_TIMESTAMP);
@@ -62,7 +62,7 @@ const char *error_code_str(ERROR_CODE e)
     M(E_INVALID_FILE_SIZE);
     M(E_HEADER_NOT_GOOD);
     M(E_INVALID_S_F_ALIGNMENT);
-    M(UH_INVALID_SECTION);
+    M(ARMADITO_INVALID_SECTION);
     M(E_NOT_ELF);
     M(E_SYMBOL_TABLE_EMPTY);
     M(E_BAD_FORMAT);
@@ -77,32 +77,32 @@ CHAR* GetErrorCodeMsg(ERROR_CODE error){
 	switch (error)
 	{
 
-	case UH_NULL:
-		return "--UH_NULL--";
+	case ARMADITO_NULL:
+		return "--ARMADITO_NULL--";
 
-	case UH_SUCCESS:
-		return "--UH_SUCCESS--";
+	case ARMADITO_SUCCESS:
+		return "--ARMADITO_SUCCESS--";
 
-	case UH_MALWARE:
-		return "--UH_MALWARE--";
+	case ARMADITO_MALWARE:
+		return "--ARMADITO_MALWARE--";
 
-	case UH_NOT_MALWARE:
-		return "--UH_NOT_MALWARE--";
+	case ARMADITO_NOT_MALWARE:
+		return "--ARMADITO_NOT_MALWARE--";
 
-	case UH_NOT_DECIDED:
-		return "--UH_NOT_DECIDED--";
+	case ARMADITO_NOT_DECIDED:
+		return "--ARMADITO_NOT_DECIDED--";
 
-	case UH_EAT_UNKNOWN:
-		return "--UH_EAT_UNKNOWN--";
+	case ARMADITO_EAT_UNKNOWN:
+		return "--ARMADITO_EAT_UNKNOWN--";
 
-	case UH_TFIDF_UNKNOWN:
-		return "--UH_TFIDF_UNKNOWN--";
+	case ARMADITO_TFIDF_UNKNOWN:
+		return "--ARMADITO_TFIDF_UNKNOWN--";
 
-	case UH_UNSUPPORTED_FILE:
-		return "--UH_UNSUPPORTED_FILE--";
+	case ARMADITO_UNSUPPORTED_FILE:
+		return "--ARMADITO_UNSUPPORTED_FILE--";
 
-	case UH_DOUBTFUL:
-		return "--UH_DOUBTFUL--";
+	case ARMADITO_DOUBTFUL:
+		return "--ARMADITO_DOUBTFUL--";
 
 	case E_READING_ERROR:
 		return "Error while reading the file";
@@ -158,7 +158,7 @@ CHAR* GetErrorCodeMsg(ERROR_CODE error){
 	case E_EAT_NOT_GOOD:
 		return "The file's EAT is not valid";
 
-	case UH_INVALID_SECTION_NAME:
+	case ARMADITO_INVALID_SECTION_NAME:
 		return "The file has an invalid section name";
 
 	case E_NO_ENTRY:
@@ -191,7 +191,7 @@ CHAR* GetErrorCodeMsg(ERROR_CODE error){
 	case E_INVALID_S_F_ALIGNMENT:
 		return "The FileAlignment of the file is invalid";
 
-	case UH_INVALID_SECTION:
+	case ARMADITO_INVALID_SECTION:
 		return "A specified section is invalid";
 
         case E_NOT_ELF:

@@ -232,13 +232,13 @@ ERROR_CODE PeInit(PPORTABLE_EXECUTABLE Pe, int fd, CHAR* filename){
 	/* reading of the ImagesSectionHeader */
 	Pe->ImagesSectionHeader = (PIMAGE_SECTION_HEADER)((PVOID)(Offset));
 
-	return UH_SUCCESS;
+	return ARMADITO_SUCCESS;
 }
 
 /**
 * check if the file has sections, and if one of the sections of the file has an empty name
 * @param  Pe the PORTABLE_EXECUTABLE representing the file
-* @return    an ERROR_CODE value between : UH_INVALID_SECTION_NAME, UH_NO_SECTIONS and UH_SUCCESS
+* @return    an ERROR_CODE value between : ARMADITO_INVALID_SECTION_NAME, ARMADITO_NO_SECTIONS and ARMADITO_SUCCESS
 */
 ERROR_CODE PeHasEmptySectionName(PPORTABLE_EXECUTABLE Pe){
 	DWORD i = 0;
@@ -246,17 +246,17 @@ ERROR_CODE PeHasEmptySectionName(PPORTABLE_EXECUTABLE Pe){
 
 	/* first, check if there is sections in the file */
 	if (Pe->ImagesSectionHeader == NULL || Pe->ImageFileHeader.NumberOfSections == 0){
-		return UH_NO_SECTIONS;
+		return ARMADITO_NO_SECTIONS;
 	}
 
 	/* check if the section header contains a section with a name of size 0 or 1 */
 	for (i = 0; i < Pe->ImageFileHeader.NumberOfSections; i++){
 		if ((CHAR*)Pe->ImagesSectionHeader[i].Name == NULL){
-			return UH_INVALID_SECTION_NAME;
+			return ARMADITO_INVALID_SECTION_NAME;
 		}
 
 		if (strlen((CHAR*)Pe->ImagesSectionHeader[i].Name) <= 1){
-			return UH_INVALID_SECTION_NAME;
+			return ARMADITO_INVALID_SECTION_NAME;
 		}
 
 		/* check if the first element of the name is a-z, A-Z, 0-9, '.', '/' or '_' */
@@ -266,7 +266,7 @@ ERROR_CODE PeHasEmptySectionName(PPORTABLE_EXECUTABLE Pe){
 			(Pe->ImagesSectionHeader[i].Name[0] == 46) || /* Is point */
 			(Pe->ImagesSectionHeader[i].Name[0] == 47) || /* Is / */
 			(Pe->ImagesSectionHeader[i].Name[0] >= 97 && Pe->ImagesSectionHeader[i].Name[0] <= 122))){
-			return UH_INVALID_SECTION_NAME;
+			return ARMADITO_INVALID_SECTION_NAME;
 		}
 
 		/*
@@ -283,12 +283,12 @@ ERROR_CODE PeHasEmptySectionName(PPORTABLE_EXECUTABLE Pe){
 				(Pe->ImagesSectionHeader[i].Name[0] == 45) || /* Is hyphen */
 				(Pe->ImagesSectionHeader[i].Name[j] == 58) || /* Is semi column */
 				(Pe->ImagesSectionHeader[i].Name[j] >= 97 && Pe->ImagesSectionHeader[i].Name[j] <= 122))){
-				return UH_INVALID_SECTION_NAME;
+				return ARMADITO_INVALID_SECTION_NAME;
 			}
 		}
 	}
 
-	return UH_SUCCESS;
+	return ARMADITO_SUCCESS;
 }
 
 /**
@@ -315,7 +315,7 @@ DWORD ComputeChecksum(DWORD CheckSum, VOID *fileBase, DWORD length) {
 /**
 * compute the checksum of a PE file in order to compare it to the written checksum in the file
 * @param  Pe the PORTABLE_EXECUTABLE representing the file
-* @return    an ERROR_CODE value between : E_CHECKSUM_ERROR and UH_SUCCESS
+* @return    an ERROR_CODE value between : E_CHECKSUM_ERROR and ARMADITO_SUCCESS
 */
 ERROR_CODE PeHasValidChecksum(PPORTABLE_EXECUTABLE Pe) {
 	VOID *RemainData;
@@ -334,7 +334,7 @@ ERROR_CODE PeHasValidChecksum(PPORTABLE_EXECUTABLE Pe) {
 
 	/* if the written checksum is 0, no tests are done (because some safe file can have a null checksum) */
 	if (writtenChksm == 0){
-		return UH_SUCCESS;
+		return ARMADITO_SUCCESS;
 	}
 
 	/**
@@ -392,21 +392,21 @@ ERROR_CODE PeHasValidChecksum(PPORTABLE_EXECUTABLE Pe) {
 		return E_CHECKSUM_ERROR;
 	}
 
-	return UH_SUCCESS;
+	return ARMADITO_SUCCESS;
 }
 
 /**
 * check if the file has the valid dos stub in its content
 * @param  Pe the PORTABLE_EXECUTABLE representing the file
 * @return    an ERROR_CODE value between : E_INVALID_STUB if the stub is invalid or not present
-*               							UH_SUCCESS if the stub is correct
+*               							ARMADITO_SUCCESS if the stub is correct
 */
 ERROR_CODE PeHasValidDOSStub(PPORTABLE_EXECUTABLE Pe){
 	/* test if the file has a STUB (which is between the dos header and the file header)
 	   so no STUB => e_lfanew value is the next byte */
 	if (Pe->ImageDosHeader.e_lfanew == 0x40)
 	{
-		return UH_SUCCESS;
+		return ARMADITO_SUCCESS;
 	}
 
 	/*TODO : Faire des recherches sur le stub alternatif !! */
@@ -421,28 +421,28 @@ ERROR_CODE PeHasValidDOSStub(PPORTABLE_EXECUTABLE Pe){
 		return E_INVALID_STUB;
 	}
 
-	return UH_SUCCESS;
+	return ARMADITO_SUCCESS;
 }
 
 /**
 * check if the timestamp in the file header is valid
 * @param  Pe the PORTABLE_EXECUTABLE representing the file
 * @return    an ERROR_CODE value between : E_INVALID_TIMESTAMP if the timestamp is invalid
-*               							UH_SUCCESS if the timestamp is correct
+*               							ARMADITO_SUCCESS if the timestamp is correct
 */
 ERROR_CODE PeFileHeaderHasValidTimestamp(PPORTABLE_EXECUTABLE Pe){
 	if (!IsValidTimeStamp(Pe->ImageFileHeader.TimeDateStamp)){
 		return E_INVALID_TIMESTAMP;
 	}
 
-	return UH_SUCCESS;
+	return ARMADITO_SUCCESS;
 }
 
 /**
 * check if the NumberOfRvaAndSizes field of the opt header has the right value
 * @param  Pe the PORTABLE_EXECUTABLE representing the file
 * @return    an ERROR_CODE value between : E_INVALID_NUMBER_RVA_SIZES if the value is incorrect
-*               							UH_SUCCESS if the value is correct
+*               							ARMADITO_SUCCESS if the value is correct
 */
 ERROR_CODE PeGoodNumberOfRvaAndSizes(PPORTABLE_EXECUTABLE Pe){
 	if (Pe->Machine == IMAGE_FILE_MACHINE_I386){
@@ -456,14 +456,14 @@ ERROR_CODE PeGoodNumberOfRvaAndSizes(PPORTABLE_EXECUTABLE Pe){
 		}
 	}
 
-	return UH_SUCCESS;
+	return ARMADITO_SUCCESS;
 }
 
 /**
 * some fields in the headers must be 0, so this function checks the value of those fields
 * @param  Pe the PORTABLE_EXECUTABLE representing the file
 * @return    an ERROR_CODE value between : E_FIELDS_WITH_INVALID_VALUE if a field has an invalid value
-*               							UH_SUCCESS if all is correct
+*               							ARMADITO_SUCCESS if all is correct
 */
 ERROR_CODE PeHasWantedFieldsToNull(PPORTABLE_EXECUTABLE Pe){
 	// It appears the GCC does not set those values to 0 (maybe because they are just supposed to be null)
@@ -496,14 +496,14 @@ ERROR_CODE PeHasWantedFieldsToNull(PPORTABLE_EXECUTABLE Pe){
 		}
 	}
 
-	return UH_SUCCESS;
+	return ARMADITO_SUCCESS;
 }
 
 /**
 * check if the SizeOfOptionalHeader field of the file header is equal to the size of the opt. header struct
 * @param  Pe the PORTABLE_EXECUTABLE representing the file
 * @return    an ERROR_CODE value between : E_INVALID_SIZE_OPT_HEADER if the value is incorrect
-*               							UH_SUCCESS if the value is correct
+*               							ARMADITO_SUCCESS if the value is correct
 */
 ERROR_CODE PeFileHeaderHasGoodSizeOfOptionalHeader(PPORTABLE_EXECUTABLE Pe){
 	if (Pe->Machine == IMAGE_FILE_MACHINE_I386){
@@ -517,7 +517,7 @@ ERROR_CODE PeFileHeaderHasGoodSizeOfOptionalHeader(PPORTABLE_EXECUTABLE Pe){
 		}
 	}
 
-	return UH_SUCCESS;
+	return ARMADITO_SUCCESS;
 }
 
 /**
@@ -531,7 +531,7 @@ ERROR_CODE PeFileHeaderHasGoodSizeOfOptionalHeader(PPORTABLE_EXECUTABLE Pe){
 *		is less than the architectures page size, then FileAlignment must match SectionAlignment.
 * @param  Pe the PORTABLE_EXECUTABLE representing the file
 * @return    an ERROR_CODE value between : E_INVALID_S_F_ALIGNMENT if the value is incorrect
-*               							UH_SUCCESS if the value is correct
+*               							ARMADITO_SUCCESS if the value is correct
 */
 ERROR_CODE PeHasValidSFAlignment(PPORTABLE_EXECUTABLE Pe){
 	if (Pe->Machine == IMAGE_FILE_MACHINE_I386){
@@ -579,7 +579,7 @@ ERROR_CODE PeHasValidSFAlignment(PPORTABLE_EXECUTABLE Pe){
 		}
 	}
 
-	return UH_SUCCESS;
+	return ARMADITO_SUCCESS;
 }
 
 /**
@@ -588,8 +588,8 @@ ERROR_CODE PeHasValidSFAlignment(PPORTABLE_EXECUTABLE Pe){
 * - the SizeOfRawData field
 * - the Misc.VirtualSize field
 * @param  Pe the PORTABLE_EXECUTABLE representing the file
-* @return    an ERROR_CODE value between : UH_INVALID_SECTION if a value is incorrect
-*               							UH_SUCCESS if the sections are good
+* @return    an ERROR_CODE value between : ARMADITO_INVALID_SECTION if a value is incorrect
+*               							ARMADITO_SUCCESS if the sections are good
 */
 ERROR_CODE PeHasValidSectionsData(PPORTABLE_EXECUTABLE Pe){
 	DWORD i = 0;
@@ -600,7 +600,7 @@ ERROR_CODE PeHasValidSectionsData(PPORTABLE_EXECUTABLE Pe){
 				Pe->ImagesSectionHeader[i].SizeOfRawData % Pe->ImageOptionalHeader32.FileAlignment != 0 ||
 				Pe->ImagesSectionHeader[i].Misc.VirtualSize == 0)
 			{
-				return UH_INVALID_SECTION;
+				return ARMADITO_INVALID_SECTION;
 			}
 
 			i++;
@@ -612,27 +612,27 @@ ERROR_CODE PeHasValidSectionsData(PPORTABLE_EXECUTABLE Pe){
 				Pe->ImagesSectionHeader[i].SizeOfRawData % Pe->ImageOptionalHeader64.FileAlignment != 0 ||
 				Pe->ImagesSectionHeader[i].Misc.VirtualSize == 0)
 			{
-				return UH_INVALID_SECTION;
+				return ARMADITO_INVALID_SECTION;
 			}
 
 			i++;
 		}
 	}
 
-	return UH_SUCCESS;
+	return ARMADITO_SUCCESS;
 }
 
 /**
 * check if the file has the required format and structure according to the PE documentation
 * @param  Pe the PORTABLE_EXECUTABLE representing the file
-* @return    an ERROR_CODE value between : E_INVALID_STRUCTURE and UH_SUCCESS
+* @return    an ERROR_CODE value between : E_INVALID_STRUCTURE and ARMADITO_SUCCESS
 */
 ERROR_CODE PeHasValidStructure(PPORTABLE_EXECUTABLE Pe){
 	/* check if the sections of the file are good */
-	if (PeHasEmptySectionName(Pe) == UH_INVALID_SECTION_NAME ||
-		PeHasEmptySectionName(Pe) == UH_NO_SECTIONS ||
-		PeHasValidSectionsData(Pe) == UH_INVALID_SECTION){
-		SetCurrentError(UH_INVALID_SECTION);
+	if (PeHasEmptySectionName(Pe) == ARMADITO_INVALID_SECTION_NAME ||
+		PeHasEmptySectionName(Pe) == ARMADITO_NO_SECTIONS ||
+		PeHasValidSectionsData(Pe) == ARMADITO_INVALID_SECTION){
+		SetCurrentError(ARMADITO_INVALID_SECTION);
 		return E_INVALID_STRUCTURE;
 	}
 
@@ -699,7 +699,7 @@ ERROR_CODE PeHasValidStructure(PPORTABLE_EXECUTABLE Pe){
 		return E_INVALID_STRUCTURE;
 	}
 
-	return UH_SUCCESS;
+	return ARMADITO_SUCCESS;
 }
 
 VOID PeDestroy(PPORTABLE_EXECUTABLE Pe) {
@@ -748,7 +748,7 @@ ERROR_CODE PeHasDataDirectory(PPORTABLE_EXECUTABLE Pe, DWORD imageDirectoryEntry
 		return E_NO_ENTRY;
 	}
 	else{
-		return UH_SUCCESS;
+		return ARMADITO_SUCCESS;
 	}
 }
 
@@ -789,7 +789,7 @@ ERROR_CODE PeHasEntryPoint(PPORTABLE_EXECUTABLE Pe) {
 	if (Pe->Machine == IMAGE_FILE_MACHINE_I386){
 		if (Pe->ImageFileHeader.SizeOfOptionalHeader != 0 && Pe->ImageOptionalHeader32.AddressOfEntryPoint){
 			if (PeIsValidAddress(Pe, Pe->BaseAddress + PeRvaToOffset(Pe, Pe->ImageOptionalHeader32.AddressOfEntryPoint))){
-				return UH_SUCCESS;
+				return ARMADITO_SUCCESS;
 			}
 			else{
 				return E_INVALID_ENTRY_POINT;
@@ -802,7 +802,7 @@ ERROR_CODE PeHasEntryPoint(PPORTABLE_EXECUTABLE Pe) {
 	else if (Pe->Machine == IMAGE_FILE_MACHINE_AMD64){
 		if (Pe->ImageFileHeader.SizeOfOptionalHeader != 0 && Pe->ImageOptionalHeader64.AddressOfEntryPoint){
 			if (PeIsValidAddress(Pe, Pe->BaseAddress + PeRvaToOffset(Pe, Pe->ImageOptionalHeader64.AddressOfEntryPoint))){
-				return UH_SUCCESS;
+				return ARMADITO_SUCCESS;
 			}
 			else{
 				return E_INVALID_ENTRY_POINT;
@@ -1028,7 +1028,7 @@ ERROR_CODE GenerateExportedFunctions(PPORTABLE_EXECUTABLE Pe, PDATABASE_NODE Dat
 		return E_CALLOC_ERROR;
 	}
 
-	return UH_SUCCESS;
+	return ARMADITO_SUCCESS;
 }
 
 /**
@@ -1406,5 +1406,5 @@ ERROR_CODE GenerateImportedFunctions(PPORTABLE_EXECUTABLE Pe, PDATABASE_NODE Dat
 		return E_CALLOC_ERROR;
 	}
 
-	return UH_SUCCESS;
+	return ARMADITO_SUCCESS;
 }

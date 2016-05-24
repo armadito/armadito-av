@@ -6,9 +6,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef FUCK
-#include <dirent.h>
-#endif
 
 #include "osdeps.h"
 #include "h1-errors.h"
@@ -44,7 +41,7 @@ DWORD TotalSizeElfDataBaseTFIDFInf = 0, elfNbDocsTFIDFInf = 0, TotalSizeElfDataB
 /**
  * this function is for testing a file and deciding if it is a malicious file, a benign file, or something else
  * @param  	    fd the file descriptor, fileName the realpath of the file
- * @return          an ERROR_CODE value between : UH_NOT_DECIDED, E_CALLOC_ERROR, UH_MALWARE and UH_NOT_MALWARE.
+ * @return          an ERROR_CODE value between : ARMADITO_NOT_DECIDED, E_CALLOC_ERROR, ARMADITO_MALWARE and ARMADITO_NOT_MALWARE.
  */
 ERROR_CODE fileAnalysis(int fd, char *fileName){
 
@@ -53,7 +50,7 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 	/*variable initialization*/
 	PVECTOR testFileEat = NULL, testFileIat = NULL;
 	/* ERROR_CODE array for tests return values */
-	ERROR_CODE infosArray[9] = { UH_NULL, UH_NULL, UH_NULL, UH_NULL, UH_NULL, UH_NULL, UH_NULL, UH_NULL, UH_NULL };
+	ERROR_CODE infosArray[9] = { ARMADITO_NULL, ARMADITO_NULL, ARMADITO_NULL, ARMADITO_NULL, ARMADITO_NULL, ARMADITO_NULL, ARMADITO_NULL, ARMADITO_NULL, ARMADITO_NULL };
 	PORTABLE_EXECUTABLE Pe;
 
 	/* initialization of the Pe structure */
@@ -63,7 +60,7 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 		return E_CALLOC_ERROR;
 	}
 
-	if (infosArray[0] != UH_SUCCESS){
+	if (infosArray[0] != ARMADITO_SUCCESS){
 		PeDestroy(&Pe);
 		return infosArray[0];
 	}
@@ -73,10 +70,10 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 	/////////////////////////////////////////////////////////////////
 
 	// Do not analyze .NET files
-	if (PeHasDataDirectory(&Pe, IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR) == UH_SUCCESS)
+	if (PeHasDataDirectory(&Pe, IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR) == ARMADITO_SUCCESS)
 	{
 		PeDestroy(&Pe);
-		return UH_UNSUPPORTED_FILE;
+		return ARMADITO_UNSUPPORTED_FILE;
 	}
 
 	/////////////////////////////////////////////////////////////////
@@ -88,32 +85,32 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 	if (infosArray[3] == E_INVALID_ENTRY_POINT){
 		PeDestroy(&Pe);
 		DBG_PRNT("> %s",error_code_str(infosArray[3]));
-		return UH_MALWARE;
+		return ARMADITO_MALWARE;
 	}
 
 	// if the file does not have an IAT and an EAT, it is the entry point which is the deciding parameter
 	if (infosArray[1] == E_NO_ENTRY && infosArray[2] == E_NO_ENTRY){
 		PeDestroy(&Pe);
-		if (infosArray[3] == UH_SUCCESS){
+		if (infosArray[3] == ARMADITO_SUCCESS){
 			DBG_PRNT("> %s", error_code_str(infosArray[3]));
-			return UH_MALWARE;
+			return ARMADITO_MALWARE;
 		}
 		else{
-			//DBG_PRNT("> %s\ninfosArray[1] == E_NO_ENTRY && infosArray[2] == E_NO_ENTRY && infosArray[3] != UH_SUCCESS\n", fileName);
-			return UH_UNSUPPORTED_FILE;
+			//DBG_PRNT("> %s\ninfosArray[1] == E_NO_ENTRY && infosArray[2] == E_NO_ENTRY && infosArray[3] != ARMADITO_SUCCESS\n", fileName);
+			return ARMADITO_UNSUPPORTED_FILE;
 		}
 	}
 
 	if (PeHasValidStructure(&Pe) == E_INVALID_STRUCTURE){
 		DBG_PRNT("> %s", error_code_str(E_INVALID_STRUCTURE));
 		PeDestroy(&Pe);
-		return UH_MALWARE;
+		return ARMADITO_MALWARE;
 	}
 
 	// uncomment in order to only test the structure of the file
 #if 0
 	PeDestroy(&Pe);
-	return UH_NOT_MALWARE;
+	return ARMADITO_NOT_MALWARE;
 #endif
 
 	if (infosArray[1] != E_NO_ENTRY){
@@ -126,45 +123,45 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 		else if (infosArray[4] == E_EMPTY_VECTOR){
 			if (infosArray[2] == E_NO_ENTRY){
 				PeDestroy(&Pe);
-				return UH_NOT_DECIDED;
+				return ARMADITO_NOT_DECIDED;
 			}
 		}
 		/* the eat of some safe file can be empty but present due to some compilers */
 		else if (infosArray[4] == E_EAT_EMPTY){
 			if (infosArray[2] == E_NO_ENTRY){
 				PeDestroy(&Pe);
-				if (infosArray[3] == UH_SUCCESS){
+				if (infosArray[3] == ARMADITO_SUCCESS){
 					DBG_PRNT("> %s", error_code_str(infosArray[3]));
-					return UH_MALWARE;
+					return ARMADITO_MALWARE;
 				}
 				else{
-					return UH_NOT_DECIDED;
+					return ARMADITO_NOT_DECIDED;
 				}
 			}
 		}
-		else if (infosArray[4] != UH_SUCCESS){
+		else if (infosArray[4] != ARMADITO_SUCCESS){
 			PeDestroy(&Pe);
 			DBG_PRNT("> %s",  error_code_str(infosArray[4]));
-			return UH_MALWARE;
+			return ARMADITO_MALWARE;
 		}
 		else { /*tests on the EAT*/
-			infosArray[4] = UH_SUCCESS;
+			infosArray[4] = ARMADITO_SUCCESS;
 			infosArray[6] = isKnownEAT(testFileEat, modelArrayMalwareEat, modelArrayNotMalwareEat);
 
 			vectorDelete(testFileEat);
 
-			if (infosArray[6] == UH_MALWARE){
+			if (infosArray[6] == ARMADITO_MALWARE){
 				PeDestroy(&Pe);
 				DBG_PRNT("> %s", error_code_str(infosArray[6]));
-				return UH_MALWARE;
+				return ARMADITO_MALWARE;
 			}
-			if (infosArray[2] == E_NO_ENTRY && infosArray[6] == UH_NOT_MALWARE){
+			if (infosArray[2] == E_NO_ENTRY && infosArray[6] == ARMADITO_NOT_MALWARE){
 				PeDestroy(&Pe);
-				return UH_NOT_MALWARE;
+				return ARMADITO_NOT_MALWARE;
 			}
-			if (infosArray[6] == UH_EAT_UNKNOWN && infosArray[2] == E_NO_ENTRY){
+			if (infosArray[6] == ARMADITO_EAT_UNKNOWN && infosArray[2] == E_NO_ENTRY){
 				PeDestroy(&Pe);
-				return UH_NOT_DECIDED;
+				return ARMADITO_NOT_DECIDED;
 			}
 		}
 	}
@@ -173,16 +170,16 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 		infosArray[5] = GenerateImportedFunctions(&Pe, DataBaseIat, TotalSizeDataBaseIat, &testFileIat);
 		if (infosArray[5] == E_EMPTY_VECTOR){
 			PeDestroy(&Pe);
-			return UH_NOT_DECIDED;
+			return ARMADITO_NOT_DECIDED;
 		}
 		if (infosArray[5] == E_CALLOC_ERROR){
 			PeDestroy(&Pe);
-			return UH_NOT_DECIDED;
+			return ARMADITO_NOT_DECIDED;
 		}
-		if (infosArray[5] != UH_SUCCESS){
+		if (infosArray[5] != ARMADITO_SUCCESS){
 			PeDestroy(&Pe);
-			//DBG_PRNT("> %s\ninfosArray[5] != UH_SUCCESS : %s\n", fileName, GetErrorCodeMsg(infosArray[5]));
-			return UH_MALWARE;
+			//DBG_PRNT("> %s\ninfosArray[5] != ARMADITO_SUCCESS : %s\n", fileName, GetErrorCodeMsg(infosArray[5]));
+			return ARMADITO_MALWARE;
 		}
 		else{ /*tests on the IAT*/
 
@@ -191,17 +188,17 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 
 			infosArray[7] = hasMalwareIAT(testFileIat, modelArrayMalwareIat, modelArrayNotMalwareIat);
 
-			if (infosArray[7] == UH_NOT_MALWARE){
+			if (infosArray[7] == ARMADITO_NOT_MALWARE){
 				PeDestroy(&Pe);
 				vectorDelete(testFileIat);
-				return UH_NOT_MALWARE;
+				return ARMADITO_NOT_MALWARE;
 			}
 
-			if (infosArray[7] == UH_MALWARE){
+			if (infosArray[7] == ARMADITO_MALWARE){
 				PeDestroy(&Pe);
 				vectorDelete(testFileIat);
-				//DBG_PRNT("> %s\ninfosArray[8] == UH_MALWARE\n", fileName);
-				return UH_MALWARE;
+				//DBG_PRNT("> %s\ninfosArray[8] == ARMADITO_MALWARE\n", fileName);
+				return ARMADITO_MALWARE;
 			}
 
 			infosArray[8] = tfidfTest(testFileIat,
@@ -213,16 +210,16 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 				nbDocsTFIDFSain);
 
 			/*
-			if (infosArray[8] == UH_NOT_MALWARE){
+			if (infosArray[8] == ARMADITO_NOT_MALWARE){
 				PeDestroy(&Pe);
 				vectorDelete(testFileIat);
-				return UH_NOT_MALWARE;
+				return ARMADITO_NOT_MALWARE;
 			}
-			if (infosArray[8] == UH_MALWARE){
+			if (infosArray[8] == ARMADITO_MALWARE){
 				PeDestroy(&Pe);
 				vectorDelete(testFileIat);
-				DBG_PRNT("> %s\ninfosArray[8] == UH_MALWARE\n", fileName);
-				return UH_MALWARE;
+				DBG_PRNT("> %s\ninfosArray[8] == ARMADITO_MALWARE\n", fileName);
+				return ARMADITO_MALWARE;
 			}*/
 
 			
@@ -232,16 +229,16 @@ ERROR_CODE fileAnalysis(int fd, char *fileName){
 
 	PeDestroy(&Pe);
 
-	if (infosArray[8] == UH_MALWARE){
-		//DBG_PRNT("> %s\ninfosArray[7] == UH_MALWARE\n", fileName);
-		return UH_MALWARE;
+	if (infosArray[8] == ARMADITO_MALWARE){
+		//DBG_PRNT("> %s\ninfosArray[7] == ARMADITO_MALWARE\n", fileName);
+		return ARMADITO_MALWARE;
 	}
 
-	if ((infosArray[8] == UH_NOT_MALWARE && infosArray[6] != UH_MALWARE) || (infosArray[6] == UH_NOT_MALWARE && infosArray[8] != UH_MALWARE)){
-		return UH_NOT_MALWARE;
+	if ((infosArray[8] == ARMADITO_NOT_MALWARE && infosArray[6] != ARMADITO_MALWARE) || (infosArray[6] == ARMADITO_NOT_MALWARE && infosArray[8] != ARMADITO_MALWARE)){
+		return ARMADITO_NOT_MALWARE;
 	}
 
-	return UH_NOT_DECIDED;
+	return ARMADITO_NOT_DECIDED;
 }
 
 /**
@@ -529,7 +526,7 @@ ERROR_CODE analyseElfFile(int fd, char* fileName){
 	retvalue = ElfInit(fd, fileName, &elfOfFile);
 
 	// TOFIX: Logger plus clairement le type d'erreur pour ce qui est considéré comme "NOT_DECIDED"
-	if (retvalue != UH_SUCCESS){
+	if (retvalue != ARMADITO_SUCCESS){
 		DBG_PRNT("> %s", error_code_str(retvalue));
 		return retvalue;
 	}
@@ -538,7 +535,7 @@ ERROR_CODE analyseElfFile(int fd, char* fileName){
 	retvalue = ElfSymbolTable(&elfOfFile, &symbolVector, db, db_size);
 
 
-	if (retvalue != UH_SUCCESS){
+	if (retvalue != ARMADITO_SUCCESS){
 		DBG_PRNT("> %s", error_code_str(retvalue));
 		ElfDestroy(&elfOfFile);
 		return retvalue;

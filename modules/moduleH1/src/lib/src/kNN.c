@@ -6,9 +6,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#ifdef FUCK
-#include <dirent.h>
-#endif
 #include <string.h>
 
 #include "distances.h"
@@ -32,11 +29,11 @@ ERROR_CODE tableStateDecide(PTABLE table){
 	}
 	if (score == NUMBER_OF_N_N*ELEMENT_MALWARE_MODEL){
 		//printf("%6.2f%%\n", 100);
-		return UH_MALWARE;
+		return ARMADITO_MALWARE;
 	}
 	if (score == NUMBER_OF_N_N*ELEMENT_NOT_MALWARE_MODEL){
 		//printf("%6.2f%%\n", 0);
-		return UH_NOT_MALWARE;
+		return ARMADITO_NOT_MALWARE;
 	}
 
 	//second case : all neighbors are under the minimun similarity threshold (so have a higher distance than IAT_KNN_MINI_THRESHOLD)
@@ -52,7 +49,7 @@ ERROR_CODE tableStateDecide(PTABLE table){
 	}
 	if (score == NUMBER_OF_N_N){
 		//printf("N/A\n");
-		return UH_NOT_DECIDED;
+		return ARMADITO_NOT_DECIDED;
 	}
 
 	//third case : one or more are above the similarity threshold (so have a lower distance than IAT_KNN_THRESHOLD)
@@ -75,11 +72,11 @@ ERROR_CODE tableStateDecide(PTABLE table){
 	if ((numberOfRelevantMalware + numberOfRelevantNotMalware) != 0){
 		if (numberOfRelevantMalware > numberOfRelevantNotMalware){
 			//printf("%6.2f%%\n", 100*((double)numberOfRelevantMalware)/((double)(numberOfRelevantMalware + numberOfRelevantNotMalware)));
-			return UH_DOUBTFUL;
+			return ARMADITO_DOUBTFUL;
 		}
 		else{
 			//printf("%6.2f%%\n", 100 - 100*((double)numberOfRelevantNotMalware)/((double)(numberOfRelevantMalware + numberOfRelevantNotMalware)));
-			return UH_NOT_MALWARE;
+			return ARMADITO_NOT_MALWARE;
 		}
 	}
 
@@ -103,16 +100,16 @@ ERROR_CODE tableStateDecide(PTABLE table){
 	if ((numberOfRelevantMalware + numberOfRelevantNotMalware) != 0){
 		if (numberOfRelevantMalware > numberOfRelevantNotMalware){
 			//printf("%6.2f%%\n", 100*((double)numberOfRelevantMalware)/((double)(numberOfRelevantMalware + numberOfRelevantNotMalware)));
-			return UH_DOUBTFUL;
+			return ARMADITO_DOUBTFUL;
 		}
 		else{
 			//printf("%6.2f%%\n", 100 - 100 * ((double)numberOfRelevantNotMalware) / ((double)(numberOfRelevantMalware + numberOfRelevantNotMalware)));
-			return UH_NOT_MALWARE;
+			return ARMADITO_NOT_MALWARE;
 		}
 	}
 
 	//printf("N/A\n");
-	return UH_NOT_DECIDED;
+	return ARMADITO_NOT_DECIDED;
 }
 
 ERROR_CODE hasMalwareIAT(PVECTOR testFile, PMODEL modelArrayMalware, PMODEL modelArrayNotMalware){
@@ -143,7 +140,7 @@ ERROR_CODE hasMalwareIAT(PVECTOR testFile, PMODEL modelArrayMalware, PMODEL mode
 		}
 		if (dist == 0){
 			tableDelete(bestTable);
-			return UH_NOT_MALWARE;
+			return ARMADITO_NOT_MALWARE;
 		}
 	}
 
@@ -161,7 +158,7 @@ ERROR_CODE hasMalwareIAT(PVECTOR testFile, PMODEL modelArrayMalware, PMODEL mode
 		}
 		if (dist == 0){
 			tableDelete(bestTable);
-			return UH_MALWARE;
+			return ARMADITO_MALWARE;
 		}
 	}
 
@@ -204,18 +201,18 @@ ERROR_CODE hasMalwareIAT(PVECTOR testFile, PMODEL modelArrayMalware, PMODEL mode
 		
 
 		/* we decide based on the majority */
-		//return (nbMalwareElements >= (NUMBER_OF_N_N / 2) + 1 ? UH_MALWARE : UH_NOT_MALWARE);
+		//return (nbMalwareElements >= (NUMBER_OF_N_N / 2) + 1 ? ARMADITO_MALWARE : ARMADITO_NOT_MALWARE);
 
 		// if the iat are not enough relevant to take a decision.
 		DBG_PRNT("> IAT_UNDECIDED (%d)", score);  
 		tableDelete(bestTable);
-		return UH_NOT_DECIDED;
+		return ARMADITO_NOT_DECIDED;
 	}
 	else {
 		/* a positive score means that the file is closer to the malware model, a negative means that it is closer to the not malware model */
 		//tableShow(bestTable);
 		tableDelete(bestTable);
-		return (score > 0 ? UH_MALWARE : UH_NOT_MALWARE);
+		return (score > 0 ? ARMADITO_MALWARE : ARMADITO_NOT_MALWARE);
 	}
 }
 
@@ -223,7 +220,7 @@ ERROR_CODE isKnownEAT(PVECTOR testFile, PMODEL modelArrayMalware, PMODEL modelAr
 	DWORD i = 0;
 	DOUBLE dist = 0;
 	DOUBLE minDist = 1;
-	ERROR_CODE result = UH_EAT_UNKNOWN;
+	ERROR_CODE result = ARMADITO_EAT_UNKNOWN;
 
 	/*search for nearest neighbors in the not malware model */
 	for (i = 0; i < modelArrayNotMalware->numberOfFile; i++){
@@ -232,11 +229,11 @@ ERROR_CODE isKnownEAT(PVECTOR testFile, PMODEL modelArrayMalware, PMODEL modelAr
 			return E_TEST_ERROR;
 		}
 		if (dist == 0){ /* if the eat is known in the model */
-			return UH_NOT_MALWARE;
+			return ARMADITO_NOT_MALWARE;
 		}
 		if (dist <= EAT_KNN_THRESHOLD && dist < minDist){
 			minDist = dist;
-			result = UH_NOT_MALWARE;
+			result = ARMADITO_NOT_MALWARE;
 		}
 	}
 
@@ -247,11 +244,11 @@ ERROR_CODE isKnownEAT(PVECTOR testFile, PMODEL modelArrayMalware, PMODEL modelAr
 			return E_TEST_ERROR;
 		}
 		if (dist == 0){ /* if the eat is known in the model */
-			return UH_MALWARE;
+			return ARMADITO_MALWARE;
 		}
 		if (dist <= EAT_KNN_THRESHOLD && dist < minDist){
 			minDist = dist;
-			result = UH_MALWARE;
+			result = ARMADITO_MALWARE;
 		}
 	}
 

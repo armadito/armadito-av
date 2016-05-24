@@ -109,7 +109,7 @@ ERROR_CODE tfidfTest(PVECTOR testFile,
 
 		// if function is found only in malware database.
 		if(tmp_y == 0 && tmp_x > 0){ 
-			return UH_MALWARE;
+			return ARMADITO_MALWARE;
 		}
 
 		tmp = tmp_x / tmp_y;
@@ -121,17 +121,17 @@ ERROR_CODE tfidfTest(PVECTOR testFile,
 	}
 
 	if (sum == 0 || j == 0){
-		return UH_TFIDF_UNKNOWN;
+		return ARMADITO_TFIDF_UNKNOWN;
 	}
 
 	sum = sum / ((DOUBLE)j);
 	if (sum < THRESHOLD_NOT_MALWARE){
-		return UH_NOT_MALWARE;
+		return ARMADITO_NOT_MALWARE;
 	}
 	else if (sum > THRESHOLD_MALWARE){
-		return UH_MALWARE;
+		return ARMADITO_MALWARE;
 	}
 	else{
-		return UH_TFIDF_UNKNOWN;
+		return ARMADITO_TFIDF_UNKNOWN;
 	}
 }

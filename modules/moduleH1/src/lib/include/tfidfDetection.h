@@ -34,7 +34,7 @@ PTFIDF_NODE loadTFIDFBases(CHAR *szFileName, PDWORD TotalSizeDataBase, PDWORD nb
  * @param  TotalSizeDataBaseTFIDFSain the size of the not malware base
  * @param  nbDocsTFIDFInf             the number of docs used to create the malware base
  * @param  nbDocsTFIDFSain            the number of docs used to create the not malware base
- * @return                            UH_NOT_MALWARE, UH_MALWARE, E_TEST_ERROR or UH_TFIDF_UNKNOWN
+ * @return                            ARMADITO_NOT_MALWARE, ARMADITO_MALWARE, E_TEST_ERROR or ARMADITO_TFIDF_UNKNOWN
  */
 ERROR_CODE tfidfTest(PVECTOR testFile,
 	PTFIDF_NODE DBInf,
