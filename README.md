@@ -1,7 +1,7 @@
 Uhuru
 =====
 
-Copyright (c) NOV'IT/Teclib, 2014, 2015
+Copyright (C) Teclib', 2015, 2016
 
 Project home: http://www.somewhere.org
 
@@ -42,9 +42,9 @@ If you want to compile one module only, or core :
 PACKAGE could be one of the following : 
 
 * core (libarmadito)
-* clamav (uhuru-mod-clamav)
-* module5_2 (uhuru-mod-module5-2)
-* modulePDF (uhuru-mod-PDF)
+* clamav (armadito-mod-clamav)
+* moduleH1 (armadito-mod-moduleH1)
+* modulePDF (armadito-mod-PDF)
 
 
 On WINDOWS :
