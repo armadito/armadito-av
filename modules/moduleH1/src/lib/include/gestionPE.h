@@ -11,7 +11,7 @@
 #include "vector.h"
 #include "windowsTypes.h"
 #include "databases.h"
-#include "uh_errors.h"
+#include "h1-errors.h"
 
 /**
  * initialize the PORTABLE_EXECUTABLE used to store the file
