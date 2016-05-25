@@ -163,7 +163,7 @@
         {
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_1A6DF2850D454A89891EE6359E9C4675"
             {
-            "SourcePath" = "8:..\\..\\..\\..\\..\\databases\\module5_2\\windows\\database_2.dat"
+            "SourcePath" = "8:..\\..\\..\\..\\..\\databases\\moduleH1\\windows\\database_2.dat"
             "TargetName" = "8:database_2.dat"
             "Tag" = "8:"
             "Folder" = "8:_B9B61FB4C378467B97D2489AA0D5A5B1"
@@ -203,7 +203,7 @@
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_4C5EA019AB2A415A91FDA3832A61B7F5"
             {
-            "SourcePath" = "8:..\\..\\..\\..\\..\\databases\\module5_2\\windows\\Database_malsain_1.zip"
+            "SourcePath" = "8:..\\..\\..\\..\\..\\databases\\moduleH1\\windows\\Database_malsain_1.zip"
             "TargetName" = "8:Database_malsain_1.zip"
             "Tag" = "8:"
             "Folder" = "8:_B9B61FB4C378467B97D2489AA0D5A5B1"
@@ -223,7 +223,7 @@
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_4D13B77593704B7880CE4397277F6F24"
             {
-            "SourcePath" = "8:..\\..\\..\\..\\..\\databases\\module5_2\\windows\\database_1.dat"
+            "SourcePath" = "8:..\\..\\..\\..\\..\\databases\\moduleH1\\windows\\database_1.dat"
             "TargetName" = "8:database_1.dat"
             "Tag" = "8:"
             "Folder" = "8:_B9B61FB4C378467B97D2489AA0D5A5B1"
@@ -243,7 +243,7 @@
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5DCABC66738F4036B5306276CE2D9410"
             {
-            "SourcePath" = "8:..\\..\\..\\..\\..\\databases\\module5_2\\windows\\Database_malsain_2.zip"
+            "SourcePath" = "8:..\\..\\..\\..\\..\\databases\\moduleH1\\windows\\Database_malsain_2.zip"
             "TargetName" = "8:Database_malsain_2.zip"
             "Tag" = "8:"
             "Folder" = "8:_B9B61FB4C378467B97D2489AA0D5A5B1"
@@ -263,7 +263,7 @@
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5F644AA215BE4C5FB4EA8C16F9910D94"
             {
-            "SourcePath" = "8:..\\..\\..\\..\\..\\databases\\module5_2\\windows\\Database_sain_2.zip"
+            "SourcePath" = "8:..\\..\\..\\..\\..\\databases\\moduleH1\\windows\\Database_sain_2.zip"
             "TargetName" = "8:Database_sain_2.zip"
             "Tag" = "8:"
             "Folder" = "8:_B9B61FB4C378467B97D2489AA0D5A5B1"
@@ -283,7 +283,7 @@
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_74A28AF133AD42D8ACEEFBA7B2D54EE8"
             {
-            "SourcePath" = "8:..\\..\\..\\..\\..\\databases\\module5_2\\windows\\Database_sain_1.zip"
+            "SourcePath" = "8:..\\..\\..\\..\\..\\databases\\moduleH1\\windows\\Database_sain_1.zip"
             "TargetName" = "8:Database_sain_1.zip"
             "Tag" = "8:"
             "Folder" = "8:_B9B61FB4C378467B97D2489AA0D5A5B1"
@@ -303,7 +303,7 @@
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_E25F554C67B84B8384DE91CF76978FEB"
             {
-            "SourcePath" = "8:..\\..\\..\\..\\..\\databases\\module5_2\\windows\\DBI_inf.dat"
+            "SourcePath" = "8:..\\..\\..\\..\\..\\databases\\moduleH1\\windows\\DBI_inf.dat"
             "TargetName" = "8:DBI_inf.dat"
             "Tag" = "8:"
             "Folder" = "8:_B9B61FB4C378467B97D2489AA0D5A5B1"
@@ -323,7 +323,7 @@
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_EDEAE6838FEA4B30BC789A1BF7354CEC"
             {
-            "SourcePath" = "8:..\\..\\..\\..\\..\\databases\\module5_2\\windows\\DBI_sain.dat"
+            "SourcePath" = "8:..\\..\\..\\..\\..\\databases\\moduleH1\\windows\\DBI_sain.dat"
             "TargetName" = "8:DBI_sain.dat"
             "Tag" = "8:"
             "Folder" = "8:_B9B61FB4C378467B97D2489AA0D5A5B1"
@@ -428,7 +428,7 @@
                                     }
                                     "{9EF0B969-E518-4E46-987F-47570745A589}:_73978DBBDFB14802A63861FB7B88FE36"
                                     {
-                                    "Name" = "8:module5_2"
+                                    "Name" = "8:moduleH1"
                                     "AlwaysCreate" = "11:FALSE"
                                     "Condition" = "8:"
                                     "Transitive" = "11:FALSE"

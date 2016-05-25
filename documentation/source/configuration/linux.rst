@@ -20,7 +20,7 @@ You are able to configure how on-demand scan works in **/etc/armadito/armadito.c
    [on-demand]
    white-list-dir = "/boot"; "/dev"; "/etc"; "/proc"; "/run"; "/sys"; "/var"
    mime-types="*"
-   modules="clamav"; "module5_2"
+   modules="clamav"; "moduleH1"
    max-size = 10048576 
 
 * **white-list-dir** : list of directories excluded from on-demand scan.

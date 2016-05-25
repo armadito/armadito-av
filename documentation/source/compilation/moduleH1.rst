@@ -21,7 +21,7 @@ TBW
 Prerequisites
 -------------
 
-In order to compile Armadito 5.2 module, you need the following tools:
+In order to compile Armadito H1 module, you need the following tools:
 
 - automake/autoconf
 - GNU make
