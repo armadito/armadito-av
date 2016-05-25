@@ -711,7 +711,7 @@
         "DisplayName" = "8:Debug"
         "IsDebugOnly" = "11:TRUE"
         "IsReleaseOnly" = "11:FALSE"
-        "OutputFilename" = "8:Debug\\Armadito-setup-0.9.0.msi"
+        "OutputFilename" = "8:Debug\\Armadito-setup-0.9.1.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -3220,9 +3220,39 @@
         }
         "LaunchCondition"
         {
+            "{836E08B8-0285-4809-BA42-01DB6754A45D}:_3FA274187B6B484DB24B8C113BCAB882"
+            {
+            "Name" = "8:msvcx64"
+            "Condition" = "8:REGISTRYMSVC64"
+            "Message" = "8:Please install \"Visual C++ Redistributable Packages for Visual Studio 2013\" (x64)"
+            "InstallUrl" = "8:https://www.microsoft.com/en-us/download/details.aspx?id=40784"
+            }
+            "{836E08B8-0285-4809-BA42-01DB6754A45D}:_9AF814A768E34C60B0AA9E6B93A12F82"
+            {
+            "Name" = "8:msvcx86"
+            "Condition" = "8:REGISTRYMSVC86"
+            "Message" = "8:Please install \"Visual C++ Redistributable Packages for Visual Studio 2013\" (x86)"
+            "InstallUrl" = "8:https://www.microsoft.com/en-us/download/details.aspx?id=40784"
+            }
         }
         "Locator"
         {
+            "{CF66B7F7-B7DA-4B08-A67A-233430638C9C}:_04EF636FEC5E45A3AF616B936CFC447B"
+            {
+            "Name" = "8:Search for VS C++ redistributable package for vs 2013 x64"
+            "Root" = "2:1"
+            "RegKey" = "8:SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\12.0\\VC\\Runtimes\\x64"
+            "Value" = "8:Installed"
+            "Property" = "8:REGISTRYMSVC64"
+            }
+            "{CF66B7F7-B7DA-4B08-A67A-233430638C9C}:_3A12E01DA73A417F97BC4D7C386C2598"
+            {
+            "Name" = "8:Search for VS C++ redistributable package for vs 2013 x86"
+            "Root" = "2:1"
+            "RegKey" = "8:SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\12.0\\VC\\Runtimes\\x86"
+            "Value" = "8:Installed"
+            "Property" = "8:REGISTRYMSVC86"
+            }
         }
         "MsiBootstrapper"
         {
@@ -3233,24 +3263,24 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Armadito-av"
-        "ProductCode" = "8:{F0960F1F-7950-408E-8BBD-2946EBD9F9A0}"
-        "PackageCode" = "8:{6AA23E2B-D71B-4406-94C4-05A98D3F380D}"
+        "ProductCode" = "8:{0D93F22B-F86E-40F6-B757-5EFD706FCAC2}"
+        "PackageCode" = "8:{AE9F1FD7-20DB-4ABB-B8C8-63AAB79B569D}"
         "UpgradeCode" = "8:{8FF60D97-FAB5-42D5-8BC1-1924AD47EA25}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:0.9.0"
+        "ProductVersion" = "8:0.9.1"
         "Manufacturer" = "8:Teclib"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
         "Title" = "8:Armadito-setup"
         "Subject" = "8:"
-        "ARPCONTACT" = "8:Teclib'/Novit"
+        "ARPCONTACT" = "8:Teclib'"
         "Keywords" = "8:antivirus"
         "ARPCOMMENTS" = "8:Armadito antivirus"
-        "ARPURLINFOABOUT" = "8:"
+        "ARPURLINFOABOUT" = "8:http://www.teclib-edition.com/"
         "ARPPRODUCTICON" = "8:"
         "ARPIconIndex" = "3:0"
         "SearchPath" = "8:"
