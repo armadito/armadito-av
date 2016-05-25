@@ -10,7 +10,7 @@
 #include "structs.h"
 
 
-#define SCAN_PORT_NAME L"\\UhuruPortScanFilter"
+#define SCAN_PORT_NAME L"\\A6oPortScanFilter"
 #define USER_SCAN_THREAD_COUNT 6
 #define MAX_PATH_SIZE 512
 #define BUFSIZE 512

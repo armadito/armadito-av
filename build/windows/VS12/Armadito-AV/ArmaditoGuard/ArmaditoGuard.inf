@@ -1,6 +1,5 @@
 ;
 ; ** COPYRIGHT (C) 2016 Teclib'
-; Author: Ulrich FAUSTHER
 ; <ufausther@teclib.com>
 ; ArmaditoGuard.inf
 ;
@@ -78,7 +77,7 @@ ArmaditoGuard.sys = 1,,
 ; ================= String section =====================
 
 [Strings]
-ManufacturerName        = "Teclib'/Nov'it"
+ManufacturerName        = "Teclib"
 ServiceDescription      = "ArmaditoGuard Filter Driver"
 ServiceName             = "ArmaditoGuard"
 DriverName              = "ArmaditoGuard"
