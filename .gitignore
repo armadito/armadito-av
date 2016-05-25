@@ -1,3 +1,4 @@
 deps/*
 core/windows/driver/signature/*
+databases/*
 out/*
