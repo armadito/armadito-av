@@ -735,6 +735,16 @@
                     "Name" = "8:Microsoft .NET Framework 4.5 (x86 and x64)"
                     "ProductCode" = "8:.NETFramework,Version=v4.5"
                     }
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Visual.C++.12.0.x64"
+                    {
+                    "Name" = "8:Visual C++ 2013 Runtime Libraries (x64)"
+                    "ProductCode" = "8:Microsoft.Visual.C++.12.0.x64"
+                    }
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Visual.C++.12.0.x86"
+                    {
+                    "Name" = "8:Visual C++ 2013 Runtime Libraries (x86)"
+                    "ProductCode" = "8:Microsoft.Visual.C++.12.0.x86"
+                    }
                 }
             }
         }
@@ -789,20 +799,6 @@
             "InstallerClass" = "11:FALSE"
             "CustomActionData" = "8:"
             }
-            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_4BC07703FC664404BBFFE39568B04B38"
-            {
-            "Name" = "8:Primary Output from ArmaditoSvc (Active)"
-            "Condition" = "8:"
-            "Object" = "8:_C3C49575AE2A4C2D975E93DDFE1920F7"
-            "FileType" = "3:2"
-            "InstallAction" = "3:1"
-            "Arguments" = "8:--start"
-            "EntryPoint" = "8:"
-            "Sequence" = "3:3"
-            "Identifier" = "8:_7C37BAC6_5441_4842_BBD0_3996B413CBFC"
-            "InstallerClass" = "11:FALSE"
-            "CustomActionData" = "8:"
-            }
             "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_5683C16D44A74ED79C271547E7B2B3F0"
             {
             "Name" = "8:Primary Output from ArmaditoSvc (Active)"
@@ -817,20 +813,6 @@
             "InstallerClass" = "11:FALSE"
             "CustomActionData" = "8:"
             }
-            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_625C326BDFCE41F697C33EE2C4A3C2A9"
-            {
-            "Name" = "8:Primary Output from ArmaditoGuard-setup (Active)"
-            "Condition" = "8:"
-            "Object" = "8:_5AE6723470834DF5AA556757C0F5F46D"
-            "FileType" = "3:2"
-            "InstallAction" = "3:4"
-            "Arguments" = "8:--stop"
-            "EntryPoint" = "8:"
-            "Sequence" = "3:2"
-            "Identifier" = "8:_5F1AD974_46EA_4290_B823_A69CC018222A"
-            "InstallerClass" = "11:FALSE"
-            "CustomActionData" = "8:"
-            }
             "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_6E0D4CE3100A41349E84AEC11D3087DB"
             {
             "Name" = "8:Primary Output from ArmaditoGuard-setup (Active)"
@@ -840,7 +822,7 @@
             "InstallAction" = "3:4"
             "Arguments" = "8:--uninstall"
             "EntryPoint" = "8:"
-            "Sequence" = "3:3"
+            "Sequence" = "3:2"
             "Identifier" = "8:_51BCBE83_C620_4AEE_AB55_EEBFC3CFE5EA"
             "InstallerClass" = "11:FALSE"
             "CustomActionData" = "8:"
@@ -856,6 +838,20 @@
             "EntryPoint" = "8:"
             "Sequence" = "3:2"
             "Identifier" = "8:_85493929_6209_48B8_AFE2_E13A93DDD2C8"
+            "InstallerClass" = "11:FALSE"
+            "CustomActionData" = "8:"
+            }
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_90908FD7812945C68BC2C8C6E05CDE6C"
+            {
+            "Name" = "8:Primary Output from ArmaditoSvc (Active)"
+            "Condition" = "8:"
+            "Object" = "8:_C3C49575AE2A4C2D975E93DDFE1920F7"
+            "FileType" = "3:2"
+            "InstallAction" = "3:2"
+            "Arguments" = "8:--start"
+            "EntryPoint" = "8:"
+            "Sequence" = "3:1"
+            "Identifier" = "8:_7C37BAC6_5441_4842_BBD0_3996B413CBFC"
             "InstallerClass" = "11:FALSE"
             "CustomActionData" = "8:"
             }
@@ -3123,7 +3119,7 @@
             }
             "{3C67513D-01DD-4637-8A68-80971EB9504F}:_93AE649AF8DA4D24B5C52546E2401D4C"
             {
-            "DefaultLocation" = "8:[ProgramFilesFolder][Manufacturer]\\[ProductName]"
+            "DefaultLocation" = "8:[ProgramFiles64Folder][Manufacturer]\\[ProductName]"
             "Name" = "8:#1925"
             "AlwaysCreate" = "11:FALSE"
             "Condition" = "8:"
@@ -3259,7 +3255,7 @@
         "ARPIconIndex" = "3:0"
         "SearchPath" = "8:"
         "UseSystemSearchPath" = "11:TRUE"
-        "TargetPlatform" = "3:0"
+        "TargetPlatform" = "3:1"
         "PreBuildEvent" = "8:"
         "PostBuildEvent" = "8:"
         "RunPostBuildEvent" = "3:0"
