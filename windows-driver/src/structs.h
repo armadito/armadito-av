@@ -1,3 +1,14 @@
+/***
+
+Copyright (C) 2015, 2016 Teclib'
+
+This file is part of Armadito windows driver.
+
+Reproduction, distribution and derivative works are permitted under the terms of the Microsoft Public License
+See file COPYING.MSPL for terms of license.
+
+***/
+
 #ifndef _STRUCT_H_
 #define _STRUCT_H_
 
