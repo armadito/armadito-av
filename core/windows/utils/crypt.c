@@ -1,3 +1,24 @@
+/***
+
+Copyright (C) 2015, 2016 Teclib'
+
+This file is part of Armadito core.
+
+Armadito core is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Armadito core is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
+
+***/
+
 #include <libarmadito.h>
 #include "crypt.h"
 #include "others.h"
@@ -143,7 +164,7 @@ HCRYPTKEY import_public_key(char * filename, HCRYPTPROV hProv) {
 		// import public key from file.
 		content = GetFileContent_b(filename,&size);
 		if (content == NULL) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: uh_verify_file_signature :: Get public key content failed\n");
+			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: Get public key content failed\n");
 			__leave;
 		}
 
@@ -283,7 +304,7 @@ HCRYPTHASH calc_file_hash(char * filename,HCRYPTPROV hProv, ALG_ID  algo) {
 }
 
 /*
-uh_verify_file_signature
+verify_file_signature
 This function verify the signature of a file with public key.
 returns 0 on success or a value less than zero on error.
 */
@@ -352,12 +373,12 @@ int verify_file_signature(char *filename, char *sigfile){
 		}
 
 		/*printf("\n");
-		printf("[+] Debug :: uh_verify_file_signature :: signature value = \n");
+		printf("[+] Debug :: verify_file_signature :: signature value = \n");
 		print_hexa(signature, sig_size);
 		printf("\n");
 		printf("\n");
 
-		printf("[+] Debug :: uh_verify_file_signature :: invert value = \n");
+		printf("[+] Debug :: verify_file_signature :: invert value = \n");
 		print_hexa(invert, sig_size);
 		printf("\n");
 		printf("\n");
@@ -391,14 +412,14 @@ int verify_file_signature(char *filename, char *sigfile){
 		}		
 		
 		if(CryptDestroyKey(hPubKey) == FALSE){
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: uh_verify_file_signature :: Crypt Destroy Key failed! :: GLE = 0x%x\n",GetLastError());
+			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: Crypt Destroy Key failed! :: GLE = 0x%x\n",GetLastError());
 		}
 
 		if (hHash != 0)
 			CryptDestroyHash(hHash);
 
 		if (CryptReleaseContext(hProv, 0) == FALSE) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: uh_verify_file_signature :: Release crypt context failed. :: GLE = %d\n",GetLastError);			
+			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: Release crypt context failed. :: GLE = %d\n",GetLastError);			
 		}
 
 	}

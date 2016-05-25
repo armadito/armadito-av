@@ -1,0 +1,4 @@
+LIBRARY moduleH1.dll
+
+EXPORTS
+module

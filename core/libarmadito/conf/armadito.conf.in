@@ -1,36 +1,35 @@
-#
-# Armadito Linux configuration file
-#
-
-[on-demand]
-
-# white list of directories: files in these directories will never be scanned
-white-list-dir = "/boot"; "/dev"; "/etc"; "/proc"; "/run"; "/sys"; "/var"
-
-# scanned mime types: scan everything
-mime-types="*"
-
-# scan modules: scan with clamav, modulePDF and module5_2
-modules=clamav; module5_2; modulePDF
-
-# 1M, must support units
-#max-size = 1048576 
-
-[alert]
-
-alert-dir = "@localstatedir@/spool/armadito"
-
-
-[quarantine]
-
-# is quarantine enabled?
-enable = 0
-
-# quarantine directory
-# files containing malware will be moved to this directory, renamed and made 
-# non-readable
-# quarantine directory must be mode 333 octal. This is normaly managed by 
-# package installation scripts
-quarantine-dir = "@localstatedir@/lib/armadito/quarantine"
-
-
+ #
+ # Armadito Linux configuration file
+ #
+ 
+ [on-demand]
+ 
+ # white list of directories: files in these directories will never be scanned
+ white-list-dir = "/boot"; "/dev"; "/etc"; "/proc"; "/run"; "/sys"; "/var"
+ 
+ # scanned mime types: scan everything
+	
+ mime-types="*"
+ 
+ # scan modules: scan with clamav, modulePDF and moduleH1
+ modules=clamav; moduleH1; modulePDF
+ 
+ # 1M, must support units
+ #max-size = 1048576 
+ 
+ [alert]
+ 
+ alert-dir = "@localstatedir@/spool/armadito"
+ 
+ 
+ [quarantine]
+ 
+ # is quarantine enabled?
+ enable = 0
+ 
+ # quarantine directory
+ # files containing malware will be moved to this directory, renamed and made 
+ # non-readable
+ # quarantine directory must be mode 333 octal. This is normaly managed by 
+ # package installation scripts
+ quarantine-dir = "@localstatedir@/lib/armadito/quarantine"
