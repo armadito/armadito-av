@@ -3,7 +3,7 @@ Section: utils
 Priority: optional
 Maintainer: François Déchelle <fdechelle@teclib.com>
 Standards-Version: 3.9.2
-Build-Depends: debhelper (>= 9), libmagic-dev, libglib2.0-dev, libxml2-dev
+Build-Depends: debhelper (>= 9), autotools-dev, libmagic-dev, libglib2.0-dev, libxml2-dev, libjson-c-dev
 
 Package: libarmadito
 Section: libs
@@ -20,3 +20,11 @@ Description: Armadito core library - development files
  Provides support for Armadito functionnalities (scanning, configuration, modules)
  The package contains the needed headers and libraries for developing software using the libarmadito interface.
  
+Package: armadito-core
+Section: libs
+Architecture: i386 amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, libarmadito (>= 0.10.0)
+Description: Armadito core
+ The package contains the Armadito daemon, the command line tools and the real-time protection module for Linux
+ 
+
