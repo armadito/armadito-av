@@ -1,0 +1,6 @@
+#!/usr/bin/make -f
+%:
+	dh $@
+
+#override_dh_installinit:
+#	dh_installinit -plibarmadito-daemon --onlyscripts --name=armadito-scand
