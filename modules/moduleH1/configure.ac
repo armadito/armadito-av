@@ -47,7 +47,7 @@ fi
 # database directory
 AC_MSG_CHECKING(for databases directory)
 if test "$with_dbdir" = "no" ; then
-   MODULEH1_DBDIR="$localstatedir/lib/armadito/bases/moduleH1"1
+   MODULEH1_DBDIR="$localstatedir/lib/armadito/bases/moduleH1"
 else
    MODULEH1_DBDIR="$with_dbdir"
 fi
