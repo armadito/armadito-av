@@ -1,3 +1,24 @@
+/***
+
+Copyright (C) 2015, 2016 Teclib'
+
+This file is part of Armadito core.
+
+Armadito core is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Armadito core is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
+
+***/
+
 #include <libarmadito.h>
 #include "os/dir.h"
 #include "quarantine.h"
@@ -191,7 +212,7 @@ char * GetFilenameFromPath(char * path) {
 	return filename;
 }
 
-int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct a6o_report * uh_report) {
+int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct a6o_report * report) {
 
 	int ret = 0;
 	char * info_path = NULL;
@@ -250,15 +271,15 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct a6
 		
 		json_object_object_add(jobj, "path", json_object_new_string(oldfilepath));
 
-		if (uh_report != NULL && uh_report->mod_name != NULL) {
-			json_object_object_add(jobj, "module", json_object_new_string(uh_report->mod_name));
+		if (report != NULL && report->mod_name != NULL) {
+			json_object_object_add(jobj, "module", json_object_new_string(report->mod_name));
 		}
 		else {
 			json_object_object_add(jobj, "module", json_object_new_string("black_list"));
 		}
 
-		if (uh_report != NULL && uh_report->mod_report != NULL) {
-			json_object_object_add(jobj, "desc", json_object_new_string(uh_report->mod_report));
+		if (report != NULL && report->mod_report != NULL) {
+			json_object_object_add(jobj, "desc", json_object_new_string(report->mod_report));
 		}
 		else {
 			json_object_object_add(jobj, "desc", json_object_new_string("uh_malware"));

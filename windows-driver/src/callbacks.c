@@ -1,3 +1,14 @@
+/***
+
+Copyright (C) 2015, 2016 Teclib'
+
+This file is part of Armadito windows driver.
+
+Reproduction, distribution and derivative works are permitted under the terms of the Microsoft Public License
+See file COPYING.MSPL for terms of license.
+
+***/
+
 #include "callbacks.h"
 #include "communication.h"
 #include "ArmaditoGuard.h"
@@ -5,7 +16,7 @@
 extern PFLT_PORT gClientComPort;
 //extern PEPROCESS gScanProcess;
 
-const CHAR * PrintUhuruScanResult(SCAN_RESULT res) {
+const CHAR * PrintArmaditoScanResult(SCAN_RESULT res) {
 
 	switch (res) {
 
@@ -475,7 +486,7 @@ Return Value:
 			FileContext->scanResult = scanRes;
 			// Print scan result:
 			if (FileContext->scanResult == ARMADITO_MALWARE || FileContext->scanResult == ARMADITO_CLEAN)
-				a6oDbgPrint("[i] INFO :: ArmaditoGuard!PostOperationIrpCreate ::[%d]:: %wZ => %s\n",FltGetRequestorProcessId(Data), FltObjects->FileObject->FileName,PrintUhuruScanResult(FileContext->scanResult));
+				a6oDbgPrint("[i] INFO :: ArmaditoGuard!PostOperationIrpCreate ::[%d]:: %wZ => %s\n",FltGetRequestorProcessId(Data), FltObjects->FileObject->FileName,PrintArmaditoScanResult(FileContext->scanResult));
 		}
 		
 
@@ -656,7 +667,7 @@ Return Value:
 		else if (NT_SUCCESS(ntStatus)) {	// If a context is already set for this file.
 			
 			if (FileContext->scanResult == ARMADITO_CLEAN)
-				//DbgPrint("[i] Debug :: ArmaditoGuard!PostOperationIrpWrite :: Writing in MARKED file %s :: %wZ\n",PrintUhuruScanResult(FileContext->scanResult),FltObjects->FileObject->FileName);
+				//DbgPrint("[i] Debug :: ArmaditoGuard!PostOperationIrpWrite :: Writing in MARKED file %s :: %wZ\n",PrintArmaditoScanResult(FileContext->scanResult),FltObjects->FileObject->FileName);
 			
 			// If the file was no detected as a malware, then rescan it later.
 			if (FileContext->scanResult != ARMADITO_MALWARE) {
@@ -759,7 +770,7 @@ _Flt_CompletionContext_Outptr_ PVOID *CompletionContext
 
 		// Test if the file has already been scanned.
 		if (FileContext->scanResult != NONE && FileContext->scanResult != TIMEOUT && FileContext->scanResult != ARMADITO_UNKNOWN_FILE_TYPE ) {
-			//DbgPrint("[+] Debug :: ArmaditoGuard!PreOperationIrpCleanup :: File Already Scanned  :: %wZ :: %s\n", FltObjects->FileObject->FileName, PrintUhuruScanResult(FileContext->scanResult));
+			//DbgPrint("[+] Debug :: ArmaditoGuard!PreOperationIrpCleanup :: File Already Scanned  :: %wZ :: %s\n", FltObjects->FileObject->FileName, PrintArmaditoScanResult(FileContext->scanResult));
 			__leave;
 		}
 			
@@ -769,7 +780,7 @@ _Flt_CompletionContext_Outptr_ PVOID *CompletionContext
 		FileContext->scanResult = scanResult;
 
 		//if (FileContext->scanResult == ARMADITO_MALWARE || FileContext->scanResult == ARMADITO_CLEAN)
-		a6oDbgPrint("[i] INFO :: ArmaditoGuard!PreOperationIrpCleanup ::[%d]:: %wZ => %s\n",FltGetRequestorProcessId(Data),FltObjects->FileObject->FileName,PrintUhuruScanResult(FileContext->scanResult));
+		a6oDbgPrint("[i] INFO :: ArmaditoGuard!PreOperationIrpCleanup ::[%d]:: %wZ => %s\n",FltGetRequestorProcessId(Data),FltObjects->FileObject->FileName,PrintArmaditoScanResult(FileContext->scanResult));
 
 
 		// if the file has been detected has malware...
@@ -844,7 +855,7 @@ Return Value:
 			__leave; //return FLT_POSTOP_FINISHED_PROCESSING;
 		}
 
-		a6oDbgPrint("[+] Debug :: ArmaditoGuard!PostOperationIrpCleanup :: Cleaning File Context :: %wZ => %s\n", FltObjects->FileObject->FileName,PrintUhuruScanResult(FileContext->scanResult));
+		a6oDbgPrint("[+] Debug :: ArmaditoGuard!PostOperationIrpCleanup :: Cleaning File Context :: %wZ => %s\n", FltObjects->FileObject->FileName,PrintArmaditoScanResult(FileContext->scanResult));
 		
 		
 		//DbgPrint("[i] Debug :: ArmaditoGuard!PostOperationIrpCleanup :: ::Context realeased for file %wZ\n",FltObjects->FileObject->FileName);

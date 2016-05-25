@@ -1,4 +1,4 @@
-Uhuru-AV Linux Tests
+Armadito-AV Linux Tests
 ====================
 Valentin HAMON<vhamon@teclib.com>
 v1.1, 2016-01
