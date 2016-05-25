@@ -32,7 +32,7 @@ Installing bower (must be done as root too):
 
 After cloning the repository, the source tree of the user interface must be configured for node webkit:
 
-	cd SOMEWHERE/ng-armadito
+	cd SOMEWHERE/armadito-av/gui
 	bower install
 	npm install
 

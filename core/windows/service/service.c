@@ -1,3 +1,24 @@
+/***
+
+Copyright (C) 2015, 2016 Teclib'
+
+This file is part of Armadito core.
+
+Armadito core is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Armadito core is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
+
+***/
+
 #include <libarmadito.h>
 #include "service.h"
 #include "log.h"
@@ -29,128 +50,9 @@ GLOBAL_SCAN_CONTEXT gScanContext = {0};
 	Service Load and unload procedures functions
 --------------------------------------------------*/
 
-/* deprecated function :: prototypes changes*/
-int ServiceLoadProcedure_deprecated( ) {
-
-	int ret = 0;
-	a6o_error * uh_error = NULL;
-	HRESULT hres = S_OK;
-	struct a6o_conf * conf = NULL;
-	a6o_error * error = NULL;
-	struct armadito * armadito = NULL;
-	int onaccess_enable = 0;
-	char * conffile = NULL;
-
-	__try {
-
-		// Load configuration from file.	
-		if ((conf = a6o_conf_new()) == NULL) {
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: init_configuration :: conf struct initialization failed!\n");
-			ret = -2;
-			__leave;
-		}
-
-#if 0
-		// Load configuration from registry.
-		if (restore_conf_from_registry(conf) < 0) {			
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR," [-] Error :: fail to load the configuration!\n");
-			ret = -1;
-			__leave;
-		}
-#else
-		// get configuration file path.
-		conffile = a6o_std_path(CONFIG_FILE_LOCATION);
-		if (conffile == NULL) {
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: init_configuration :: get configuration file path failed !\n");
-			ret = -3;
-			__leave;
-		}
-
-		printf("[+] Debug :: init_configuration :: conf file = %s\n",conffile);
-
-		// Load config from config file. a6o.conf
-		a6o_conf_load_file(conf, conffile, &error);
-#endif
-
-		
-
-		printf("[+] Debug :: Configuration loaded successfully!\n");
-		
-		// Init a6o structure
-		armadito = a6o_open(conf,&uh_error);
-		if (armadito == NULL) {
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " a6o_open() struct initialization failed!\n");
-			ret = -1;
-			__leave;
-		}
-
-		printf("[+] Debug :: Armadito structure loaded successfully!\n");
-
-		// initialize global scan structure.
-		gScanContext.armadito = armadito;
-		gScanContext.onDemandCtx = NULL;
-		gScanContext.onAccessCtx = NULL;
-		gScanContext.FinalizeAll = 0;
-
-		//  Initialize scan listening threads. and Connect to the driver communication port. (Only if real time is enabled)
-		// TODO :: get this information from config.
-		
-		// Get on-access configuration.
-		onaccess_enable = a6o_conf_get_uint(conf, "on-access", "enable");
-		if (onaccess_enable < 0) { // On error
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " getting on_access configuration failed.\n");
-			ret = -1;
-			__leave;
-		}
-
-
-		if (onaccess_enable) {
-
-			//gScanContext.onAccessCtx = &onAccessCtx;
-			hres = UserScanInit(&gScanContext);
-			if (FAILED(hres)) {
-				//hres = UserScanFinalize(&userScanCtx);
-				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Scan Thread initialization failed!\n");
-				ret = -2;
-				__leave;
-			}
-
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_INFO, " Service connected to the driver successfully!\n");
-		}
-		
-
-		// Create Named Pipe for IHM
-		// Notes : If you intend to use a named pipe locally only, deny access to NT AUTHORITY\NETWORK or switch to local RPC.
-		//gScanContext.onDemandCtx = &onDemandCtx;
-		if (Start_IHM_Connection(&gScanContext) < 0) {
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR," Start IHM connection failed :: %d\n",ret);
-			ret = -3;
-			__leave;
-
-		}	
-		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_INFO, " Service connected to the GUI successfully!\n");
-		a6o_notify(NOTIF_INFO,"Service started!" );
-
-
-	}
-	__finally {
-
-		// if failed
-		if (ret < 0) {
-
-			ServiceUnloadProcedure( );
-			
-		}
-
-	}
-
-	return ret;
-}
-
 int ServiceLoadProcedure(start_mode mode) {
 
 	int ret = 0;
-	a6o_error * uh_error = NULL;
 	HRESULT hres = S_OK;
 	struct a6o_conf * conf = NULL;
 	a6o_error * error = NULL;
@@ -202,7 +104,8 @@ int ServiceLoadProcedure(start_mode mode) {
 		printf("[+] Debug :: Configuration loaded successfully!\n");
 		
 		// Init a6o structure
-		armadito = a6o_open(conf,&uh_error);
+		error = NULL;
+		armadito = a6o_open(conf,&error);
 		if (armadito == NULL) {
 			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " a6o_open() struct initialization failed!\n");
 			ret = -1;
@@ -270,7 +173,7 @@ int ServiceLoadProcedure(start_mode mode) {
 int ServiceUnloadProcedure( ) {
 
 	HRESULT hres = S_OK;
-	a6o_error * uh_error = NULL;
+	a6o_error * error = NULL;
 	int ret = 0;
 
 	// Finish all scan threads and close communication port with driver.	
@@ -289,7 +192,7 @@ int ServiceUnloadProcedure( ) {
 
 	// Close Armadito structure
 	if (gScanContext.armadito != NULL) {
-		a6o_close(gScanContext.armadito,&uh_error);
+		a6o_close(gScanContext.armadito, &error);
 	}
 
 	gScanContext.onAccessCtx = NULL;
@@ -778,7 +681,6 @@ VOID ReportSvcStatus(DWORD dwCurrentState, DWORD dwWin32ExitCode, DWORD dwWaitHi
 */
 void WINAPI ServiceCtrlHandler( DWORD dwCtrl ) {
 
-	a6o_error * uh_error = NULL;
 	HRESULT hres = S_OK;
 	int ret = 0;
 
@@ -839,7 +741,6 @@ void WINAPI ServiceCtrlHandler( DWORD dwCtrl ) {
 */
 void PerformServiceAction( ) {
 	
-	a6o_error * uh_error = NULL;
 	HRESULT hres = S_OK;
 	int ret = 0;
 
@@ -1451,7 +1352,7 @@ void DisplayBanner( ) {
 int main(int argc, char ** argv) {
 
 	int ret = 0;
-	struct a6o_report uh_report = {0};
+	struct a6o_report report = {0};
 	PVOID OldValue = NULL;
 
 	if (argc >= 2 && strncmp(argv[1],"--conf",6) == 0 ) {
@@ -1562,7 +1463,7 @@ int main(int argc, char ** argv) {
 	if ( argc >=3 && strncmp(argv[1],"--quarantine",11) == 0 ){
 
 #if 0
-		ret = MoveFileInQuarantine(argv[2],uh_report);
+		ret = MoveFileInQuarantine(argv[2], report);
 		if (ret < 0) {
 			return EXIT_FAILURE;
 		}

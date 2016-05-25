@@ -1,3 +1,14 @@
+/***
+
+Copyright (C) 2015, 2016 Teclib'
+
+This file is part of Armadito windows driver.
+
+Reproduction, distribution and derivative works are permitted under the terms of the Microsoft Public License
+See file COPYING.MSPL for terms of license.
+
+***/
+
 #include "communication.h"
 
 #define SCAN_PORT_NAME L"\\A6oPortScanFilter"
@@ -53,7 +64,7 @@ NTSTATUS InitCommunicationPort(_In_ PFLT_FILTER FilterHandle, _Out_ PFLT_PORT *S
 
 	NTSTATUS ntStatus = STATUS_SUCCESS;
 	OBJECT_ATTRIBUTES ObjectAttributes;
-	UNICODE_STRING PortName;// = RTL_CONSTANT_STRING(L"\\UhuruPortScanFilter");
+	UNICODE_STRING PortName;// = RTL_CONSTANT_STRING(L"\\ArmaditoPortScanFilter");
 	PFLT_PORT LocalServerPort = NULL;
 	PSECURITY_DESCRIPTOR SecurityDescriptor = NULL;
 	// Create Security Descriptor/

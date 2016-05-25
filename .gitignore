@@ -1,7 +1,6 @@
 deps/*
-core/windows/driver/signature/*
 *.zip
 *.vcxproj.user
 databases/*
 windows-driver/signature/*
-out/*
+build/linux/out/*
