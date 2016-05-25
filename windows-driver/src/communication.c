@@ -53,7 +53,7 @@ NTSTATUS InitCommunicationPort(_In_ PFLT_FILTER FilterHandle, _Out_ PFLT_PORT *S
 
 	NTSTATUS ntStatus = STATUS_SUCCESS;
 	OBJECT_ATTRIBUTES ObjectAttributes;
-	UNICODE_STRING PortName;// = RTL_CONSTANT_STRING(L"\\UhuruPortScanFilter");
+	UNICODE_STRING PortName;// = RTL_CONSTANT_STRING(L"\\ArmaditoPortScanFilter");
 	PFLT_PORT LocalServerPort = NULL;
 	PSECURITY_DESCRIPTOR SecurityDescriptor = NULL;
 	// Create Security Descriptor/

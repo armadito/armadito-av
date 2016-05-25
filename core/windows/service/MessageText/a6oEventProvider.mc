@@ -43,7 +43,7 @@ Severity=Error
 Facility=Application
 SymbolicName=MSG_ERROR
 Language=English
-Armadito-av :: Error :: %1
+ArmaditoAV :: Error :: %1
 .
 
 ; // Warning messages
@@ -52,7 +52,7 @@ Severity=Warning
 Facility=Application
 SymbolicName=MSG_WARNING
 Language=English
-Armadito-av :: Warning :: %1
+ArmaditoAV :: Warning :: %1
 .
 
 ; // Information messages
@@ -61,7 +61,7 @@ Severity=Informational
 Facility=Application
 SymbolicName=MSG_INFO
 Language=English
-Armadito-av :: Information :: %1
+ArmaditoAV :: Information :: %1
 .
 
 ; // Success messages
@@ -70,5 +70,5 @@ Severity=Success
 Facility=Application
 SymbolicName=MSG_SUCCESS
 Language=English
-Armadito-av :: Success :: %1
+ArmaditoAV :: Success :: %1
 .
