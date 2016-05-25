@@ -153,8 +153,11 @@ int json_client_process(struct json_client *cl)
 
 		n_read = read(cl->sock, buffer_end(&cl->input_buffer), INPUT_READ_SIZE);
 
-		if (n_read > 0)
+		if (n_read > 0){
 			buffer_increment(&cl->input_buffer, n_read);
+			break;
+		}
+
 	} while (n_read > 0);
 
 	if (n_read < 0) {
