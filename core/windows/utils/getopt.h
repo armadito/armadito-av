@@ -1,5 +1,5 @@
-#ifndef _LIBUHURU_GETOPT_H_
-#define _LIBUHURU_GETOPT_H_
+#ifndef _LIBARMADITO_GETOPT_H_
+#define _LIBARMADITO_GETOPT_H_
 
 #include <stdlib.h>
 

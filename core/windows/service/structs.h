@@ -1,5 +1,5 @@
-#ifndef __UH_STRUCTS_H__
-#define __UH_STRUCTS_H__
+#ifndef __ARMADITO_STRUCTS_H__
+#define __ARMADITO_STRUCTS_H__
 
 #include <Windows.h>
 
@@ -101,7 +101,7 @@ typedef struct _GLOBAL_SCAN_CONTEXT {
 	//  On access Scan context    	
 	PONACCESS_SCAN_CONTEXT onAccessCtx;
     
-	// Uhuru Structure.
+	// Armadito Structure.
 	struct armadito * armadito;
 
 	// Flag for finish order.

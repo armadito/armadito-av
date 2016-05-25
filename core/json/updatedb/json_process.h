@@ -1,5 +1,5 @@
-#ifndef __UH_JSON_PARSE_H__
-#define __UH_JSON_PARSE_H__
+#ifndef __ARMADITO_JSON_PARSE_H__
+#define __ARMADITO_JSON_PARSE_H__
 #endif
 
 #include <stdio.h>

@@ -76,7 +76,7 @@
 //
 // MessageText:
 //
-// Armadito-av :: Error :: %1
+// ArmaditoAV :: Error :: %1
 //
 #define MSG_ERROR                        ((DWORD)0xC0000100L)
 
@@ -86,7 +86,7 @@
 //
 // MessageText:
 //
-// Armadito-av :: Warning :: %1
+// ArmaditoAV :: Warning :: %1
 //
 #define MSG_WARNING                      ((DWORD)0x80000200L)
 
@@ -96,7 +96,7 @@
 //
 // MessageText:
 //
-// Armadito-av :: Information :: %1
+// ArmaditoAV :: Information :: %1
 //
 #define MSG_INFO                         ((DWORD)0x40000300L)
 
@@ -106,7 +106,7 @@
 //
 // MessageText:
 //
-// Armadito-av :: Success :: %1
+// ArmaditoAV :: Success :: %1
 //
 #define MSG_SUCCESS                      ((DWORD)0x00000400L)
 

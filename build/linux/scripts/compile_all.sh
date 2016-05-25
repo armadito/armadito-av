@@ -2,8 +2,6 @@
 OS_V=ubuntu-14.04-64
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-OUT_DIR=$DIR/../out
-SRC_DIR=$DIR/../
 
 PACKAGE=$1
 
@@ -21,10 +19,10 @@ then
 	./compile.sh -p modules/clamav -o $OS_V
 fi
 
-if [[ $PACKAGE == "module5_2" || $PACKAGE == "" ]];
+if [[ $PACKAGE == "moduleH1" || $PACKAGE == "" ]];
 then
-	./configure.sh -p modules/module5_2 -o $OS_V
-	./compile.sh -p modules/module5_2 -o $OS_V
+	./configure.sh -p modules/moduleH1 -o $OS_V
+	./compile.sh -p modules/moduleH1 -o $OS_V
 fi
 
 if [[ $PACKAGE == "modulePDF" || $PACKAGE == "" ]];
