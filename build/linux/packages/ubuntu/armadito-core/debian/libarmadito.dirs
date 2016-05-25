@@ -1,0 +1,3 @@
+var/spool/armadito
+var/lib/armadito/quarantine
+var/lib/armadito/tmp
