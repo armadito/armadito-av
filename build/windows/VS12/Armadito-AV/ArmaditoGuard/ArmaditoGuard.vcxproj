@@ -293,15 +293,15 @@
     <FilesToPackage Include="@(Inf->'%(CopyOutput)')" Condition="'@(Inf)'!=''" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\core\windows\driver\src\ArmaditoGuard.c" />
-    <ClCompile Include="..\..\..\..\..\core\windows\driver\src\callbacks.c" />
-    <ClCompile Include="..\..\..\..\..\core\windows\driver\src\communication.c" />
+    <ClCompile Include="..\..\..\..\..\windows-driver\src\ArmaditoGuard.c" />
+    <ClCompile Include="..\..\..\..\..\windows-driver\src\callbacks.c" />
+    <ClCompile Include="..\..\..\..\..\windows-driver\src\communication.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\core\windows\driver\src\ArmaditoGuard.h" />
-    <ClInclude Include="..\..\..\..\..\core\windows\driver\src\callbacks.h" />
-    <ClInclude Include="..\..\..\..\..\core\windows\driver\src\communication.h" />
-    <ClInclude Include="..\..\..\..\..\core\windows\driver\src\structs.h" />
+    <ClInclude Include="..\..\..\..\..\windows-driver\src\ArmaditoGuard.h" />
+    <ClInclude Include="..\..\..\..\..\windows-driver\src\callbacks.h" />
+    <ClInclude Include="..\..\..\..\..\windows-driver\src\communication.h" />
+    <ClInclude Include="..\..\..\..\..\windows-driver\src\structs.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

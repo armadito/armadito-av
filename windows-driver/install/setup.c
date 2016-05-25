@@ -5,8 +5,36 @@
 #include <process.h>
 #include <SetupAPI.h>
 
-
+#define LOG_FILE "C:\\armadito-install.log"
 #define INF_FILE "\\ArmaditoGuard.inf"
+
+int gfirst_time = 0;
+
+// TODO :: add timestamp.
+void a6oLogFile(const char *fmt, ...)
+{
+	
+	FILE * f = NULL;
+	const char *mode = "a";
+	errno_t err;
+	va_list ap;
+
+
+	if (gfirst_time) {
+		mode = "w";
+		gfirst_time = 0;
+	}
+	err = fopen_s(&f, LOG_FILE, mode);
+	if (err != 0)
+		return;
+
+	va_start(ap, fmt);
+	vfprintf(f, fmt, ap);
+	va_end(ap);
+	fclose(f);
+
+	return;
+}
 
 char * GetBinaryDirectory( ) {
 
@@ -16,14 +44,14 @@ char * GetBinaryDirectory( ) {
 	int len = 0;
 
 	if (!GetModuleFileNameA(NULL, (LPSTR)&filepath, MAX_PATH)) {		
-		printf("[-] Error :: GetBinaryDirectory!GetModuleFileName() failed :: %d\n",GetLastError());
+		a6oLogFile("[-] Error :: GetBinaryDirectory!GetModuleFileName() failed :: %d\n", GetLastError());
 		return NULL;
 	}
 
 	// get the file name from the complete file path
 	ptr = strrchr(filepath,'\\');
 	if (ptr == NULL) {		
-		printf("[-] Error :: GetBinaryDirectory!strrchr() failed :: backslash not found in the path :: %s.\n",filepath);
+		a6oLogFile("[-] Error :: GetBinaryDirectory!strrchr() failed :: backslash not found in the path :: %s.\n", filepath);
 		return NULL;
 	}
 	
@@ -37,7 +65,6 @@ char * GetBinaryDirectory( ) {
 
 	return dirpath;
 }
-
 
 char * BuildInfCmd(char * pre_command ) {
 
@@ -90,7 +117,6 @@ char * BuildInfCmd(char * pre_command ) {
 	return cmd;
 }
 
-
 int install( ) {
 
 	int ret = 0;
@@ -100,6 +126,9 @@ int install( ) {
 	PVOID OldValue = NULL;
 
 	cmd = BuildInfCmd("DefaultInstall 132 ");
+	if (cmd == NULL){
+		return -1;
+	}
 
 	// convert ascii string to wide char string.
 	w_cmd = (WCHAR*)calloc(MAX_PATH,sizeof(WCHAR));
@@ -110,18 +139,20 @@ int install( ) {
 	// https://msdn.microsoft.com/en-us/library/aa384187.aspx
 	// https://msdn.microsoft.com/en-us/library/aa365743.aspx
 	// Disables file system redirection for the calling thread.
-	if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {
-		return -1;
+	if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {		
+		a6oLogFile("[-] Error :: Disable Wow64 file system redirection failed !\n");
+		return -2;
 	}
 
-	printf("[i] Debug :: install :: installing the driver...\n" );
+	a6oLogFile("[+] Debug :: install :: installing the driver...\n");
 	InstallHinfSectionW(NULL, NULL, w_cmd,0);
-	printf("[i] Debug :: install :: InstallHinfSection executed!\n" );
+	a6oLogFile("[+] Debug :: install :: InstallHinfSection executed!\n");
 
 	if (Wow64RevertWow64FsRedirection(OldValue) == FALSE ){
         //  Failure to re-enable redirection should be considered
         //  a criticial failure and execution aborted.
-        return -2;
+		a6oLogFile("[-] Error :: Revert Wow64 file system redirection failed !\n");
+        return -3;
     }
 
 	free(cmd);
@@ -138,15 +169,19 @@ int uninstall( ) {
 	PVOID OldValue = NULL;
 
 	cmd = BuildInfCmd("DefaultUnInstall 132 ");
+	if (cmd == NULL){
+		return -1;
+	}
 
-	printf(L"[i] Debug :: uninstall :: Uninstalling the driver...\n" );
+	a6oLogFile("[i] Debug :: uninstall :: Uninstalling the driver...\n");
 
 	w_cmd = (WCHAR*)calloc(MAX_PATH,sizeof(WCHAR));
 	mbstowcs_s(&count, w_cmd,MAX_PATH, cmd,MAX_PATH);
 
-	wprintf(L"[i] Debug :: install ::  wide string =  %ls\n",w_cmd);
+	wprintf(L"[i] Debug :: uninstall ::  cmd =  %ls\n",w_cmd);
 
 	if (Wow64DisableWow64FsRedirection(&OldValue) == FALSE) {
+		a6oLogFile("[-] Error :: Disable Wow64 file system redirection failed !\n");
 		return -1;
 	}
 
@@ -155,10 +190,11 @@ int uninstall( ) {
 	if (Wow64RevertWow64FsRedirection(OldValue) == FALSE ){
         //  Failure to re-enable redirection should be considered
         //  a criticial failure and execution aborted.
+		a6oLogFile("[-] Error :: Revert Wow64 file system redirection failed !\n");
         return -2;
     }
 
-	printf("[i] Debug :: uninstall :: InstallHinfSection executed!\n" );
+	a6oLogFile("[i] Debug :: uninstall :: InstallHinfSection executed!\n");
 
 
 	free(cmd);
@@ -190,49 +226,48 @@ int main(int argc, char ** argv) {
 
 	// check parameter.
 	if (argc < 2) {
-		printf("[-] Error :: No arguments\n" );
+		a6oLogFile("[-] Error :: ArmaditoGuard-setup :: missing parameter\n");
 		Help( );
 		return ERROR_INSTALL_FAILURE;
 	}
 
 	if (strncmp(argv[1],"--install",9) == 0) {
 
-		if (install( ) < 0) {
-			printf("[-] Error :: ArmaditoGuard installation failed!\n" );
+		if (install( ) < 0) {			
+			a6oLogFile("[-] Error :: ArmaditoGuard installation failed!\n");
 			return ERROR_INSTALL_FAILURE;
 		}
 
 	}
 	else if (strncmp(argv[1],"--start",7) == 0) {
 
-		if (start( ) < 0) {
-			printf("[-] Error :: ArmaditoGuard start failed!\n" );
+		if (start( ) < 0) {			
+			a6oLogFile("[-] Error :: ArmaditoGuard start failed!\n");
 			return -1;
-
 		}
 
 	}
 	else if (strncmp(argv[1],"--stop",6) == 0) {
 
-		if (stop( ) < 0) {
-			printf("[-] Error :: ArmaditoGuard stop failed!\n" );
+		if (stop( ) < 0) {			
+			a6oLogFile("[-] Error :: ArmaditoGuard stop failed!\n");
 			return -1;
 		}
 
 	}
 	else if (strncmp(argv[1],"--uninstall",11) == 0) {
 
-		if (uninstall( ) < 0) {
-			printf("[-] Error :: ArmaditoGuard uninstallation failed!\n" );
+		if (uninstall( ) < 0) {			
+			a6oLogFile("[-] Error :: ArmaditoGuard uninstallation failed!\n");
 			return -1;
 		}
 
 	}
 	else {
-		printf("[-] Error :: Bad parameter\n" );
+		a6oLogFile("[-] Error :: ArmaditoGuard-setup :: Invalid parameter\n");
 		Help( );
 		return ERROR_INSTALL_FAILURE;
 	}
-
+	
 	return 0;	
 }
