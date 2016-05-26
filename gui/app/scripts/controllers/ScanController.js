@@ -195,6 +195,7 @@ angular.module('armaditoApp')
       $scope.malware_count = 0;
       $scope.suspicious_count = 0;
       $scope.scanned_count = 0;
+      $scope.canceled = 0;
 
       // we remove last listener
       $rootScope.myEmitter.removeListener('scan_info', $scope.threatDataFromAv);
@@ -210,6 +211,8 @@ angular.module('armaditoApp')
     
       //console.log("[+] Debug :: cancel scan ::", $scope.type);
       ArmaditoSVC.cancelScan($scope.threatDataFromAv);
+
+      $scope.canceled = 1;
     };
 
 
