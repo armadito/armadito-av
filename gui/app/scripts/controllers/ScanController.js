@@ -59,7 +59,7 @@ angular.module('armaditoApp')
 
     $scope.scan_data.files = [];
     $scope.state.modules = [];
-
+    $scope.scan_data.displayed_file = "";
     
 
     // This function refresh structure values from data receive from AV. 
@@ -78,8 +78,10 @@ angular.module('armaditoApp')
 
         // Handle the first response of the av.
         if(json_object.av_response == "scan" && json_object.status == 0 ){
-          console.log("[+] Debug :: Scan order send successfully to av!\n");      
+          console.log("[+] Debug :: Scan order send successfully to av!\n");     
+	  $scope.scan_data.progress = 0; 
 	  global.scan_in_progress = 1;    
+	  $scope.$apply();
           return;
         }
 
@@ -90,6 +92,8 @@ angular.module('armaditoApp')
 
           $scope.scan_data.progress = json_object.params.progress ;
           //console.log("[+] Debug :: progress = ", $scope.scan_data.progress);
+
+	  $scope.scan_data.displayed_file = json_object.params.path;	  
 
           if(json_object.params.scan_status === 'malware' || json_object.params.scan_status === 'suspicious'){
             $scope.scan_data.files.push(json_object.params);
