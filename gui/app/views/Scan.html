@@ -53,7 +53,7 @@
 	</div>
 	<div class="row pullTop" >
 	  	<div class="col-sm-offset-1 col-md-offset-1 col-xs-10 col-sm-10 col-md-10" >
-	  		<h6  ng-if="scan_data.files.length"> &nbsp;&nbsp;&nbsp;&nbsp;{{ 'analyse_view.Scanning_file' | translate}} : <b title="{{file.path}}" ng-repeat="file in scan_data.files track by $index"><span ng-if="$last">{{truncate(file.path,50)}}</span></b></h6>
+		    <h6 ng-if="scan_data.displayed_file" > &nbsp;&nbsp;&nbsp;&nbsp;{{ 'analyse_view.Scanning_file' | translate}} : <b>{{truncate(scan_data.displayed_file,50)}}</b></h6>
 		    <uib-progressbar max="max" class="progressBar" value="scan_data.progress"><span class="progressBarPercent"><span ng-if="scan_data.progress > 0 || scan_data.progress === 0">{{scan_data.progress}}%</span></span>
 	    	</uib-progressbar>   
 	  	</div>
