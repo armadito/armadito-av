@@ -210,9 +210,12 @@ angular.module('armaditoApp')
     $scope.CancelScan = function(){
     
       //console.log("[+] Debug :: cancel scan ::", $scope.type);
-      ArmaditoSVC.cancelScan($scope.threatDataFromAv);
+	      
+      if($scope.canceled == 0){
+           ArmaditoSVC.cancelScan($scope.threatDataFromAv);
+	   $scope.canceled = 1;
+      }
 
-      $scope.canceled = 1;
     };
 
 
