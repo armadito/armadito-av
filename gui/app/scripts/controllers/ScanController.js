@@ -30,7 +30,8 @@ along with Armadito gui.  If not, see <http://www.gnu.org/licenses/>.
  */
  
  var os = require('os');
- 
+ var homedir = require('homedir');
+
 angular.module('armaditoApp')
   .controller('ScanController', ['$rootScope','$scope','ArmaditoSVC','ArmaditoIPC','$uibModal', function ($rootScope,$scope,ArmaditoSVC,ArmaditoIPC, $uibModal) {
 
@@ -147,13 +148,15 @@ angular.module('armaditoApp')
     
      // console.log("[+] Debug :: type d'analyse ::", $scope.type);
  
-     // reset progress bar
+      // reset progress bar
       $scope.scan_data.progress = 0;
       $scope.scan_data.files = [];
 
       if($scope.type == "analyse_view.Full_scan"){
-        // only for test
-        console.log("[+] Debug :: ANALYSE COMPLÈTE ::\n");
+	
+	// TODO: Set full_scan path in AV-side
+	
+        console.log("[+] Debug :: Full scan ::\n");
         if(os.platform() == "win32"){
            $scope.scan_data.path_to_scan = "C:\\";
 	}
@@ -163,23 +166,22 @@ angular.module('armaditoApp')
 
       }else if($scope.type == "analyse_view.Quick_scan"){
 
-        // only for test
-        console.log("[+] Debug :: ANALYSE RAPIDE ::\n");
+        console.log("[+] Debug :: Quick scan ::\n");
+
+	// TODO: Set quick_scan path in AV-side
 
         if(os.platform() == "win32"){
-           
-		   var userpath = process.env['USERPROFILE'];
-		   userpath = userpath.replace(/\\/g, "\\\\");
-		   $scope.scan_data.path_to_scan =  userpath ;
+	   var userpath = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
+	   userpath = userpath.replace(/\\/g, "\\\\");
+	   $scope.scan_data.path_to_scan =  userpath ;
 	}
 	else {
-	   $scope.scan_data.path_to_scan = "/home";	
+	   
+	   $scope.scan_data.path_to_scan = homedir(); // "/home";	
 	}
 
       }else if($scope.type == "analyse_view.Custom_scan"){
-
-        // only for test
-        console.log("[+] Debug :: ANALYSE PERSONALISÉE ::\n");
+        console.log("[+] Debug :: Custom scan ::\n");
       }
       else{
         // display a notif.
