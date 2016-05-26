@@ -3,7 +3,7 @@ AUTOMAKE_OPTIONS=subdir-objects no-dependencies
 bin_PROGRAMS= armadito-info armadito-scan
 
 AM_CFLAGS=-I$(top_srcdir)/libarmadito/include -I$(top_srcdir)/libarmadito/include/config -I$(top_srcdir)/linux @GLIB2_CFLAGS@
-LIBS=$(top_builddir)/libarmadito/src/libarmadito.la @GLIB2_LIBS@
+LIBS=$(top_builddir)/libarmadito/src/libarmadito.la @GLIB2_LIBS@ -lmagic
 
 armadito_info_SOURCES=\
 armadito-info.c \
