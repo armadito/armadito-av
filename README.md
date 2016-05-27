@@ -9,4 +9,3 @@ Project home: http://www.teclib-edition.com/teclib-products/armadito-antivirus
 
 See Online documentation at : http://armadito.readthedocs.io/en/latest
 
-Documentation can be built locally within *documentation* directory.
