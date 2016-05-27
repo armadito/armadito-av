@@ -35,32 +35,20 @@ along with Armadito gui.  If not, see <http://www.gnu.org/licenses/>.
 angular.module('armaditoApp')
   .controller('ScanController', ['$rootScope','$scope','ArmaditoSVC','ArmaditoIPC','$uibModal', function ($rootScope,$scope,ArmaditoSVC,ArmaditoIPC, $uibModal) {
 
-    $scope.HideInputFile = true;
-    $scope.type = "analyse_view.Choose_analyse_type";
-    $scope.scan_server;
-    $scope.malware_count = 0;
-    $scope.suspicious_count = 0;
-    $scope.scanned_count = 0;
-
-    // Scan data :: Path to scan and progress
-    $scope.scan_data = {
-      path_to_scan : "",
-      progress : 0
-    };
-    
-    // Initialize state.
-    $scope.state = {
-      status : 0,
-      service : false,
-      realtime : false,
-      update : "critical",
-      last_update : "Il y a 3 jours",
-      version : 0.1       
-    };
-
-    $scope.scan_data.files = [];
-    $scope.state.modules = [];
+    $scope.initTab = function(){   
    
+	    $scope.type = "analyse_view.Choose_analyse_type";
+	    $scope.malware_count = 0;
+	    $scope.suspicious_count = 0;
+	    $scope.scanned_count = 0;
+
+	    $scope.scan_data = {
+	      path_to_scan : "",
+	      progress : 0
+	    };
+	    
+	    $scope.scan_data.files = [];
+    }
 
     // This function refresh structure values from data receive from AV. 
     // callback function
@@ -137,22 +125,10 @@ angular.module('armaditoApp')
       json_object = null;
     }
 
-
-    // we remove last listener
-    $rootScope.myEmitter.removeListener('scan_info', $scope.threatDataFromAv);
-
-    // register emitter 
-    $rootScope.myEmitter.addListener('scan_info', $scope.threatDataFromAv);
-
-
     $scope.StartScan = function(){
     
      // console.log("[+] Debug :: type d'analyse ::", $scope.type);
- 
-      // reset progress bar
-      $scope.scan_data.progress = 0;
-      $scope.scan_data.files = [];
-      $scope.scan_data.displayed_file = "";
+
 
       if($scope.type == "analyse_view.Full_scan"){
 	
@@ -191,7 +167,10 @@ angular.module('armaditoApp')
         return;
       }
 
-      // reset counters
+      // reset variables
+      $scope.scan_data.progress = 0;
+      $scope.scan_data.files = [];
+      $scope.scan_data.displayed_file = "";
       $scope.malware_count = 0;
       $scope.suspicious_count = 0;
       $scope.scanned_count = 0;
@@ -268,6 +247,15 @@ angular.module('armaditoApp')
                separator + 
                fullStr.substr(fullStr.length - backChars);
     };
+
+    // model initialisation
+    $scope.initTab();
+
+    // we remove last listener
+    $rootScope.myEmitter.removeListener('scan_info', $scope.threatDataFromAv);
+
+    // register emitter 
+    $rootScope.myEmitter.addListener('scan_info', $scope.threatDataFromAv);
 
   }]);
 
