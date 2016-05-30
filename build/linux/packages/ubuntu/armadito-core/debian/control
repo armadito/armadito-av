@@ -15,7 +15,7 @@ Description: Armadito core library
 Package: libarmadito-dev
 Section: libdevel
 Architecture: i386 amd64
-Depends: ${shlibs:Depends}, ${misc:Depends}, libarmadito (>= 0.10.0)
+Depends: ${shlibs:Depends}, ${misc:Depends}, libarmadito (>= 0.10.0), pkg-config
 Description: Armadito core library - development files
  Provides support for Armadito functionnalities (scanning, configuration, modules)
  The package contains the needed headers and libraries for developing software using the libarmadito interface.

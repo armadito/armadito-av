@@ -18,3 +18,5 @@ install-exec-hook:
 
 install-data-hook:
 	-rm -f "$(DESTDIR)$(modulesdir)"/clamav.la "$(DESTDIR)$(modulesdir)"/clamav.a
+
+EXTRA_DIST=clamav.sym
