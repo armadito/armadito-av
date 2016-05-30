@@ -2,7 +2,7 @@
 
 function usage()
 {
-    echo "Usage: deb-src.sh -d DISTRIB -k GPG_KEY_ID TARBALL"
+    echo "Usage: deb-src.sh -d DISTRIB -k GPG_KEY_ID [-b BUILD_VERSION] TARBALL"
     echo "Create a Debian source package from tarball"
     echo "Example: deb-src.sh -d trusty -k BEEFFACE armadito-core-0.10.1.tar.gz"
     echo ""
@@ -12,6 +12,7 @@ function usage()
     echo "Options:"
     echo "  DISTRIB          distrib code name (trusty, wily, xenial...)"
     echo "  GPG_KEY_ID       GPG key id for package signing"
+    echo "  BUILD_VERSION    build version appended to source version"
     echo ""
 
     exit 1
@@ -58,11 +59,18 @@ function build_deb_src()
     local TARBALL=$1
     local DISTRIB=$2
     local GPG_KEY=$3
+    local BUILD_VERSION=$4
 
     local OUT_DIR=$SCRIPT_DIR/../out
     local PKG=$(pkg $TARBALL)
     local TARBALL_EXT=$(tarball_extension $TARBALL)
-    local VERSION=$(version $TARBALL)
+    local SRC_VERSION=$(version $TARBALL)
+    if [ ! -z "$BUILD_VERSION" ] ; then
+	VERSION=$SRC_VERSION.$BUILD_VERSION
+    else
+	VERSION=$SRC_VERSION
+    fi
+
     local DEBIAN_TARBALL=${PKG}_$VERSION.orig.tar.$TARBALL_EXT
     local BUILD_DIR=$OUT_DIR/pkg
     local DEBIAN_DIR=$SCRIPT_DIR/../packages/ubuntu/$PKG/debian
@@ -78,6 +86,10 @@ function build_deb_src()
     (
 	cd $BUILD_DIR
 	tar xv${TAR_FLAG}f $DEBIAN_TARBALL
+
+	if [ ! -z "$BUILD_VERSION" ] ; then
+	    mv $BUILD_DIR/$PKG-$SRC_VERSION $BUILD_DIR/$PKG-$VERSION
+	fi
     )
 
     cp -r $DEBIAN_DIR $BUILD_DIR/$PKG-$VERSION
@@ -85,11 +97,14 @@ function build_deb_src()
     # we append the distro to the package version
     (
 	cd $BUILD_DIR/$PKG-$VERSION
-	dch --local ppa1~$DISTRIB --distribution $DISTRIB --controlmaint 'adding distro name'
-    )
 
-    (
-	cd $BUILD_DIR/$PKG-$VERSION
+	if [ ! -z "$BUILD_VERSION" ] ; then
+	    local DEBIAN_VERSION=$(dpkg-parsechangelog --show-field Version | sed -r -e "s/$SRC_VERSION//") 
+	    dch --newversion $VERSION$DEBIAN_VERSION --distribution $DISTRIB --controlmaint "$BUILD_VERSION"
+	fi
+
+	dch --local ppa1~$DISTRIB --distribution $DISTRIB --controlmaint 'adding distro name'
+
 	debuild -S -sa -pgpg2 -k$GPG_KEY_ID
     )
 }
@@ -100,13 +115,16 @@ function build_deb_src()
 
 if [ $# -eq 0 ] ; then usage ; fi
 
-while getopts "d:k:h" opt; do
+while getopts "d:k:b:h" opt; do
     case $opt in
 	d)
 	    DISTRIB=$OPTARG
 	    ;;
 	k)
 	    GPG_KEY_ID=$OPTARG
+	    ;;
+	b)
+	    BUILD_VERSION=$OPTARG
 	    ;;
 	h)
 	    usage
@@ -127,7 +145,7 @@ TARBALL=$1
 
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-build_deb_src $TARBALL $DISTRIB $GPG_KEY_ID
+build_deb_src $TARBALL $DISTRIB $GPG_KEY_ID $BUILD_VERSION
 
 exit 0
 
