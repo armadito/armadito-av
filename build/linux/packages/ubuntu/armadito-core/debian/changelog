@@ -1,3 +1,15 @@
+armadito-core (0.10.1-0ubuntu1) wily; urgency=medium
+
+  * fixed link error related to dependencies fix
+
+ -- François Déchelle <fdechelle@teclib.com>  Thu, 26 May 2016 15:36:16 +0200
+
+armadito-core (0.10.0-0ubuntu6) wily; urgency=medium
+
+  * fixing dependencies
+
+ -- François Déchelle <fdechelle@teclib.com>  Thu, 26 May 2016 14:29:33 +0200
+
 armadito-core (0.10.0-0ubuntu5) wily; urgency=medium
 
   * fixing build fail
