@@ -6,3 +6,6 @@
 /nwjs-v*
 /nwjs-sdk-*
 /test
+Makefile
+autom4te.cache/*
+configure
