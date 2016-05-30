@@ -1,18 +1,12 @@
 Compilation on Windows
 ====================
 
-On windows, you can compile Armadito AV sources with Visual Studio.
-This has been tested in Visual Studio 2013. 
-You might have to apply some modifications regarding to which Visual Studio's version you use. 
+On Windows, you can compile Armadito AV sources with Visual Studio.
+This has been tested with Visual Studio 2013. You might have to apply some modifications regarding to which Visual Studio's version you use. 
 
-Prepare compilation
-*******************
-
-
-Compile everything
-******************
-
-Open the armadito-av VS project at location : **armadito-av\build\windows\VS\Armadito-AV\Armadito-AV.sln
+Open the armadito-av VS project at location : 
+ 
+   *SOMEWHERE\\armadito-av\\build\\windows\\VS\\Armadito-AV\\Armadito-AV.sln*
 
 
 Driver compilation and signing
@@ -38,6 +32,8 @@ Driver compilation and signing
 Compilation Results
 *******************
 
-By default, compilation results are located in **armadito-av\build\windows\VS\Armadito-AV\out\[config]
+By default, compilation results are located in :
+  
+   *SOMEWHERE\\armadito-av\\build\\windows\\VS\\Armadito-AV\\out\\[config]*
 
 .. toctree::

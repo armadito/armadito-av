@@ -48,6 +48,7 @@
     "max_height": 560
   },
   "dependencies": {
+    "homedir": "^0.6.0",
     "os-locale": "^1.4.0",
     "platform-dependent-modules": "0.0.13",
     "sprintf-js": "^1.0.3"
@@ -57,14 +58,10 @@
       "linux": [
         "abstract-socket"
       ],
-      "win32": [
-      ],
-      "darwin": [
-      ],
-      "freebsd": [
-      ],
-      "sunos": [
-      ]
+      "win32": [],
+      "darwin": [],
+      "freebsd": [],
+      "sunos": []
     }
   },
   "scripts": {
