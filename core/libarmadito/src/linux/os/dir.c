@@ -112,10 +112,6 @@ int os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data)
 			break;
 		}
 
-		// Call to scan_entry()
-		real_entry_path = realpath(entry_path, NULL);
-		ret = (*dirent_cb)(real_entry_path, dirent_flags(entry), 0, data);
-
 		if (entry->d_type == DT_DIR && recurse) {
 		      ret = os_dir_map(entry_path, recurse, dirent_cb, data);
 		      if (ret != 0) {
@@ -123,15 +119,20 @@ int os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data)
 			break;
 		      }
 		}
-
+                else{
+                        // Call to scan_entry()
+                        real_entry_path = realpath(entry_path, NULL);
+                        ret = (*dirent_cb)(real_entry_path, dirent_flags(entry), 0, data);      
+                        free(real_entry_path);
+                }
+ 
 		free(entry_path);
-		free(real_entry_path);
 	}
 
         if (closedir(d) < 0)
         	a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "error closing directory %s (%s)", path, strerror(errno));
 
-        return ret;
+        return 0;
 }
 
 /*
