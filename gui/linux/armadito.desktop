@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Armadito
+Comment=Armadito antivirus
+Exec=/usr/bin/armadito-ui
+Icon=/usr/share/icons/hicolor/scalable/apps/armadito_white.svg
+Terminal=false
+Type=Application
+Categories=Application;Antivirus
+
