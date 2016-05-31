@@ -1,15 +1,10 @@
-Build Instructions
-==================
+Armadito module PDF
+===================
 
-Firstly, get armaditopdf sources : 
-   $ cd SOMEWHERE/armadito-av/modules/modulePDF/
-   $ git clone http://gitlab.teclib.infra/armadito/armaditopdf.git -b DEV
-   
-On Windows
-==========
-Once downloaded, you can build modulePDF project directly in Visual Studio. 
-If the operation is successful, modulePDF.dll will be copied in SOMEWHERE/build/windows/VS/Armadito-AV/out/Debug/modules.
+Armadito module PDF is an heuristic module for PDF documents analysis.
 
-On Linux
-========
-TODO
+Copyright (C) Teclib', 2015, 2016
+
+Project home : <http://www.teclib-edition.com/teclib-products/armadito-antivirus>
+
+See Online documentation at : <http://armadito-av.readthedocs.io/en/latest/>

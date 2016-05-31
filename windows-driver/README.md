@@ -1,7 +1,7 @@
-Armadito ClamAV module
-======================
+Armadito Windows Driver
+=======================
 
-Armadito ClamAV module corresponds to the integration of libclamav library within Armadito-av.
+Armadito Windows Driver is responsible of on-access protection of Armadito antivirus.
 
 Copyright (C) Teclib', 2015, 2016
 
