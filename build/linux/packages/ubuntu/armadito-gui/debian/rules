@@ -11,4 +11,6 @@ include /usr/share/dpkg/default.mk
 #export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 
 %:
-	dh $@  --with autotools-dev
+#	dh $@  --with autotools-dev
+	dh $@
+
