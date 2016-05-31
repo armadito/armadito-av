@@ -10,6 +10,7 @@ AC_CONFIG_LINKS([bower.json:bower.json package.json:package.json])
 
 # Output files
 AC_CONFIG_FILES([
+linux/Makefile
 Makefile
 ])
 AC_OUTPUT
