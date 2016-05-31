@@ -6,3 +6,11 @@
 /nwjs-v*
 /nwjs-sdk-*
 /test
+Makefile
+Makefile.in
+autom4te.cache/*
+configure
+aclocal.m4
+install-sh
+missing
+

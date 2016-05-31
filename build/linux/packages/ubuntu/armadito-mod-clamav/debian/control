@@ -3,7 +3,7 @@ Section: utils
 Priority: optional
 Maintainer: François Déchelle <fdechelle@teclib.com>
 Standards-Version: 3.9.2
-Build-Depends: debhelper (>= 9), libarmadito-dev (>= 0.10.0), libclamav-dev
+Build-Depends: debhelper (>= 9), autotools-dev, libarmadito-dev (>= 0.10.0), libclamav-dev
 
 Package: armadito-mod-clamav
 Section: libs

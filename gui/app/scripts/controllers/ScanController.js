@@ -62,7 +62,7 @@ angular.module('armaditoApp')
 
         json_object = JSON.parse(data);
 
-        console.log("[+] Debug :: Data received from av :: "); //, json_object);
+        //console.log("[+] Debug :: Data received from av :: "); //, json_object);
 
         // Handle the first response of the av.
         if(json_object.av_response == "scan" && json_object.status == 0 ){
@@ -72,8 +72,6 @@ angular.module('armaditoApp')
 	  $scope.$apply();
           return;
         }
-
-        console.log("[+] Debug :: Data received from av :: ihm_request "); // + json_object.ihm_request);
 
         // Handle progress  information from av
         if(json_object.ihm_request == "scan"){

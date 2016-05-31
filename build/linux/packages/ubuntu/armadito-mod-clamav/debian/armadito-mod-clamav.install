@@ -1,2 +1,2 @@
-usr/lib/*/armadito/modules/clamav.so
+debian/armadito-mod-clamav/usr/lib/*/armadito/modules/clamav.so
 
