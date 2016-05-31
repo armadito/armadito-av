@@ -39,10 +39,18 @@ install-data-hook:
 	cp -r bower_components $(guidir)
 	cp -r node_modules $(guidir)
 	cp -r $(srcdir)/app $(guidir)
+	-[ ! -d $(guidir)/nwjs ] && mkdir -p $(guidir)/nwjs
+	tar -C $(guidir)/nwjs -x -v -z -f $(NWJS_TARBALL)
+	(cd $(guidir)/nwjs; ln -s `basename $(NWJS_TARBALL) | sed -r -e 's/\.tar\.gz$$//'` current)
+# fix permissions as NW.JS tarball is 0600 or 0700 :(
+	find -L $(guidir)/nwjs/current -type f ! -name nw ! -name '*.so' | xargs chmod 0664
+	find -L $(guidir)/nwjs/current -type d | xargs chmod 0775
+	chmod 0775 $(guidir)/nwjs/current/nw $(guidir)/nwjs/current/lib/*.so
+
 
 EXTRA_DIST=\
 bower.json \
 COPYING \
 package.json \
 README.md \
-app
+app 
