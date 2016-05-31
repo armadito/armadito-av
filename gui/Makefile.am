@@ -1,7 +1,9 @@
 AUTOMAKE_OPTIONS=dist-zip
 
+SUBDIRS=linux
+
 #NPM_INSTALL=$(NPM) install -q --no-color --no-spin
-NPM_INSTALL=$(NPM) install --no-color --no-spin
+NPM_INSTALL=$(NPM) install --no-color --no-spin --production
 BOWER=$(top_builddir)/node_modules/bower/bin/bower
 #BOWER_INSTALL=$(BOWER) install -q --no-color --no-spin
 BOWER_INSTALL=$(BOWER) install --no-color --no-spin
