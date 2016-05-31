@@ -51,6 +51,12 @@ To build the projects libarmadito and clamav_a6o you will need dependencies libr
 
 Driver compilation and signing
 ******************************
+=======
+Windows Driver 
+=============
+
+Driver Signing
+**************
 
 1. Add your certificate to local store.
 
@@ -72,13 +78,8 @@ Driver compilation and signing
 
 3. Build the projects "ArmaditoGuard" and "ArmaditoGuard Package"
 
-
-Compilation Results
-*******************
-
-By default, compilation results are located in :
-  
-   *SOMEWHERE\\armadito-av\\build\\windows\\VS\\Armadito-AV\\out\\[config]*
+Compilation
+***********
 
 
 Sources:
@@ -87,6 +88,5 @@ Sources:
 - https://msdn.microsoft.com/windows/hardware/drivers/develop/visual-studio-driver-development-environment
 
 .. toctree::
-
 
 

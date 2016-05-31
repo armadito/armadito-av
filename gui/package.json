@@ -32,7 +32,7 @@
   "engines": {
     "node": ">=0.10.0"
   },
-  "version": "0.9.0",
+  "version": "0.10.1",
   "main": "app/index.html",
   "window": {
     "icon": "app/images/armadito.jpg",
@@ -50,22 +50,6 @@
   "dependencies": {
     "homedir": "^0.6.0",
     "os-locale": "^1.4.0",
-    "platform-dependent-modules": "0.0.13",
     "sprintf-js": "^1.0.3"
-  },
-  "config": {
-    "platformDependentModules": {
-      "linux": [
-        "abstract-socket"
-      ],
-      "win32": [],
-      "darwin": [],
-      "freebsd": [],
-      "sunos": []
-    }
-  },
-  "scripts": {
-    "_postinstall": "node ./node_modules/platform-dependent-modules/cli.js",
-    "postinstall": "npm run _postinstall"
   }
 }

@@ -13,7 +13,7 @@ lib/include/elfReader.h \
 lib/include/gestionPE.h \
 lib/include/kNN.h \
 lib/include/miniz.h \
-lib/include/util.h \
+lib/include/utils.h \
 lib/include/model.h \
 lib/include/table.h \
 lib/include/tfidfDetection.h \
@@ -47,3 +47,5 @@ install-exec-hook:
 
 install-data-hook:
 	-rm -f "$(DESTDIR)$(modulesdir)"/moduleH1.la "$(DESTDIR)$(modulesdir)"/moduleH1.a
+
+EXTRA_DIST= moduleH1.sym

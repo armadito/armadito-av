@@ -4,5 +4,5 @@ Compilation
 .. toctree::
    :maxdepth: 2
    
-   linux.rst
-   windows.rst
+   linux/index.rst
+   windows/index.rst
