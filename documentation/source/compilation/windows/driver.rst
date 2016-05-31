@@ -1,91 +1,80 @@
-Compilation on Windows
+Armadito Windows Driver 
 ======================
 
-Set developpement environnement
-*******************************
+Armadito Windows Driver is responsible of on-access protection of Armadito antivirus.
 
-On Windows, you can compile Armadito AV sources with:
-	- Visual Studio
-	- and Windows Driver Kit (for the driver).
+Prerequisites
+-------------
 
+* Microsoft Visual Studio 2013 (Community edition or more)
+* Armadito windows dependencies archive (deps.zip)
+* Windows Driver Kit 8.1
 
-Notes:
-This version has been developped and tested with Visual Studio Community 2013 and Windows Driver Kit 8.1
-You might have to apply some modifications regarding to which Visual Studio's version you use.
+To get Windows Driver Kit 8.1 : <https://www.microsoft.com/en-us/download/details.aspx?id=42273>
 
+.. warning:: Windows Driver Kit 8.1 goes **only** with MS Visual Studio 2013. You must get the WDK compatible to your Visual Studio version. 
 
-
-Projects Compilation
-********************
-
-Open the armadito-av VS project at location : 
- 
-   *SOMEWHERE\\armadito-av\\build\\windows\\VS12\\Armadito-AV\\Armadito-AV.sln*
-
-The projects availables in this solution are separated in subfolders:
-
-- Driver
-	- ArmaditoGuard (driver sources)
-	- ArmaditoGuard Package (driver package)
-- Libarmadito
-	- libarmadito (armadito core library)
-- Modules
-	- clamav_a6o (clamav module)
-	- moduleH1	(heuristic module)
-	- modulePDF (PDF module)
-- Service
-	- ArmaditoSvc (analysis service)
-- Setup
-	- ArmaditoGuard-setup (driver installation)
-	- Armadito-db-setup (setup project for module databases)
-	- Armadito-setup (setup project for armadito)
-
-
-Prerequisites:
-
-To build the projects libarmadito and clamav_a6o you will need dependencies libraries and DLLs.
-
-	- Download the windows dependendcies archive "deps.zip" available "put_win_deps_url".
-	- Extract the archive content in location : [SOMEWHERE\\armadito-av\\deps] folder.
-
-
-Driver compilation and signing
-******************************
-=======
-Windows Driver 
-=============
 
 Driver Signing
-**************
+-------------
 
-1. Add your certificate to local store.
+Add your certificate to local store
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - Open the Certificate Manager Tool (certmgr.msc)
-- Go to "Certificats - utilisateur actuel" >> Personnel >> Certificats
-- Right clic on the folder and choose "Toutes les tâches" >> importer.
-- Follow the assistant to import your certificate. 
+- Go to **Certificates - Actual User** > **Personal** > **Certificates**
+- Right-click on the folder and choose **All tasks** > **Import**
+- Then, follow the assistant to import your certificate. 
 
 
-2. Sign sources with your certificate.
+Sign with your certificate
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Open the VS project "ArmaditoGuard"
-- Open the property page.
-- Go to "Propriété de configuration" > Driver Signing.
-- In the area "Sign mode" choose "Product Sign".
-- In the area "Production Certificate" choose "Select from store" and select your certificate previously added.
-- Repete the previous steps for the project "ArmaditoGuard Package"
+- Open Armadito-av solution in Visual Studio.
+- Right-click on project **ArmaditoGuard** and select **Properties**.
+- Go to **Configuration Properties** > **Driver Signing** > **General**.
+- **Sign mode** > **Product Sign**.
+- **Production Certificate** > **Select from store** and select your certificate previously added.
+- Repeat the previous steps for the project **ArmaditoGuard Package**.
 
+Build
+-----
 
-3. Build the projects "ArmaditoGuard" and "ArmaditoGuard Package"
+Open the armadito-av VS solution at location : 
+ 
+::
 
-Compilation
-***********
+   SOMEWHERE\armadito-av\build\windows\VS12\Armadito-AV\Armadito-AV.sln
 
+Firstly, select **Driver\ArmaditoGuard** project in Solution Explorer and build it. 
 
-Sources:
-********
+Then, select **Driver\\ArmaditoGuard Package** project in Solution Explorer and build it. 
 
-- https://msdn.microsoft.com/windows/hardware/drivers/develop/visual-studio-driver-development-environment
+Finally, select **Setup\\ArmaditoGuard-setup** project in Solution Explorer and build it.
+
+Out
+---
+
+Out folder could be one of these :
+
+::
+
+   SOMEWHERE\armadito-av\build\windows\VS12\Armadito-AV\out\Debug
+
+or 
+
+::
+
+   SOMEWHERE\armadito-av\build\windows\VS12\Armadito-AV\out\Release
+
+If build has been successful, you should have this file :
+
+::
+
+   SOMEWHERE\armadito-av\build\windows\VS12\Armadito-AV\out\[build_mode]\driver\armaditoguard.cat
+   SOMEWHERE\armadito-av\build\windows\VS12\Armadito-AV\out\[build_mode]\driver\armaditoguard.inf
+   SOMEWHERE\armadito-av\build\windows\VS12\Armadito-AV\out\[build_mode]\driver\armaditoguard.sys
+   SOMEWHERE\armadito-av\build\windows\VS12\Armadito-AV\out\[build_mode]\driver\ArmaditoGuard-setup.exe
 
 .. toctree::
 

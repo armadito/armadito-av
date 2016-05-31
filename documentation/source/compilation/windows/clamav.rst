@@ -2,7 +2,7 @@ Armadito ClamAV module
 ======================
 
 Armadito ClamAV module corresponds to the integration of libclamav library within Armadito-av. 
-On Windows, that means that a library called **clamav_a6o.dll** will interact with both **libarmadito.dll** and **libclamav.dll**.
+On Windows, after build, a library called **clamav_a6o.dll** will be generated. It aims to interact with both **libarmadito.dll** and **libclamav.dll**.
 
 
 Prerequisites
@@ -15,19 +15,19 @@ Uncompress **deps-x.zip** in armadito-av sources root directory. You should have
 
 ::
     
-   SOMEWHERE\\armadito-av\\deps\\glib\\...
-   SOMEWHERE\\armadito-av\\deps\\json-c\\...
+   SOMEWHERE\armadito-av\deps\glib\...
+   SOMEWHERE\armadito-av\deps\json-c\...
 
 Build
 -----
 
-Open the armadito-av VS project at location : 
+Open the armadito-av VS solution at location : 
  
 ::
 
-   SOMEWHERE\\armadito-av\\build\\windows\\VS12\\Armadito-AV\\Armadito-AV.sln
+   SOMEWHERE\armadito-av\build\windows\VS12\Armadito-AV\Armadito-AV.sln
 
-Then, select libarmadito project in Solution Explorer and build it. 
+Then, select **modules\\clamav_a6o** project in Solution Explorer and build it. 
 
 
 Out
@@ -37,22 +37,21 @@ Out folder could be one of these :
 
 ::
 
-   SOMEWHERE\\armadito-av\\build\\windows\\VS12\\Armadito-AV\\out\\Debug
+   SOMEWHERE\armadito-av\build\windows\VS12\Armadito-AV\out\Debug
 
 or 
 
 ::
 
-   SOMEWHERE\\armadito-av\\build\\windows\\VS12\\Armadito-AV\\out\\Release
+   SOMEWHERE\armadito-av\build\windows\VS12\Armadito-AV\out\Release
 
 If build has been successful, you should have these files :
 
 ::
 
-   SOMEWHERE\\armadito-av\\build\\windows\\VS12\\Armadito-AV\\out\\[build_mode]\\conf\\armadito.conf
-   SOMEWHERE\\armadito-av\\build\\windows\\VS12\\Armadito-AV\\out\\[build_mode]\\glib-2-vs12.dll
-   SOMEWHERE\\armadito-av\\build\\windows\\VS12\\Armadito-AV\\out\\[build_mode]\\gmodule-2.vs12.dll
-   SOMEWHERE\\armadito-av\\build\\windows\\VS12\\Armadito-AV\\out\\[build_mode]\\gthread-2.vs12.dll
-   SOMEWHERE\\armadito-av\\build\\windows\\VS12\\Armadito-AV\\out\\[build_mode]\\libarmadito.dll
+   SOMEWHERE\armadito-av\build\windows\VS12\Armadito-AV\out\[build_mode]\modules\clamav_a6o.dll
+   SOMEWHERE\armadito-av\build\windows\VS12\Armadito-AV\out\[build_mode]\libclamav.dll
+   SOMEWHERE\armadito-av\build\windows\VS12\Armadito-AV\out\[build_mode]\libeay32.dll
+   SOMEWHERE\armadito-av\build\windows\VS12\Armadito-AV\out\[build_mode]\ssleay32.dll
 
 
