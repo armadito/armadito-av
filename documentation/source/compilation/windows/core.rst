@@ -2,7 +2,7 @@ Armadito core
 =============
 
 Armadito core corresponds to libarmadito library. Symbols exported from this library allows all modules libraries to use the same APIs.
-On Windows, that leads to the creation of **libarmadito.dll**.
+On Windows, after build, a library called **libarmadito.dll** will be generated.
 
 Prerequisites
 -------------
@@ -20,13 +20,13 @@ Uncompress **deps-x.zip** in armadito-av sources root directory. You should have
 Build
 -----
 
-Open the armadito-av VS project at location : 
+Open the armadito-av VS solution at location : 
  
 ::
 
    SOMEWHERE\armadito-av\build\windows\VS12\Armadito-AV\Armadito-AV.sln
 
-Then, select libarmadito project in Solution Explorer and build it. 
+Then, select **Lib-armadito\\libarmadito** project in Solution Explorer and build it. 
 
 
 Out
