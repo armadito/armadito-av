@@ -1,7 +1,7 @@
 Armadito gui
 ============
 
-Armadito gui rely on recent web technologies to provide a multi-plateform graphical user interface.
+Armadito gui rely on recent web technologies to provide a multi-plateform graphical user interface for Armadito antivirus. 
 
 Prerequisites
 -------------
