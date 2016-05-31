@@ -1,0 +1,28 @@
+top_srcdir=@top_srcdir@
+srcdir=@srcdir@
+top_builddir=@top_builddir@
+
+PACKAGE_NAME = @PACKAGE_NAME@
+PACKAGE_VERSION = @PACKAGE_VERSION@
+distdir=$(PACKAGE_NAME)-$(PACKAGE_VERSION)
+
+ZIP=@ZIP@
+
+DISTFILES=\
+bower.json \
+configure \
+configure.ac \
+COPYING \
+Makefile.in \
+package.json \
+README.md
+
+distdir:
+	test ! -d "$(distdir)" || rm -rf "$(distdir)"
+	test -d "$(distdir)" || mkdir "$(distdir)"
+	(cd $(top_srcdir) ; tar cf - $(DISTFILES)) | (cd "$(distdir)"; tar xvf -)
+
+dist: distdir
+	-rm -f "$(distdir)".zip
+	$(ZIP) -r "$(distdir)".zip "$(distdir)"
+	rm -rf "$(distdir)"

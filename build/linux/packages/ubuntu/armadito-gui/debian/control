@@ -1,0 +1,13 @@
+Source: armadito-gui
+Section: utils
+Priority: optional
+Maintainer: François Déchelle <fdechelle@teclib.com>
+Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 9), 
+
+Package: armadito-gui
+Section: libs
+Architecture: i386 amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Armadito graphical user interface
+ Provides Armadito NW.JS graphical user interface
