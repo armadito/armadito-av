@@ -1,5 +1,3 @@
-#AUTOMAKE_OPTIONS=dist-zip
-
 SUBDIRS=linux
 
 #NPM_INSTALL=$(NPM) install -q --no-color --no-spin
