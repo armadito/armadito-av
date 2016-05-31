@@ -1,5 +1,5 @@
 Compilation on Windows
-====================
+======================
 
 On Windows, you can compile Armadito AV sources with Visual Studio.
 This has been tested with Visual Studio 2013. 
