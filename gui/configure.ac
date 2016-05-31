@@ -1,9 +1,29 @@
 AC_INIT(armadito-gui,0.10.1,fdechelle@teclib.com)
 AM_INIT_AUTOMAKE
 
-# Checks for programs.
+# collect arguments
+AC_ARG_WITH([nwjs],
+	AS_HELP_STRING([--with-nwjs=TARBALL],[specify path to nw.js tarball]),
+	with_nwjs="$withval",
+	with_nwjs="none")
+
+# checks for programs.
 AC_PATH_PROG(ZIP, zip)
 AC_PATH_PROG(NPM, npm)
+
+# check for nw.js
+AC_MSG_CHECKING(for nw.js tarball)
+if test "$with_nwjs" != "none" ; then
+   NWJS_TARBALL="$with_nwjs"
+else
+   # default value???? don't know what reasonnable default value to use
+   NWJS_TARBALL="none"
+fi
+AC_MSG_RESULT($NWJS_TARBALL)
+if test ! -f "$NWJS_TARBALL" ; then
+   AC_MSG_ERROR("cannot find $NWJS_TARBALL")
+fi
+AC_SUBST(NWJS_TARBALL)
 
 # make symbolic links
 AC_CONFIG_LINKS([bower.json:bower.json package.json:package.json])
