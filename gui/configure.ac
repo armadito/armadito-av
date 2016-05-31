@@ -16,7 +16,7 @@ AC_MSG_CHECKING(for nw.js tarball)
 if test "$with_nwjs" != "none" ; then
    NWJS_TARBALL="$with_nwjs"
 else
-   NWJS_TARBALL=`find $top_srcdir/nwjs -name 'nwjs-v*.tar.gz'`
+   NWJS_TARBALL=`find $srcdir/nwjs -name 'nwjs-v*.tar.gz'`
 fi
 AC_MSG_RESULT($NWJS_TARBALL)
 if test ! -f "$NWJS_TARBALL" ; then
