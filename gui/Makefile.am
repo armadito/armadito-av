@@ -1,4 +1,4 @@
-AUTOMAKE_OPTIONS=dist-zip
+#AUTOMAKE_OPTIONS=dist-zip
 
 SUBDIRS=linux
 
@@ -47,10 +47,15 @@ install-data-hook:
 	find -L $(guidir)/nwjs/current -type d | xargs chmod 0775
 	chmod 0775 $(guidir)/nwjs/current/nw $(guidir)/nwjs/current/lib/*.so
 
-
 EXTRA_DIST=\
 bower.json \
 COPYING \
 package.json \
 README.md \
 app 
+
+dist-hook:
+	chmod u+w $(distdir)
+	-mkdir -p $(distdir)/nwjs
+	chmod u+w $(distdir)/nwjs
+	cp $(NWJS_TARBALL) $(distdir)/nwjs
