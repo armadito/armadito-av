@@ -16,8 +16,7 @@ AC_MSG_CHECKING(for nw.js tarball)
 if test "$with_nwjs" != "none" ; then
    NWJS_TARBALL="$with_nwjs"
 else
-   # default value???? don't know what reasonnable default value to use
-   NWJS_TARBALL="none"
+   NWJS_TARBALL=`find $top_srcdir/nwjs -name 'nwjs-v*.tar.gz'`
 fi
 AC_MSG_RESULT($NWJS_TARBALL)
 if test ! -f "$NWJS_TARBALL" ; then
