@@ -113,21 +113,10 @@ NTSTATUS InitCommunicationPort(_In_ PFLT_FILTER FilterHandle, _Out_ PFLT_PORT *S
 
 		
 
-		// TEST
-		//FltCloseCommunicationPort(LocalServerPort);
-
 		(*ServerPort) = LocalServerPort;
 
 		DbgPrint("[+] Debug :: ArmaditoGuard!InitCommunicationPort :: FltCreateCommunicationPort() has succeded :: serverPort = 0x%p. \n",(PVOID)(*ServerPort));
 		
-		/*
-		if(SecurityDescriptor != NULL){
-			FltFreeSecurityDescriptor(SecurityDescriptor);
-		}		
-		/*
-		
-		DbgPrint("[+] Debug :: ArmaditoGuard!InitCommunicationPort :: FltCreateCommunicationPort() has succeded :: serverPort = 0x%p. \n",(PVOID)(*ServerPort));
-		*/
 
 
 	}

@@ -428,8 +428,7 @@ Return Value:
 
 --*/
 VOID CleanupFileContext(_In_ PFLT_CONTEXT Context, _In_ FLT_CONTEXT_TYPE ContextType){
-    //PFILE_CONTEXT ctx = NULL;
-	//NTSTATUS ntStatus = STATUS_SUCCESS;
+
 
     PAGED_CODE();
 
@@ -437,13 +436,6 @@ VOID CleanupFileContext(_In_ PFLT_CONTEXT Context, _In_ FLT_CONTEXT_TYPE Context
 	UNREFERENCED_PARAMETER( Context );
 
 	DbgPrint("[-] Debug :: ArmaditoGuard!CleanupFileContext :: CleanupFileContext!!\n");
-
-	//FLT_ASSERT(ContextType == FLT_FILE_CONTEXT);
-
-	//ctx = (PFILE_CONTEXT)Context;
-	//DebugPrint(TRACE_LEVEL_INFORMATION, FLT_CONTEXT_FILE, "[+] (FileCtx) Free the context : 0x%p | ContextType : %#I64x.", ctx, ContextType);
-	//}
-	//RtlZeroMemory(ctx, sizeof(FILE_CONTEXT));
 
 }
 
@@ -685,9 +677,7 @@ Return Value:
 		} else 
 			DbgPrint("[+] Debug :: ArmaditoGuard!DriverEntry :: FltStartFiltering succeeded \n");
 
-		/*if (gFilterComPort != NULL) {
-			 FltCloseCommunicationPort( gFilterComPort );
-		}*/
+		
     }
 
     return status;
@@ -720,8 +710,7 @@ Return Value:
 
     PAGED_CODE();
 
-    //PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-     //             ("ArmaditoGuard!ArmaditoGuardUnload: Entered\n") );
+    
 
 	if (gFilterComPort != NULL) {
 		 FltCloseCommunicationPort( gFilterComPort );
