@@ -1,8 +1,0 @@
-[Desktop Entry]
-Name=Uhuru
-Comment=Uhuru Antivirus
-Exec=uhuru-qt
-Icon=/usr/share/icons/hicolor/scalable/apps/uhuru.svg
-Terminal=false
-Type=Application
-Categories=Application;Antivirus

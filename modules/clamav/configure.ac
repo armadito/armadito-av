@@ -1,4 +1,4 @@
-AC_INIT(uhuru-mod-clamav,1.3.0,francois@dechelle.net)
+AC_INIT(armadito-mod-clamav, 0.10.1, fdechelle@teclib.com)
 AM_INIT_AUTOMAKE
 
 # collect arguments
@@ -26,10 +26,10 @@ fi
 
 PKG_PROG_PKG_CONFIG
 
-# check for libuhuru
-PKG_CHECK_MODULES(LIBUHURU, libuhuru, [HAVE_LIBUHURU=yes], [HAVE_LIBUHURU=no])
-if test "$HAVE_LIBUHURU" = "no"; then
-   AC_MSG_ERROR("cannot find UHURU library")
+# check for libarmadito
+PKG_CHECK_MODULES(LIBARMADITO, libarmadito, [HAVE_LIBARMADITO=yes], [HAVE_LIBARMADITO=no])
+if test "$HAVE_LIBARMADITO" = "no"; then
+   AC_MSG_ERROR("cannot find ARMADITO library")
 fi
 
 # check for libclamav
@@ -37,6 +37,12 @@ PKG_CHECK_MODULES(LIBCLAMAV, libclamav, [HAVE_LIBCLAMAV=yes], [HAVE_LIBCLAMAV=no
 if test "$HAVE_LIBCLAMAV" = "no"; then
    AC_MSG_ERROR("cannot find ClamAV library")
 fi
+
+# check for glib
+#PKG_CHECK_MODULES(GLIB2, glib-2.0, [HAVE_GLIB2=yes], [HAVE_GLIB2=no])
+#if test "$HAVE_GLIB2" = "no"; then
+#   AC_MSG_ERROR("cannot find glib-2.0 library")
+#fi
 
 # Output files
 AC_CONFIG_FILES([
