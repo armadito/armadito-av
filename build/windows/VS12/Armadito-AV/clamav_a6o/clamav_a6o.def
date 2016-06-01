@@ -1,0 +1,4 @@
+LIBRARY clamav_a6o.dll
+
+EXPORTS
+module

@@ -1,5 +1,5 @@
 #
-# Uhuru Clamav scan module configuration
+# Armadito Clamav scan module configuration
 #
 [clamav]
 
@@ -8,13 +8,10 @@
 # on linux, by default Clamav use /tmp but /tmp is monitored by real-time
 # so having temporary directory used by the antivirus and monitored by the antivirus
 # at the same time is not a good idea
-tmpdir="@localstatedir@/lib/uhuru/tmp"
+#tmpdir="@localstatedir@/lib/armadito/tmp"
 
 # default signatures databases directory
-#dbdir=/var/lib/uhuru/bases/clamav
-
-# additional signatures database
-#db=/var/lib/uhuru/bases/clamav/extras/oiv.db
+#dbdir=/var/lib/armadito/bases/clamav
 
 # number of days after which the module will be considered 'late'
 #late_days = 3
