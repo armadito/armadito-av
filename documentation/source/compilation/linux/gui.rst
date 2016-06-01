@@ -8,7 +8,7 @@ Prerequisites
 
 To run Armadito graphical user interface, you need:
 
-- node webkit SDK
+- NW.js SDK
 - bower
 - node.js
 
@@ -68,6 +68,8 @@ Running the interface
 First, the Armadito daemon must be launched. Refer to Armadito documentation for instructions.
 
 The user interface can be launched with:
+
+::
 
 	cd SOMEWHERE/ng-armadito
 	SOMEWHEREELSE/nwjs-sdk-v0.13.4-linux-x64/nw .
