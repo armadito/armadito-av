@@ -1,0 +1,4 @@
+Screenshots
+===========
+
+.. toctree::

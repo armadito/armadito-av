@@ -1,0 +1,3 @@
+#!/bin/bash
+
+exec @libdir@/armadito/gui/nwjs/current/nw @libdir@/armadito/gui

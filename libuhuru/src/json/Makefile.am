@@ -1,1 +1,0 @@
-SUBDIRS=ui #updatedb

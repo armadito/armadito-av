@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Fichiers sources">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Fichiers de ressources">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Fichiers sources\json">
+      <UniqueIdentifier>{c5c11477-d79f-4dd6-a4e0-a486313412d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\json">
+      <UniqueIdentifier>{02560ae0-79ee-4e4d-a4c6-ae559bf2d104}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\json\ui">
+      <UniqueIdentifier>{c774a6e8-3549-43af-9cde-916a4e77e469}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\json\ui">
+      <UniqueIdentifier>{eef014d2-2a43-4552-82c2-af15be58fe4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\utils">
+      <UniqueIdentifier>{8875eb4b-cf56-499e-95e3-2c20f35a7463}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\utils">
+      <UniqueIdentifier>{fe559646-46a4-4796-9fbe-6144bd71bc98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\json\updatedb">
+      <UniqueIdentifier>{ece3719a-7b2d-480c-b296-8a9beebd8e5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\json\updatedb">
+      <UniqueIdentifier>{01bc20f6-e409-4ce5-9de5-560b1e0fb7b2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\core\windows\service\log.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\core\windows\service\scan_onaccess.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\core\windows\service\scan_ondemand.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\core\windows\service\service.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\core\windows\service\notify.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\core\json\ui\conf.c">
+      <Filter>Fichiers sources\json\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\core\json\ui\jsonhandler.c">
+      <Filter>Fichiers sources\json\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\core\json\ui\scan.c">
+      <Filter>Fichiers sources\json\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\core\json\ui\state.c">
+      <Filter>Fichiers sources\json\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\core\json\ui\ui-win.c">
+      <Filter>Fichiers sources\json\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\core\json\ui\quarantine.c">
+      <Filter>Fichiers sources\json\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\core\windows\utils\others.c">
+      <Filter>Fichiers sources\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\core\windows\service\config.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\core\json\updatedb\json_process.c">
+      <Filter>Fichiers sources\json\updatedb</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\core\windows\utils\crypt.c">
+      <Filter>Fichiers sources\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\core\json\ui\windows\update.c">
+      <Filter>Fichiers sources\json\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\core\windows\utils\tools.c">
+      <Filter>Fichiers sources\utils</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\core\windows\service\log.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\windows\service\scan_onaccess.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\windows\service\scan_ondemand.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\windows\service\service.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\windows\service\structs.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\windows\service\notify.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\json\ui\conf.h">
+      <Filter>Fichiers d%27en-tête\json\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\json\ui\jsonhandler.h">
+      <Filter>Fichiers d%27en-tête\json\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\json\ui\jsonhandlerp.h">
+      <Filter>Fichiers d%27en-tête\json\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\json\ui\quarantine.h">
+      <Filter>Fichiers d%27en-tête\json\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\json\ui\scan.h">
+      <Filter>Fichiers d%27en-tête\json\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\json\ui\state.h">
+      <Filter>Fichiers d%27en-tête\json\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\json\ui\ui.h">
+      <Filter>Fichiers d%27en-tête\json\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\json\ui\update.h">
+      <Filter>Fichiers d%27en-tête\json\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\windows\utils\others.h">
+      <Filter>Fichiers d%27en-tête\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\windows\service\config.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\json\updatedb\json_process.h">
+      <Filter>Fichiers d%27en-tête\json\updatedb</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\windows\utils\crypt.h">
+      <Filter>Fichiers d%27en-tête\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\core\windows\utils\tools.h">
+      <Filter>Fichiers d%27en-tête\utils</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
