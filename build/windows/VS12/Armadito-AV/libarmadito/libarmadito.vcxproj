@@ -22,7 +22,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -39,6 +39,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\core\libarmadito\include\config;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\include;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\include\glib-2.0;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\lib\glib-2.0\include;$(SolutionDir)..\..\..\..\deps\json-c\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\lib;$(SolutionDir)..\..\..\..\deps\json-c\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\core\libarmadito\include\config;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\include;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\include\glib-2.0;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\lib\glib-2.0\include;$(SolutionDir)..\..\..\..\deps\json-c\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\lib;$(SolutionDir)..\..\..\..\deps\json-c\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
@@ -104,13 +108,56 @@ echo post-build step for $(ProjectName) OK
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\..\core\libarmadito\src;$(SolutionDir)..\..\..\..\core\libarmadito\src\windows;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ModuleDefinitionFile>libarmadito.def</ModuleDefinitionFile>
+      <AdditionalDependencies>glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;urlmon.lib;json-c.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>echo post-build step for $(ProjectName)
+
+echo Copying files from $(OutDir) to $(SolutionDir)out\$(Configuration)
+
+REM create target directory
+if not exist "$(SolutionDir)out\$(Configuration)" mkdir "$(SolutionDir)out\$(Configuration)"
+
+REM copy the DLL
+xcopy "$(OutDir)libarmadito.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM create confdirectory
+if not exist "$(SolutionDir)out\$(Configuration)\conf" mkdir "$(SolutionDir)out\$(Configuration)\conf"
+
+REM copy the conf file
+xcopy "$(SolutionDir)..\..\..\..\core\libarmadito\conf\armadito.conf"  "$(SolutionDir)out\$(Configuration)\conf" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM copy the glib DLLs
+REM should we take into accout the $(Configuration) ??? 
+xcopy "$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin\glib-2-vs12.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+xcopy "$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin\gmodule-2-vs12.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+xcopy "$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin\gthread-2-vs12.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM Exit properly because the build will not fail 
+REM unless the final step exits with an error code
+
+goto BuildEventOK
+
+:BuildEventFailed
+echo post-build step for $(ProjectName) FAILED
+exit 1
+
+:BuildEventOK
+echo post-build step for $(ProjectName) OK
+</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\..\core\libarmadito\src\action.c" />
