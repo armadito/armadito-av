@@ -56,4 +56,4 @@ dist-hook:
 	chmod u+w $(distdir)
 	-mkdir -p $(distdir)/nwjs
 	chmod u+w $(distdir)/nwjs
-	cp $(NWJS_TARBALL) $(distdir)/nwjs
+	cp $(NWJS_TARBALL_32) $(NWJS_TARBALL_64) $(distdir)/nwjs
