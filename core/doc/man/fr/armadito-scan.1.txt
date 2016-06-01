@@ -1,0 +1,63 @@
+ARMADITO-SCAN(1)
+================
+:doctype: manpage
+
+NOM
+---
+armadito-scan - outil de scan en ligne de commande
+
+
+SYNOPSIS
+--------
+*armadito-scan* ['OPTIONS'] 'FILE|DIR'
+
+
+DESCRIPTION
+-----------
+La commande *armadito-scan*(1) lance une recherche de malwares dans le fichier ou répertoire passé en argument et affiche les résultats sur sa sortie standard.
+
+Cette commande utilise la librairie de scan *libarmadito*(3).
+
+
+OPTIONS
+-------
+*-r, --recursive*::
+    Récursif.
+    Analyse récursive des répertoires. Lance la recherche dans le répertoire et dans tous ses sous-répertoires.
+
+*-t, --threaded*::
+    Threadé.
+    Utilise un ensemble de threads pour accélérer l'analyse.
+
+*-n, --no-summary*::
+    Pas de résumé.
+    N'affiche pas le résumé de l'analyse à la fin de l'exécution.
+
+*-h, --help*::
+    Aide
+    Affiche l'aide et termine l'exécution.
+
+
+EXIT STATUS
+-----------
+*0*::
+    Succès
+
+*1*::
+    Erreur
+
+
+AUTHOR
+------
+armadito-scan a été écrit par François Déchelle.
+
+
+RESOURCES
+---------
+Site web: <http://armadito.org/>
+
+
+COPYING
+-------
+Copyright \(C) 2014 qui?. Free use of this software is
+granted under the terms of the GNU General Public License (GPL).
