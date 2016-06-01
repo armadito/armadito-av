@@ -1,0 +1,128 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Fichiers sources">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Fichiers de ressources">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Fichiers sources\lib">
+      <UniqueIdentifier>{1c418496-f425-49ac-8be7-c6ef87cb4b06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\module">
+      <UniqueIdentifier>{91e36cc5-b597-4ac6-95ad-330f43b9d351}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\module">
+      <UniqueIdentifier>{f73707a7-f281-44b8-8f24-2f62fd307407}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\lib">
+      <UniqueIdentifier>{7062413c-459e-48ab-808e-a6aa235dc284}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\module\moduleH1.c">
+      <Filter>Fichiers sources\module</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\databases.c">
+      <Filter>Fichiers sources\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\distances.c">
+      <Filter>Fichiers sources\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\elfReader.c">
+      <Filter>Fichiers sources\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\gestionPE.c">
+      <Filter>Fichiers sources\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\kNN.c">
+      <Filter>Fichiers sources\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\miniz.c">
+      <Filter>Fichiers sources\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\model.c">
+      <Filter>Fichiers sources\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\table.c">
+      <Filter>Fichiers sources\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\tfidfDetection.c">
+      <Filter>Fichiers sources\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\h1-errors.c">
+      <Filter>Fichiers sources\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\h1-static.c">
+      <Filter>Fichiers sources\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\vector.c">
+      <Filter>Fichiers sources\lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\windows\osdeps.c">
+      <Filter>Fichiers sources\lib</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\module\h1-static.h">
+      <Filter>Fichiers d%27en-tête\module</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\databases.h">
+      <Filter>Fichiers d%27en-tête\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\distances.h">
+      <Filter>Fichiers d%27en-tête\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\elfReader.h">
+      <Filter>Fichiers d%27en-tête\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\gestionPE.h">
+      <Filter>Fichiers d%27en-tête\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\kNN.h">
+      <Filter>Fichiers d%27en-tête\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\miniz.h">
+      <Filter>Fichiers d%27en-tête\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\model.h">
+      <Filter>Fichiers d%27en-tête\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\osdeps.h">
+      <Filter>Fichiers d%27en-tête\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\PEUtils.h">
+      <Filter>Fichiers d%27en-tête\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\table.h">
+      <Filter>Fichiers d%27en-tête\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\tfidfDetection.h">
+      <Filter>Fichiers d%27en-tête\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\h1-errors.h">
+      <Filter>Fichiers d%27en-tête\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\utils.h">
+      <Filter>Fichiers d%27en-tête\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\vector.h">
+      <Filter>Fichiers d%27en-tête\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\windowsTypes.h">
+      <Filter>Fichiers d%27en-tête\lib</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="moduleH1.def">
+      <Filter>Fichiers d%27en-tête\module</Filter>
+    </None>
+  </ItemGroup>
+</Project>

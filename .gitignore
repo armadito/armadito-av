@@ -1,0 +1,6 @@
+deps/*
+*.zip
+*.vcxproj.user
+databases/*
+windows-driver/signature/*
+build/linux/out/*

@@ -1,0 +1,168 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{40272027-A04A-4FC3-8A0E-7FA12222B791}</ProjectGuid>
+    <RootNamespace>moduleH1</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\modules\moduleH1\src\lib\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir);$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\modules\moduleH1\src\lib\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(OutDir)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>libarmadito.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>moduleH1.def</ModuleDefinitionFile>
+    </Link>
+    <PostBuildEvent>
+      <Command>echo post-build step for $(ProjectName)
+
+echo Copying files from $(OutDir) to $(SolutionDir)out\$(Configuration)
+
+REM create target directory
+if not exist "$(SolutionDir)out\$(Configuration)" mkdir "$(SolutionDir)out\$(Configuration)"
+if not exist "$(SolutionDir)out\$(Configuration)\modules" mkdir "$(SolutionDir)out\$(Configuration)\modules"
+
+REM copy the DLL into the modules directory
+xcopy "$(OutDir)moduleH1.dll" "$(SolutionDir)out\$(Configuration)\modules" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM Exit properly because the build will not fail 
+REM unless the final step exits with an error code
+
+goto BuildEventOK
+
+:BuildEventFailed
+echo post-build step for $(ProjectName) FAILED
+exit 1
+
+:BuildEventOK
+echo post-build step for $(ProjectName) OK
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>libarmadito.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>moduleH1.def</ModuleDefinitionFile>
+    </Link>
+    <PostBuildEvent>
+      <Command>echo post-build step for $(ProjectName)
+
+echo Copying files from $(OutDir) to $(SolutionDir)out\$(Configuration)
+
+REM create target directory
+if not exist "$(SolutionDir)out\$(Configuration)" mkdir "$(SolutionDir)out\$(Configuration)"
+if not exist "$(SolutionDir)out\$(Configuration)\modules" mkdir "$(SolutionDir)out\$(Configuration)\modules"
+
+REM copy the DLL into the modules directory
+xcopy "$(OutDir)moduleH1.dll" "$(SolutionDir)out\$(Configuration)\modules" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM Exit properly because the build will not fail 
+REM unless the final step exits with an error code
+
+goto BuildEventOK
+
+:BuildEventFailed
+echo post-build step for $(ProjectName) FAILED
+exit 1
+
+:BuildEventOK
+echo post-build step for $(ProjectName) OK</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\databases.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\distances.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\elfReader.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\gestionPE.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\kNN.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\miniz.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\model.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\table.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\tfidfDetection.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\h1-static.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\h1-errors.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\vector.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\lib\src\windows\osdeps.c" />
+    <ClCompile Include="..\..\..\..\..\modules\moduleH1\src\module\moduleH1.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\databases.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\distances.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\elfReader.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\gestionPE.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\kNN.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\miniz.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\model.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\osdeps.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\PEUtils.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\table.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\tfidfDetection.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\h1-errors.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\utils.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\vector.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\lib\include\windowsTypes.h" />
+    <ClInclude Include="..\..\..\..\..\modules\moduleH1\src\module\h1-static.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="moduleH1.def" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

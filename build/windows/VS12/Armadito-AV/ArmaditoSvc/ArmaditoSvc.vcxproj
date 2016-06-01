@@ -1,0 +1,192 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{B7A4D2B8-9E32-4007-9F90-9E4283E66208}</ProjectGuid>
+    <RootNamespace>ArmaditoSvc</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\core\json;$(SolutionDir)..\..\..\..\deps\json-c\include;$(SolutionDir)..\..\..\..\core\windows;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\..\..\deps\json-c\lib;$(OutDir);$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\core\json;$(SolutionDir)..\..\..\..\deps\json-c\include;$(SolutionDir)..\..\..\..\core\windows;$(IncludePath)</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(SolutionDir)..\..\..\..\deps\json-c\lib;$(OutDir);$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>libarmadito.lib;json-c.lib;FltLib.lib;Crypt32.lib;Urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>echo post-build step for $(ProjectName)
+
+echo Copying files from $(OutDir) to $(SolutionDir)out\$(Configuration)
+
+REM create target directory
+if not exist "$(SolutionDir)out\$(Configuration)" mkdir "$(SolutionDir)out\$(Configuration)"
+
+REM copy the EXE
+xcopy "$(OutDir)ArmaditoSvc.exe" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM copy the needed DLLs
+xcopy "$(SolutionDir)..\..\..\..\deps\pcre\lib\pcre3.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+xcopy "$(SolutionDir)..\..\..\..\deps\libintl\lib\libintl3.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+xcopy "$(SolutionDir)..\..\..\..\deps\libiconv\lib\libiconv2.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM copy the configuration files
+if not exist "$(SolutionDir)out\$(Configuration)\conf" mkdir "$(SolutionDir)out\$(Configuration)\conf"
+xcopy "$(SolutionDir)..\..\..\..\core\libarmadito\conf\armadito.conf" "$(SolutionDir)out\$(Configuration)\conf" /D /I /Y
+
+REM Exit properly because the build will not fail 
+REM unless the final step exits with an error code
+
+goto BuildEventOK
+
+:BuildEventFailed
+echo post-build step for $(ProjectName) FAILED
+exit 1
+
+:BuildEventOK
+echo post-build step for $(ProjectName) OK
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>libarmadito.lib;json-c.lib;FltLib.lib;Crypt32.lib;Urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>echo post-build step for $(ProjectName)
+
+echo Copying files from $(OutDir) to $(SolutionDir)out\$(Configuration)
+
+REM create target directory
+if not exist "$(SolutionDir)out\$(Configuration)" mkdir "$(SolutionDir)out\$(Configuration)"
+
+REM copy the EXE
+xcopy "$(OutDir)ArmaditoSvc.exe" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM copy the needed DLLs
+xcopy "$(SolutionDir)..\..\..\..\deps\pcre\lib\pcre3.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+xcopy "$(SolutionDir)..\..\..\..\deps\libintl\lib\libintl3.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+xcopy "$(SolutionDir)..\..\..\..\deps\libiconv\lib\libiconv2.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM copy the configuration files
+if not exist "$(SolutionDir)out\$(Configuration)\conf" mkdir "$(SolutionDir)out\$(Configuration)\conf"
+xcopy "$(SolutionDir)..\..\..\..\core\libarmadito\conf\armadito.conf" "$(SolutionDir)out\$(Configuration)\conf" /D /I /Y
+
+REM Exit properly because the build will not fail 
+REM unless the final step exits with an error code
+
+goto BuildEventOK
+
+:BuildEventFailed
+echo post-build step for $(ProjectName) FAILED
+exit 1
+
+:BuildEventOK
+echo post-build step for $(ProjectName) OK
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\core\json\ui\conf.c" />
+    <ClCompile Include="..\..\..\..\..\core\json\ui\jsonhandler.c" />
+    <ClCompile Include="..\..\..\..\..\core\json\ui\quarantine.c" />
+    <ClCompile Include="..\..\..\..\..\core\json\ui\scan.c" />
+    <ClCompile Include="..\..\..\..\..\core\json\ui\state.c" />
+    <ClCompile Include="..\..\..\..\..\core\json\ui\ui-win.c" />
+    <ClCompile Include="..\..\..\..\..\core\json\ui\windows\update.c" />
+    <ClCompile Include="..\..\..\..\..\core\json\updatedb\json_process.c" />
+    <ClCompile Include="..\..\..\..\..\core\windows\service\config.c" />
+    <ClCompile Include="..\..\..\..\..\core\windows\service\log.c" />
+    <ClCompile Include="..\..\..\..\..\core\windows\service\notify.c" />
+    <ClCompile Include="..\..\..\..\..\core\windows\service\scan_onaccess.c" />
+    <ClCompile Include="..\..\..\..\..\core\windows\service\scan_ondemand.c" />
+    <ClCompile Include="..\..\..\..\..\core\windows\service\service.c" />
+    <ClCompile Include="..\..\..\..\..\core\windows\utils\crypt.c" />
+    <ClCompile Include="..\..\..\..\..\core\windows\utils\others.c" />
+    <ClCompile Include="..\..\..\..\..\core\windows\utils\tools.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\core\json\ui\conf.h" />
+    <ClInclude Include="..\..\..\..\..\core\json\ui\jsonhandler.h" />
+    <ClInclude Include="..\..\..\..\..\core\json\ui\jsonhandlerp.h" />
+    <ClInclude Include="..\..\..\..\..\core\json\ui\quarantine.h" />
+    <ClInclude Include="..\..\..\..\..\core\json\ui\scan.h" />
+    <ClInclude Include="..\..\..\..\..\core\json\ui\state.h" />
+    <ClInclude Include="..\..\..\..\..\core\json\ui\ui.h" />
+    <ClInclude Include="..\..\..\..\..\core\json\ui\update.h" />
+    <ClInclude Include="..\..\..\..\..\core\json\updatedb\json_process.h" />
+    <ClInclude Include="..\..\..\..\..\core\windows\service\config.h" />
+    <ClInclude Include="..\..\..\..\..\core\windows\service\log.h" />
+    <ClInclude Include="..\..\..\..\..\core\windows\service\notify.h" />
+    <ClInclude Include="..\..\..\..\..\core\windows\service\scan_onaccess.h" />
+    <ClInclude Include="..\..\..\..\..\core\windows\service\scan_ondemand.h" />
+    <ClInclude Include="..\..\..\..\..\core\windows\service\service.h" />
+    <ClInclude Include="..\..\..\..\..\core\windows\service\structs.h" />
+    <ClInclude Include="..\..\..\..\..\core\windows\utils\crypt.h" />
+    <ClInclude Include="..\..\..\..\..\core\windows\utils\others.h" />
+    <ClInclude Include="..\..\..\..\..\core\windows\utils\tools.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

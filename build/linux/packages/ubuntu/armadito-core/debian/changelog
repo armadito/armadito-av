@@ -1,0 +1,41 @@
+armadito-core (0.10.1-0ubuntu1) wily; urgency=medium
+
+  * fixed link error related to dependencies fix
+
+ -- François Déchelle <fdechelle@teclib.com>  Thu, 26 May 2016 15:36:16 +0200
+
+armadito-core (0.10.0-0ubuntu6) wily; urgency=medium
+
+  * fixing dependencies
+
+ -- François Déchelle <fdechelle@teclib.com>  Thu, 26 May 2016 14:29:33 +0200
+
+armadito-core (0.10.0-0ubuntu5) wily; urgency=medium
+
+  * fixing build fail
+
+ -- François Déchelle <fdechelle@teclib.com>  Wed, 25 May 2016 16:43:23 +0200
+
+armadito-core (0.10.0-0ubuntu4) wily; urgency=medium
+
+  * fixing build fail
+
+ -- François Déchelle <fdechelle@teclib.com>  Wed, 25 May 2016 16:35:32 +0200
+
+armadito-core (0.10.0-0ubuntu3) wily; urgency=medium
+
+  * adding new binary package armadito-core
+
+ -- François Déchelle <fdechelle@teclib.com>  Wed, 25 May 2016 16:24:38 +0200
+
+armadito-core (0.10.0-0ubuntu2) wily; urgency=medium
+
+  * fixing missing build dependencies
+
+ -- François Déchelle <fdechelle@teclib.com>  Wed, 25 May 2016 15:10:51 +0200
+
+armadito-core (0.10.0-0ubuntu1) wily; urgency=medium
+
+  * Initial release
+
+ -- François Déchelle <fdechelle@teclib.com>  Wed, 25 May 2016 11:20:34 +0200

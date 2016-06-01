@@ -1,5 +1,0 @@
-[type: gettext/glade]src/gtk/ui/aboutdialog.glade
-[type: gettext/glade]src/gtk/ui/scandialog.glade
-src/gtk/ui/systraymenu.c
-src/gtk/ui/scandialog.c
-src/gtk/utils/dbus.c

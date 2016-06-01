@@ -1,0 +1,213 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{8A108A73-1029-45C1-AC8D-993025690CB2}</ProjectGuid>
+    <RootNamespace>libarmadito</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\core\libarmadito\include\config;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\include;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\include\glib-2.0;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\lib\glib-2.0\include;$(SolutionDir)..\..\..\..\deps\json-c\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\lib;$(SolutionDir)..\..\..\..\deps\json-c\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\core\libarmadito\include\config;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\include;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\include\glib-2.0;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\lib\glib-2.0\include;$(SolutionDir)..\..\..\..\deps\json-c\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\lib;$(SolutionDir)..\..\..\..\deps\json-c\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\..\core\libarmadito\src;$(SolutionDir)..\..\..\..\core\libarmadito\src\windows;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;urlmon.lib;json-c.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>libarmadito.def</ModuleDefinitionFile>
+    </Link>
+    <PostBuildEvent>
+      <Command>echo post-build step for $(ProjectName)
+
+echo Copying files from $(OutDir) to $(SolutionDir)out\$(Configuration)
+
+REM create target directory
+if not exist "$(SolutionDir)out\$(Configuration)" mkdir "$(SolutionDir)out\$(Configuration)"
+
+REM copy the DLL
+xcopy "$(OutDir)libarmadito.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM create confdirectory
+if not exist "$(SolutionDir)out\$(Configuration)\conf" mkdir "$(SolutionDir)out\$(Configuration)\conf"
+
+REM copy the conf file
+xcopy "$(SolutionDir)..\..\..\..\core\libarmadito\conf\armadito.conf"  "$(SolutionDir)out\$(Configuration)\conf" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM copy the glib DLLs
+REM should we take into accout the $(Configuration) ??? 
+xcopy "$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin\glib-2-vs12.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+xcopy "$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin\gmodule-2-vs12.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+xcopy "$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin\gthread-2-vs12.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM Exit properly because the build will not fail 
+REM unless the final step exits with an error code
+
+goto BuildEventOK
+
+:BuildEventFailed
+echo post-build step for $(ProjectName) FAILED
+exit 1
+
+:BuildEventOK
+echo post-build step for $(ProjectName) OK
+</Command>
+      <Message>this script will copy needed files (.dll, configuration, etc) to a target directory</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\..\core\libarmadito\src;$(SolutionDir)..\..\..\..\core\libarmadito\src\windows;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ModuleDefinitionFile>libarmadito.def</ModuleDefinitionFile>
+      <AdditionalDependencies>glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;urlmon.lib;json-c.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>echo post-build step for $(ProjectName)
+
+echo Copying files from $(OutDir) to $(SolutionDir)out\$(Configuration)
+
+REM create target directory
+if not exist "$(SolutionDir)out\$(Configuration)" mkdir "$(SolutionDir)out\$(Configuration)"
+
+REM copy the DLL
+xcopy "$(OutDir)libarmadito.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM create confdirectory
+if not exist "$(SolutionDir)out\$(Configuration)\conf" mkdir "$(SolutionDir)out\$(Configuration)\conf"
+
+REM copy the conf file
+xcopy "$(SolutionDir)..\..\..\..\core\libarmadito\conf\armadito.conf"  "$(SolutionDir)out\$(Configuration)\conf" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM copy the glib DLLs
+REM should we take into accout the $(Configuration) ??? 
+xcopy "$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin\glib-2-vs12.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+xcopy "$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin\gmodule-2-vs12.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+xcopy "$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin\gthread-2-vs12.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM Exit properly because the build will not fail 
+REM unless the final step exits with an error code
+
+goto BuildEventOK
+
+:BuildEventFailed
+echo post-build step for $(ProjectName) FAILED
+exit 1
+
+:BuildEventOK
+echo post-build step for $(ProjectName) OK
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\action.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\armadito.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\conf.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\confparser.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\error.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\filectx.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\info.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\log.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\module.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\notify.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\ondemand.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\report.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\scan.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\scanconf.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\status.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\stdpaths.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\onaccess_windows.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\ondemandmod.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\quarantine_windows.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\os\dir.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\os\file.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\os\mimetype.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\os\stdpaths_win.c" />
+    <ClCompile Include="..\..\..\..\..\core\libarmadito\src\windows\os\string.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\include\libarmadito\stdpaths.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\include\os\dir.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\include\os\file.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\include\os\io.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\include\os\mimetype.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\include\os\stdpaths.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\include\os\string.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\src\armaditop.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\src\confparser.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\src\modulep.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\src\ondemandp.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\src\reportp.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\src\scanp.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\src\statusp.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\onaccess_windows.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\ondemandmod.h" />
+    <ClInclude Include="..\..\..\..\..\core\libarmadito\src\windows\builtin-modules\quarantine.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="libarmadito.def" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

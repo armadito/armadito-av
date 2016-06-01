@@ -1,0 +1,12 @@
+bindir=@bindir@
+sbindir=@sbindir@
+includedir=@includedir@
+libdir=@libdir@
+moduledir=@moduledir@
+version=@PACKAGE_VERSION@
+
+Name: ARMADITO anti-virus library
+Description: ARMADITO anti-virus library
+Version: ${version} 
+Libs:-L${libdir} -larmadito
+Cflags: -I${includedir} 

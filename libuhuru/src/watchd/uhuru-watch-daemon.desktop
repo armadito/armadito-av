@@ -1,7 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Uhuru watch daemon
-Exec=/usr/bin/uhuru-watch-daemon
-NoDisplay=true
-Terminal=false
-
