@@ -1,7 +1,7 @@
 Armadito module H1
 ==================
 
-Armadito module H1 is an heuristic module for MS-Windows PE and Linux ELF malwares detection. 
+Armadito module H1 is a scan module dedicated to binaries analysis (PE and ELF).
 On Windows, after build, a library called **moduleH1.dll** will be generated.
 
 

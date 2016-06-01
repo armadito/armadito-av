@@ -72,10 +72,6 @@ Once configured, build is easy:
 ::
 
     $ make
-    make  all-recursive
-    make[1]: entrant dans le répertoire " /home/joebar/build/libarmadito "
-    ...
-
 
 Installing
 ----------
