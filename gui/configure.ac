@@ -3,31 +3,43 @@ AM_INIT_AUTOMAKE
 
 # collect arguments
 AC_ARG_WITH([nwjs],
-	AS_HELP_STRING([--with-nwjs=TARBALL],[specify path to nw.js tarball]),
+	AS_HELP_STRING([--with-nwjs=DIR],[specify path to directory containing nw.js tarball]),
 	with_nwjs="$withval",
 	with_nwjs="none")
 
 # checks for programs.
 AC_PATH_PROG(NPM, npm)
-if test x'$NPM' = x ; then
+if test ! -x "$NPM" ; then
    AC_MSG_ERROR("cannot find npm")
 fi
 
 # check for nw.js
-AC_MSG_CHECKING(for nw.js tarball)
-NWJS_TARBALL='none'
+AC_MSG_CHECKING(for nw.js tarballs)
+NWJS_TARBALL_DIR='none'
 if test "$with_nwjs" != "none" ; then
-   NWJS_TARBALL="$with_nwjs"
+   NWJS_TARBALL_DIR="$with_nwjs"
 else
-   FOUND_NWJS_TARBALL=`find $srcdir -name 'nwjs-v*.tar.gz'`
-   if test x"$FOUND_NWJS_TARBALL" != x ; then
-   NWJS_TARBALL=$FOUND_NWJS_TARBALL
-   fi
+   NWJS_TARBALL_DIR=$srcdir
 fi
-AC_MSG_RESULT($NWJS_TARBALL)
-if test ! -f "$NWJS_TARBALL" ; then
-   AC_MSG_ERROR("cannot find NW.JS tarball")
+NWJS_TARBALL_32=`find $NWJS_TARBALL_DIR -name 'nwjs-v*-linux-ia32.tar.gz'`
+NWJS_TARBALL_64=`find $NWJS_TARBALL_DIR -name 'nwjs-v*-linux-x64.tar.gz'`
+if test -f "$NWJS_TARBALL_32" -a -f "$NWJS_TARBALL_64" ; then
+   AC_MSG_RESULT($NWJS_TARBALL_32 $NWJS_TARBALL_64)
+else
+   AC_MSG_RESULT("none found")
+   AC_MSG_ERROR("cannot find NW.JS tarballs")
 fi
+AC_CANONICAL_HOST
+case "$host_cpu" in
+i*86)
+	NWJS_TARBALL=$NWJS_TARBALL_32
+	;;
+x86_64)
+	NWJS_TARBALL=$NWJS_TARBALL_64
+	;;
+esac
+AC_SUBST(NWJS_TARBALL_32)
+AC_SUBST(NWJS_TARBALL_64)
 AC_SUBST(NWJS_TARBALL)
 
 # make symbolic links
