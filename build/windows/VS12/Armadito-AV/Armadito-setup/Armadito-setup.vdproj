@@ -111,6 +111,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_253BE395A44D4ED7B6C019F09A0C7C82"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_2B1EEDF860614164978C2F482CD8D59B"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -202,12 +208,6 @@
         "Entry"
         {
         "MsmKey" = "8:_3F970D8137E5422AA83C59794494DB4E"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_3FABC5D355A144898BF856A9CD32FC6C"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -387,6 +387,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_7E51413574F0411EADB3097D2F1441F6"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_81551C1AEAA94E80A812EB6A7DB4EC90"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -435,12 +441,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_965DFED9652F41A6B6F0114B2A34ED35"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_96614168F0BB4DF4B77144B1C868686E"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -483,12 +483,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_9E122B487A124AAFBCAFCDB0609B49BC"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_9E256A88E28E496FB01DC33E438E4D0D"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -496,6 +490,12 @@
         "Entry"
         {
         "MsmKey" = "8:_A453D3A7754F4A72A17C5423AC89756F"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_A8528274991B4F4AB3C6F230EE555F2A"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -561,19 +561,13 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_B5EE4C81CD9F4C2CAD7E693EF877CDE4"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_B8AEBF6142784CE5A475A1819573BEB8"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_BE0D5FCDC9E640D7A5A92C072FE1E8D6"
+        "MsmKey" = "8:_BB5449910CBD466693245D894DEEC850"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -598,6 +592,12 @@
         "Entry"
         {
         "MsmKey" = "8:_C9C2DA245FE74B5692826862FE684A43"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_CE2603848F6B46ED8AB04FD9D3EBD05F"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -753,7 +753,7 @@
         "DisplayName" = "8:Release"
         "IsDebugOnly" = "11:FALSE"
         "IsReleaseOnly" = "11:TRUE"
-        "OutputFilename" = "8:Release\\Armadito-setup.msi"
+        "OutputFilename" = "8:Release\\Armadito-setup-0.10.0.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -1218,6 +1218,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_253BE395A44D4ED7B6C019F09A0C7C82"
+            {
+            "SourcePath" = "8:..\\x64\\Win7Release\\ArmaditoGuard Package\\ArmaditoGuard.sys"
+            "TargetName" = "8:ArmaditoGuard.sys"
+            "Tag" = "8:"
+            "Folder" = "8:_AF7056AA2E394D968C21EA2094286DA9"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_2B1EEDF860614164978C2F482CD8D59B"
             {
             "SourcePath" = "8:..\\..\\..\\..\\..\\..\\nwjs\\nwjs-sdk-v0.13.4-win-x64\\nw.dll"
@@ -1504,26 +1524,6 @@
             "TargetName" = "8:ar.pak"
             "Tag" = "8:"
             "Folder" = "8:_58875052FCE24E18BE77AC57C8213994"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_3FABC5D355A144898BF856A9CD32FC6C"
-            {
-            "SourcePath" = "8:..\\..\\..\\..\\..\\deps\\libclamav\\lib\\32bit\\libclamav.dll"
-            "TargetName" = "8:libclamav.dll"
-            "Tag" = "8:"
-            "Folder" = "8:_93AE649AF8DA4D24B5C52546E2401D4C"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -2078,6 +2078,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_7E51413574F0411EADB3097D2F1441F6"
+            {
+            "SourcePath" = "8:..\\x64\\Win7Release\\ArmaditoGuard Package\\armaditoguard.cat"
+            "TargetName" = "8:armaditoguard.cat"
+            "Tag" = "8:"
+            "Folder" = "8:_AF7056AA2E394D968C21EA2094286DA9"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_81551C1AEAA94E80A812EB6A7DB4EC90"
             {
             "SourcePath" = "8:..\\..\\..\\..\\..\\..\\nwjs\\nwjs-sdk-v0.13.4-win-x64\\locales\\fr.pak"
@@ -2218,26 +2238,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_965DFED9652F41A6B6F0114B2A34ED35"
-            {
-            "SourcePath" = "8:..\\x64\\Win7Debug\\ArmaditoGuard Package\\ArmaditoGuard.sys"
-            "TargetName" = "8:ArmaditoGuard.sys"
-            "Tag" = "8:"
-            "Folder" = "8:_AF7056AA2E394D968C21EA2094286DA9"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_96614168F0BB4DF4B77144B1C868686E"
             {
             "SourcePath" = "8:..\\..\\..\\..\\..\\..\\nwjs\\nwjs-sdk-v0.13.4-win-x64\\payload.exe"
@@ -2364,26 +2364,6 @@
             "TargetName" = "8:pl.pak"
             "Tag" = "8:"
             "Folder" = "8:_58875052FCE24E18BE77AC57C8213994"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_9E122B487A124AAFBCAFCDB0609B49BC"
-            {
-            "SourcePath" = "8:..\\x64\\Win7Debug\\ArmaditoGuard Package\\ArmaditoGuard.inf"
-            "TargetName" = "8:ArmaditoGuard.inf"
-            "Tag" = "8:"
-            "Folder" = "8:_AF7056AA2E394D968C21EA2094286DA9"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -2658,10 +2638,10 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_BE0D5FCDC9E640D7A5A92C072FE1E8D6"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_BB5449910CBD466693245D894DEEC850"
             {
-            "SourcePath" = "8:..\\x64\\Win7Debug\\ArmaditoGuard Package\\armaditoguard.cat"
-            "TargetName" = "8:armaditoguard.cat"
+            "SourcePath" = "8:..\\x64\\Win7Release\\ArmaditoGuard Package\\ArmaditoGuard.inf"
+            "TargetName" = "8:ArmaditoGuard.inf"
             "Tag" = "8:"
             "Folder" = "8:_AF7056AA2E394D968C21EA2094286DA9"
             "Condition" = "8:"
@@ -2724,6 +2704,26 @@
             "TargetName" = "8:pnacl_public_x86_32_crtend_o"
             "Tag" = "8:"
             "Folder" = "8:_16B5F17881224B798A188B12B46FA678"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_CE2603848F6B46ED8AB04FD9D3EBD05F"
+            {
+            "SourcePath" = "8:..\\..\\..\\..\\..\\deps\\libclamav\\lib\\32bit\\libclamav.dll"
+            "TargetName" = "8:libclamav.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_93AE649AF8DA4D24B5C52546E2401D4C"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -3263,15 +3263,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Armadito-av"
-        "ProductCode" = "8:{0D93F22B-F86E-40F6-B757-5EFD706FCAC2}"
-        "PackageCode" = "8:{AE9F1FD7-20DB-4ABB-B8C8-63AAB79B569D}"
+        "ProductCode" = "8:{01F63719-C38B-414B-83FE-49CF9A8AD9A8}"
+        "PackageCode" = "8:{2F715A81-21F3-4639-9BD4-D74DDFBFB9E7}"
         "UpgradeCode" = "8:{8FF60D97-FAB5-42D5-8BC1-1924AD47EA25}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:0.9.1"
+        "ProductVersion" = "8:0.10.0"
         "Manufacturer" = "8:Teclib"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -3827,7 +3827,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_33576B0261484D31AC2167EE2EE9C6FE"
             {
-            "SourcePath" = "8:..\\Debug\\libarmadito.dll"
+            "SourcePath" = "8:..\\Release\\libarmadito.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_93AE649AF8DA4D24B5C52546E2401D4C"
@@ -3855,7 +3855,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_5AE6723470834DF5AA556757C0F5F46D"
             {
-            "SourcePath" = "8:..\\Debug\\ArmaditoGuard-setup.exe"
+            "SourcePath" = "8:..\\Release\\ArmaditoGuard-setup.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_AF7056AA2E394D968C21EA2094286DA9"
@@ -3883,7 +3883,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_77AD3D56EA784BD6852FD04AA691DFD4"
             {
-            "SourcePath" = "8:..\\Debug\\modulePDF.dll"
+            "SourcePath" = "8:..\\Release\\modulePDF.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_3AC8906D68C844FCADF9BC483EF5B167"
@@ -3911,7 +3911,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_91D9061B85384E439C7A7E9785C4EE95"
             {
-            "SourcePath" = "8:..\\Debug\\clamav_a6o.dll"
+            "SourcePath" = "8:..\\Release\\clamav_a6o.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_3AC8906D68C844FCADF9BC483EF5B167"
@@ -3937,9 +3937,9 @@
                 {
                 }
             }
-            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_B5EE4C81CD9F4C2CAD7E693EF877CDE4"
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_A8528274991B4F4AB3C6F230EE555F2A"
             {
-            "SourcePath" = "8:..\\Debug\\moduleH1.dll"
+            "SourcePath" = "8:..\\Release\\moduleH1.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_3AC8906D68C844FCADF9BC483EF5B167"
@@ -3959,7 +3959,7 @@
             "ProjectOutputGroupRegister" = "3:1"
             "OutputConfiguration" = "8:"
             "OutputGroupCanonicalName" = "8:Built"
-            "OutputProjectGuid" = "8:{6F7FCB67-F47F-43A9-A431-AF4192305385}"
+            "OutputProjectGuid" = "8:{40272027-A04A-4FC3-8A0E-7FA12222B791}"
             "ShowKeyOutput" = "11:TRUE"
                 "ExcludeFilters"
                 {
@@ -3967,7 +3967,7 @@
             }
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_C3C49575AE2A4C2D975E93DDFE1920F7"
             {
-            "SourcePath" = "8:..\\Debug\\ArmaditoSvc.exe"
+            "SourcePath" = "8:..\\Release\\ArmaditoSvc.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_93AE649AF8DA4D24B5C52546E2401D4C"
