@@ -1,1 +1,3 @@
+debian/armadito-gui/usr/bin/armadito-ui
+debian/armadito-gui/usr/lib/*/armadito/gui/*
 
