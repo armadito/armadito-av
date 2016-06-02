@@ -41,8 +41,7 @@ This will generate the **Makefile.in** files and the **configure** script.
 
 **configure** script takes the following useful options:
 
-    --prefix=PREFIX         install architecture-independent files in PREFIX
-                            [/usr/local]
+    --prefix=PREFIX         install architecture-independent files in PREFIX [default is /usr/local]
     --enable-debug          enable debugging [default is yes]
 
 The **PREFIX** directory will be used by **make install**. Its use is mandatory, unless 
