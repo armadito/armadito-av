@@ -13,22 +13,6 @@ See file COPYING.MSPL for terms of license.
 #define _STRUCT_H_
 
 // Scan results struct.
-// None - MALWARE - CLEAN - TIMEOUT
-/*
-typedef enum _SCAN_RESULT
-{
-	NONE = 0,		//  file not scanned yet.
-	CLEAN,			//	clean file
-	MALWARE,		// detected as malware.
-	TIMEOUT,		// scan not finished due to timeout.
-	UNDECIED,
-	UNSUPPORTED,
-	DBG_FLAG,
-	ERROR
-
-}SCAN_RESULT_OLD, *PSCAN_RESULT_OLD;
-*/
-
 typedef enum a6o_file_status {
 	NONE = 0,
 	ARMADITO_UNDECIDED,         /*!< not yet decided by scan                                */

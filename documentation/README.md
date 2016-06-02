@@ -6,15 +6,7 @@ Our documentation is available online at <http://armadito-av.readthedocs.io/en/l
 Build
 -----
 
-Linux
-^^^^^
-
 make clean && make html && firefox build/html/index.html
-
-Windows
-^^^^^^^
-
-TBW
 
 Thanks
 ------
