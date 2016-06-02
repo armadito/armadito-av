@@ -100,11 +100,9 @@ SCAN_RESULT LaunchFileAnalysis(_In_ PFLT_CALLBACK_DATA Data, _In_ PCFLT_RELATED_
 		if (!NT_SUCCESS(ntStatus)) {
 			
 			DbgPrint("[-] Error :: ArmaditoGuard!LaunchFileAnalysis :: FltParseFileNameInformation() routine failed :: 0x%x \n", ntStatus);
-			//res = NONE;
+			
 			__leave;
-			//FltReleaseFileNameInformation(FileNameInformation);
-			//FileNameInformation = NULL;
-			//return FLT_POSTOP_FINISHED_PROCESSING;
+			
 		}
 
 		// Deny access to Quarantine folder		
@@ -382,18 +380,7 @@ Return Value:
 
 	__try {
 
-		// Check if the request come from the scan process.
-		/*
-		ntStatus = IsFromTheAnalysisProcess(FltGetRequestorProcess(Data),&bIsScanProcess);
-		if (!NT_SUCCESS(ntStatus)){
-			DbgPrint("[i] Error :: ArmaditoGuard!PostOperationIrpCreate :: IsFromTheAnalysisProcess failed :: status = 0x%x :: %d\n", ntStatus,ntStatus);
-			__leave;
-		}
 
-		if (bIsScanProcess == TRUE) {
-			DbgPrint("[-] Warning :: ArmaditoGuard!PosOperationIrpCreate :: !! Ignoring Analysis process request !! :: %wZ\n",FltObjects->FileObject->FileName);
-			__leave;
-		}*/
 
 		// Ignore Directory Open Creation.
 		ntStatus = FltIsDirectory(FltObjects->FileObject, FltObjects->Instance, &bIsDir);
@@ -522,8 +509,7 @@ Return Value:
 			// 3. Set the callback data structure IoStatus.Information field to zero.
 			Data->IoStatus.Information = 0;
 					
-			// 4. Return FLT_POSTOP_FINISHED_PROCESSING
-			//return FLT_POSTOP_FINISHED_PROCESSING;
+			// 4. Return FLT_POSTOP_FINISHED_PROCESSING			
 			__leave; // free Unicode string in __finally section.
 	
 		}
