@@ -3,6 +3,8 @@ Armadito module H1
 
 Armadito module H1 is a scan module dedicated to binaries analysis (PE and ELF).
 
+Module H1 is based on work by the DAVFI project (http://www.davfi.fr/).
+
 Copyright (C) Teclib', 2015, 2016
 
 Project home : <http://www.teclib-edition.com/teclib-products/armadito-antivirus>
