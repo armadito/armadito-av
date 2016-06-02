@@ -42,7 +42,7 @@ Armadito antivirus can be divided in subprojects, which are the following :
 
 **Armadito module H1**
 
-* **Description** : Heuristic scan module focusing on ELF/PE analysis.
+* **Description** : Heuristic scan module focusing on ELF/PE analysis. Based on work by the DAVFI project (http://www.davfi.fr/)
 * **License** : `GPLv3 <https://www.gnu.org/licenses/license-list.html#GNUGPLv3>`_
 * **Path** : <...>/armadito-av/modules/moduleH1
 
