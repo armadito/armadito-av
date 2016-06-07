@@ -280,16 +280,12 @@ HRESULT UserScanWorker( _In_  PGLOBAL_SCAN_CONTEXT Context )
 				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_WARNING, " ArmaditoSvc!UserScanWorker :: [%d] :: ConvertDeviceNameToMsDosName failed :: \n",ThreadId);				
 				scan_result = ARMADITO_EINVAL;
 			}
-			else if (strstr(msDosFilename,"ARMADITO.TXT") != NULL) {  // Do not scan the log file. (debug only)
-				scan_result = ARMADITO_WHITE_LISTED;
-			}
 			else {
 
 				// launch a simple file scan
 				//printf("[+] Debug :: UserScanWorker :: [%d] :: a6o_scan :: [%s] \n",ThreadId,msDosFilename);
 				scan_result = a6o_scan_simple(Context->armadito, msDosFilename, &report);
-				a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "[+] Debug :: UserScanWorker :: [%d] :: %s :: %s\n", ThreadId, msDosFilename, ScanResultToStr(scan_result));
-				printf("[+] Debug :: UserScanWorker :: [%d] :: %s :: %s\n", ThreadId, msDosFilename, ScanResultToStr(scan_result));
+				a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "[+] Debug :: UserScanWorker :: [%d] :: %s :: %s\n", ThreadId, msDosFilename, ScanResultToStr(scan_result));				
 
 			}
 
