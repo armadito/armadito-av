@@ -21,25 +21,31 @@
     <ClCompile Include="..\..\..\..\..\modules\modulePDF\modulePDF.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armaditopdf\module7\src\filters.c">
+    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armadito-pdf\lib\src\filters.c">
       <Filter>Fichiers sources\ArmaditoPDF</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armaditopdf\module7\src\osdeps.c">
+    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armadito-pdf\lib\src\osdeps.c">
       <Filter>Fichiers sources\ArmaditoPDF</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armaditopdf\module7\src\pdfAnalysis.c">
+    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armadito-pdf\lib\src\pdfObjectsAnalysis.c">
       <Filter>Fichiers sources\ArmaditoPDF</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armaditopdf\module7\src\pdfObjectsAnalysis.c">
+    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armadito-pdf\lib\src\pdfParsing.c">
       <Filter>Fichiers sources\ArmaditoPDF</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armaditopdf\module7\src\pdfParsing.c">
+    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armadito-pdf\lib\src\pdfStructAnalysis.c">
       <Filter>Fichiers sources\ArmaditoPDF</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armaditopdf\module7\src\pdfStructAnalysis.c">
+    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armadito-pdf\lib\src\utils.c">
       <Filter>Fichiers sources\ArmaditoPDF</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armaditopdf\module7\src\utils.c">
+    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armadito-pdf\lib\src\armaditopdf.c">
+      <Filter>Fichiers sources\ArmaditoPDF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armadito-pdf\lib\src\log.c">
+      <Filter>Fichiers sources\ArmaditoPDF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\modulePDF\armadito-pdf\lib\src\pdfStructs.c">
       <Filter>Fichiers sources\ArmaditoPDF</Filter>
     </ClCompile>
   </ItemGroup>
