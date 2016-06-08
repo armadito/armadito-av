@@ -22,6 +22,7 @@ along with Armadito module PDF.  If not, see <http://www.gnu.org/licenses/>.
 #include <libarmadito.h>
 #include <string.h>
 
-#include <pdfAnalyzer.h>
+#include <armaditopdf.h>
+#include <osdeps.h>
 
 #define MALICIOUS_COEF 70
