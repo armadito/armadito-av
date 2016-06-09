@@ -362,22 +362,22 @@ echo post-build step for $(ProjectName) OK</Command>
     <PostBuildEvent>
       <Command>echo post-build step for $(ProjectName)
 
-echo Copying files from $(OutDir) to $(SolutionDir)out\$(Configuration)
+echo Copying files from $(OutDir) to $(SolutionDir)$(Configuration)
 
 REM create target directory
-if not exist "$(SolutionDir)out\$(Configuration)" mkdir "$(SolutionDir)out\Debug"
-if not exist "$(SolutionDir)out\$(Configuration)\driver" mkdir "$(SolutionDir)out\Debug\driver"
+if not exist "$(SolutionDir)out\$(Configuration)" mkdir "$(SolutionDir)Debug"
+if not exist "$(SolutionDir)out\$(Configuration)\driver" mkdir "$(SolutionDir)Debug\driver"
 
 REM copy the INF into the driver directory
-xcopy "$(OutDir)$(ProjectName)\ArmaditoGuard.inf" "$(SolutionDir)out\Debug\driver" /D /I /Y
+xcopy "$(OutDir)$(ProjectName)\ArmaditoGuard.inf" "$(SolutionDir)Debug\driver" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
 REM copy the SYS into the driver directory
-xcopy "$(OutDir)$(ProjectName)\ArmaditoGuard.sys" "$(SolutionDir)out\Debug\driver" /D /I /Y
+xcopy "$(OutDir)$(ProjectName)\ArmaditoGuard.sys" "$(SolutionDir)Debug\driver" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
 REM copy the CAT into the driver directory
-xcopy "$(OutDir)$(ProjectName)\ArmaditoGuard.cat" "$(SolutionDir)out\Debug\driver" /D /I /Y
+xcopy "$(OutDir)$(ProjectName)\ArmaditoGuard.cat" "$(SolutionDir)Debug\driver" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
 REM Exit properly because the build will not fail 
