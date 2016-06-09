@@ -62,14 +62,14 @@
     <PostBuildEvent>
       <Command>echo post-build step for $(ProjectName)
 
-echo Copying files from $(OutDir) to $(SolutionDir)out\$(Configuration)
+echo Copying files from $(OutDir) to $(SolutionDir)$(Configuration)
 
 REM create target directory
-if not exist "$(SolutionDir)out\$(Configuration)" mkdir "$(SolutionDir)out\$(Configuration)"
-if not exist "$(SolutionDir)out\$(Configuration)\driver" mkdir "$(SolutionDir)out\$(Configuration)\driver"
+if not exist "$(SolutionDir)$(Configuration)" mkdir "$(SolutionDir)$(Configuration)"
+if not exist "$(SolutionDir)$(Configuration)\driver" mkdir "$(SolutionDir)$(Configuration)\driver"
 
 REM copy the EXE into the driver directory
-xcopy "$(OutDir)ArmaditoGuard-setup.exe" "$(SolutionDir)out\$(Configuration)\driver" /D /I /Y
+xcopy "$(OutDir)ArmaditoGuard-setup.exe" "$(SolutionDir)$(Configuration)\driver" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
 REM Exit properly because the build will not fail 

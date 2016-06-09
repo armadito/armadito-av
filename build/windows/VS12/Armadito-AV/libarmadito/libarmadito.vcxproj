@@ -64,26 +64,26 @@
 echo Copying files from $(OutDir) to $(SolutionDir)out\$(Configuration)
 
 REM create target directory
-if not exist "$(SolutionDir)out\$(Configuration)" mkdir "$(SolutionDir)out\$(Configuration)"
+REM if not exist "$(SolutionDir)out\$(Configuration)" mkdir "$(SolutionDir)out\$(Configuration)"
 
 REM copy the DLL
-xcopy "$(OutDir)libarmadito.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
+REM xcopy "$(OutDir)libarmadito.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+REM if errorlevel 1 goto BuildEventFailed
 
-REM create confdirectory
-if not exist "$(SolutionDir)out\$(Configuration)\conf" mkdir "$(SolutionDir)out\$(Configuration)\conf"
+REM create conf directory
+if not exist "$(SolutionDir)$(Configuration)\conf" mkdir "$(SolutionDir)$(Configuration)\conf"
 
 REM copy the conf file
-xcopy "$(SolutionDir)..\..\..\..\core\libarmadito\conf\armadito.conf"  "$(SolutionDir)out\$(Configuration)\conf" /D /I /Y
+xcopy "$(SolutionDir)..\..\..\..\core\libarmadito\conf\armadito.conf"  "$(SolutionDir)$(Configuration)\conf" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
 REM copy the glib DLLs
 REM should we take into accout the $(Configuration) ??? 
-xcopy "$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin\glib-2-vs12.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
+xcopy "$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin\glib-2-vs12.dll"  "$(SolutionDir)$(Configuration)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
-xcopy "$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin\gmodule-2-vs12.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
+xcopy "$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin\gmodule-2-vs12.dll"  "$(SolutionDir)$(Configuration)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
-xcopy "$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin\gthread-2-vs12.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
+xcopy "$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin\gthread-2-vs12.dll"  "$(SolutionDir)$(Configuration)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
 REM Exit properly because the build will not fail 

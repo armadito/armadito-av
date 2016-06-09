@@ -59,26 +59,26 @@
     <PostBuildEvent>
       <Command>echo post-build step for $(ProjectName)
 
-echo Copying files from $(OutDir) to $(SolutionDir)out\$(Configuration)
+echo Copying files from $(OutDir) to $(SolutionDir)$(Configuration)
 
 REM create target directory
-if not exist "$(SolutionDir)out\$(Configuration)" mkdir "$(SolutionDir)out\$(Configuration)"
+if not exist "$(SolutionDir)$(Configuration)" mkdir "$(SolutionDir)$(Configuration)"
 
 REM copy the EXE
-xcopy "$(OutDir)ArmaditoSvc.exe" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+xcopy "$(OutDir)ArmaditoSvc.exe" "$(SolutionDir)$(Configuration)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
 REM copy the needed DLLs
-xcopy "$(SolutionDir)..\..\..\..\deps\pcre\lib\pcre3.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+xcopy "$(SolutionDir)..\..\..\..\deps\pcre\lib\pcre3.dll" "$(SolutionDir)$(Configuration)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
-xcopy "$(SolutionDir)..\..\..\..\deps\libintl\lib\libintl3.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+xcopy "$(SolutionDir)..\..\..\..\deps\libintl\lib\libintl3.dll" "$(SolutionDir)$(Configuration)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
-xcopy "$(SolutionDir)..\..\..\..\deps\libiconv\lib\libiconv2.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
+xcopy "$(SolutionDir)..\..\..\..\deps\libiconv\lib\libiconv2.dll" "$(SolutionDir)$(Configuration)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
 REM copy the configuration files
-if not exist "$(SolutionDir)out\$(Configuration)\conf" mkdir "$(SolutionDir)out\$(Configuration)\conf"
-xcopy "$(SolutionDir)..\..\..\..\core\libarmadito\conf\armadito.conf" "$(SolutionDir)out\$(Configuration)\conf" /D /I /Y
+if not exist "$(SolutionDir)$(Configuration)\conf" mkdir "$(SolutionDir)$(Configuration)\conf"
+xcopy "$(SolutionDir)..\..\..\..\core\libarmadito\conf\armadito.conf" "$(SolutionDir)$(Configuration)\conf" /D /I /Y
 
 REM Exit properly because the build will not fail 
 REM unless the final step exits with an error code

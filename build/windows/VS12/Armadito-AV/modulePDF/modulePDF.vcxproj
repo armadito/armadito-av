@@ -60,14 +60,14 @@
     <PostBuildEvent>
       <Command>echo post-build step for $(ProjectName)
 
-echo Copying files from $(OutDir) to $(SolutionDir)out\$(Configuration)
+echo Copying files from $(OutDir) to $(SolutionDir)$(Configuration)
 
 REM create target directory
-if not exist "$(SolutionDir)out\$(Configuration)" mkdir "$(SolutionDir)out\$(Configuration)"
-if not exist "$(SolutionDir)out\$(Configuration)\modules" mkdir "$(SolutionDir)out\$(Configuration)\modules"
+if not exist "$(SolutionDir)$(Configuration)" mkdir "$(SolutionDir)$(Configuration)"
+if not exist "$(SolutionDir)$(Configuration)\modules" mkdir "$(SolutionDir)$(Configuration)\modules"
 
 REM copy the DLL into the modules directory
-xcopy "$(OutDir)modulePDF.dll" "$(SolutionDir)out\$(Configuration)\modules" /D /I /Y
+xcopy "$(OutDir)modulePDF.dll" "$(SolutionDir)$(Configuration)\modules" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
 REM Exit properly because the build will not fail 
