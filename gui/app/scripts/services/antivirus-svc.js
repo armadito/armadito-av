@@ -28,8 +28,6 @@ along with Armadito gui.  If not, see <http://www.gnu.org/licenses/>.
  * Provider in the tatooDesktopApp.
  */
 
-var fs = require('fs');
-
 angular.module('armadito.svc', [])
 .service('ArmaditoSVC', ['ArmaditoIPC', function (ArmaditoIPC) {
 
@@ -37,8 +35,6 @@ angular.module('armadito.svc', [])
 	var ipc_path;
 	var server_ipc_path;
 	var scan_server_ipc_path;
-	var clientId;
-	var client_sock;
 	var av_response = 'none';
 
 	var os = require('os');

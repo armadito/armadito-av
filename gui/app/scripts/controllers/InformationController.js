@@ -29,8 +29,7 @@ along with Armadito gui.  If not, see <http://www.gnu.org/licenses/>.
  * Controller of the armaditoApp
  */
  
- var os = require('os');
- var sprintf = require("sprintf-js").sprintf;
+var sprintf = require("sprintf-js").sprintf;
 
 angular.module('armaditoApp')
   .controller('InformationController', ['$scope','ArmaditoSVC','ArmaditoIPC', function ($scope,ArmaditoSVC,ArmaditoIPC) {
@@ -78,9 +77,6 @@ angular.module('armaditoApp')
 		$scope.threatDataFromAv = function(data){
 			
 			var json_object;
-			var jobj_modules;
-			var date = new Date().toISOString();
-			
 			//console.log('------- current date = ',date);
 		
 			try {
@@ -126,11 +122,11 @@ angular.module('armaditoApp')
 				$scope.state.modules = json_object.info.modules;				
 				for (var i = 0; i< $scope.state.modules.length ; i++){
 
-					$scope.state.modules[i].update['date'] = $scope.timeConverter($scope.state.modules[i].update['timestamp']);
+					$scope.state.modules[i].update.date = $scope.timeConverter($scope.state.modules[i].update.timestamp);
 					
 					//console.log('[+] Debug :: threatDataFromAv :: module name :: ',$scope.state.modules[i].name);
-					//console.log('[+] Debug :: threatDataFromAv :: module timestamp :: ',$scope.state.modules[i].update['timestamp']);	
-					//console.log('[+] Debug :: threatDataFromAv :: module date :: ',$scope.state.modules[i].update['date']);				
+					//console.log('[+] Debug :: threatDataFromAv :: module timestamp :: ',$scope.state.modules[i].timestamp);	
+					//console.log('[+] Debug :: threatDataFromAv :: module date :: ',$scope.state.modules[i].date);				
 				}
 
 			}

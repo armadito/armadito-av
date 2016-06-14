@@ -32,8 +32,6 @@ angular.module('armadito.ipc', [])
 .service('ArmaditoIPC', function () {
 	
 	var factory = {};
-	var av_response;
-	var client_socket;
 	var client_sock;
 	var os = require('os');
 	var net = require('net');
@@ -86,7 +84,7 @@ angular.module('armadito.ipc', [])
 	
 	factory.disconnect2_av = function(){
 		client_sock.end();
-		client_sock.close;
+		client_sock.close();
 	};
 
 	// ----------------------------------------------

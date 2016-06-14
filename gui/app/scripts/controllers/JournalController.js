@@ -87,7 +87,7 @@ angular.module('armaditoApp')
 	        }
       	});
 
-      	modalInstance.result.then(function (scanOptions) {
+      	modalInstance.result.then(function () {
 	        $scope.quarantineObjects = [];
 	        toastr.success('Suppression d\'objets en quarantaine effectuée avec succès.');
 	    }, function () {
@@ -222,7 +222,7 @@ angular.module('armaditoApp')
         modalInstance.result.then(function (selectedItem) {
           $scope.selected = selectedItem;
         }, function () {
-          $log.info('Modal dismissed at: ' + new Date());
+          console.log('Modal dismissed at: ' + new Date());
         });
       };
 
@@ -247,7 +247,7 @@ angular.module('armaditoApp')
 		    modalInstance.result.then(function (selectedItem) {
 		      $scope.selected = selectedItem;
 		    }, function () {
-		      $log.info('Modal dismissed at: ' + new Date());
+		      console.log('Modal dismissed at: ' + new Date());
 		    });
 		  };
 
