@@ -10,5 +10,6 @@ You can participate to the project in different ways, such as:
 - installing Armadito antivirus
 - submitting bug reports
 - requesting new features
+- developing your own scan module
 
 .. toctree::
