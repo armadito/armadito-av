@@ -9,8 +9,8 @@ AC_ARG_ENABLE([debug],
 	enable_debug="yes")
 
 # check for analysis module sources
-AC_MSG_CHECKING(for armaditopdf sources)
-AC_CONFIG_SRCDIR(armaditopdf/module7/main.c)
+AC_MSG_CHECKING(for armadito-pdf sources)
+AC_CONFIG_SRCDIR(armadito-pdf/lib/src/armaditopdf.c)
 AC_MSG_RESULT(yes)
 
 # check for needed programs
