@@ -34,9 +34,6 @@ angular.module('armaditoApp')
          $scope.threatDataFromAv = function(data){
 
 	      var json_object;
-	      var jobj_modules;
-	      var date = new Date().toISOString();
-
 	      try {
 
 		json_object = JSON.parse(data);

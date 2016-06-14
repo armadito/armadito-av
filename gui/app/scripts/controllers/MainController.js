@@ -76,7 +76,7 @@ angular.module('armaditoApp')
 	        }
       	});
 
-      	modalInstance.result.then(function (scanOptions) {
+      	modalInstance.result.then(function () {
       	 	window.close();
 	    }, function () {
         	console.log('Modal dismissed at: ' + new Date());
