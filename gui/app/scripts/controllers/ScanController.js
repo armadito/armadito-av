@@ -33,21 +33,20 @@ along with Armadito gui.  If not, see <http://www.gnu.org/licenses/>.
  var homedir = require('homedir');
 
 angular.module('armaditoApp')
-  .controller('ScanController', ['$rootScope','$scope','ArmaditoSVC','ArmaditoIPC','$uibModal', function ($rootScope,$scope,ArmaditoSVC,ArmaditoIPC, $uibModal) {
+  .controller('ScanController', ['$rootScope','$scope','ArmaditoSVC','ArmaditoIPC','$uibModal', 'ScanDataFactory', function ($rootScope,$scope,ArmaditoSVC,ArmaditoIPC, $uibModal, ScanDataFactory) {
 
-    $scope.initTab = function(){   
+    $scope.updateScope = function(){
    
-	    $scope.type = "analyse_view.Choose_analyse_type";
-	    $scope.malware_count = 0;
-	    $scope.suspicious_count = 0;
-	    $scope.scanned_count = 0;
-
-	    $scope.scan_data = {
-	      path_to_scan : "",
-	      progress : 0
-	    };
-	    
-	    $scope.scan_data.files = [];
+	    // Get from factory
+	    $scope.type = ScanDataFactory.data.type;
+	    $scope.scan_progress = ScanDataFactory.data.progress;
+	    $scope.scan_files = ScanDataFactory.data.files;
+	    $scope.scanned_count = ScanDataFactory.data.scanned_count;
+	    $scope.suspicious_count = ScanDataFactory.data.suspicious_count;
+	    $scope.malware_count = ScanDataFactory.data.malware_count;
+	    $scope.displayed_file = ScanDataFactory.data.displayed_file;
+	    $scope.path_to_scan = ScanDataFactory.data.path_to_scan;
+            $scope.canceled = ScanDataFactory.data.canceled;
     }
 
     // This function refresh structure values from data receive from AV. 
@@ -55,7 +54,6 @@ angular.module('armaditoApp')
     $scope.threatDataFromAv = function(data){
 
       var json_object;
-
       try {
 
         json_object = JSON.parse(data);
@@ -64,9 +62,9 @@ angular.module('armaditoApp')
 
         // Handle the first response of the av.
         if(json_object.av_response == "scan" && json_object.status == 0 ){
-          console.log("[+] Debug :: Scan order send successfully to av!\n");     
-	  $scope.scan_data.progress = 0; 
+          console.log("[+] Debug :: Scan order send successfully to av!\n");
 	  global.scan_in_progress = 1;    
+	  $scope.updateScope();
 	  $scope.$apply();
           return;
         }
@@ -74,41 +72,39 @@ angular.module('armaditoApp')
         // Handle progress  information from av
         if(json_object.ihm_request == "scan"){
 
-          $scope.scan_data.progress = json_object.params.progress ;
-          //console.log("[+] Debug :: progress = ", $scope.scan_data.progress);
-
+	  // Update model
 	  if(json_object.params.path){
-	      $scope.scan_data.displayed_file = json_object.params.path;	  
-          }
+	      ScanDataFactory.set_displayed_file(json_object.params.path);
+	      $scope.displayed_file = ScanDataFactory.data.displayed_file;
+	  }
 
           if(json_object.params.scan_status === 'malware' || json_object.params.scan_status === 'suspicious'){
-            $scope.scan_data.files.push(json_object.params);
+	      ScanDataFactory.add_scanned_file(json_object.params.path,
+					      json_object.params.scan_status,
+					      json_object.params.scan_action,
+					      json_object.params.mod_name,
+					      json_object.params.mod_report);
           }
 
-	  if(json_object.params.malware_count){
-	     $scope.malware_count = json_object.params.malware_count;
-	  }
-	
-          if(json_object.params.suspicious_count){
-	     $scope.suspicious_count = json_object.params.suspicious_count;
-          }	
-	
-          if(json_object.params.scanned_count){
-	     $scope.scanned_count = json_object.params.scanned_count;
-          }	
+          ScanDataFactory.update_counters(json_object.params.scanned_count,
+			              json_object.params.suspicious_count,
+				      json_object.params.malware_count,
+			              json_object.params.progress);
 
-          //console.log("tableau", $scope.scan_data.files);
+	  // updateScope
+	  $scope.updateScope();
 
-          // terminate scan.
-          if($scope.scan_data.progress == 100){
+          // Terminate scan.
+          if($scope.scan_progress == 100){
                console.log("[+] Debug :: Scan finished!");
 	       global.scan_in_progress = 0;
 
-	       // Scan is finished, we remove listener
-	       $rootScope.myEmitter.removeListener('scan_info', $scope.threatDataFromAv);
+	       // Scan is finished, we remove listeners
+	       $rootScope.myEmitter.removeAllListeners('scan_info');
           }
 
-          $scope.$apply();
+          // Apply modifications
+	  $scope.$apply();
         }
         
       }
@@ -123,72 +119,66 @@ angular.module('armaditoApp')
 
     $scope.StartScan = function(){
     
-     // console.log("[+] Debug :: type d'analyse ::", $scope.type);
+      // Reset factory
+      ScanDataFactory.reset();
 
+      // Set Scan configuration
+      $scope.configureScan();
+
+      // Save current scan conf in factory
+      ScanDataFactory.set_scan_conf($scope.path_to_scan, $scope.type);
+
+      console.log("[+] Debug :: Start scan ::\n");
+
+      // updateScope
+      $scope.updateScope();
+
+      // we remove last listener
+      $rootScope.myEmitter.removeAllListeners('scan_info');
+
+      // register emitter
+      $rootScope.myEmitter.addListener('scan_info', $scope.threatDataFromAv);
+
+      // Launch scan
+      ArmaditoSVC.launchScan($scope.path_to_scan, $scope.threatDataFromAv);
+    };
+
+    $scope.configureScan = function(){
 
       if($scope.type == "analyse_view.Full_scan"){
-	
-	// TODO: Set full_scan path in AV-side
-	
         console.log("[+] Debug :: Full scan ::\n");
+
         if(os.platform() == "win32"){
-           $scope.scan_data.path_to_scan = "C:\\";
+           $scope.path_to_scan = "C:\\";
 	}
 	else {
-	   $scope.scan_data.path_to_scan = "/";	
+	   $scope.path_to_scan = "/";
 	}
 
       }else if($scope.type == "analyse_view.Quick_scan"){
-
         console.log("[+] Debug :: Quick scan ::\n");
-
-	// TODO: Set quick_scan path in AV-side
 
         if(os.platform() == "win32"){
 	   var userpath = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
 	   userpath = userpath.replace(/\\/g, "\\\\");
-	   $scope.scan_data.path_to_scan =  userpath ;
+	   $scope.path_to_scan =  userpath;
 	}
 	else {
-	   
-	   $scope.scan_data.path_to_scan = homedir(); // "/home";	
+	   $scope.path_to_scan = homedir(); // "/home";
 	}
 
       }else if($scope.type == "analyse_view.Custom_scan"){
         console.log("[+] Debug :: Custom scan ::\n");
       }
-      else{
-        // display a notif.
-        console.log("[+] Debug :: Please enter an analysis type ::\n");
-        return;
-      }
-
-      // reset variables
-      $scope.scan_data.progress = 0;
-      $scope.scan_data.files = [];
-      $scope.scan_data.displayed_file = "";
-      $scope.malware_count = 0;
-      $scope.suspicious_count = 0;
-      $scope.scanned_count = 0;
-      $scope.canceled = 0;
-
-      // we remove last listener
-      $rootScope.myEmitter.removeListener('scan_info', $scope.threatDataFromAv);
-
-      // register emitter 
-      $rootScope.myEmitter.addListener('scan_info', $scope.threatDataFromAv);
-
-      ArmaditoSVC.launchScan($scope.scan_data.path_to_scan, $scope.threatDataFromAv);
 
     };
 
     $scope.CancelScan = function(){
     
-      //console.log("[+] Debug :: cancel scan ::", $scope.type);
-	      
+      //console.log("[+] Debug :: cancel scan ");
       if($scope.canceled == 0){
            ArmaditoSVC.cancelScan($scope.threatDataFromAv);
-	   $scope.canceled = 1;
+	   ScanDataFactory.setCanceled();
       }
 
     };
@@ -220,7 +210,7 @@ angular.module('armaditoApp')
       modalInstance.result.then(function (scanOptions) {
         $scope.scanOptions = scanOptions;
         //console.log("Scan options : ", $scope.scanOptions);
-        $scope.scan_data.path_to_scan = $scope.scanOptions.pathToScan;
+        $scope.path_to_scan = $scope.scanOptions.pathToScan;
         $scope.StartScan();
       }, function () {
         console.log('Modal dismissed at: ' + new Date());
@@ -244,14 +234,8 @@ angular.module('armaditoApp')
                fullStr.substr(fullStr.length - backChars);
     };
 
-    // model initialisation
-    $scope.initTab();
-
-    // we remove last listener
-    $rootScope.myEmitter.removeListener('scan_info', $scope.threatDataFromAv);
-
-    // register emitter 
-    $rootScope.myEmitter.addListener('scan_info', $scope.threatDataFromAv);
+    // updateScope
+    $scope.updateScope();
 
   }]);
 

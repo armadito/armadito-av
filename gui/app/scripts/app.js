@@ -29,7 +29,7 @@ along with Armadito gui.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Main module of the application.
  */
-angular
+var a6oApp = angular
   .module('armaditoApp', [
     'ngAnimate',
     'ngAria',
@@ -101,3 +101,62 @@ angular
     });
 });
 
+a6oApp.factory('ScanDataFactory', function () {
+	return {
+	    data: {
+	      suspicious_count: 0,
+	      scanned_count: 0,
+	      malware_count: 0,
+	      scan_progress: 0,
+	      progress: 0,
+	      canceled: 0,
+	      path_to_scan: "",
+	      displayed_file: "",
+	      type: "analyse_view.Choose_analyse_type",
+	      files: []
+	    },
+	    update_counters: function(_scanned_count, _suspicious_count, _malware_count, _progress ) {
+	      // Improve this method as needed
+	      this.data.suspicious_count = _suspicious_count;
+	      this.data.scanned_count = _scanned_count;
+              this.data.malware_count = _malware_count;
+	      this.data.progress = _progress;
+	    },
+	    set_displayed_file: function (_displayed_file) {
+	      this.data.displayed_file = _displayed_file;
+	    },
+	    add_scanned_file: function (_file_path, _file_scan_status, _file_scan_action , _file_mod_name, _file_mod_report) {
+              var file = {
+		path: _file_path,
+		scan_status: _file_scan_status,
+		scan_action: _file_scan_action,
+		mod_name: _file_mod_name,
+                mod_report: _file_mod_report
+	      };
+
+	      this.data.files.push(file);
+              file = null;
+	    },
+	    set_scan_conf: function (_path_to_scan, _type) {
+	      this.data.path_to_scan =  _path_to_scan;
+	      this.data.type = _type;
+	    },
+            setCanceled: function () {
+              this.data.canceled = 1;
+	    },
+	    reset: function() {
+	           this.data = {
+		      suspicious_count: 0,
+		      scanned_count: 0,
+		      malware_count: 0,
+		      progress: 0,
+		      canceled : 0,
+		      path_to_scan: "",
+		      displayed_file: "",
+		      type: "analyse_view.Choose_analyse_type",
+		      files: []
+	           };
+	    }
+	};
+
+});
