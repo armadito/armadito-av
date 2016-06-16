@@ -187,12 +187,12 @@ angular.module('armaditoApp')
   			if(json_object.ihm_request == "notification"){
 
   				// Notifications.  				
-  				$rootScope.myEmitter.emit('notification',data);
+  				$rootScope.myEmitter.emit('notification', json_object);
 
   			}else if(json_object.ihm_request == "scan"){
 
   				// scan information.
-  				$rootScope.myEmitter.emit('scan_info',data);
+  				$rootScope.myEmitter.emit('scan_info', json_object);
 
   			}else{
   				console.log("[-] Error :: invalid request from av!\n");
@@ -210,13 +210,10 @@ angular.module('armaditoApp')
 
   	}
 
-  	$scope.displayNotification = function(data){
+  	$scope.displayNotification = function(json_object){
 
   		// console.log("[i] Info :: displayNotification :: "+data);
-  		var json_object;	
 		try {
-			json_object = JSON.parse(data);
-
 			if(json_object.params.type == "INFO"){
 
 				toastr.info(json_object.params.message, 'Info');
@@ -233,12 +230,10 @@ angular.module('armaditoApp')
 		catch(e){
 			console.error("Parsing error:", e); 
 			json_object = null;
-			data = null;
 			return null;
 		}  		
 
 		json_object = null;
-		data = null;
   	};
 
   	ArmaditoSVC.startNotificationServer($scope.processDataFromAV);
