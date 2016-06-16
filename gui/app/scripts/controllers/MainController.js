@@ -164,7 +164,6 @@ angular.module('armaditoApp')
 
   	util.inherits(MyEmitter,EventEmitter);
 
-
   	$rootScope.myEmitter.on('notification', function(data){
 
   		console.log("[!] Event :: A [notification] event occured!\n");
@@ -181,11 +180,8 @@ angular.module('armaditoApp')
   	$scope.processDataFromAV = function(data){
 
   		var json_object;  		
-
   		console.log("[+] Debug :: processDataFromAV :: "+data);
-
   		try{
-
   			json_object = JSON.parse(data);
   			
   			if(json_object.ihm_request == "notification"){
@@ -200,55 +196,49 @@ angular.module('armaditoApp')
 
   			}else{
   				console.log("[-] Error :: invalid request from av!\n");
+				json_object = null;
   				return -1;
   			}
-
   		}  	
   		catch(e){
   			console.error("[-] Error :: Parsing error:", e); 
+			json_object = null;
 			return -1;
   		}
-
+		json_object = null;
   		return 0;
 
   	}
 
   	$scope.displayNotification = function(data){
 
-  		console.log("[i] Info :: displayNotification :: "+data);
-
-  		var type;
-  		var message;
+  		// console.log("[i] Info :: displayNotification :: "+data);
   		var json_object;	
-		
 		try {
-
 			json_object = JSON.parse(data);
 
-			type = json_object.params.type;
-			message = json_object.params.message;
+			if(json_object.params.type == "INFO"){
 
-			if(type == "INFO"){
+				toastr.info(json_object.params.message, 'Info');
 
-				toastr.info(message, 'Info');
+			}else if(json_object.params.type == "WARNING"){
 
-			}else if(type == "WARNING"){
+				toastr.warning(json_object.params.message, 'Warning');
 
-				toastr.warning(message, 'Warning');
+			}else if(json_object.params.type == "ERROR"){
 
-			}else if(type == "ERROR"){
-
-				toastr.error(message, 'Error');
-
-			}
-
-				
+				toastr.error(json_object.params.message, 'Error');
+			}	
 		}
 		catch(e){
 			console.error("Parsing error:", e); 
+			json_object = null;
+			data = null;
 			return null;
 		}  		
 
+		json_object = null;
+		data = null;
   	};
 
   	ArmaditoSVC.startNotificationServer($scope.processDataFromAV);
