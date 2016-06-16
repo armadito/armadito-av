@@ -246,6 +246,11 @@ static void final_progress(struct a6o_scan *scan)
 	struct a6o_report report;
 
 	a6o_report_init(&report, scan->scan_id, NULL, 100);
+
+        report.scanned_count = scan->scanned_count;
+        report.suspicious_count = scan->suspicious_count;	
+        report.malware_count = scan->malware_count;
+
 	a6o_scan_call_callbacks(scan, &report);
 	a6o_report_destroy(&report);
 }
