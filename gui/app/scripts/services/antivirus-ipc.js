@@ -84,7 +84,7 @@ angular.module('armadito.ipc', [])
 	
 	factory.disconnect2_av = function(){
 		client_sock.end();
-		client_sock.close();
+		client_sock.close;
 	};
 
 	// ----------------------------------------------
