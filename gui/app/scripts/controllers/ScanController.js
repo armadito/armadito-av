@@ -51,13 +51,9 @@ angular.module('armaditoApp')
 
     // This function refresh structure values from data receive from AV. 
     // callback function
-    $scope.threatDataFromAv = function(data){
+    $scope.threatDataFromAv = function(json_object){
 
-      var json_object;
       try {
-
-        json_object = JSON.parse(data);
-
         //console.log("[+] Debug :: Data received from av :: "); //, json_object);
 
         // Handle the first response of the av.
