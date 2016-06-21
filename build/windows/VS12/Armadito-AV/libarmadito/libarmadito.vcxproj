@@ -5,9 +5,17 @@
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -21,7 +29,20 @@
     <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
@@ -33,18 +54,36 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\ArmaditoBuildDefines.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\ArmaditoBuildDefines.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\ArmaditoBuildDefines.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\ArmaditoBuildDefines.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\core\libarmadito\include\config;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\include;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\include\glib-2.0;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\lib\glib-2.0\include;$(SolutionDir)..\..\..\..\deps\json-c\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\lib;$(SolutionDir)..\..\..\..\deps\json-c\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(A6oRoot)\core\libarmadito\include;$(A6oRoot)\core\libarmadito\include\config;$(GlibInclude);$(JsoncInclude);$(IncludePath)</IncludePath>
+    <LibraryPath>$(GlibLib);$(JsoncLib);$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(A6oRoot)\core\libarmadito\include;$(A6oRoot)\core\libarmadito\include\config;$(GlibInclude);$(JsoncInclude);$(IncludePath)</IncludePath>
+    <LibraryPath>$(GlibLib);$(JsoncLib);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\core\libarmadito\include\config;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\include;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\include\glib-2.0;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\lib\glib-2.0\include;$(SolutionDir)..\..\..\..\deps\json-c\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin;$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\lib;$(SolutionDir)..\..\..\..\deps\json-c\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(A6oRoot)\core\libarmadito\include;$(A6oRoot)\core\libarmadito\include\config;$(GlibInclude);$(JsoncInclude);$(IncludePath)</IncludePath>
+    <LibraryPath>$(GlibLib);$(JsoncLib);$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(A6oRoot)\core\libarmadito\include;$(A6oRoot)\core\libarmadito\include\config;$(GlibInclude);$(JsoncInclude);$(IncludePath)</IncludePath>
+    <LibraryPath>$(GlibLib);$(JsoncLib);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -58,32 +97,25 @@
       <AdditionalDependencies>glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;urlmon.lib;json-c.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>libarmadito.def</ModuleDefinitionFile>
     </Link>
+    <PostBuildEvent />
     <PostBuildEvent>
       <Command>echo post-build step for $(ProjectName)
 
-echo Copying files from $(OutDir) to $(SolutionDir)out\$(Configuration)
-
-REM create target directory
-REM if not exist "$(SolutionDir)out\$(Configuration)" mkdir "$(SolutionDir)out\$(Configuration)"
-
-REM copy the DLL
-REM xcopy "$(OutDir)libarmadito.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
-REM if errorlevel 1 goto BuildEventFailed
+echo Copying files to $(TargetDir)
 
 REM create conf directory
-if not exist "$(SolutionDir)$(Configuration)\conf" mkdir "$(SolutionDir)$(Configuration)\conf"
+if not exist "$(TargetDir)conf" mkdir "$(TargetDir)conf"
 
 REM copy the conf file
-xcopy "$(SolutionDir)..\..\..\..\core\libarmadito\conf\armadito.conf"  "$(SolutionDir)$(Configuration)\conf" /D /I /Y
+xcopy "$(A6oRoot)\core\libarmadito\conf\armadito.conf"  "$(TargetDir)conf" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
 REM copy the glib DLLs
-REM should we take into accout the $(Configuration) ??? 
-xcopy "$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin\glib-2-vs12.dll"  "$(SolutionDir)$(Configuration)" /D /I /Y
+xcopy "$(GlibBin)glib-2-vs12.dll"  "$(TargetDir)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
-xcopy "$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin\gmodule-2-vs12.dll"  "$(SolutionDir)$(Configuration)" /D /I /Y
+xcopy "$(GlibBin)gmodule-2-vs12.dll"  "$(TargetDir)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
-xcopy "$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin\gthread-2-vs12.dll"  "$(SolutionDir)$(Configuration)" /D /I /Y
+xcopy "$(GlibBin)gthread-2-vs12.dll"  "$(TargetDir)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
 REM Exit properly because the build will not fail 
@@ -98,7 +130,59 @@ exit 1
 :BuildEventOK
 echo post-build step for $(ProjectName) OK
 </Command>
-      <Message>this script will copy needed files (.dll, configuration, etc) to a target directory</Message>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>copy files to target directory</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\..\core\libarmadito\src;$(SolutionDir)..\..\..\..\core\libarmadito\src\windows;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;urlmon.lib;json-c.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>libarmadito.def</ModuleDefinitionFile>
+    </Link>
+    <PostBuildEvent />
+    <PostBuildEvent>
+      <Command>echo post-build step for $(ProjectName)
+
+echo Copying files to $(TargetDir)
+
+REM create conf directory
+if not exist "$(TargetDir)conf" mkdir "$(TargetDir)conf"
+
+REM copy the conf file
+xcopy "$(A6oRoot)\core\libarmadito\conf\armadito.conf"  "$(TargetDir)conf" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM copy the glib DLLs
+xcopy "$(GlibBin)glib-2-vs12.dll"  "$(TargetDir)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+xcopy "$(GlibBin)gmodule-2-vs12.dll"  "$(TargetDir)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+xcopy "$(GlibBin)gthread-2-vs12.dll"  "$(TargetDir)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM Exit properly because the build will not fail 
+REM unless the final step exits with an error code
+
+goto BuildEventOK
+
+:BuildEventFailed
+echo post-build step for $(ProjectName) FAILED
+exit 1
+
+:BuildEventOK
+echo post-build step for $(ProjectName) OK
+</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>copy files to target directory</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -117,32 +201,25 @@ echo post-build step for $(ProjectName) OK
       <ModuleDefinitionFile>libarmadito.def</ModuleDefinitionFile>
       <AdditionalDependencies>glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;urlmon.lib;json-c.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent />
     <PostBuildEvent>
       <Command>echo post-build step for $(ProjectName)
 
-echo Copying files from $(OutDir) to $(SolutionDir)out\$(Configuration)
+echo Copying files to $(TargetDir)
 
-REM create target directory
-if not exist "$(SolutionDir)out\$(Configuration)" mkdir "$(SolutionDir)out\$(Configuration)"
-
-REM copy the DLL
-xcopy "$(OutDir)libarmadito.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
-
-REM create confdirectory
-if not exist "$(SolutionDir)out\$(Configuration)\conf" mkdir "$(SolutionDir)out\$(Configuration)\conf"
+REM create conf directory
+if not exist "$(TargetDir)conf" mkdir "$(TargetDir)conf"
 
 REM copy the conf file
-xcopy "$(SolutionDir)..\..\..\..\core\libarmadito\conf\armadito.conf"  "$(SolutionDir)out\$(Configuration)\conf" /D /I /Y
+xcopy "$(A6oRoot)\core\libarmadito\conf\armadito.conf"  "$(TargetDir)conf" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
 REM copy the glib DLLs
-REM should we take into accout the $(Configuration) ??? 
-xcopy "$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin\glib-2-vs12.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
+xcopy "$(GlibBin)glib-2-vs12.dll"  "$(TargetDir)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
-xcopy "$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin\gmodule-2-vs12.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
+xcopy "$(GlibBin)gmodule-2-vs12.dll"  "$(TargetDir)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
-xcopy "$(SolutionDir)..\..\..\..\deps\glib\vs12\Win32\bin\gthread-2-vs12.dll"  "$(SolutionDir)out\$(Configuration)" /D /I /Y
+xcopy "$(GlibBin)gthread-2-vs12.dll"  "$(TargetDir)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
 REM Exit properly because the build will not fail 
@@ -157,6 +234,63 @@ exit 1
 :BuildEventOK
 echo post-build step for $(ProjectName) OK
 </Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>copy files to target directory</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\..\core\libarmadito\src;$(SolutionDir)..\..\..\..\core\libarmadito\src\windows;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ModuleDefinitionFile>libarmadito.def</ModuleDefinitionFile>
+      <AdditionalDependencies>glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib;urlmon.lib;json-c.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent />
+    <PostBuildEvent>
+      <Command>echo post-build step for $(ProjectName)
+
+echo Copying files to $(TargetDir)
+
+REM create conf directory
+if not exist "$(TargetDir)conf" mkdir "$(TargetDir)conf"
+
+REM copy the conf file
+xcopy "$(A6oRoot)\core\libarmadito\conf\armadito.conf"  "$(TargetDir)conf" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM copy the glib DLLs
+xcopy "$(GlibBin)glib-2-vs12.dll"  "$(TargetDir)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+xcopy "$(GlibBin)gmodule-2-vs12.dll"  "$(TargetDir)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+xcopy "$(GlibBin)gthread-2-vs12.dll"  "$(TargetDir)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
+REM Exit properly because the build will not fail 
+REM unless the final step exits with an error code
+
+goto BuildEventOK
+
+:BuildEventFailed
+echo post-build step for $(ProjectName) FAILED
+exit 1
+
+:BuildEventOK
+echo post-build step for $(ProjectName) OK
+</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>copy files to target directory</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
