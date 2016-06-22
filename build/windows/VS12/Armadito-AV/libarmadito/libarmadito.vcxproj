@@ -70,19 +70,19 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(A6oRoot)\core\libarmadito\include;$(A6oRoot)\core\libarmadito\include\config;$(GlibInclude);$(JsoncInclude);$(IncludePath)</IncludePath>
+    <IncludePath>$(A6oInclude);$(A6oRoot)core\libarmadito\include\config;$(A6oRoot)core\libarmadito\src;$(A6oRoot)core\libarmadito\src\windows;$(IncludePath)</IncludePath>
     <LibraryPath>$(GlibLib);$(JsoncLib);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(A6oRoot)\core\libarmadito\include;$(A6oRoot)\core\libarmadito\include\config;$(GlibInclude);$(JsoncInclude);$(IncludePath)</IncludePath>
+    <IncludePath>$(A6oInclude);$(A6oRoot)core\libarmadito\include\config;$(A6oRoot)core\libarmadito\src;$(A6oRoot)core\libarmadito\src\windows;$(IncludePath)</IncludePath>
     <LibraryPath>$(GlibLib);$(JsoncLib);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(A6oRoot)\core\libarmadito\include;$(A6oRoot)\core\libarmadito\include\config;$(GlibInclude);$(JsoncInclude);$(IncludePath)</IncludePath>
+    <IncludePath>$(A6oInclude);$(A6oRoot)core\libarmadito\include\config;$(A6oRoot)core\libarmadito\src;$(A6oRoot)core\libarmadito\src\windows;$(IncludePath)</IncludePath>
     <LibraryPath>$(GlibLib);$(JsoncLib);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(A6oRoot)\core\libarmadito\include;$(A6oRoot)\core\libarmadito\include\config;$(GlibInclude);$(JsoncInclude);$(IncludePath)</IncludePath>
+    <IncludePath>$(A6oInclude);$(A6oRoot)core\libarmadito\include\config;$(A6oRoot)core\libarmadito\src;$(A6oRoot)core\libarmadito\src\windows;$(IncludePath)</IncludePath>
     <LibraryPath>$(GlibLib);$(JsoncLib);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -90,7 +90,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\..\core\libarmadito\src;$(SolutionDir)..\..\..\..\core\libarmadito\src\windows;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(GlibInclude);$(JsoncInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -103,10 +103,8 @@
 
 echo Copying files to $(TargetDir)
 
-REM create conf directory
-if not exist "$(TargetDir)conf" mkdir "$(TargetDir)conf"
-
 REM copy the conf file
+if not exist "$(TargetDir)conf" mkdir "$(TargetDir)conf"
 xcopy "$(A6oRoot)\core\libarmadito\conf\armadito.conf"  "$(TargetDir)conf" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
@@ -117,6 +115,11 @@ xcopy "$(GlibBin)gmodule-2-vs12.dll"  "$(TargetDir)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 xcopy "$(GlibBin)gthread-2-vs12.dll"  "$(TargetDir)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
+xcopy "$(A6oDeps)libintl\lib\libintl3.dll" "$(TargetDir)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+xcopy "$(A6oDeps)libiconv\lib\libiconv2.dll" "$(TargetDir)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
 
 REM Exit properly because the build will not fail 
 REM unless the final step exits with an error code
@@ -140,7 +143,7 @@ echo post-build step for $(ProjectName) OK
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\..\core\libarmadito\src;$(SolutionDir)..\..\..\..\core\libarmadito\src\windows;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(GlibInclude);$(JsoncInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -153,10 +156,8 @@ echo post-build step for $(ProjectName) OK
 
 echo Copying files to $(TargetDir)
 
-REM create conf directory
-if not exist "$(TargetDir)conf" mkdir "$(TargetDir)conf"
-
 REM copy the conf file
+if not exist "$(TargetDir)conf" mkdir "$(TargetDir)conf"
 xcopy "$(A6oRoot)\core\libarmadito\conf\armadito.conf"  "$(TargetDir)conf" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
@@ -167,6 +168,11 @@ xcopy "$(GlibBin)gmodule-2-vs12.dll"  "$(TargetDir)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 xcopy "$(GlibBin)gthread-2-vs12.dll"  "$(TargetDir)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
+xcopy "$(A6oDeps)libintl\lib\libintl3.dll" "$(TargetDir)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+xcopy "$(A6oDeps)libiconv\lib\libiconv2.dll" "$(TargetDir)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
 
 REM Exit properly because the build will not fail 
 REM unless the final step exits with an error code
@@ -192,7 +198,7 @@ echo post-build step for $(ProjectName) OK
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\..\core\libarmadito\src;$(SolutionDir)..\..\..\..\core\libarmadito\src\windows;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(GlibInclude);$(JsoncInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -207,10 +213,8 @@ echo post-build step for $(ProjectName) OK
 
 echo Copying files to $(TargetDir)
 
-REM create conf directory
-if not exist "$(TargetDir)conf" mkdir "$(TargetDir)conf"
-
 REM copy the conf file
+if not exist "$(TargetDir)conf" mkdir "$(TargetDir)conf"
 xcopy "$(A6oRoot)\core\libarmadito\conf\armadito.conf"  "$(TargetDir)conf" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
@@ -221,6 +225,11 @@ xcopy "$(GlibBin)gmodule-2-vs12.dll"  "$(TargetDir)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 xcopy "$(GlibBin)gthread-2-vs12.dll"  "$(TargetDir)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
+xcopy "$(A6oDeps)libintl\lib\libintl3.dll" "$(TargetDir)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+xcopy "$(A6oDeps)libiconv\lib\libiconv2.dll" "$(TargetDir)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
 
 REM Exit properly because the build will not fail 
 REM unless the final step exits with an error code
@@ -246,7 +255,7 @@ echo post-build step for $(ProjectName) OK
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\..\..\..\core\libarmadito\src;$(SolutionDir)..\..\..\..\core\libarmadito\src\windows;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(GlibInclude);$(JsoncInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -261,10 +270,8 @@ echo post-build step for $(ProjectName) OK
 
 echo Copying files to $(TargetDir)
 
-REM create conf directory
-if not exist "$(TargetDir)conf" mkdir "$(TargetDir)conf"
-
 REM copy the conf file
+if not exist "$(TargetDir)conf" mkdir "$(TargetDir)conf"
 xcopy "$(A6oRoot)\core\libarmadito\conf\armadito.conf"  "$(TargetDir)conf" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 
@@ -275,6 +282,11 @@ xcopy "$(GlibBin)gmodule-2-vs12.dll"  "$(TargetDir)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
 xcopy "$(GlibBin)gthread-2-vs12.dll"  "$(TargetDir)" /D /I /Y
 if errorlevel 1 goto BuildEventFailed
+xcopy "$(A6oDeps)libintl\lib\libintl3.dll" "$(TargetDir)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+xcopy "$(A6oDeps)libiconv\lib\libiconv2.dll" "$(TargetDir)" /D /I /Y
+if errorlevel 1 goto BuildEventFailed
+
 
 REM Exit properly because the build will not fail 
 REM unless the final step exits with an error code

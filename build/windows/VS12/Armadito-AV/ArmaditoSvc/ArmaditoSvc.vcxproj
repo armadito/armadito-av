@@ -5,9 +5,17 @@
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -21,7 +29,20 @@
     <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
@@ -33,17 +54,35 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\ArmaditoBuildDefines.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\ArmaditoBuildDefines.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\ArmaditoBuildDefines.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\ArmaditoBuildDefines.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\core\json;$(SolutionDir)..\..\..\..\deps\json-c\include;$(SolutionDir)..\..\..\..\core\windows;$(IncludePath)</IncludePath>
+    <IncludePath>$(A6oInclude);$(A6oRoot)core\json;$(A6oRoot)core\windows;$(IncludePath)</IncludePath>
+    <LibraryPath>$(JsoncLib);$(OutDir);$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(A6oInclude);$(A6oRoot)core\json;$(A6oRoot)core\windows;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)..\..\..\..\deps\json-c\lib;$(OutDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)..\..\..\..\core\libarmadito\include;$(SolutionDir)..\..\..\..\core\json;$(SolutionDir)..\..\..\..\deps\json-c\include;$(SolutionDir)..\..\..\..\core\windows;$(IncludePath)</IncludePath>
+    <IncludePath>$(A6oInclude);$(A6oRoot)core\json;$(A6oRoot)core\windows;$(IncludePath)</IncludePath>
+    <LibraryPath>$(JsoncLib);$(OutDir);$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(A6oInclude);$(A6oRoot)core\json;$(A6oRoot)core\windows;$(IncludePath)</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(SolutionDir)..\..\..\..\deps\json-c\lib;$(OutDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -51,6 +90,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(JsoncInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -59,26 +99,47 @@
     <PostBuildEvent>
       <Command>echo post-build step for $(ProjectName)
 
-echo Copying files from $(OutDir) to $(SolutionDir)$(Configuration)
-
-REM create target directory
-if not exist "$(SolutionDir)$(Configuration)" mkdir "$(SolutionDir)$(Configuration)"
+echo Copying files to $(TargetDir)
 
 REM copy the EXE
-xcopy "$(OutDir)ArmaditoSvc.exe" "$(SolutionDir)$(Configuration)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
+REM NO LONGER NEEDED?
+REM xcopy "$(OutDir)ArmaditoSvc.exe" "$(TargetDir)" /D /I /Y
+REM if errorlevel 1 goto BuildEventFailed
 
-REM copy the needed DLLs
-xcopy "$(SolutionDir)..\..\..\..\deps\pcre\lib\pcre3.dll" "$(SolutionDir)$(Configuration)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
-xcopy "$(SolutionDir)..\..\..\..\deps\libintl\lib\libintl3.dll" "$(SolutionDir)$(Configuration)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
-xcopy "$(SolutionDir)..\..\..\..\deps\libiconv\lib\libiconv2.dll" "$(SolutionDir)$(Configuration)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
+REM Exit properly because the build will not fail 
+REM unless the final step exits with an error code
 
-REM copy the configuration files
-if not exist "$(SolutionDir)$(Configuration)\conf" mkdir "$(SolutionDir)$(Configuration)\conf"
-xcopy "$(SolutionDir)..\..\..\..\core\libarmadito\conf\armadito.conf" "$(SolutionDir)$(Configuration)\conf" /D /I /Y
+goto BuildEventOK
+
+:BuildEventFailed
+echo post-build step for $(ProjectName) FAILED
+exit 1
+
+:BuildEventOK
+echo post-build step for $(ProjectName) OK
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(JsoncInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>libarmadito.lib;json-c.lib;FltLib.lib;Crypt32.lib;Urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>echo post-build step for $(ProjectName)
+
+echo Copying files to $(TargetDir)
+
+REM copy the EXE
+REM NO LONGER NEEDED?
+REM xcopy "$(OutDir)ArmaditoSvc.exe" "$(TargetDir)" /D /I /Y
+REM if errorlevel 1 goto BuildEventFailed
 
 REM Exit properly because the build will not fail 
 REM unless the final step exits with an error code
@@ -101,6 +162,7 @@ echo post-build step for $(ProjectName) OK
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(JsoncInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -111,26 +173,51 @@ echo post-build step for $(ProjectName) OK
     <PostBuildEvent>
       <Command>echo post-build step for $(ProjectName)
 
-echo Copying files from $(OutDir) to $(SolutionDir)out\$(Configuration)
-
-REM create target directory
-if not exist "$(SolutionDir)out\$(Configuration)" mkdir "$(SolutionDir)out\$(Configuration)"
+echo Copying files to $(TargetDir)
 
 REM copy the EXE
-xcopy "$(OutDir)ArmaditoSvc.exe" "$(SolutionDir)out\$(Configuration)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
+REM NO LONGER NEEDED?
+REM xcopy "$(OutDir)ArmaditoSvc.exe" "$(TargetDir)" /D /I /Y
+REM if errorlevel 1 goto BuildEventFailed
 
-REM copy the needed DLLs
-xcopy "$(SolutionDir)..\..\..\..\deps\pcre\lib\pcre3.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
-xcopy "$(SolutionDir)..\..\..\..\deps\libintl\lib\libintl3.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
-xcopy "$(SolutionDir)..\..\..\..\deps\libiconv\lib\libiconv2.dll" "$(SolutionDir)out\$(Configuration)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
+REM Exit properly because the build will not fail 
+REM unless the final step exits with an error code
 
-REM copy the configuration files
-if not exist "$(SolutionDir)out\$(Configuration)\conf" mkdir "$(SolutionDir)out\$(Configuration)\conf"
-xcopy "$(SolutionDir)..\..\..\..\core\libarmadito\conf\armadito.conf" "$(SolutionDir)out\$(Configuration)\conf" /D /I /Y
+goto BuildEventOK
+
+:BuildEventFailed
+echo post-build step for $(ProjectName) FAILED
+exit 1
+
+:BuildEventOK
+echo post-build step for $(ProjectName) OK
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(JsoncInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>libarmadito.lib;json-c.lib;FltLib.lib;Crypt32.lib;Urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>echo post-build step for $(ProjectName)
+
+echo Copying files to $(TargetDir)
+
+REM copy the EXE
+REM NO LONGER NEEDED?
+REM xcopy "$(OutDir)ArmaditoSvc.exe" "$(TargetDir)" /D /I /Y
+REM if errorlevel 1 goto BuildEventFailed
 
 REM Exit properly because the build will not fail 
 REM unless the final step exits with an error code
