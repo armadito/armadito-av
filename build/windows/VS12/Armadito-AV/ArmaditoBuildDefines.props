@@ -5,11 +5,14 @@
     <A6oRoot>$(SolutionDir)..\..\..\..\</A6oRoot>
     <A6oDeps>$(SolutionDir)..\..\deps\</A6oDeps>
     <A6oInclude>$(A6oRoot)core\libarmadito\include</A6oInclude>
+    <A6oInstall>$(SolutionDir)..\</A6oInstall>
+    <A6oInstalledIncludes>$(A6oInstall)include\libarmadito.h</A6oInstalledIncludes>
     <GlibBin>$(A6oDeps)glib\Win32\$(Configuration)\bin\</GlibBin>
     <GlibInclude>$(A6oDeps)glib\Win32\$(Configuration)\include;$(A6oDeps)glib\Win32\$(Configuration)\include\glib-2.0;$(A6oDeps)glib\Win32\$(Configuration)\lib\glib-2.0\include</GlibInclude>
     <GlibLib>$(A6oDeps)glib\Win32\$(Configuration)\bin;$(A6oDeps)glib\Win32\$(Configuration)\lib</GlibLib>
     <JsoncInclude>$(A6oDeps)json-c\$(Platform)\$(Configuration)\include</JsoncInclude>
     <JsoncLib>$(A6oDeps)json-c\$(Platform)\$(Configuration)\lib</JsoncLib>
+    <A6oInstalledLibs>$(A6oInstall)lib\libarmadito.lib</A6oInstalledLibs>
   </PropertyGroup>
   <PropertyGroup />
   <ItemDefinitionGroup />
@@ -22,6 +25,12 @@
     </BuildMacro>
     <BuildMacro Include="A6oInclude">
       <Value>$(A6oInclude)</Value>
+    </BuildMacro>
+    <BuildMacro Include="A6oInstall">
+      <Value>$(A6oInstall)</Value>
+    </BuildMacro>
+    <BuildMacro Include="A6oInstalledIncludes">
+      <Value>$(A6oInstalledIncludes)</Value>
     </BuildMacro>
     <BuildMacro Include="GlibBin">
       <Value>$(GlibBin)</Value>
@@ -37,6 +46,9 @@
     </BuildMacro>
     <BuildMacro Include="JsoncLib">
       <Value>$(JsoncLib)</Value>
+    </BuildMacro>
+    <BuildMacro Include="A6oInstalledLibs">
+      <Value>$(A6oInstalledLibs)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>

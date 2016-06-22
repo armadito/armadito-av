@@ -3,3 +3,5 @@ databases/*
 windows-driver/signature/*
 build/linux/out/*
 build/windows/deps
+build/windows/VS12/include
+build/windows/VS12/lib
