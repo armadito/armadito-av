@@ -504,8 +504,8 @@ int DeleteRegistryKeys( ) {
 */
 int ServiceInstall(DWORD startType) {
 
-	SC_HANDLE schSCManager;
-	SC_HANDLE schService;
+	SC_HANDLE schSCManager = NULL;
+	SC_HANDLE schService = NULL;
 	char binaryPath[MAX_PATH] = {'\0'};
 	int ret = -1;
 
