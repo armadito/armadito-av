@@ -105,7 +105,8 @@
     <CustomBuildStep>
       <Command>xcopy /i /y $(A6oRoot)core\libarmadito\include\libarmadito.h $(A6oInstall)include
 xcopy /i /y $(A6oRoot)core\libarmadito\include\libarmadito\*.h $(A6oInstall)include\libarmadito
-xcopy /i /y $(TargetDir)libarmadito.lib $(A6oInstall)lib
+xcopy /i /y $(TargetDir)libarmadito.lib $(A6oInstall)lib\$(Platform)\$(Configuration)
+
 </Command>
     </CustomBuildStep>
     <CustomBuildStep>
@@ -137,7 +138,8 @@ xcopy /i /y $(TargetDir)libarmadito.lib $(A6oInstall)lib
     <CustomBuildStep>
       <Command>xcopy /i /y $(A6oRoot)core\libarmadito\include\libarmadito.h $(A6oInstall)include
 xcopy /i /y $(A6oRoot)core\libarmadito\include\libarmadito\*.h $(A6oInstall)include\libarmadito
-xcopy /i /y $(TargetDir)libarmadito.lib $(A6oInstall)lib
+xcopy /i /y $(TargetDir)libarmadito.lib $(A6oInstall)lib\$(Platform)\$(Configuration)
+
 </Command>
     </CustomBuildStep>
     <CustomBuildStep>
@@ -173,7 +175,8 @@ xcopy /i /y $(TargetDir)libarmadito.lib $(A6oInstall)lib
     <CustomBuildStep>
       <Command>xcopy /i /y $(A6oRoot)core\libarmadito\include\libarmadito.h $(A6oInstall)include
 xcopy /i /y $(A6oRoot)core\libarmadito\include\libarmadito\*.h $(A6oInstall)include\libarmadito
-xcopy /i /y $(TargetDir)libarmadito.lib $(A6oInstall)lib
+xcopy /i /y $(TargetDir)libarmadito.lib $(A6oInstall)lib\$(Platform)\$(Configuration)
+
 </Command>
     </CustomBuildStep>
     <CustomBuildStep>
@@ -209,7 +212,8 @@ xcopy /i /y $(TargetDir)libarmadito.lib $(A6oInstall)lib
     <CustomBuildStep>
       <Command>xcopy /i /y $(A6oRoot)core\libarmadito\include\libarmadito.h $(A6oInstall)include
 xcopy /i /y $(A6oRoot)core\libarmadito\include\libarmadito\*.h $(A6oInstall)include\libarmadito
-xcopy /i /y $(TargetDir)libarmadito.lib $(A6oInstall)lib
+xcopy /i /y $(TargetDir)libarmadito.lib $(A6oInstall)lib\$(Platform)\$(Configuration)
+
 </Command>
     </CustomBuildStep>
     <CustomBuildStep>
