@@ -1,2 +1,5 @@
-SUBDIRS=on-access-linux
+if COND_FANOTIFY
+FANOTIFY_SUBDIR=on-access-linux
+endif
 
+SUBDIRS=$(FANOTIFY_SUBDIR)

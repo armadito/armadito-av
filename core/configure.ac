@@ -4,9 +4,11 @@ AM_INIT_AUTOMAKE([subdir-objects])
 # collect arguments
 # debug
 AC_ARG_ENABLE([debug],
-	AS_HELP_STRING([--enable-debug],[enable debugging @<:@default is yes@:>@]),
-	,
-	enable_debug="yes")
+	AS_HELP_STRING([--enable-debug],[enable debugging @<:@default is yes@:>@]))
+# fanotify
+AC_ARG_ENABLE([fanotify],
+	AS_HELP_STRING([--enable-fanotify],[enable on-access scan using fanotify (see man 7 fanotify) @<:@default is no@:>@.
+	The Linux kernel must be compiled with fanotify support]))
 
 # configuration header
 AM_CONFIG_HEADER(libarmadito/include/config/libarmadito-config-autoconf.h)
@@ -101,17 +103,23 @@ if test "$HAVE_MAGIC_H" = "no"; then
 fi
 
 # check for fanotify
-AC_CHECK_FUNCS(fanotify_init, [HAVE_FANOTIFY_INIT=1], [HAVE_FANOTIFY_INIT=0])
-if test "$HAVE_FANOTIFY_INIT" = "0" ; then
-   AC_MSG_ERROR("fanotify is not available on this Linux distribution")
+AC_MSG_CHECKING(for on-acces scan using fanotify)
+if test "$enable_fanotify" = "no"; then
+   AC_MSG_RESULT(disabled)
+else
+	AC_MSG_RESULT(enabled)
+	AC_CHECK_FUNC(fanotify_init, [HAVE_FANOTIFY_INIT=yes], [HAVE_FANOTIFY_INIT=no])
+	if test "$HAVE_FANOTIFY_INIT" = "no" ; then
+	   AC_MSG_ERROR("fanotify is not available on this Linux distribution but on-access scan using fanotify is enabled")
+	fi
 fi
+AM_CONDITIONAL([COND_FANOTIFY], [test "$enable_fanotify" = "yes" -a "$HAVE_FANOTIFY_INIT" = "yes"])
 
 # check for json-c library
 PKG_CHECK_MODULES(LIBJSONC, json-c, [HAVE_LIBJSONC=yes], [HAVE_LIBJSONC=no])
 if test "$HAVE_LIBJSONC" = "no"; then
    AC_MSG_ERROR("cannot find json-c library")
 fi
-
 
 # documentation
 # check for asciidoc and a2x
