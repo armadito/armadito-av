@@ -39,6 +39,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <dirent.h>
 
 #define DEFAULT_LOG_LEVEL     "error"
 #define DEFAULT_IPC_TYPE      JSON_IPC
