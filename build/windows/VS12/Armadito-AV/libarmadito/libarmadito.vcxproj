@@ -72,6 +72,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(A6oInclude);$(A6oRoot)core\libarmadito\include\config;$(A6oRoot)core\libarmadito\src;$(A6oRoot)core\libarmadito\src\windows;$(IncludePath)</IncludePath>
     <LibraryPath>$(GlibLib);$(JsoncLib);$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(A6oInclude);$(A6oRoot)core\libarmadito\include\config;$(A6oRoot)core\libarmadito\src;$(A6oRoot)core\libarmadito\src\windows;$(IncludePath)</IncludePath>
@@ -80,6 +81,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(A6oInclude);$(A6oRoot)core\libarmadito\include\config;$(A6oRoot)core\libarmadito\src;$(A6oRoot)core\libarmadito\src\windows;$(IncludePath)</IncludePath>
     <LibraryPath>$(GlibLib);$(JsoncLib);$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(A6oInclude);$(A6oRoot)core\libarmadito\include\config;$(A6oRoot)core\libarmadito\src;$(A6oRoot)core\libarmadito\src\windows;$(IncludePath)</IncludePath>

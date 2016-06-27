@@ -72,6 +72,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(A6oInclude);$(A6oRoot)core\json;$(A6oRoot)core\windows;$(IncludePath)</IncludePath>
     <LibraryPath>$(JsoncLib);$(OutDir);$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(A6oInclude);$(A6oRoot)core\json;$(A6oRoot)core\windows;$(IncludePath)</IncludePath>
@@ -80,6 +81,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(A6oInclude);$(A6oRoot)core\json;$(A6oRoot)core\windows;$(IncludePath)</IncludePath>
     <LibraryPath>$(JsoncLib);$(OutDir);$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(A6oInclude);$(A6oRoot)core\json;$(A6oRoot)core\windows;$(IncludePath)</IncludePath>

@@ -1,4 +1,0 @@
-LIBRARY moduleClamav.dll
-
-EXPORTS
-module
