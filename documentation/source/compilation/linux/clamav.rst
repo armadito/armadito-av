@@ -11,6 +11,7 @@ In order to compile Armadito ClamAV module, you need the following tools:
 - automake/autoconf
 - GNU make
 - C compiler
+- libclamav library and headers
 
 .. warning:: Be sure you have built **Armadito core** library before trying to build this module.
 
