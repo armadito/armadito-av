@@ -93,10 +93,14 @@ if test "$HAVE_LIBXML2" = "no"; then
 fi
 
 # check for libmagic, that has no pkg-config
+SAVE_CFLAGS=${CFLAGS}
+CFLAGS=-fPIC
 AC_CHECK_LIB(magic, magic_open, [HAVE_LIBMAGIC=yes], [HAVE_LIBMAGIC=no])
 if test "$HAVE_LIBMAGIC" = "no"; then
    AC_MSG_ERROR("cannot find -lmagic")
 fi
+CFLAGS=${SAVE_CFLAGS}
+unset SAVE_CFLAGS
 AC_CHECK_HEADER(magic.h, [HAVE_MAGIC_H=yes], [HAVE_MAGIC_H=no])
 if test "$HAVE_MAGIC_H" = "no"; then
    AC_MSG_ERROR("cannot find magic.h")
@@ -107,11 +111,15 @@ AC_MSG_CHECKING(for on-acces scan using fanotify)
 if test "$enable_fanotify" = "no"; then
    AC_MSG_RESULT(disabled)
 else
+	SAVE_CFLAGS=${CFLAGS}
+	CFLAGS=-fPIC
 	AC_MSG_RESULT(enabled)
 	AC_CHECK_FUNC(fanotify_init, [HAVE_FANOTIFY_INIT=yes], [HAVE_FANOTIFY_INIT=no])
 	if test "$HAVE_FANOTIFY_INIT" = "no" ; then
 	   AC_MSG_ERROR("fanotify is not available on this Linux distribution but on-access scan using fanotify is enabled")
 	fi
+	CFLAGS=${SAVE_CFLAGS}
+	unset SAVE_CFLAGS
 fi
 AM_CONDITIONAL([COND_FANOTIFY], [test "$enable_fanotify" = "yes" -a "$HAVE_FANOTIFY_INIT" = "yes"])
 

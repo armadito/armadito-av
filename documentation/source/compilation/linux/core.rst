@@ -21,6 +21,12 @@ To install the needed headers:
 
      apt-get install automake autoconf libtool libglib2.0-dev libmagic-dev libxml2-dev libjson-c-dev
 
+- Fedora:
+
+::
+
+     dnf install automake autoconf libtool glib2-devel file-devel libxml2-devel json-c-devel
+
 
 Configuration
 -------------
