@@ -53,6 +53,11 @@ char * get_db_module_path(char * filename, char * module) {
 		return NULL;
 	}
 
+	if (strstr(filename, "..")) {
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR, "[-] Error :: get_db_module_path :: filename contains ..\n");
+		return NULL;
+	}
+
 	dbdir = a6o_std_path(BASES_LOCATION);
 	if (dbdir == NULL) {
 		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: get_db_module_path :: Can't get database directory!\n");
