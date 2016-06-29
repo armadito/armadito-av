@@ -1507,8 +1507,14 @@ int main(int argc, char ** argv) {
 
 	if ( argc >=2 && strncmp(argv[1],"--updatedb",10) == 0 ){
 
+		fprintf(stderr, "updatedb disabled yet (HTTPS not yet implemented)\n");
+
+#if 0
+		/* code disabled for now */
 		DisplayBanner( );
 		update_modules_db(NULL);
+#endif
+
 		return EXIT_SUCCESS;
 	}
 
