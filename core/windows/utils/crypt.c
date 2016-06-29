@@ -329,6 +329,7 @@ int verify_file_signature(char *filename, char *sigfile){
 		// Acquire crypt context
 		if (CryptAcquireContextA(&hProv,NULL, MS_ENHANCED_PROV,PROV_RSA_FULL,CRYPT_VERIFYCONTEXT) == FALSE) {
 			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: Acquire crypt context failed. :: GLE = 0x%x\n",GetLastError());
+			ret = -1;
 			__leave;
 		}
 
@@ -336,6 +337,7 @@ int verify_file_signature(char *filename, char *sigfile){
 		pubkeyfile = download_pub_key();
 		if (pubkeyfile == NULL) {
 			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: Can't download public key from armadito server!\n");
+			ret = -1;
 			__leave;
 		}
 		
