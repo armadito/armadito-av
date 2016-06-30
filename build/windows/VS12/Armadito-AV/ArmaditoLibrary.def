@@ -1,4 +1,4 @@
-LIBRARY libarmadito
+LIBRARY Armadito
 EXPORTS
 a6o_open
 a6o_close
