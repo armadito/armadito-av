@@ -4,7 +4,7 @@
   <PropertyGroup Label="UserMacros">
     <A6oRoot>$(SolutionDir)..\..\..\..\</A6oRoot>
     <A6oDeps>$(SolutionDir)..\..\deps\</A6oDeps>
-    <A6oOutDir>$(A6oRoot)..\out\$(Platform)\$(Configuration)\</A6oOutDir>
+    <A6oOut>$(A6oRoot)..\OUT\$(Platform)\$(Configuration)\</A6oOut>
     <A6oInclude>$(A6oRoot)core\libarmadito\include</A6oInclude>
     <A6oInstall>$(SolutionDir)..\</A6oInstall>
     <A6oInstalledIncludes>$(A6oInstall)include\libarmadito.h</A6oInstalledIncludes>
@@ -12,6 +12,7 @@
     <GlibBin>$(A6oDeps)glib\Win32\$(Configuration)\bin\</GlibBin>
     <GlibInclude>$(A6oDeps)glib\Win32\$(Configuration)\include;$(A6oDeps)glib\Win32\$(Configuration)\include\glib-2.0;$(A6oDeps)glib\Win32\$(Configuration)\lib\glib-2.0\include</GlibInclude>
     <GlibLib>$(A6oDeps)glib\Win32\$(Configuration)\bin;$(A6oDeps)glib\Win32\$(Configuration)\lib</GlibLib>
+    <GlibLibraries>glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib</GlibLibraries>
     <JsoncInclude>$(A6oDeps)json-c\$(Platform)\$(Configuration)\include</JsoncInclude>
     <JsoncLib>$(A6oDeps)json-c\$(Platform)\$(Configuration)\lib</JsoncLib>
   </PropertyGroup>
@@ -24,8 +25,8 @@
     <BuildMacro Include="A6oDeps">
       <Value>$(A6oDeps)</Value>
     </BuildMacro>
-    <BuildMacro Include="A6oOutDir">
-      <Value>$(A6oOutDir)</Value>
+    <BuildMacro Include="A6oOut">
+      <Value>$(A6oOut)</Value>
     </BuildMacro>
     <BuildMacro Include="A6oInclude">
       <Value>$(A6oInclude)</Value>
@@ -47,6 +48,9 @@
     </BuildMacro>
     <BuildMacro Include="GlibLib">
       <Value>$(GlibLib)</Value>
+    </BuildMacro>
+    <BuildMacro Include="GlibLibraries">
+      <Value>$(GlibLibraries)</Value>
     </BuildMacro>
     <BuildMacro Include="JsoncInclude">
       <Value>$(JsoncInclude)</Value>

@@ -54,38 +54,48 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\ArmaditoBuildDefines.props" />
+    <Import Project="ArmaditoBuildDefines.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\ArmaditoBuildDefines.props" />
+    <Import Project="ArmaditoBuildDefines.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\ArmaditoBuildDefines.props" />
+    <Import Project="ArmaditoBuildDefines.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="..\ArmaditoBuildDefines.props" />
+    <Import Project="ArmaditoBuildDefines.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(A6oInclude);$(A6oRoot)core\json;$(A6oRoot)core\windows;$(IncludePath)</IncludePath>
-    <LibraryPath>$(JsoncLib);$(OutDir);$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <LibraryPath>$(A6oOut);$(JsoncLib);$(LIbraryPath)</LibraryPath>
+    <OutDir>$(A6oOut)</OutDir>
+    <IntDir>$(SolutionDir)$(ProjectName)\$(Platform)\$(Configuration)\obj</IntDir>
+    <TargetName>ArmaditoSvc</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(A6oInclude);$(A6oRoot)core\json;$(A6oRoot)core\windows;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)..\..\..\..\deps\json-c\lib;$(OutDir);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(A6oOut);$(JsoncLib);$(LIbraryPath)</LibraryPath>
+    <OutDir>$(A6oOut)</OutDir>
+    <IntDir>$(SolutionDir)$(ProjectName)\$(Platform)\$(Configuration)\obj</IntDir>
+    <TargetName>ArmaditoSvc</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(A6oInclude);$(A6oRoot)core\json;$(A6oRoot)core\windows;$(IncludePath)</IncludePath>
-    <LibraryPath>$(JsoncLib);$(OutDir);$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(LibraryPath)</LibraryPath>
-    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <LibraryPath>$(A6oOut);$(JsoncLib);$(LIbraryPath)</LibraryPath>
+    <OutDir>$(A6oOut)</OutDir>
+    <IntDir>$(SolutionDir)$(ProjectName)\$(Platform)\$(Configuration)\obj</IntDir>
+    <TargetName>ArmaditoSvc</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(A6oInclude);$(A6oRoot)core\json;$(A6oRoot)core\windows;$(IncludePath)</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(SolutionDir)..\..\..\..\deps\json-c\lib;$(OutDir);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(A6oOut);$(JsoncLib);$(LIbraryPath)</LibraryPath>
+    <OutDir>$(A6oOut)</OutDir>
+    <IntDir>$(SolutionDir)$(ProjectName)\$(Platform)\$(Configuration)\obj</IntDir>
+    <TargetName>ArmaditoSvc</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -96,30 +106,11 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libarmadito.lib;json-c.lib;FltLib.lib;Crypt32.lib;Urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Armadito.lib;json-c.lib;fltLib.lib;Crypt32.lib;Urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>echo post-build step for $(ProjectName)
-
-echo Copying files to $(TargetDir)
-
-REM copy the EXE
-REM NO LONGER NEEDED?
-REM xcopy "$(OutDir)ArmaditoSvc.exe" "$(TargetDir)" /D /I /Y
-REM if errorlevel 1 goto BuildEventFailed
-
-REM Exit properly because the build will not fail 
-REM unless the final step exits with an error code
-
-goto BuildEventOK
-
-:BuildEventFailed
-echo post-build step for $(ProjectName) FAILED
-exit 1
-
-:BuildEventOK
-echo post-build step for $(ProjectName) OK
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -131,30 +122,11 @@ echo post-build step for $(ProjectName) OK
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libarmadito.lib;json-c.lib;FltLib.lib;Crypt32.lib;Urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Armadito.lib;json-c.lib;fltLib.lib;Crypt32.lib;Urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>echo post-build step for $(ProjectName)
-
-echo Copying files to $(TargetDir)
-
-REM copy the EXE
-REM NO LONGER NEEDED?
-REM xcopy "$(OutDir)ArmaditoSvc.exe" "$(TargetDir)" /D /I /Y
-REM if errorlevel 1 goto BuildEventFailed
-
-REM Exit properly because the build will not fail 
-REM unless the final step exits with an error code
-
-goto BuildEventOK
-
-:BuildEventFailed
-echo post-build step for $(ProjectName) FAILED
-exit 1
-
-:BuildEventOK
-echo post-build step for $(ProjectName) OK
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -170,30 +142,11 @@ echo post-build step for $(ProjectName) OK
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>libarmadito.lib;json-c.lib;FltLib.lib;Crypt32.lib;Urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Armadito.lib;json-c.lib;fltLib.lib;Crypt32.lib;Urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>echo post-build step for $(ProjectName)
-
-echo Copying files to $(TargetDir)
-
-REM copy the EXE
-REM NO LONGER NEEDED?
-REM xcopy "$(OutDir)ArmaditoSvc.exe" "$(TargetDir)" /D /I /Y
-REM if errorlevel 1 goto BuildEventFailed
-
-REM Exit properly because the build will not fail 
-REM unless the final step exits with an error code
-
-goto BuildEventOK
-
-:BuildEventFailed
-echo post-build step for $(ProjectName) FAILED
-exit 1
-
-:BuildEventOK
-echo post-build step for $(ProjectName) OK
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -209,71 +162,52 @@ echo post-build step for $(ProjectName) OK
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>libarmadito.lib;json-c.lib;FltLib.lib;Crypt32.lib;Urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Armadito.lib;json-c.lib;fltLib.lib;Crypt32.lib;Urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>echo post-build step for $(ProjectName)
-
-echo Copying files to $(TargetDir)
-
-REM copy the EXE
-REM NO LONGER NEEDED?
-REM xcopy "$(OutDir)ArmaditoSvc.exe" "$(TargetDir)" /D /I /Y
-REM if errorlevel 1 goto BuildEventFailed
-
-REM Exit properly because the build will not fail 
-REM unless the final step exits with an error code
-
-goto BuildEventOK
-
-:BuildEventFailed
-echo post-build step for $(ProjectName) FAILED
-exit 1
-
-:BuildEventOK
-echo post-build step for $(ProjectName) OK
-</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\core\json\ui\conf.c" />
-    <ClCompile Include="..\..\..\..\..\core\json\ui\jsonhandler.c" />
-    <ClCompile Include="..\..\..\..\..\core\json\ui\quarantine.c" />
-    <ClCompile Include="..\..\..\..\..\core\json\ui\scan.c" />
-    <ClCompile Include="..\..\..\..\..\core\json\ui\state.c" />
-    <ClCompile Include="..\..\..\..\..\core\json\ui\ui-win.c" />
-    <ClCompile Include="..\..\..\..\..\core\json\ui\windows\update.c" />
-    <ClCompile Include="..\..\..\..\..\core\json\updatedb\json_process.c" />
-    <ClCompile Include="..\..\..\..\..\core\windows\service\config.c" />
-    <ClCompile Include="..\..\..\..\..\core\windows\service\log.c" />
-    <ClCompile Include="..\..\..\..\..\core\windows\service\notify.c" />
-    <ClCompile Include="..\..\..\..\..\core\windows\service\scan_onaccess.c" />
-    <ClCompile Include="..\..\..\..\..\core\windows\service\scan_ondemand.c" />
-    <ClCompile Include="..\..\..\..\..\core\windows\service\service.c" />
-    <ClCompile Include="..\..\..\..\..\core\windows\utils\crypt.c" />
-    <ClCompile Include="..\..\..\..\..\core\windows\utils\others.c" />
-    <ClCompile Include="..\..\..\..\..\core\windows\utils\tools.c" />
+    <ClCompile Include="..\..\..\..\core\json\ui\conf.c" />
+    <ClCompile Include="..\..\..\..\core\json\ui\jsonhandler.c" />
+    <ClCompile Include="..\..\..\..\core\json\ui\quarantine.c" />
+    <ClCompile Include="..\..\..\..\core\json\ui\scan.c" />
+    <ClCompile Include="..\..\..\..\core\json\ui\state.c" />
+    <ClCompile Include="..\..\..\..\core\json\ui\ui-win.c" />
+    <ClCompile Include="..\..\..\..\core\json\ui\windows\update.c" />
+    <ClCompile Include="..\..\..\..\core\json\updatedb\json_process.c" />
+    <ClCompile Include="..\..\..\..\core\windows\service\config.c" />
+    <ClCompile Include="..\..\..\..\core\windows\service\log.c" />
+    <ClCompile Include="..\..\..\..\core\windows\service\notify.c" />
+    <ClCompile Include="..\..\..\..\core\windows\service\scan_onaccess.c" />
+    <ClCompile Include="..\..\..\..\core\windows\service\scan_ondemand.c" />
+    <ClCompile Include="..\..\..\..\core\windows\service\service.c" />
+    <ClCompile Include="..\..\..\..\core\windows\utils\crypt.c" />
+    <ClCompile Include="..\..\..\..\core\windows\utils\others.c" />
+    <ClCompile Include="..\..\..\..\core\windows\utils\tools.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\core\json\ui\conf.h" />
-    <ClInclude Include="..\..\..\..\..\core\json\ui\jsonhandler.h" />
-    <ClInclude Include="..\..\..\..\..\core\json\ui\jsonhandlerp.h" />
-    <ClInclude Include="..\..\..\..\..\core\json\ui\quarantine.h" />
-    <ClInclude Include="..\..\..\..\..\core\json\ui\scan.h" />
-    <ClInclude Include="..\..\..\..\..\core\json\ui\state.h" />
-    <ClInclude Include="..\..\..\..\..\core\json\ui\ui.h" />
-    <ClInclude Include="..\..\..\..\..\core\json\ui\update.h" />
-    <ClInclude Include="..\..\..\..\..\core\json\updatedb\json_process.h" />
-    <ClInclude Include="..\..\..\..\..\core\windows\service\config.h" />
-    <ClInclude Include="..\..\..\..\..\core\windows\service\log.h" />
-    <ClInclude Include="..\..\..\..\..\core\windows\service\notify.h" />
-    <ClInclude Include="..\..\..\..\..\core\windows\service\scan_onaccess.h" />
-    <ClInclude Include="..\..\..\..\..\core\windows\service\scan_ondemand.h" />
-    <ClInclude Include="..\..\..\..\..\core\windows\service\service.h" />
-    <ClInclude Include="..\..\..\..\..\core\windows\service\structs.h" />
-    <ClInclude Include="..\..\..\..\..\core\windows\utils\crypt.h" />
-    <ClInclude Include="..\..\..\..\..\core\windows\utils\others.h" />
-    <ClInclude Include="..\..\..\..\..\core\windows\utils\tools.h" />
+    <ClInclude Include="..\..\..\..\core\json\ui\conf.h" />
+    <ClInclude Include="..\..\..\..\core\json\ui\jsonhandler.h" />
+    <ClInclude Include="..\..\..\..\core\json\ui\jsonhandlerp.h" />
+    <ClInclude Include="..\..\..\..\core\json\ui\quarantine.h" />
+    <ClInclude Include="..\..\..\..\core\json\ui\scan.h" />
+    <ClInclude Include="..\..\..\..\core\json\ui\state.h" />
+    <ClInclude Include="..\..\..\..\core\json\ui\ui.h" />
+    <ClInclude Include="..\..\..\..\core\json\ui\update.h" />
+    <ClInclude Include="..\..\..\..\core\json\updatedb\json_process.h" />
+    <ClInclude Include="..\..\..\..\core\windows\service\config.h" />
+    <ClInclude Include="..\..\..\..\core\windows\service\log.h" />
+    <ClInclude Include="..\..\..\..\core\windows\service\notify.h" />
+    <ClInclude Include="..\..\..\..\core\windows\service\scan_onaccess.h" />
+    <ClInclude Include="..\..\..\..\core\windows\service\scan_ondemand.h" />
+    <ClInclude Include="..\..\..\..\core\windows\service\service.h" />
+    <ClInclude Include="..\..\..\..\core\windows\service\structs.h" />
+    <ClInclude Include="..\..\..\..\core\windows\utils\crypt.h" />
+    <ClInclude Include="..\..\..\..\core\windows\utils\others.h" />
+    <ClInclude Include="..\..\..\..\core\windows\utils\tools.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
