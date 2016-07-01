@@ -79,55 +79,58 @@ static xmlNodePtr alert_doc_gdh_node(void)
 
 static void get_ip_addr(char *ip_addr)
 {
+	int s;
+	char mask[NI_MAXHOST];
 	struct ifaddrs *ifaddr, *ifa;
 
-	/* FIXME: do not exit on failure, but report error */
+	/* Set string to empty one */
+	ip_addr[0] = '\0';
+
+	/* Don't exit and just set ip is not available while failing */
 	if (getifaddrs(&ifaddr) == -1) {
 		perror("getifaddrs");
-
-		if(ifaddr != NULL){
-		   freeifaddrs(ifaddr);
-                }
-		exit(EXIT_FAILURE);
+		goto on_failure;
 	}
 
+	/* Search for the first interface with a mask different than 255.0.0.0
+	   and extract its associated ip, stop the search on failure */
 	for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
 		if (ifa->ifa_addr == NULL)
 			continue;
 
-		if (ifa->ifa_addr->sa_family == AF_INET || ifa->ifa_addr->sa_family == AF_INET6) {
-			int s;
-			char mask[NI_MAXHOST];
+		if (ifa->ifa_addr->sa_family != AF_INET && ifa->ifa_addr->sa_family != AF_INET6)
+			continue;
 
-			/* FIXME: do not exit on failure, but report error */
-			s = getnameinfo(ifa->ifa_netmask,
-					(ifa->ifa_addr->sa_family == AF_INET) ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
-					mask, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
-			if (s != 0) {
-				a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "getnameinfo() failed: %s", gai_strerror(s));
-				freeifaddrs(ifaddr);
-				exit(EXIT_FAILURE);
-			}
-
-			if (strcmp(mask, "255.0.0.0") == 0)
-				continue;
-
-			/* FIXME: do not exit on failure, but report error */
-			s = getnameinfo(ifa->ifa_addr,
-					(ifa->ifa_addr->sa_family == AF_INET) ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
-					ip_addr, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
-			if (s != 0) {
-				a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "getnameinfo() failed: %s\n", gai_strerror(s));
-				freeifaddrs(ifaddr);
-				exit(EXIT_FAILURE);
-			}
-
-			freeifaddrs(ifaddr);
-			return;
+		s = getnameinfo(ifa->ifa_netmask,
+			(ifa->ifa_addr->sa_family == AF_INET) ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
+			mask, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+		if (s != 0) {
+			a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "getnameinfo() failed: %s", gai_strerror(s));
+			break;
 		}
+
+		/* Skip the interface if it has a too large ip mask */
+		if (strcmp(mask, "255.0.0.0") == 0)
+			continue;
+
+		s = getnameinfo(ifa->ifa_addr,
+			(ifa->ifa_addr->sa_family == AF_INET) ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
+			ip_addr, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+		if (s != 0) {
+			a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "getnameinfo() failed: %s\n", gai_strerror(s));
+			break;
+		}
+
+		break;
 	}
 
-	freeifaddrs(ifaddr);
+on_failure:
+	/* Set ip_addr not available if not found */
+	if (ip_addr[0] == '\0')
+		snprintf(ip_addr, NI_MAXHOST - 1, "n/a");
+	if (ifaddr != NULL)
+		freeifaddrs(ifaddr);
+	return;
 }
 
 static xmlNodePtr alert_doc_identification_node(void)
