@@ -569,6 +569,12 @@ void a6o_conf_parser_free(struct a6o_conf_parser *cp)
 
 		scanner_free(cp->scanner);
 
+		if (cp->current_section != NULL)
+			free((void *)cp->current_section);
+
+		if (cp->current_value_list != NULL)
+			free((void *)cp->current_key);
+
 		if (cp->current_value_string != NULL)
 			free((void *)cp->current_value_string);
 
