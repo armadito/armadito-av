@@ -87,6 +87,7 @@ definitions:
           value:
             type: number
             description: the time
+
   Error:
     type: object
     properties:
@@ -97,6 +98,7 @@ definitions:
         type: string
       fields:
         type: string
+
   AntivirusStatus:
     type: object
     properties:
@@ -109,6 +111,7 @@ definitions:
       real-time-protection:
         type: string
         description: is the real-time protection on or off?
+
   ModuleStatus:
     type: object
     properties:
@@ -121,6 +124,7 @@ definitions:
       update:
         type: string
         description: module update date
+
   Status:
     type: object
     properties:
@@ -148,25 +152,25 @@ definitions:
         description: the progress bar
       malware_count:
         type: number
-        description: the progress bar
+        description: malware counter
       suspicious_count:
         type: number
-        description: the progress bar
+        description: suspicious counter
       scanned_count:
         type: number
-        description: the progress bar
+        description: scanned file counter
       path:
         type: string
-        description: the progress bar
+        description: last scanned path
       scan_status:
         type: string
-        description: the progress bar
+        description: scan status for path
       scan_action:
         type: string
-        description: the progress bar
+        description: action taken for malware
       mod_name:
         type: string
-        description: the progress bar
+        description: name of module that has detected the malware
       mod_report:
         type: string
-        description: the progress bar
+        description: report of module that has detected the malware
