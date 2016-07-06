@@ -277,35 +277,6 @@ struct a6o_conf_parser *a6o_conf_parser_new(const char *filename, conf_parser_ca
 	return cp;
 }
 
-static char *token2str(guint token)
-{
-	switch(token) {
-#define M(E) case E: return #E
-		M(TOKEN_EOF);
-		M(TOKEN_LEFT_BRACE);
-		M(TOKEN_RIGHT_BRACE);
-		M(TOKEN_EQUAL_SIGN);
-		M(TOKEN_COMMA);
-		M(TOKEN_SEMI_COLON);
-		M(TOKEN_NONE);
-		M(TOKEN_STRING);
-	default:
-		return "???";
-	}
-
-	return "???";
-}
-
-static void print_token(struct scanner *scanner, enum token_type token)
-{
-	fprintf(stderr, "%-20s %3d ", token2str(token), token);
-	if (token == TOKEN_STRING)
-		fprintf(stderr, " \"%s\"", scanner_token_text(scanner));
-	else
-		fprintf(stderr, " %c", (token < 255) ? (char)token : '?');
-	fprintf(stderr, "\n");
-}
-
 static const char *token_str(enum token_type token)
 {
 	if (token == TOKEN_STRING)
