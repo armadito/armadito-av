@@ -55,6 +55,7 @@ enum token_type {
 	TOKEN_NONE			= 256,
 	TOKEN_STRING,
 	TOKEN_INTEGER,
+	TOKEN_ERROR,
 };
 
 static struct scanner *scanner_new(FILE *input)
@@ -124,7 +125,7 @@ static int scanner_ungetc(struct scanner *s, int c)
 	return ungetc(c, s->input);
 }
 
-int scanner_get_next_token(struct scanner *s)
+static int scanner_get_next_token(struct scanner *s, guint previous_token)
 {
 	int c;
 	enum {
@@ -160,9 +161,16 @@ int scanner_get_next_token(struct scanner *s)
 			} else if (isdigit(c)) {
 				g_string_append_c(s->token_text, c);
 				state = S_INTEGER;
-			} else if (c == '[' || c == ']' || c == '=' || c == ',' || c == ';') {  /* may be return char in any case ? */
-				g_string_append_c(s->token_text, c);
-				return c;
+			} else {
+				/* Handle value error cases before accept or ignore current char */
+				if (previous_token == TOKEN_EQUAL_SIGN) {
+					scanner_ungetc(s, c);
+					return (c == '\n') ? TOKEN_NONE : TOKEN_ERROR ;
+				}
+				if (c == '[' || c == ']' || c == '=' || c == ',' || c == ';') {  /* may be return char in any case ? */
+					g_string_append_c(s->token_text, c);
+					return c;
+				}
 			}
 			break;
 
@@ -333,7 +341,7 @@ static void accept(struct a6o_conf_parser *cp, guint token)
 {
 	if (cp->lookahead_token == token) {
 		if (cp->lookahead_token != TOKEN_EOF)
-			cp->lookahead_token = scanner_get_next_token(cp->scanner);
+			cp->lookahead_token = scanner_get_next_token(cp->scanner, token);
 	} else
 		syntax_error(cp, token);
 }
@@ -474,6 +482,22 @@ static void r_value(struct a6o_conf_parser *cp)
 	else if (cp->lookahead_token == TOKEN_STRING) {
 		r_string_value(cp);
 		r_opt_string_list(cp);
+	} else {
+		if (cp->lookahead_token == TOKEN_NONE ||cp->lookahead_token == TOKEN_EOF)
+			a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "syntax error: file %s line %d column %d expecting value for %s, got none",
+				cp->filename,
+				scanner_current_line(cp->scanner),
+				scanner_current_column(cp->scanner),
+				cp->current_key);
+		else
+			a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "syntax error: file %s line %d column %d expecting value for %s, got '%c', do you forget to use double-quotes ?",
+				cp->filename,
+				scanner_current_line(cp->scanner),
+				scanner_current_column(cp->scanner),
+				cp->current_key,
+				scanner_getc(cp->scanner));
+
+		longjmp(cp->env, 1);
 	}
 }
 
@@ -545,7 +569,7 @@ int a6o_conf_parser_parse(struct a6o_conf_parser *cp)
 	if (cp->input == NULL)
 		return -1;
 
-	cp->lookahead_token = scanner_get_next_token(cp->scanner);
+	cp->lookahead_token = scanner_get_next_token(cp->scanner, TOKEN_NONE);
 
 	cp->current_section = NULL;
 	cp->current_key = NULL;
