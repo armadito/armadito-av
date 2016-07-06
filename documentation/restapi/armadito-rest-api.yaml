@@ -51,7 +51,27 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-  
+  /scan:
+    post:
+      summary: launch a scan
+      description: launch a scan
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: scan object
+          required: true
+          schema:
+            $ref: "#/definitions/Scan"
+      responses:
+        200:
+          description: OK
+        405:
+          description: Invalid input
+    
 
 definitions:
   Pong:
@@ -113,3 +133,40 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/ModuleStatus'
+  Scan:
+    type: object
+    properties:
+      path:
+        type: string
+        description: the path to scan
+
+  ScanReport:
+    type: object
+    properties:
+      progress:
+        type: number
+        description: the progress bar
+      malware_count:
+        type: number
+        description: the progress bar
+      suspicious_count:
+        type: number
+        description: the progress bar
+      scanned_count:
+        type: number
+        description: the progress bar
+      path:
+        type: string
+        description: the progress bar
+      scan_status:
+        type: string
+        description: the progress bar
+      scan_action:
+        type: string
+        description: the progress bar
+      mod_name:
+        type: string
+        description: the progress bar
+      mod_report:
+        type: string
+        description: the progress bar
