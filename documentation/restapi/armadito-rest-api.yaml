@@ -71,7 +71,16 @@ paths:
           description: OK
         405:
           description: Invalid input
-    
+
+  /poll:
+    get:
+      description:
+        get server push event
+      responses:
+        200:
+          description: event received OK
+          schema:
+            $ref: '#/definitions/Event'
 
 definitions:
   Pong:
@@ -143,34 +152,53 @@ definitions:
       path:
         type: string
         description: the path to scan
-
-  ScanReport:
+  
+  Event:
     type: object
+    discriminator: eventType
+    required:
+      - eventType # required for inheritance to work
     properties:
-      progress:
-        type: number
-        description: the progress bar
-      malware_count:
-        type: number
-        description: malware counter
-      suspicious_count:
-        type: number
-        description: suspicious counter
-      scanned_count:
-        type: number
-        description: scanned file counter
-      path:
+      eventType:
         type: string
-        description: last scanned path
-      scan_status:
-        type: string
-        description: scan status for path
-      scan_action:
-        type: string
-        description: action taken for malware
-      mod_name:
-        type: string
-        description: name of module that has detected the malware
-      mod_report:
-        type: string
-        description: report of module that has detected the malware
+
+  DetectionEvent:
+    allOf:
+      - $ref: '#/definitions/Event'
+      - type: object
+        properties:
+          path:
+            type: string
+            description: path
+          scan_status:
+            type: string
+            description: scan status for path
+          scan_action:
+            type: string
+            description: action taken for malware
+          mod_name:
+            type: string
+            description: name of module that has detected the malware
+          mod_report:
+            type: string
+            description: report of module that has detected the malware
+
+  OnDemandProgressEvent:
+    allOf:
+      - $ref: '#/definitions/Event'
+      - type: object
+        properties:
+          progress:
+            type: number
+            description: the progress bar
+          malware_count:
+            type: number
+            description: malware counter
+          suspicious_count:
+            type: number
+            description: suspicious counter
+          scanned_count:
+            type: number
+            description: scanned file counter
+            
+
