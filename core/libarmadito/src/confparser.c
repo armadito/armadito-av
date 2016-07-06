@@ -313,12 +313,8 @@ static const char *token_str(enum token_type token)
 	else if (token == TOKEN_EOF)
 		return "end of file";
 	else if (token < TOKEN_NONE) {
-		/* memory leak, I know, but this function is called only in case of syntax error... */
-		char *tmp = (char *)malloc(2);
-
+		static char tmp[2] = " ";
 		tmp[0] = (char)token;
-		tmp[1] = '\0';
-
 		return tmp;
 	}
 
