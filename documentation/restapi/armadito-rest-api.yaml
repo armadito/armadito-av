@@ -1,0 +1,115 @@
+# Example YAML to get you started quickly.
+# Be aware that YAML has indentation based scoping.
+# Code completion support is available so start typing for available options.
+swagger: '2.0'
+
+# This is your document metadata
+info:
+  version: "0.0.0"
+  title: Armadito REST API
+
+host: localhost:8888
+basePath: /api
+produces:
+  - application/json
+
+# Describe your paths here
+paths:
+
+  # This is a path endpoint. Change it.
+  /ping:
+    # This is a HTTP operation
+    get:
+      # Describe this verb here. Note: you can use markdown
+      description: |
+        Ping the server to get status
+      # This is array of GET operation parameters:
+      # Expected responses for this operation:
+      responses:
+        # Response code
+        200:
+          description: Successful response
+          # A schema describing your response object.
+          # Use JSON Schema format
+          schema:
+            $ref: '#/definitions/Pong'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /status:
+    get:
+      description:
+        get the server status
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: '#/definitions/Status'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  
+
+definitions:
+  Pong:
+    type: object
+    properties:
+      response:
+        type: string
+        description: contains the server response
+      params:
+        type: object
+        description: contains the server response content
+        properties:
+          value:
+            type: number
+            description: the time
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
+  AntivirusStatus:
+    type: object
+    properties:
+      version:
+        type: string
+        description: the version of the antivirus
+      service:
+        type: string
+        description: is the service on or off?
+      real-time-protection:
+        type: string
+        description: is the real-time protection on or off?
+  ModuleStatus:
+    type: object
+    properties:
+      name:
+        type: string
+        description: module name
+      version:
+        type: string
+        description: module version
+      update:
+        type: string
+        description: module update date
+  Status:
+    type: object
+    properties:
+      antivirus:
+        $ref: '#/definitions/AntivirusStatus'
+      update:
+        type: string
+        description: the last update date of the antivirus
+      modules:
+        type: array
+        items:
+          $ref: '#/definitions/ModuleStatus'
