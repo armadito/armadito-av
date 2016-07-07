@@ -55,6 +55,7 @@ enum token_type {
 	TOKEN_NONE			= 256,
 	TOKEN_STRING,
 	TOKEN_INTEGER,
+	TOKEN_ERROR,
 };
 
 static struct scanner *scanner_new(FILE *input)
@@ -124,7 +125,7 @@ static int scanner_ungetc(struct scanner *s, int c)
 	return ungetc(c, s->input);
 }
 
-int scanner_get_next_token(struct scanner *s)
+static int scanner_get_next_token(struct scanner *s, guint previous_token)
 {
 	int c;
 	enum {
@@ -160,9 +161,16 @@ int scanner_get_next_token(struct scanner *s)
 			} else if (isdigit(c)) {
 				g_string_append_c(s->token_text, c);
 				state = S_INTEGER;
-			} else if (c == '[' || c == ']' || c == '=' || c == ',' || c == ';') {  /* may be return char in any case ? */
-				g_string_append_c(s->token_text, c);
-				return c;
+			} else {
+				/* Handle value error cases before accept or ignore current char */
+				if (previous_token == TOKEN_EQUAL_SIGN) {
+					scanner_ungetc(s, c);
+					return (c == '\n') ? TOKEN_NONE : TOKEN_ERROR ;
+				}
+				if (c == '[' || c == ']' || c == '=' || c == ',' || c == ';') {  /* may be return char in any case ? */
+					g_string_append_c(s->token_text, c);
+					return c;
+				}
 			}
 			break;
 
@@ -269,35 +277,6 @@ struct a6o_conf_parser *a6o_conf_parser_new(const char *filename, conf_parser_ca
 	return cp;
 }
 
-static char *token2str(guint token)
-{
-	switch(token) {
-#define M(E) case E: return #E
-		M(TOKEN_EOF);
-		M(TOKEN_LEFT_BRACE);
-		M(TOKEN_RIGHT_BRACE);
-		M(TOKEN_EQUAL_SIGN);
-		M(TOKEN_COMMA);
-		M(TOKEN_SEMI_COLON);
-		M(TOKEN_NONE);
-		M(TOKEN_STRING);
-	default:
-		return "???";
-	}
-
-	return "???";
-}
-
-static void print_token(struct scanner *scanner, enum token_type token)
-{
-	fprintf(stderr, "%-20s %3d ", token2str(token), token);
-	if (token == TOKEN_STRING)
-		fprintf(stderr, " \"%s\"", scanner_token_text(scanner));
-	else
-		fprintf(stderr, " %c", (token < 255) ? (char)token : '?');
-	fprintf(stderr, "\n");
-}
-
 static const char *token_str(enum token_type token)
 {
 	if (token == TOKEN_STRING)
@@ -305,12 +284,8 @@ static const char *token_str(enum token_type token)
 	else if (token == TOKEN_EOF)
 		return "end of file";
 	else if (token < TOKEN_NONE) {
-		/* memory leak, I know, but this function is called only in case of syntax error... */
-		char *tmp = (char *)malloc(2);
-
+		static char tmp[2] = " ";
 		tmp[0] = (char)token;
-		tmp[1] = '\0';
-
 		return tmp;
 	}
 
@@ -333,7 +308,7 @@ static void accept(struct a6o_conf_parser *cp, guint token)
 {
 	if (cp->lookahead_token == token) {
 		if (cp->lookahead_token != TOKEN_EOF)
-			cp->lookahead_token = scanner_get_next_token(cp->scanner);
+			cp->lookahead_token = scanner_get_next_token(cp->scanner, token);
 	} else
 		syntax_error(cp, token);
 }
@@ -469,11 +444,52 @@ static void r_key(struct a6o_conf_parser *cp)
 /* value : int_value | string_value opt_string_list */
 static void r_value(struct a6o_conf_parser *cp)
 {
-	if (cp->lookahead_token == TOKEN_INTEGER)
+	if (cp->lookahead_token == TOKEN_INTEGER) {
 		r_int_value(cp);
+#ifdef DEBUG
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_DEBUG, "configuration parser: file %s, %s = %d",
+			cp->filename,
+			cp->current_key,
+			cp->current_value_int);
+#endif
+	}
 	else if (cp->lookahead_token == TOKEN_STRING) {
 		r_string_value(cp);
 		r_opt_string_list(cp);
+#ifdef DEBUG
+		if (cp->current_value_type == CONF_TYPE_STRING)
+			a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_DEBUG, "configuration parser: file %s, %s = \"%s\"",
+				cp->filename,
+				cp->current_key,
+				cp->current_value_string);
+		else {
+			int i;
+			GString *values = g_string_new("");
+			for (i = 0; i < cp->current_value_list->len; i++, g_string_append_printf(values, ";"))
+				g_string_append_printf(values, "\"%s\"", g_ptr_array_index(cp->current_value_list, i));
+			a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_DEBUG, "configuration parser: file %s, %s = %s",
+				cp->filename,
+				cp->current_key,
+				values->str);
+			g_string_free(values, TRUE);
+		}
+#endif
+	} else {
+		if (cp->lookahead_token == TOKEN_NONE ||cp->lookahead_token == TOKEN_EOF)
+			a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "syntax error: file %s line %d column %d expecting value for %s, got none",
+				cp->filename,
+				scanner_current_line(cp->scanner),
+				scanner_current_column(cp->scanner),
+				cp->current_key);
+		else
+			a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "syntax error: file %s line %d column %d expecting value for %s, got '%c', do you forget to use double-quotes ?",
+				cp->filename,
+				scanner_current_line(cp->scanner),
+				scanner_current_column(cp->scanner),
+				cp->current_key,
+				scanner_getc(cp->scanner));
+
+		longjmp(cp->env, 1);
 	}
 }
 
@@ -545,7 +561,7 @@ int a6o_conf_parser_parse(struct a6o_conf_parser *cp)
 	if (cp->input == NULL)
 		return -1;
 
-	cp->lookahead_token = scanner_get_next_token(cp->scanner);
+	cp->lookahead_token = scanner_get_next_token(cp->scanner, TOKEN_NONE);
 
 	cp->current_section = NULL;
 	cp->current_key = NULL;
