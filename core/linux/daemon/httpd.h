@@ -26,4 +26,6 @@ struct httpd;
 
 struct httpd *httpd_new(unsigned short port);
 
+void httpd_gen_fake_events(struct httpd *h);
+
 #endif
