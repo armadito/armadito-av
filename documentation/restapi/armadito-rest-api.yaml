@@ -105,8 +105,6 @@ definitions:
         format: int32
       message:
         type: string
-      fields:
-        type: string
 
   AntivirusStatus:
     type: object
@@ -115,10 +113,10 @@ definitions:
         type: string
         description: the version of the antivirus
       service:
-        type: string
+        type: boolean
         description: is the service on or off?
       real-time-protection:
-        type: string
+        type: boolean
         description: is the real-time protection on or off?
 
   ModuleStatus:
@@ -132,6 +130,7 @@ definitions:
         description: module version
       update:
         type: string
+        format: date-time
         description: module update date
 
   Status:
@@ -141,6 +140,7 @@ definitions:
         $ref: '#/definitions/AntivirusStatus'
       update:
         type: string
+        format: date-time
         description: the last update date of the antivirus
       modules:
         type: array
@@ -172,6 +172,16 @@ definitions:
             description: path
           scan_status:
             type: string
+            enum: 
+              - "undecided"
+              - "clean"
+              - "ignored"
+              - "invalid argument"
+              - "internal error"
+              - "suspicious"
+              - "white listed"
+              - "malware"
+              - "unknown status"
             description: scan status for path
           scan_action:
             type: string
@@ -189,16 +199,20 @@ definitions:
       - type: object
         properties:
           progress:
-            type: number
+            type: integer
+            format: int32
             description: the progress bar
           malware_count:
-            type: number
+            type: integer
+            format: int32
             description: malware counter
           suspicious_count:
-            type: number
+            type: integer
+            format: int32
             description: suspicious counter
           scanned_count:
-            type: number
+            type: integer
+            format: int32
             description: scanned file counter
             
 
