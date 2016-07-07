@@ -23,6 +23,7 @@
 #include <libarmadito.h>
 
 #include "httpd.h"
+#include "reportp.h"
 
 #define PAGE_404 "<html><head><title>not found!</title></head><body>not found!</body></html>\n"
 
@@ -31,6 +32,7 @@ struct httpd {
 	struct MHD_Daemon *daemon;
 	struct MHD_Response *response_404;
 	magic_t magic;
+	GAsyncQueue *event_queue;
 };
 
 #define MAGIC_HEADER_SIZE (8 * 1024)
@@ -143,32 +145,76 @@ static int content_serve(struct httpd *h, struct MHD_Connection *connection, con
 	 return ret;
 }
 
-static struct json_object *json_response_get(const char *url)
+/*
+   OnDemandProgressEvent:
+    allOf:
+      - $ref: '#/definitions/Event'
+      - type: object
+        properties:
+          progress:
+            type: integer
+            format: int32
+            description: the progress bar
+          malware_count:
+            type: integer
+            format: int32
+            description: malware counter
+          suspicious_count:
+            type: integer
+            format: int32
+            description: suspicious counter
+          scanned_count:
+            type: integer
+            format: int32
+            description: scanned file counter
+* */
+
+static struct a6o_report *report_fake_new(void)
 {
-	struct json_object *obj ;
-	struct json_object *params;
+	struct a6o_report *r = malloc(sizeof(struct a6o_report));
+	
+	a6o_report_init(r, 42, "/foo/bar", random() % 100);
+	
+	return r;
+}
+ 
+static struct json_object *json_on_demand_progress_event_new(struct a6o_report *report)
+{
+	struct json_object *j_report;;
 
-	obj = json_object_new_object();
-	json_object_object_add(obj, "response", json_object_new_string("pong"));
-	params = json_object_new_object();
-	json_object_object_add(params, "value", json_object_new_int(rand()));
-	json_object_object_add(obj, "params", json_object_get(params));
-
-	return obj;
+	j_report = json_object_new_object();
+	
+	json_object_object_add(j_report, "eventType", json_object_new_string("OnDemandProgressEvent"));
+ 	json_object_object_add(j_report, "progress", json_object_new_int(report->progress));
+	json_object_object_add(j_report, "malware_count", json_object_new_int(report->malware_count));
+	json_object_object_add(j_report, "suspicious_count", json_object_new_int(report->suspicious_count));
+	json_object_object_add(j_report, "scanned_count", json_object_new_int(report->scanned_count));
+ 
+	return j_report;
 }
 
-static int api_serve(struct MHD_Connection *connection, const char *url)
+static int api_serve(struct httpd *h, struct MHD_Connection *connection, const char *url)
 {
 	struct MHD_Response *response;
 	struct json_object *j_response ;
 	const char *json_buff;
 	int ret;
 
-	j_response = json_response_get(url);
+#if 0	
+	j_response = (struct json_object *)g_async_queue_pop(h->event_queue);
 	json_buff = json_object_to_json_string(j_response);
+#endif
+#if 1
+	g_async_queue_lock(h->event_queue);
+	asprintf((char **)&json_buff, "{\"in_queue\":%d}", g_async_queue_length_unlocked(h->event_queue));
+	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "in api_serve %d events in queue", g_async_queue_length_unlocked(h->event_queue));
+	g_async_queue_unlock(h->event_queue);
+#endif
 
 	response = MHD_create_response_from_buffer(strlen(json_buff), (char *)json_buff, MHD_RESPMEM_MUST_COPY);
+#if 0
 	json_object_put(j_response); /* free the json object */
+#endif
 
 	if (response == NULL) {
 		return MHD_NO;
@@ -209,7 +255,7 @@ static int answer_to_connection(void *cls, struct MHD_Connection *connection,
 	url_path = get_path(url);
 
 	if (!strncmp(url_path, "/api", 4))
-		return api_serve(connection, url_path);
+		return api_serve(h, connection, url_path + 4);
 
 	return content_serve(h, connection, url_path);
 }
@@ -247,7 +293,7 @@ static gboolean httpd_listen_cb(GIOChannel *source, GIOCondition condition, gpoi
 	struct httpd *h = (struct httpd *)data;
 	int client_sock, r;
 	struct sockaddr_in client_addr;
-	socklen_t addrlen;
+	socklen_t addrlen = 0;
 
 	client_sock = accept(h->listen_sock, &client_addr, &addrlen);
 
@@ -297,10 +343,42 @@ struct httpd *httpd_new(unsigned short port)
 
 	channel = g_io_channel_unix_new(h->listen_sock);
 	g_io_add_watch(channel, G_IO_IN, httpd_listen_cb, h);
+	
+	h->event_queue = g_async_queue_new();
 
 	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_INFO , "HTTP server started on port %d\n", port);
 
 	return h;
+}
+
+static gpointer gen_events(gpointer data)
+{
+	struct httpd *h = (struct httpd *)data;
+	
+	while (1) {
+		struct a6o_report *r = report_fake_new();
+		struct json_object *jr = json_on_demand_progress_event_new(r);
+		
+		g_async_queue_push(h->event_queue, jr);
+		
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "gen_events: %s %d", r->path, r->progress);
+
+		g_async_queue_lock(h->event_queue);
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "in thread %d events in queue", g_async_queue_length_unlocked(h->event_queue));
+		g_async_queue_unlock(h->event_queue);
+		
+		sleep(2);
+	}
+	
+	return NULL;
+}
+
+void httpd_gen_fake_events(struct httpd *h)
+{
+	GThread *gen_events_thread;
+
+	g_async_queue_ref(h->event_queue);
+	gen_events_thread = g_thread_new("gen_events", gen_events, h);
 }
 
 int httpd_destroy(struct httpd *h)
