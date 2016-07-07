@@ -8,7 +8,10 @@
 #include <winsock2.h>
 #endif
 #include <arpa/inet.h>
+#include <sys/types.h>
+#include <errno.h>
 #include <fcntl.h>
+#include <glib.h>
 #include <json.h>
 #include <magic.h>
 #include <microhttpd.h>
@@ -17,12 +20,14 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <libarmadito.h>
 
 #include "httpd.h"
 
 #define PAGE_404 "<html><head><title>not found!</title></head><body>not found!</body></html>\n"
 
 struct httpd {
+	int listen_sock;
 	struct MHD_Daemon *daemon;
 	struct MHD_Response *response_404;
 	magic_t magic;
@@ -209,20 +214,77 @@ static int answer_to_connection(void *cls, struct MHD_Connection *connection,
 	return content_serve(h, connection, url_path);
 }
 
-struct httpd *httpd_new(unsigned short port)
+static int open_listen_socket(short port)
 {
-	struct httpd *h;
+	int sock, optval, r;
 	struct sockaddr_in listening_addr;
 
-	h = malloc(sizeof(struct httpd));
+	sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (sock < 0)
+		return -1;
+
+	optval = 1;
+	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&optval, sizeof(optval)) < 0)
+		return -1;
 
 	listening_addr.sin_family = AF_INET;
 	listening_addr.sin_port = htons(port);
 	listening_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
-	h->daemon = MHD_start_daemon(MHD_USE_SELECT_INTERNALLY, port, NULL, NULL, answer_to_connection, h, MHD_OPTION_SOCK_ADDR, &listening_addr, MHD_OPTION_END);
+	r = bind(sock, (struct sockaddr *)&listening_addr, sizeof(listening_addr));
+	if (r < 0)
+		return -1;
+
+	r = listen(sock, 5);
+	if (r < 0)
+		return -1;
+
+	return sock;
+}
+
+static gboolean httpd_listen_cb(GIOChannel *source, GIOCondition condition, gpointer data)
+{
+	struct httpd *h = (struct httpd *)data;
+	int client_sock, r;
+	struct sockaddr_in client_addr;
+	socklen_t addrlen;
+
+	client_sock = accept(h->listen_sock, &client_addr, &addrlen);
+
+	if (client_sock < 0) {
+		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR, "accept() failed (%s)", strerror(errno));
+		return FALSE;
+	}
+
+	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG, "accepted client connection: fd = %d", client_sock);
+
+	r = MHD_add_connection (h->daemon, client_sock, (struct sockaddr *)&client_addr, addrlen);
+
+	if (r != MHD_YES) {
+		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG, "accepted client connection: fd = %d", client_sock);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+struct httpd *httpd_new(unsigned short port)
+{
+	struct httpd *h = malloc(sizeof(struct httpd));
+	GIOChannel *channel;
+
+	h->listen_sock = open_listen_socket(port);
+	if(h->listen_sock < 0) {
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "error opening server TCP socket (%s)", strerror(errno));
+		free(h);
+		return NULL;
+	}
+
+	h->daemon = MHD_start_daemon(MHD_USE_NO_LISTEN_SOCKET | MHD_USE_THREAD_PER_CONNECTION, 0, NULL, NULL, answer_to_connection, h, MHD_OPTION_END);
 
 	if (h->daemon == NULL) {
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "error creating microhttpd server");
+		close(h->listen_sock);
 		free(h);
 		return NULL;
 	}
@@ -233,17 +295,17 @@ struct httpd *httpd_new(unsigned short port)
 	h->magic = magic_open(MAGIC_MIME_TYPE);
 	magic_load(h->magic, NULL);
 
-	fprintf(stderr, "daemon started on port %d\n", port);
+	channel = g_io_channel_unix_new(h->listen_sock);
+	g_io_add_watch(channel, G_IO_IN, httpd_listen_cb, h);
 
-	getchar();
-
-	MHD_stop_daemon(h->daemon);
+	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_INFO , "HTTP server started on port %d\n", port);
 
 	return h;
 }
 
 int httpd_destroy(struct httpd *h)
 {
+	MHD_stop_daemon(h->daemon);
 	magic_close(h->magic);
 }
 

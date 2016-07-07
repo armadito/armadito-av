@@ -271,8 +271,14 @@ static void start_daemon(const char *progname, struct a6o_daemon_options *opts)
 static void start_http_server(struct a6o_daemon_options *opts)
 {
 	struct httpd *h;
+	GMainLoop *loop;
 	
+	log_init(opts->s_log_level, !opts->no_daemon);
+
 	h = httpd_new(opts->port);
+
+	loop = g_main_loop_new(NULL, FALSE);
+	g_main_loop_run(loop);
 }
 
 int main(int argc, char **argv)
