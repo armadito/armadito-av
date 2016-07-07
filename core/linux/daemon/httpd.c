@@ -7,15 +7,16 @@
 #else
 #include <winsock2.h>
 #endif
-#include <microhttpd.h>
 #include <arpa/inet.h>
+#include <fcntl.h>
+#include <json.h>
+#include <magic.h>
+#include <microhttpd.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
-#include <unistd.h>
 #include <sys/stat.h>
-#include <fcntl.h>
-#include <magic.h>
+#include <unistd.h>
 
 #include "httpd.h"
 
@@ -137,6 +138,47 @@ static int content_serve(struct httpd *h, struct MHD_Connection *connection, con
 	 return ret;
 }
 
+static struct json_object *json_response_get(const char *url)
+{
+	struct json_object *obj ;
+	struct json_object *params;
+
+	obj = json_object_new_object();
+	json_object_object_add(obj, "response", json_object_new_string("pong"));
+	params = json_object_new_object();
+	json_object_object_add(params, "value", json_object_new_int(rand()));
+	json_object_object_add(obj, "params", json_object_get(params));
+
+	return obj;
+}
+
+static int api_serve(struct MHD_Connection *connection, const char *url)
+{
+	struct MHD_Response *response;
+	struct json_object *j_response ;
+	const char *json_buff;
+	int ret;
+
+	j_response = json_response_get(url);
+	json_buff = json_object_to_json_string(j_response);
+
+	response = MHD_create_response_from_buffer(strlen(json_buff), (char *)json_buff, MHD_RESPMEM_MUST_COPY);
+	json_object_put(j_response); /* free the json object */
+
+	if (response == NULL) {
+		return MHD_NO;
+	}
+
+	MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_TYPE, "application/json");
+	MHD_add_response_header(response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+	/* Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept */
+
+	ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+	MHD_destroy_response(response);
+
+	return ret;
+}
+
 static const char *get_path(const char *url)
 {
 	if (!strncmp(url, "http://", 7))
@@ -158,11 +200,11 @@ static int answer_to_connection(void *cls, struct MHD_Connection *connection,
 	if (strcmp(method, MHD_HTTP_METHOD_GET) != 0
 		&& strcmp(method, MHD_HTTP_METHOD_POST) != 0)
 		return MHD_NO; /* should return a response saying "invalid method" */
+
 	url_path = get_path(url);
-#if 0
+
 	if (!strncmp(url_path, "/api", 4))
-		return a6o_mhd_api_serve(connection, url_path);
-#endif
+		return api_serve(connection, url_path);
 
 	return content_serve(h, connection, url_path);
 }
@@ -194,11 +236,6 @@ struct httpd *httpd_new(unsigned short port)
 	fprintf(stderr, "daemon started on port %d\n", port);
 
 	getchar();
-
-#if 0
-	a6o_mhd_content_close();
-	a6o_mhd_api_close();
-#endif
 
 	MHD_stop_daemon(h->daemon);
 
