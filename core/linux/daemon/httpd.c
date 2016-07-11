@@ -172,24 +172,24 @@ static int content_serve(struct httpd *h, struct MHD_Connection *connection, con
 static struct a6o_report *report_fake_new(void)
 {
 	struct a6o_report *r = malloc(sizeof(struct a6o_report));
-	
+
 	a6o_report_init(r, 42, "/foo/bar", random() % 100);
-	
+
 	return r;
 }
- 
+
 static struct json_object *json_on_demand_progress_event_new(struct a6o_report *report)
 {
 	struct json_object *j_report;;
 
 	j_report = json_object_new_object();
-	
+
 	json_object_object_add(j_report, "eventType", json_object_new_string("OnDemandProgressEvent"));
  	json_object_object_add(j_report, "progress", json_object_new_int(report->progress));
 	json_object_object_add(j_report, "malware_count", json_object_new_int(report->malware_count));
 	json_object_object_add(j_report, "suspicious_count", json_object_new_int(report->suspicious_count));
 	json_object_object_add(j_report, "scanned_count", json_object_new_int(report->scanned_count));
- 
+
 	return j_report;
 }
 
@@ -200,11 +200,13 @@ static int api_serve(struct httpd *h, struct MHD_Connection *connection, const c
 	const char *json_buff;
 	int ret;
 
-#if 0	
+#if 1
+	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "in api_serve(): event queue %p", h->event_queue);
 	j_response = (struct json_object *)g_async_queue_pop(h->event_queue);
 	json_buff = json_object_to_json_string(j_response);
+	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "json buffer %s", json_buff);
 #endif
-#if 1
+#if 0
 	g_async_queue_lock(h->event_queue);
 	asprintf((char **)&json_buff, "{\"in_queue\":%d}", g_async_queue_length_unlocked(h->event_queue));
 	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "in api_serve %d events in queue", g_async_queue_length_unlocked(h->event_queue));
@@ -212,7 +214,7 @@ static int api_serve(struct httpd *h, struct MHD_Connection *connection, const c
 #endif
 
 	response = MHD_create_response_from_buffer(strlen(json_buff), (char *)json_buff, MHD_RESPMEM_MUST_COPY);
-#if 0
+#if 1
 	json_object_put(j_response); /* free the json object */
 #endif
 
@@ -244,7 +246,7 @@ static int answer_to_connection(void *cls, struct MHD_Connection *connection,
 				size_t *upload_data_size, void **con_cls)
 {
 	const char *url_path;
-	struct httpd *h = (struct httpd *)con_cls;
+	struct httpd *h = (struct httpd *)cls;
 
 	fprintf(stderr, "got request for: %s\n", url);
 
@@ -304,7 +306,7 @@ static gboolean httpd_listen_cb(GIOChannel *source, GIOCondition condition, gpoi
 
 	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG, "accepted client connection: fd = %d", client_sock);
 
-	r = MHD_add_connection (h->daemon, client_sock, (struct sockaddr *)&client_addr, addrlen);
+	r = MHD_add_connection(h->daemon, client_sock, (struct sockaddr *)&client_addr, addrlen);
 
 	if (r != MHD_YES) {
 		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG, "accepted client connection: fd = %d", client_sock);
@@ -341,12 +343,14 @@ struct httpd *httpd_new(unsigned short port)
 	h->magic = magic_open(MAGIC_MIME_TYPE);
 	magic_load(h->magic, NULL);
 
-	channel = g_io_channel_unix_new(h->listen_sock);
-	g_io_add_watch(channel, G_IO_IN, httpd_listen_cb, h);
-	
 	h->event_queue = g_async_queue_new();
 
-	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_INFO , "HTTP server started on port %d\n", port);
+	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "in httpd_new(): event queue %p", h->event_queue);
+
+	channel = g_io_channel_unix_new(h->listen_sock);
+	g_io_add_watch(channel, G_IO_IN, httpd_listen_cb, h);
+
+	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_INFO , "HTTP server started on port %d", port);
 
 	return h;
 }
@@ -354,22 +358,22 @@ struct httpd *httpd_new(unsigned short port)
 static gpointer gen_events(gpointer data)
 {
 	struct httpd *h = (struct httpd *)data;
-	
+
 	while (1) {
 		struct a6o_report *r = report_fake_new();
 		struct json_object *jr = json_on_demand_progress_event_new(r);
-		
+
 		g_async_queue_push(h->event_queue, jr);
-		
+
 		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "gen_events: %s %d", r->path, r->progress);
 
 		g_async_queue_lock(h->event_queue);
 		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "in thread %d events in queue", g_async_queue_length_unlocked(h->event_queue));
 		g_async_queue_unlock(h->event_queue);
-		
+
 		sleep(2);
 	}
-	
+
 	return NULL;
 }
 
