@@ -1,3 +1,24 @@
+/***
+
+Copyright (C) 2015, 2016 Teclib'
+
+This file is part of Armadito core.
+
+Armadito core is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Armadito core is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
+
+***/
+
 #define _GNU_SOURCE
 
 #include <sys/types.h>
@@ -16,9 +37,11 @@
 #include <magic.h>
 #include <microhttpd.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <time.h>
 #include <unistd.h>
 #include <libarmadito.h>
 
@@ -26,11 +49,13 @@
 #include "reportp.h"
 
 #define PAGE_404 "<html><head><title>not found!</title></head><body>not found!</body></html>\n"
+#define PAGE_403 "<html><head><title>forbidden!</title></head><body>Request forbidden. Make sure your request has a User-Agent header.</body></html>\n"
 
 struct httpd {
 	int listen_sock;
 	struct MHD_Daemon *daemon;
 	struct MHD_Response *response_404;
+	struct MHD_Response *response_403;
 	magic_t magic;
 	GAsyncQueue *event_queue;
 };
@@ -97,7 +122,7 @@ static const char *get_mime_type(magic_t magic, int fd, const char *path)
       if (nread != -1)
 	mime_type = magic_buffer(magic, header, nread);
 
-      lseek (fd, 0, SEEK_SET);
+      lseek(fd, 0, SEEK_SET);
 
       return mime_type;
 }
@@ -111,19 +136,24 @@ static int content_serve(struct httpd *h, struct MHD_Connection *connection, con
 	struct MHD_Response *response;
 	int ret;
 
-	if (!is_url_valid(url))
+	if (!is_url_valid(url)) {
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "url %s is not valid", url);
 		return MHD_queue_response(connection, MHD_HTTP_NOT_FOUND, h->response_404);
+	}
 
 	path = get_path_from_url(url);
 	fd = do_open(path, &file_size);
 
-	if (fd < 0)
+	if (fd < 0) {
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "cannot open path %s", path);
 		return MHD_queue_response(connection, MHD_HTTP_NOT_FOUND, h->response_404);
+	}
 
 	mime_type = get_mime_type(h->magic, fd, path);
 	free((void *)path);
 
 	if (mime_type == NULL) {
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "cannot get mime type of path %s", path);
 		close(fd);
 		return MHD_queue_response(connection, MHD_HTTP_NOT_FOUND, h->response_404);
 	}
@@ -171,9 +201,12 @@ static int content_serve(struct httpd *h, struct MHD_Connection *connection, con
 
 static struct a6o_report *report_fake_new(void)
 {
+	static int count = 0;
 	struct a6o_report *r = malloc(sizeof(struct a6o_report));
 
-	a6o_report_init(r, 42, "/foo/bar", random() % 100);
+	a6o_report_init(r, 42, "/foo/bar", count);
+	count++;
+	count %= 101;
 
 	return r;
 }
@@ -193,30 +226,116 @@ static struct json_object *json_on_demand_progress_event_new(struct a6o_report *
 	return j_report;
 }
 
-static int api_serve(struct httpd *h, struct MHD_Connection *connection, const char *url)
+static const char *api_get_user_agent(struct MHD_Connection *connection)
+{
+	return MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_USER_AGENT);
+}
+
+void djb2_init(int64_t *hash)
+{
+  *hash = 5381;	
+}
+
+void djb2_hash_buff(const char *buff, size_t len, int64_t *hash)
+{
+	for ( ; len--; buff++)
+		*hash = ((*hash << 5) + *hash) + *buff; /* hash * 33 + c */
+}
+
+void djb2_hash_str(const char *str, int64_t *hash)
+{
+	for ( ; *str; str++)
+		*hash = ((*hash << 5) + *hash) + *str; /* hash * 33 + c */
+}
+
+static struct json_object *api_gen_token(const char *user_agent)
+{
+	int64_t token;
+	char c;
+	time_t now;
+	struct json_object *j_token;
+
+	djb2_init(&token);
+	time(&now);
+	djb2_hash_buff((const char *)&now, sizeof(time_t), &token);
+	djb2_hash_str(user_agent, &token);
+	djb2_hash_buff(&c, sizeof(char *), &token);
+
+	if (token < 0)
+		token = -token;
+		
+	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "token %lld", token);
+
+	j_token = json_object_new_object();
+	json_object_object_add(j_token, "token", json_object_new_int64(token));
+
+	return j_token;
+}
+
+static int api_serve(struct httpd *h, struct MHD_Connection *connection, const char *path)
+{
+	const char *user_agent, *json_buff;
+	int64_t api_token;
+	struct json_object *j_response ;
+	struct MHD_Response *response;
+	int ret;
+
+	/* return a HTTP 404 if endpoint is not valid */
+	/* for now, only one endpoint */
+	if (strcmp(path, "/token")) {
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API invalid path %s", path);
+		return MHD_queue_response(connection, MHD_HTTP_NOT_FOUND, h->response_404);
+	}
+
+	/* return a HTTP 403 (forbidden) if no User-Agent header */
+	user_agent = api_get_user_agent(connection);
+	if (user_agent == NULL) {
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API path %s has no User-Agent", path);
+		return MHD_queue_response(connection, MHD_HTTP_FORBIDDEN, h->response_403);
+	}
+
+	/* if endpoint is not /token, return a HTTP 400 (bad request) if no token in HTTP headers */
+	/*  TODO */
+
+	/* return a HTTP 400 (bad request) if request parameters are not valid */
+	j_response = api_gen_token(user_agent);
+	
+	json_buff = json_object_to_json_string(j_response);
+	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "json buffer %s", json_buff);
+
+	response = MHD_create_response_from_buffer(strlen(json_buff), (char *)json_buff, MHD_RESPMEM_MUST_COPY);
+	if (response == NULL) {
+		json_object_put(j_response); /* free the json object */
+		return MHD_NO;
+	}
+
+	json_object_put(j_response); /* free the json object */
+
+	MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_TYPE, "application/json");
+	MHD_add_response_header(response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+	/* Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept */
+
+	ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+	MHD_destroy_response(response);
+
+	return ret;
+}
+
+static int old_api_serve(struct httpd *h, struct MHD_Connection *connection, const char *url)
 {
 	struct MHD_Response *response;
 	struct json_object *j_response ;
 	const char *json_buff;
 	int ret;
 
-#if 1
 	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "in api_serve(): event queue %p", h->event_queue);
 	j_response = (struct json_object *)g_async_queue_pop(h->event_queue);
 	json_buff = json_object_to_json_string(j_response);
 	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "json buffer %s", json_buff);
-#endif
-#if 0
-	g_async_queue_lock(h->event_queue);
-	asprintf((char **)&json_buff, "{\"in_queue\":%d}", g_async_queue_length_unlocked(h->event_queue));
-	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "in api_serve %d events in queue", g_async_queue_length_unlocked(h->event_queue));
-	g_async_queue_unlock(h->event_queue);
-#endif
 
 	response = MHD_create_response_from_buffer(strlen(json_buff), (char *)json_buff, MHD_RESPMEM_MUST_COPY);
-#if 1
+
 	json_object_put(j_response); /* free the json object */
-#endif
 
 	if (response == NULL) {
 		return MHD_NO;
@@ -316,6 +435,16 @@ static gboolean httpd_listen_cb(GIOChannel *source, GIOCondition condition, gpoi
 	return TRUE;
 }
 
+static struct MHD_Response *create_std_response(const char *page)
+{
+	struct MHD_Response *resp;
+
+	resp = MHD_create_response_from_buffer(strlen(page), (char *)page, MHD_RESPMEM_PERSISTENT);
+	MHD_add_response_header(resp,  MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
+
+	return resp;	
+}
+
 struct httpd *httpd_new(unsigned short port)
 {
 	struct httpd *h = malloc(sizeof(struct httpd));
@@ -337,8 +466,8 @@ struct httpd *httpd_new(unsigned short port)
 		return NULL;
 	}
 
-	h->response_404 = MHD_create_response_from_buffer(strlen(PAGE_404), (char *)PAGE_404, MHD_RESPMEM_PERSISTENT);
-	MHD_add_response_header(h->response_404,  MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
+	h->response_404 = create_std_response(PAGE_404);
+	h->response_403 = create_std_response(PAGE_403);
 
 	h->magic = magic_open(MAGIC_MIME_TYPE);
 	magic_load(h->magic, NULL);
@@ -371,7 +500,7 @@ static gpointer gen_events(gpointer data)
 		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "in thread %d events in queue", g_async_queue_length_unlocked(h->event_queue));
 		g_async_queue_unlock(h->event_queue);
 
-		sleep(2);
+		sleep(3);
 	}
 
 	return NULL;
