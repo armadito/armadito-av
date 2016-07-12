@@ -231,23 +231,27 @@ static const char *api_get_user_agent(struct MHD_Connection *connection)
 	return MHD_lookup_connection_value(connection, MHD_HEADER_KIND, MHD_HTTP_HEADER_USER_AGENT);
 }
 
-void djb2_init(int64_t *hash)
+#define HASH_ONE(H, C) (H) ^= ((H) << 5) + ((H) >> 2) + (C)
+/* #define HASH_ONE(H, C) (H) = (((H) << 5) + (H)) + (C) */
+
+static void hash_init(int64_t *hash)
 {
-  *hash = 5381;	
+	/* *hash = 5381;*/
+	*hash = 0;
 }
 
-void djb2_hash_buff(const char *buff, size_t len, int64_t *hash)
+static void hash_buff(const char *buff, size_t len, int64_t *hash)
 {
 	for ( ; len--; buff++)
-		*hash = ((*hash << 5) + *hash) + *buff; /* hash * 33 + c */
+		HASH_ONE(*hash, *buff);
 }
 
-void djb2_hash_str(const char *str, int64_t *hash)
+static void hash_str(const char *str, int64_t *hash)
 {
 	for ( ; *str; str++)
-		*hash = ((*hash << 5) + *hash) + *str; /* hash * 33 + c */
+		HASH_ONE(*hash, *str);
 }
-
+ 
 static struct json_object *api_gen_token(const char *user_agent)
 {
 	int64_t token;
@@ -255,11 +259,11 @@ static struct json_object *api_gen_token(const char *user_agent)
 	time_t now;
 	struct json_object *j_token;
 
-	djb2_init(&token);
+	hash_init(&token);
 	time(&now);
-	djb2_hash_buff((const char *)&now, sizeof(time_t), &token);
-	djb2_hash_str(user_agent, &token);
-	djb2_hash_buff(&c, sizeof(char *), &token);
+	hash_buff((const char *)&now, sizeof(time_t), &token);
+	hash_str(user_agent, &token);
+	hash_buff(&c, sizeof(char *), &token);
 
 	if (token < 0)
 		token = -token;
