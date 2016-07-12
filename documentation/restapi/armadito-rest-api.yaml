@@ -16,7 +16,22 @@ produces:
 # Describe your paths here
 paths:
 
-  # This is a path endpoint. Change it.
+  /token:
+    get:
+      description: |
+        Request an API token
+      produces:
+        - application/json
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: '#/definitions/Token'
+        default:
+          description: error
+          schema:
+            $ref: '#/definitions/Error'
+
   /ping:
     # This is a HTTP operation
     get:
@@ -25,6 +40,15 @@ paths:
         Ping the server to get status
       # This is array of GET operation parameters:
       # Expected responses for this operation:
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: token
+          description: session token
+          required: true
+          type: integer
+          format: int64
       responses:
         # Response code
         200:
@@ -83,6 +107,23 @@ paths:
             $ref: '#/definitions/Event'
 
 definitions:
+
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+
+  Token:
+    type: object
+    properties:
+      token:
+        type: integer
+        format: int64
+    
   Pong:
     type: object
     properties:
@@ -96,15 +137,6 @@ definitions:
           value:
             type: number
             description: the time
-
-  Error:
-    type: object
-    properties:
-      code:
-        type: integer
-        format: int32
-      message:
-        type: string
 
   AntivirusStatus:
     type: object
