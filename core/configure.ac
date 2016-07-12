@@ -167,5 +167,6 @@ linux/net/Makefile
 linux/service/Makefile
 linux/tools/Makefile
 tests/Makefile
+tests/web/Makefile
 ])
 AC_OUTPUT

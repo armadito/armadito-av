@@ -1,0 +1,40 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Armadito</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <script>
+      function long_polling() {
+          var xmlhttp = new XMLHttpRequest();
+          xmlhttp.onreadystatechange = function() {
+              if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                var obj = JSON.parse(xmlhttp.responseText);
+                document.getElementById("progress").innerHTML = obj.progress;
+                long_polling();
+              }
+          };
+          console.log("sending request");
+          xmlhttp.open("GET", "api", true);
+          xmlhttp.send(null);
+      }
+      function fun() {
+          console.log("submit");
+      }
+    </script>
+
+  </head>
+  <body>
+    <div id="banner">
+      <img src="images/armadito-64x64.png">
+      <span>Armadito</span>
+    </div>
+
+    <div>
+      progress: <span id="progress">0</span>
+    </div>
+
+    <script>
+      long_polling();
+    </script>
+  </body>
+</html>

@@ -1,3 +1,5 @@
+SUBDIRS=web
+
 AUTOMAKE_OPTIONS=subdir-objects no-dependencies
 
 check_PROGRAMS=testarmadito1 testarmaditoscan1 testxmlreport1 testconfparser1 testipcreceive1 testipcsend1 testdir1 testjsonprint1 testconf1
