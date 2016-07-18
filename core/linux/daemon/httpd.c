@@ -60,11 +60,8 @@ struct httpd {
 	struct MHD_Response *response_400;
 	struct MHD_Response *response_403;
 	struct MHD_Response *response_404;
+	GHashTable *client_table;
 	magic_t magic;
-};
-
-struct api_client {
-	GAsyncQueue *event_queue;
 };
 
 #define MAGIC_HEADER_SIZE (8 * 1024)
@@ -235,6 +232,24 @@ static struct json_object *json_on_demand_progress_event_new(struct a6o_report *
 }
 #endif
 
+struct api_client {
+	GAsyncQueue *event_queue;
+};
+
+static struct api_client *api_client_new(struct httpd *h, int64_t api_token)
+{
+	struct api_client *c = malloc(sizeof(struct api_client));
+	
+	c->event_queue = g_async_queue_new();
+
+	return c;
+}
+
+static void api_client_destroy(struct api_client *c)
+{
+	g_async_queue_unref(c->event_queue);
+}
+
 typedef int (*api_cb_t)(struct api_client *c, struct MHD_Connection *connection, struct json_object **out);
 
 static int token_api_cb(struct api_client *c, struct MHD_Connection *connection, struct json_object **out);
@@ -344,6 +359,8 @@ static int scan_api_cb(struct api_client *c, struct MHD_Connection *connection, 
 
 static int poll_api_cb(struct api_client *c, struct MHD_Connection *connection, struct json_object **out)
 {
+	*out = (struct json_object *)g_async_queue_pop(c->event_queue);
+
 	return 0;
 }
 
@@ -384,6 +401,7 @@ static int api_serve(struct httpd *h, struct MHD_Connection *connection, const c
 	/* return a HTTP 400 (bad request) if request parameters are not valid */
 	/* TODO */
 
+	j_response = NULL;
 	ret = (*api_cb)(NULL, connection, &j_response);
 	json_buff = json_object_to_json_string(j_response);
 
@@ -405,38 +423,6 @@ static int api_serve(struct httpd *h, struct MHD_Connection *connection, const c
 
 	return ret;
 }
-
-#if 0
-static int old_api_serve(struct httpd *h, struct MHD_Connection *connection, const char *url)
-{
-	struct MHD_Response *response;
-	struct json_object *j_response ;
-	const char *json_buff;
-	int ret;
-
-	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "in api_serve(): event queue %p", h->event_queue);
-	j_response = (struct json_object *)g_async_queue_pop(h->event_queue);
-	json_buff = json_object_to_json_string(j_response);
-	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "json buffer %s", json_buff);
-
-	response = MHD_create_response_from_buffer(strlen(json_buff), (char *)json_buff, MHD_RESPMEM_MUST_COPY);
-
-	json_object_put(j_response); /* free the json object */
-
-	if (response == NULL) {
-		return MHD_NO;
-	}
-
-	MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_TYPE, "application/json");
-	MHD_add_response_header(response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN, "*");
-	/* Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept */
-
-	ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
-	MHD_destroy_response(response);
-
-	return ret;
-}
-#endif
 
 static const char *get_path(const char *url)
 {
@@ -561,10 +547,7 @@ struct httpd *httpd_new(unsigned short port)
 	h->magic = magic_open(MAGIC_MIME_TYPE);
 	magic_load(h->magic, NULL);
 
-#if 0
-	h->event_queue = g_async_queue_new();
-	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "in httpd_new(): event queue %p", h->event_queue);
-#endif
+	h->client_table = g_hash_table_new (g_int64_hash, g_int64_equal);
 
 	channel = g_io_channel_unix_new(h->listen_sock);
 	g_io_add_watch(channel, G_IO_IN, httpd_listen_cb, h);
@@ -574,11 +557,51 @@ struct httpd *httpd_new(unsigned short port)
 	return h;
 }
 
+void httpd_destroy(struct httpd *h)
+{
+	MHD_stop_daemon(h->daemon);
+	magic_close(h->magic);
+
+	g_hash_table_destroy(h->client_table);
+}
+
+
+/* DEPRECATED CODE */
+#if 0
+static int old_api_serve(struct httpd *h, struct MHD_Connection *connection, const char *url)
+{
+	struct MHD_Response *response;
+	struct json_object *j_response ;
+	const char *json_buff;
+	int ret;
+
+	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "in api_serve(): event queue %p", h->event_queue);
+	j_response = (struct json_object *)g_async_queue_pop(h->event_queue);
+	json_buff = json_object_to_json_string(j_response);
+	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "json buffer %s", json_buff);
+
+	response = MHD_create_response_from_buffer(strlen(json_buff), (char *)json_buff, MHD_RESPMEM_MUST_COPY);
+
+	json_object_put(j_response); /* free the json object */
+
+	if (response == NULL) {
+		return MHD_NO;
+	}
+
+	MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_TYPE, "application/json");
+	MHD_add_response_header(response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+	/* Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept */
+
+	ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+	MHD_destroy_response(response);
+
+	return ret;
+}
+
 static gpointer gen_events(gpointer data)
 {
 	struct httpd *h = (struct httpd *)data;
 
-#if 0
 	while (1) {
 		struct a6o_report *r = report_fake_new();
 		struct json_object *jr = json_on_demand_progress_event_new(r);
@@ -593,7 +616,6 @@ static gpointer gen_events(gpointer data)
 
 		sleep(3);
 	}
-#endif
 
 	return NULL;
 }
@@ -602,16 +624,12 @@ void httpd_gen_fake_events(struct httpd *h)
 {
 	GThread *gen_events_thread;
 
-#if 0
 	g_async_queue_ref(h->event_queue);
-#endif
+
 	gen_events_thread = g_thread_new("gen_events", gen_events, h);
 }
 
-int httpd_destroy(struct httpd *h)
-{
-	MHD_stop_daemon(h->daemon);
-	magic_close(h->magic);
-}
+#endif
+
 
 
