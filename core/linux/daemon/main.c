@@ -276,7 +276,6 @@ static void start_http_server(struct a6o_daemon_options *opts)
 	log_init(opts->s_log_level, !opts->no_daemon);
 
 	h = httpd_new(opts->port);
-		//httpd_gen_fake_events(h);
 
 	loop = g_main_loop_new(NULL, FALSE);
 	g_main_loop_run(loop);
