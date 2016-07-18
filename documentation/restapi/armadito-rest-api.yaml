@@ -44,7 +44,7 @@ paths:
         - application/json
       parameters:
         - in: header
-          name: token
+          name: X-Armadito-Token
           description: session token
           required: true
           type: integer
@@ -66,6 +66,15 @@ paths:
     get:
       description:
         get the server status
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: X-Armadito-Token
+          description: session token
+          required: true
+          type: integer
+          format: int64
       responses:
         200:
           description: success
@@ -84,6 +93,12 @@ paths:
       produces:
         - application/json
       parameters:
+        - in: header
+          name: X-Armadito-Token
+          description: session token
+          required: true
+          type: integer
+          format: int64
         - in: body
           name: body
           description: scan object
@@ -100,6 +115,15 @@ paths:
     get:
       description:
         get server push event
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: X-Armadito-Token
+          description: session token
+          required: true
+          type: integer
+          format: int64
       responses:
         200:
           description: event received OK
@@ -127,16 +151,11 @@ definitions:
   Pong:
     type: object
     properties:
-      response:
+      status:
         type: string
-        description: contains the server response
-      params:
-        type: object
-        description: contains the server response content
-        properties:
-          value:
-            type: number
-            description: the time
+        description: contains the server status
+        enum: 
+          - "ok"
 
   AntivirusStatus:
     type: object
