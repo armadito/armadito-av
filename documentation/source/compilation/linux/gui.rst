@@ -45,7 +45,7 @@ After cloning the repository, the source tree of the user interface must be conf
 
 ::
 
-	cd SOMEWHERE/armadito-av/gui
+	cd /home/joebar/armadito-av/gui
 	bower install
 	npm install
 
@@ -53,14 +53,65 @@ After cloning the repository, the source tree of the user interface must be conf
 Installing node webkit
 ----------------------
 
-After downloading latest stable SDK from http://nwjs.io/downloads/, untar the tarball:
+Downloading the latest normal 32 and 64 bit from http://nwjs.io/downloads/, under the tarball:
 
 ::
 
-	cd SOMEWHEREELSE
-	tar xvzf nwjs-v0.14.0-linux-x64.tar.gz  ### adapt w.r.t. distribution, 32 or 64 bits
+        into the /home/joebar/install
 
 That's all
+
+Configuration
+-------------
+
+Once git repo cloned, you need to initialize the build using automake, autoconf and tools.
+A shell script **autogen.sh** is provided to ease this step:
+
+::
+
+    $ ./autogen.sh 
+    + aclocal --force
+    + automake --foreign --add-missing --force-missing --copy
+    + autoconf --force
+
+This will generate the **Makefile.in** files and the **configure** script.
+
+**configure** script takes the following useful options:
+
+    --prefix=PREFIX         install architecture-independent files in PREFIX [default is /usr/local]
+    
+The **PREFIX** directory will be used by **make install**. Its use is mandatory, unless 
+building a package and installing in system directories, since building the
+scanning modules and the graphical user interface will need a libarmadito properly
+installed.
+
+Typical invocation of the configure script is:
+
+::
+
+    $ /home/joebar/armadito-av/gui/configure --prefix=/home/joebar/install --enable-debug 
+
+Building
+--------
+
+Once configured, build is easy:
+
+::
+
+    $ make
+
+
+Installing
+----------
+
+After build, installation is done by:
+
+::
+
+    $ make install
+
+This will install libraries, tools, header files... in the subdirectories of the **PREFIX**
+directory defined at configure time.
 
 Running the interface
 ---------------------
@@ -71,8 +122,7 @@ The user interface can be launched with:
 
 ::
 
-	cd SOMEWHERE/ng-armadito
-	SOMEWHEREELSE/nwjs-sdk-v0.13.4-linux-x64/nw .
+	exec /home/joebar/install/lib/armadito/gui/nwjs/current/nw /home/joebar/install/lib/armadito/gui
 
 
 Debugging the interface
