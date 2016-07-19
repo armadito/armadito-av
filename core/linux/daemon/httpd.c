@@ -54,7 +54,11 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #define A6O_HTTP_HEADER_TOKEN "X-Armadito-Token"
 
+#undef USE_GLIB_CHANNEL
+#define USE_MHD_THREAD_POOL
+
 struct httpd {
+	unsigned short port;
 	int listen_sock;
 	struct MHD_Daemon *daemon;
 	struct MHD_Response *response_400;
@@ -388,7 +392,7 @@ static int api_serve(struct httpd *h, struct MHD_Connection *connection, const c
 		return MHD_queue_response(connection, MHD_HTTP_FORBIDDEN, h->response_403);
 	}
 
-	/* if endpoint is not /token, return a HTTP 400 (bad request) if no token in HTTP headers */
+	/* if endpoint is not /token and if no token in HTTP headers, return a HTTP 400 (bad request) */
 	if (strcmp(path, "/token")) {
 		if (api_get_token(connection, &api_token) == NULL) {
 			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API path %s has no token", path);
@@ -482,6 +486,7 @@ static int open_listen_socket(short port)
 	return sock;
 }
 
+#ifdef USE_GLIB_CHANNEL
 static gboolean httpd_listen_cb(GIOChannel *source, GIOCondition condition, gpointer data)
 {
 	struct httpd *h = (struct httpd *)data;
@@ -508,6 +513,67 @@ static gboolean httpd_listen_cb(GIOChannel *source, GIOCondition condition, gpoi
 	return TRUE;
 }
 
+static void notify_completed_cb(void *cls, struct MHD_Connection *connection, void **con_cls, enum MHD_RequestTerminationCode toe)
+{
+	const union MHD_ConnectionInfo *info;
+
+	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG, "connection completed: toe = %d", toe);
+
+	info = MHD_get_connection_info(connection, MHD_CONNECTION_INFO_CONNECTION_FD);
+
+	switch(toe) {
+	case MHD_REQUEST_TERMINATED_COMPLETED_OK:
+		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG, "connection completed ok: fd = %d", info->connect_fd);
+		if (close(info->connect_fd) < 0) {
+			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "connection close failed (%s)", strerror(errno));
+		}
+		break;
+	case MHD_REQUEST_TERMINATED_WITH_ERROR:
+		break;
+	case MHD_REQUEST_TERMINATED_TIMEOUT_REACHED:
+		break;
+	case MHD_REQUEST_TERMINATED_DAEMON_SHUTDOWN:
+		break;
+	case MHD_REQUEST_TERMINATED_READ_ERROR:
+		break;
+	case MHD_REQUEST_TERMINATED_CLIENT_ABORT:
+		break;
+	}
+}
+
+static void create_daemon(struct httpd *h)
+{
+	GIOChannel *channel;
+
+	h->listen_sock = open_listen_socket(h->port);
+	if(h->listen_sock < 0) {
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "error opening server TCP socket (%s)", strerror(errno));
+		return;
+	}
+
+	h->daemon = MHD_start_daemon(MHD_USE_NO_LISTEN_SOCKET | MHD_USE_THREAD_PER_CONNECTION, 0, NULL, NULL, answer_to_connection, h,
+			MHD_OPTION_NOTIFY_COMPLETED, notify_completed_cb, NULL,
+			MHD_OPTION_END);
+
+
+	channel = g_io_channel_unix_new(h->listen_sock);
+	g_io_add_watch(channel, G_IO_IN, httpd_listen_cb, h);	
+}
+#endif
+
+#ifdef USE_MHD_THREAD_POOL
+static struct MHD_Daemon *create_daemon(struct httpd *h)
+{
+	struct sockaddr_in listening_addr;
+
+	listening_addr.sin_family = AF_INET;
+	listening_addr.sin_port = htons(h->port);
+	listening_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+
+	h->daemon = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION, 0, NULL, NULL, answer_to_connection, h, MHD_OPTION_SOCK_ADDR, &listening_addr, MHD_OPTION_END);
+}
+#endif
+
 static struct MHD_Response *create_std_response(const char *page)
 {
 	struct MHD_Response *resp;
@@ -522,24 +588,11 @@ static struct MHD_Response *create_std_response(const char *page)
 struct httpd *httpd_new(unsigned short port)
 {
 	struct httpd *h = malloc(sizeof(struct httpd));
-	GIOChannel *channel;
 
-	h->listen_sock = open_listen_socket(port);
-	if(h->listen_sock < 0) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "error opening server TCP socket (%s)", strerror(errno));
-		free(h);
-		return NULL;
-	}
-
-	h->daemon = MHD_start_daemon(MHD_USE_NO_LISTEN_SOCKET | MHD_USE_THREAD_PER_CONNECTION, 0, NULL, NULL, answer_to_connection, h, MHD_OPTION_END);
-
-	if (h->daemon == NULL) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "error creating microhttpd server");
-		close(h->listen_sock);
-		free(h);
-		return NULL;
-	}
-
+	h->listen_sock = -1;
+	h->port = port;
+	h->daemon = NULL;
+	
 	h->response_400 = create_std_response(PAGE_400);
 	h->response_403 = create_std_response(PAGE_403);
 	h->response_404 = create_std_response(PAGE_404);
@@ -549,8 +602,14 @@ struct httpd *httpd_new(unsigned short port)
 
 	h->client_table = g_hash_table_new (g_int64_hash, g_int64_equal);
 
-	channel = g_io_channel_unix_new(h->listen_sock);
-	g_io_add_watch(channel, G_IO_IN, httpd_listen_cb, h);
+	create_daemon(h);
+	if (h->daemon == NULL) {
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "error creating microhttpd server");
+		if (h->listen_sock > 0)
+			close(h->listen_sock);
+		free(h);
+		return NULL;
+	}
 
 	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_INFO , "HTTP server started on port %d", port);
 
