@@ -42,6 +42,11 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
+#ifdef _WIN32
+#include <sys/timeb.h>
+#elif defined(linux)
+#include <sys/time.h>
+#endif
 #include <unistd.h>
 #include <libarmadito.h>
 
@@ -67,6 +72,10 @@ struct httpd {
 	GHashTable *client_table;
 	magic_t magic;
 };
+
+static int httpd_add_client(struct httpd *h, int64_t token);
+static struct api_client *httpd_get_client(struct httpd *h, int64_t token);
+static int httpd_remove_client(struct httpd *h, int64_t token);
 
 #define MAGIC_HEADER_SIZE (8 * 1024)
 
@@ -240,10 +249,10 @@ struct api_client {
 	GAsyncQueue *event_queue;
 };
 
-static struct api_client *api_client_new(struct httpd *h, int64_t api_token)
+static struct api_client *api_client_new(void)
 {
 	struct api_client *c = malloc(sizeof(struct api_client));
-	
+
 	c->event_queue = g_async_queue_new();
 
 	return c;
@@ -254,12 +263,12 @@ static void api_client_destroy(struct api_client *c)
 	g_async_queue_unref(c->event_queue);
 }
 
-typedef int (*api_cb_t)(struct api_client *c, struct MHD_Connection *connection, struct json_object **out);
+typedef int (*api_cb_t)(struct httpd *h, struct MHD_Connection *connection, struct json_object **out);
 
-static int token_api_cb(struct api_client *c, struct MHD_Connection *connection, struct json_object **out);
-static int ping_api_cb(struct api_client *c, struct MHD_Connection *connection, struct json_object **out);
-static int scan_api_cb(struct api_client *c, struct MHD_Connection *connection, struct json_object **out);
-static int poll_api_cb(struct api_client *c, struct MHD_Connection *connection, struct json_object **out);
+static int token_api_cb(struct httpd *h, struct MHD_Connection *connection, struct json_object **out);
+static int ping_api_cb(struct httpd *h, struct MHD_Connection *connection, struct json_object **out);
+static int scan_api_cb(struct httpd *h, struct MHD_Connection *connection, struct json_object **out);
+static int poll_api_cb(struct httpd *h, struct MHD_Connection *connection, struct json_object **out);
 
 static struct api_dispatch_entry {
 	const char *path;
@@ -294,7 +303,7 @@ static const char *api_get_user_agent(struct MHD_Connection *connection)
 static const char *api_get_token(struct MHD_Connection *connection, int64_t *p_token)
 {
 	const char *s_token;
-	
+
 	s_token = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, A6O_HTTP_HEADER_TOKEN);
 	if (s_token != NULL)
 		*p_token = atoll(s_token);
@@ -322,8 +331,8 @@ static void hash_str(const char *str, int64_t *hash)
 	for ( ; *str; str++)
 		HASH_ONE(*hash, *str);
 }
- 
-static int token_api_cb(struct api_client *c, struct MHD_Connection *connection, struct json_object **out)
+
+static int token_api_cb(struct httpd *h, struct MHD_Connection *connection, struct json_object **out)
 {
 	int64_t token;
 	const char *user_agent;
@@ -339,16 +348,18 @@ static int token_api_cb(struct api_client *c, struct MHD_Connection *connection,
 
 	if (token < 0)
 		token = -token;
-		
+
 	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "token %lld", token);
 
 	*out = json_object_new_object();
 	json_object_object_add(*out, "token", json_object_new_int64(token));
 
+	httpd_add_client(h, token);
+
 	return 0;
 }
 
-static int ping_api_cb(struct api_client *c, struct MHD_Connection *connection, struct json_object **out)
+static int ping_api_cb(struct httpd *h, struct MHD_Connection *connection, struct json_object **out)
 {
 	*out = json_object_new_object();
 	json_object_object_add(*out, "status", json_object_new_string("ok"));
@@ -356,16 +367,109 @@ static int ping_api_cb(struct api_client *c, struct MHD_Connection *connection, 
 	return 0;
 }
 
-static int scan_api_cb(struct api_client *c, struct MHD_Connection *connection, struct json_object **out)
+static struct json_object *report_json(struct a6o_report *report)
+{
+	struct json_object *j_report;
+
+	j_report = json_object_new_object();
+
+	json_object_object_add(j_report, "progress", json_object_new_int(report->progress));
+	json_object_object_add(j_report, "malware_count", json_object_new_int(report->malware_count));
+	json_object_object_add(j_report, "suspicious_count", json_object_new_int(report->suspicious_count));
+	json_object_object_add(j_report, "scanned_count", json_object_new_int(report->scanned_count));
+
+	if (report->path != NULL)
+		json_object_object_add(j_report, "path", json_object_new_string(report->path));
+
+	json_object_object_add(j_report, "scan_status", json_object_new_string(a6o_file_status_pretty_str(report->status)));
+	json_object_object_add(j_report, "scan_action", json_object_new_string(a6o_action_pretty_str(report->action)));
+
+	if (report->mod_name != NULL)
+		json_object_object_add(j_report, "mod_name", json_object_new_string(report->mod_name));
+
+	if (report->mod_report != NULL)
+		json_object_object_add(j_report, "mod_report", json_object_new_string(report->mod_report));
+
+	return j_report;
+}
+
+struct scan_data {
+	struct api_client *client;
+	time_t last_send_time;
+	int last_send_progress;
+	struct a6o_on_demand *on_demand;
+};
+
+#ifdef linux
+static time_t get_milliseconds(void)
+{
+	struct timeval now;
+
+	if (gettimeofday(&now, NULL) < 0) {
+		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR, "error getting time IHM (%s)", strerror(errno));
+		return 0;
+	}
+
+	return now.tv_sec * 1000 + now.tv_usec / 1000;
+}
+#endif
+
+#ifdef _WIN32
+static time_t get_milliseconds( ) {
+
+	time_t ms = 0;
+	struct _timeb tb;
+
+	_ftime64_s(&tb);
+	ms = tb.time * 1000 + tb.millitm;
+
+	return ms;
+}
+#endif
+
+#define SEND_PERIOD 200  /* milliseconds */
+
+static void scan_callback(struct a6o_report *report, void *callback_data)
+{
+	struct json_object *j_report;
+	struct scan_data *scan_data = (struct scan_data *)callback_data;
+	time_t now = get_milliseconds();
+
+	if (report->status == ARMADITO_CLEAN
+		&& report->progress != 100
+		&& scan_data->last_send_progress != REPORT_PROGRESS_UNKNOWN
+		&& scan_data->last_send_progress == report->progress
+		&& scan_data->last_send_time != 0
+		&& (now - scan_data->last_send_time) < SEND_PERIOD)
+		return;
+
+	j_report = report_json(report);
+
+	g_async_queue_push(scan_data->client->event_queue, j_report);
+
+	scan_data->last_send_time = now;
+	scan_data->last_send_progress = report->progress;
+}
+
+static int scan_api_cb(struct httpd *h, struct MHD_Connection *connection, struct json_object **out)
 {
 	return 0;
 }
 
-static int poll_api_cb(struct api_client *c, struct MHD_Connection *connection, struct json_object **out)
+static int poll_api_cb(struct httpd *h, struct MHD_Connection *connection, struct json_object **out)
 {
-	*out = (struct json_object *)g_async_queue_pop(c->event_queue);
+	int64_t token;
+	struct api_client *client;
 
-	return 0;
+	api_get_token(connection, &token);
+	client = httpd_get_client(h, token);
+
+	if (client != NULL) {
+		*out = (struct json_object *)g_async_queue_pop(client->event_queue);
+		return 0;
+	}
+
+	return 1;
 }
 
 static int api_serve(struct httpd *h, struct MHD_Connection *connection, const char *path)
@@ -374,7 +478,7 @@ static int api_serve(struct httpd *h, struct MHD_Connection *connection, const c
 	struct json_object *j_response;
 	api_cb_t api_cb;
 	struct MHD_Response *response;
-	int64_t api_token;
+	int64_t token;
 	int ret;
 
 	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "request to API: path %s", path);
@@ -394,19 +498,19 @@ static int api_serve(struct httpd *h, struct MHD_Connection *connection, const c
 
 	/* if endpoint is not /token and if no token in HTTP headers, return a HTTP 400 (bad request) */
 	if (strcmp(path, "/token")) {
-		if (api_get_token(connection, &api_token) == NULL) {
+		if (api_get_token(connection, &token) == NULL) {
 			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API path %s has no token", path);
 			return MHD_queue_response(connection, MHD_HTTP_FORBIDDEN, h->response_400);
 		}
-		
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "api token %lld", api_token);
+
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "api token %lld", token);
 	}
 
 	/* return a HTTP 400 (bad request) if request parameters are not valid */
 	/* TODO */
 
 	j_response = NULL;
-	ret = (*api_cb)(NULL, connection, &j_response);
+	ret = (*api_cb)(h, connection, &j_response);
 	json_buff = json_object_to_json_string(j_response);
 
 	response = MHD_create_response_from_buffer(strlen(json_buff), (char *)json_buff, MHD_RESPMEM_MUST_COPY);
@@ -458,6 +562,7 @@ static int answer_to_connection(void *cls, struct MHD_Connection *connection,
 	return content_serve(h, connection, url_path);
 }
 
+#ifdef USE_GLIB_CHANNEL
 static int open_listen_socket(short port)
 {
 	int sock, optval, r;
@@ -486,7 +591,6 @@ static int open_listen_socket(short port)
 	return sock;
 }
 
-#ifdef USE_GLIB_CHANNEL
 static gboolean httpd_listen_cb(GIOChannel *source, GIOCondition condition, gpointer data)
 {
 	struct httpd *h = (struct httpd *)data;
@@ -557,7 +661,7 @@ static void create_daemon(struct httpd *h)
 
 
 	channel = g_io_channel_unix_new(h->listen_sock);
-	g_io_add_watch(channel, G_IO_IN, httpd_listen_cb, h);	
+	g_io_add_watch(channel, G_IO_IN, httpd_listen_cb, h);
 }
 #endif
 
@@ -582,9 +686,8 @@ static struct MHD_Response *create_std_response(const char *page)
 	MHD_add_response_header(resp,  MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
 	MHD_add_response_header(resp, MHD_HTTP_HEADER_CONNECTION, "close");
 
-	return resp;	
+	return resp;
 }
-
 struct httpd *httpd_new(unsigned short port)
 {
 	struct httpd *h = malloc(sizeof(struct httpd));
@@ -592,7 +695,7 @@ struct httpd *httpd_new(unsigned short port)
 	h->listen_sock = -1;
 	h->port = port;
 	h->daemon = NULL;
-	
+
 	h->response_400 = create_std_response(PAGE_400);
 	h->response_403 = create_std_response(PAGE_403);
 	h->response_404 = create_std_response(PAGE_404);
@@ -600,7 +703,7 @@ struct httpd *httpd_new(unsigned short port)
 	h->magic = magic_open(MAGIC_MIME_TYPE);
 	magic_load(h->magic, NULL);
 
-	h->client_table = g_hash_table_new (g_int64_hash, g_int64_equal);
+	h->client_table = g_hash_table_new_full(g_int64_hash, g_int64_equal, (GDestroyNotify)free, (GDestroyNotify)api_client_destroy);
 
 	create_daemon(h);
 	if (h->daemon == NULL) {
@@ -614,6 +717,59 @@ struct httpd *httpd_new(unsigned short port)
 	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_INFO , "HTTP server started on port %d", port);
 
 	return h;
+}
+
+static int httpd_add_client(struct httpd *h, int64_t token)
+{
+	int64_t *p_key;
+	struct api_client *client;
+
+	p_key = malloc(sizeof(int64_t));
+	*p_key = token;
+
+	if (g_hash_table_contains(h->client_table, p_key)) {
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "API token %lld already registered", token);
+		free(p_key);
+		return 0;
+	}
+
+	client = api_client_new();
+
+	return g_hash_table_insert(h->client_table, p_key, client);
+}
+
+static struct api_client *httpd_get_client(struct httpd *h, int64_t token)
+{
+	int64_t *p_key;
+	struct api_client *c;
+
+	p_key = malloc(sizeof(int64_t));
+	*p_key = token;
+
+	c = g_hash_table_lookup(h->client_table, p_key);
+
+	if (c == NULL)
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "API token %lld is not registered", token);
+
+	free(p_key);
+
+	return c;
+}
+
+static int httpd_remove_client(struct httpd *h, int64_t token)
+{
+	int64_t *p_key;
+
+	p_key = malloc(sizeof(int64_t));
+	*p_key = token;
+
+	if (!g_hash_table_contains(h->client_table, p_key)) {
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "API token %lld is not registered", token);
+		free(p_key);
+		return 0;
+	}
+
+	return g_hash_table_remove(h->client_table, p_key);
 }
 
 void httpd_destroy(struct httpd *h)
