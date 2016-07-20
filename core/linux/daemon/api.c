@@ -33,7 +33,10 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 /* usefull??? */
 typedef int64_t api_token_t;
 
-#define A6O_HTTP_HEADER_TOKEN "X-Armadito-Token"
+#define API_TOKEN_HEADER "X-Armadito-Token"
+#define JSON_400 "{\"code\":400, \"message\": \"Bad Request. Make sure your request has a X-Armadito-Token header\"}"
+#define JSON_403 "{\"code\":403, \"message\": \"Request forbidden. Make sure your request has a User-Agent header\"}"
+#define JSON_404 "{\"code\":404, \"message\": \"Not found\"}"
 
 struct api_handler {
 	GHashTable *client_table;
@@ -106,7 +109,7 @@ static const char *api_get_token(struct MHD_Connection *connection, int64_t *p_t
 {
 	const char *s_token;
 
-	s_token = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, A6O_HTTP_HEADER_TOKEN);
+	s_token = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, API_TOKEN_HEADER);
 	if (s_token != NULL)
 		*p_token = atoll(s_token);
 
@@ -294,14 +297,14 @@ int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection, 
 
 	/* return a HTTP 403 (forbidden) if no User-Agent header */
 	if (api_get_user_agent(connection) == NULL) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API path %s has no User-Agent", path);
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API path %s has no User-Agent header", path);
 		return MHD_queue_response(connection, MHD_HTTP_FORBIDDEN, a->response_403);
 	}
 
 	/* if endpoint is not /token and if no token in HTTP headers, return a HTTP 400 (bad request) */
 	if (strcmp(path, "/token")) {
 		if (api_get_token(connection, &token) == NULL) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API path %s has no token", path);
+			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API path %s has no " API_TOKEN_HEADER " header", path);
 			return MHD_queue_response(connection, MHD_HTTP_FORBIDDEN, a->response_400);
 		}
 
@@ -334,11 +337,26 @@ int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection, 
 	return ret;
 }
 
+static struct MHD_Response *create_std_response(const char *json)
+{
+	struct MHD_Response *resp;
+
+	resp = MHD_create_response_from_buffer(strlen(json), (char *)json, MHD_RESPMEM_PERSISTENT);
+	MHD_add_response_header(resp,  MHD_HTTP_HEADER_CONTENT_TYPE, "application/json");
+	MHD_add_response_header(resp, MHD_HTTP_HEADER_CONNECTION, "close");
+
+	return resp;
+}
+
 struct api_handler *api_handler_new(void)
 {
 	struct api_handler *a = malloc(sizeof(struct api_handler));
 
 	a->client_table = g_hash_table_new_full(g_int64_hash, g_int64_equal, (GDestroyNotify)free, (GDestroyNotify)api_client_destroy);
+
+	a->response_400 = create_std_response(JSON_400);
+	a->response_403 = create_std_response(JSON_403);
+ 	a->response_404 = create_std_response(JSON_404);
 
 	return a;
 }
