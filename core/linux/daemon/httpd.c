@@ -56,6 +56,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "reportp.h"
 
 #define PAGE_404 "<html><head><title>not found!</title></head><body>not found!</body></html>\n"
+#define PAGE_405 "<html><head><title>not allowed!</title></head><body>Method not allowed for this ressource!</body></html>\n"
 
 #undef USE_GLIB_CHANNEL
 #define USE_MHD_THREAD_POOL
@@ -65,6 +66,7 @@ struct httpd {
 	int listen_sock;
 	struct MHD_Daemon *daemon;
 	struct MHD_Response *response_404;
+	struct MHD_Response *response_405;
 	magic_t magic;
 	struct api_handler *api_handler;
 };
@@ -206,14 +208,21 @@ static int answer_to_connection(void *cls, struct MHD_Connection *connection,
 
 	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "got request for: %s", url);
 
-	if (strcmp(method, MHD_HTTP_METHOD_GET) != 0
-		&& strcmp(method, MHD_HTTP_METHOD_POST) != 0)
-		return MHD_NO; /* should return a response saying "invalid method" */
+	if (strcmp(method, MHD_HTTP_METHOD_GET) && strcmp(method, MHD_HTTP_METHOD_POST)) {
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "method %s not allowed for %s", method, url);
+		return MHD_queue_response(connection, MHD_HTTP_METHOD_NOT_ALLOWED, h->response_405);
+	}
 
 	url_path = get_path(url);
 
 	if (!strncmp(url_path, "/api", 4))
 		return api_handler_serve(h->api_handler, connection, url_path + 4);
+
+	/* method POST is not allowed for content */
+	if (!strcmp(method, MHD_HTTP_METHOD_POST)) {
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "method POST not allowed for %s", url);
+		return MHD_queue_response(connection, MHD_HTTP_METHOD_NOT_ALLOWED, h->response_405);
+	}
 
 	return content_serve(h, connection, url_path);
 }
@@ -354,6 +363,7 @@ struct httpd *httpd_new(unsigned short port)
 	h->daemon = NULL;
 
 	h->response_404 = create_std_response(PAGE_404);
+	h->response_405 = create_std_response(PAGE_405);
 
 	h->magic = magic_open(MAGIC_MIME_TYPE);
 	magic_load(h->magic, NULL);
