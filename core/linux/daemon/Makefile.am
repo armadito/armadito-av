@@ -8,6 +8,8 @@ armadito_scand_LDADD=$(top_builddir)/libarmadito/src/libarmadito.la $(top_buildd
 
 armadito_scand_SOURCES= \
 main.c \
+api.c \
+api.h \
 httpd.c \
 httpd.h \
 ipc.c \
@@ -24,7 +26,7 @@ daemonize.c \
 daemonize.h \
 unixsockserver.c \
 unixsockserver.h \
-../net/netdefaults.h 
+../net/netdefaults.h
 
 install-exec-hook:
 	-mkdir -p $(DESTDIR)$(localstatedir)/run
