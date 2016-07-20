@@ -55,8 +55,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "api.h"
 #include "reportp.h"
 
-#define PAGE_400 "<html><head><title>forbidden!</title></head><body>Bad Request. Make sure your request has a X-Armadito-Token header.</body></html>\n"
-#define PAGE_403 "<html><head><title>forbidden!</title></head><body>Request forbidden. Make sure your request has a User-Agent header.</body></html>\n"
 #define PAGE_404 "<html><head><title>not found!</title></head><body>not found!</body></html>\n"
 
 #undef USE_GLIB_CHANNEL
@@ -66,10 +64,9 @@ struct httpd {
 	unsigned short port;
 	int listen_sock;
 	struct MHD_Daemon *daemon;
-	struct MHD_Response *response_400;
-	struct MHD_Response *response_403;
 	struct MHD_Response *response_404;
 	magic_t magic;
+	struct api_handler *api_handler;
 };
 
 static int httpd_add_client(struct httpd *h, int64_t token);
@@ -216,7 +213,7 @@ static int answer_to_connection(void *cls, struct MHD_Connection *connection,
 	url_path = get_path(url);
 
 	if (!strncmp(url_path, "/api", 4))
-		return api_serve(h, connection, url_path + 4);
+		return api_handler_serve(h->api_handler, connection, url_path + 4);
 
 	return content_serve(h, connection, url_path);
 }
@@ -347,6 +344,7 @@ static struct MHD_Response *create_std_response(const char *page)
 
 	return resp;
 }
+
 struct httpd *httpd_new(unsigned short port)
 {
 	struct httpd *h = malloc(sizeof(struct httpd));
@@ -355,14 +353,10 @@ struct httpd *httpd_new(unsigned short port)
 	h->port = port;
 	h->daemon = NULL;
 
-	h->response_400 = create_std_response(PAGE_400);
-	h->response_403 = create_std_response(PAGE_403);
 	h->response_404 = create_std_response(PAGE_404);
 
 	h->magic = magic_open(MAGIC_MIME_TYPE);
 	magic_load(h->magic, NULL);
-
-	h->client_table = g_hash_table_new_full(g_int64_hash, g_int64_equal, (GDestroyNotify)free, (GDestroyNotify)api_client_destroy);
 
 	create_daemon(h);
 	if (h->daemon == NULL) {
@@ -373,6 +367,8 @@ struct httpd *httpd_new(unsigned short port)
 		return NULL;
 	}
 
+	h->api_handler = api_handler_new();
+
 	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_INFO , "HTTP server started on port %d", port);
 
 	return h;
@@ -382,8 +378,6 @@ void httpd_destroy(struct httpd *h)
 {
 	MHD_stop_daemon(h->daemon);
 	magic_close(h->magic);
-
-	g_hash_table_destroy(h->client_table);
 }
 
 

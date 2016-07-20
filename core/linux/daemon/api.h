@@ -34,10 +34,10 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "httpd.h"
 
-struct a6o_api;
+struct api_handler;
 
-int a6o_api_serve(struct a6o_api *a, struct MHD_Connection *connection, const char *path);
+struct api_handler *api_handler_new(void);
 
-
+int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection, const char *path);
 
 #endif
