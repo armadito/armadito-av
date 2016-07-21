@@ -77,6 +77,22 @@ static int httpd_remove_client(struct httpd *h, int64_t token);
 
 #define MAGIC_HEADER_SIZE (8 * 1024)
 
+#ifdef DEBUG
+static int value_print(void *cls, enum MHD_ValueKind kind, const char *key, const char *value)
+{
+	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "key %s value %s", key, value);
+
+	return MHD_YES;
+}
+
+void connection_debug(struct MHD_Connection *connection)
+{
+	int r;
+
+	r = MHD_get_connection_values(connection, MHD_HEADER_KIND, value_print, NULL);
+}
+#endif
+
 static int is_url_valid(const char *url)
 {
 	if (!strcmp(url, "/"))
@@ -198,28 +214,112 @@ static const char *get_path(const char *url)
 	return url;
 }
 
-static int answer_to_connection(void *cls, struct MHD_Connection *connection,
-				const char *url, const char *method,
-				const char *version, const char *upload_data,
-				size_t *upload_data_size, void **con_cls)
+static enum http_method get_method(const char *method)
+{
+	if(!strcmp(method, MHD_HTTP_METHOD_GET))
+		return HTTP_METHOD_GET;
+	if(!strcmp(method, MHD_HTTP_METHOD_POST))
+		return HTTP_METHOD_POST;
+	return HTTP_METHOD_OTHER;
+}
+
+static int iterate_post(void *coninfo_cls, enum MHD_ValueKind kind, const char *key,
+			const char *filename, const char *content_type, const char *transfer_encoding,
+			const char *data, uint64_t off, size_t size)
+{
+  struct request_info *info = coninfo_cls;
+
+  return MHD_YES;
+}
+
+struct request_info {
+	enum http_method method;
+	const char *request_data;
+	size_t request_data_size;
+	struct MHD_PostProcessor *post_processor;
+};
+
+#define POST_BUFFER_SIZE 32768
+
+static struct request_info *request_info_new(struct MHD_Connection *connection, enum http_method method)
+{
+	struct request_info *info = malloc(sizeof(struct request_info));
+
+	info->method = method;
+	info->request_data = NULL;
+	info->request_data_size = 0;
+
+	if (method == HTTP_METHOD_POST)
+		info->post_processor = MHD_create_post_processor(connection, POST_BUFFER_SIZE, iterate_post, info);
+	else
+		info->post_processor = NULL;
+
+	return info;
+}
+
+static void request_info_free(struct request_info *info)
+{
+	if (info->request_data != NULL)
+		free((void *)info->request_data);
+
+	free((void *)info);
+}
+
+static int anwser_to_api(struct MHD_Connection *connection,
+	enum http_method method, const char *api_path,
+	struct api_handler *api_handler,
+	const char *upload_data, size_t *upload_data_size, void **con_cls)
+{
+	if (method == HTTP_METHOD_GET)
+		return api_handler_serve(api_handler, connection, api_path, method);
+
+	if (*con_cls == NULL) {
+		*con_cls = request_info_new(connection, method);
+		return MHD_YES;
+	}
+
+	if (*upload_data_size != 0) {
+		struct request_info *info = (struct request_info *)(*con_cls);
+
+		MHD_post_process(info->post_processor, upload_data, *upload_data_size);
+		*upload_data_size = 0;
+
+		return MHD_YES;
+	}
+
+	return api_handler_serve(api_handler, connection, api_path, method);
+}
+
+static int answer_to_connection_cb(void *cls, struct MHD_Connection *connection,
+	const char *url, const char *s_method,
+	const char *version, const char *upload_data,
+	size_t *upload_data_size, void **con_cls)
 {
 	const char *url_path;
 	struct httpd *h = (struct httpd *)cls;
+	enum http_method method = get_method(s_method);
 
 	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "got request for: %s", url);
 
-	if (strcmp(method, MHD_HTTP_METHOD_GET) && strcmp(method, MHD_HTTP_METHOD_POST)) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "method %s not allowed for %s", method, url);
+	if (method == HTTP_METHOD_OTHER) {
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "method %s not allowed for %s", s_method, url);
 		return MHD_queue_response(connection, MHD_HTTP_METHOD_NOT_ALLOWED, h->response_405);
 	}
 
 	url_path = get_path(url);
 
-	if (!strncmp(url_path, "/api", 4))
-		return api_handler_serve(h->api_handler, connection, url_path + 4);
+	/* is it an API call ? */
+	if (!strncmp(url_path, "/api", 4)) {
+		if (method == HTTP_METHOD_GET)
+			return api_handler_serve(h->api_handler, connection, url_path + 4, method);
+
+		return anwser_to_api(connection,
+			method, url_path + 4, h->api_handler,
+			upload_data, upload_data_size, con_cls);
+	}
 
 	/* method POST is not allowed for content */
-	if (!strcmp(method, MHD_HTTP_METHOD_POST)) {
+	if (method == HTTP_METHOD_POST) {
 		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "method POST not allowed for %s", url);
 		return MHD_queue_response(connection, MHD_HTTP_METHOD_NOT_ALLOWED, h->response_405);
 	}
@@ -320,7 +420,7 @@ static void create_daemon(struct httpd *h)
 		return;
 	}
 
-	h->daemon = MHD_start_daemon(MHD_USE_NO_LISTEN_SOCKET | MHD_USE_THREAD_PER_CONNECTION, 0, NULL, NULL, answer_to_connection, h,
+	h->daemon = MHD_start_daemon(MHD_USE_NO_LISTEN_SOCKET | MHD_USE_THREAD_PER_CONNECTION, 0, NULL, NULL, answer_to_connection_cb, h,
 			MHD_OPTION_NOTIFY_COMPLETED, notify_completed_cb, NULL,
 			MHD_OPTION_END);
 
@@ -339,7 +439,7 @@ static struct MHD_Daemon *create_daemon(struct httpd *h)
 	listening_addr.sin_port = htons(h->port);
 	listening_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
-	h->daemon = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION, 0, NULL, NULL, answer_to_connection, h, MHD_OPTION_SOCK_ADDR, &listening_addr, MHD_OPTION_END);
+	h->daemon = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION, 0, NULL, NULL, answer_to_connection_cb, h, MHD_OPTION_SOCK_ADDR, &listening_addr, MHD_OPTION_END);
 }
 #endif
 
