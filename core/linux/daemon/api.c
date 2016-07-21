@@ -38,12 +38,14 @@ typedef int64_t api_token_t;
 #define JSON_400 "{\"code\":400, \"message\": \"Bad Request. Make sure your request has a X-Armadito-Token header\"}"
 #define JSON_403 "{\"code\":403, \"message\": \"Request forbidden. Make sure your request has a User-Agent header\"}"
 #define JSON_404 "{\"code\":404, \"message\": \"Not found\"}"
+#define JSON_415 "{\"code\":415, \"message\": \"Unsupported Media Type. Content-Type must be application/json\"}"
 
 struct api_handler {
 	GHashTable *client_table;
 	struct MHD_Response *response_400;
 	struct MHD_Response *response_403;
 	struct MHD_Response *response_404;
+	struct MHD_Response *response_415;
 };
 
 
@@ -278,46 +280,71 @@ static int poll_api_cb(struct api_handler *a, struct MHD_Connection *connection,
 	return 1;
 }
 
-int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection, const char *path, enum http_method method)
-{
-	const char *json_buff;
-	struct json_object *j_response;
+struct api_data {
 	api_cb_t api_cb;
-	struct MHD_Response *response;
 	int64_t token;
-	int ret;
+	int http_status_code;
+	struct MHD_Response *error_response;
+};
 
-	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "request to API: path %s", path);
-	connection_debug(connection);
-
+static int api_handler_pre_check(struct api_handler *a, struct MHD_Connection *connection,
+	const char *path, enum http_method method, struct api_data *data)
+{
 	/* return a HTTP 404 if path is not valid */
-	api_cb = get_api_cb(path);
-	if (api_cb == NULL) {
+	data->api_cb = get_api_cb(path);
+	if (data->api_cb == NULL) {
 		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API invalid path %s", path);
-		return MHD_queue_response(connection, MHD_HTTP_NOT_FOUND, a->response_404);
+
+		data->http_status_code = MHD_HTTP_NOT_FOUND;
+		data->error_response = a->response_404;
+
+		return 0;
 	}
 
 	/* return a HTTP 403 (forbidden) if no User-Agent header */
 	if (api_get_user_agent(connection) == NULL) {
 		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API path %s has no User-Agent header", path);
-		return MHD_queue_response(connection, MHD_HTTP_FORBIDDEN, a->response_403);
+
+		data->http_status_code = MHD_HTTP_FORBIDDEN;
+		data->error_response = a->response_403;
+
+		return 0;
 	}
 
 	/* if endpoint is not /token and if no token in HTTP headers, return a HTTP 400 (bad request) */
-	if (strcmp(path, "/token")) {
-		if (api_get_token(connection, &token) == NULL) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API path %s has no " API_TOKEN_HEADER " header", path);
-			return MHD_queue_response(connection, MHD_HTTP_FORBIDDEN, a->response_400);
-		}
+	if (strcmp(path, "/token") && api_get_token(connection, &data->token) == NULL) {
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API path %s has no " API_TOKEN_HEADER " header", path);
+		data->http_status_code = MHD_HTTP_FORBIDDEN;
+		data->error_response = a->response_400;
 
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "api token %lld", token);
+		return 0;
 	}
+
+	/* must verify Content-Type and encoding and return HTTP 415 Unsupported Media Type if invalid */
 
 	/* return a HTTP 400 (bad request) if request parameters are not valid */
 	/* TODO */
 
+	return 1;
+}
+
+int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
+	const char *path, enum http_method method, const char *post_data)
+{
+	struct api_data data;
+	const char *json_buff;
+	struct json_object *j_response;
+	struct MHD_Response *response;
+	int ret;
+
+	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "request to API: path %s", path);
+	connection_debug(connection);
+
+	if (!api_handler_pre_check(a, connection, path, method, &data))
+		return MHD_queue_response(connection, data.http_status_code, data.error_response);
+
 	j_response = NULL;
-	ret = (*api_cb)(a, connection, &j_response);
+	ret = (*data.api_cb)(a, connection, &j_response);
 	json_buff = json_object_to_json_string(j_response);
 
 	response = MHD_create_response_from_buffer(strlen(json_buff), (char *)json_buff, MHD_RESPMEM_MUST_COPY);
@@ -359,6 +386,7 @@ struct api_handler *api_handler_new(void)
 	a->response_400 = create_std_response(JSON_400);
 	a->response_403 = create_std_response(JSON_403);
  	a->response_404 = create_std_response(JSON_404);
+	a->response_415 = create_std_response(JSON_415);
 
 	return a;
 }

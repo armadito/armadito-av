@@ -80,7 +80,7 @@ static int httpd_remove_client(struct httpd *h, int64_t token);
 #ifdef DEBUG
 static int value_print(void *cls, enum MHD_ValueKind kind, const char *key, const char *value)
 {
-	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "key %s value %s", key, value);
+	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "connection: key %s value %s", key, value);
 
 	return MHD_YES;
 }
@@ -223,46 +223,34 @@ static enum http_method get_method(const char *method)
 	return HTTP_METHOD_OTHER;
 }
 
-static int iterate_post(void *coninfo_cls, enum MHD_ValueKind kind, const char *key,
-			const char *filename, const char *content_type, const char *transfer_encoding,
-			const char *data, uint64_t off, size_t size)
-{
-  struct request_info *info = coninfo_cls;
-
-  return MHD_YES;
-}
-
-struct request_info {
-	enum http_method method;
-	const char *request_data;
-	size_t request_data_size;
-	struct MHD_PostProcessor *post_processor;
+struct post_processor {
+	GByteArray *buffer;
 };
 
-#define POST_BUFFER_SIZE 32768
-
-static struct request_info *request_info_new(struct MHD_Connection *connection, enum http_method method)
+static struct post_processor *post_processor_new(struct MHD_Connection *connection)
 {
-	struct request_info *info = malloc(sizeof(struct request_info));
+	struct post_processor *p = malloc(sizeof(struct post_processor));
 
-	info->method = method;
-	info->request_data = NULL;
-	info->request_data_size = 0;
+	p->buffer = g_byte_array_new();
 
-	if (method == HTTP_METHOD_POST)
-		info->post_processor = MHD_create_post_processor(connection, POST_BUFFER_SIZE, iterate_post, info);
-	else
-		info->post_processor = NULL;
-
-	return info;
+	return p;
 }
 
-static void request_info_free(struct request_info *info)
+static const char *post_processor_append(struct post_processor *p,
+	const char *upload_data, size_t upload_data_size)
 {
-	if (info->request_data != NULL)
-		free((void *)info->request_data);
+	g_byte_array_append(p->buffer, upload_data, upload_data_size);
+}
 
-	free((void *)info);
+#define post_processor_get_data(p) ((p)->buffer->data)
+
+#define post_processor_get_size(p) ((p)->buffer->len)
+
+static void post_processor_free(struct post_processor *p)
+{
+	g_byte_array_free(p->buffer, TRUE);
+
+	free((void *)p);
 }
 
 static int anwser_to_api(struct MHD_Connection *connection,
@@ -270,24 +258,34 @@ static int anwser_to_api(struct MHD_Connection *connection,
 	struct api_handler *api_handler,
 	const char *upload_data, size_t *upload_data_size, void **con_cls)
 {
+	struct post_processor *p;
+
 	if (method == HTTP_METHOD_GET)
-		return api_handler_serve(api_handler, connection, api_path, method);
+		return api_handler_serve(api_handler, connection, api_path, method, NULL);
 
 	if (*con_cls == NULL) {
-		*con_cls = request_info_new(connection, method);
+		p = post_processor_new(connection);
+
+		*con_cls = p;
+
 		return MHD_YES;
 	}
 
-	if (*upload_data_size != 0) {
-		struct request_info *info = (struct request_info *)(*con_cls);
+	p = (struct post_processor *)(*con_cls);
 
-		MHD_post_process(info->post_processor, upload_data, *upload_data_size);
+	if (*upload_data_size != 0) {
+		post_processor_append(p, upload_data, *upload_data_size);
 		*upload_data_size = 0;
 
 		return MHD_YES;
 	}
 
-	return api_handler_serve(api_handler, connection, api_path, method);
+	post_processor_append(p, "", 1);
+
+	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "finished processing POST: data %s len %d",
+		post_processor_get_data(p), post_processor_get_size(p));
+
+	return api_handler_serve(api_handler, connection, api_path, method, post_processor_get_data(p));
 }
 
 static int answer_to_connection_cb(void *cls, struct MHD_Connection *connection,
@@ -297,32 +295,26 @@ static int answer_to_connection_cb(void *cls, struct MHD_Connection *connection,
 {
 	const char *url_path;
 	struct httpd *h = (struct httpd *)cls;
-	enum http_method method = get_method(s_method);
+	enum http_method method;
+	int is_api_request;
 
-	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "got request for: %s", url);
+	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "got %s request for: %s", s_method, url);
 
-	if (method == HTTP_METHOD_OTHER) {
+	method = get_method(s_method);
+	url_path = get_path(url);
+	is_api_request = !strncmp(url_path, "/api", 4);
+
+	/* allowed methods: GET for all, POST only for API */
+	if (method == HTTP_METHOD_OTHER
+		|| (method == HTTP_METHOD_POST && !is_api_request)) {
 		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "method %s not allowed for %s", s_method, url);
 		return MHD_queue_response(connection, MHD_HTTP_METHOD_NOT_ALLOWED, h->response_405);
 	}
 
-	url_path = get_path(url);
-
-	/* is it an API call ? */
-	if (!strncmp(url_path, "/api", 4)) {
-		if (method == HTTP_METHOD_GET)
-			return api_handler_serve(h->api_handler, connection, url_path + 4, method);
-
+	if (is_api_request)
 		return anwser_to_api(connection,
-			method, url_path + 4, h->api_handler,
-			upload_data, upload_data_size, con_cls);
-	}
-
-	/* method POST is not allowed for content */
-	if (method == HTTP_METHOD_POST) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "method POST not allowed for %s", url);
-		return MHD_queue_response(connection, MHD_HTTP_METHOD_NOT_ALLOWED, h->response_405);
-	}
+				method, url_path + 4, h->api_handler,
+				upload_data, upload_data_size, con_cls);
 
 	return content_serve(h, connection, url_path);
 }
