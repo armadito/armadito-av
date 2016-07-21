@@ -22,10 +22,29 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef DAEMON_HTTPD_H_
 #define DAEMON_HTTPD_H_
 
+#include <libarmadito-config.h>
+#ifndef _WIN32
+#include <sys/select.h>
+#include <sys/socket.h>
+#else
+#include <winsock2.h>
+#endif
+#include <microhttpd.h>
+
+enum http_method {
+	HTTP_METHOD_GET,
+	HTTP_METHOD_POST,
+	HTTP_METHOD_OTHER,
+};
+
 struct httpd;
 
 struct httpd *httpd_new(unsigned short port);
 
 void httpd_destroy(struct httpd *h);
+
+#ifdef DEBUG
+void connection_debug(struct MHD_Connection *connection);
+#endif
 
 #endif

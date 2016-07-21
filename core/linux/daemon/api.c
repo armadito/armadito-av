@@ -34,6 +34,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 typedef int64_t api_token_t;
 
 #define API_TOKEN_HEADER "X-Armadito-Token"
+
 #define JSON_400 "{\"code\":400, \"message\": \"Bad Request. Make sure your request has a X-Armadito-Token header\"}"
 #define JSON_403 "{\"code\":403, \"message\": \"Request forbidden. Make sure your request has a User-Agent header\"}"
 #define JSON_404 "{\"code\":404, \"message\": \"Not found\"}"
@@ -277,7 +278,7 @@ static int poll_api_cb(struct api_handler *a, struct MHD_Connection *connection,
 	return 1;
 }
 
-int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection, const char *path)
+int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection, const char *path, enum http_method method)
 {
 	const char *json_buff;
 	struct json_object *j_response;
@@ -287,6 +288,7 @@ int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection, 
 	int ret;
 
 	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "request to API: path %s", path);
+	connection_debug(connection);
 
 	/* return a HTTP 404 if path is not valid */
 	api_cb = get_api_cb(path);
