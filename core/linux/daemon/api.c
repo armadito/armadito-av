@@ -71,12 +71,12 @@ static void api_client_destroy(struct api_client *c)
 	g_async_queue_unref(c->event_queue);
 }
 
-typedef int (*api_cb_t)(struct api_handler *a, struct MHD_Connection *connection, struct json_object **out);
+typedef int (*api_cb_t)(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out);
 
-static int token_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object **out);
-static int ping_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object **out);
-static int scan_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object **out);
-static int poll_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object **out);
+static int token_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out);
+static int ping_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out);
+static int scan_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out);
+static int poll_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out);
 
 static struct api_dispatch_entry {
 	const char *path;
@@ -88,7 +88,6 @@ static struct api_dispatch_entry {
 	{ "/poll", poll_api_cb},
 	{ NULL, NULL},
 };
-
 
 static api_cb_t get_api_cb(const char *path)
 {
@@ -140,7 +139,7 @@ static void hash_str(const char *str, int64_t *hash)
 		HASH_ONE(*hash, *str);
 }
 
-static int token_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object **out)
+static int token_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out)
 {
 	int64_t token;
 	const char *user_agent;
@@ -167,7 +166,7 @@ static int token_api_cb(struct api_handler *a, struct MHD_Connection *connection
 	return 0;
 }
 
-static int ping_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object **out)
+static int ping_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out)
 {
 	*out = json_object_new_object();
 	json_object_object_add(*out, "status", json_object_new_string("ok"));
@@ -259,12 +258,12 @@ static void scan_callback(struct a6o_report *report, void *callback_data)
 	scan_data->last_send_progress = report->progress;
 }
 
-static int scan_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object **out)
+static int scan_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out)
 {
 	return 0;
 }
 
-static int poll_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object **out)
+static int poll_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out)
 {
 	int64_t token;
 	struct api_client *client;
@@ -344,7 +343,7 @@ int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
 		return MHD_queue_response(connection, data.http_status_code, data.error_response);
 
 	j_response = NULL;
-	ret = (*data.api_cb)(a, connection, &j_response);
+	ret = (*data.api_cb)(a, connection, NULL, &j_response);
 	json_buff = json_object_to_json_string(j_response);
 
 	response = MHD_create_response_from_buffer(strlen(json_buff), (char *)json_buff, MHD_RESPMEM_MUST_COPY);
