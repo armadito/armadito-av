@@ -38,6 +38,7 @@ struct api_handler;
 
 struct api_handler *api_handler_new(void);
 
-int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection, const char *path, enum http_method method);
+int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
+	const char *path, enum http_method method, const char *post_data);
 
 #endif
