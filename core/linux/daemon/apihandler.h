@@ -19,8 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef DAEMON_API_H_
-#define DAEMON_API_H_
+#ifndef DAEMON_APIHANDLER_H_
+#define DAEMON_APIHANDLER_H_
 
 #ifndef _WIN32
 #include <sys/select.h>
@@ -31,14 +31,25 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <microhttpd.h>
 #include <json.h>
 
-#include "apihandler.h"
+#include "httpd.h"
 
-typedef int (*api_cb_t)(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out);
+struct api_handler;
 
-int register_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out);
-int unregister_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out);
-int ping_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out);
-int scan_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out);
-int poll_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out);
+struct api_handler *api_handler_new(void);
+
+int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
+	const char *path, enum http_method method, const char *post_data, size_t post_data_size);
+
+const char *api_get_user_agent(struct MHD_Connection *connection);
+const char *api_get_token(struct MHD_Connection *connection, int64_t *p_token);
+
+struct api_client;
+
+int api_handler_add_client(struct api_handler *a, int64_t token);
+struct api_client *api_handler_get_client(struct api_handler *a, int64_t token);
+int api_handler_remove_client(struct api_handler *a, int64_t token);
+
+int api_client_push_event(struct api_client *client, struct json_object *event);
+int api_client_pop_event(struct api_client *client, struct json_object **p_event);
 
 #endif

@@ -10,6 +10,8 @@ armadito_scand_SOURCES= \
 main.c \
 api.c \
 api.h \
+apihandler.c \
+apihandler.h \
 httpd.c \
 httpd.h \
 ipc.c \

@@ -52,8 +52,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <libarmadito.h>
 
 #include "httpd.h"
-#include "api.h"
-#include "reportp.h"
+#include "apihandler.h"
 
 #define PAGE_404 "<html><head><title>not found!</title></head><body>not found!</body></html>\n"
 #define PAGE_405 "<html><head><title>not allowed!</title></head><body>Method not allowed for this ressource!</body></html>\n"
@@ -261,7 +260,7 @@ static int anwser_to_api(struct MHD_Connection *connection,
 	struct post_processor *p;
 
 	if (method == HTTP_METHOD_GET)
-		return api_handler_serve(api_handler, connection, api_path, method, NULL);
+		return api_handler_serve(api_handler, connection, api_path, method, NULL, 0);
 
 	if (*con_cls == NULL) {
 		p = post_processor_new(connection);
@@ -285,7 +284,8 @@ static int anwser_to_api(struct MHD_Connection *connection,
 	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "finished processing POST: data %s len %d",
 		post_processor_get_data(p), post_processor_get_size(p));
 
-	return api_handler_serve(api_handler, connection, api_path, method, post_processor_get_data(p));
+	return api_handler_serve(api_handler, connection, api_path, method,
+		post_processor_get_data(p), post_processor_get_size(p));
 }
 
 static int answer_to_connection_cb(void *cls, struct MHD_Connection *connection,
