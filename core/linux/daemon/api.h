@@ -33,8 +33,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "apihandler.h"
 
-typedef int (*api_cb_t)(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out);
-
 int register_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out);
 int unregister_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out);
 int ping_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out);

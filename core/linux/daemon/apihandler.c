@@ -37,6 +37,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #define JSON_400 "{\"code\":400, \"message\": \"Bad Request. Make sure your request has a X-Armadito-Token header and if POST request contains valid JSON\"}"
 #define JSON_403 "{\"code\":403, \"message\": \"Request forbidden. Make sure your request has a User-Agent header\"}"
 #define JSON_404 "{\"code\":404, \"message\": \"Not found\"}"
+#define JSON_405 "{\"code\":405, \"message\": \"Method not allowed\"}"
 #define JSON_415 "{\"code\":415, \"message\": \"Unsupported Media Type. Content-Type must be application/json\"}"
 #define JSON_422 "{\"code\":422, \"message\": \"Unprocessable request. Make sure the JSON request is valid\"}"
 #define JSON_500 "{\"code\":500, \"message\": \"Request processing triggered an internal error\"}"
@@ -46,6 +47,7 @@ struct api_handler {
 	struct MHD_Response *response_400;
 	struct MHD_Response *response_403;
 	struct MHD_Response *response_404;
+	struct MHD_Response *response_405;
 	struct MHD_Response *response_415;
 	struct MHD_Response *response_422;
 	struct MHD_Response *response_500;
@@ -54,27 +56,29 @@ struct api_handler {
 
 static void api_client_destroy(struct api_client *c);
 
-static struct api_dispatch_entry {
+static struct api_endpoint {
 	const char *path;
 	api_cb_t api_cb;
-} api_dispatch_table[] = {
-	{ "/register", register_api_cb},
-	{ "/unregister", unregister_api_cb},
-	{ "/ping", ping_api_cb},
-	{ "/scan", scan_api_cb},
-	{ "/poll", poll_api_cb},
+	enum http_method accepted_methods;
+	int need_token;
+} api_endpoint_table[] = {
+	{ "/register", register_api_cb, HTTP_METHOD_GET, 0},
+	{ "/unregister", unregister_api_cb, HTTP_METHOD_GET, 1},
+	{ "/ping", ping_api_cb, HTTP_METHOD_GET, 1},
+	{ "/scan", scan_api_cb, HTTP_METHOD_POST, 1},
+	{ "/poll", poll_api_cb, HTTP_METHOD_GET, 1},
 	{ NULL, NULL},
 };
 
-static api_cb_t get_api_cb(const char *path)
+static struct api_endpoint *get_api_endpoint(const char *path)
 {
-	struct api_dispatch_entry *p;
+	struct api_endpoint *p;
 
-	for (p = api_dispatch_table; p->path != NULL && strcmp(p->path, path); p++)
+	for (p = api_endpoint_table; p->path != NULL && strcmp(p->path, path); p++)
 		;
 
 	if (p->path != NULL)
-		return p->api_cb;
+		return p;
 
 	return NULL;
 }
@@ -120,12 +124,15 @@ const char *api_get_token(struct MHD_Connection *connection, int64_t *p_token)
 }
 
 static int api_handler_pre_check(struct api_handler *a, struct MHD_Connection *connection,
-	const char *path, enum http_method method, api_cb_t *p_api_cb, int64_t *p_token,
+	const char *path, enum http_method method, struct api_endpoint **p_endpoint, int64_t *p_token,
 	struct MHD_Response **p_error_response)
 {
+	struct api_endpoint *endpoint;
+
 	/* return a HTTP 404 if path is not valid */
-	*p_api_cb = get_api_cb(path);
-	if (*p_api_cb == NULL) {
+	endpoint = get_api_endpoint(path);
+	*p_endpoint = endpoint;
+	if (endpoint == NULL) {
 		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API invalid path %s", path);
 		*p_error_response = a->response_404;
 
@@ -140,13 +147,21 @@ static int api_handler_pre_check(struct api_handler *a, struct MHD_Connection *c
 		return MHD_HTTP_FORBIDDEN;
 	}
 
-	/* if endpoint is not /register and if no token in HTTP headers, return HTTP 400 bad request */
-	/* may be should be either in dispatch table or in api callback */
-	if (strcmp(path, "/register") && api_get_token(connection, p_token) == NULL) {
+	/* if endpoint needs token and if no token in HTTP headers, return HTTP 400 bad request */
+	if (endpoint->need_token && api_get_token(connection, p_token) == NULL) {
 		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API path %s has no " API_TOKEN_HEADER " header", path);
 		*p_error_response = a->response_400;
 
 		return MHD_HTTP_BAD_REQUEST;
+	}
+
+	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "accepted methods %d method %d", endpoint->accepted_methods, method);
+	/* if method is not in endpoint accepted methods, return HTTP 405 method not allowed */
+	if ((endpoint->accepted_methods & method) == 0) {
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "method not allowed for %s", path);
+		*p_error_response = a->response_405;
+
+		return MHD_HTTP_METHOD_NOT_ALLOWED;
 	}
 
 	/* if POST, verify Content-Type and encoding and return HTTP 415 Unsupported Media Type if invalid */
@@ -192,6 +207,7 @@ static struct json_object *api_parse_json_request(struct api_handler *a, const c
 int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
 	const char *path, enum http_method method, const char *post_data, size_t post_data_size)
 {
+	struct api_endpoint *endpoint;
 	api_cb_t api_cb;
 	int64_t token;
 	int http_status_code;
@@ -202,7 +218,7 @@ int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
 
 	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "request to API: path %s", path);
 
-	http_status_code = api_handler_pre_check(a, connection, path, method, &api_cb, &token, &response);
+	http_status_code = api_handler_pre_check(a, connection, path, method, &endpoint, &token, &response);
 	if (http_status_code != MHD_HTTP_OK)
 		return MHD_queue_response(connection, http_status_code, response);
 
@@ -212,6 +228,8 @@ int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
 		if (j_request == NULL)
 			return MHD_queue_response(connection, MHD_HTTP_BAD_REQUEST, a->response_400);
 	}
+
+	api_cb = endpoint->api_cb;
 
 	ret = (*api_cb)(a, connection, j_request, &j_response);
 	json_buff = json_object_to_json_string(j_response);
@@ -255,6 +273,7 @@ struct api_handler *api_handler_new(void)
 	a->response_400 = create_std_response(JSON_400);
 	a->response_403 = create_std_response(JSON_403);
  	a->response_404 = create_std_response(JSON_404);
+ 	a->response_405 = create_std_response(JSON_405);
 	a->response_415 = create_std_response(JSON_415);
 	a->response_422 = create_std_response(JSON_422);
 	a->response_500 = create_std_response(JSON_500);

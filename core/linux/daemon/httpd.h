@@ -32,9 +32,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <microhttpd.h>
 
 enum http_method {
-	HTTP_METHOD_GET,
-	HTTP_METHOD_POST,
-	HTTP_METHOD_OTHER,
+	HTTP_METHOD_GET   = 1 << 0,
+	HTTP_METHOD_POST  = 1 << 1,
+	HTTP_METHOD_OTHER = 0,
 };
 
 struct httpd;
