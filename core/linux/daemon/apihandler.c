@@ -52,22 +52,23 @@ struct api_handler {
 	struct MHD_Response *response_422;
 	struct MHD_Response *response_500;
 	struct json_tokener *tokener;
+	void *user_data;
 };
 
 static void api_client_destroy(struct api_client *c);
 
 static struct api_endpoint {
 	const char *path;
-	api_cb_t api_cb;
 	enum http_method accepted_methods;
 	int need_token;
+	api_cb_t api_cb;
 } api_endpoint_table[] = {
-	{ "/register", register_api_cb, HTTP_METHOD_GET, 0},
-	{ "/unregister", unregister_api_cb, HTTP_METHOD_GET, 1},
-	{ "/ping", ping_api_cb, HTTP_METHOD_GET, 1},
-	{ "/scan", scan_api_cb, HTTP_METHOD_POST, 1},
-	{ "/poll", poll_api_cb, HTTP_METHOD_GET, 1},
-	{ NULL, NULL},
+	{ "/register", HTTP_METHOD_GET, 0, register_api_cb},
+	{ "/unregister", HTTP_METHOD_GET, 1, unregister_api_cb},
+	{ "/ping", HTTP_METHOD_GET, 1, ping_api_cb},
+	{ "/scan", HTTP_METHOD_POST, 1, scan_api_cb},
+	{ "/poll", HTTP_METHOD_GET, 1, poll_api_cb},
+	{ NULL, 0, 0, NULL},
 };
 
 static struct api_endpoint *get_api_endpoint(const char *path)
@@ -117,25 +118,24 @@ const char *api_get_token(struct MHD_Connection *connection, int64_t *p_token)
 	const char *s_token;
 
 	s_token = MHD_lookup_connection_value(connection, MHD_HEADER_KIND, API_TOKEN_HEADER);
-	if (s_token != NULL)
+	if (s_token != NULL && p_token != NULL)
 		*p_token = atoll(s_token);
 
 	return s_token;
 }
 
 static int api_handler_pre_check(struct api_handler *a, struct MHD_Connection *connection,
-	const char *path, enum http_method method, struct api_endpoint **p_endpoint, int64_t *p_token,
-	struct MHD_Response **p_error_response)
+	enum http_method method, const char *path,
+	struct api_endpoint **p_endpoint, struct MHD_Response **p_error_response)
 {
-	struct api_endpoint *endpoint;
+	struct api_endpoint *endpoint = get_api_endpoint(path);
+
+	*p_endpoint = endpoint;
 
 	/* return a HTTP 404 if path is not valid */
-	endpoint = get_api_endpoint(path);
-	*p_endpoint = endpoint;
 	if (endpoint == NULL) {
 		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API invalid path %s", path);
 		*p_error_response = a->response_404;
-
 		return MHD_HTTP_NOT_FOUND;
 	}
 
@@ -143,24 +143,20 @@ static int api_handler_pre_check(struct api_handler *a, struct MHD_Connection *c
 	if (api_get_user_agent(connection) == NULL) {
 		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API path %s has no User-Agent header", path);
 		*p_error_response = a->response_403;
-
 		return MHD_HTTP_FORBIDDEN;
 	}
 
 	/* if endpoint needs token and if no token in HTTP headers, return HTTP 400 bad request */
-	if (endpoint->need_token && api_get_token(connection, p_token) == NULL) {
+	if (endpoint->need_token && api_get_token(connection, NULL) == NULL) {
 		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API path %s has no " API_TOKEN_HEADER " header", path);
 		*p_error_response = a->response_400;
-
 		return MHD_HTTP_BAD_REQUEST;
 	}
 
-	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "accepted methods %d method %d", endpoint->accepted_methods, method);
 	/* if method is not in endpoint accepted methods, return HTTP 405 method not allowed */
 	if ((endpoint->accepted_methods & method) == 0) {
 		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "method not allowed for %s", path);
 		*p_error_response = a->response_405;
-
 		return MHD_HTTP_METHOD_NOT_ALLOWED;
 	}
 
@@ -171,18 +167,13 @@ static int api_handler_pre_check(struct api_handler *a, struct MHD_Connection *c
 		if (content_type == NULL || strcmp(content_type, "application/json") != 0) {
 			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "invalid Content-Type %s", content_type);
 			*p_error_response = a->response_415;
-
 			if (content_type != NULL)
 				free((void *)content_type);
-
 			return MHD_HTTP_UNSUPPORTED_MEDIA_TYPE;
 		}
 
 		free((void *)content_type);
 	}
-
-	/* return a HTTP 400 bad request if request parameters are not valid */
-	/* TODO */
 
 	return MHD_HTTP_OK;
 }
@@ -205,20 +196,17 @@ static struct json_object *api_parse_json_request(struct api_handler *a, const c
 }
 
 int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
-	const char *path, enum http_method method, const char *post_data, size_t post_data_size)
+	enum http_method method, const char *path, const char *post_data, size_t post_data_size)
 {
 	struct api_endpoint *endpoint;
-	api_cb_t api_cb;
-	int64_t token;
-	int http_status_code;
+	int http_status_code, ret;
 	const char *json_buff;
 	struct json_object *j_request = NULL, *j_response = NULL;
 	struct MHD_Response *response;
-	int ret;
 
 	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "request to API: path %s", path);
 
-	http_status_code = api_handler_pre_check(a, connection, path, method, &endpoint, &token, &response);
+	http_status_code = api_handler_pre_check(a, connection, method, path, &endpoint, &response);
 	if (http_status_code != MHD_HTTP_OK)
 		return MHD_queue_response(connection, http_status_code, response);
 
@@ -229,9 +217,10 @@ int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
 			return MHD_queue_response(connection, MHD_HTTP_BAD_REQUEST, a->response_400);
 	}
 
-	api_cb = endpoint->api_cb;
+	/* return a HTTP 400 bad request if request parameters are not valid */
+	/* TODO */
 
-	ret = (*api_cb)(a, connection, j_request, &j_response);
+	ret = (*(endpoint->api_cb))(a, connection, j_request, &j_response, a->user_data);
 	json_buff = json_object_to_json_string(j_response);
 
 	response = MHD_create_response_from_buffer(strlen(json_buff), (char *)json_buff, MHD_RESPMEM_MUST_COPY);
@@ -264,7 +253,7 @@ static struct MHD_Response *create_std_response(const char *json)
 	return resp;
 }
 
-struct api_handler *api_handler_new(void)
+struct api_handler *api_handler_new(void *user_data)
 {
 	struct api_handler *a = malloc(sizeof(struct api_handler));
 
@@ -280,6 +269,8 @@ struct api_handler *api_handler_new(void)
 
 	a->tokener = json_tokener_new();
 	assert(a->tokener != NULL);
+
+	a->user_data = user_data;
 
 	return a;
 }
@@ -362,6 +353,6 @@ int api_client_push_event(struct api_client *client, struct json_object *event)
 
 int api_client_pop_event(struct api_client *client, struct json_object **p_event)
 {
-
+	*p_event = g_async_queue_pop(client->event_queue);
 }
 

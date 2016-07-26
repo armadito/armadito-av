@@ -39,7 +39,7 @@ enum http_method {
 
 struct httpd;
 
-struct httpd *httpd_new(unsigned short port);
+struct httpd *httpd_new(unsigned short port, void *user_data);
 
 void httpd_destroy(struct httpd *h);
 

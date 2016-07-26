@@ -234,6 +234,8 @@ static void load_conf_dir(struct a6o_conf *conf)
 	free((void *)conf_dir);
 }
 
+
+#if 0
 static void start_daemon(const char *progname, struct a6o_daemon_options *opts)
 {
 	struct a6o_conf *conf;
@@ -267,15 +269,37 @@ static void start_daemon(const char *progname, struct a6o_daemon_options *opts)
 
 	g_main_loop_run(loop);
 }
+#endif
 
-static void start_http_server(struct a6o_daemon_options *opts)
+static void start_http_server(const char *progname, struct a6o_daemon_options *opts)
 {
+	struct a6o_conf *conf;
+	struct armadito *armadito;
+	a6o_error *error = NULL;
 	struct httpd *h;
 	GMainLoop *loop;
-	
+
 	log_init(opts->s_log_level, !opts->no_daemon);
 
-	h = httpd_new(opts->port);
+	if (!opts->no_daemon)
+		daemonize();
+
+	if (opts->pid_file != NULL)
+		create_pid_file(opts->pid_file);
+
+	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_NONE, "starting %s%s", progname, opts->no_daemon ? "" : " in daemon mode");
+
+	conf = a6o_conf_new();
+	load_conf(conf);
+	load_conf_dir(conf);
+
+	armadito = a6o_open(conf, &error);
+	if (armadito == NULL) {
+		a6o_error_print(error, stderr);
+		exit(EXIT_FAILURE);
+	}
+
+	h = httpd_new(opts->port, armadito);
 
 	loop = g_main_loop_new(NULL, FALSE);
 	g_main_loop_run(loop);
@@ -291,7 +315,7 @@ int main(int argc, char **argv)
 
 	parse_options(argc, argv, &opts);
 
-	start_http_server(&opts);
+	start_http_server(argv[0], &opts);
 
 	return EXIT_SUCCESS;
 }
