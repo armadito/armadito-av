@@ -20,6 +20,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 ***/
 
 #include <assert.h>
+#include <glib.h>
 #include <json.h>
 #include <errno.h>
 #include <stdint.h>
@@ -32,12 +33,14 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "debug.h"
 
 #define HASH_ONE(H, C) (H) ^= ((H) << 5) + ((H) >> 2) + (C)
+#define HASH_INIT_VAL 0
+
 /* #define HASH_ONE(H, C) (H) = (((H) << 5) + (H)) + (C) */
+/* #define HASH_INIT_VAL 5381 */
 
 static void hash_init(int64_t *hash)
 {
-	/* *hash = 5381;*/
-	*hash = 0;
+	*hash = HASH_INIT_VAL;
 }
 
 static void hash_buff(const char *buff, size_t len, int64_t *hash)
@@ -52,7 +55,7 @@ static void hash_str(const char *str, int64_t *hash)
 		HASH_ONE(*hash, *str);
 }
 
-int register_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out)
+int register_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
 {
 	int64_t token;
 	const char *user_agent;
@@ -79,7 +82,7 @@ int register_api_cb(struct api_handler *a, struct MHD_Connection *connection, st
 	return 0;
 }
 
-int unregister_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out)
+int unregister_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
 {
 	int64_t token;
 
@@ -90,7 +93,7 @@ int unregister_api_cb(struct api_handler *a, struct MHD_Connection *connection, 
 	return 0;
 }
 
-int ping_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out)
+int ping_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
 {
 	*out = json_object_new_object();
 	json_object_object_add(*out, "status", json_object_new_string("ok"));
@@ -125,6 +128,7 @@ static struct json_object *report_json(struct a6o_report *report)
 }
 
 struct scan_data {
+	const char *path;
 	struct api_client *client;
 	time_t last_send_time;
 	int last_send_progress;
@@ -176,20 +180,64 @@ static void scan_callback(struct a6o_report *report, void *callback_data)
 
 	j_report = report_json(report);
 
+#ifdef DEBUG
+	jobj_debug(j_report, "scan JSON report");
+#endif
+
 	api_client_push_event(scan_data->client, j_report);
 
 	scan_data->last_send_time = now;
 	scan_data->last_send_progress = report->progress;
 }
 
-int scan_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out)
+static gpointer scan_api_thread(gpointer data)
 {
+	struct scan_data *scan_data = (struct scan_data *)data;
+
+	a6o_on_demand_run(scan_data->on_demand);
+
+	a6o_on_demand_free(scan_data->on_demand);
+
+	free(scan_data);
+
+	return NULL;
+}
+
+int scan_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
+{
+	struct json_object *j_path;
+	const char *path;
+	struct scan_data *scan_data;
+	int64_t token;
+	struct api_client *client;
+	struct armadito *armadito = (struct armadito *)user_data;
+
 	jobj_debug(in, "scan JSON input");
+
+	api_get_token(connection, &token);
+	client = api_handler_get_client(a, token);
+
+	/* check if 'in' object contains key "path" with a string value */
+	if (!json_object_object_get_ex(in, "path", &j_path)
+		|| !json_object_is_type(j_path, json_type_string))
+		return 1;
+
+	scan_data = malloc(sizeof(struct scan_data));
+	scan_data->path = strdup(path);
+	scan_data->client = client;
+	scan_data->last_send_time = 0L;
+	scan_data->last_send_progress = REPORT_PROGRESS_UNKNOWN;
+
+	scan_data->on_demand = a6o_on_demand_new(armadito, 42, json_object_get_string(j_path), ARMADITO_SCAN_RECURSE | ARMADITO_SCAN_THREADED);
+
+	a6o_scan_add_callback(a6o_on_demand_get_scan(scan_data->on_demand), scan_callback, scan_data);
+
+	g_thread_new("scan thread", scan_api_thread, scan_data);
 
 	return 0;
 }
 
-int poll_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out)
+int poll_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
 {
 	int64_t token;
 	struct api_client *client;
@@ -200,6 +248,10 @@ int poll_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct
 
 	if (client != NULL) {
 		api_client_pop_event(client, out);
+
+#ifdef DEBUG
+		jobj_debug(*out, "JSON event");
+#endif
 
 		return 0;
 	}

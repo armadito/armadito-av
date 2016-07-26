@@ -68,6 +68,7 @@ struct httpd {
 	struct MHD_Response *response_405;
 	magic_t magic;
 	struct api_handler *api_handler;
+	void *user_data;
 };
 
 static int httpd_add_client(struct httpd *h, int64_t token);
@@ -260,7 +261,7 @@ static int anwser_to_api(struct MHD_Connection *connection,
 	struct post_processor *p;
 
 	if (method == HTTP_METHOD_GET)
-		return api_handler_serve(api_handler, connection, api_path, method, NULL, 0);
+		return api_handler_serve(api_handler, connection, method, api_path, NULL, 0);
 
 	if (*con_cls == NULL) {
 		p = post_processor_new(connection);
@@ -284,7 +285,7 @@ static int anwser_to_api(struct MHD_Connection *connection,
 	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "finished processing POST: data %s len %d",
 		post_processor_get_data(p), post_processor_get_size(p));
 
-	return api_handler_serve(api_handler, connection, api_path, method,
+	return api_handler_serve(api_handler, connection, method, api_path,
 		post_processor_get_data(p), post_processor_get_size(p));
 }
 
@@ -446,7 +447,7 @@ static struct MHD_Response *create_std_response(const char *page)
 	return resp;
 }
 
-struct httpd *httpd_new(unsigned short port)
+struct httpd *httpd_new(unsigned short port, void *user_data)
 {
 	struct httpd *h = malloc(sizeof(struct httpd));
 
@@ -469,7 +470,8 @@ struct httpd *httpd_new(unsigned short port)
 		return NULL;
 	}
 
-	h->api_handler = api_handler_new();
+	h->api_handler = api_handler_new(user_data);
+	h->user_data = user_data;
 
 	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_INFO , "HTTP server started on port %d", port);
 
