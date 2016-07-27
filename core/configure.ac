@@ -98,6 +98,12 @@ if test "$HAVE_LIBMICROHTTPD" = "no"; then
    AC_MSG_ERROR("cannot find libmicrohttpd library")
 fi
 
+# check for libcurl
+PKG_CHECK_MODULES(LIBCURL, libcurl, [HAVE_LIBCURL=yes], [HAVE_LIBCURL=no])
+if test "$HAVE_LIBCURL" = "no"; then
+   AC_MSG_ERROR("cannot find libcurl library")
+fi
+
 # check for libmagic, that has no pkg-config
 SAVE_CFLAGS=${CFLAGS}
 CFLAGS=-fPIC
