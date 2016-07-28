@@ -43,13 +43,13 @@ int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
 typedef int (*api_cb_t)(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data);
 
 const char *api_get_user_agent(struct MHD_Connection *connection);
-const char *api_get_token(struct MHD_Connection *connection, int64_t *p_token);
+const char *api_get_token(struct MHD_Connection *connection);
 
 struct api_client;
 
-int api_handler_add_client(struct api_handler *a, int64_t token);
-struct api_client *api_handler_get_client(struct api_handler *a, int64_t token);
-int api_handler_remove_client(struct api_handler *a, int64_t token);
+int api_handler_add_client(struct api_handler *a, const char *token);
+struct api_client *api_handler_get_client(struct api_handler *a, const char *token);
+int api_handler_remove_client(struct api_handler *a, const char *token);
 
 int api_client_push_event(struct api_client *client, struct json_object *event);
 int api_client_pop_event(struct api_client *client, struct json_object **p_event);

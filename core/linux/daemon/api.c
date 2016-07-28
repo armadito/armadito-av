@@ -19,6 +19,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
+#define _GNU_SOURCE
 #include <assert.h>
 #include <glib.h>
 #include <json.h>
@@ -61,6 +62,7 @@ int register_api_cb(struct api_handler *a, struct MHD_Connection *connection, st
 	const char *user_agent;
 	char here;
 	time_t now;
+	char *s_token;
 
 	hash_init(&token);
 	time(&now);
@@ -75,20 +77,21 @@ int register_api_cb(struct api_handler *a, struct MHD_Connection *connection, st
 	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "token %lld", token);
 
 	*out = json_object_new_object();
-	json_object_object_add(*out, "token", json_object_new_int64(token));
+	asprintf(&s_token, "%lld", token);
+	json_object_object_add(*out, "token", json_object_new_string(s_token));
 
-	api_handler_add_client(a, token);
+	api_handler_add_client(a, s_token);
 
 	return 0;
 }
 
 int unregister_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
 {
-	int64_t token;
+	const char *token = api_get_token(connection);
 
-	api_get_token(connection, &token);
-
-	api_handler_remove_client(a, token);
+	/* this should not happen because the token presence has already been tested in API handler */
+	if (token != NULL)
+		api_handler_remove_client(a, token);
 
 	return 0;
 }
@@ -128,7 +131,6 @@ static struct json_object *report_json(struct a6o_report *report)
 }
 
 struct scan_data {
-	const char *path;
 	struct api_client *client;
 	time_t last_send_time;
 	int last_send_progress;
@@ -206,15 +208,17 @@ static gpointer scan_api_thread(gpointer data)
 int scan_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
 {
 	struct json_object *j_path;
-	const char *path;
+	const char *path, *token;
 	struct scan_data *scan_data;
-	int64_t token;
 	struct api_client *client;
 	struct armadito *armadito = (struct armadito *)user_data;
 
 	jobj_debug(in, "scan JSON input");
 
-	api_get_token(connection, &token);
+	token = api_get_token(connection);
+	if (token == NULL)
+		return 1;
+
 	client = api_handler_get_client(a, token);
 
 	/* check if 'in' object contains key "path" with a string value */
@@ -223,7 +227,6 @@ int scan_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct
 		return 1;
 
 	scan_data = malloc(sizeof(struct scan_data));
-	scan_data->path = strdup(path);
 	scan_data->client = client;
 	scan_data->last_send_time = 0L;
 	scan_data->last_send_progress = REPORT_PROGRESS_UNKNOWN;
@@ -239,10 +242,14 @@ int scan_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct
 
 int poll_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
 {
-	int64_t token;
+	const char *token;
 	struct api_client *client;
 
-	api_get_token(connection, &token);
+	token = api_get_token(connection);
+
+	/* this should not happen because the token presence has already been tested in API handler */
+	if (token == NULL)
+		return 1;
 
 	client = api_handler_get_client(a, token);
 
