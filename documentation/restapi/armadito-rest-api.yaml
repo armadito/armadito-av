@@ -16,12 +16,36 @@ produces:
 # Describe your paths here
 paths:
 
-  /token:
+  /register:
     get:
       description: |
-        Request an API token
+        register an API client |
+        this will return an API token
       produces:
         - application/json
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: '#/definitions/Token'
+        default:
+          description: error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /unregister:
+    get:
+      description: |
+        unregister an API client
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: X-Armadito-Token
+          description: session token
+          required: true
+          type: string
+          format: int64
       responses:
         200:
           description: success
@@ -84,6 +108,7 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+
   /scan:
     post:
       summary: launch a scan
@@ -206,11 +231,11 @@ definitions:
   
   Event:
     type: object
-    discriminator: eventType
+    discriminator: event_type
     required:
-      - eventType # required for inheritance to work
+      - event_type # required for inheritance to work
     properties:
-      eventType:
+      event_type:
         type: string
 
   DetectionEvent:
@@ -246,10 +271,10 @@ definitions:
           scan_action:
             type: string
             description: action taken for malware
-          mod_name:
+          module_name:
             type: string
             description: name of scan module that has detected the malware
-          mod_report:
+          module_report:
             type: string
             description: report of scan module that has detected the malware
 
