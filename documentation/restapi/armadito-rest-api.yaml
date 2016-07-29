@@ -16,7 +16,22 @@ produces:
 # Describe your paths here
 paths:
 
-  # This is a path endpoint. Change it.
+  /token:
+    get:
+      description: |
+        Request an API token
+      produces:
+        - application/json
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: '#/definitions/Token'
+        default:
+          description: error
+          schema:
+            $ref: '#/definitions/Error'
+
   /ping:
     # This is a HTTP operation
     get:
@@ -25,6 +40,15 @@ paths:
         Ping the server to get status
       # This is array of GET operation parameters:
       # Expected responses for this operation:
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: X-Armadito-Token
+          description: session token
+          required: true
+          type: integer
+          format: int64
       responses:
         # Response code
         200:
@@ -42,6 +66,15 @@ paths:
     get:
       description:
         get the server status
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: X-Armadito-Token
+          description: session token
+          required: true
+          type: integer
+          format: int64
       responses:
         200:
           description: success
@@ -60,6 +93,12 @@ paths:
       produces:
         - application/json
       parameters:
+        - in: header
+          name: X-Armadito-Token
+          description: session token
+          required: true
+          type: integer
+          format: int64
         - in: body
           name: body
           description: scan object
@@ -72,10 +111,19 @@ paths:
         405:
           description: Invalid input
 
-  /poll:
+  /event:
     get:
       description:
-        get server push event
+        get server event
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: X-Armadito-Token
+          description: session token
+          required: true
+          type: integer
+          format: int64
       responses:
         200:
           description: event received OK
@@ -83,19 +131,6 @@ paths:
             $ref: '#/definitions/Event'
 
 definitions:
-  Pong:
-    type: object
-    properties:
-      response:
-        type: string
-        description: contains the server response
-      params:
-        type: object
-        description: contains the server response content
-        properties:
-          value:
-            type: number
-            description: the time
 
   Error:
     type: object
@@ -105,8 +140,22 @@ definitions:
         format: int32
       message:
         type: string
-      fields:
+
+  Token:
+    type: object
+    properties:
+      token:
+        type: integer
+        format: int64
+    
+  Pong:
+    type: object
+    properties:
+      status:
         type: string
+        description: contains the server status
+        enum: 
+          - "ok"
 
   AntivirusStatus:
     type: object
@@ -115,10 +164,10 @@ definitions:
         type: string
         description: the version of the antivirus
       service:
-        type: string
+        type: boolean
         description: is the service on or off?
       real-time-protection:
-        type: string
+        type: boolean
         description: is the real-time protection on or off?
 
   ModuleStatus:
@@ -132,6 +181,7 @@ definitions:
         description: module version
       update:
         type: string
+        format: date-time
         description: module update date
 
   Status:
@@ -141,6 +191,7 @@ definitions:
         $ref: '#/definitions/AntivirusStatus'
       update:
         type: string
+        format: date-time
         description: the last update date of the antivirus
       modules:
         type: array
@@ -167,21 +218,40 @@ definitions:
       - $ref: '#/definitions/Event'
       - type: object
         properties:
+          detection_time:
+            type: string
+            format: dateTime
+            description: detection timestamp
+          context:
+            type: string
+            enum:
+              - "real-time"
+              - "on-demand"
           path:
             type: string
             description: path
           scan_status:
             type: string
+            enum: 
+              - "undecided"
+              - "clean"
+              - "ignored"
+              - "invalid argument"
+              - "internal error"
+              - "suspicious"
+              - "white listed"
+              - "malware"
+              - "unknown status"
             description: scan status for path
           scan_action:
             type: string
             description: action taken for malware
           mod_name:
             type: string
-            description: name of module that has detected the malware
+            description: name of scan module that has detected the malware
           mod_report:
             type: string
-            description: report of module that has detected the malware
+            description: report of scan module that has detected the malware
 
   OnDemandProgressEvent:
     allOf:
@@ -189,16 +259,46 @@ definitions:
       - type: object
         properties:
           progress:
-            type: number
+            type: integer
+            format: int32
             description: the progress bar
           malware_count:
-            type: number
+            type: integer
+            format: int32
             description: malware counter
           suspicious_count:
-            type: number
+            type: integer
+            format: int32
             description: suspicious counter
           scanned_count:
-            type: number
+            type: integer
+            format: int32
             description: scanned file counter
-            
 
+  OnDemandCompletedEvent:
+    allOf:
+      - $ref: '#/definitions/Event'
+      - type: object
+        properties:
+          start_time:
+            type: string
+            format: dateTime
+            description: start time of the on-demand scan
+          duration:
+            type: string
+            format: dateTime
+            description: duration of the scan
+          total_malware_count:
+            type: integer
+            format: int32
+            description: malware counter
+          total_suspicious_count:
+            type: integer
+            format: int32
+            description: suspicious counter
+          total_scanned_count:
+            type: integer
+            format: int32
+            description: scanned file counter
+          # array of detection event
+          
