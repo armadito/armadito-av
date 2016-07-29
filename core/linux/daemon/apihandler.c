@@ -51,7 +51,6 @@ struct api_handler {
 	struct MHD_Response *response_415;
 	struct MHD_Response *response_422;
 	struct MHD_Response *response_500;
-	struct json_tokener *tokener;
 	void *user_data;
 };
 
@@ -176,19 +175,23 @@ static int api_handler_pre_check(struct api_handler *a, struct MHD_Connection *c
 	return MHD_HTTP_OK;
 }
 
-static struct json_object *api_parse_json_request(struct api_handler *a, const char *post_data, size_t post_data_size)
+static struct json_object *api_parse_json_request(const char *post_data, size_t post_data_size)
 {
+	struct json_tokener *tokener;
 	struct json_object *j_request;
 
-	json_tokener_reset(a->tokener);
+	tokener = json_tokener_new();
+	assert(tokener != NULL);
 
-	j_request = json_tokener_parse_ex(a->tokener, post_data, post_data_size);
+	j_request = json_tokener_parse_ex(tokener, post_data, post_data_size);
 
 	if (j_request == NULL) {
-		enum json_tokener_error jerr = json_tokener_get_error(a->tokener);
+		enum json_tokener_error jerr = json_tokener_get_error(tokener);
 
 		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_WARNING, "error in JSON parsing: %s", json_tokener_error_desc(jerr));
 	}
+
+	json_tokener_free(tokener);
 
 	return j_request;
 }
@@ -209,7 +212,7 @@ int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
 		return MHD_queue_response(connection, http_status_code, response);
 
 	if (method == HTTP_METHOD_POST && post_data_size) {
-		j_request = api_parse_json_request(a, post_data, post_data_size);
+		j_request = api_parse_json_request(post_data, post_data_size);
 
 		if (j_request == NULL)
 			return MHD_queue_response(connection, MHD_HTTP_BAD_REQUEST, a->response_400);
@@ -264,9 +267,6 @@ struct api_handler *api_handler_new(void *user_data)
 	a->response_415 = create_std_response(JSON_415);
 	a->response_422 = create_std_response(JSON_422);
 	a->response_500 = create_std_response(JSON_500);
-
-	a->tokener = json_tokener_new();
-	assert(a->tokener != NULL);
 
 	a->user_data = user_data;
 
