@@ -104,32 +104,76 @@ int ping_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct
 	return 0;
 }
 
-static struct json_object *report_json(struct a6o_report *report)
+static struct json_object *detection_event_json(struct a6o_report *report)
 {
-	struct json_object *j_report;
+	struct json_object *j_event;
 
-	j_report = json_object_new_object();
+	j_event = json_object_new_object();
 
-	json_object_object_add(j_report, "progress", json_object_new_int(report->progress));
-	json_object_object_add(j_report, "malware_count", json_object_new_int(report->malware_count));
-	json_object_object_add(j_report, "suspicious_count", json_object_new_int(report->suspicious_count));
-	json_object_object_add(j_report, "scanned_count", json_object_new_int(report->scanned_count));
+	json_object_object_add(j_event, "event_type", json_object_new_string("DetectionEvent"));
 
-	if (report->path != NULL)
-		json_object_object_add(j_report, "path", json_object_new_string(report->path));
+	json_object_object_add(j_event, "detection_time", json_object_new_string("1970-01-01T00:00:00Z"));
+	json_object_object_add(j_event, "context", json_object_new_string("on-demand"));
 
-	json_object_object_add(j_report, "scan_status", json_object_new_string(a6o_file_status_pretty_str(report->status)));
-	json_object_object_add(j_report, "scan_action", json_object_new_string(a6o_action_pretty_str(report->action)));
+	json_object_object_add(j_event, "path", json_object_new_string(report->path));
+
+	json_object_object_add(j_event, "scan_status", json_object_new_string(a6o_file_status_pretty_str(report->status)));
+	json_object_object_add(j_event, "scan_action", json_object_new_string(a6o_action_pretty_str(report->action)));
 
 	if (report->mod_name != NULL)
-		json_object_object_add(j_report, "mod_name", json_object_new_string(report->mod_name));
+		json_object_object_add(j_event, "module_name", json_object_new_string(report->mod_name));
 
 	if (report->mod_report != NULL)
-		json_object_object_add(j_report, "mod_report", json_object_new_string(report->mod_report));
+		json_object_object_add(j_event, "module_report", json_object_new_string(report->mod_report));
 
-	return j_report;
+#ifdef DEBUG
+	jobj_debug(j_event, "detection event");
+#endif
+
+	return j_event;
 }
 
+static struct json_object *on_demand_completed_event_json(struct a6o_report *report)
+{
+	struct json_object *j_event;
+
+	j_event = json_object_new_object();
+
+	json_object_object_add(j_event, "event_type", json_object_new_string("OnDemandCompletedEvent"));
+
+	json_object_object_add(j_event, "start_time", json_object_new_string("1970-01-01T00:00:00Z"));
+	json_object_object_add(j_event, "duration", json_object_new_string("P0Y0M0DT00H00M01S"));
+	json_object_object_add(j_event, "progress", json_object_new_int(report->progress));
+	json_object_object_add(j_event, "total_malware_count", json_object_new_int(report->malware_count));
+	json_object_object_add(j_event, "total_suspicious_count", json_object_new_int(report->suspicious_count));
+	json_object_object_add(j_event, "total_scanned_count", json_object_new_int(report->scanned_count));
+
+#ifdef DEBUG
+	jobj_debug(j_event, "on-demand completed event");
+#endif
+
+	return j_event;
+}
+
+static struct json_object *on_demand_progress_event_json(struct a6o_report *report)
+{
+	struct json_object *j_event;
+
+	j_event = json_object_new_object();
+
+	json_object_object_add(j_event, "event_type", json_object_new_string("OnDemandProgressEvent"));
+
+	json_object_object_add(j_event, "progress", json_object_new_int(report->progress));
+	json_object_object_add(j_event, "malware_count", json_object_new_int(report->malware_count));
+	json_object_object_add(j_event, "suspicious_count", json_object_new_int(report->suspicious_count));
+	json_object_object_add(j_event, "scanned_count", json_object_new_int(report->scanned_count));
+
+#ifdef DEBUG
+	jobj_debug(j_event, "on-demand progress event");
+#endif
+
+	return j_event;
+}
 struct scan_data {
 	struct api_client *client;
 	time_t last_send_time;
@@ -166,30 +210,52 @@ static time_t get_milliseconds( ) {
 
 #define SEND_PERIOD 200  /* milliseconds */
 
+static int must_send_progress_event(struct a6o_report *report, struct scan_data *scan_data, time_t now)
+{
+	if (report->path == NULL)
+		return 0;
+
+	if (scan_data->last_send_progress == REPORT_PROGRESS_UNKNOWN)
+		return 1;
+
+	if (scan_data->last_send_progress != report->progress)
+		return 1;
+
+	if (scan_data->last_send_time == 0)
+		return 1;
+
+	if((now - scan_data->last_send_time) >= SEND_PERIOD)
+		return 1;
+
+	return 0;
+}
+
 static void scan_callback(struct a6o_report *report, void *callback_data)
 {
-	struct json_object *j_report;
+	struct json_object *j_event;
 	struct scan_data *scan_data = (struct scan_data *)callback_data;
-	time_t now = get_milliseconds();
+	time_t now;
 
-	if (report->status == ARMADITO_CLEAN
-		&& report->progress != 100
-		&& scan_data->last_send_progress != REPORT_PROGRESS_UNKNOWN
-		&& scan_data->last_send_progress == report->progress
-		&& scan_data->last_send_time != 0
-		&& (now - scan_data->last_send_time) < SEND_PERIOD)
-		return;
+	if (report->path != NULL
+		&& (report->status == ARMADITO_MALWARE
+			|| report->status == ARMADITO_SUSPICIOUS)) {
+			j_event = detection_event_json(report);
+			api_client_push_event(scan_data->client, j_event);
+		}
 
-	j_report = report_json(report);
+	now = get_milliseconds();
+	if (must_send_progress_event(report, scan_data, now)) {
+		j_event = on_demand_progress_event_json(report);
+		api_client_push_event(scan_data->client, j_event);
 
-#ifdef DEBUG
-	jobj_debug(j_report, "scan JSON report");
-#endif
+		scan_data->last_send_time = now;
+		scan_data->last_send_progress = report->progress;
+	}
 
-	api_client_push_event(scan_data->client, j_report);
-
-	scan_data->last_send_time = now;
-	scan_data->last_send_progress = report->progress;
+	if(report->path == NULL && report->progress == 100 ) {
+		j_event = on_demand_completed_event_json(report);
+		api_client_push_event(scan_data->client, j_event);
+	}
 }
 
 static gpointer scan_api_thread(gpointer data)
@@ -240,7 +306,7 @@ int scan_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct
 	return 0;
 }
 
-int poll_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
+int event_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
 {
 	const char *token;
 	struct api_client *client;
