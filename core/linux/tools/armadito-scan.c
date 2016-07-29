@@ -45,16 +45,20 @@ struct scan_summary {
 	int clean;
 };
 
-struct scan_report {
+struct detection_event {
+	const char *detection_time;
+	const char *context;
 	const char *path;
 	const char *scan_status;
-	const char *mod_name;
-	const char *mod_report;
 	const char *scan_action;
-	int progress;
-	int malware_count;
-	int suspicious_count;
-	int scanned_count;
+	const char *module_name;
+	const char *module_report;
+};
+
+struct on_demand_completed_event {
+	int total_malware_count;
+	int total_suspicious_count;
+	int total_scanned_count;
 };
 
 struct scan_options {
@@ -99,7 +103,7 @@ static void usage(void)
 	fprintf(stderr, "  --threaded -t                 scan using multiple threads\n");
 	fprintf(stderr, "  --no-summary -n               disable summary at end of scanning\n");
 #if O
-	/* not available with rest api */
+	/* yet not available with rest api */
 	fprintf(stderr, "  --print-clean -c              print also clean files as they are scanned\n");
 #endif
 	fprintf(stderr, "  --port=PORT | -p PORT         TCP port to connect to Armadito-AV (default is " S_DEFAULT_PORT ")\n");
@@ -208,6 +212,7 @@ static int json_object_get_int_or_def(struct json_object *j_obj, const char *key
 	return json_object_get_int(j_int);
 }
 
+#if 0
 static void process_json_report(struct json_object *j_report, struct scan_report *report)
 {
 	report->path = json_object_get_string_or_null(j_report, "path");
@@ -224,16 +229,11 @@ static void process_json_report(struct json_object *j_report, struct scan_report
 
 static int process_report(struct scan_report *report)
 {
-#if 0
 	/* path is empty string, do nothing */
 	if (!*path)
 		return;
-#endif
-
-#if 0
 	if (!strcmp(report->scan_status, "white_listed") || !strcmp(report->scan_status, "clean"))
 		return 0;
-#endif
 
 	printf("%s: %s", report->path, report->scan_status);
 	if (strcmp(report->scan_status, "undecided")
@@ -246,7 +246,12 @@ static int process_report(struct scan_report *report)
 
 	return report->progress >= 100;
 }
+#endif
 
+static const char *get_event_type(struct json_object *j_event)
+{
+	return json_object_get_string_or_null(j_event, "event_type");
+}
 
 static void do_scan(struct scan_options *opts)
 {
@@ -270,17 +275,16 @@ static void do_scan(struct scan_options *opts)
 
 	while (!end_of_scan) {
 		j_response = NULL;
-		api_client_call(client, "/poll", NULL, &j_response);
+		api_client_call(client, "/event", NULL, &j_response);
 		if (j_response != NULL) {
-			struct scan_report report;
-
 			json_object_to_file("/dev/stderr", j_response);
 			fprintf(stderr, "\n");
 
-			process_json_report(j_response, &report);
-			end_of_scan = process_report(&report);
+			 end_of_scan = !strcmp(get_event_type(j_response), "OnDemandCompletedEvent");
 		}
 	}
+
+	api_client_unregister(client);
 
 #if 0
 	if (!opts->no_summary) {

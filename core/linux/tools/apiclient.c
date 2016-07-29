@@ -134,9 +134,11 @@ int api_client_call(struct api_client *client, const char *path, struct json_obj
 	curl_easy_setopt(hnd, CURLOPT_URL, url);
 	free(url);
 
-	asprintf(&token_header, API_TOKEN_HEADER ": %s", client->token);
-	slist = curl_slist_append(slist, token_header);
-	free(token_header);
+	if (client->token != NULL) {
+		asprintf(&token_header, API_TOKEN_HEADER ": %s", client->token);
+		slist = curl_slist_append(slist, token_header);
+		free(token_header);
+	}
 
 	if (in != NULL) {
 		add_json_content(hnd, in);
@@ -194,7 +196,7 @@ int api_client_register(struct api_client *client)
 
 int api_client_unregister(struct api_client *client)
 {
-
+	return api_client_call(client, "/unregister", NULL, NULL);
 }
 
 void api_client_free(struct api_client *client)
