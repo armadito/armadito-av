@@ -66,7 +66,7 @@ static struct api_endpoint {
 	{ "/unregister", HTTP_METHOD_GET, 1, unregister_api_cb},
 	{ "/ping", HTTP_METHOD_GET, 1, ping_api_cb},
 	{ "/scan", HTTP_METHOD_POST, 1, scan_api_cb},
-	{ "/poll", HTTP_METHOD_GET, 1, poll_api_cb},
+	{ "/event", HTTP_METHOD_GET, 1, event_api_cb},
 	{ NULL, 0, 0, NULL},
 };
 
