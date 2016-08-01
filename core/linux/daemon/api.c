@@ -77,7 +77,7 @@ int register_api_cb(struct api_handler *a, struct MHD_Connection *connection, st
 	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "token %lld", token);
 
 	*out = json_object_new_object();
-	asprintf(&s_token, "%lld", token);
+	asprintf(&s_token, "%ld", token);
 	json_object_object_add(*out, "token", json_object_new_string(s_token));
 
 	api_handler_add_client(a, s_token);
@@ -143,7 +143,6 @@ static struct json_object *on_demand_completed_event_json(struct a6o_report *rep
 
 	json_object_object_add(j_event, "start_time", json_object_new_string("1970-01-01T00:00:00Z"));
 	json_object_object_add(j_event, "duration", json_object_new_string("P0Y0M0DT00H00M01S"));
-	json_object_object_add(j_event, "progress", json_object_new_int(report->progress));
 	json_object_object_add(j_event, "total_malware_count", json_object_new_int(report->malware_count));
 	json_object_object_add(j_event, "total_suspicious_count", json_object_new_int(report->suspicious_count));
 	json_object_object_add(j_event, "total_scanned_count", json_object_new_int(report->scanned_count));

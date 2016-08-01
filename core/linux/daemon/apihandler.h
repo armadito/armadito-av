@@ -44,6 +44,7 @@ typedef int (*api_cb_t)(struct api_handler *a, struct MHD_Connection *connection
 
 const char *api_get_user_agent(struct MHD_Connection *connection);
 const char *api_get_token(struct MHD_Connection *connection);
+const char *api_get_argument(struct MHD_Connection *connection, const char *key);
 
 struct api_client;
 
