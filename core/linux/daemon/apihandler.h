@@ -40,7 +40,8 @@ struct api_handler *api_handler_new(void *user_data);
 int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
 	enum http_method method, const char *path, const char *post_data, size_t post_data_size);
 
-typedef int (*api_cb_t)(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data);
+typedef int (*check_cb_t)(struct MHD_Connection *connection, struct json_object *in);
+typedef int (*process_cb_t)(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data);
 
 const char *api_get_user_agent(struct MHD_Connection *connection);
 const char *api_get_token(struct MHD_Connection *connection);
