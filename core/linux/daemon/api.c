@@ -56,7 +56,7 @@ static void hash_str(const char *str, int64_t *hash)
 		HASH_ONE(*hash, *str);
 }
 
-int register_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
+int register_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
 {
 	int64_t token;
 	const char *user_agent;
@@ -80,26 +80,36 @@ int register_api_cb(struct api_handler *a, struct MHD_Connection *connection, st
 	asprintf(&s_token, "%ld", token);
 	json_object_object_add(*out, "token", json_object_new_string(s_token));
 
-	api_handler_add_client(a, s_token);
-
-	return 0;
+	return api_handler_add_client(a, s_token);
 }
 
-int unregister_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
+int unregister_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
 {
 	const char *token = api_get_token(connection);
 
 	/* this should not happen because the token presence has already been tested in API handler */
 	if (token != NULL)
-		api_handler_remove_client(a, token);
+		return api_handler_remove_client(a, token);
+
+	return 1;
+}
+
+int ping_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
+{
+	*out = json_object_new_object();
+	json_object_object_add(*out, "status", json_object_new_string("ok"));
 
 	return 0;
 }
 
-int ping_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
+int scan_check_cb(struct MHD_Connection *connection, struct json_object *in)
 {
-	*out = json_object_new_object();
-	json_object_object_add(*out, "status", json_object_new_string("ok"));
+	struct json_object *j_path;
+
+	/* check if 'in' object contains key "path" with a string value */
+	if (!json_object_object_get_ex(in, "path", &j_path)
+		|| !json_object_is_type(j_path, json_type_string))
+		return 1;
 
 	return 0;
 }
@@ -270,7 +280,7 @@ static gpointer scan_api_thread(gpointer data)
 	return NULL;
 }
 
-int scan_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
+int scan_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
 {
 	struct json_object *j_path;
 	const char *path, *token;
@@ -281,15 +291,16 @@ int scan_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct
 	jobj_debug(in, "scan JSON input");
 
 	token = api_get_token(connection);
+	/* this should not happen because the token presence has already been tested in API handler */
 	if (token == NULL)
 		return 1;
 
 	client = api_handler_get_client(a, token);
-
-	/* check if 'in' object contains key "path" with a string value */
-	if (!json_object_object_get_ex(in, "path", &j_path)
-		|| !json_object_is_type(j_path, json_type_string))
+	if (client == NULL)
 		return 1;
+
+	/* check of parameters has already been done in scan_check_cb */
+	json_object_object_get_ex(in, "path", &j_path);
 
 	scan_data = malloc(sizeof(struct scan_data));
 	scan_data->client = client;
@@ -305,13 +316,12 @@ int scan_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct
 	return 0;
 }
 
-int event_api_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
+int event_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
 {
 	const char *token;
 	struct api_client *client;
 
 	token = api_get_token(connection);
-
 	/* this should not happen because the token presence has already been tested in API handler */
 	if (token == NULL)
 		return 1;
