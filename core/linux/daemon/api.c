@@ -107,8 +107,11 @@ int scan_check_cb(struct MHD_Connection *connection, struct json_object *in)
 	struct json_object *j_path;
 
 	/* check if 'in' object contains key "path" with a string value */
-	if (!json_object_object_get_ex(in, "path", &j_path)
-		|| !json_object_is_type(j_path, json_type_string))
+
+	if (!json_object_object_get_ex(in, "path", &j_path))
+		return 1;
+
+	if (!json_object_is_type(j_path, json_type_string))
 		return 1;
 
 	return 0;
