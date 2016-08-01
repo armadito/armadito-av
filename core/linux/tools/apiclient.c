@@ -155,7 +155,7 @@ int api_client_call(struct api_client *client, const char *path, struct json_obj
 	curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
 	curl_easy_setopt(hnd, CURLOPT_USERAGENT, "curl/7.47.0");
 	curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
-	/* curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L); */
+	curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
 	curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
 
 	if (slist != NULL)

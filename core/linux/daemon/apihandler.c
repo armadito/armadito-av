@@ -68,7 +68,7 @@ static struct api_endpoint {
 	{ "/ping", HTTP_METHOD_GET, 1, ping_process_cb, NULL},
 	{ "/scan", HTTP_METHOD_POST, 1, scan_process_cb, scan_check_cb},
 	{ "/event", HTTP_METHOD_GET, 1, event_process_cb, NULL},
-	{ NULL, 0, 0, NULL},
+	{ NULL, 0, 0, NULL, NULL},
 };
 
 static struct api_endpoint *get_api_endpoint(const char *path)
@@ -202,6 +202,21 @@ static struct json_object *api_parse_json_request(const char *post_data, size_t 
 	return j_request;
 }
 
+static int api_queue_response(struct MHD_Connection *connection, struct MHD_Response *response)
+{
+	int ret;
+
+	MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_TYPE, "application/json");
+	MHD_add_response_header(response, MHD_HTTP_HEADER_CONNECTION, "close");
+	MHD_add_response_header(response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+	/* Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept */
+
+	ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+	MHD_destroy_response(response);
+
+	return ret;
+}
+
 int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
 	enum http_method method, const char *path, const char *post_data, size_t post_data_size)
 {
@@ -219,7 +234,6 @@ int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
 
 	if (method == HTTP_METHOD_POST && post_data_size) {
 		j_request = api_parse_json_request(post_data, post_data_size);
-
 		if (j_request == NULL) {
 			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API path %s does not contain valid JSON", path);
 			return MHD_queue_response(connection, MHD_HTTP_BAD_REQUEST, a->response_400);
@@ -227,10 +241,9 @@ int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
 	}
 
 	/* if request parameters are not valid return HTTP 422 Unprocessable Entity  */
-	if (endpoint->check_cb != NULL) {
-		if ((*endpoint->check_cb)(connection, j_request))
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API path %s does not contain valid parameters", path);
-			return MHD_queue_response(connection, MHD_HTTP_UNPROCESSABLE_ENTITY, a->response_422);
+	if (endpoint->check_cb != NULL && (*endpoint->check_cb)(connection, j_request)) {
+		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API path %s does not contain valid parameters", path);
+		return MHD_queue_response(connection, MHD_HTTP_UNPROCESSABLE_ENTITY, a->response_422);
 	}
 
 	/* if request processing failed return HTTP 500 Internal Server Error  */
@@ -239,32 +252,23 @@ int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
 	if (j_request != NULL)
 		json_object_put(j_request);
 
-	/* a failed processing should not create a JSON response? */
-	if (j_response != NULL)
-		json_object_put(j_response);
-
 	if (ret) {
 		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "processing request to API path %s failed", path);
+
+		/* a failed processing should not create a JSON response? */
+		if (j_response != NULL)
+			json_object_put(j_response);
 		return MHD_queue_response(connection, MHD_HTTP_INTERNAL_SERVER_ERROR, a->response_500);
 	}
 
 	json_buff = json_object_to_json_string(j_response);
-
 	response = MHD_create_response_from_buffer(strlen(json_buff), (char *)json_buff, MHD_RESPMEM_MUST_COPY);
 	json_object_put(j_response); /* free the json object */
 
 	if (response == NULL)
 		return MHD_NO;
 
-	MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_TYPE, "application/json");
-	MHD_add_response_header(response, MHD_HTTP_HEADER_CONNECTION, "close");
-	MHD_add_response_header(response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN, "*");
-	/* Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept */
-
-	ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
-	MHD_destroy_response(response);
-
-	return ret;
+	return api_queue_response(connection, response);
 }
 
 static struct MHD_Response *create_std_response(const char *json)
