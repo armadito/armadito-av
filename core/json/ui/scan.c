@@ -239,7 +239,7 @@ enum a6o_json_status scan_response_cb(struct armadito *armadito, struct json_req
 	return JSON_OK;
 }
 
-void scan_process_cb(struct armadito *armadito, void *request_data)
+void scan_do_process_cb(struct armadito *armadito, void *request_data)
 {
 	struct scan_data *scan_data = (struct scan_data *)request_data;
 
