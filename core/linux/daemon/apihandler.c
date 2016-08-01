@@ -121,6 +121,11 @@ const char *api_get_token(struct MHD_Connection *connection)
 	return s_token;
 }
 
+const char *api_get_argument(struct MHD_Connection *connection, const char *key)
+{
+	return MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, key);
+}
+
 static int api_handler_pre_check(struct api_handler *a, struct MHD_Connection *connection,
 	enum http_method method, const char *path,
 	struct api_endpoint **p_endpoint, struct MHD_Response **p_error_response)
