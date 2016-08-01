@@ -37,14 +37,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #define PROGRAM_NAME "armadito-scan"
 #define PROGRAM_VERSION PACKAGE_VERSION
 
-struct scan_summary {
-	int scanned;
-	int malware;
-	int suspicious;
-	int unhandled;
-	int clean;
-};
-
 struct detection_event {
 	const char *detection_time;
 	const char *context;
@@ -59,6 +51,19 @@ struct on_demand_completed_event {
 	int total_malware_count;
 	int total_suspicious_count;
 	int total_scanned_count;
+};
+
+struct event {
+	enum event_type {
+		DETECTION_EVENT,
+		ON_DEMAND_PROGRESS_EVENT,
+		ON_DEMAND_COMPLETED_EVENT,
+		UNKNOWN_EVENT,
+	} type;
+	union {
+		struct detection_event d;
+		struct on_demand_completed_event c;
+	} content;
 };
 
 struct scan_options {
@@ -167,29 +172,6 @@ static void parse_options(int argc, char **argv, struct scan_options *opts)
 	opts->path_to_scan = strdup(argv[optind]);
 }
 
-static void print_summary(struct scan_summary *summary)
-{
-	printf("\nSCAN SUMMARY:\n");
-	printf("scanned files     : %d\n", summary->scanned);
-	printf("malware files     : %d\n", summary->malware);
-	printf("suspicious files  : %d\n", summary->suspicious);
-	printf("unhandled files   : %d\n", summary->unhandled);
-	printf("clean files       : %d\n", summary->clean);
-}
-
-static struct scan_summary *scan_summary_new(void)
-{
-	struct scan_summary *s = malloc(sizeof(struct scan_summary));
-
-	s->scanned = 0;
-	s->malware = 0;
-	s->suspicious = 0;
-	s->unhandled = 0;
-	s->clean = 0;
-
-	return s;
-}
-
 static const char *json_object_get_string_or_null(struct json_object *j_obj, const char *key)
 {
 	struct json_object *j_str = NULL;
@@ -212,60 +194,49 @@ static int json_object_get_int_or_def(struct json_object *j_obj, const char *key
 	return json_object_get_int(j_int);
 }
 
-#if 0
-static void process_json_report(struct json_object *j_report, struct scan_report *report)
+static enum event_type process_json_event(struct json_object *j_ev, struct event *ev)
 {
-	report->path = json_object_get_string_or_null(j_report, "path");
-	report->scan_status = json_object_get_string_or_null(j_report, "scan_status");
-	report->mod_name = json_object_get_string_or_null(j_report, "mod_name");
-	report->mod_report = json_object_get_string_or_null(j_report, "mod_report");
-	report->scan_action = json_object_get_string_or_null(j_report, "scan_action");
+	const char *ev_type = json_object_get_string_or_null(j_ev, "event_type");
 
-	report->progress = json_object_get_int_or_def(j_report, "progress", -1);
-	report->malware_count = json_object_get_int_or_def(j_report, "malware_count", -1);
-	report->suspicious_count = json_object_get_int_or_def(j_report, "suspicious_count", -1);
-	report->scanned_count = json_object_get_int_or_def(j_report, "scanned_count", -1);
-}
-
-static int process_report(struct scan_report *report)
-{
-	/* path is empty string, do nothing */
-	if (!*path)
-		return;
-	if (!strcmp(report->scan_status, "white_listed") || !strcmp(report->scan_status, "clean"))
-		return 0;
-
-	printf("%s: %s", report->path, report->scan_status);
-	if (strcmp(report->scan_status, "undecided")
-		&& strcmp(report->scan_status, "clean")
-		&& strcmp(report->scan_status, "unknown_file_type")) {
-		printf(" [%s - %s]", report->mod_name, report->mod_report);
-		printf(" (action %s) ", report->scan_action);
+	if (ev_type == NULL) {
+		ev->type = UNKNOWN_EVENT;
+		return ev->type;
 	}
-	printf("\n");
+	if (!strcmp(ev_type, "DetectionEvent"))
+		ev->type = DETECTION_EVENT;
+	else if (!strcmp(ev_type, "OnDemandProgressEvent"))
+		ev->type = ON_DEMAND_PROGRESS_EVENT;
+	else if (!strcmp(ev_type, "OnDemandCompletedEvent"))
+		ev->type = ON_DEMAND_COMPLETED_EVENT;
+	else
+		ev->type = UNKNOWN_EVENT;
 
-	return report->progress >= 100;
+	switch(ev->type) {
+	case DETECTION_EVENT:
+		ev->content.d.path = json_object_get_string_or_null(j_ev, "path");
+		ev->content.d.detection_time = json_object_get_string_or_null(j_ev, "detection_time");
+		ev->content.d.context = json_object_get_string_or_null(j_ev, "context");
+		ev->content.d.path = json_object_get_string_or_null(j_ev, "path");
+		ev->content.d.scan_status = json_object_get_string_or_null(j_ev, "scan_status");
+		ev->content.d.scan_action = json_object_get_string_or_null(j_ev, "scan_action");
+		ev->content.d.module_name = json_object_get_string_or_null(j_ev, "module_name");
+		ev->content.d.module_report = json_object_get_string_or_null(j_ev, "module_report");
+		break;
+	case ON_DEMAND_COMPLETED_EVENT:
+		ev->content.c.total_scanned_count = json_object_get_int_or_def(j_ev, "total_scanned_count", 0);
+		ev->content.c.total_malware_count = json_object_get_int_or_def(j_ev, "total_malware_count", 0);
+		ev->content.c.total_suspicious_count = json_object_get_int_or_def(j_ev, "total_suspicious_count", 0);
+		break;
+	}
+
+	return ev->type;
 }
-#endif
 
-static const char *get_event_type(struct json_object *j_event)
+static void do_scan(struct scan_options *opts, struct api_client *client)
 {
-	return json_object_get_string_or_null(j_event, "event_type");
-}
-
-static void do_scan(struct scan_options *opts)
-{
-	struct api_client *client;
-	struct json_object *j_request;
-	struct json_object *j_response;
+	struct json_object *j_request, *j_response;
 	int end_of_scan = 0;
-
-#if 0
-	scan->summary = (opts->no_summary) ? NULL : scan_summary_new();
-	scan->print_clean = opts->print_clean;
-#endif
-
-	client = api_client_new(opts->port);
+	struct event ev;
 
 	api_client_register(client);
 
@@ -274,33 +245,48 @@ static void do_scan(struct scan_options *opts)
 	api_client_call(client, "/scan", j_request, &j_response);
 
 	while (!end_of_scan) {
-		j_response = NULL;
+	j_response = NULL;
 		api_client_call(client, "/event", NULL, &j_response);
-		if (j_response != NULL) {
-			json_object_to_file("/dev/stderr", j_response);
-			fprintf(stderr, "\n");
+		if (j_response == NULL)
+			continue;
 
-			 end_of_scan = !strcmp(get_event_type(j_response), "OnDemandCompletedEvent");
+		json_object_to_file("/dev/stderr", j_response);
+		fprintf(stderr, "\n");
+
+		switch(process_json_event(j_response, &ev)) {
+		case DETECTION_EVENT:
+			printf("%s: %s [%s - %s] (action %s)\n",
+				ev.content.d.path,
+				ev.content.d.scan_status,
+				ev.content.d.module_name,
+				ev.content.d.module_report,
+				ev.content.d.scan_action);
+			break;
+		case ON_DEMAND_COMPLETED_EVENT:
+			end_of_scan = 1;
+			if (!opts->no_summary) {
+				printf("\nSCAN SUMMARY:\n");
+				printf("scanned files     : %d\n", ev.content.c.total_scanned_count);
+				printf("malware files     : %d\n", ev.content.c.total_malware_count);
+				printf("suspicious files  : %d\n", ev.content.c.total_suspicious_count);
+			}
+			break;
 		}
 	}
 
 	api_client_unregister(client);
-
-#if 0
-	if (!opts->no_summary) {
-		print_summary(scan->summary);
-		free(scan->summary);
-	}
-#endif
 }
 
 int main(int argc, char **argv)
 {
 	struct scan_options *opts = (struct scan_options *)malloc(sizeof(struct scan_options));
+	struct api_client *client;
 
 	parse_options(argc, argv, opts);
 
-	do_scan(opts);
+	client = api_client_new(opts->port);
+
+	do_scan(opts, client);
 
 	return 0;
 }
