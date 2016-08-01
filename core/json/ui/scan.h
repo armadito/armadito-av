@@ -26,7 +26,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 enum a6o_json_status scan_response_cb(struct armadito *armadito, struct json_request *req, struct json_response *resp, void **request_data);
 
-void scan_process_cb(struct armadito *armadito, void *request_data);
+void scan_do_process_cb(struct armadito *armadito, void *request_data);
 
 enum a6o_json_status scan_cancel_response_cb(struct armadito *armadito, struct json_request *req, struct json_response *resp, void **request_data);
 
