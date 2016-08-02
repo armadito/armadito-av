@@ -125,11 +125,16 @@ void a6o_info_free(struct a6o_info *info)
 				struct a6o_base_info **b;
 
 				for(b = mod_info->base_infos; *b != NULL; b++) {
-					free((void *)(*b)->name);
-					free((void *)(*b)->version);
-					free((void *)(*b)->full_path);
+					struct a6o_base_info *base_info = *b;
 
-					free(*b);
+					if (base_info->name != NULL)
+						free((void *)base_info->name);
+					if (base_info->version != NULL)
+						free((void *)base_info->version);
+					if (base_info->full_path != NULL)
+						free((void *)base_info->full_path);
+
+					free(base_info);
 				}
 
 				free(mod_info->base_infos);
