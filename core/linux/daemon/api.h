@@ -33,12 +33,18 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "apihandler.h"
 
-int scan_check_cb(struct MHD_Connection *connection, struct json_object *in);
 
 int register_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data);
+
 int unregister_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data);
+
 int ping_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data);
-int scan_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data);
+
 int event_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data);
+
+int scan_check_cb(struct MHD_Connection *connection, struct json_object *in);
+int scan_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data);
+
+int status_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data);
 
 #endif
