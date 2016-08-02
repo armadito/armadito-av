@@ -102,6 +102,32 @@ int ping_process_cb(struct api_handler *a, struct MHD_Connection *connection, st
 	return 0;
 }
 
+
+int event_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
+{
+	const char *token;
+	struct api_client *client;
+
+	token = api_get_token(connection);
+	/* this should not happen because the token presence has already been tested in API handler */
+	if (token == NULL)
+		return 1;
+
+	client = api_handler_get_client(a, token);
+
+	if (client != NULL) {
+		api_client_pop_event(client, out);
+
+#ifdef DEBUG
+		jobj_debug(*out, "JSON event");
+#endif
+
+		return 0;
+	}
+
+	return 1;
+}
+
 int scan_check_cb(struct MHD_Connection *connection, struct json_object *in)
 {
 	struct json_object *j_path;
@@ -186,6 +212,7 @@ static struct json_object *on_demand_progress_event_json(struct a6o_report *repo
 
 	return j_event;
 }
+
 struct scan_data {
 	struct api_client *client;
 	time_t last_send_time;
@@ -248,17 +275,18 @@ static void scan_callback(struct a6o_report *report, void *callback_data)
 	struct scan_data *scan_data = (struct scan_data *)callback_data;
 	time_t now;
 
-	if (report->path != NULL
-		&& (report->status == ARMADITO_MALWARE
-			|| report->status == ARMADITO_SUSPICIOUS)) {
-			j_event = detection_event_json(report);
-			api_client_push_event(scan_data->client, j_event);
-		}
+	if ((report->status == ARMADITO_MALWARE || report->status == ARMADITO_SUSPICIOUS)
+		&& report->path != NULL) {
+		j_event = detection_event_json(report);
+		api_client_push_event(scan_data->client, j_event);
+		json_object_put(j_event);
+	}
 
 	now = get_milliseconds();
 	if (must_send_progress_event(report, scan_data, now)) {
 		j_event = on_demand_progress_event_json(report);
 		api_client_push_event(scan_data->client, j_event);
+		json_object_put(j_event);
 
 		scan_data->last_send_time = now;
 		scan_data->last_send_progress = report->progress;
@@ -267,6 +295,7 @@ static void scan_callback(struct a6o_report *report, void *callback_data)
 	if(report->path == NULL && report->progress == 100 ) {
 		j_event = on_demand_completed_event_json(report);
 		api_client_push_event(scan_data->client, j_event);
+		json_object_put(j_event);
 	}
 }
 
@@ -304,13 +333,14 @@ int scan_process_cb(struct api_handler *a, struct MHD_Connection *connection, st
 
 	/* check of parameters has already been done in scan_check_cb */
 	json_object_object_get_ex(in, "path", &j_path);
+	path = json_object_get_string(j_path);
 
 	scan_data = malloc(sizeof(struct scan_data));
 	scan_data->client = client;
 	scan_data->last_send_time = 0L;
 	scan_data->last_send_progress = REPORT_PROGRESS_UNKNOWN;
 
-	scan_data->on_demand = a6o_on_demand_new(armadito, 42, json_object_get_string(j_path), ARMADITO_SCAN_RECURSE | ARMADITO_SCAN_THREADED);
+	scan_data->on_demand = a6o_on_demand_new(armadito, 42, path, ARMADITO_SCAN_RECURSE | ARMADITO_SCAN_THREADED);
 
 	a6o_scan_add_callback(a6o_on_demand_get_scan(scan_data->on_demand), scan_callback, scan_data);
 
@@ -319,8 +349,81 @@ int scan_process_cb(struct api_handler *a, struct MHD_Connection *connection, st
 	return 0;
 }
 
-int event_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
+static struct json_object *update_status_json(enum a6o_update_status status)
 {
+	switch(status) {
+	case ARMADITO_UPDATE_OK:
+		return json_object_new_string("up-to-date");
+	case ARMADITO_UPDATE_LATE:
+		return json_object_new_string("late");
+	case ARMADITO_UPDATE_CRITICAL:
+		return json_object_new_string("critical");
+	case ARMADITO_UPDATE_NON_AVAILABLE:
+		return json_object_new_string("non-available");
+	}
+
+	return json_object_new_string("non-available");
+}
+
+static struct json_object *status_event_json(struct a6o_info *info)
+{
+	struct json_object *j_event, *j_mod_array;
+	struct a6o_module_info **m;
+
+	j_event = json_object_new_object();
+
+	json_object_object_add(j_event, "event_type", json_object_new_string("StatusEvent"));
+
+	json_object_object_add(j_event, "global_status", update_status_json(info->global_status));
+	json_object_object_add(j_event, "global_update_timestamp", json_object_new_int64(info->global_update_ts));
+
+	j_mod_array = json_object_new_array();
+	json_object_object_add(j_event, "modules", j_mod_array);
+
+	for(m = info->module_infos; *m != NULL; m++) {
+		struct json_object *j_mod = json_object_new_object();
+
+		json_object_object_add(j_mod, "name", json_object_new_string((*m)->name));
+		json_object_object_add(j_mod, "mod_status", update_status_json((*m)->mod_status));
+		json_object_object_add(j_event, "update_timestamp", json_object_new_int64((*m)->mod_update_ts));
+
+		json_object_array_add(j_mod_array, j_mod);
+	}
+
+	return j_event;
+}
+
+struct status_data {
+	struct api_client *client;
+	struct armadito *armadito;
+};
+
+static gpointer status_api_thread(gpointer data)
+{
+	struct status_data *status_data = (struct status_data *)data;
+	struct a6o_info *info;
+	struct json_object *j_event;
+
+	info = a6o_info_new(status_data->armadito);
+
+//	if (info == NULL) {
+//		resp->error_message = os_strdup("getting info failed");
+//
+//		return JSON_REQUEST_FAILED;
+//	}
+
+	j_event = status_event_json(info);
+
+	api_client_push_event(status_data->client, j_event);
+
+	a6o_info_free(info);
+
+	return NULL;
+}
+
+int status_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
+{
+	struct status_data *status_data;
 	const char *token;
 	struct api_client *client;
 
@@ -330,16 +433,14 @@ int event_process_cb(struct api_handler *a, struct MHD_Connection *connection, s
 		return 1;
 
 	client = api_handler_get_client(a, token);
+	if (client == NULL)
+		return 1;
 
-	if (client != NULL) {
-		api_client_pop_event(client, out);
+	status_data = malloc(sizeof(struct status_data));
+	status_data->client = client;
+	status_data->armadito = (struct armadito *)user_data;
 
-#ifdef DEBUG
-		jobj_debug(*out, "JSON event");
-#endif
+	g_thread_new("status thread", status_api_thread, status_data);
 
-		return 0;
-	}
-
-	return 1;
+	return 0;
 }

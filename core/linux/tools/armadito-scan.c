@@ -129,7 +129,7 @@ static void parse_options(int argc, char **argv, struct scan_options *opts)
 	while (1) {
 		int c, option_index = 0;
 
-		c = getopt_long(argc, argv, "hVrtn", scan_option_defs, &option_index);
+		c = getopt_long(argc, argv, "hVrtnp:", scan_option_defs, &option_index);
 
 		if (c == -1)
 			break;
@@ -245,7 +245,7 @@ static void do_scan(struct scan_options *opts, struct api_client *client)
 	api_client_call(client, "/scan", j_request, &j_response);
 
 	while (!end_of_scan) {
-	j_response = NULL;
+		j_response = NULL;
 		api_client_call(client, "/event", NULL, &j_response);
 		if (j_response == NULL)
 			continue;

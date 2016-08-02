@@ -66,8 +66,9 @@ static struct api_endpoint {
 	{ "/register", HTTP_METHOD_GET, 0, register_process_cb, NULL},
 	{ "/unregister", HTTP_METHOD_GET, 1, unregister_process_cb, NULL},
 	{ "/ping", HTTP_METHOD_GET, 1, ping_process_cb, NULL},
-	{ "/scan", HTTP_METHOD_POST, 1, scan_process_cb, scan_check_cb},
 	{ "/event", HTTP_METHOD_GET, 1, event_process_cb, NULL},
+	{ "/scan", HTTP_METHOD_POST, 1, scan_process_cb, scan_check_cb},
+	{ "/status", HTTP_METHOD_GET, 1, status_process_cb, NULL},
 	{ NULL, 0, 0, NULL, NULL},
 };
 
@@ -202,9 +203,18 @@ static struct json_object *api_parse_json_request(const char *post_data, size_t 
 	return j_request;
 }
 
-static int api_queue_response(struct MHD_Connection *connection, struct MHD_Response *response)
+static int api_queue_response(struct MHD_Connection *connection, struct json_object *j_response)
 {
+	struct MHD_Response *response;
+	const char *json_buff;
 	int ret;
+
+	json_buff = json_object_to_json_string(j_response);
+	response = MHD_create_response_from_buffer(strlen(json_buff), (char *)json_buff, MHD_RESPMEM_MUST_COPY);
+	json_object_put(j_response); /* free the json object */
+
+	if (response == NULL)
+		return MHD_NO;
 
 	MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_TYPE, "application/json");
 	MHD_add_response_header(response, MHD_HTTP_HEADER_CONNECTION, "close");
@@ -221,10 +231,9 @@ int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
 	enum http_method method, const char *path, const char *post_data, size_t post_data_size)
 {
 	struct api_endpoint *endpoint;
-	int http_status_code, ret;
-	const char *json_buff;
-	struct json_object *j_request = NULL, *j_response = NULL;
 	struct MHD_Response *response;
+	int http_status_code, ret;
+	struct json_object *j_request = NULL, *j_response = NULL;
 
 	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "request to API: path %s", path);
 
@@ -258,17 +267,11 @@ int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
 		/* a failed processing should not create a JSON response? */
 		if (j_response != NULL)
 			json_object_put(j_response);
+
 		return MHD_queue_response(connection, MHD_HTTP_INTERNAL_SERVER_ERROR, a->response_500);
 	}
 
-	json_buff = json_object_to_json_string(j_response);
-	response = MHD_create_response_from_buffer(strlen(json_buff), (char *)json_buff, MHD_RESPMEM_MUST_COPY);
-	json_object_put(j_response); /* free the json object */
-
-	if (response == NULL)
-		return MHD_NO;
-
-	return api_queue_response(connection, response);
+	return api_queue_response(connection, j_response);
 }
 
 static struct MHD_Response *create_std_response(const char *json)
