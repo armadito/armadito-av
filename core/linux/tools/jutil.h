@@ -19,21 +19,16 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef TOOLS_APICLIENT_H_
-#define TOOLS_APICLIENT_H_
+#ifndef TOOLS_JUTIL_H
+#define TOOLS_JUTIL_H
 
 #include <json.h>
+#include <stdint.h>
 
-struct api_client;
+const char *j_get_string(struct json_object *j_obj, const char *key);
 
-struct api_client *api_client_new(unsigned short port, int verbose);
+int j_get_int(struct json_object *j_obj, const char *key);
 
-int api_client_call(struct api_client *client, const char *path, struct json_object *in, struct json_object **out);
-
-int api_client_register(struct api_client *client);
-
-int api_client_unregister(struct api_client *client);
-
-void api_client_free(struct api_client *client);
+int64_t j_get_int64(struct json_object *j_obj, const char *key);
 
 #endif

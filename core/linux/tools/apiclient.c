@@ -28,17 +28,19 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 struct api_client {
 	unsigned short port;
+	int verbose; /* make curl print HTTP request and response */
 	const char *token;
 };
 
 #define API_HOST "127.0.0.1"
 #define API_TOKEN_HEADER "X-Armadito-Token"
 
-struct api_client *api_client_new(unsigned short port)
+struct api_client *api_client_new(unsigned short port, int verbose)
 {
 	struct api_client *c = malloc(sizeof(struct api_client));
 
 	c->port = port;
+	c->verbose = verbose;
 	c->token = NULL;
 
 	return c;
@@ -155,7 +157,7 @@ int api_client_call(struct api_client *client, const char *path, struct json_obj
 	curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
 	curl_easy_setopt(hnd, CURLOPT_USERAGENT, "curl/7.47.0");
 	curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
-	curl_easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
+	curl_easy_setopt(hnd, CURLOPT_VERBOSE, client->verbose);
 	curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
 
 	if (slist != NULL)

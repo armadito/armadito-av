@@ -31,6 +31,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <time.h>
 
 #include "apiclient.h"
+#include "jutil.h"
 
 #define DEFAULT_PORT          8888
 #define S_DEFAULT_PORT        "8888"
@@ -40,37 +41,15 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 struct info_options {
 	unsigned short port;
+	int verbose;
 };
 
 static struct option info_option_defs[] = {
 	{"help",      no_argument,        0, 'h'},
 	{"version",   no_argument,        0, 'V'},
+	{"verbose",   no_argument,        0, 'v'},
 	{"port",      required_argument,  0, 'p'},
 	{0, 0, 0, 0}
-};
-
-struct base_info {
-	const char *name;
-	time_t base_update_ts;
-	const char *version;
-	unsigned int signature_count;
-	const char *full_path;
-};
-
-struct module_info {
-	const char *name;
-	const char *mod_status;
-	time_t mod_update_ts;
-	/* NULL terminated array of pointers to struct base_info */
-	struct base_info **base_infos;
-};
-
-struct status_event {
-	const char *global_status;
-	/* NULL terminated array of pointers to struct a6o_module_info */
-	struct module_info **module_infos;
-	int n_modules;
-	int alloc_modules;
 };
 
 static void version(void)
@@ -88,6 +67,7 @@ static void usage(void)
 	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "  --help  -h                    print help and quit\n");
 	fprintf(stderr, "  --version -V                  print program version\n");
+	fprintf(stderr, "  --verbose -v                  print HTTP trafic\n");
 	fprintf(stderr, "  --port=PORT | -p PORT         TCP port to connect to Armadito-AV (default is " S_DEFAULT_PORT ")\n");
 	fprintf(stderr, "\n");
 
@@ -97,11 +77,12 @@ static void usage(void)
 static void parse_options(int argc, char **argv, struct info_options *opts)
 {
 	opts->port = DEFAULT_PORT;
+	opts->verbose = 0;
 
 	while (1) {
 		int c, option_index = 0;
 
-		c = getopt_long(argc, argv, "hVp:", info_option_defs, &option_index);
+		c = getopt_long(argc, argv, "hVvp:", info_option_defs, &option_index);
 
 		if (c == -1)
 			break;
@@ -112,6 +93,9 @@ static void parse_options(int argc, char **argv, struct info_options *opts)
 			break;
 		case 'V': /* version */
 			version();
+			break;
+		case 'v': /* verbose */
+			opts->verbose = 1;
 			break;
 		case 'p': /* port */
 			opts->port = (unsigned short)atoi(optarg);
@@ -129,71 +113,61 @@ static void parse_options(int argc, char **argv, struct info_options *opts)
 		usage();
 }
 
-#if 0
-static struct info *info_new(void)
+static void time_2_date(int64_t timestamp, char *buf, size_t len)
 {
-	struct info *info = malloc(sizeof(struct info));
-
-	info->global_status = NULL;
-
-	info->n_modules = 0;
-	info->alloc_modules = 1;
-	info->module_infos = malloc(sizeof(struct module_info) * info->alloc_modules);
-	info->module_infos[info->n_modules] = NULL;
-
-	return info;
+	strftime(buf, len, "%FT%TZ", gmtime(&timestamp));
 }
 
-static void info_append_module(struct info *info, struct module_info *mod_inf)
+static void status_print(struct json_object *j_ev)
 {
-	if (info->n_modules >= info->alloc_modules - 1) {
-		info->alloc_modules *= 2;
-		info->module_infos = realloc(info->module_infos, sizeof(struct module_info) * info->alloc_modules);
-	}
-
-	info->module_infos[info->n_modules] = mod_inf;
-	info->n_modules++;
-	info->module_infos[info->n_modules] = NULL;
-}
-
-static void info_free(struct info *info)
-{
-	/* FIXME: free all the fields */
-	free(info);
-}
-
-static void info_save_to_stdout(struct info *info)
-{
-	struct module_info **m;
-	struct base_info **b;
+	int n_mods, m;
+	struct json_object *j_mod_array;
+	char buf[sizeof("1970-01-01T00:00:00Z!")];
 
 	printf( "--- Armadito info --- \n");
-	printf( "Update global status : %s\n", info->global_status);
-	if (info->module_infos != NULL) {
-		for(m = info->module_infos; *m != NULL; m++){
-			printf( "Module %s \n", (*m)->name );
-			printf( "- Update status : %s\n", (*m)->mod_status);
-			printf( "- Update date : %s \n", (*m)->update_date );
+	printf( "global status : %s\n", j_get_string(j_ev, "global_status"));
+	time_2_date(j_get_int64(j_ev, "global_update_timestamp"), buf, sizeof(buf));
+	printf( "global update date : %s\n", buf);
 
-			if ((*m)->base_infos != NULL) {
-				for(b = (*m)->base_infos; *b != NULL; b++){
-					printf( "-- Base %s \n", (*b)->name );
-					printf( "--- Update date : %s \n", (*b)->date );
-					printf( "--- Version : %s \n", (*b)->version );
-					printf( "--- Signature count : %d \n", (*b)->signature_count );
-					printf( "--- Full path : %s \n", (*b)->full_path );
-				}
-			}
+	json_object_object_get_ex(j_ev, "modules", &j_mod_array);
+	n_mods = json_object_array_length(j_mod_array);
+
+	for(m = 0; m < n_mods; m++) {
+		struct json_object *j_mod, *j_base_array;
+		int n_bases, b;
+
+		j_mod = json_object_array_get_idx(j_mod_array, m);
+		printf( "Module %s \n",  j_get_string(j_mod, "name"));
+		printf( "- Update status : %s\n", j_get_string(j_mod, "mod_status"));
+		time_2_date(j_get_int64(j_mod, "mod_update_timestamp"), buf, sizeof(buf));
+		printf( "- Update date : %s\n", buf);
+
+		if (!json_object_object_get_ex(j_mod, "bases", &j_base_array))
+			continue;
+
+		n_bases = json_object_array_length(j_base_array);
+
+		for(b = 0; b < n_bases; b++) {
+			struct json_object *j_base;
+			const char *version;
+
+			j_base = json_object_array_get_idx(j_base_array, b);
+			printf( "-- Base %s \n", j_get_string(j_base, "name"));
+			time_2_date(j_get_int64(j_base, "base_update_ts"), buf, sizeof(buf));
+			printf( "--- Update date : %s\n", buf);
+			version = j_get_string(j_base, "version");
+			if (version != NULL)
+				printf( "--- Version : %s\n", version);
+			printf( "--- Signature count : %d\n", j_get_int(j_base, "signature_count"));
+			printf( "--- Full path : %s\n", j_get_string(j_base, "full_path"));
 		}
 	}
 }
-#endif
 
 static void do_info(struct info_options *opts, struct api_client *client)
 {
 	struct json_object *j_response;
 	int end_of_info = 0;
-	struct status_event ev;
 
 	api_client_register(client);
 
@@ -205,31 +179,10 @@ static void do_info(struct info_options *opts, struct api_client *client)
 		if (j_response == NULL)
 			continue;
 
-		json_object_to_file("/dev/stderr", j_response);
-		fprintf(stderr, "\n");
-
-#if 0
-		switch(process_json_event(j_response, &ev)) {
-		case DETECTION_EVENT:
-			printf("%s: %s [%s - %s] (action %s)\n",
-				ev.content.d.path,
-				ev.content.d.scan_status,
-				ev.content.d.module_name,
-				ev.content.d.module_report,
-				ev.content.d.scan_action);
-			break;
-		case ON_DEMAND_COMPLETED_EVENT:
+		if (!strcmp(j_get_string(j_response, "event_type"), "StatusEvent")) {
+			status_print(j_response);
 			end_of_info = 1;
-			if (!opts->no_summary) {
-				printf("\nSCAN SUMMARY:\n");
-				printf("scanned files     : %d\n", ev.content.c.total_scanned_count);
-				printf("malware files     : %d\n", ev.content.c.total_malware_count);
-				printf("suspicious files  : %d\n", ev.content.c.total_suspicious_count);
-			}
-			break;
 		}
-#endif
-		end_of_info = 1;
 	}
 
 	api_client_unregister(client);
@@ -242,7 +195,7 @@ int main(int argc, char **argv)
 
 	parse_options(argc, argv, opts);
 
-	client = api_client_new(opts->port);
+	client = api_client_new(opts->port, opts->verbose);
 
 	do_info(opts, client);
 
