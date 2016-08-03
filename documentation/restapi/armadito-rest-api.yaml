@@ -45,7 +45,6 @@ paths:
           description: session token
           required: true
           type: string
-          format: int64
       responses:
         200:
           description: success
@@ -72,7 +71,6 @@ paths:
           description: session token
           required: true
           type: integer
-          format: int64
       responses:
         # Response code
         200:
@@ -81,6 +79,52 @@ paths:
           # Use JSON Schema format
           schema:
             $ref: '#/definitions/Pong'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /event:
+    get:
+      description:
+        get server event
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: X-Armadito-Token
+          description: session token
+          required: true
+          type: integer
+      responses:
+        200:
+          description: event received OK
+          schema:
+            $ref: '#/definitions/Event'
+
+  /scan:
+    post:
+      summary: launch a scan
+      description: launch a scan
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: X-Armadito-Token
+          description: session token
+          required: true
+          type: integer
+        - in: body
+          name: body
+          description: scan object
+          required: true
+          schema:
+            $ref: "#/definitions/Scan"
+      responses:
+        200:
+          description: OK
         default:
           description: Unexpected error
           schema:
@@ -98,62 +142,13 @@ paths:
           description: session token
           required: true
           type: integer
-          format: int64
       responses:
         200:
-          description: success
-          schema:
-            $ref: '#/definitions/Status'
+          description: OK
         default:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
-
-  /scan:
-    post:
-      summary: launch a scan
-      description: launch a scan
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      parameters:
-        - in: header
-          name: X-Armadito-Token
-          description: session token
-          required: true
-          type: integer
-          format: int64
-        - in: body
-          name: body
-          description: scan object
-          required: true
-          schema:
-            $ref: "#/definitions/Scan"
-      responses:
-        200:
-          description: OK
-        405:
-          description: Invalid input
-
-  /event:
-    get:
-      description:
-        get server event
-      produces:
-        - application/json
-      parameters:
-        - in: header
-          name: X-Armadito-Token
-          description: session token
-          required: true
-          type: integer
-          format: int64
-      responses:
-        200:
-          description: event received OK
-          schema:
-            $ref: '#/definitions/Event'
 
 definitions:
 
@@ -182,46 +177,6 @@ definitions:
         enum: 
           - "ok"
 
-  AntivirusStatus:
-    type: object
-    properties:
-      version:
-        type: string
-        description: the version of the antivirus
-      service:
-        type: boolean
-        description: is the service on or off?
-      real-time-protection:
-        type: boolean
-        description: is the real-time protection on or off?
-
-  ModuleStatus:
-    type: object
-    properties:
-      name:
-        type: string
-        description: module name
-      version:
-        type: string
-        description: module version
-      update:
-        type: string
-        format: date-time
-        description: module update date
-
-  Status:
-    type: object
-    properties:
-      antivirus:
-        $ref: '#/definitions/AntivirusStatus'
-      update:
-        type: string
-        format: date-time
-        description: the last update date of the antivirus
-      modules:
-        type: array
-        items:
-          $ref: '#/definitions/ModuleStatus'
   Scan:
     type: object
     properties:
@@ -237,6 +192,20 @@ definitions:
     properties:
       event_type:
         type: string
+
+  ScanStatus:
+    type: string
+    enum: 
+      - "undecided"
+      - "clean"
+      - "ignored"
+      - "invalid argument"
+      - "internal error"
+      - "suspicious"
+      - "white listed"
+      - "malware"
+      - "unknown status"
+    description: scan status for path
 
   DetectionEvent:
     allOf:
@@ -256,18 +225,7 @@ definitions:
             type: string
             description: path
           scan_status:
-            type: string
-            enum: 
-              - "undecided"
-              - "clean"
-              - "ignored"
-              - "invalid argument"
-              - "internal error"
-              - "suspicious"
-              - "white listed"
-              - "malware"
-              - "unknown status"
-            description: scan status for path
+            $ref: '#/definitions/ScanStatus'
           scan_action:
             type: string
             description: action taken for malware
@@ -326,4 +284,82 @@ definitions:
             format: int32
             description: scanned file counter
           # array of detection event
-          
+
+  UpdateStatus:
+    type: string
+    enum:
+      - "up-to-date"
+      - "late"
+      - "critical"
+      - "non-available"
+    description: update status of modules and antivirus
+
+  BaseInfo:
+    type: object
+    properties:
+      name:
+        type: string
+        description: base name
+      base_update_timestamp:
+        type: integer
+        format: int64
+        description: base update timestamp
+      version:
+        type: string
+        description: base version if available
+      signature_count:
+        type: integer
+        description: number of signatures in the base
+      full_path:
+        type: string
+        description: full path of the base file if available
+
+  ModuleStatus:
+    type: object
+    properties:
+      name:
+        type: string
+        description: module name
+      mod_status:
+        $ref: '#/definitions/UpdateStatus'
+      mod_update_timestamp:
+        type: integer
+        format: int64
+        description: module update timestamp
+      bases:
+        type: array
+        items:
+          $ref: '#/definitions/BaseInfo'
+
+  StatusEvent:
+    allOf:
+      - $ref: '#/definitions/Event'
+      - type: object
+        properties:
+          global_status:
+            $ref: '#/definitions/UpdateStatus'
+          global_update_timestamp:
+            type: integer
+            format: int64
+            description: global update timestamp
+          modules:
+            type: array
+            items:
+              $ref: '#/definitions/ModuleStatus'
+
+  #
+  # not implemented yet
+  #
+  AntivirusStatus:
+    type: object
+    properties:
+      version:
+        type: string
+        description: the version of the antivirus
+      service:
+        type: boolean
+        description: is the service on or off?
+      real-time-protection:
+        type: boolean
+        description: is the real-time protection on or off?
+
