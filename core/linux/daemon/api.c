@@ -373,7 +373,6 @@ static struct json_object *status_event_json(struct a6o_info *info)
 	j_event = json_object_new_object();
 
 	json_object_object_add(j_event, "event_type", json_object_new_string("StatusEvent"));
-
 	json_object_object_add(j_event, "global_status", update_status_json(info->global_status));
 	json_object_object_add(j_event, "global_update_timestamp", json_object_new_int64(info->global_update_ts));
 
@@ -382,33 +381,34 @@ static struct json_object *status_event_json(struct a6o_info *info)
 
 	for(m = info->module_infos; *m != NULL; m++) {
 		struct a6o_module_info *mod_info = *m;
-		struct json_object *j_mod = json_object_new_object();
+		struct a6o_base_info **b;
+		struct json_object *j_mod, *j_base_array;
 
+		j_mod = json_object_new_object();
 		json_object_array_add(j_mod_array, j_mod);
 
 		json_object_object_add(j_mod, "name", json_object_new_string(mod_info->name));
 		json_object_object_add(j_mod, "mod_status", update_status_json(mod_info->mod_status));
 		json_object_object_add(j_mod, "mod_update_timestamp", json_object_new_int64(mod_info->mod_update_ts));
 
-		if (mod_info->base_infos != NULL) {
-			struct a6o_base_info **b;
-			struct json_object *j_base_array = json_object_new_array();
+		if (mod_info->base_infos == NULL)
+			continue;
 
-			json_object_object_add(j_mod, "bases", j_base_array);
+		j_base_array = json_object_new_array();
+		json_object_object_add(j_mod, "bases", j_base_array);
 
-			for(b = mod_info->base_infos; *b != NULL; b++) {
-				struct a6o_base_info *base_info = *b;
-				struct json_object *j_base = json_object_new_object();
+		for(b = mod_info->base_infos; *b != NULL; b++) {
+			struct a6o_base_info *base_info = *b;
+			struct json_object *j_base = json_object_new_object();
 
-				json_object_array_add(j_base_array, j_base);
+			json_object_array_add(j_base_array, j_base);
 
-				json_object_object_add(j_base, "name", json_object_new_string(base_info->name));
-				json_object_object_add(j_base, "base_update_ts", json_object_new_int64(base_info->base_update_ts));
-				if (base_info->version != NULL)
-					json_object_object_add(j_base, "version", json_object_new_string(base_info->version));
-				json_object_object_add(j_base, "signature_count", json_object_new_int64(base_info->signature_count));
-				json_object_object_add(j_base, "full_path", json_object_new_string(base_info->full_path));
-			}
+			json_object_object_add(j_base, "name", json_object_new_string(base_info->name));
+			json_object_object_add(j_base, "base_update_ts", json_object_new_int64(base_info->base_update_ts));
+			if (base_info->version != NULL)
+				json_object_object_add(j_base, "version", json_object_new_string(base_info->version));
+			json_object_object_add(j_base, "signature_count", json_object_new_int64(base_info->signature_count));
+			json_object_object_add(j_base, "full_path", json_object_new_string(base_info->full_path));
 		}
 	}
 
