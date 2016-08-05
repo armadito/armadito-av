@@ -45,7 +45,7 @@
                    document.getElementById("scanned_count").innerHTML = ev.scanned_count;
                 } else if (ev.event_type == "DetectionEvent") {
                    var results = document.getElementById("results")
-                   var row = results.insertRow(-1);
+                   var row = results.insertRow(1);
                    var path = row.insertCell(0);
                    path.innerHTML = ev.path;
                    var status = row.insertCell(1);
