@@ -30,41 +30,13 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 
 #include "apiclient.h"
+#include "jutil.h"
 
 #define DEFAULT_PORT          8888
 #define S_DEFAULT_PORT        "8888"
 
 #define PROGRAM_NAME "armadito-scan"
 #define PROGRAM_VERSION PACKAGE_VERSION
-
-struct detection_event {
-	const char *detection_time;
-	const char *context;
-	const char *path;
-	const char *scan_status;
-	const char *scan_action;
-	const char *module_name;
-	const char *module_report;
-};
-
-struct on_demand_completed_event {
-	int total_malware_count;
-	int total_suspicious_count;
-	int total_scanned_count;
-};
-
-struct event {
-	enum event_type {
-		DETECTION_EVENT,
-		ON_DEMAND_PROGRESS_EVENT,
-		ON_DEMAND_COMPLETED_EVENT,
-		UNKNOWN_EVENT,
-	} type;
-	union {
-		struct detection_event d;
-		struct on_demand_completed_event c;
-	} content;
-};
 
 struct scan_options {
 	const char *unix_path;
@@ -74,18 +46,20 @@ struct scan_options {
 	int print_clean;
 	const char *path_to_scan;
 	unsigned short port;
+	int verbose;
 };
 
 static struct option scan_option_defs[] = {
 	{"help",        no_argument,        0, 'h'},
 	{"version",     no_argument,        0, 'V'},
+	{"verbose",     no_argument,        0, 'v'},
 	{"recursive",   no_argument,        0, 'r'},
 	{"threaded",    no_argument,        0, 't'},
 	{"no-summary",  no_argument,        0, 'n'},
 #if O
 	{"print-clean", no_argument,        0, 'c'},
 #endif
-	{"port",      required_argument,  0, 'p'},
+	{"port",        required_argument,  0, 'p'},
 	{0, 0, 0, 0}
 };
 
@@ -104,6 +78,7 @@ static void usage(void)
 	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "  --help  -h                    print help and quit\n");
 	fprintf(stderr, "  --version -V                  print program version\n");
+	fprintf(stderr, "  --verbose -v                  print HTTP trafic\n");
 	fprintf(stderr, "  --recursive  -r               scan directories recursively\n");
 	fprintf(stderr, "  --threaded -t                 scan using multiple threads\n");
 	fprintf(stderr, "  --no-summary -n               disable summary at end of scanning\n");
@@ -125,11 +100,12 @@ static void parse_options(int argc, char **argv, struct scan_options *opts)
 	opts->print_clean = 0;
 	opts->path_to_scan = NULL;
 	opts->port = DEFAULT_PORT;
+	opts->verbose = 0;
 
 	while (1) {
 		int c, option_index = 0;
 
-		c = getopt_long(argc, argv, "hVrtnp:", scan_option_defs, &option_index);
+		c = getopt_long(argc, argv, "hVvrtnp:", scan_option_defs, &option_index);
 
 		if (c == -1)
 			break;
@@ -140,6 +116,9 @@ static void parse_options(int argc, char **argv, struct scan_options *opts)
 			break;
 		case 'V': /* version */
 			version();
+			break;
+		case 'v': /* verbose */
+			opts->verbose = 1;
 			break;
 		case 'r': /* recursive */
 			opts->recursive = 1;
@@ -172,71 +151,29 @@ static void parse_options(int argc, char **argv, struct scan_options *opts)
 	opts->path_to_scan = strdup(argv[optind]);
 }
 
-static const char *json_object_get_string_or_null(struct json_object *j_obj, const char *key)
+static void detection_event_print(struct json_object *j_ev)
 {
-	struct json_object *j_str = NULL;
-
-	if (!json_object_object_get_ex(j_obj, key, &j_str)
-		|| !json_object_is_type(j_str, json_type_string))
-		return NULL;
-
-	return strdup(json_object_get_string(j_str));
+	printf("%s: %s [%s - %s] (action %s)\n",
+		j_get_string(j_ev, "path"),
+		j_get_string(j_ev, "scan_status"),
+		j_get_string(j_ev, "module_name"),
+		j_get_string(j_ev, "module_report"),
+		j_get_string(j_ev, "scan_action"));
 }
 
-static int json_object_get_int_or_def(struct json_object *j_obj, const char *key, int def)
+static void completed_event_print(struct json_object *j_ev)
 {
-	struct json_object *j_int = NULL;
-
-	if (!json_object_object_get_ex(j_obj, key, &j_int)
-		|| !json_object_is_type(j_int, json_type_int))
-		return def;
-
-	return json_object_get_int(j_int);
-}
-
-static enum event_type process_json_event(struct json_object *j_ev, struct event *ev)
-{
-	const char *ev_type = json_object_get_string_or_null(j_ev, "event_type");
-
-	if (ev_type == NULL) {
-		ev->type = UNKNOWN_EVENT;
-		return ev->type;
-	}
-	if (!strcmp(ev_type, "DetectionEvent"))
-		ev->type = DETECTION_EVENT;
-	else if (!strcmp(ev_type, "OnDemandProgressEvent"))
-		ev->type = ON_DEMAND_PROGRESS_EVENT;
-	else if (!strcmp(ev_type, "OnDemandCompletedEvent"))
-		ev->type = ON_DEMAND_COMPLETED_EVENT;
-	else
-		ev->type = UNKNOWN_EVENT;
-
-	switch(ev->type) {
-	case DETECTION_EVENT:
-		ev->content.d.path = json_object_get_string_or_null(j_ev, "path");
-		ev->content.d.detection_time = json_object_get_string_or_null(j_ev, "detection_time");
-		ev->content.d.context = json_object_get_string_or_null(j_ev, "context");
-		ev->content.d.path = json_object_get_string_or_null(j_ev, "path");
-		ev->content.d.scan_status = json_object_get_string_or_null(j_ev, "scan_status");
-		ev->content.d.scan_action = json_object_get_string_or_null(j_ev, "scan_action");
-		ev->content.d.module_name = json_object_get_string_or_null(j_ev, "module_name");
-		ev->content.d.module_report = json_object_get_string_or_null(j_ev, "module_report");
-		break;
-	case ON_DEMAND_COMPLETED_EVENT:
-		ev->content.c.total_scanned_count = json_object_get_int_or_def(j_ev, "total_scanned_count", 0);
-		ev->content.c.total_malware_count = json_object_get_int_or_def(j_ev, "total_malware_count", 0);
-		ev->content.c.total_suspicious_count = json_object_get_int_or_def(j_ev, "total_suspicious_count", 0);
-		break;
-	}
-
-	return ev->type;
+	printf("\nSCAN SUMMARY:\n");
+	printf("scanned files     : %d\n", j_get_int(j_ev, "total_scanned_count"));
+	printf("malware files     : %d\n", j_get_int(j_ev, "total_malware_count"));
+	printf("suspicious files  : %d\n", j_get_int(j_ev, "total_suspicious_count"));
 }
 
 static void do_scan(struct scan_options *opts, struct api_client *client)
 {
 	struct json_object *j_request, *j_response;
 	int end_of_scan = 0;
-	struct event ev;
+	const char *ev_type;
 
 	api_client_register(client);
 
@@ -250,28 +187,18 @@ static void do_scan(struct scan_options *opts, struct api_client *client)
 		if (j_response == NULL)
 			continue;
 
-		json_object_to_file("/dev/stderr", j_response);
-		fprintf(stderr, "\n");
-
-		switch(process_json_event(j_response, &ev)) {
-		case DETECTION_EVENT:
-			printf("%s: %s [%s - %s] (action %s)\n",
-				ev.content.d.path,
-				ev.content.d.scan_status,
-				ev.content.d.module_name,
-				ev.content.d.module_report,
-				ev.content.d.scan_action);
-			break;
-		case ON_DEMAND_COMPLETED_EVENT:
-			end_of_scan = 1;
-			if (!opts->no_summary) {
-				printf("\nSCAN SUMMARY:\n");
-				printf("scanned files     : %d\n", ev.content.c.total_scanned_count);
-				printf("malware files     : %d\n", ev.content.c.total_malware_count);
-				printf("suspicious files  : %d\n", ev.content.c.total_suspicious_count);
-			}
-			break;
+		if (api_client_is_verbose(client)) {
+			json_object_to_file("/dev/stderr", j_response);
+			fprintf(stderr, "\n");
 		}
+
+		ev_type = j_get_string(j_response, "event_type");
+		if (!strcmp(ev_type, "OnDemandCompletedEvent")) {
+			if (!opts->no_summary)
+				completed_event_print(j_response);
+			end_of_scan = 1;
+		} else if (!strcmp(ev_type, "DetectionEvent"))
+			detection_event_print(j_response);
 	}
 
 	api_client_unregister(client);
@@ -284,7 +211,7 @@ int main(int argc, char **argv)
 
 	parse_options(argc, argv, opts);
 
-	client = api_client_new(opts->port);
+	client = api_client_new(opts->port, opts->verbose);
 
 	do_scan(opts, client);
 

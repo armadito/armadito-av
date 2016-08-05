@@ -179,6 +179,11 @@ static void do_info(struct info_options *opts, struct api_client *client)
 		if (j_response == NULL)
 			continue;
 
+		if (api_client_is_verbose(client)) {
+			json_object_to_file("/dev/stderr", j_response);
+			fprintf(stderr, "\n");
+		}
+
 		if (!strcmp(j_get_string(j_response, "event_type"), "StatusEvent")) {
 			status_print(j_response);
 			end_of_info = 1;
