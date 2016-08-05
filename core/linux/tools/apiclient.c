@@ -46,6 +46,11 @@ struct api_client *api_client_new(unsigned short port, int verbose)
 	return c;
 }
 
+int api_client_is_verbose(struct api_client *client)
+{
+	return client->verbose;
+}
+
 struct post_processor {
 	GByteArray *buffer;
 };
