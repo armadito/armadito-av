@@ -28,15 +28,13 @@ long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=1
-FILE_NAME_0=8356;C;0;EUTF-8;1;1;0;%2Fusr%2Finclude%2Fmicrohttpd.h;0;8
-FILE_NAME_1=10265;C;0;EUTF-8;1;1;0;%2Fhome%2Ffdechelle%2Fprojects%2Farmadito%2Fgit%2Farmadito-av%2Fexp_microhttpd%2Fcore%2Flinux%2Fdaemon%2Fhttpd.c;0;8
-FILE_NAME_2=998;C;0;EUTF-8;1;1;0;%2Fhome%2Ffdechelle%2Fprojects%2Farmadito%2Fgit%2Farmadito-av%2Fexp_microhttpd%2Fcore%2Flinux%2Fdaemon%2Fapi.h;0;8
-FILE_NAME_3=2102;C;0;EUTF-8;1;1;0;%2Fhome%2Ffdechelle%2Fprojects%2Farmadito%2Fgit%2Farmadito-av%2Fexp_microhttpd%2Fcore%2Flinux%2Fdaemon%2Fapi.c;0;8
-FILE_NAME_4=0;C;0;EUTF-8;1;1;0;%2Fhome%2Ffdechelle%2Fprojects%2Farmadito%2Fgit%2Farmadito-av%2Fexp_microhttpd%2Fcore%2Flinux%2Fdaemon%2Fhttpd.h;0;8
+current_page=2
+FILE_NAME_0=0;C;0;EUTF-8;1;1;0;%2Fhome%2Ffdechelle%2Fprojects%2Farmadito%2Fgit%2Farmadito-av%2Fexp_microhttpd%2Fcore%2Flibarmadito%2Fsrc%2Flinux%2Fbuiltin-modules%2Falert.c;0;8
+FILE_NAME_1=0;C;0;EUTF-8;1;1;0;%2Fhome%2Ffdechelle%2Fprojects%2Farmadito%2Fgit%2Farmadito-av%2Fexp_microhttpd%2Fcore%2Flibarmadito%2Finclude%2Flibarmadito%2Fnotify.h;0;8
+FILE_NAME_2=876;C;0;EUTF-8;1;1;0;%2Fhome%2Ffdechelle%2Fprojects%2Farmadito%2Fgit%2Farmadito-av%2Fexp_microhttpd%2Fcore%2Flinux%2Fdaemon%2Fapihandler.h;0;8
 
 [VTE]
-last_dir=/home/fdechelle/projects/armadito/git/armadito-av/exp_microhttpd
+last_dir=/home/fdechelle/projects/armadito/git/armadito-av/exp_microhttpd/core
 
 [prjorg]
 source_patterns=*.c;*.C;*.cpp;*.cxx;*.c++;*.cc;*.m;
@@ -56,3 +54,6 @@ EX_00_WD=
 NF_02_LB=Make _install
 NF_02_CM=make install
 NF_02_WD=%p/../../../../build/core
+NF_01_LB=Make Custom _Target…
+NF_01_CM=make 
+NF_01_WD=%p/../../../../build/core
