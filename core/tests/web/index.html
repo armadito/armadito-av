@@ -4,19 +4,68 @@
     <title>Armadito</title>
     <link rel="stylesheet" href="styles/main.css">
     <script>
+      var token = null;
+      
+      function register() {
+        var xmlhttp = new XMLHttpRequest();
+          xmlhttp.onreadystatechange = function() {
+              if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                var obj = JSON.parse(xmlhttp.responseText);
+                token = obj.token;
+                console.log("token is now: " + token);
+              }
+          };
+        xmlhttp.open("GET", "/api/register", true);
+        xmlhttp.send(null);
+      }
+
+      function scan() {
+        console.log("scan");
+        var path_to_scan = document.getElementById("path").value;
+        console.log("path to scan: " + path_to_scan);
+        var data = {path: path_to_scan};
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open("POST", "/api/scan", true);
+        xmlhttp.setRequestHeader("X-Armadito-Token", token);
+        xmlhttp.setRequestHeader("Content-TYpe", "application/json");
+        xmlhttp.send(JSON.stringify(data));
+        
+        long_polling();
+      }
+
       function long_polling() {
           var xmlhttp = new XMLHttpRequest();
           xmlhttp.onreadystatechange = function() {
               if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                var obj = JSON.parse(xmlhttp.responseText);
-                document.getElementById("progress").innerHTML = obj.progress;
-                long_polling();
+                var ev = JSON.parse(xmlhttp.responseText);
+                if (ev.event_type == "OnDemandProgressEvent") {
+                   document.getElementById("progress").innerHTML = ev.progress;
+                   document.getElementById("malware_count").innerHTML = ev.malware_count;
+                   document.getElementById("suspicious_count").innerHTML = ev.suspicious_count;
+                   document.getElementById("scanned_count").innerHTML = ev.scanned_count;
+                } else if (ev.event_type == "DetectionEvent") {
+                   var results = document.getElementById("results")
+                   var row = results.insertRow(-1);
+                   var path = row.insertCell(0);
+                   path.innerHTML = ev.path;
+                   var status = row.insertCell(1);
+                   status.innerHTML = ev.scan_status;
+                   var action = row.insertCell(2);
+                   action.innerHTML = ev.scan_action;
+                   var module = row.insertCell(3);
+                   module.innerHTML = ev.module_name;
+                   var module_report = row.insertCell(4);
+                   module_report.innerHTML = ev.module_report;
+                }
+                long_polling(token);
               }
           };
           console.log("sending request");
-          xmlhttp.open("GET", "api", true);
+          xmlhttp.open("GET", "/api/event", true);
+          xmlhttp.setRequestHeader("X-Armadito-Token", token);
           xmlhttp.send(null);
       }
+
       function fun() {
           console.log("submit");
       }
@@ -30,11 +79,31 @@
     </div>
 
     <div>
+	Path: <input type="text" id="path"/><button onclick="scan()">Scan</button>
+    </div>
+
+    <div>
       progress: <span id="progress">0</span>
+    </div>
+    <div>
+     malware_count: <span id="malware_count">0</span>
+    </div>
+    <div>
+     suspicious_count: <span id="suspicious_count">0</span>
+    </div>
+    <div>
+     scanned_count: <span id="scanned_count">0</span>
+    </div>
+
+    <div>
+      <table id="results" width="90%" border="1">
+	<tr> <th>path</th> <th>status</th> <th>action</th> <th>module</th> <th>report</th></tr>
+      </table>
     </div>
 
     <script>
-      long_polling();
+        register();
     </script>
+
   </body>
 </html>
