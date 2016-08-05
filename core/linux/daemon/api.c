@@ -39,11 +39,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 /* #define HASH_ONE(H, C) (H) = (((H) << 5) + (H)) + (C) */
 /* #define HASH_INIT_VAL 5381 */
 
-static void hash_init(int64_t *hash)
-{
-	*hash = HASH_INIT_VAL;
-}
-
 static void hash_buff(const char *buff, size_t len, int64_t *hash)
 {
 	for ( ; len--; buff++)
@@ -58,13 +53,12 @@ static void hash_str(const char *str, int64_t *hash)
 
 int register_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
 {
-	int64_t token;
+	int64_t token = HASH_INIT_VAL;
 	const char *user_agent;
 	char here;
 	time_t now;
 	char *s_token;
 
-	hash_init(&token);
 	time(&now);
 	hash_buff((const char *)&now, sizeof(time_t), &token);
 	user_agent = api_get_user_agent(connection);
@@ -279,14 +273,12 @@ static void scan_callback(struct a6o_report *report, void *callback_data)
 		&& report->path != NULL) {
 		j_event = detection_event_json(report);
 		api_client_push_event(scan_data->client, j_event);
-		json_object_put(j_event);
 	}
 
 	now = get_milliseconds();
 	if (must_send_progress_event(report, scan_data, now)) {
 		j_event = on_demand_progress_event_json(report);
 		api_client_push_event(scan_data->client, j_event);
-		json_object_put(j_event);
 
 		scan_data->last_send_time = now;
 		scan_data->last_send_progress = report->progress;
@@ -295,7 +287,6 @@ static void scan_callback(struct a6o_report *report, void *callback_data)
 	if(report->path == NULL && report->progress == 100 ) {
 		j_event = on_demand_completed_event_json(report);
 		api_client_push_event(scan_data->client, j_event);
-		json_object_put(j_event);
 	}
 }
 
