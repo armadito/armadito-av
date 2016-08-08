@@ -176,14 +176,14 @@ static void do_scan(struct scan_options *opts, struct api_client *client)
 	const char *ev_type;
 
 	if (api_client_register(client) != 0) {
-		fprintf(stderr, "cannot register client: %s", api_client_get_error(client));
+		fprintf(stderr, "cannot register client: %s\n", api_client_get_error(client));
 		return;
 	}
 
 	j_request = json_object_new_object();
 	json_object_object_add(j_request, "path", json_object_new_string(opts->path_to_scan));
 	if (api_client_call(client, "/scan", j_request, &j_response) != 0) {
-		fprintf(stderr, "cannot start scan on server: %s", api_client_get_error(client));
+		fprintf(stderr, "cannot start scan on server: %s\n", api_client_get_error(client));
 		return;
 	}
 
@@ -191,8 +191,8 @@ static void do_scan(struct scan_options *opts, struct api_client *client)
 		j_response = NULL;
 
 		if (api_client_call(client, "/event", NULL, &j_response) != 0) {
-			fprintf(stderr, "cannot get event from server: %s", api_client_get_error(client));
-			break;
+			fprintf(stderr, "cannot get event from server: %s\n", api_client_get_error(client));
+			return;
 		}
 
 		if (j_response == NULL)
@@ -213,7 +213,7 @@ static void do_scan(struct scan_options *opts, struct api_client *client)
 	}
 
 	if (api_client_unregister(client) != 0)
-		fprintf(stderr, "cannot unregister client: %s", api_client_get_error(client));
+		fprintf(stderr, "cannot unregister client: %s\n", api_client_get_error(client));
 }
 
 int main(int argc, char **argv)
