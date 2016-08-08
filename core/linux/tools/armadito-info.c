@@ -166,16 +166,26 @@ static void status_print(struct json_object *j_ev)
 
 static void do_info(struct info_options *opts, struct api_client *client)
 {
-	struct json_object *j_response;
 	int end_of_info = 0;
 
-	api_client_register(client);
+	if (api_client_register(client) != 0) {
+		fprintf(stderr, "cannot register client: %s", api_client_get_error(client));
+		return;
+	}
 
-	api_client_call(client, "/status", NULL, NULL);
+	if (api_client_call(client, "/status", NULL, NULL) != 0) {
+		fprintf(stderr, "cannot get status from server: %s", api_client_get_error(client));
+		return;
+	}
 
 	while (!end_of_info) {
-		j_response = NULL;
-		api_client_call(client, "/event", NULL, &j_response);
+		struct json_object *j_response = NULL;
+
+		if (api_client_call(client, "/event", NULL, &j_response) != 0) {
+			fprintf(stderr, "cannot get event from server: %s", api_client_get_error(client));
+			break;
+		}
+
 		if (j_response == NULL)
 			continue;
 
@@ -190,7 +200,8 @@ static void do_info(struct info_options *opts, struct api_client *client)
 		}
 	}
 
-	api_client_unregister(client);
+	if (api_client_unregister(client) != 0)
+		fprintf(stderr, "cannot unregister client: %s", api_client_get_error(client));
 }
 
 int main(int argc, char **argv)

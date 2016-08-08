@@ -30,6 +30,8 @@ struct api_client *api_client_new(unsigned short port, int verbose);
 
 int api_client_is_verbose(struct api_client *client);
 
+const char *api_client_get_error(struct api_client *client);
+
 int api_client_call(struct api_client *client, const char *path, struct json_object *in, struct json_object **out);
 
 int api_client_register(struct api_client *client);
