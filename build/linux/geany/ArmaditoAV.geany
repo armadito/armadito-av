@@ -28,10 +28,11 @@ long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=2
-FILE_NAME_0=0;C;0;EUTF-8;1;1;0;%2Fhome%2Ffdechelle%2Fprojects%2Farmadito%2Fgit%2Farmadito-av%2Fexp_microhttpd%2Fcore%2Flibarmadito%2Fsrc%2Flinux%2Fbuiltin-modules%2Falert.c;0;8
-FILE_NAME_1=0;C;0;EUTF-8;1;1;0;%2Fhome%2Ffdechelle%2Fprojects%2Farmadito%2Fgit%2Farmadito-av%2Fexp_microhttpd%2Fcore%2Flibarmadito%2Finclude%2Flibarmadito%2Fnotify.h;0;8
-FILE_NAME_2=876;C;0;EUTF-8;1;1;0;%2Fhome%2Ffdechelle%2Fprojects%2Farmadito%2Fgit%2Farmadito-av%2Fexp_microhttpd%2Fcore%2Flinux%2Fdaemon%2Fapihandler.h;0;8
+current_page=3
+FILE_NAME_0=0;C;0;EUTF-8;1;1;0;%2Fhome%2Ffdechelle%2Fprojects%2Farmadito%2Fgit%2Farmadito-av%2Fexp_microhttpd%2Fcore%2Flinux%2Ftools%2Farmadito-scan.c;0;8
+FILE_NAME_1=3804;C;0;EUTF-8;1;1;0;%2Fhome%2Ffdechelle%2Fprojects%2Farmadito%2Fgit%2Farmadito-av%2Fexp_microhttpd%2Fcore%2Flinux%2Ftools%2Fapiclient.c;0;8
+FILE_NAME_2=5523;C;0;EUTF-8;1;1;0;%2Fhome%2Ffdechelle%2Fprojects%2Farmadito%2Fgit%2Farmadito-av%2Fexp_microhttpd%2Fcore%2Flinux%2Fdaemon%2Fapi.c;0;8
+FILE_NAME_3=775;C;0;EUTF-8;1;1;0;%2Fhome%2Ffdechelle%2Fprojects%2Farmadito%2Fgit%2Farmadito-av%2Fexp_microhttpd%2Fcore%2Flinux%2Fdaemon%2Fapihandler.c;0;8
 
 [VTE]
 last_dir=/home/fdechelle/projects/armadito/git/armadito-av/exp_microhttpd/core
