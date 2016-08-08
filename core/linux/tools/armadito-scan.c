@@ -175,15 +175,26 @@ static void do_scan(struct scan_options *opts, struct api_client *client)
 	int end_of_scan = 0;
 	const char *ev_type;
 
-	api_client_register(client);
+	if (api_client_register(client) != 0) {
+		fprintf(stderr, "cannot register client: %s", api_client_get_error(client));
+		return;
+	}
 
 	j_request = json_object_new_object();
 	json_object_object_add(j_request, "path", json_object_new_string(opts->path_to_scan));
-	api_client_call(client, "/scan", j_request, &j_response);
+	if (api_client_call(client, "/scan", j_request, &j_response) != 0) {
+		fprintf(stderr, "cannot start scan on server: %s", api_client_get_error(client));
+		return;
+	}
 
 	while (!end_of_scan) {
 		j_response = NULL;
-		api_client_call(client, "/event", NULL, &j_response);
+
+		if (api_client_call(client, "/event", NULL, &j_response) != 0) {
+			fprintf(stderr, "cannot get event from server: %s", api_client_get_error(client));
+			break;
+		}
+
 		if (j_response == NULL)
 			continue;
 
@@ -201,7 +212,8 @@ static void do_scan(struct scan_options *opts, struct api_client *client)
 			detection_event_print(j_response);
 	}
 
-	api_client_unregister(client);
+	if (api_client_unregister(client) != 0)
+		fprintf(stderr, "cannot unregister client: %s", api_client_get_error(client));
 }
 
 int main(int argc, char **argv)

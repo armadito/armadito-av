@@ -30,6 +30,7 @@ struct api_client {
 	unsigned short port;
 	int verbose; /* make curl print HTTP request and response */
 	const char *token;
+	char *error_buffer;
 };
 
 #define API_HOST "127.0.0.1"
@@ -42,6 +43,7 @@ struct api_client *api_client_new(unsigned short port, int verbose)
 	c->port = port;
 	c->verbose = verbose;
 	c->token = NULL;
+	c->error_buffer = malloc(CURL_ERROR_SIZE);
 
 	return c;
 }
@@ -49,6 +51,11 @@ struct api_client *api_client_new(unsigned short port, int verbose)
 int api_client_is_verbose(struct api_client *client)
 {
 	return client->verbose;
+}
+
+const char *api_client_get_error(struct api_client *client)
+{
+	return client->error_buffer;
 }
 
 struct post_processor {
@@ -163,6 +170,7 @@ int api_client_call(struct api_client *client, const char *path, struct json_obj
 	curl_easy_setopt(hnd, CURLOPT_USERAGENT, "curl/7.47.0");
 	curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
 	curl_easy_setopt(hnd, CURLOPT_VERBOSE, client->verbose);
+	curl_easy_setopt(hnd, CURLOPT_ERRORBUFFER, client->error_buffer);
 	curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
 
 	if (slist != NULL)
@@ -209,5 +217,6 @@ int api_client_unregister(struct api_client *client)
 void api_client_free(struct api_client *client)
 {
 	free((void *)client->token);
+	free((void *)client->error_buffer);
 	free(client);
 }
