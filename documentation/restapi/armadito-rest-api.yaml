@@ -145,7 +145,10 @@ paths:
   /unregister:
     get:
       description: |
-        unregister an API client
+        Unregister a session token.
+        The token must have been obtained from a previous '/register' request.
+        If this request return a HTTP 200 OK response, the token will no longer
+        be valid and must not be reused.
       produces:
         - application/json
       parameters:
@@ -161,13 +164,9 @@ paths:
             $ref: '#/definitions/Error'
 
   /ping:
-    # This is a HTTP operation
     get:
-      # Describe this verb here. Note: you can use markdown
       description: |
-        Ping the server to get status
-      # This is array of GET operation parameters:
-      # Expected responses for this operation:
+        Ping the server.
       produces:
         - application/json
       parameters:
@@ -187,8 +186,14 @@ paths:
 
   /event:
     get:
-      description:
-        get server event
+      description: |
+        Poll server event.
+
+        This request will block until an event is ready on the server side.
+        This event is returned as a JSON object in the body of the response.
+
+        This request implements a COMET application model https://en.wikipedia.org/wiki/Comet_(programming)
+
       produces:
         - application/json
       parameters:
@@ -201,8 +206,19 @@ paths:
 
   /scan:
     post:
-      summary: launch a scan
-      description: launch a scan
+      description: |
+        Launch a scan
+        
+        The path to scan is passed as a JSON object in the body of the request.
+        
+        The scan progress and results will be available by polling '/api/event' once the 
+        '/api/scan' request has completed. The events that will then be available are:
+        * DetectionEvent
+        * OnDemandProgressEvent
+        * OnDemandCompletedEvent
+        
+        Note that this request DOES NOT wait for the end of the scan. As explained earlier,
+        this request is asynchronous.
       consumes:
         - application/json
       produces:
@@ -211,7 +227,7 @@ paths:
         - $ref: '#/parameters/token'
         - in: body
           name: body
-          description: scan object
+          description: scan object containing the path to scan
           required: true
           schema:
             $ref: "#/definitions/Scan"
@@ -225,8 +241,15 @@ paths:
 
   /status:
     get:
-      description:
-        get the server status
+      description: |
+        Get the antivirus status.
+        
+        The antivirus status will be available by polling '/api/event' once the '/api/status' 
+        request has completed. The events that will then be available are:
+        * StatusEvent
+        
+        Note that this request DOES NOT return the antivirus status as a JSON object. As 
+        explained earlier, this request is asynchronous.
       produces:
         - application/json
       parameters:
@@ -261,7 +284,6 @@ definitions:
     properties:
       status:
         type: string
-        description: contains the server status
         enum: 
           - "ok"
 
@@ -273,6 +295,18 @@ definitions:
         description: the path to scan
   
   Event:
+    description: |
+      This is the base class of all events that are available via GET requests to '/api/event'
+      
+      Events are JSON objects that will always contain an `event_type` key, used as a discriminator
+      between different event types.
+      
+      Currently available 'Event' sub-types are:
+      * DetectionEvent
+      * OnDemandProgressEvent
+      * OnDemandCompletedEvent
+      * StatusEvent
+      
     type: object
     discriminator: event_type
     required:
@@ -382,7 +416,7 @@ definitions:
       - "non-available"
     description: update status of modules and antivirus
 
-  BaseInfo:
+  BaseStatus:
     type: object
     properties:
       name:
@@ -417,7 +451,7 @@ definitions:
       bases:
         type: array
         items:
-          $ref: '#/definitions/BaseInfo'
+          $ref: '#/definitions/BaseStatus'
 
   StatusEvent:
     allOf:
