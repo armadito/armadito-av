@@ -97,6 +97,17 @@ consumes:
   - application/json
 
 ################################################################################
+#                                   Tags                                       #
+################################################################################
+tags:
+  - name: Session
+    description: session management
+  - name: Action
+    description: antivirus actions
+  - name: Event
+    description: antivirus events
+
+################################################################################
 #                          Common parameters                                   #
 ################################################################################
 parameters:
@@ -116,6 +127,8 @@ paths:
 
   /register:
     get:
+      tags:
+        - Session
       description: |
         Request a new session token.
         
@@ -144,6 +157,8 @@ paths:
 
   /unregister:
     get:
+      tags:
+        - Session
       description: |
         Unregister a session token.
         The token must have been obtained from a previous '/register' request.
@@ -165,6 +180,8 @@ paths:
 
   /ping:
     get:
+      tags:
+        - Action
       description: |
         Ping the server.
       produces:
@@ -186,6 +203,8 @@ paths:
 
   /event:
     get:
+      tags:
+        - Event
       description: |
         Poll server event.
 
@@ -206,6 +225,8 @@ paths:
 
   /scan:
     post:
+      tags:
+        - Action
       description: |
         Launch a scan
         
@@ -241,6 +262,8 @@ paths:
 
   /status:
     get:
+      tags:
+        - Action
       description: |
         Get the antivirus status.
         
