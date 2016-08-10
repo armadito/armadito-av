@@ -19,15 +19,25 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _SCAN_H_
-#define _SCAN_H_
+#ifndef TOOLS_APICLIENT_H_
+#define TOOLS_APICLIENT_H_
 
-#include "jsonhandlerp.h"
+#include <json.h>
 
-enum a6o_json_status scan_response_cb(struct armadito *armadito, struct json_request *req, struct json_response *resp, void **request_data);
+struct api_client;
 
-void scan_do_process_cb(struct armadito *armadito, void *request_data);
+struct api_client *api_client_new(unsigned short port, int verbose);
 
-enum a6o_json_status scan_cancel_response_cb(struct armadito *armadito, struct json_request *req, struct json_response *resp, void **request_data);
+int api_client_is_verbose(struct api_client *client);
+
+const char *api_client_get_error(struct api_client *client);
+
+int api_client_call(struct api_client *client, const char *path, struct json_object *in, struct json_object **out);
+
+int api_client_register(struct api_client *client);
+
+int api_client_unregister(struct api_client *client);
+
+void api_client_free(struct api_client *client);
 
 #endif

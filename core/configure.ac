@@ -1,4 +1,4 @@
-AC_INIT(armadito-core,0.10.1,fdechelle@teclib.com)
+AC_INIT(armadito-core,0.11.0-exp,fdechelle@teclib.com)
 AM_INIT_AUTOMAKE([subdir-objects])
 
 # collect arguments
@@ -92,6 +92,18 @@ if test "$HAVE_LIBXML2" = "no"; then
    AC_MSG_ERROR("cannot find libxml2 library")
 fi
 
+# check for libmicrohttpd
+PKG_CHECK_MODULES(LIBMICROHTTPD, libmicrohttpd, [HAVE_LIBMICROHTTPD=yes], [HAVE_LIBMICROHTTPD=no])
+if test "$HAVE_LIBMICROHTTPD" = "no"; then
+   AC_MSG_ERROR("cannot find libmicrohttpd library")
+fi
+
+# check for libcurl
+PKG_CHECK_MODULES(LIBCURL, libcurl, [HAVE_LIBCURL=yes], [HAVE_LIBCURL=no])
+if test "$HAVE_LIBCURL" = "no"; then
+   AC_MSG_ERROR("cannot find libcurl library")
+fi
+
 # check for libmagic, that has no pkg-config
 SAVE_CFLAGS=${CFLAGS}
 CFLAGS=-fPIC
@@ -161,5 +173,6 @@ linux/net/Makefile
 linux/service/Makefile
 linux/tools/Makefile
 tests/Makefile
+tests/web/Makefile
 ])
 AC_OUTPUT

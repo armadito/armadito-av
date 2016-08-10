@@ -19,15 +19,16 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _SCAN_H_
-#define _SCAN_H_
+#ifndef TOOLS_JUTIL_H
+#define TOOLS_JUTIL_H
 
-#include "jsonhandlerp.h"
+#include <json.h>
+#include <stdint.h>
 
-enum a6o_json_status scan_response_cb(struct armadito *armadito, struct json_request *req, struct json_response *resp, void **request_data);
+const char *j_get_string(struct json_object *j_obj, const char *key);
 
-void scan_do_process_cb(struct armadito *armadito, void *request_data);
+int j_get_int(struct json_object *j_obj, const char *key);
 
-enum a6o_json_status scan_cancel_response_cb(struct armadito *armadito, struct json_request *req, struct json_response *resp, void **request_data);
+int64_t j_get_int64(struct json_object *j_obj, const char *key);
 
 #endif

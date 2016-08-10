@@ -68,30 +68,40 @@ static int update_status_compare(enum a6o_update_status s1, enum a6o_update_stat
 
 struct a6o_info *a6o_info_new(struct armadito *armadito)
 {
-	struct a6o_info *info = g_new0(struct a6o_info, 1);
+	struct a6o_info *info = malloc(sizeof(struct a6o_info));
 	GArray *g_module_infos;
 	struct a6o_module **modv;
 
+	info->global_status = ARMADITO_UPDATE_NON_AVAILABLE;
+	info->global_update_ts = 0;
+
 	g_module_infos = g_array_new(TRUE, TRUE, sizeof(struct a6o_module_info *));
 
-	info->global_status = ARMADITO_UPDATE_NON_AVAILABLE;
-
 	for (modv = a6o_get_modules(armadito); *modv != NULL; modv++) {
-		if ((*modv)->info_fun != NULL) {
-			enum a6o_update_status mod_status;
-			struct a6o_module_info *mod_info = g_new0(struct a6o_module_info, 1);
+		struct a6o_module *mod = *modv;
 
-			mod_status = (*(*modv)->info_fun)((*modv), mod_info);
+		if (mod->info_fun != NULL) {
+			enum a6o_update_status mod_status;
+			struct a6o_module_info *mod_info = malloc(sizeof(struct a6o_module_info));
+
+			mod_info->name = NULL;
+			mod_info->mod_update_ts = 0;
+			mod_info->base_infos = NULL;
+
+			mod_status = (*mod->info_fun)(mod, mod_info);
 
 			if (mod_status != ARMADITO_UPDATE_NON_AVAILABLE) {
-				mod_info->name = os_strdup((*modv)->name);
+				mod_info->name = os_strdup(mod->name);
 				mod_info->mod_status = mod_status;
 				g_array_append_val(g_module_infos, mod_info);
 			} else
-				g_free(mod_info);
+				free(mod_info);
 
 			if (update_status_compare(info->global_status, mod_status) < 0)
 				info->global_status = mod_status;
+
+			if (mod_info->mod_update_ts > info->global_update_ts)
+				info->global_update_ts = mod_info->mod_update_ts;
 		}
 	}
 
@@ -103,37 +113,43 @@ struct a6o_info *a6o_info_new(struct armadito *armadito)
 
 void a6o_info_free(struct a6o_info *info)
 {
-	struct a6o_module_info **m;
+	struct a6o_module_info **mod_infov;
 
 	if (info->module_infos != NULL) {
-		for(m = info->module_infos; *m != NULL; m++) {
-			free((void *)(*m)->name);
-			free((void *)(*m)->update_date);
+		for(mod_infov = info->module_infos; *mod_infov != NULL; mod_infov++) {
+			struct a6o_module_info *mod_info = *mod_infov;
 
-			if ((*m)->base_infos != NULL) {
+			free((void *)mod_info->name);
+
+			if (mod_info->base_infos != NULL) {
 				struct a6o_base_info **b;
 
-				for(b = (*m)->base_infos; *b != NULL; b++) {
-					free((void *)(*b)->name);
-					free((void *)(*b)->date);
-					free((void *)(*b)->version);
-					free((void *)(*b)->full_path);
+				for(b = mod_info->base_infos; *b != NULL; b++) {
+					struct a6o_base_info *base_info = *b;
 
-					free(*b);
+					if (base_info->name != NULL)
+						free((void *)base_info->name);
+					if (base_info->version != NULL)
+						free((void *)base_info->version);
+					if (base_info->full_path != NULL)
+						free((void *)base_info->full_path);
+
+					free(base_info);
 				}
 
-				free((*m)->base_infos);
+				free(mod_info->base_infos);
 			}
 
-			g_free(*m);
+			free(mod_info);
 		}
 
-		g_free(info->module_infos);
+		free(info->module_infos);
 	}
 
-	g_free(info);
+	free(info);
 }
 
+#if 0
 void a6o_info_to_stdout(struct a6o_info *info)
 {
 	struct a6o_module_info **m;
@@ -144,7 +160,7 @@ void a6o_info_to_stdout(struct a6o_info *info)
 	if (info->module_infos != NULL) {
 		for(m = info->module_infos; *m != NULL; m++){
 			fprintf(stdout, "Module %s \n", (*m)->name );
-			fprintf(stdout, "- Update date : %s \n", (*m)->update_date );
+			fprintf(stdout, "- Update timestamp : %s \n", (*m)->update_timestamp);
 			fprintf(stdout, "- Update status : %d\n", (*m)->mod_status);
 
 			if ((*m)->base_infos != NULL) {
@@ -178,3 +194,5 @@ const char *a6o_base_info_debug(struct a6o_base_info *info)
 	return ret;
 }
 #endif
+#endif
+

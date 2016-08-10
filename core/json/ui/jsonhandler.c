@@ -65,7 +65,7 @@ static struct request_dispatch_entry {
 	process_cb_t process;
 } request_dispatch_table[] = {
 	{ "state", state_response_cb, NULL},
-	{ "scan", scan_response_cb, scan_process_cb},
+	{ "scan", scan_response_cb, scan_do_process_cb},
 	{ "quarantine", quarantine_response_cb, NULL},
 	{ "conf_set", conf_response_cb, NULL},
 	{ "updatedb", update_response_cb, NULL},

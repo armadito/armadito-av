@@ -19,15 +19,32 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _SCAN_H_
-#define _SCAN_H_
+#ifndef DAEMON_HTTPD_H_
+#define DAEMON_HTTPD_H_
 
-#include "jsonhandlerp.h"
+#include <libarmadito-config.h>
+#ifndef _WIN32
+#include <sys/select.h>
+#include <sys/socket.h>
+#else
+#include <winsock2.h>
+#endif
+#include <microhttpd.h>
 
-enum a6o_json_status scan_response_cb(struct armadito *armadito, struct json_request *req, struct json_response *resp, void **request_data);
+enum http_method {
+	HTTP_METHOD_GET   = 1 << 0,
+	HTTP_METHOD_POST  = 1 << 1,
+	HTTP_METHOD_OTHER = 0,
+};
 
-void scan_do_process_cb(struct armadito *armadito, void *request_data);
+struct httpd;
 
-enum a6o_json_status scan_cancel_response_cb(struct armadito *armadito, struct json_request *req, struct json_response *resp, void **request_data);
+struct httpd *httpd_new(unsigned short port, void *user_data);
+
+void httpd_destroy(struct httpd *h);
+
+#ifdef DEBUG
+void connection_debug(struct MHD_Connection *connection);
+#endif
 
 #endif

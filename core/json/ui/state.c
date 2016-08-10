@@ -38,10 +38,10 @@ int get_on_access_state(struct a6o_info *info) {
 
 	int ret = 0;
 	struct a6o_module_info **m;
-	
-	for(m = info->module_infos; *m != NULL; m++) {		
 
-		if ( (strncmp( (*m)->name, "on-access", 9) == 0) && ((*m)->mod_status == ARMADITO_UPDATE_OK) ) {			
+	for(m = info->module_infos; *m != NULL; m++) {
+
+		if ( (strncmp( (*m)->name, "on-access", 9) == 0) && ((*m)->mod_status == ARMADITO_UPDATE_OK) ) {
 			return 1;
 		}
 
@@ -50,7 +50,7 @@ int get_on_access_state(struct a6o_info *info) {
 	return ret;
 }
 #else
-int get_on_access_state(void* user_data) {	
+int get_on_access_state(void* user_data) {
 	//TODO linux version.
 	return 0;
 }
@@ -143,12 +143,14 @@ static struct json_object *state_json(struct a6o_info *info)
 
 		json_object_object_add(j_mod, "name", json_object_new_string((*m)->name));
 		json_object_object_add(j_mod, "version", json_object_new_string("0.0.0"));
+#if 0
 		json_object_object_add(j_mod, "update", update_json_ex((*m)->mod_status, (*m)->update_date, (*m)->timestamp));
 
 		if ( (*m)->timestamp > timestamp) {
 			timestamp = (*m)->timestamp;
 			last_update = (*m)->update_date;
 		}
+#endif
 
 		json_object_array_add(j_mod_array, j_mod);
 	}

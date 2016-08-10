@@ -120,7 +120,7 @@ static void info_send(struct ipc_manager *manager, struct a6o_info *info)
 		ipc_manager_msg_add(manager,
 				IPC_STRING_T, (*m)->name,
 				IPC_STRING_T, a6o_update_status_str((*m)->mod_status),
-				IPC_STRING_T, (*m)->update_date,
+				IPC_STRING_T, "(*m)->update_date",
 				IPC_NONE_T);
 
 		if ((*m)->base_infos != NULL) {
@@ -129,7 +129,7 @@ static void info_send(struct ipc_manager *manager, struct a6o_info *info)
 			for(b = (*m)->base_infos; *b != NULL; b++)
 				ipc_manager_msg_add(manager,
 						IPC_STRING_T, (*b)->name,
-						IPC_STRING_T, (*b)->date,
+						IPC_STRING_T, "(*b)->date",
 						IPC_STRING_T, (*b)->version,
 						IPC_INT32_T, (*b)->signature_count,
 						IPC_STRING_T, (*b)->full_path,

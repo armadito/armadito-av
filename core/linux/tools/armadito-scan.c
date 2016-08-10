@@ -21,32 +21,22 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "libarmadito-config.h"
 
-#include "daemon/ipc.h"
-#include "net/unixsockclient.h"
-#include "net/netdefaults.h"
-
 #include <assert.h>
 #include <getopt.h>
 #include <errno.h>
+#include <json.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "apiclient.h"
+#include "jutil.h"
+
+#define DEFAULT_PORT          8888
+#define S_DEFAULT_PORT        "8888"
+
 #define PROGRAM_NAME "armadito-scan"
 #define PROGRAM_VERSION PACKAGE_VERSION
-
-struct scan_summary {
-	int scanned;
-	int malware;
-	int suspicious;
-	int unhandled;
-	int clean;
-};
-
-struct scan {
-	struct scan_summary *summary;
-	int print_clean;
-};
 
 struct scan_options {
 	const char *unix_path;
@@ -55,16 +45,21 @@ struct scan_options {
 	int no_summary;
 	int print_clean;
 	const char *path_to_scan;
+	unsigned short port;
+	int verbose;
 };
 
 static struct option scan_option_defs[] = {
 	{"help",        no_argument,        0, 'h'},
 	{"version",     no_argument,        0, 'V'},
+	{"verbose",     no_argument,        0, 'v'},
 	{"recursive",   no_argument,        0, 'r'},
 	{"threaded",    no_argument,        0, 't'},
 	{"no-summary",  no_argument,        0, 'n'},
+#if O
 	{"print-clean", no_argument,        0, 'c'},
-	{"path",        required_argument,  0, 'a'},
+#endif
+	{"port",        required_argument,  0, 'p'},
 	{0, 0, 0, 0}
 };
 
@@ -83,11 +78,15 @@ static void usage(void)
 	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "  --help  -h                    print help and quit\n");
 	fprintf(stderr, "  --version -V                  print program version\n");
+	fprintf(stderr, "  --verbose -v                  print HTTP trafic\n");
 	fprintf(stderr, "  --recursive  -r               scan directories recursively\n");
 	fprintf(stderr, "  --threaded -t                 scan using multiple threads\n");
 	fprintf(stderr, "  --no-summary -n               disable summary at end of scanning\n");
+#if O
+	/* yet not available with rest api */
 	fprintf(stderr, "  --print-clean -c              print also clean files as they are scanned\n");
-	fprintf(stderr, "  --path=PATH | -a PATH         unix socket path (default is " DEFAULT_SOCKET_PATH ")\n");
+#endif
+	fprintf(stderr, "  --port=PORT | -p PORT         TCP port to connect to Armadito-AV (default is " S_DEFAULT_PORT ")\n");
 	fprintf(stderr, "\n");
 
 	exit(1);
@@ -99,13 +98,14 @@ static void parse_options(int argc, char **argv, struct scan_options *opts)
 	opts->threaded = 0;
 	opts->no_summary = 0;
 	opts->print_clean = 0;
-	opts->unix_path = DEFAULT_SOCKET_PATH;
 	opts->path_to_scan = NULL;
+	opts->port = DEFAULT_PORT;
+	opts->verbose = 0;
 
 	while (1) {
 		int c, option_index = 0;
 
-		c = getopt_long(argc, argv, "hVrtnca:", scan_option_defs, &option_index);
+		c = getopt_long(argc, argv, "hVvrtnp:", scan_option_defs, &option_index);
 
 		if (c == -1)
 			break;
@@ -117,6 +117,9 @@ static void parse_options(int argc, char **argv, struct scan_options *opts)
 		case 'V': /* version */
 			version();
 			break;
+		case 'v': /* verbose */
+			opts->verbose = 1;
+			break;
 		case 'r': /* recursive */
 			opts->recursive = 1;
 			break;
@@ -126,11 +129,13 @@ static void parse_options(int argc, char **argv, struct scan_options *opts)
 		case 'n': /* no-summary */
 			opts->no_summary = 1;
 			break;
+#if 0
 		case 'c': /* print-clean */
 			opts->print_clean = 1;
 			break;
-		case 'a': /* path */
-			opts->unix_path = strdup(optarg);
+#endif
+		case 'p': /* port */
+			opts->port = (unsigned short)atoi(optarg);
 			break;
 		case '?':
 			/* getopt_long already printed an error message. */
@@ -146,132 +151,81 @@ static void parse_options(int argc, char **argv, struct scan_options *opts)
 	opts->path_to_scan = strdup(argv[optind]);
 }
 
-static void ipc_handler_scan_file(struct ipc_manager *m, void *data)
+static void detection_event_print(struct json_object *j_ev)
 {
-	struct scan *scan = (struct scan *)data;
-	char *path, *status, *mod_name, *mod_report, *action;
-	int progress, clean = 0;
-
-	ipc_manager_get_arg_at(m, 0, IPC_STRING_T, &path);
-	ipc_manager_get_arg_at(m, 1, IPC_STRING_T, &status);
-	ipc_manager_get_arg_at(m, 2, IPC_STRING_T, &mod_name);
-	ipc_manager_get_arg_at(m, 3, IPC_STRING_T, &mod_report);
-	ipc_manager_get_arg_at(m, 4, IPC_STRING_T, &action);
-	ipc_manager_get_arg_at(m, 5, IPC_INT32_T, &progress);
-
-	/* path is empty string, do nothing */
-	if (!*path)
-		return;
-
-	if (scan->summary != NULL) {
-		scan->summary->scanned++;
-
-		if (!strcmp(status, "ARMADITO_MALWARE"))
-			scan->summary->malware++;
-		else if (!strcmp(status, "ARMADITO_SUSPICIOUS"))
-			scan->summary->suspicious++;
-		else if (!strcmp(status, "ARMADITO_EINVAL")
-			|| !strcmp(status, "ARMADITO_IERROR")
-			|| !strcmp(status, "ARMADITO_UNKNOWN_FILE_TYPE")
-			|| !strcmp(status, "ARMADITO_UNDECIDED"))
-			scan->summary->unhandled++;
-		else if (!strcmp(status, "ARMADITO_WHITE_LISTED")
-			|| !strcmp(status, "ARMADITO_CLEAN")) {
-			scan->summary->clean++;
-			clean = 1;
-		}
-	}
-
-	if (!scan->print_clean && clean)
-		return;
-
-	printf("%s: %s", path, status);
-	if (strcmp(status, "ARMADITO_UNDECIDED") && strcmp(status, "ARMADITO_CLEAN") && strcmp(status, "ARMADITO_UNKNOWN_FILE_TYPE")) {
-		printf(" [%s - %s]", mod_name, mod_report);
-		printf(" (action %s) ", action);
-	}
-	printf("\n");
+	printf("%s: %s [%s - %s] (action %s)\n",
+		j_get_string(j_ev, "path"),
+		j_get_string(j_ev, "scan_status"),
+		j_get_string(j_ev, "module_name"),
+		j_get_string(j_ev, "module_report"),
+		j_get_string(j_ev, "scan_action"));
 }
 
-static void ipc_handler_scan_end(struct ipc_manager *m, void *data)
-{
-	struct a6o_scan *scan = (struct a6o_scan *)data;
-
-	/* ??? */
-}
-
-static void print_summary(struct scan_summary *summary)
+static void completed_event_print(struct json_object *j_ev)
 {
 	printf("\nSCAN SUMMARY:\n");
-	printf("scanned files     : %d\n", summary->scanned);
-	printf("malware files     : %d\n", summary->malware);
-	printf("suspicious files  : %d\n", summary->suspicious);
-	printf("unhandled files   : %d\n", summary->unhandled);
-	printf("clean files       : %d\n", summary->clean);
+	printf("scanned files     : %d\n", j_get_int(j_ev, "total_scanned_count"));
+	printf("malware files     : %d\n", j_get_int(j_ev, "total_malware_count"));
+	printf("suspicious files  : %d\n", j_get_int(j_ev, "total_suspicious_count"));
 }
 
-static struct scan_summary *scan_summary_new(void)
+static void do_scan(struct scan_options *opts, struct api_client *client)
 {
-	struct scan_summary *s = malloc(sizeof(struct scan_summary));
+	struct json_object *j_request, *j_response;
+	int end_of_scan = 0;
+	const char *ev_type;
 
-	s->scanned = 0;
-	s->malware = 0;
-	s->suspicious = 0;
-	s->unhandled = 0;
-	s->clean = 0;
-
-	return s;
-}
-
-static void do_scan(struct scan_options *opts, int client_sock)
-{
-	struct scan *scan;
-	struct ipc_manager *manager;
-
-	scan = (struct scan *)malloc(sizeof(struct scan));
-	assert(scan != NULL);
-
-	scan->summary = (opts->no_summary) ? NULL : scan_summary_new();
-	scan->print_clean = opts->print_clean;
-
-	manager = ipc_manager_new(client_sock);
-
-	ipc_manager_add_handler(manager, IPC_MSG_ID_SCAN_FILE, ipc_handler_scan_file, scan);
-	ipc_manager_add_handler(manager, IPC_MSG_ID_SCAN_END, ipc_handler_scan_end, scan);
-
-	ipc_manager_msg_send(manager,
-			IPC_MSG_ID_SCAN,
-			IPC_STRING_T, opts->path_to_scan,
-			IPC_INT32_T, opts->threaded,
-			IPC_INT32_T, opts->recursive,
-			IPC_NONE_T);
-
-	while (ipc_manager_receive(manager) > 0)
-		;
-
-	if (!opts->no_summary) {
-		print_summary(scan->summary);
-		free(scan->summary);
+	if (api_client_register(client) != 0) {
+		fprintf(stderr, "cannot register client: %s\n", api_client_get_error(client));
+		return;
 	}
 
-	ipc_manager_free(manager);
+	j_request = json_object_new_object();
+	json_object_object_add(j_request, "path", json_object_new_string(opts->path_to_scan));
+	if (api_client_call(client, "/scan", j_request, &j_response) != 0) {
+		fprintf(stderr, "cannot start scan on server: %s\n", api_client_get_error(client));
+		return;
+	}
+
+	while (!end_of_scan) {
+		j_response = NULL;
+
+		if (api_client_call(client, "/event", NULL, &j_response) != 0) {
+			fprintf(stderr, "cannot get event from server: %s\n", api_client_get_error(client));
+			return;
+		}
+
+		if (j_response == NULL)
+			continue;
+
+		if (api_client_is_verbose(client)) {
+			json_object_to_file("/dev/stderr", j_response);
+			fprintf(stderr, "\n");
+		}
+
+		ev_type = j_get_string(j_response, "event_type");
+		if (!strcmp(ev_type, "OnDemandCompletedEvent")) {
+			if (!opts->no_summary)
+				completed_event_print(j_response);
+			end_of_scan = 1;
+		} else if (!strcmp(ev_type, "DetectionEvent"))
+			detection_event_print(j_response);
+	}
+
+	if (api_client_unregister(client) != 0)
+		fprintf(stderr, "cannot unregister client: %s\n", api_client_get_error(client));
 }
 
 int main(int argc, char **argv)
 {
 	struct scan_options *opts = (struct scan_options *)malloc(sizeof(struct scan_options));
-	int client_sock;
+	struct api_client *client;
 
 	parse_options(argc, argv, opts);
 
-	client_sock = unix_client_connect(opts->unix_path, 10);
+	client = api_client_new(opts->port, opts->verbose);
 
-	if (client_sock < 0) {
-		fprintf(stderr, "cannot open client socket (errno %d)\n", errno);
-		return 1;
-	}
-
-	do_scan(opts, client_sock);
+	do_scan(opts, client);
 
 	return 0;
 }
