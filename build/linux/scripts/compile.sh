@@ -16,9 +16,7 @@ function compile()
 
 ## Build pour Unbutu-14.04-64
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-
 OUT_DIR=$DIR/../out
-SRC_DIR=$DIR/../../../
 
 function usage()
 {
