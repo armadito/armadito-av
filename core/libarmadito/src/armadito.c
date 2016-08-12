@@ -99,23 +99,25 @@ struct armadito *a6o_open(struct a6o_conf *conf, a6o_error **error)
 	a6o_add_builtin_modules(u);
 
 	modules_dir = a6o_std_path(MODULES_LOCATION);
-	if (modules_dir == NULL)
-		goto error;
-	if (module_manager_load_path(u->module_manager, modules_dir, error))
-		goto error;
-	free((void *)modules_dir);
+	if (modules_dir == NULL) {
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "cannot get modules location, no dynamic loading of modules");
+	} else {
+		if (module_manager_load_path(u->module_manager, modules_dir, error))
+			a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "error during modules load");
+
+		free((void *)modules_dir);
+	}
 
 	if (module_manager_init_all(u->module_manager, error))
-		goto error;
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "error during modules init");
+
 	if (module_manager_configure_all(u->module_manager, conf, error))
-		goto error;
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "error during modules configuration");
+
 	if (module_manager_post_init_all(u->module_manager, error))
-		goto error;
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "error during modules post_init");
 
 	return u;
-error:
-	a6o_free(u);
-	return NULL;
 }
 
 struct a6o_conf *a6o_get_conf(struct armadito *u)

@@ -165,7 +165,7 @@ static int module_load_dirent_cb(const char *full_path, enum os_file_flag flags,
 	}
 	else
 		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "loading module: path %s is not a plain file", full_path);
-	
+
 	return 0;
 
 }
@@ -187,22 +187,23 @@ int module_manager_load_path(struct module_manager *mm, const char *path, a6o_er
 static int module_manager_all(struct module_manager *mm, int (*module_fun)(struct a6o_module *, a6o_error **error), a6o_error **error)
 {
 	struct a6o_module **modv;
+	int global_ret = 0;
 
 	for (modv = module_manager_get_modules(mm); *modv != NULL; modv++) {
 		struct a6o_module *mod = *modv;
-		int ret;
+		int mod_ret;
 
 		/* module is not ok, do nothing */
 		if (mod->status != ARMADITO_MOD_OK)
 			continue;
 
-		ret = (*module_fun)(mod, error);
+		mod_ret = (*module_fun)(mod, error);
 
-		if (ret)
-			return ret;
+		if (mod_ret)
+			global_ret = mod_ret;
 	}
 
-	return 0;
+	return global_ret;
 }
 
 static int module_init(struct a6o_module *mod, a6o_error **error)

@@ -294,7 +294,7 @@ static const char *token_str(enum token_type token)
 
 static void syntax_error(struct a6o_conf_parser *cp, guint token)
 {
-	a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "syntax error: file %s line %d column %d expecting '%s' got '%s'",
+	a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "syntax error: file %s line %d column %d expecting '%s' got '%s'",
 		cp->filename,
 		scanner_current_line(cp->scanner),
 		scanner_current_column(cp->scanner),
@@ -345,7 +345,7 @@ static void call_callback(struct a6o_conf_parser *cp)
 	cp->current_value_type = CONF_TYPE_VOID;
 
 	if (ret != 0) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "configuration file parser: callback return != 0 file %s line %d column %d",
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "configuration file parser: callback return != 0 file %s line %d column %d",
 			cp->filename,
 			scanner_current_line(cp->scanner),
 			scanner_current_column(cp->scanner));
@@ -476,13 +476,13 @@ static void r_value(struct a6o_conf_parser *cp)
 #endif
 	} else {
 		if (cp->lookahead_token == TOKEN_NONE ||cp->lookahead_token == TOKEN_EOF)
-			a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "syntax error: file %s line %d column %d expecting value for %s, got none",
+			a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "syntax error: file %s line %d column %d expecting value for %s, got none",
 				cp->filename,
 				scanner_current_line(cp->scanner),
 				scanner_current_column(cp->scanner),
 				cp->current_key);
 		else
-			a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "syntax error: file %s line %d column %d expecting value for %s, got '%c', do you forget to use double-quotes ?",
+			a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "syntax error: file %s line %d column %d expecting value for %s, got '%c', do you forget to use double-quotes ?",
 				cp->filename,
 				scanner_current_line(cp->scanner),
 				scanner_current_column(cp->scanner),

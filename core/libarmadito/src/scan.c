@@ -88,7 +88,6 @@ struct a6o_scan *a6o_scan_new(struct armadito *armadito, int scan_id)
 	scan->scanned_count = 0;
         scan->malware_count = 0;
         scan->suspicious_count = 0;
-        
 
 	return scan;
 }
