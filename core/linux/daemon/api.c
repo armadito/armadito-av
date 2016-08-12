@@ -113,7 +113,7 @@ int event_process_cb(struct api_handler *a, struct MHD_Connection *connection, s
 		api_client_pop_event(client, out);
 
 #ifdef DEBUG
-		jobj_debug(*out, "JSON event");
+		jobj_debug(*out, "event");
 #endif
 
 		return 0;
@@ -159,10 +159,6 @@ static struct json_object *detection_event_json(struct a6o_report *report)
 	if (report->mod_report != NULL)
 		json_object_object_add(j_event, "module_report", json_object_new_string(report->mod_report));
 
-#ifdef DEBUG
-	jobj_debug(j_event, "detection event");
-#endif
-
 	return j_event;
 }
 
@@ -180,10 +176,6 @@ static struct json_object *on_demand_completed_event_json(struct a6o_report *rep
 	json_object_object_add(j_event, "total_suspicious_count", json_object_new_int(report->suspicious_count));
 	json_object_object_add(j_event, "total_scanned_count", json_object_new_int(report->scanned_count));
 
-#ifdef DEBUG
-	jobj_debug(j_event, "on-demand completed event");
-#endif
-
 	return j_event;
 }
 
@@ -196,13 +188,10 @@ static struct json_object *on_demand_progress_event_json(struct a6o_report *repo
 	json_object_object_add(j_event, "event_type", json_object_new_string("OnDemandProgressEvent"));
 
 	json_object_object_add(j_event, "progress", json_object_new_int(report->progress));
+	json_object_object_add(j_event, "path", json_object_new_string(report->path));
 	json_object_object_add(j_event, "malware_count", json_object_new_int(report->malware_count));
 	json_object_object_add(j_event, "suspicious_count", json_object_new_int(report->suspicious_count));
 	json_object_object_add(j_event, "scanned_count", json_object_new_int(report->scanned_count));
-
-#ifdef DEBUG
-	jobj_debug(j_event, "on-demand progress event");
-#endif
 
 	return j_event;
 }
