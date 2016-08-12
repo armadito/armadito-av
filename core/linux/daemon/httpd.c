@@ -57,8 +57,10 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #define PAGE_404 "<html><head><title>not found!</title></head><body>not found!</body></html>\n"
 #define PAGE_405 "<html><head><title>not allowed!</title></head><body>Method not allowed for this ressource!</body></html>\n"
 
-#undef USE_GLIB_CHANNEL
-#define USE_MHD_THREAD_POOL
+/* threading model for microhttpd */
+#undef USE_GLIB_CHANNEL /* does not work */
+#undef USE_MHD_THREAD
+#define USE_MDH_SELECT
 
 struct httpd {
 	unsigned short port;
@@ -177,6 +179,7 @@ static int content_serve(struct httpd *h, struct MHD_Connection *connection, con
 
 	if (fd < 0) {
 		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "cannot open path %s", path);
+		free((void *)path);
 		return MHD_queue_response(connection, MHD_HTTP_NOT_FOUND, h->response_404);
 	}
 
@@ -423,18 +426,26 @@ static void create_daemon(struct httpd *h)
 }
 #endif
 
-#ifdef USE_MHD_THREAD_POOL
-static struct MHD_Daemon *create_daemon(struct httpd *h)
+#if defined(USE_MHD_THREAD) || defined(USE_MDH_SELECT)
+static void create_daemon(struct httpd *h)
 {
 	struct sockaddr_in listening_addr;
+	int flags;
+
+#if defined(USE_MHD_THREAD)
+	flags = MHD_USE_THREAD_PER_CONNECTION;
+#elif defined(USE_MDH_SELECT)
+	flags = MHD_USE_SELECT_INTERNALLY;
+#endif
 
 	listening_addr.sin_family = AF_INET;
 	listening_addr.sin_port = htons(h->port);
 	listening_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
-	h->daemon = MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION, 0, NULL, NULL, answer_to_connection_cb, h, MHD_OPTION_SOCK_ADDR, &listening_addr, MHD_OPTION_END);
+	h->daemon = MHD_start_daemon(flags, 0, NULL, NULL, answer_to_connection_cb, h, MHD_OPTION_SOCK_ADDR, &listening_addr, MHD_OPTION_END);
 }
 #endif
+
 
 static struct MHD_Response *create_std_response(const char *page)
 {
