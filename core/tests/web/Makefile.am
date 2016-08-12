@@ -1,5 +1,5 @@
 htmldir=$(datadir)/armadito
-html_DATA=index.html
+html_DATA=index.html scan.html status.html armadito.js
 
 imagesdir=$(datadir)/armadito/images
 images_DATA=images/armadito-64x64.png

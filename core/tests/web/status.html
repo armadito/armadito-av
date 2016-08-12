@@ -1,0 +1,40 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Armadito</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <script src="armadito.js"></script>
+
+  </head>
+  <body>
+    <div id="banner">
+      <a href="index.html"><img src="images/armadito-64x64.png"></a>
+      <span>Armadito</span>
+    </div>
+
+    <h1>Scan</h1>
+
+    <div>
+	<button onclick="status()">Status</button>
+    </div>
+
+    <div>
+      status: <span id="status">none</span>
+    </div>
+
+    <div>
+      updated on: <span id="update_timestamp">none</span>
+    </div>
+
+    <div>
+      <table id="modules" width="90%" border="1">
+	<tr> <th>name</th> <th>status</th> <th>updated on</th> <th>version</th> <th>#signature</th> <th>path</th></tr>
+      </table>
+    </div>
+
+    <script>
+        register();
+    </script>
+
+  </body>
+</html>

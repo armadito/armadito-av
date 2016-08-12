@@ -1,0 +1,48 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Armadito</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <script src="armadito.js"></script>
+
+  </head>
+  <body>
+    <div id="banner">
+      <a href="index.html"><img src="images/armadito-64x64.png"></a>
+      <span>Armadito</span>
+    </div>
+
+    <h1>Scan</h1>
+
+    <div>
+	Path: <input type="text" id="path"/><button onclick="scan()">Scan</button>
+    </div>
+
+    <div>
+      progress: <span id="progress">0</span>
+    </div>
+    <div>
+      scanning path: <span id="current_path">none</span>
+    </div>
+    <div>
+     malware_count: <span id="malware_count">0</span>
+    </div>
+    <div>
+     suspicious_count: <span id="suspicious_count">0</span>
+    </div>
+    <div>
+     scanned_count: <span id="scanned_count">0</span>
+    </div>
+
+    <div>
+      <table id="results" width="90%" border="1">
+	<tr> <th>path</th> <th>status</th> <th>action</th> <th>module</th> <th>report</th></tr>
+      </table>
+    </div>
+
+    <script>
+        register();
+    </script>
+
+  </body>
+</html>
