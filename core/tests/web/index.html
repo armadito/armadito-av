@@ -40,6 +40,7 @@
                 var ev = JSON.parse(xmlhttp.responseText);
                 if (ev.event_type == "OnDemandProgressEvent") {
                    document.getElementById("progress").innerHTML = ev.progress;
+                   document.getElementById("current_path").innerHTML = ev.path;
                    document.getElementById("malware_count").innerHTML = ev.malware_count;
                    document.getElementById("suspicious_count").innerHTML = ev.suspicious_count;
                    document.getElementById("scanned_count").innerHTML = ev.scanned_count;
@@ -84,6 +85,9 @@
 
     <div>
       progress: <span id="progress">0</span>
+    </div>
+    <div>
+      scanning path: <span id="current_path">none</span>
     </div>
     <div>
      malware_count: <span id="malware_count">0</span>
