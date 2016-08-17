@@ -3,13 +3,14 @@ OS_V=ubuntu-14.04-64
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 PACKAGE=$1
+REPO=$DIR/../../../../
 
 # Modify git repositories' paths here
-CORE_SRC=$HOME/armadito-av/core
-CLAMAV_SRC=$HOME/armadito-mod-clamav
-H1_SRC=$HOME/armadito-mod-h1
-PDF_SRC=$HOME/armadito-mod-pdf
-GUI_SRC=$HOME/armadito-gui
+CORE_SRC=$REPO/armadito-av/core
+CLAMAV_SRC=$REPO/armadito-mod-clamav
+H1_SRC=$REPO/armadito-mod-h1
+PDF_SRC=$REPO/armadito-mod-pdf
+GUI_SRC=$REPO/armadito-gui
 
 set -e
 
