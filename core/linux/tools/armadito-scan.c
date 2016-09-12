@@ -89,7 +89,7 @@ static void usage(void)
 	fprintf(stderr, "  --port=PORT | -p PORT         TCP port to connect to Armadito-AV (default is " S_DEFAULT_PORT ")\n");
 	fprintf(stderr, "\n");
 
-	exit(1);
+	exit(-1);
 }
 
 static void parse_options(int argc, char **argv, struct scan_options *opts)
@@ -169,30 +169,30 @@ static void completed_event_print(struct json_object *j_ev)
 	printf("suspicious files  : %d\n", j_get_int(j_ev, "total_suspicious_count"));
 }
 
-static void do_scan(struct scan_options *opts, struct api_client *client)
+static int do_scan(struct scan_options *opts, struct api_client *client)
 {
 	struct json_object *j_request, *j_response;
-	int end_of_scan = 0;
+	int end_of_scan, status = 0;
 	const char *ev_type;
 
 	if (api_client_register(client) != 0) {
 		fprintf(stderr, "cannot register client: %s\n", api_client_get_error(client));
-		return;
+		return -1;
 	}
 
 	j_request = json_object_new_object();
 	json_object_object_add(j_request, "path", json_object_new_string(opts->path_to_scan));
 	if (api_client_call(client, "/scan", j_request, &j_response) != 0) {
 		fprintf(stderr, "cannot start scan on server: %s\n", api_client_get_error(client));
-		return;
+		return -1;
 	}
 
-	while (!end_of_scan) {
+	for (end_of_scan = 0; !end_of_scan; ) {
 		j_response = NULL;
 
 		if (api_client_call(client, "/event", NULL, &j_response) != 0) {
 			fprintf(stderr, "cannot get event from server: %s\n", api_client_get_error(client));
-			return;
+			return -1;
 		}
 
 		if (j_response == NULL)
@@ -207,13 +207,19 @@ static void do_scan(struct scan_options *opts, struct api_client *client)
 		if (!strcmp(ev_type, "OnDemandCompletedEvent")) {
 			if (!opts->no_summary)
 				completed_event_print(j_response);
+			if (j_get_int(j_response, "total_malware_count") != 0)
+				status = 1;
 			end_of_scan = 1;
 		} else if (!strcmp(ev_type, "DetectionEvent"))
 			detection_event_print(j_response);
 	}
 
-	if (api_client_unregister(client) != 0)
+	if (api_client_unregister(client) != 0) {
 		fprintf(stderr, "cannot unregister client: %s\n", api_client_get_error(client));
+		return -1;
+	}
+
+	return status;
 }
 
 int main(int argc, char **argv)
@@ -225,7 +231,5 @@ int main(int argc, char **argv)
 
 	client = api_client_new(opts->port, opts->verbose);
 
-	do_scan(opts, client);
-
-	return 0;
+	return do_scan(opts, client);
 }
