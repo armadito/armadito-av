@@ -47,4 +47,7 @@ int scan_process_cb(struct api_handler *a, struct MHD_Connection *connection, st
 
 int status_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data);
 
+int browse_check_cb(struct MHD_Connection *connection, struct json_object *in);
+int browse_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data);
+
 #endif

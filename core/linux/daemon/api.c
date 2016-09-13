@@ -446,3 +446,79 @@ int status_process_cb(struct api_handler *a, struct MHD_Connection *connection, 
 
 	return 0;
 }
+
+static const char *dirent_type(struct dirent *entry)
+{
+	switch(entry->d_type) {
+	case DT_DIR:
+		return "folder";
+	case DT_LNK:
+		return "link";
+	case DT_REG:
+		return "file";
+	}
+
+	return "other";
+}
+
+static void browse_path(const char *path, struct json_object *result)
+{
+	DIR *d;
+	struct json_object *j_entries;
+
+	json_object_object_add(result, "path", json_object_new_string(path));
+
+	if ((d = opendir(path)) == NULL) {
+		json_object_object_add(result, "error", json_object_new_string(strerror(errno)));
+		return;
+	}
+
+	j_entries = json_object_new_array();
+	json_object_object_add(result, "content", j_entries);
+
+	while(1) {
+		struct dirent *entry;
+		struct json_object *j_entry;
+
+		errno = 0;
+		entry = readdir(d);
+
+		if (entry == NULL) {
+			/* from man readdir: If the end of the directory stream is reached, NULL is returned and errno is not changed */
+			if (errno == 0)
+				break;
+		}
+
+		if (entry->d_type == DT_DIR && (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, "..")))
+			continue;
+
+		j_entry = json_object_new_object();
+		json_object_object_add(j_entry, "name", json_object_new_string(entry->d_name));
+		json_object_object_add(j_entry, "type", json_object_new_string(dirent_type(entry)));
+
+		json_object_array_add(j_entries, j_entry);
+	}
+
+        if (closedir(d) < 0)
+        	a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "error closing directory %s (%s)", path, strerror(errno));
+}
+
+int browse_check_cb(struct MHD_Connection *connection, struct json_object *in)
+{
+	/* check if 'path' parameter is set */
+	if (api_get_argument(connection, "path") == NULL)
+		return 1;
+
+	return 0;
+}
+
+int browse_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
+{
+	const char *path = api_get_argument(connection, "path");
+
+	*out = json_object_new_object();
+
+	browse_path(path, *out);
+
+	return 0;
+}

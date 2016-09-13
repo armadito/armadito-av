@@ -69,6 +69,7 @@ static struct api_endpoint {
 	{ "/event", HTTP_METHOD_GET, 1, event_process_cb, NULL},
 	{ "/scan", HTTP_METHOD_POST, 1, scan_process_cb, scan_check_cb},
 	{ "/status", HTTP_METHOD_GET, 1, status_process_cb, NULL},
+	{ "/browse", HTTP_METHOD_GET, 0, browse_process_cb, NULL},
 	{ NULL, 0, 0, NULL, NULL},
 };
 
