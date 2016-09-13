@@ -466,6 +466,8 @@ static void browse_path(const char *path, struct json_object *result)
 	DIR *d;
 	struct json_object *j_entries;
 
+	if (path == NULL)
+		path = "/";
 	json_object_object_add(result, "path", json_object_new_string(path));
 
 	if ((d = opendir(path)) == NULL) {
@@ -501,15 +503,6 @@ static void browse_path(const char *path, struct json_object *result)
 
         if (closedir(d) < 0)
         	a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "error closing directory %s (%s)", path, strerror(errno));
-}
-
-int browse_check_cb(struct MHD_Connection *connection, struct json_object *in)
-{
-	/* check if 'path' parameter is set */
-	if (api_get_argument(connection, "path") == NULL)
-		return 1;
-
-	return 0;
 }
 
 int browse_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
