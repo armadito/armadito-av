@@ -40,7 +40,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #define JSON_405 "{\"code\":405, \"message\": \"Method not allowed\"}"
 #define JSON_415 "{\"code\":415, \"message\": \"Unsupported Media Type. Content-Type must be application/json\"}"
 #define JSON_422 "{\"code\":422, \"message\": \"Unprocessable request. Make sure the JSON request is valid\"}"
-#define JSON_500 "{\"code\":500, \"message\": \"Request processing triggered an internal error\"}"
 
 struct api_handler {
 	GHashTable *client_table;
@@ -50,7 +49,6 @@ struct api_handler {
 	struct MHD_Response *response_405;
 	struct MHD_Response *response_415;
 	struct MHD_Response *response_422;
-	struct MHD_Response *response_500;
 	void *user_data;
 };
 
@@ -204,7 +202,7 @@ static struct json_object *api_parse_json_request(const char *post_data, size_t 
 	return j_request;
 }
 
-static int api_queue_response(struct MHD_Connection *connection, struct json_object *j_response)
+static int api_queue_response(struct MHD_Connection *connection, int http_status, struct json_object *j_response)
 {
 	struct MHD_Response *response;
 	const char *json_buff;
@@ -222,10 +220,26 @@ static int api_queue_response(struct MHD_Connection *connection, struct json_obj
 	MHD_add_response_header(response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN, "*");
 	/* Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept */
 
-	ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+	ret = MHD_queue_response(connection, http_status, response);
 	MHD_destroy_response(response);
 
 	return ret;
+}
+
+/* wrap the response inside a JSON error object */
+static int api_queue_response_500(struct MHD_Connection *connection, struct json_object *j_response)
+{
+	struct json_object *j_error;
+
+	j_error = json_object_new_object();
+	json_object_object_add(j_error, "code", json_object_new_int(500));
+	json_object_object_add(j_error, "message",
+		json_object_new_string("Request processing triggered an internal error"));
+
+	if (j_response != NULL)
+		json_object_object_add(j_error, "data", j_response);
+
+	return api_queue_response(connection, MHD_HTTP_INTERNAL_SERVER_ERROR, j_error);
 }
 
 int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
@@ -256,23 +270,20 @@ int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
 		return MHD_queue_response(connection, MHD_HTTP_UNPROCESSABLE_ENTITY, a->response_422);
 	}
 
-	/* if request processing failed return HTTP 500 Internal Server Error  */
+	/* process request */
 	ret = (*(endpoint->process_cb))(a, connection, j_request, &j_response, a->user_data);
 
 	if (j_request != NULL)
 		json_object_put(j_request);
 
+	/* if request processing failed return HTTP 500 Internal Server Error  */
 	if (ret) {
 		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "processing request to API path %s failed", path);
-
-		/* a failed processing should not create a JSON response? */
-		if (j_response != NULL)
-			json_object_put(j_response);
-
-		return MHD_queue_response(connection, MHD_HTTP_INTERNAL_SERVER_ERROR, a->response_500);
+		/* a failed processing can create a JSON response */
+		return api_queue_response_500(connection, j_response);
 	}
 
-	return api_queue_response(connection, j_response);
+	return api_queue_response(connection, MHD_HTTP_OK, j_response);
 }
 
 static struct MHD_Response *create_std_response(const char *json)
@@ -298,7 +309,6 @@ struct api_handler *api_handler_new(void *user_data)
  	a->response_405 = create_std_response(JSON_405);
 	a->response_415 = create_std_response(JSON_415);
 	a->response_422 = create_std_response(JSON_422);
-	a->response_500 = create_std_response(JSON_500);
 
 	a->user_data = user_data;
 

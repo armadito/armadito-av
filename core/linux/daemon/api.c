@@ -461,7 +461,7 @@ static const char *dirent_type(struct dirent *entry)
 	return "other";
 }
 
-static void browse_path(const char *path, struct json_object *result)
+static int browse_path(const char *path, struct json_object *result)
 {
 	DIR *d;
 	struct json_object *j_entries;
@@ -472,7 +472,7 @@ static void browse_path(const char *path, struct json_object *result)
 
 	if ((d = opendir(path)) == NULL) {
 		json_object_object_add(result, "error", json_object_new_string(strerror(errno)));
-		return;
+		return 1;
 	}
 
 	j_entries = json_object_new_array();
@@ -503,6 +503,8 @@ static void browse_path(const char *path, struct json_object *result)
 
         if (closedir(d) < 0)
         	a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "error closing directory %s (%s)", path, strerror(errno));
+
+	return 0;
 }
 
 int browse_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
@@ -511,7 +513,5 @@ int browse_process_cb(struct api_handler *a, struct MHD_Connection *connection, 
 
 	*out = json_object_new_object();
 
-	browse_path(path, *out);
-
-	return 0;
+	return browse_path(path, *out);
 }
