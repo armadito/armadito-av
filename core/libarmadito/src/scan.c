@@ -207,7 +207,7 @@ static void update_counters (struct a6o_scan *scan, struct a6o_report *report, e
 		break;
       }
 
-      report->suspicious_count = scan->suspicious_count;	
+      report->suspicious_count = scan->suspicious_count;
       report->malware_count = scan->malware_count;
 }
 
