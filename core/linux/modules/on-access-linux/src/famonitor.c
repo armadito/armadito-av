@@ -204,11 +204,6 @@ static void fanotify_pass_1(struct fanotify_monitor *f, struct fanotify_event_me
 
 	/* first pass: allow all PERM events from myself, enqueue other PERM events */
 	for(event = buf; FAN_EVENT_OK(event, len); event = FAN_EVENT_NEXT(event, len)) {
-#if 0
-		/* no longer usefull */
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "fd %3d path ??? pass 1", event->fd);
-#endif
-
 		if ((event->mask & FAN_OPEN_PERM))
 			if (event->pid == f->my_pid)
 				response_write(f->fanotify_fd, event->fd, FAN_ALLOW, NULL, "PID is myself");
@@ -231,11 +226,6 @@ static void fanotify_pass_2(struct fanotify_monitor *f, struct fanotify_event_me
 				continue;
 
 			p = get_file_path_from_fd(event->fd, file_path, PATH_MAX);
-
-#if 0
-			/* no longer usefull */
-			a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "fd %3d path %s pass 2", event->fd, p != NULL ? p : "null");
-#endif
 
 			fanotify_perm_event_process(f, event, p);
 		} else

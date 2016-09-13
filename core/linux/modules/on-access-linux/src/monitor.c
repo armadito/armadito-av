@@ -125,8 +125,6 @@ struct access_monitor *access_monitor_new(struct armadito *u)
 	m->inotify_monitor = inotify_monitor_new(m);
 	m->mount_monitor = mount_monitor_new(mount_cb, m);
 
-	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "main thread %p", g_thread_self());
-
 	m->monitor_thread_context = g_main_context_new();
 
 	m->monitor_thread = g_thread_new("access monitor thread", monitor_thread_fun, m);
@@ -418,8 +416,6 @@ static gpointer monitor_thread_fun(gpointer data)
 
 	g_main_context_push_thread_default(m->monitor_thread_context);
 
-	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "started thread %p", g_thread_self());
-
 	loop = g_main_loop_new(m->monitor_thread_context, FALSE);
 
 	command_channel = g_io_channel_unix_new(m->command_pipe[0]);
@@ -468,8 +464,6 @@ static gboolean command_cb(GIOChannel *source, GIOCondition condition, gpointer 
 	char cmd;
 
 	assert(g_main_context_is_owner(m->monitor_thread_context));
-
-	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "command_cb: thread %p", g_thread_self());
 
 	if (read(m->command_pipe[0], &cmd, 1) < 0) {
 		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "read() in command callback failed (%s)", strerror(errno));

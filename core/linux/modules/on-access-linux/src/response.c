@@ -67,7 +67,7 @@ void response_write(int fanotify_fd, int fd, __u32 r, const char *path, const ch
 		// we don't log this special case
 		if(reason != NULL && strncmp(reason,"PID is myself",13) == 0)
                   return;
-				
+
 		a6o_log(ARMADITO_LOG_MODULE, log_level, MODULE_LOG_NAME ": " "fd %3d path %s %s (%s)", fd, path != NULL ? path : "null", auth, reason != NULL ? reason : "unknown");
 	}
 #endif
