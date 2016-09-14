@@ -9,7 +9,7 @@ CLAMAV_SRC=$REPO/armadito-mod-clamav
 H1_SRC=$REPO/armadito-mod-h1
 PDF_SRC=$REPO/armadito-mod-pdf
 GUI_SRC=$REPO/armadito-gui
-PRELUDE_SRC=$REPO/armadito-prelude
+PRELUDE_SRC=$REPO/armadito-prelude/python
 
 set -e
 
@@ -37,7 +37,7 @@ then
 	./compile.sh -p modulePDF
 fi
 
-if [[ $PACKAGE == "prelude" ]];
+if [[ $PACKAGE == "python-prelude" ]];
 then
 	./configure.sh -i $PRELUDE_SRC -p prelude
 	./compile.sh -p prelude
