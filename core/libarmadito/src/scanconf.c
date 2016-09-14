@@ -193,8 +193,6 @@ struct a6o_module **a6o_scan_conf_get_applicable_modules(struct a6o_scan_conf *c
 		for (modv = modules; *modv != NULL; modv++)
 			g_string_append_printf(s, " %s", (*modv)->name);
 
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_DEBUG, "%s: mime-type '%s' ->%s", c->name, mime_type, s->str);
-
 		g_string_free(s, TRUE);
 	}
 
