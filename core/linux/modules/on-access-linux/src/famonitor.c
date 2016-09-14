@@ -108,6 +108,8 @@ int fanotify_monitor_start(struct fanotify_monitor *f)
 	g_source_attach(source, access_monitor_get_main_context(f->monitor));
 	g_source_unref(source);
 
+	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "started Linux on-access protection with fanotify");
+
 	return 0;
 }
 
