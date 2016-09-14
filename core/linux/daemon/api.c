@@ -461,14 +461,39 @@ static const char *dirent_type(struct dirent *entry)
 	return "other";
 }
 
+static char *get_root_path(const char *path)
+{
+	size_t len = strlen(path);
+	char *root_path;
+
+	/* len > 0 because this is tested in browse_path before calling this function */
+	if (path[len - 1] == '/')
+		return strdup(path);
+
+	root_path = malloc(len + 2);
+	strcpy(root_path, path);
+	strcat(root_path, "/");
+
+	return root_path;
+}
+
 static int browse_path(const char *path, struct json_object *result)
 {
 	DIR *d;
-	struct json_object *j_entries;
+	struct json_object *j_entries, *j_entry;
+	char *root_path, *entry_path;
 
 	if (path == NULL)
 		path = "/";
+
+	if (path[0] == '\0') {
+		json_object_object_add(result, "error", json_object_new_string("path is empty"));
+		return 1;
+	}
+
 	json_object_object_add(result, "path", json_object_new_string(path));
+
+	root_path = get_root_path(path);
 
 	if ((d = opendir(path)) == NULL) {
 		json_object_object_add(result, "error", json_object_new_string(strerror(errno)));
@@ -480,7 +505,6 @@ static int browse_path(const char *path, struct json_object *result)
 
 	while(1) {
 		struct dirent *entry;
-		struct json_object *j_entry;
 
 		errno = 0;
 		entry = readdir(d);
@@ -498,8 +522,15 @@ static int browse_path(const char *path, struct json_object *result)
 		json_object_object_add(j_entry, "name", json_object_new_string(entry->d_name));
 		json_object_object_add(j_entry, "type", json_object_new_string(dirent_type(entry)));
 
+		if (asprintf(&entry_path, "%s%s", root_path, entry->d_name) != -1){
+			json_object_object_add(j_entry, "full_path", json_object_new_string(entry_path));
+			free(entry_path);
+		}
+
 		json_object_array_add(j_entries, j_entry);
 	}
+
+	free((void *)root_path);
 
         if (closedir(d) < 0)
         	a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "error closing directory %s (%s)", path, strerror(errno));
