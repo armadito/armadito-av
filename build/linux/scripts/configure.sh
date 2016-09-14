@@ -4,6 +4,7 @@ function configure()
 	local PACKAGE_NAME=$1
 	local OS_V=$2
 	local SRC_DIR=$3
+	local A_OPTS=""
 
 	set -e
 	mkdir -p $OUT_DIR/build/$OS_V/armadito-av/$PACKAGE_NAME
@@ -13,9 +14,19 @@ function configure()
 	sudo chmod +x autogen.sh
 	./autogen.sh	
 
+	if [[ $PACKAGE_NAME == "prelude" ]];
+	then
+		A_OPTS='--with-libprelude-pythondir=$HOME/prelude/install/lib/python2.7/site-packages --with-libprelude-libdir=$HOME/prelude/install/lib'
+	fi
+
+	if [[ $PACKAGE_NAME == "core" ]];
+	then
+		A_OPTS='--enable-debug --enable-fanotify'
+	fi
+
 	cd $OUT_DIR/build/$OS_V/armadito-av/$PACKAGE_NAME
 	echo "-------CONFIGURE-------"
-	$SRC_DIR/configure --prefix=$OUT_DIR/install/$OS_V/armadito-av PKG_CONFIG_PATH=$OUT_DIR/install/$OS_V/armadito-av/lib/pkgconfig
+	$SRC_DIR/configure --prefix=$OUT_DIR/install/$OS_V/armadito-av PKG_CONFIG_PATH=$OUT_DIR/install/$OS_V/armadito-av/lib/pkgconfig $A_OPTS
 	echo "-------CONFIGURE OKAY $PACKAGE_NAME-------"
 
 }
@@ -31,9 +42,9 @@ function usage()
     echo "Example: configure.sh -i /home/joebar/armadito-mod-clamav -p clamav -o ubuntu-14.04-64"
     echo ""
     echo "Argument:"
-    echo "  SRC_DIR          Sources directory"
-    echo "  PACKAGE_NAME     Package name to configure"
-    echo "  OS_V             OS version out subdirectory name"
+    echo "  SRC_DIR              Sources directory"
+    echo "  PACKAGE_NAME         Package name to configure"
+    echo "  OS_V                 OS version out subdirectory name"
     echo ""
 
     exit 1

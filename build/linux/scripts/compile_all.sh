@@ -11,6 +11,7 @@ CLAMAV_SRC=$REPO/armadito-mod-clamav
 H1_SRC=$REPO/armadito-mod-h1
 PDF_SRC=$REPO/armadito-mod-pdf
 GUI_SRC=$REPO/armadito-gui
+PRELUDE_SRC=$REPO/armadito-prelude
 
 set -e
 
@@ -36,6 +37,12 @@ if [[ $PACKAGE == "modulePDF" || $PACKAGE == "" ]];
 then
 	./configure.sh -i $PDF_SRC -p modulePDF -o $OS_V
 	./compile.sh -p modulePDF -o $OS_V
+fi
+
+if [[ $PACKAGE == "prelude" ]];
+then
+	./configure.sh -i $PRELUDE_SRC -p prelude -o $OS_V
+	./compile.sh -p prelude -o $OS_V
 fi
 
 #if [[ $PACKAGE == "gui" || $PACKAGE == "" ]];
