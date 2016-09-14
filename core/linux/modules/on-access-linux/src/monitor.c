@@ -62,6 +62,8 @@ struct access_monitor {
 	int enable;
 	int enable_permission;
 	int enable_removable_media;
+	int autoscan_removable_media;
+
 	GPtrArray *entries;
 
 	int start_pipe[2];
@@ -73,6 +75,8 @@ struct access_monitor {
 	struct fanotify_monitor *fanotify_monitor;
 	struct inotify_monitor *inotify_monitor;
 	struct mount_monitor *mount_monitor;
+
+	struct armadito *ar;
 };
 
 static gboolean delayed_start_cb(GIOChannel *source, GIOCondition condition, gpointer data);
@@ -81,7 +85,6 @@ static gboolean command_cb(GIOChannel *source, GIOCondition condition, gpointer 
 static void mount_cb(enum mount_event_type ev_type, const char *path, void *user_data);
 
 static gpointer monitor_thread_fun(gpointer data);
-static void scan_file_thread_fun(gpointer data, gpointer user_data);
 
 static void entry_destroy_notify(gpointer data)
 {
@@ -91,7 +94,7 @@ static void entry_destroy_notify(gpointer data)
 	free(e);
 }
 
-struct access_monitor *access_monitor_new(struct armadito *u)
+struct access_monitor *access_monitor_new(struct armadito *armadito)
 {
 	struct access_monitor *m = malloc(sizeof(struct access_monitor));
 	GIOChannel *start_channel;
@@ -99,6 +102,9 @@ struct access_monitor *access_monitor_new(struct armadito *u)
 	m->enable = 0;
 	m->enable_permission = 0;
 	m->enable_removable_media = 0;
+	m->autoscan_removable_media = 0;
+
+	m->ar = armadito;
 
 	m->entries = g_ptr_array_new_full(10, entry_destroy_notify);
 
@@ -121,7 +127,7 @@ struct access_monitor *access_monitor_new(struct armadito *u)
 	start_channel = g_io_channel_unix_new(m->start_pipe[0]);
 	g_io_add_watch(start_channel, G_IO_IN, delayed_start_cb, m);
 
-	m->fanotify_monitor = fanotify_monitor_new(m, u);
+	m->fanotify_monitor = fanotify_monitor_new(m, armadito);
 	m->inotify_monitor = inotify_monitor_new(m);
 	m->mount_monitor = mount_monitor_new(mount_cb, m);
 
@@ -168,6 +174,18 @@ int access_monitor_enable_removable_media(struct access_monitor *m, int enable_r
 int access_monitor_is_enable_removable_media(struct access_monitor *m)
 {
 	return m->enable_removable_media;
+}
+
+int access_monitor_autoscan_removable_media(struct access_monitor *m, int autoscan_removable_media)
+{
+	m->autoscan_removable_media = autoscan_removable_media;
+
+	return m->autoscan_removable_media;
+}
+
+int access_monitor_is_autoscan_removable_media(struct access_monitor *m)
+{
+	return m->autoscan_removable_media;
 }
 
 GMainContext *access_monitor_get_main_context(struct access_monitor *m)
@@ -361,11 +379,55 @@ struct mount_data {
 	struct access_monitor *monitor;
 };
 
+static struct mount_data *mount_data_new(enum mount_event_type ev_type, const char *path, struct access_monitor *monitor)
+{
+	struct mount_data *data;
+
+	data = malloc(sizeof(struct mount_data));
+
+	data->ev_type = ev_type;
+	if (path != NULL)
+		data->path = strdup(path);
+	else
+		data->path = NULL;
+	data->monitor = monitor;
+
+	return data;
+}
+
 static void mount_data_free(struct mount_data *data)
 {
 	if (data->path != NULL)
 		free((void *)data->path);
 	free(data);
+}
+
+static gpointer scan_media_thread_fun(gpointer data)
+{
+	struct mount_data *mount_data = data;
+	struct a6o_on_demand *on_demand;
+
+	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "starting scan of removable media mounted on %s", mount_data->path);
+
+	on_demand = a6o_on_demand_new(mount_data->monitor->ar, -1, mount_data->path, ARMADITO_SCAN_THREADED | ARMADITO_SCAN_RECURSE);
+	a6o_on_demand_run(on_demand);
+
+	a6o_on_demand_free(on_demand);
+
+	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "finished scan of removable media mounted on %s", mount_data->path);
+
+	mount_data_free(mount_data);
+
+	return NULL;
+}
+
+static void scan_media(struct mount_data *data)
+{
+	struct mount_data *clone;
+
+	clone = mount_data_new(data->ev_type, data->path, data->monitor);
+
+	g_thread_new("scan removable media thread", scan_media_thread_fun, clone);
 }
 
 static gboolean mount_idle_cb(gpointer user_data)
@@ -376,8 +438,12 @@ static gboolean mount_idle_cb(gpointer user_data)
 
 	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "received mount notification for %s (%s)", data->path, data->ev_type == EVENT_MOUNT ? "mount" : "umount");
 
-	if (data->ev_type == EVENT_MOUNT)
-		mark_mount_point(data->monitor, data->path);
+	if (data->ev_type == EVENT_MOUNT) {
+		if (access_monitor_is_autoscan_removable_media(data->monitor))
+			scan_media(data);
+		if (access_monitor_is_enable_removable_media(data->monitor))
+			mark_mount_point(data->monitor, data->path);
+	}
 
 	/* if ev_type is EVENT_UMOUNT, nothing to be done, the kernel has already removed the fanotify mark */
 	/* and anyway, path is NULL, so... */
@@ -391,13 +457,7 @@ static void mount_cb(enum mount_event_type ev_type, const char *path, void *user
 	struct mount_data *data;
 	struct access_monitor *monitor = (struct access_monitor *)user_data;
 
-	data = malloc(sizeof(struct mount_data));
-	data->ev_type = ev_type;
-	if (path != NULL)
-		data->path = strdup(path);
-	else
-		data->path = NULL;
-	data->monitor = monitor;
+	data = mount_data_new(ev_type, path, monitor);
 
 	/* Invoke the function. */
 	g_main_context_invoke_full(monitor->monitor_thread_context,
@@ -436,11 +496,8 @@ static void access_monitor_start_command(struct access_monitor *m)
 	if (inotify_monitor_start(m->inotify_monitor))
 		return;
 
-	/* if configured, add the mount monitor */
-	if (m->enable_removable_media) {
-		if (mount_monitor_start(m->mount_monitor) < 0)
-			return;
-	}
+	if (mount_monitor_start(m->mount_monitor) < 0)
+		return;
 
 	/* init all fanotify and inotify marks */
 	mark_entries(m);
