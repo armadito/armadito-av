@@ -51,6 +51,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <errno.h>
 
 struct alert {
 	xmlDocPtr xml_doc;
@@ -133,11 +134,16 @@ on_failure:
 	return;
 }
 
+#define PID_MAX 128
+#define PROCESS_NAME_MAX 1024
+
 static xmlNodePtr alert_doc_identification_node(void)
 {
 	xmlNodePtr node;
 	char hostname[HOST_NAME_MAX + 1];
 	char ip_addr[NI_MAXHOST];
+	char pid[PID_MAX];
+	char process_name[PROCESS_NAME_MAX];
 
 	node = xmlNewNode(NULL, "identification");
 
@@ -147,6 +153,14 @@ static xmlNodePtr alert_doc_identification_node(void)
 	get_ip_addr(ip_addr);
 	xmlNewChild(node, NULL, "ip", ip_addr);
 	xmlNewChild(node, NULL, "os", "Linux");
+
+	snprintf(pid, PID_MAX, "%d", getpid());
+	xmlNewChild(node, NULL, "pid", pid);
+
+	/* extern char *program_invocation_name; */
+	/* extern char *program_invocation_short_name; */
+
+	xmlNewChild(node, NULL, "process", program_invocation_short_name);
 
 	return node;
 }
