@@ -15,7 +15,7 @@ function configure()
 
 	if [[ $PACKAGE_NAME == "prelude" ]];
 	then
-		A_OPTS='--with-libprelude-pythondir=$HOME/prelude/install/lib/python2.7/site-packages --with-libprelude-libdir=$HOME/prelude/install/lib'
+		A_OPTS="--with-libprelude-pythondir=$HOME/prelude/install/lib/python2.7/site-packages --with-libprelude-libdir=$HOME/prelude/install/lib"
 	fi
 
 	if [[ $PACKAGE_NAME == "core" ]];
