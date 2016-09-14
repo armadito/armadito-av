@@ -10,13 +10,12 @@ function increment_version()
 }
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-OS_V=ubuntu-14.04-64
 OUT_DIR=$DIR/../out
 SRC_DIR=$DIR/../
 
-TOP_BUILDDIR=$OUT_DIR/build/$OS_V
+TOP_BUILDDIR=$OUT_DIR/build/
 TOP_SOURCEDIR=$OUT_DIR/sources
-TOP_PKGBUILDDIR=$OUT_DIR/build/packages/$OS_V
+TOP_PKGBUILDDIR=$OUT_DIR/build/packages/
 export GNUPGHOME=$HOME/uhuru-linux-packaging/gpg
 
 mkdir -p $TOP_SOURCEDIR

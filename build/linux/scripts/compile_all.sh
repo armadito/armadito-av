@@ -1,5 +1,3 @@
-# Modify version here
-OS_V=ubuntu-14.04-64
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 PACKAGE=$1
@@ -17,36 +15,36 @@ set -e
 
 if [[ $PACKAGE == "core" || $PACKAGE == "" ]];
 then
-	./configure.sh -i $CORE_SRC -p core -o $OS_V
-	./compile.sh -p core -o $OS_V
+	./configure.sh -i $CORE_SRC -p core
+	./compile.sh -p core
 fi
 
 if [[ $PACKAGE == "clamav" || $PACKAGE == "" ]];
 then
-	./configure.sh -i $CLAMAV_SRC -p clamav -o $OS_V
-	./compile.sh -p clamav -o $OS_V
+	./configure.sh -i $CLAMAV_SRC -p clamav
+	./compile.sh -p clamav
 fi
 
 if [[ $PACKAGE == "moduleH1" || $PACKAGE == "" ]];
 then
-	./configure.sh -i $H1_SRC -p moduleH1 -o $OS_V
-	./compile.sh -p moduleH1 -o $OS_V
+	./configure.sh -i $H1_SRC -p moduleH1
+	./compile.sh -p moduleH1
 fi
 
 if [[ $PACKAGE == "modulePDF" || $PACKAGE == "" ]];
 then
-	./configure.sh -i $PDF_SRC -p modulePDF -o $OS_V
-	./compile.sh -p modulePDF -o $OS_V
+	./configure.sh -i $PDF_SRC -p modulePDF
+	./compile.sh -p modulePDF
 fi
 
 if [[ $PACKAGE == "prelude" ]];
 then
-	./configure.sh -i $PRELUDE_SRC -p prelude -o $OS_V
-	./compile.sh -p prelude -o $OS_V
+	./configure.sh -i $PRELUDE_SRC -p prelude
+	./compile.sh -p prelude
 fi
 
 #if [[ $PACKAGE == "gui" || $PACKAGE == "" ]];
 #then
-#	./configure.sh -p gui -o $OS_V
-#	./compile.sh -p gui -o $OS_V
+#	./configure.sh -p gui
+#	./compile.sh -p gui
 #fi
