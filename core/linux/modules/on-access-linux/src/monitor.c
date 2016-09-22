@@ -261,8 +261,6 @@ static gboolean delayed_start_cb(GIOChannel *source, GIOCondition condition, gpo
 	struct access_monitor *m = (struct access_monitor *)data;
 	char c;
 
-	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "delayed_start_cb: thread %p", g_thread_self());
-
 	if (read(m->start_pipe[0], &c, 1) < 0) {
 		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "read() in activation callback failed (%s)", strerror(errno));
 
