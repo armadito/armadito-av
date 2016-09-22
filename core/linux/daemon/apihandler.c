@@ -33,6 +33,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "debug.h"
 
 #define API_TOKEN_HEADER "X-Armadito-Token"
+#define API_VERSION_HEADER "X-Armadito-Api-Version"
+#define API_VERSION "armadito.v0"
 
 #define JSON_400 "{\"code\":400, \"message\": \"Bad Request. Make sure your request has a X-Armadito-Token header and if POST request contains valid JSON\"}"
 #define JSON_403 "{\"code\":403, \"message\": \"Request forbidden. Make sure your request has a User-Agent header\"}"
@@ -219,6 +221,7 @@ static int api_queue_response(struct MHD_Connection *connection, int http_status
 	MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_TYPE, "application/json");
 	MHD_add_response_header(response, MHD_HTTP_HEADER_CONNECTION, "close");
 	MHD_add_response_header(response, MHD_HTTP_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+	MHD_add_response_header(response, API_VERSION_HEADER, API_VERSION);
 	/* Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept */
 
 	ret = MHD_queue_response(connection, http_status, response);
