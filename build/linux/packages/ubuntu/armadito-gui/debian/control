@@ -10,4 +10,4 @@ Section: libs
 Architecture: i386 amd64
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Armadito graphical user interface
- Provides Armadito NW.JS graphical user interface
+ Provides Armadito web graphical user interface
