@@ -49,4 +49,6 @@ int status_process_cb(struct api_handler *a, struct MHD_Connection *connection, 
 
 int browse_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data);
 
+int version_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data);
+
 #endif

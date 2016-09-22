@@ -30,6 +30,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <libarmadito.h>
 
+#include "libarmadito-config.h"
 #include "api.h"
 #include "debug.h"
 
@@ -546,3 +547,12 @@ int browse_process_cb(struct api_handler *a, struct MHD_Connection *connection, 
 
 	return browse_path(path, *out);
 }
+
+int version_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
+{
+	*out = json_object_new_object();
+	json_object_object_add(*out, "armadito-version", json_object_new_string(VERSION));
+
+	return 0;
+}
+
