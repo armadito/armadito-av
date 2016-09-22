@@ -551,7 +551,7 @@ int browse_process_cb(struct api_handler *a, struct MHD_Connection *connection, 
 int version_process_cb(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data)
 {
 	*out = json_object_new_object();
-	json_object_object_add(*out, "armadito-version", json_object_new_string(VERSION));
+	json_object_object_add(*out, "antivirus-version", json_object_new_string(VERSION));
 
 	return 0;
 }
