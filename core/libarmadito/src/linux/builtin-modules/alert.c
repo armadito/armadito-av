@@ -26,15 +26,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "modulep.h"
 #include "alert.h"
 
-#undef ALERT_VIA_SSL
-#define ALERT_VIA_FILE
-
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <libxml/xmlsave.h>
-#ifdef ALERT_VIA_SSL
-#include <curl/curl.h>
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -251,109 +245,6 @@ static void alert_add(struct alert *a, struct a6o_report *report)
 	alert_doc_add_alert(a->xml_doc, report);
 }
 
-#ifdef ALERT_VIA_UNIX_SOCKET
-static int connect_socket(const char *path)
-{
-	int fd;
-	struct sockaddr_un server_addr;
-
-	fd = socket( AF_UNIX, SOCK_STREAM, 0);
-	if (fd < 0) {
-		perror("socket() failed");
-		return -1;
-	}
-
-	server_addr.sun_family = AF_UNIX;
-	strcpy(server_addr.sun_path, path);
-
-	if (connect(fd, (struct sockaddr *)&server_addr, sizeof(struct sockaddr_un)) < 0) {
-		close(fd);
-		perror("connecting stream socket");
-		return -1;
-	}
-
-	return fd;
-}
-
-#define ALERT_SOCKET_PATH "/var/tmp/davfi_alert.s"
-
-static void alert_send_via_unix_sock(struct alert *a)
-{
-	int fd;
-
-	if (a->xml_doc == NULL)
-		return;
-
-#if 0
-	alert_doc_save(a->xml_doc, "-");
-#endif
-
-	fd = connect_socket(ALERT_SOCKET_PATH);
-	if (fd != -1) {
-		alert_doc_save_to_fd(a->xml_doc, fd);
-		close(fd);
-	}
-}
-#endif
-
-#ifdef ALERT_VIA_SSL
-#ifdef ALERT_VIA_SSL
-#define ARMADITO_ALERT_URL "https://127.0.0.1:10083/"
-/* #define ARMADITO_ALERT_URL "http://127.0.0.1:10083/" */
-#endif
-
-static size_t discard_data(void *buffer, size_t size, size_t nmemb, void *userp)
-{
-	return size * nmemb;
-}
-
-static void alert_send_via_https(struct alert *a)
-{
-	static int error_count;
-	xmlBufferPtr xml_buf;
-	struct curl_httppost *formpost = NULL;
-	struct curl_httppost *lastptr = NULL;
-	CURL *curl;
-	CURLcode res;
-
-	if (a->xml_doc == NULL)
-		return;
-
-	curl_global_init(CURL_GLOBAL_ALL);
-
-	curl = curl_easy_init();
-	if (!curl)
-		return;
-
-	curl_easy_setopt(curl, CURLOPT_URL, ARMADITO_ALERT_URL);
-	curl_easy_setopt(curl, CURLOPT_USERAGENT, "libarmadito/1.0");
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, discard_data);
-#ifdef ALERT_REPORT_SSL
-	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-#endif
-
-	alert_doc_save_to_buffer(a->xml_doc, &xml_buf);
-	curl_formadd(&formpost, &lastptr, CURLFORM_PTRNAME, "xml", CURLFORM_PTRCONTENTS, xmlBufferContent(xml_buf), CURLFORM_END);
-	curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
-
-	res = curl_easy_perform(curl);
-
-#define MAX_CURL_ERROR_PRINT 3
-	if(res != CURLE_OK && error_count++ < MAX_CURL_ERROR_PRINT) {
-		/* this mode of reporting alert is no longer available, so give up fixing error reporting */
-	}
-
-	curl_easy_cleanup(curl);
-	curl_formfree(formpost);
-
-	xmlBufferFree(xml_buf);
-}
-#endif
-
-
-#ifdef ALERT_VIA_FILE
-
 static void alert_send_via_file(struct alert *a, const char *alert_dir)
 {
 	int fd;
@@ -373,8 +264,6 @@ static void alert_send_via_file(struct alert *a, const char *alert_dir)
 
 	free(alert_path);
 }
-
-#endif
 
 static void alert_free(struct alert *a)
 {
@@ -434,14 +323,7 @@ void alert_callback(struct a6o_report *report, void *callback_data)
 
 	a = alert_new();
 	alert_add(a, report);
-
-#ifdef ALERT_VIA_SSL
-	alert_send_via_https(a);
-#endif
-#ifdef ALERT_VIA_FILE
 	alert_send_via_file(a, al_data->alert_dir);
-#endif
-
 	alert_free(a);
 
 	report->action |= ARMADITO_ACTION_ALERT;
