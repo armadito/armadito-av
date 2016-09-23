@@ -8,7 +8,7 @@ CORE_SRC=$REPO/armadito-av/core
 CLAMAV_SRC=$REPO/armadito-mod-clamav
 H1_SRC=$REPO/armadito-mod-h1
 PDF_SRC=$REPO/armadito-mod-pdf
-GUI_SRC=$REPO/armadito-gui
+GUI_SRC=$REPO/armadito-gui/web
 PRELUDE_SRC=$REPO/armadito-prelude/python
 
 set -e
@@ -43,8 +43,8 @@ then
 	./compile.sh -p prelude
 fi
 
-#if [[ $PACKAGE == "gui" || $PACKAGE == "" ]];
-#then
-#	./configure.sh -p gui
-#	./compile.sh -p gui
-#fi
+if [[ $PACKAGE == "gui" || $PACKAGE == "" ]];
+then
+	./configure.sh -i $GUI_SRC -p gui
+	./compile.sh -p gui
+fi
