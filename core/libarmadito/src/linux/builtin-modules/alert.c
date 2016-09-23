@@ -151,9 +151,7 @@ static xmlNodePtr alert_doc_identification_node(void)
 	snprintf(pid, PID_MAX, "%d", getpid());
 	xmlNewChild(node, NULL, "pid", pid);
 
-	/* extern char *program_invocation_name; */
-	/* extern char *program_invocation_short_name; */
-
+	// https://linux.die.net/man/3/program_invocation_short_name
 	xmlNewChild(node, NULL, "process", program_invocation_short_name);
 
 	return node;
@@ -265,10 +263,6 @@ static void alert_free(struct alert *a)
 
 	free(a);
 }
-
-/*
- * module specific functions
- */
 
 struct alert_data {
 	char *alert_dir;
