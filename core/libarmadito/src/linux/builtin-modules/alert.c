@@ -51,14 +51,14 @@ struct alert {
 	xmlDocPtr xml_doc;
 };
 
-static xmlNodePtr alert_doc_gdh_node(void)
+static xmlNodePtr alert_doc_detection_time_node(void)
 {
 	xmlNodePtr node;
 	time_t t;
 	struct tm l_tm;
 	char buff[32];
 
-	node = xmlNewNode(NULL, "gdh");
+	node = xmlNewNode(NULL, "detection_time");
 
 	time(&t);
 	localtime_r(&t, &l_tm);
@@ -168,9 +168,6 @@ static xmlDocPtr alert_doc_new(void)
 
 	doc = xmlNewDoc("1.0");
 	root_node = xmlNewNode(NULL, "alert");
-	xmlNewProp(root_node, "xmlns", "http://www.davfi-project.org/AlertSchema");
-	xmlNewProp(root_node, "xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-	xmlNewProp(root_node, "xsi:schemaLocation", "http://www.davfi-project.org/AlertSchema AlertSchema.xsd ");
 	xmlDocSetRootElement(doc, root_node);
 
 	return doc;
@@ -181,16 +178,13 @@ static void alert_doc_add_alert(xmlDocPtr doc, struct a6o_report *report)
 	xmlNodePtr root_node, node;
 
 	root_node = xmlDocGetRootElement(doc);
-	xmlNewChild(root_node, NULL, "code", "a");
 	xmlNewChild(root_node, NULL, "level", "2");
 
 	node = xmlNewChild(root_node, NULL, "uri", report->path);
 	xmlNewProp(node, "type", "path");
 
-	xmlAddChild(root_node, alert_doc_gdh_node());
-
+	xmlAddChild(root_node, alert_doc_detection_time_node());
 	xmlAddChild(root_node, alert_doc_identification_node());
-
 	xmlNewChild(root_node, NULL, "module", report->mod_name);
 	xmlNewChild(root_node, NULL, "module_specific", report->mod_report);
 }
