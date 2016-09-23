@@ -2,22 +2,25 @@
 
 function usage()
 {
-    echo "Usage: deb-src.sh -d DISTRIB -k GPG_KEY_ID [-b BUILD_VERSION] TARBALL"
+    echo "Usage: deb-src.sh [-d DISTRIB] [-k GPG_KEY_ID] [-b BUILD_VERSION] [-D BUILD_DIR] TARBALL"
     echo "Create a Debian source package from tarball"
-    echo "Example: deb-src.sh -d trusty -k BEEFFACE armadito-core-0.10.1.tar.gz"
+    echo "Example: deb-src.sh -d trusty -k BEEFFACE -D $HOME/armadito/build/pkg armadito-core-0.10.1.tar.gz"
     echo ""
     echo "Argument:"
     echo "  TARBALL          source tarball"
     echo ""
     echo "Options:"
-    echo "  DISTRIB          distrib code name (trusty, wily, xenial...)"
-    echo "  GPG_KEY_ID       GPG key id for package signing"
-    echo "  BUILD_VERSION    build version appended to source version"
+    echo "  -d DISTRIB          distrib code name: trusty, wily, xenial... (default to $(lsb_release -cs))"
+    echo "  -k GPG_KEY_ID       GPG key id for package signing (if none, first key of the keyring will be used)"
+    echo "  -b BUILD_VERSION    build version appended to source version"
+    echo "  -D BUILD_DIR        build package in this directory (default to /var/tmp)"
     echo ""
 
     exit 1
 }
 
+# create dirs passed in arguments if they don't exist
+# $ mkdir_if_needed foo bar joe
 function mkdir_if_needed()
 {
     local dir
@@ -54,17 +57,26 @@ function tarball_extension()
     echo $E
 }
 
+# get the default GPG key
+# $ gpg_default_key
+# BEEFFACE
+function gpg_default_key()
+{
+    gpg2 --list-keys | awk '$1 == "pub" { gsub(".*/", "", $2); print($2); exit 0; }'
+}
+
 function build_deb_src()
 {
     local TARBALL=$1
     local DISTRIB=$2
     local GPG_KEY=$3
     local BUILD_VERSION=$4
+    local BUILD_DIR=$5
 
-    local OUT_DIR=$SCRIPT_DIR/../out
     local PKG=$(pkg $TARBALL)
     local TARBALL_EXT=$(tarball_extension $TARBALL)
     local SRC_VERSION=$(version $TARBALL)
+
     if [ ! -z "$BUILD_VERSION" ] ; then
 	VERSION=$SRC_VERSION.$BUILD_VERSION
     else
@@ -72,7 +84,6 @@ function build_deb_src()
     fi
 
     local DEBIAN_TARBALL=${PKG}_$VERSION.orig.tar.$TARBALL_EXT
-    local BUILD_DIR=$OUT_DIR/pkg
     local DEBIAN_DIR=$SCRIPT_DIR/../packages/ubuntu/$PKG/debian
 
     mkdir_if_needed $BUILD_DIR
@@ -115,7 +126,7 @@ function build_deb_src()
 
 if [ $# -eq 0 ] ; then usage ; fi
 
-while getopts "d:k:b:h" opt; do
+while getopts "d:k:b:D:h" opt; do
     case $opt in
 	d)
 	    DISTRIB=$OPTARG
@@ -125,6 +136,9 @@ while getopts "d:k:b:h" opt; do
 	    ;;
 	b)
 	    BUILD_VERSION=$OPTARG
+	    ;;
+	D)
+	    BUILD_DIR=$OPTARG
 	    ;;
 	h)
 	    usage
@@ -139,19 +153,26 @@ while getopts "d:k:b:h" opt; do
 done
 shift $((OPTIND-1))
 
+if [ -z "$DISTRIB" ] ; then
+    DISTRIB=$(lsb_release -cs)
+fi
+
+if [ -z "$GPG_KEY_ID" ] ; then
+    GPG_KEY_ID=$(gpg_default_key)
+fi
+if [ -z "$BUILD_DIR" ] ; then
+    BUILD_DIR=/var/tmp
+fi
+
 set -x
 
 TARBALL=$1
 
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-build_deb_src $TARBALL $DISTRIB $GPG_KEY_ID $BUILD_VERSION
+build_deb_src "$TARBALL" "$DISTRIB" "$GPG_KEY_ID" "$BUILD_VERSION" "$BUILD_DIR"
 
 exit 0
 
 # ===================
 dput -u ppa:armadito/armadito-av $PKGDIR/${PKG}_$VERSION-${BUILDVER}_source.changes
-
-
-
-
