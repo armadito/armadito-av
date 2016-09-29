@@ -3,7 +3,7 @@ Section: utils
 Priority: optional
 Maintainer: François Déchelle <fdechelle@teclib.com>
 Standards-Version: 3.9.2
-Build-Depends: debhelper (>= 9), autotools-dev, nodejs-legacy, npm
+Build-Depends: debhelper (>= 9), autotools-dev
 
 Package: armadito-gui
 Section: libs
