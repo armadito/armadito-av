@@ -4,8 +4,13 @@ dist: trusty
 
 before_install:
   - sudo apt-get install libtool libglib2.0-dev libmagic-dev libxml2-dev libjson-c-dev libmicrohttpd-dev libcurl4-openssl-dev
-  - cd core
-  - ./autogen.sh
 
 compiler:
   - gcc
+
+before_script:
+  - cd core
+  - ./autogen.sh
+
+script:
+  ./configure && make && make check
