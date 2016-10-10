@@ -30,4 +30,4 @@ addons:
     notification_email: vhamon@teclib.com
     build_command_prepend: "./configure; make clean"
     build_command:   "make -j 4"
-    branch_pattern: DEV
+    branch_pattern: coverity_scan
