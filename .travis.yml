@@ -20,7 +20,7 @@ before_script:
   - ./autogen.sh
 
 script:
-  ./configure && make && make check
+  ./configure && make clean && make && make check
 
 addons:
   coverity_scan:
@@ -28,6 +28,6 @@ addons:
       name: "armadito/armadito-av"
       description: "Build submitted via Travis CI"
     notification_email: vhamon@teclib.com
-    build_command_prepend: "cd core;./autogen.sh;./configure; make clean"
+    build_command_prepend: "./configure; make clean"
     build_command:   "make -j 4"
     branch_pattern: DEV
