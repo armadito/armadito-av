@@ -2,7 +2,14 @@ language: C
 sudo: required
 dist: trusty
 
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "VoHY4zThCD1+/AaAMi5dAU6lS9EA8jUo2Bi0t0WExTf6CJfR9sbLi5A6wizfsiJOuPSTrgoSooJ+HeKj4s9nk8+UYOXDaWMCnBj4iWwepcp7f4DxWvlYiItjaoO7c7/8gzd/8Fx9iSoy8k5ZD5sTdp34qJrrYs08y5lcSq+GZLKQP5Wfbe24Js1Z8zqVjDoPgC6vEf2ntrJzBoV81g5oofReSVYQL5+UcRvxmAZm2nqzFsyk/QFlVaeLA/J6qQfINZOMJaXpvpEdBdb1XnBZbHt3wXNrSQbUKf4qvVvKcA2zg0I2+1P222DrpC82Ogqz1I7tgm2f37GrEn7sqCtO+3N4rqEdMPScn41W0/i49xigKMvGPxEzMqSVYNF171KIV+qqBlm7bGXPvJHLuctAqxnwSYzr4k+tahn2ZVt7IRtHw64tE+W8OJzU+RLK1rWaGZ4z7MSxvnqlURn6X0SzMI8V4/pE2bFSOpd7srlnu6+bncrN22BYQYc/X9IYaa+4esRI9PlTimE7Dcp+Au8ovZa5JQyORUjl414zRMdJtglmropxdKY1+nBhzNh10/jbGKtUMizG1PUPlPWSODwJHRXVEyI72SMtYn/OjNUgzhw2yE8kfYt5hE3CN9racS1TkzafIo2BLsxHEFnUBuI6G1uwwNfu1sjDEAvjfwHYlFo="
+
 before_install:
+  - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
   - sudo apt-get install libtool libglib2.0-dev libmagic-dev libxml2-dev libjson-c-dev libmicrohttpd-dev libcurl4-openssl-dev
 
 compiler:
@@ -14,3 +21,13 @@ before_script:
 
 script:
   ./configure && make && make check
+
+addons:
+  coverity_scan:
+    project:
+      name: "armadito/armadito-av"
+      description: "Build submitted via Travis CI"
+    notification_email: vhamon@teclib.com
+    build_command_prepend: "cd core;./autogen.sh;./configure; make clean"
+    build_command:   "make -j 4"
+    branch_pattern: DEV
