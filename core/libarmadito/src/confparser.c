@@ -496,11 +496,14 @@ static void r_value(struct a6o_conf_parser *cp)
 /* int_value: INT */
 static void r_int_value(struct a6o_conf_parser *cp)
 {
+	int fd;
+
 	/* store current value */
 	cp->current_value_type = CONF_TYPE_INT;
 	cp->current_value_int = atoi(scanner_token_text(cp->scanner));
 
-	accept(cp, TOKEN_INTEGER);
+	fd = accept(cp, TOKEN_INTEGER);
+	close(fd);
 }
 
 /* string_value: STRING */
