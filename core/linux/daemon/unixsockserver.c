@@ -75,8 +75,11 @@ int unix_server_listen(const char *socket_path)
 		return -1;
 	}
 
-	if (socket_path[0] != '\0')
-		chmod(socket_path, 0777);
+	/* TODO : use guid instead of giving full access */
+	if (socket_path[0] != '\0') {
+		if(chmod(socket_path, 0777) < 0)
+			perror("chmod on socket failed");
+	}
 
 	return fd;
 }
