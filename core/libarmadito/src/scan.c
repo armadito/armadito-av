@@ -264,6 +264,7 @@ void a6o_scan_free(struct a6o_scan *scan)
  * **************************************************
  */
 
+#if 0
 
 /* the simple version, for on-access scan: */
 /* no callbacks */
@@ -300,6 +301,8 @@ enum a6o_file_status a6o_scan_simple_old(struct armadito *armadito, const char *
 
 	return status;
 }
+
+#endif
 
 enum a6o_file_status a6o_scan_simple(struct armadito *armadito, const char *path, struct a6o_report *report)
 {
