@@ -381,12 +381,12 @@ int api_handler_remove_client(struct api_handler *a, const char *token)
 	return 0;
 }
 
-int api_client_push_event(struct api_client *client, struct json_object *event)
+void api_client_push_event(struct api_client *client, struct json_object *event)
 {
 	g_async_queue_push(client->event_queue, event);
 }
 
-int api_client_pop_event(struct api_client *client, struct json_object **p_event)
+void api_client_pop_event(struct api_client *client, struct json_object **p_event)
 {
 	*p_event = g_async_queue_pop(client->event_queue);
 }
