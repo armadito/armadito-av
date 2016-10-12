@@ -285,10 +285,10 @@ enum a6o_file_status a6o_scan_simple_old(struct armadito *armadito, const char *
 	/* find the mime type, as in scan_file fun */
 	mime_type = os_mime_type_guess(path);
 
-#if 0
+/*
 	if (mime_type != NULL)
 		modules = a6o_get_applicable_modules(armadito, mime_type);
-#endif
+*/
 
 	if (modules == NULL || mime_type == NULL) {
 		free((void *)mime_type);
