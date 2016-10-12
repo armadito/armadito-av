@@ -560,6 +560,7 @@ void arg_destroy_notify(gpointer data)
 int a6o_conf_parser_parse(struct a6o_conf_parser *cp)
 {
 	int ret = -2;
+	int fd;
 
 	if (cp->input == NULL)
 		return -1;
@@ -573,8 +574,8 @@ int a6o_conf_parser_parse(struct a6o_conf_parser *cp)
 	if (!setjmp(cp->env)) {
 		r_configuration(cp);
 
-		accept(cp, TOKEN_EOF);
-
+		fd = accept(cp, TOKEN_EOF);
+		close(fd);
 		ret = 0;
 	}
 
