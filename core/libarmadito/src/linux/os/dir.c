@@ -122,7 +122,7 @@ int os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data)
                 else{
                         // Call to scan_entry()
                         real_entry_path = realpath(entry_path, NULL);
-                        ret = (*dirent_cb)(real_entry_path, dirent_flags(entry), 0, data);
+                        (*dirent_cb)(real_entry_path, dirent_flags(entry), 0, data);
                         free(real_entry_path);
                 }
 
