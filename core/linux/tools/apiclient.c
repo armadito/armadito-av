@@ -71,7 +71,7 @@ static struct post_processor *post_processor_new(void)
 	return p;
 }
 
-static const char *post_processor_append(struct post_processor *p,
+static void post_processor_append(struct post_processor *p,
 	const char *data, size_t data_size)
 {
 	g_byte_array_append(p->buffer, data, data_size);
