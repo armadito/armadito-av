@@ -76,6 +76,7 @@ static int quarantine_do(struct quarantine_data *qu_data, const char *path)
 		gid = stat_buf.st_gid;
 	} else {
 		ret = -2;
+		goto get_out;
 	}
 
 	if (rename(path, newpath) != 0) {
