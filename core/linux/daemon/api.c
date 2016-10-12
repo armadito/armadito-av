@@ -498,6 +498,7 @@ static int browse_path(const char *path, struct json_object *result)
 
 	if ((d = opendir(path)) == NULL) {
 		json_object_object_add(result, "error", json_object_new_string(strerror(errno)));
+		free((void *)root_path);
 		return 1;
 	}
 
