@@ -2,6 +2,25 @@ language: C
 sudo: required
 dist: trusty
 
+addons:
+  apt:
+    packages:
+    - libtool
+    - libglib2.0-dev
+    - libmagic-dev
+    - libxml2-dev
+    - libjson-c-dev
+    - libmicrohttpd-dev
+    - libcurl4-openssl-dev
+  coverity_scan:
+    project:
+      name: "armadito/armadito-av"
+      description: "Build submitted via Travis CI"
+    notification_email: vhamon@teclib.com
+    build_command_prepend: "./configure; make clean"
+    build_command:   "make -j 4"
+    branch_pattern: coverity_scan
+
 env:
   global:
    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
@@ -10,7 +29,6 @@ env:
 
 before_install:
   - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
-  - sudo apt-get install libtool libglib2.0-dev libmagic-dev libxml2-dev libjson-c-dev libmicrohttpd-dev libcurl4-openssl-dev
 
 compiler:
   - gcc
@@ -21,13 +39,3 @@ before_script:
 
 script:
   ./configure && make clean && make && make check
-
-addons:
-  coverity_scan:
-    project:
-      name: "armadito/armadito-av"
-      description: "Build submitted via Travis CI"
-    notification_email: vhamon@teclib.com
-    build_command_prepend: "./configure; make clean"
-    build_command:   "make -j 4"
-    branch_pattern: coverity_scan
