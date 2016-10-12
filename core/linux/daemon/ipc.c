@@ -133,7 +133,7 @@ int ipc_manager_get_arg_at(struct ipc_manager *manager, int index, ipc_type_t ty
 
 int ipc_manager_add_handler(struct ipc_manager *manager, ipc_msg_id_t msg_id, ipc_handler_t handler, void *data)
 {
-	if (msg_id < IPC_MSG_ID_FIRST || msg_id > IPC_MSG_ID_LAST) {
+	if (msg_id > IPC_MSG_ID_LAST) {
 		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "IPC: cannot add handler for msg_id %d: out of range %d - %d ", msg_id, IPC_MSG_ID_FIRST, IPC_MSG_ID_LAST);
 		return -1;
 	}
