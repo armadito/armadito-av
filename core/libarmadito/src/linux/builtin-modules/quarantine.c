@@ -105,6 +105,7 @@ static int quarantine_do(struct quarantine_data *qu_data, const char *path)
 	fclose(info);
 
 get_out:
+	free(newpath);
 	return ret;
 }
 
