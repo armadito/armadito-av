@@ -86,6 +86,7 @@ struct a6o_json_handler *a6o_json_handler_new(struct armadito *armadito)
 	struct a6o_json_handler *j = malloc(sizeof(struct a6o_json_handler));
 
 	if (armadito == NULL) {
+		free(j);
 		return NULL;
 	}
 
