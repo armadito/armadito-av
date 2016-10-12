@@ -90,12 +90,14 @@ struct a6o_info *a6o_info_new(struct armadito *armadito)
 
 			mod_status = (*mod->info_fun)(mod, mod_info);
 
-			if (mod_status != ARMADITO_UPDATE_NON_AVAILABLE) {
-				mod_info->name = os_strdup(mod->name);
-				mod_info->mod_status = mod_status;
-				g_array_append_val(g_module_infos, mod_info);
-			} else
+			if (mod_status == ARMADITO_UPDATE_NON_AVAILABLE) {
 				free(mod_info);
+				continue;
+			}
+
+			mod_info->name = os_strdup(mod->name);
+			mod_info->mod_status = mod_status;
+			g_array_append_val(g_module_infos, mod_info);
 
 			if (update_status_compare(info->global_status, mod_status) < 0)
 				info->global_status = mod_status;
