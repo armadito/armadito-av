@@ -184,14 +184,15 @@ static int content_serve(struct httpd *h, struct MHD_Connection *connection, con
 	}
 
 	mime_type = get_mime_type(h->magic, fd, path);
-	free((void *)path);
 
 	if (mime_type == NULL) {
 		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "cannot get mime type of path %s", path);
+		free((void *)path);
 		close(fd);
 		return MHD_queue_response(connection, MHD_HTTP_NOT_FOUND, h->response_404);
 	}
 
+	free((void *)path);
 	response = MHD_create_response_from_fd(file_size, fd);
 	if (response == NULL) {
 		close (fd);
