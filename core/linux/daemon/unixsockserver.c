@@ -64,11 +64,13 @@ int unix_server_listen(const char *socket_path)
 	addrlen = offsetof(struct sockaddr_un, sun_path) + path_len + 1;
 
 	if (bind(fd, (struct sockaddr *)&listening_addr, addrlen) < 0) {
+		close(fd);
 		perror("bind() failed");
 		return -1;
 	}
 
 	if (listen(fd, 5) < 0) {
+		close(fd);
 		perror("listen() failed");
 		return -1;
 	}
