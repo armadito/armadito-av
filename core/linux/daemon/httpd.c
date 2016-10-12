@@ -206,6 +206,7 @@ static int content_serve(struct httpd *h, struct MHD_Connection *connection, con
 
 	 ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
 	 MHD_destroy_response(response);
+	 close(fd);
 
 	 return ret;
 }
