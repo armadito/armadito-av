@@ -58,6 +58,7 @@ int daemonize(void)
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
+	return 0;
 }
 
 /* refs:
