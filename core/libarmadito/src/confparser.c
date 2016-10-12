@@ -304,7 +304,7 @@ static void syntax_error(struct a6o_conf_parser *cp, guint token)
 	longjmp(cp->env, 1);
 }
 
-static void accept(struct a6o_conf_parser *cp, guint token)
+static void token_accept(struct a6o_conf_parser *cp, guint token)
 {
 	if (cp->lookahead_token == token) {
 		if (cp->lookahead_token != TOKEN_EOF)
@@ -397,9 +397,9 @@ static void r_section_list(struct a6o_conf_parser *cp)
 /* section : '[' STRING ']' definition_list */
 static void r_section(struct a6o_conf_parser *cp)
 {
-	accept(cp, TOKEN_LEFT_BRACE);
+	token_accept(cp, TOKEN_LEFT_BRACE);
 	r_section_name(cp);
-	accept(cp, TOKEN_RIGHT_BRACE);
+	token_accept(cp, TOKEN_RIGHT_BRACE);
 	r_definition_list(cp);
 }
 
@@ -409,7 +409,7 @@ static void r_section_name(struct a6o_conf_parser *cp)
 	/* store current section */
 	free_and_set(&cp->current_section, scanner_token_text(cp->scanner));
 
-	accept(cp, TOKEN_STRING);
+	token_accept(cp, TOKEN_STRING);
 }
 
 /* definition_list: definition definition_list | EMPTY */
@@ -425,7 +425,7 @@ static void r_definition_list(struct a6o_conf_parser *cp)
 static void r_definition(struct a6o_conf_parser *cp)
 {
 	r_key(cp);
-	accept(cp, TOKEN_EQUAL_SIGN);
+	token_accept(cp, TOKEN_EQUAL_SIGN);
 	r_value(cp);
 
 	/* process stored values by calling the callback */
@@ -438,7 +438,7 @@ static void r_key(struct a6o_conf_parser *cp)
 	/* store current key */
 	free_and_set(&cp->current_key, scanner_token_text(cp->scanner));
 
-	accept(cp, TOKEN_STRING);
+	token_accept(cp, TOKEN_STRING);
 }
 
 /* value : int_value | string_value opt_string_list */
@@ -496,14 +496,11 @@ static void r_value(struct a6o_conf_parser *cp)
 /* int_value: INT */
 static void r_int_value(struct a6o_conf_parser *cp)
 {
-	int fd;
-
 	/* store current value */
 	cp->current_value_type = CONF_TYPE_INT;
 	cp->current_value_int = atoi(scanner_token_text(cp->scanner));
 
-	fd = accept(cp, TOKEN_INTEGER);
-	close(fd);
+	token_accept(cp, TOKEN_INTEGER);
 }
 
 /* string_value: STRING */
@@ -513,7 +510,7 @@ static void r_string_value(struct a6o_conf_parser *cp)
 	cp->current_value_type = CONF_TYPE_STRING;
 	cp->current_value_string = os_strdup(scanner_token_text(cp->scanner));
 
-	accept(cp, TOKEN_STRING);
+	token_accept(cp, TOKEN_STRING);
 }
 
 /* opt_string_list : list_sep list_string_value opt_string_list | EMPTY */
@@ -540,16 +537,16 @@ static void r_list_string_value(struct a6o_conf_parser *cp)
 
 	g_ptr_array_add(cp->current_value_list, os_strdup(scanner_token_text(cp->scanner)));
 
-	accept(cp, TOKEN_STRING);
+	token_accept(cp, TOKEN_STRING);
 }
 
 /* list_sep : ',' | ';'  */
 static void r_list_sep(struct a6o_conf_parser *cp)
 {
 	if (cp->lookahead_token == TOKEN_COMMA)
-		accept(cp, TOKEN_COMMA);
+		token_accept(cp, TOKEN_COMMA);
 	else
-		accept(cp, TOKEN_SEMI_COLON);
+		token_accept(cp, TOKEN_SEMI_COLON);
 }
 
 void arg_destroy_notify(gpointer data)
@@ -560,7 +557,6 @@ void arg_destroy_notify(gpointer data)
 int a6o_conf_parser_parse(struct a6o_conf_parser *cp)
 {
 	int ret = -2;
-	int fd;
 
 	if (cp->input == NULL)
 		return -1;
@@ -574,8 +570,7 @@ int a6o_conf_parser_parse(struct a6o_conf_parser *cp)
 	if (!setjmp(cp->env)) {
 		r_configuration(cp);
 
-		fd = accept(cp, TOKEN_EOF);
-		close(fd);
+		token_accept(cp, TOKEN_EOF);
 		ret = 0;
 	}
 
