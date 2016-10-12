@@ -199,7 +199,7 @@ static void ipc_manager_call_handler(struct ipc_manager *m)
 	ipc_handler_t handler;
 	void *data;
 
-	if (m->msg_id < IPC_MSG_ID_FIRST || m->msg_id > IPC_MSG_ID_LAST) {
+	if (m->msg_id > IPC_MSG_ID_LAST) {
 		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_WARNING, "IPC: received msg_id %d out of range %d - %d ", m->msg_id, IPC_MSG_ID_FIRST, IPC_MSG_ID_LAST);
 		return;
 	}
