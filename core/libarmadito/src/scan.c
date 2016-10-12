@@ -290,8 +290,10 @@ enum a6o_file_status a6o_scan_simple_old(struct armadito *armadito, const char *
 		modules = a6o_get_applicable_modules(armadito, mime_type);
 #endif
 
-	if (modules == NULL || mime_type == NULL)
+	if (modules == NULL || mime_type == NULL) {
+		free((void *)mime_type);
 		return ARMADITO_UNKNOWN_FILE_TYPE;
+	}
 
 	status = scan_apply_modules(fd, path, mime_type, modules, report);
 
