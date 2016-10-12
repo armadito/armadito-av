@@ -241,7 +241,7 @@ static struct post_processor *post_processor_new(struct MHD_Connection *connecti
 	return p;
 }
 
-static void *post_processor_append(struct post_processor *p,
+static void post_processor_append(struct post_processor *p,
 	const char *upload_data, size_t upload_data_size)
 {
 	g_byte_array_append(p->buffer, upload_data, upload_data_size);

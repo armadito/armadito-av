@@ -72,6 +72,7 @@ static int quarantine_do(struct quarantine_data *qu_data, const char *path)
 
 	close(fd);
 
+	/* coverity[fs_check_call] */
 	if(!stat(path, &stat_buf)) {
 		mode = stat_buf.st_mode;
 		uid = stat_buf.st_uid;
