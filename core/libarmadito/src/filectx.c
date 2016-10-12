@@ -109,8 +109,10 @@ enum a6o_file_context_status a6o_file_context_get(struct a6o_file_context *ctx, 
 		return ctx->status;
 	}
 
+	if(path != NULL)
+		ctx->path = os_strdup(path);
+
 	ctx->status = ARMADITO_FC_MUST_SCAN;
-	ctx->path = os_strdup(path);
 	ctx->mime_type = mime_type;
 	ctx->applicable_modules = applicable_modules;
 
