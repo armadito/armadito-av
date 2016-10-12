@@ -53,6 +53,7 @@ void a6o_conf_value_set(struct a6o_conf_value *cv, const struct a6o_conf_value *
 	switch (src->type) {
 	case CONF_TYPE_VOID:
 		a6o_conf_value_set_void(cv);
+		break;
 	case CONF_TYPE_INT:
 		a6o_conf_value_set_int(cv, a6o_conf_value_get_int(src));
 		break;
