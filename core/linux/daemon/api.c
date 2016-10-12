@@ -56,7 +56,6 @@ int register_process_cb(struct api_handler *a, struct MHD_Connection *connection
 {
 	int64_t token = HASH_INIT_VAL;
 	const char *user_agent;
-	char here;
 	time_t now;
 	char *s_token;
 
@@ -64,7 +63,6 @@ int register_process_cb(struct api_handler *a, struct MHD_Connection *connection
 	hash_buff((const char *)&now, sizeof(time_t), &token);
 	user_agent = api_get_user_agent(connection);
 	hash_str(user_agent, &token);
-	hash_buff(&here, sizeof(char *), &token);
 
 	if (token < 0)
 		token = -token;
