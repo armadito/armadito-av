@@ -52,7 +52,7 @@ enum a6o_file_context_status a6o_file_context_get(struct a6o_file_context *ctx, 
 	const char *mime_type;
 	int err = 0;
 
-	if (fd == -1 && path == NULL) {
+	if (fd < 0 && path == NULL) {
 		ctx->status = ARMADITO_FC_FILE_OPEN_ERROR;
 		return ctx->status;
 	}
