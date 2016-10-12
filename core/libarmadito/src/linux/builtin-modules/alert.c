@@ -288,8 +288,8 @@ static enum a6o_mod_status alert_conf_alert_dir(struct a6o_module *module, const
 
 	al_data->alert_dir = strdup(a6o_conf_value_get_string(value));
 
-	/* really necessary??? */
-	os_mkdir_p(al_data->alert_dir);
+	if(os_mkdir_p(al_data->alert_dir) < 0)
+		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "unable to make alert dir : %s\n",  strerror(errno));
 
 	return ARMADITO_MOD_OK;
 }
