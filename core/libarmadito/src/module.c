@@ -162,6 +162,9 @@ static int module_load_dirent_cb(const char *full_path, enum os_file_flag flags,
 
 		if (!module_load(full_path, &mod_loaded, &error) && mod_loaded != NULL)
 			module_manager_add((struct module_manager *)data, mod_loaded);
+
+		if(error != NULL)
+			free(error);
 	}
 	else
 		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "loading module: path %s is not a plain file", full_path);
