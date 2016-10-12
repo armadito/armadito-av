@@ -62,6 +62,8 @@ static int quarantine_do(struct quarantine_data *qu_data, const char *path)
 	newpath = (char *)malloc(strlen(qu_data->quarantine_dir) + 1 + 6 + 5 + 1); /* "QUARANTINE_DIR/XXXXXX[.info]" */
 	strcpy(newpath, qu_data->quarantine_dir);
 	strcat(newpath, "/XXXXXX");
+
+	/* coverity[secure_temp] */
 	if ((fd = mkstemp(newpath)) < 0) {
 		perror("mkstemp");
 		ret = -1;
