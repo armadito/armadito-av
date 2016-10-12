@@ -315,7 +315,7 @@ static void token_accept(struct a6o_conf_parser *cp, guint token)
 
 static void call_callback(struct a6o_conf_parser *cp)
 {
-	int ret;
+	int ret = 0;
 	struct a6o_conf_value value;
 
 	value.type = cp->current_value_type;
