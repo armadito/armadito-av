@@ -1,5 +1,6 @@
 Armadito
 ========
+[![Build Status](https://travis-ci.org/armadito/armadito-av.svg?branch=DEV)](https://travis-ci.org/armadito/armadito-av)
 
 Armadito is an open-source antivirus.
 
