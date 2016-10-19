@@ -34,7 +34,6 @@ compiler:
   - gcc
 
 before_script:
-  - cd core
   - ./autogen.sh
 
 script:
