@@ -4,7 +4,7 @@ PACKAGE=$1
 REPO=$DIR/../../../../
 
 # Modify git repositories' paths here
-CORE_SRC=$REPO/armadito-av/core
+CORE_SRC=$REPO/armadito-av
 CLAMAV_SRC=$REPO/armadito-mod-clamav
 H1_SRC=$REPO/armadito-mod-h1
 PDF_SRC=$REPO/armadito-mod-pdf
