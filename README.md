@@ -1,6 +1,8 @@
 Armadito core
 =============
 
+[![Join the chat at https://gitter.im/armadito-av/Lobby](https://badges.gitter.im/armadito-av/Lobby.svg)](https://gitter.im/armadito-av/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Build Status](https://travis-ci.org/armadito/armadito-av.svg?branch=DEV)](https://travis-ci.org/armadito/armadito-av)
 <a href="https://scan.coverity.com/projects/armadito-armadito-av">
   <img alt="Coverity Scan Build Status"
