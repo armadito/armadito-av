@@ -160,10 +160,7 @@ arch/linux/modules/on-access-linux/src/Makefile
 arch/linux/modules/on-access-linux/tests/Makefile
 arch/linux/net/Makefile
 arch/linux/service/Makefile
-arch/linux/tools/Makefile
 conf/Makefile
-man/Makefile
-man/fr/Makefile
 json/Makefile
 json/ui/Makefile
 libarmadito/Makefile
@@ -171,7 +168,10 @@ libarmadito/include/Makefile
 libarmadito/include/os/Makefile
 libarmadito/pkgconfig/Makefile
 libarmadito/src/Makefile
+man/Makefile
+man/fr/Makefile
 tests/Makefile
 tests/web/Makefile
+tools/Makefile
 ])
 AC_OUTPUT
