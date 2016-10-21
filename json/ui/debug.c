@@ -20,7 +20,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 ***/
 
 #include <libarmadito.h>
-#include "config/libarmadito-config.h"
+#include "armadito-config.h"
 
 #include "debug.h"
 

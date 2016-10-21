@@ -19,13 +19,13 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _LIBARMADITO_CONFIG_H_
-#define _LIBARMADITO_CONFIG_H_
+#ifndef ARMADITO_CONFIG_H_
+#define ARMADITO_CONFIG_H_
 
 #ifdef _WIN32
-#include "libarmadito-config-win32.h"
+#include "armadito-config-win32.h"
 #else
-#include <libarmadito-config-autoconf.h>
+#include <armadito-config-autoconf.h>
 #endif
 
 #endif

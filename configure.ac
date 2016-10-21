@@ -11,7 +11,7 @@ AC_ARG_ENABLE([fanotify],
 	The Linux kernel must be compiled with fanotify support]))
 
 # configuration header
-AM_CONFIG_HEADER(libarmadito/include/config/libarmadito-config-autoconf.h)
+AM_CONFIG_HEADER(armadito-config-autoconf.h)
 
 # for now, add builtin modules by hand
 AC_DEFINE([HAVE_ALERT_MODULE],[1],[Define to compile builtin module alert])
@@ -168,7 +168,6 @@ json/Makefile
 json/ui/Makefile
 libarmadito/Makefile
 libarmadito/include/Makefile
-libarmadito/include/config/Makefile
 libarmadito/include/os/Makefile
 libarmadito/pkgconfig/Makefile
 libarmadito/src/Makefile

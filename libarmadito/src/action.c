@@ -21,7 +21,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <libarmadito.h>
 
-#include "libarmadito-config.h"
+#include "armadito-config.h"
 
 const char *a6o_action_pretty_str(enum a6o_action action)
 {

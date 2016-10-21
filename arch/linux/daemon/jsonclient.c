@@ -21,7 +21,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <libarmadito.h>
 
-#include <libarmadito-config.h>
+#include <armadito-config.h>
 
 #include "jsonhandler.h"
 #include "jsonclient.h"

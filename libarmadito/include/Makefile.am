@@ -1,4 +1,4 @@
-SUBDIRS=config os
+SUBDIRS=os
 
 include_HEADERS= \
 libarmadito.h 

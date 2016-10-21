@@ -22,7 +22,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _LIBARMADITO_OS_STRING_H_
 #define _LIBARMADITO_OS_STRING_H_
 
-#include "config/libarmadito-config.h"
+#include "armadito-config.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -27,7 +27,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #define _GNU_SOURCE
 
 #include <libarmadito.h>
-#include "libarmadito-config.h"
+#include "armadito-config.h"
 
 #include "monitor.h"
 #include "famonitor.h"

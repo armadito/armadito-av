@@ -29,7 +29,7 @@ update.h
 #../updatedb/json_process.c 
 #../updatedb/json_process.h 
 
-libarmadito_json_la_CFLAGS= -I$(top_srcdir)/libarmadito/include -I$(top_srcdir)/libarmadito/include/config -I$(top_srcdir)/linux
+libarmadito_json_la_CFLAGS= -I$(top_srcdir)/libarmadito/include -I$(top_srcdir) -I$(top_srcdir)/linux
 libarmadito_json_la_LIBADD= 
 
 libarmadito_json_la_CFLAGS+= @LIBJSONC_CFLAGS@

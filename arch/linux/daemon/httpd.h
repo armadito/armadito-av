@@ -22,7 +22,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef DAEMON_HTTPD_H_
 #define DAEMON_HTTPD_H_
 
-#include <libarmadito-config.h>
+#include <armadito-config.h>
 #ifndef _WIN32
 #include <sys/select.h>
 #include <sys/socket.h>

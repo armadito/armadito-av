@@ -5,6 +5,7 @@ INSTALL
 Makefile
 Makefile.in
 aclocal.m4
+armadito-config-autoconf.h.in
 autom4te.cache/*
 build/linux/out/*
 build/windows/VS12/include

@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS=subdir-objects no-dependencies
 
-AM_CPPFLAGS= -I$(top_srcdir)/libarmadito/include/config
+AM_CPPFLAGS= -I$(top_srcdir)
 
 bin_PROGRAMS=armadito-scan armadito-info
 

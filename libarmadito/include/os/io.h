@@ -22,7 +22,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _LIBARMADITO_OS_IO_H_
 #define _LIBARMADITO_OS_IO_H_
 
-#include "libarmadito-config.h"
+#include "armadito-config.h"
 
 #ifdef HAVE_IO_H
 #include <io.h>

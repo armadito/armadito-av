@@ -2,13 +2,14 @@ if COND_MAN
 OPT_MAN_DIR=man
 endif
 
-SUBDIRS=conf $(OPT_MAN_DIR) libarmadito arch tests
+SUBDIRS=conf libarmadito arch tests $(OPT_MAN_DIR)
 
 TAGDIRS=\
-$(top_srcdir)/doc \
-$(top_srcdir)/include \
-$(top_srcdir)/pkgconfig \
-$(top_srcdir)/src \
+$(top_srcdir)/arch \
+$(top_srcdir)/conf \
+$(top_srcdir)/json \
+$(top_srcdir)/libarmadito \
+$(top_srcdir)/man \
 $(top_srcdir)/tests 
 
 TAGS:
@@ -16,3 +17,4 @@ TAGS:
 .PHONY: TAGS
 
 
+EXTRA_DIST=armadito-config.h armadito-config-win32.h

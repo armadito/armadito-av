@@ -30,7 +30,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <libarmadito.h>
 
-#include "libarmadito-config.h"
+#include "armadito-config.h"
 #include "api.h"
 #include "debug.h"
 

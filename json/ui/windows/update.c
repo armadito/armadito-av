@@ -22,7 +22,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "ui\update.h"
 #include <stdio.h>
 #include <libarmadito.h>
-//#include "libarmadito-config.h"
+//#include "armadito-config.h"
 #include <Windows.h>
 #include <libarmadito/stdpaths.h>
 #include "service\service.h"
