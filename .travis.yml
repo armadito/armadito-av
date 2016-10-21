@@ -1,7 +1,6 @@
 language: C
 sudo: required
 dist: trusty
-
 addons:
   apt:
     packages:
@@ -14,27 +13,27 @@ addons:
     - libcurl4-openssl-dev
   coverity_scan:
     project:
-      name: "armadito/armadito-av"
-      description: "Build submitted via Travis CI"
+      name: armadito/armadito-av
+      description: Build submitted via Travis CI
     notification_email: vhamon@teclib.com
     build_command_prepend: "./configure; make clean"
-    build_command:   "make -j 4"
+    build_command: make -j 4
     branch_pattern: coverity_scan
+  sonarqube: true
 
 env:
   global:
-   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
-   #   via the "travis encrypt" command using the project repo's public key
-   - secure: "VoHY4zThCD1+/AaAMi5dAU6lS9EA8jUo2Bi0t0WExTf6CJfR9sbLi5A6wizfsiJOuPSTrgoSooJ+HeKj4s9nk8+UYOXDaWMCnBj4iWwepcp7f4DxWvlYiItjaoO7c7/8gzd/8Fx9iSoy8k5ZD5sTdp34qJrrYs08y5lcSq+GZLKQP5Wfbe24Js1Z8zqVjDoPgC6vEf2ntrJzBoV81g5oofReSVYQL5+UcRvxmAZm2nqzFsyk/QFlVaeLA/J6qQfINZOMJaXpvpEdBdb1XnBZbHt3wXNrSQbUKf4qvVvKcA2zg0I2+1P222DrpC82Ogqz1I7tgm2f37GrEn7sqCtO+3N4rqEdMPScn41W0/i49xigKMvGPxEzMqSVYNF171KIV+qqBlm7bGXPvJHLuctAqxnwSYzr4k+tahn2ZVt7IRtHw64tE+W8OJzU+RLK1rWaGZ4z7MSxvnqlURn6X0SzMI8V4/pE2bFSOpd7srlnu6+bncrN22BYQYc/X9IYaa+4esRI9PlTimE7Dcp+Au8ovZa5JQyORUjl414zRMdJtglmropxdKY1+nBhzNh10/jbGKtUMizG1PUPlPWSODwJHRXVEyI72SMtYn/OjNUgzhw2yE8kfYt5hE3CN9racS1TkzafIo2BLsxHEFnUBuI6G1uwwNfu1sjDEAvjfwHYlFo="
+  - secure: VoHY4zThCD1+/AaAMi5dAU6lS9EA8jUo2Bi0t0WExTf6CJfR9sbLi5A6wizfsiJOuPSTrgoSooJ+HeKj4s9nk8+UYOXDaWMCnBj4iWwepcp7f4DxWvlYiItjaoO7c7/8gzd/8Fx9iSoy8k5ZD5sTdp34qJrrYs08y5lcSq+GZLKQP5Wfbe24Js1Z8zqVjDoPgC6vEf2ntrJzBoV81g5oofReSVYQL5+UcRvxmAZm2nqzFsyk/QFlVaeLA/J6qQfINZOMJaXpvpEdBdb1XnBZbHt3wXNrSQbUKf4qvVvKcA2zg0I2+1P222DrpC82Ogqz1I7tgm2f37GrEn7sqCtO+3N4rqEdMPScn41W0/i49xigKMvGPxEzMqSVYNF171KIV+qqBlm7bGXPvJHLuctAqxnwSYzr4k+tahn2ZVt7IRtHw64tE+W8OJzU+RLK1rWaGZ4z7MSxvnqlURn6X0SzMI8V4/pE2bFSOpd7srlnu6+bncrN22BYQYc/X9IYaa+4esRI9PlTimE7Dcp+Au8ovZa5JQyORUjl414zRMdJtglmropxdKY1+nBhzNh10/jbGKtUMizG1PUPlPWSODwJHRXVEyI72SMtYn/OjNUgzhw2yE8kfYt5hE3CN9racS1TkzafIo2BLsxHEFnUBuI6G1uwwNfu1sjDEAvjfwHYlFo=
+  - secure: jaoDidvyYDmX1DuapIbRpQDVW0oKz/qHuW7zvRVkDSuZ76sFv+TDh8J1GoqfIVcI9wZfoMYv0xHfTR66tKVGXkA7x+8cn94pqcNo8FP2UASKQnXNgYJ01SapU9Kp/g+QddxrGOjmrs6WnS1Je0RyjHUWomfrMxVQMYfHIWwS8sYUsQDydkQHy63iokLIjFs8Vp5BkSj/ZIHw86DHaqkvPTSIPb60fcuL3rR+/pnYTgxGGICIZr3Ga64p7V4pbFFOhY5f0meUzBMX4iqZMWO7Z09scYkHph9/741tbfwQSI7vd/1eSbhHXaaXMEIeWBHjHfo2m0Ihfp3xolEyE/NnXbv3UK99Hl1o/GRlb+m2WRD1xF+XNg3lBsXiMZV2nGiDz2fEjc+KrGfUHinLk1CXAkOrBeDHfeeu/zolDIv50HRpG8vWXe3ls8kvi4k+Yn5hlIFRCow6ejZcBIC50HFXiEYYm581rhamPK/rHUzUGEdr1m2ZktODSoj1uXLZ+r0xYHcXMvROdE5tGsbwacQ0WmoeLIQRW3Im0uYiXh0ncc1LdVyg4ing++L45g6XfdhZJiw16ZRGWad2Pc/+HyaDsyKSPv/I80DIF6C0U5B/rINN5shmVMo8LvrVus9S3ILF3sezrurAE9342BGxVF03p2rhOwYrp6LFmvW42zczW38=
 
 before_install:
-  - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
-
+- echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END
+  CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
 compiler:
-  - gcc
-
+- gcc
 before_script:
-  - ./autogen.sh
-
+- "./autogen.sh"
 script:
-  ./configure && make clean && make && make check
+- "./configure"
+- make clean all
+- sonar-scanner -e -X -Dsonar.host.url=https://sonarqube.com -Dsonar.login=$SONAR_TOKEN
