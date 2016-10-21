@@ -1,6 +1,0 @@
-if COND_DOC
-MAN_SUBDIR=man
-endif
-
-SUBDIRS=$(MAN_SUBDIR)
-
