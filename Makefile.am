@@ -1,4 +1,8 @@
-SUBDIRS=libarmadito json linux doc tests
+if COND_MAN
+OPT_MAN_DIR=man
+endif
+
+SUBDIRS=conf $(OPT_MAN_DIR) libarmadito json linux tests
 
 TAGDIRS=\
 $(top_srcdir)/doc \

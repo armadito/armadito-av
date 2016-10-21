@@ -145,18 +145,17 @@ fi
 # check for asciidoc and a2x
 AC_PATH_PROG(ASCIIDOC, asciidoc)
 AC_PATH_PROG(A2X, a2x)
-AM_CONDITIONAL([COND_DOC], [test ! -z "$ASCIIDOC" -a ! -z "$A2X" ])
+AM_CONDITIONAL([COND_MAN], [test ! -z "$ASCIIDOC" -a ! -z "$A2X" ])
 
 # Output files
 AC_CONFIG_FILES([
 Makefile
-doc/Makefile
-doc/man/Makefile
-doc/man/fr/Makefile
+conf/Makefile
+man/Makefile
+man/fr/Makefile
 json/Makefile
 json/ui/Makefile
 libarmadito/Makefile
-libarmadito/conf/Makefile
 libarmadito/include/Makefile
 libarmadito/include/config/Makefile
 libarmadito/include/os/Makefile
