@@ -2,7 +2,7 @@ if COND_MAN
 OPT_MAN_DIR=man
 endif
 
-SUBDIRS=conf $(OPT_MAN_DIR) libarmadito json linux tests
+SUBDIRS=conf $(OPT_MAN_DIR) libarmadito arch tests
 
 TAGDIRS=\
 $(top_srcdir)/doc \
