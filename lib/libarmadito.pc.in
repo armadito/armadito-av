@@ -2,7 +2,6 @@ bindir=@bindir@
 sbindir=@sbindir@
 includedir=@includedir@
 libdir=@libdir@
-moduledir=@moduledir@
 version=@PACKAGE_VERSION@
 
 Name: ARMADITO anti-virus library

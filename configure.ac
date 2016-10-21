@@ -163,8 +163,8 @@ arch/linux/service/Makefile
 conf/Makefile
 json/Makefile
 json/ui/Makefile
+lib/Makefile
 libarmadito/Makefile
-libarmadito/include/Makefile
 libarmadito/include/os/Makefile
 libarmadito/pkgconfig/Makefile
 libarmadito/src/Makefile

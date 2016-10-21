@@ -21,7 +21,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "armadito-config.h"
 
-#include <libarmadito.h>
+#include <libarmadito/armadito.h>
 
 #include <errno.h>
 #include <glib.h>

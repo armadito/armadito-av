@@ -1,3 +1,3 @@
-SUBDIRS=include pkgconfig src
+SUBDIRS= pkgconfig src #include
 
 

@@ -19,13 +19,16 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _LIBARMADITO_H_
-#define _LIBARMADITO_H_
+#ifndef __ARMADITO_H_
+#define __ARMADITO_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#include <libarmadito/log.h>
+
+#if 0
 #include <libarmadito/action.h>
 #include <libarmadito/status.h>
 #include <libarmadito/error.h>
@@ -37,9 +40,9 @@ extern "C" {
 #include <libarmadito/filectx.h>
 #include <libarmadito/scan.h>
 #include <libarmadito/ondemand.h>
-#include <libarmadito/log.h>
 #include <libarmadito/notify.h>
 #include <libarmadito/stdpaths.h>
+#endif
 
 #ifdef __cplusplus
 }
