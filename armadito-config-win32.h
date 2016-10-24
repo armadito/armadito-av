@@ -51,6 +51,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 /* specific strerror */
 #undef HAVE_STRERROR
 
+/* functions */
+#undef HAVE_CLOCK_GETTIME
+
 /* file handling macros */
 #define MAXPATHLEN _MAX_PATH
 

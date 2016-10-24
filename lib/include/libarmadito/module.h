@@ -19,12 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _LIBARMADITO_MODULE_H_
-#define _LIBARMADITO_MODULE_H_
-
-#include <libarmadito/status.h>
-#include <libarmadito/conf.h>
-#include <libarmadito/info.h>
+#ifndef __LIBARMADITO_MODULE_H_
+#define __LIBARMADITO_MODULE_H_
 
 struct armadito;
 struct a6o_module;

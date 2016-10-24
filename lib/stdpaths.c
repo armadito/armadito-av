@@ -19,20 +19,19 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#include <libarmadito.h>
+#include <libarmadito/armadito.h>
 
 #include "armadito-config.h"
-#include "os/string.h"
-#include "os/stdpaths.h"
 
-#include <assert.h>
-#include <stdlib.h>
-
+static const char *os_stdpath_module();
+static const char *os_stdpath_config_file();
+static const char *os_stdpath_config_dir();
+static const char *os_stdpath_bases();
+static const char *os_stdpath_binary();
+static const char *os_stdpath_tmp();
 
 const char *a6o_std_path(enum a6o_std_location location)
 {
-	assert(location >= 0 && location < LAST_LOCATION);
-
 	switch(location) {
 	case MODULES_LOCATION:
 		return os_stdpath_module();
@@ -57,4 +56,41 @@ const char *a6o_std_path(enum a6o_std_location location)
 	return NULL;
 }
 
+#ifdef linux
+#include <string.h>
 
+const char *os_stdpath_module()
+{
+	return strdup(LIBARMADITO_MODULES_PATH);
+}
+
+const char *os_stdpath_config_file()
+{
+	return strdup(LIBARMADITO_CONF_DIR "/armadito.conf");
+}
+
+const char *os_stdpath_config_dir()
+{
+	return strdup(LIBARMADITO_CONF_DIR "/conf.d");
+}
+
+const char *os_stdpath_bases()
+{
+	return strdup(LIBARMADITO_BASES_DIR);
+}
+
+const char *os_stdpath_binary()
+{
+	return NULL;
+}
+
+const char *os_stdpath_tmp()
+{
+	return NULL;
+}
+
+char a6o_path_sep(void)
+{
+	return '/';
+}
+#endif

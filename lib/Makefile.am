@@ -3,10 +3,17 @@ AUTOMAKE_OPTIONS=subdir-objects
 lib_LTLIBRARIES=libarmadito.la
 
 libarmadito_la_SOURCES= \
-log.c 
+confval.c \
+log.c \
+stdpaths.c
 
-AM_CPPFLAGS=
-libarmadito_la_CFLAGS=-I$(top_srcdir)/lib/include -I$(top_srcdir) #-I$(top_srcdir)/libarmadito/src/linux
+AM_CPPFLAGS=-DUSE_FILE_DESCRIPTORS \
+	-DLIBARMADITO_MODULES_PATH='"$(libdir)/armadito/modules"' \
+	-DLIBARMADITO_CONF_DIR='"$(sysconfdir)/armadito"' \
+	-DLIBARMADITO_BASES_DIR='"$(localstatedir)/lib/armadito/bases"' \
+	-DLIBARMADITO_TMP_DIR='"$(localstatedir)/lib/armadito/tmp"' 
+
+libarmadito_la_CFLAGS=-I$(top_srcdir)/lib/include -I$(top_srcdir) 
 libarmadito_la_LIBADD= 
 
 libarmadito_la_CFLAGS+= @GLIB2_CFLAGS@
@@ -22,23 +29,13 @@ armaditoincludedir=$(includedir)/libarmadito
 
 armaditoinclude_HEADERS= \
 include/libarmadito/armadito.h \
-include/libarmadito/log.h
-
-# to be recycled
-#libarmadito/action.h \
-#libarmadito/conf.h \
-#libarmadito/error.h \
-#libarmadito/filectx.h \
-#libarmadito/handle.h \
-#libarmadito/info.h \
-#libarmadito/log.h \
-#libarmadito/module.h \
-#libarmadito/notify.h \
-#libarmadito/ondemand.h \
-#libarmadito/scan.h \
-#libarmadito/scanconf.h \
-#libarmadito/status.h \
-#libarmadito/stdpaths.h 
+include/libarmadito/confval.h \
+include/libarmadito/info.h \
+include/libarmadito/log.h \
+include/libarmadito/module.h \
+include/libarmadito/status.h \
+include/libarmadito/stdpaths.h \
+include/libarmadito/string.h 
 
 pkgconfigdir=$(libdir)/pkgconfig
 pkgconfig_DATA=libarmadito.pc

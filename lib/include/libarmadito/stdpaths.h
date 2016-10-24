@@ -19,23 +19,37 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef __ARMADITO_H_
-#define __ARMADITO_H_
+/**
+ * \file stdpaths.h
+ *
+ * \brief definition of Armadito standard paths, for modules, configuration...
+ *
+ * The std_path() function returns for accessing standard paths.
+ *
+ * This file defines functions to query standard locations on the local filesystem, such as
+ * - modules binaries directory
+ * - configuration file
+ * - configuration directory
+ * - bases directory
+ *
+ * Standard locations are platform dependant.
+ *
+ */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __LIBARMADITO_STDPATHS_H_
+#define __LIBARMADITO_STDPATHS_H_
 
-#include <libarmadito/log.h>
-#include <libarmadito/string.h>
-#include <libarmadito/confval.h>
-#include <libarmadito/status.h>
-#include <libarmadito/info.h>
-#include <libarmadito/module.h>
-#include <libarmadito/stdpaths.h>
+enum a6o_std_location {
+	MODULES_LOCATION,
+	CONFIG_FILE_LOCATION,
+	CONFIG_DIR_LOCATION,
+	BASES_LOCATION,
+	BINARY_LOCATION,
+	TMP_LOCATION,
+};
 
-#ifdef __cplusplus
-}
-#endif
+const char *a6o_std_path(enum a6o_std_location location);
+
+char a6o_path_sep(void);
 
 #endif

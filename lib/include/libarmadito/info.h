@@ -19,11 +19,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _LIBARMADITO_INFO_H_
-#define _LIBARMADITO_INFO_H_
+#ifndef __LIBARMADITO_INFO_H_
+#define __LIBARMADITO_INFO_H_
 
-#include <libarmadito/status.h>
-#include <libarmadito/handle.h>
 #include <time.h>
 
 enum a6o_update_status {
@@ -32,8 +30,6 @@ enum a6o_update_status {
 	ARMADITO_UPDATE_CRITICAL,
 	ARMADITO_UPDATE_NON_AVAILABLE,
 };
-
-const char *a6o_update_status_str(enum a6o_update_status status);
 
 struct a6o_base_info {
 	const char *name;
@@ -50,18 +46,5 @@ struct a6o_module_info {
 	/* NULL terminated array of pointers to struct base_info */
 	struct a6o_base_info **base_infos;
 };
-
-struct a6o_info {
-	enum a6o_update_status global_status;
-	time_t global_update_ts;
-	/* NULL terminated array of pointers to struct a6o_module_info */
-	struct a6o_module_info **module_infos;
-};
-
-struct a6o_info *a6o_info_new(struct armadito *armadito);
-
-void a6o_info_to_stdout(struct a6o_info *info);
-
-void a6o_info_free(struct a6o_info *info);
 
 #endif

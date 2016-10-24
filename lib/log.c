@@ -29,13 +29,13 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef linux
-#include <sys/types.h>
-#include <unistd.h>
 #include <time.h>
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
 #endif
-
-/* should not be there, but for now... */
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #ifdef HAVE_GETPID
 #define os_getpid getpid
 #endif
@@ -57,7 +57,7 @@ void a6o_log(enum a6o_log_domain domain, enum a6o_log_level level, const char *f
 	gchar *message;
 
 	/* anything to do? */
-	if (level > current_max_level && level != ARMADITO_LOG_LEVEL_NONE)
+	if (level != ARMADITO_LOG_LEVEL_NONE && level > current_max_level)
 		return;
 
 	/* format message */
@@ -128,7 +128,7 @@ const char *a6o_log_level_str(enum a6o_log_level log_level)
 	return "";
 }
 
-#ifdef linux
+#ifdef HAVE_CLOCK_GETTIME
 static void append_uptime(GString *gstring)
 {
 	struct timespec now = {0L, 0L};
@@ -136,6 +136,10 @@ static void append_uptime(GString *gstring)
 	clock_gettime(CLOCK_MONOTONIC_COARSE, &now);
 
 	g_string_append_printf(gstring, "[%6.6f] ", now.tv_sec + now.tv_nsec / 1000000000.0);
+}
+#else
+static void append_uptime(GString *gstring)
+{
 }
 #endif
 
@@ -145,9 +149,7 @@ void a6o_log_default_handler(enum a6o_log_domain domain, enum a6o_log_level log_
 	GString *gstring = g_string_new(NULL);
 	gchar *string;
 
-#ifdef linux
 	append_uptime(gstring);
-#endif
 
 	g_string_append_printf(gstring, "%s[%d]: ", LOG_NAME, os_getpid());
 

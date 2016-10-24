@@ -34,6 +34,7 @@ AC_CHECK_FUNCS(close)
 AC_CHECK_FUNCS(lseek)
 AC_CHECK_FUNCS(getpid)
 AC_CHECK_FUNCS(strerror)
+AC_CHECK_FUNCS(clock_gettime)
 
 # check for headers
 AC_CHECK_HEADERS([sys/types.h])

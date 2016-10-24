@@ -27,8 +27,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
  * a6o_file_status defines the status of a file during or after scan
  */
 
-#ifndef _LIBARMADITO_STATUS_H_
-#define _LIBARMADITO_STATUS_H_
+#ifndef __LIBARMADITO_STATUS_H_
+#define __LIBARMADITO_STATUS_H_
 
 enum a6o_file_status {
 	ARMADITO_UNDECIDED = 1,         /*!< not yet decided by scan                                */
@@ -40,9 +40,5 @@ enum a6o_file_status {
 	ARMADITO_WHITE_LISTED,          /*!< file is while listed, i.e. guaranteed clean            */
 	ARMADITO_MALWARE,               /*!< file contains a malware                                */
 };
-
-const char *a6o_file_status_str(enum a6o_file_status status);
-
-const char *a6o_file_status_pretty_str(enum a6o_file_status status);
 
 #endif

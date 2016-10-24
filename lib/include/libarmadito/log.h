@@ -28,8 +28,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
-#ifndef _LIBARMADITO_LOG_H_
-#define _LIBARMADITO_LOG_H_
+#ifndef __LIBARMADITO_LOG_H_
+#define __LIBARMADITO_LOG_H_
 
 /**
  * \enum a6o_log_level
