@@ -8,8 +8,9 @@ CORE_SRC=$REPO/armadito-av
 CLAMAV_SRC=$REPO/armadito-mod-clamav
 H1_SRC=$REPO/armadito-mod-h1
 PDF_SRC=$REPO/armadito-mod-pdf
-GUI_SRC=$REPO/armadito-gui/web
+WEBUI_SRC=$REPO/armadito-web-ui
 PRELUDE_SRC=$REPO/armadito-prelude/python
+SYSTRAY_SRC=$REPO/armadito-systray-ui/gtk
 
 set -e
 
@@ -43,8 +44,14 @@ then
 	./compile.sh -p prelude
 fi
 
-if [[ $PACKAGE == "gui" || $PACKAGE == "" ]];
+if [[ $PACKAGE == "webui" || $PACKAGE == "" ]];
 then
-	./configure.sh -i $GUI_SRC -p gui
-	./compile.sh -p gui
+	./configure.sh -i $WEBUI_SRC -p webui
+	./compile.sh -p webui
+fi
+
+if [[ $PACKAGE == "systray" || $PACKAGE == "" ]];
+then
+	./configure.sh -i $SYSTRAY_SRC -p systray
+	./compile.sh -p systray
 fi
