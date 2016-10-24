@@ -5,7 +5,8 @@ lib_LTLIBRARIES=libarmadito.la
 libarmadito_la_SOURCES= \
 confval.c \
 log.c \
-stdpaths.c
+stdpaths.c \
+string.c
 
 AM_CPPFLAGS=-DUSE_FILE_DESCRIPTORS \
 	-DLIBARMADITO_MODULES_PATH='"$(libdir)/armadito/modules"' \
