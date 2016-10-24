@@ -29,6 +29,9 @@ env:
 before_install:
 - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END
   CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+- wget https://sonarqube.com/static/cpp/build-wrapper-linux-x86.zip
+- unzip build-wrapper-linux-x86.zip
+- export PATH=$PWD/build-wrapper-linux-x86:$PATH
 
 compiler:
 - gcc
@@ -38,5 +41,5 @@ before_script:
 
 script:
 - "./configure"
-- make clean all
+- build-wrapper-linux-x86-64 --out-dir build-wrapper-out make clean all
 - sonar-scanner -e -X -Dsonar.host.url=https://sonarqube.com -Dsonar.login=$SONAR_TOKEN
