@@ -1,3 +1,0 @@
-SUBDIRS= pkgconfig src #include
-
-
