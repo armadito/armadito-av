@@ -19,32 +19,26 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef DAEMON_HTTPD_H_
-#define DAEMON_HTTPD_H_
+#ifndef HTTPD_LOG_H
+#define HTTPD_LOG_H
 
-#include <armadito-config.h>
-#ifndef _WIN32
-#include <sys/select.h>
-#include <sys/socket.h>
-#else
-#include <winsock2.h>
-#endif
-#include <microhttpd.h>
+/* debug */
+void log_d(const char *format, ...);
 
-enum http_method {
-	HTTP_METHOD_GET   = 1 << 0,
-	HTTP_METHOD_POST  = 1 << 1,
-	HTTP_METHOD_OTHER = 0,
+/* error */
+void log_e(const char *format, ...);
+
+/* info */
+void log_i(const char *format, ...);
+
+/* warning */
+void log_w(const char *format, ...);
+
+enum log_mode {
+	LOG_TO_SYSTEM_LOG,
+	LOG_TO_STDERR,
 };
 
-struct httpd;
-
-struct httpd *httpd_new(unsigned short port, void *user_data);
-
-void httpd_destroy(struct httpd *h);
-
-#ifdef DEBUG
-void connection_debug(struct MHD_Connection *connection);
-#endif
+void log_init(enum log_mode mode);
 
 #endif

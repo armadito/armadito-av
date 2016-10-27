@@ -26,7 +26,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "log.h"
 #include "server.h"
 #include "daemonize.h"
-#include "httpd.h"
 #include "unixsockserver.h"
 #include "net/netdefaults.h"
 
@@ -44,8 +43,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #define DEFAULT_LOG_LEVEL     "error"
 #define DEFAULT_PID_FILE      LOCALSTATEDIR "/run/armadito-scand.pid"
-#define DEFAULT_PORT          8888
-#define S_DEFAULT_PORT        "8888"
 
 #define PROGRAM_NAME "armadito-scand"
 #define PROGRAM_VERSION PACKAGE_VERSION
@@ -54,7 +51,6 @@ struct a6o_daemon_options {
 	int no_daemon;
 	const char *s_log_level;
 	const char *pid_file;
-	unsigned short port;
 };
 
 static struct option daemon_option_defs[] = {

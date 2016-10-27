@@ -42,6 +42,7 @@ AC_CHECK_HEADERS([sys/types.h])
 AC_CHECK_HEADERS([unistd.h])
 AC_CHECK_HEADERS([fcntl.h])
 AC_CHECK_HEADERS([sys/stat.h])
+AC_CHECK_HEADERS([syslog.h])
 
 # check for debug
 AC_MSG_CHECKING(for debug)
@@ -137,10 +138,10 @@ else
 fi
 AM_CONDITIONAL([COND_FANOTIFY], [test "$enable_fanotify" = "yes" -a "$HAVE_FANOTIFY_INIT" = "yes"])
 
-# check for json-c library
-PKG_CHECK_MODULES(LIBJSONC, json-c, [HAVE_LIBJSONC=yes], [HAVE_LIBJSONC=no])
-if test "$HAVE_LIBJSONC" = "no"; then
-   AC_MSG_ERROR("cannot find json-c library")
+# check for jansson library (JSON)
+PKG_CHECK_MODULES(LIBJANSSON, jansson, [HAVE_LIBJANSSON=yes], [HAVE_LIBJANSSON=no])
+if test "$HAVE_LIBJANSSON" = "no"; then
+   AC_MSG_ERROR("cannot find jansson library")
 fi
 
 # documentation
@@ -163,6 +164,7 @@ arch/linux/modules/on-access-linux/tests/Makefile
 arch/linux/net/Makefile
 arch/linux/service/Makefile
 conf/Makefile
+httpd/Makefile
 json/Makefile
 json/ui/Makefile
 libcore/Makefile

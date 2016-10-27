@@ -40,6 +40,7 @@ static enum a6o_log_level get_a6o_log_level_from_str(const char *s_log_level)
 
 	if (!strcmp(s_log_level,"debug"))
 		return ARMADITO_LOG_LEVEL_DEBUG;
+
 	return -1;
 }
 

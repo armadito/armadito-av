@@ -19,17 +19,32 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _IPCCLIENT_H_
-#define _IPCCLIENT_H_
+#ifndef HTTPD_HTTPD_H
+#define HTTPD_HTTPD_H
 
-#include <libarmadito.h>
+#include <armadito-config.h>
+#ifndef _WIN32
+#include <sys/select.h>
+#include <sys/socket.h>
+#else
+#include <winsock2.h>
+#endif
+#include <microhttpd.h>
 
-struct ipc_client;
+enum http_method {
+	HTTP_METHOD_GET   = 1 << 0,
+	HTTP_METHOD_POST  = 1 << 1,
+	HTTP_METHOD_OTHER = 0,
+};
 
-struct ipc_client *ipc_client_new(int sock, struct armadito *armadito);
+struct httpd;
 
-void ipc_client_free(struct ipc_client *cl);
+struct httpd *httpd_new(unsigned short port);
 
-int ipc_client_process(struct ipc_client *cl);
+void httpd_destroy(struct httpd *h);
+
+#ifdef DEBUG
+void connection_debug(struct MHD_Connection *connection);
+#endif
 
 #endif

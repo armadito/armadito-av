@@ -19,8 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef DAEMON_APIHANDLER_H_
-#define DAEMON_APIHANDLER_H_
+#ifndef HTTPD_APIHANDLER_H
+#define HTTPD_APIHANDLER_H
 
 #ifndef _WIN32
 #include <sys/select.h>
@@ -29,7 +29,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <winsock2.h>
 #endif
 #include <microhttpd.h>
-#include <json.h>
+#include <jansson.h>
 
 #include "httpd.h"
 
@@ -40,8 +40,8 @@ struct api_handler *api_handler_new(void *user_data);
 int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
 	enum http_method method, const char *path, const char *post_data, size_t post_data_size);
 
-typedef int (*check_cb_t)(struct MHD_Connection *connection, struct json_object *in);
-typedef int (*process_cb_t)(struct api_handler *a, struct MHD_Connection *connection, struct json_object *in, struct json_object **out, void *user_data);
+typedef int (*check_cb_t)(struct MHD_Connection *connection, json_t *in);
+typedef int (*process_cb_t)(struct api_handler *a, struct MHD_Connection *connection, json_t *in, json_t **out, void *user_data);
 
 const char *api_get_user_agent(struct MHD_Connection *connection);
 const char *api_get_token(struct MHD_Connection *connection);
@@ -53,7 +53,7 @@ int api_handler_add_client(struct api_handler *a, const char *token);
 struct api_client *api_handler_get_client(struct api_handler *a, const char *token);
 int api_handler_remove_client(struct api_handler *a, const char *token);
 
-void api_client_push_event(struct api_client *client, struct json_object *event);
-void api_client_pop_event(struct api_client *client, struct json_object **p_event);
+void api_client_push_event(struct api_client *client, json_t *event);
+void api_client_pop_event(struct api_client *client, json_t **p_event);
 
 #endif

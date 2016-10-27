@@ -34,7 +34,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <errno.h>
 #include <fcntl.h>
 #include <glib.h>
-#include <json.h>
 #include <magic.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -49,9 +48,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <sys/time.h>
 #endif
 #include <unistd.h>
-#include <libarmadito.h>
 
 #include "httpd.h"
+#include "log.h"
 #include "apihandler.h"
 
 #define PAGE_404 "<html><head><title>not found!</title></head><body>not found!</body></html>\n"
@@ -70,7 +69,6 @@ struct httpd {
 	struct MHD_Response *response_405;
 	magic_t magic;
 	struct api_handler *api_handler;
-	void *user_data;
 };
 
 static int httpd_add_client(struct httpd *h, int64_t token);
@@ -170,7 +168,7 @@ static int content_serve(struct httpd *h, struct MHD_Connection *connection, con
 	int ret;
 
 	if (!is_url_valid(url)) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "url %s is not valid", url);
+		log_d("url %s is not valid", url);
 		return MHD_queue_response(connection, MHD_HTTP_NOT_FOUND, h->response_404);
 	}
 
@@ -178,7 +176,7 @@ static int content_serve(struct httpd *h, struct MHD_Connection *connection, con
 	fd = do_open(path, &file_size);
 
 	if (fd < 0) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "cannot open path %s", path);
+		log_d("cannot open path %s", path);
 		free((void *)path);
 		return MHD_queue_response(connection, MHD_HTTP_NOT_FOUND, h->response_404);
 	}
@@ -186,7 +184,7 @@ static int content_serve(struct httpd *h, struct MHD_Connection *connection, con
 	mime_type = get_mime_type(h->magic, fd, path);
 
 	if (mime_type == NULL) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "cannot get mime type of path %s", path);
+		log_d("cannot get mime type of path %s", path);
 		free((void *)path);
 		close(fd);
 		return MHD_queue_response(connection, MHD_HTTP_NOT_FOUND, h->response_404);
@@ -286,7 +284,7 @@ static int anwser_to_api(struct MHD_Connection *connection,
 
 	post_processor_append(p, "", 1);
 
-	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "finished processing POST: data %s len %d",
+	log_d("finished processing POST: data %s len %d",
 		post_processor_get_data(p), post_processor_get_size(p));
 
 	return api_handler_serve(api_handler, connection, method, api_path,
@@ -303,7 +301,7 @@ static int answer_to_connection_cb(void *cls, struct MHD_Connection *connection,
 	enum http_method method;
 	int is_api_request;
 
-	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "got %s request for: %s", s_method, url);
+	log_d("got %s request for: %s", s_method, url);
 
 	method = get_method(s_method);
 	url_path = get_path(url);
@@ -312,7 +310,7 @@ static int answer_to_connection_cb(void *cls, struct MHD_Connection *connection,
 	/* allowed methods: GET for all, POST only for API */
 	if (method == HTTP_METHOD_OTHER
 		|| (method == HTTP_METHOD_POST && !is_api_request)) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "method %s not allowed for %s", s_method, url);
+		log_w("method %s not allowed for %s", s_method, url);
 		return MHD_queue_response(connection, MHD_HTTP_METHOD_NOT_ALLOWED, h->response_405);
 	}
 
@@ -363,16 +361,16 @@ static gboolean httpd_listen_cb(GIOChannel *source, GIOCondition condition, gpoi
 	client_sock = accept(h->listen_sock, &client_addr, &addrlen);
 
 	if (client_sock < 0) {
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR, "accept() failed (%s)", strerror(errno));
+		log_e("accept() failed (%s)", strerror(errno));
 		return FALSE;
 	}
 
-	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG, "accepted client connection: fd = %d", client_sock);
+	log_d("accepted client connection: fd = %d", client_sock);
 
 	r = MHD_add_connection(h->daemon, client_sock, (struct sockaddr *)&client_addr, addrlen);
 
 	if (r != MHD_YES) {
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG, "accepted client connection: fd = %d", client_sock);
+		log_d("accepted client connection: fd = %d", client_sock);
 		return FALSE;
 	}
 
@@ -383,15 +381,15 @@ static void notify_completed_cb(void *cls, struct MHD_Connection *connection, vo
 {
 	const union MHD_ConnectionInfo *info;
 
-	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG, "connection completed: toe = %d", toe);
+	log_d("connection completed: toe = %d", toe);
 
 	info = MHD_get_connection_info(connection, MHD_CONNECTION_INFO_CONNECTION_FD);
 
 	switch(toe) {
 	case MHD_REQUEST_TERMINATED_COMPLETED_OK:
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG, "connection completed ok: fd = %d", info->connect_fd);
+		log_d("connection completed ok: fd = %d", info->connect_fd);
 		if (close(info->connect_fd) < 0) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "connection close failed (%s)", strerror(errno));
+			log_e("connection close failed (%s)", strerror(errno));
 		}
 		break;
 	case MHD_REQUEST_TERMINATED_WITH_ERROR:
@@ -413,7 +411,7 @@ static void create_daemon(struct httpd *h)
 
 	h->listen_sock = open_listen_socket(h->port);
 	if(h->listen_sock < 0) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "error opening server TCP socket (%s)", strerror(errno));
+		log_w("error opening server TCP socket (%s)", strerror(errno));
 		return;
 	}
 
@@ -459,7 +457,7 @@ static struct MHD_Response *create_std_response(const char *page)
 	return resp;
 }
 
-struct httpd *httpd_new(unsigned short port, void *user_data)
+struct httpd *httpd_new(unsigned short port)
 {
 	struct httpd *h = malloc(sizeof(struct httpd));
 
@@ -475,17 +473,16 @@ struct httpd *httpd_new(unsigned short port, void *user_data)
 
 	create_daemon(h);
 	if (h->daemon == NULL) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "error creating microhttpd server");
+		log_w("error creating microhttpd server");
 		if (h->listen_sock > 0)
 			close(h->listen_sock);
 		free(h);
 		return NULL;
 	}
 
-	h->api_handler = api_handler_new(user_data);
-	h->user_data = user_data;
+	h->api_handler = api_handler_new(NULL);
 
-	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_INFO , "HTTP server started on port %d", port);
+	log_i("HTTP server started on port %d", port);
 
 	return h;
 }

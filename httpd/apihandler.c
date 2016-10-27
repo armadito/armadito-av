@@ -20,17 +20,17 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 ***/
 
 #include <assert.h>
-#include <json.h>
+#include <jansson.h>
 #include <glib.h>
 #include <errno.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <libarmadito.h>
+#include <string.h>
 
 #include "api.h"
 #include "httpd.h"
-#include "debug.h"
+#include "log.h"
 
 #define API_TOKEN_HEADER "X-Armadito-Token"
 #define API_VERSION_HEADER "X-Armadito-Api-Version"
@@ -140,28 +140,28 @@ static int api_handler_pre_check(struct api_handler *a, struct MHD_Connection *c
 
 	/* return a HTTP 404 if path is not valid */
 	if (endpoint == NULL) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API invalid path %s", path);
+		log_w("request to API invalid path %s", path);
 		*p_error_response = a->response_404;
 		return MHD_HTTP_NOT_FOUND;
 	}
 
 	/* return a HTTP 403 forbidden if no User-Agent header */
 	if (api_get_user_agent(connection) == NULL) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API path %s has no User-Agent header", path);
+		log_w("request to API path %s has no User-Agent header", path);
 		*p_error_response = a->response_403;
 		return MHD_HTTP_FORBIDDEN;
 	}
 
 	/* if endpoint needs token and if no token in HTTP headers, return HTTP 400 bad request */
 	if (endpoint->need_token && api_get_token(connection) == NULL) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API path %s has no " API_TOKEN_HEADER " header", path);
+		log_w("request to API path %s has no " API_TOKEN_HEADER " header", path);
 		*p_error_response = a->response_400;
 		return MHD_HTTP_BAD_REQUEST;
 	}
 
 	/* if method is not in endpoint accepted methods, return HTTP 405 method not allowed */
 	if ((endpoint->accepted_methods & method) == 0) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "method not allowed for %s", path);
+		log_w("method not allowed for %s", path);
 		*p_error_response = a->response_405;
 		return MHD_HTTP_METHOD_NOT_ALLOWED;
 	}
@@ -171,7 +171,7 @@ static int api_handler_pre_check(struct api_handler *a, struct MHD_Connection *c
 		const char *content_type = api_get_content_type(connection);
 
 		if (content_type == NULL || strcmp(content_type, "application/json") != 0) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "invalid Content-Type %s", content_type);
+			log_w("invalid Content-Type %s", content_type);
 			*p_error_response = a->response_415;
 			if (content_type != NULL)
 				free((void *)content_type);
@@ -184,36 +184,28 @@ static int api_handler_pre_check(struct api_handler *a, struct MHD_Connection *c
 	return MHD_HTTP_OK;
 }
 
-static struct json_object *api_parse_json_request(const char *post_data, size_t post_data_size)
+static json_t *api_parse_json_request(const char *post_data, size_t post_data_size)
 {
-	struct json_tokener *tokener;
-	struct json_object *j_request;
+	json_t *j_request;
+	json_error_t error;
 
-	tokener = json_tokener_new();
-	assert(tokener != NULL);
+	j_request = json_loads(post_data, post_data_size, &error);
 
-	j_request = json_tokener_parse_ex(tokener, post_data, post_data_size);
-
-	if (j_request == NULL) {
-		enum json_tokener_error jerr = json_tokener_get_error(tokener);
-
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_WARNING, "error in JSON parsing: %s", json_tokener_error_desc(jerr));
-	}
-
-	json_tokener_free(tokener);
+	if (j_request == NULL)
+		log_w("error in JSON parsing: %s", error.text);
 
 	return j_request;
 }
 
-static int api_queue_response(struct MHD_Connection *connection, int http_status, struct json_object *j_response)
+static int api_queue_response(struct MHD_Connection *connection, int http_status, json_t *j_response)
 {
 	struct MHD_Response *response;
 	const char *json_buff;
 	int ret;
 
-	json_buff = json_object_to_json_string(j_response);
+	json_buff = json_dumps(j_response, 0);
 	response = MHD_create_response_from_buffer(strlen(json_buff), (char *)json_buff, MHD_RESPMEM_MUST_COPY);
-	json_object_put(j_response); /* free the json object */
+	json_decref(j_response); /* free the json object */
 
 	if (response == NULL)
 		return MHD_NO;
@@ -231,17 +223,17 @@ static int api_queue_response(struct MHD_Connection *connection, int http_status
 }
 
 /* wrap the response inside a JSON error object */
-static int api_queue_response_500(struct MHD_Connection *connection, struct json_object *j_response)
+static int api_queue_response_500(struct MHD_Connection *connection, json_t *j_response)
 {
-	struct json_object *j_error;
+	json_t *j_error;
 
-	j_error = json_object_new_object();
-	json_object_object_add(j_error, "code", json_object_new_int(500));
-	json_object_object_add(j_error, "message",
-		json_object_new_string("Request processing triggered an internal error"));
+	j_error = json_object();
+	json_object_set(j_error, "code", json_integer(500));
+	json_object_set(j_error, "message",
+		json_string("Request processing triggered an internal error"));
 
 	if (j_response != NULL)
-		json_object_object_add(j_error, "data", j_response);
+		json_object_set(j_error, "data", j_response);
 
 	return api_queue_response(connection, MHD_HTTP_INTERNAL_SERVER_ERROR, j_error);
 }
@@ -252,9 +244,9 @@ int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
 	struct api_endpoint *endpoint;
 	struct MHD_Response *response;
 	int http_status_code, ret;
-	struct json_object *j_request = NULL, *j_response = NULL;
+	json_t *j_request = NULL, *j_response = NULL;
 
-	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "request to API: path %s", path);
+	log_d("request to API: path %s", path);
 
 	http_status_code = api_handler_pre_check(a, connection, method, path, &endpoint, &response);
 	if (http_status_code != MHD_HTTP_OK)
@@ -263,14 +255,14 @@ int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
 	if (method == HTTP_METHOD_POST && post_data_size) {
 		j_request = api_parse_json_request(post_data, post_data_size);
 		if (j_request == NULL) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API path %s does not contain valid JSON", path);
+			log_w("request to API path %s does not contain valid JSON", path);
 			return MHD_queue_response(connection, MHD_HTTP_BAD_REQUEST, a->response_400);
 		}
 	}
 
 	/* if request parameters are not valid return HTTP 422 Unprocessable Entity  */
 	if (endpoint->check_cb != NULL && (*endpoint->check_cb)(connection, j_request)) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "request to API path %s does not contain valid parameters", path);
+		log_w("request to API path %s does not contain valid parameters", path);
 		return MHD_queue_response(connection, MHD_HTTP_UNPROCESSABLE_ENTITY, a->response_422);
 	}
 
@@ -278,11 +270,11 @@ int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
 	ret = (*(endpoint->process_cb))(a, connection, j_request, &j_response, a->user_data);
 
 	if (j_request != NULL)
-		json_object_put(j_request);
+		json_decref(j_request);
 
 	/* if request processing failed return HTTP 500 Internal Server Error  */
 	if (ret) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "processing request to API path %s failed", path);
+		log_w("processing request to API path %s failed", path);
 		/* a failed processing can create a JSON response */
 		return api_queue_response_500(connection, j_response);
 	}
@@ -344,7 +336,7 @@ int api_handler_add_client(struct api_handler *a, const char *token)
 	struct api_client *client;
 
 	if (g_hash_table_contains(a->client_table, token)) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "API token %s already registered", token);
+		log_w("API token %s already registered", token);
 		return 1;
 	}
 
@@ -362,7 +354,7 @@ struct api_client *api_handler_get_client(struct api_handler *a, const char *tok
 	c = g_hash_table_lookup(a->client_table, token);
 
 	if (c == NULL)
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "API token %s is not registered", token);
+		log_w("API token %s is not registered", token);
 
 	return c;
 }
@@ -374,19 +366,19 @@ int api_handler_remove_client(struct api_handler *a, const char *token)
 	ret = g_hash_table_remove(a->client_table, token);
 
 	if (!ret) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "API token %s is not registered", token);
+		log_w("API token %s is not registered", token);
 		return 1;
 	}
 
 	return 0;
 }
 
-void api_client_push_event(struct api_client *client, struct json_object *event)
+void api_client_push_event(struct api_client *client, json_t *event)
 {
 	g_async_queue_push(client->event_queue, event);
 }
 
-void api_client_pop_event(struct api_client *client, struct json_object **p_event)
+void api_client_pop_event(struct api_client *client, json_t **p_event)
 {
 	*p_event = g_async_queue_pop(client->event_queue);
 }
