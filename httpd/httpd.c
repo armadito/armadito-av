@@ -176,7 +176,7 @@ static int content_serve(struct httpd *h, struct MHD_Connection *connection, con
 	fd = do_open(path, &file_size);
 
 	if (fd < 0) {
-		log_d("cannot open path %s", path);
+		log_w("cannot open path %s", path);
 		free((void *)path);
 		return MHD_queue_response(connection, MHD_HTTP_NOT_FOUND, h->response_404);
 	}
