@@ -125,7 +125,7 @@ void a6o_scan_conf_add_module(struct a6o_scan_conf *c, const char *module_name, 
 	struct a6o_module *mod = a6o_get_module_by_name(u, module_name);
 
 	if (mod == NULL) {
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_WARNING, "scan configuration: no module '%s'", module_name);
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, "scan configuration: no module '%s'", module_name);
 		return;
 	}
 
@@ -186,7 +186,7 @@ struct a6o_module **a6o_scan_conf_get_applicable_modules(struct a6o_scan_conf *c
 	struct a6o_module **modules = get_applicable_modules(c, mime_type);
 
 	if (modules == NULL) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_DEBUG, "%s: no module for mime-type '%s'", c->name, mime_type);
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "%s: no module for mime-type '%s'", c->name, mime_type);
 	} else {
 		struct a6o_module **modv;
 		GString *s = g_string_new("");

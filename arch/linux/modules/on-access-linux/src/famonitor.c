@@ -84,11 +84,11 @@ int fanotify_monitor_start(struct fanotify_monitor *f)
 
 	if (f->fanotify_fd < 0) {
 		if (errno == EPERM)
-			a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "you must be root or have CAP_SYS_ADMIN capability to enable on-access protection");
+			a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "you must be root or have CAP_SYS_ADMIN capability to enable on-access protection");
 		else if (errno == ENOSYS)
-			a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "this kernel does not implement fanotify_init(). The fanotify API is available only if the kernel was configured with CONFIG_FANOTIFY");
+			a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "this kernel does not implement fanotify_init(). The fanotify API is available only if the kernel was configured with CONFIG_FANOTIFY");
 		else
-			a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "fanotify_init failed (%s)", strerror(errno));
+			a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "fanotify_init failed (%s)", strerror(errno));
 
 		return -1;
 	}
@@ -108,7 +108,7 @@ int fanotify_monitor_start(struct fanotify_monitor *f)
 	g_source_attach(source, access_monitor_get_main_context(f->monitor));
 	g_source_unref(source);
 
-	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "started Linux on-access protection with fanotify");
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "started Linux on-access protection with fanotify");
 
 	return 0;
 }
@@ -139,7 +139,7 @@ static void scan_file_thread_fun(gpointer data, gpointer user_data)
 
 	scan = a6o_scan_new(f->armadito, -1);
 	status = a6o_scan_context(scan, file_context);
-	fan_r = status == ARMADITO_MALWARE ? FAN_DENY : FAN_ALLOW;
+	fan_r = status == A6O_FILE_MALWARE ? FAN_DENY : FAN_ALLOW;
 
 	if (watchdog_remove(f->watchdog, file_context->fd, NULL))
 		response_write(f->fanotify_fd, file_context->fd, fan_r, file_context->path, "scanned");
@@ -248,7 +248,7 @@ static gboolean fanotify_cb(GIOChannel *source, GIOCondition condition, gpointer
 	assert(g_main_context_is_owner(access_monitor_get_main_context(f->monitor)));
 
 	if ((len = read(f->fanotify_fd, buf, FANOTIFY_BUFFER_SIZE)) < 0) {
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "error reading fanotify event descriptor (%s)", strerror(errno));
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "error reading fanotify event descriptor (%s)", strerror(errno));
 		return TRUE;
 	}
 
@@ -270,7 +270,7 @@ int fanotify_monitor_mark_directory(struct fanotify_monitor *f, const char *path
 	r = fanotify_mark(f->fanotify_fd, FAN_MARK_ADD, fan_mask, AT_FDCWD, path);
 
 	if (r < 0)
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "adding fanotify mark for %s failed (%s)", path, strerror(errno));
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "adding fanotify mark for %s failed (%s)", path, strerror(errno));
 
 	return r;
 }
@@ -285,7 +285,7 @@ int fanotify_monitor_unmark_directory(struct fanotify_monitor *f, const char *pa
 	r = fanotify_mark(f->fanotify_fd, FAN_MARK_REMOVE, fan_mask, AT_FDCWD, path);
 
 	if (r < 0)
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "removing fanotify mark for %s failed (%s)", path, strerror(errno));
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "removing fanotify mark for %s failed (%s)", path, strerror(errno));
 
 	return r;
 }
@@ -297,7 +297,7 @@ int fanotify_monitor_mark_mount(struct fanotify_monitor *f, const char *path, in
 
 	r = fanotify_mark(f->fanotify_fd, FAN_MARK_ADD | FAN_MARK_MOUNT, fan_mask, AT_FDCWD, path);
 	if (r < 0)
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "adding fanotify mark on mount point %s failed (%s)", path, strerror(errno));
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "adding fanotify mark on mount point %s failed (%s)", path, strerror(errno));
 
 	return r;
 }
@@ -310,7 +310,7 @@ int fanotify_monitor_unmark_mount(struct fanotify_monitor *f, const char *path, 
 	r = fanotify_mark(f->fanotify_fd, FAN_MARK_REMOVE | FAN_MARK_MOUNT, fan_mask, AT_FDCWD, path);
 
 	if (r < 0)
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "removing fanotify mark for mount point %s failed (%s)", path, strerror(errno));
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "removing fanotify mark for mount point %s failed (%s)", path, strerror(errno));
 
 	return r;
 }

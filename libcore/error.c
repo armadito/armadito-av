@@ -48,7 +48,7 @@ void a6o_error_set(a6o_error **error, int error_code, const char *error_message)
 
 	/* same check as in glib: if error location is already set, do not overwrite it!!! */
 	if (*error != NULL) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "a6o_error set over the top of a previous a6o_error or uninitialized memory.\n\
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "a6o_error set over the top of a previous a6o_error or uninitialized memory.\n\
 This indicates a bug in someone's code. You must ensure an error is NULL before it's set.\n\
 The overwriting error message was: %s", error_message);
 

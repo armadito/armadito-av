@@ -57,7 +57,7 @@ const char *os_mime_type_guess_fd(int fd)
 	}
 
 	if ((n_read = _read(fd, buf, BUF_SIZE)) < 0) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "Cannot read %d bytes from file descriptor %d", BUF_SIZE, fd);
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "Cannot read %d bytes from file descriptor %d", BUF_SIZE, fd);
 		printf("Cannot read %d bytes from file descriptor %d", BUF_SIZE, fd);
 		return NULL;
 	}
@@ -101,7 +101,7 @@ const char *os_mime_type_guess(const char *path)
 	bres = GetFileSizeEx(fh, &fileSize);
 
 	if (bres == FALSE) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "Error :: os_mime_type_guess() :: GetFileSizeEx() failed :: %s :: err = %d (%s) :: ",path,GetLastError(),os_strerror(GetLastError()));
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "Error :: os_mime_type_guess() :: GetFileSizeEx() failed :: %s :: err = %d (%s) :: ",path,GetLastError(),os_strerror(GetLastError()));
 		return NULL;
 	}
 
@@ -115,7 +115,7 @@ const char *os_mime_type_guess(const char *path)
 	((char*)buf)[size] = '\0';
 
 	if (ReadFile(fh, buf, size, &read, NULL) == FALSE) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, " os_mime_type_guess() :: Read file failed ::  (%s) ",os_strerror(GetLastError()));
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, " os_mime_type_guess() :: Read file failed ::  (%s) ",os_strerror(GetLastError()));
 		free(buf);
 		CloseHandle(fh);
 		return NULL; 
@@ -123,7 +123,7 @@ const char *os_mime_type_guess(const char *path)
 
 	HRESULT res = FindMimeFromData(NULL, NULL, buf, size, NULL, FMFD_DEFAULT, &mt, 0);
 	if ( res != S_OK) {	  
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR," FindMimeFromData failed :: %s \n", getHresError(res));
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_ERROR," FindMimeFromData failed :: %s \n", getHresError(res));
 		free(buf);
 		CloseHandle(fh);
 		return NULL;

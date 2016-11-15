@@ -45,7 +45,7 @@ static enum a6o_mod_status quarantine_init(struct a6o_module *module)
 
 	module->data = qu_data;
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static int quarantine_do(struct quarantine_data *qu_data, const char *path)
@@ -121,18 +121,18 @@ void quarantine_callback(struct a6o_report *report, void *callback_data)
 		return;
 
 	switch(report->status) {
-	case ARMADITO_UNDECIDED:
-	case ARMADITO_CLEAN:
-	case ARMADITO_UNKNOWN_FILE_TYPE:
-	case ARMADITO_EINVAL:
-	case ARMADITO_IERROR:
-	case ARMADITO_SUSPICIOUS:
-	case ARMADITO_WHITE_LISTED:
+	case A6O_FILE_UNDECIDED:
+	case A6O_FILE_CLEAN:
+	case A6O_FILE_UNKNOWN_TYPE:
+	case A6O_FILE_EINVAL:
+	case A6O_FILE_IERROR:
+	case A6O_FILE_SUSPICIOUS:
+	case A6O_FILE_WHITE_LISTED:
 		return;
 	}
 
 	if (quarantine_do(qu_data, report->path) != -1)
-		report->action |= ARMADITO_ACTION_QUARANTINE;
+		report->action |= A6O_ACTION_QUARANTINE;
 }
 
 static enum a6o_mod_status quarantine_conf_quarantine_dir(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
@@ -141,7 +141,7 @@ static enum a6o_mod_status quarantine_conf_quarantine_dir(struct a6o_module *mod
 
 	qu_data->quarantine_dir = strdup(a6o_conf_value_get_string(value));
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static enum a6o_mod_status quarantine_conf_enable(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
@@ -150,7 +150,7 @@ static enum a6o_mod_status quarantine_conf_enable(struct a6o_module *module, con
 
 	qu_data->enable = a6o_conf_value_get_int(value);
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static struct a6o_conf_entry quarantine_conf_table[] = {

@@ -30,16 +30,16 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 static enum a6o_log_level get_a6o_log_level_from_str(const char *s_log_level)
 {
 	if (!strcmp(s_log_level,"error"))
-		return ARMADITO_LOG_LEVEL_ERROR;
+		return A6O_LOG_LEVEL_ERROR;
 
 	if (!strcmp(s_log_level,"warning"))
-		return ARMADITO_LOG_LEVEL_WARNING;
+		return A6O_LOG_LEVEL_WARNING;
 
 	if (!strcmp(s_log_level,"info"))
-		return ARMADITO_LOG_LEVEL_INFO;
+		return A6O_LOG_LEVEL_INFO;
 
 	if (!strcmp(s_log_level,"debug"))
-		return ARMADITO_LOG_LEVEL_DEBUG;
+		return A6O_LOG_LEVEL_DEBUG;
 
 	return -1;
 }
@@ -47,13 +47,13 @@ static enum a6o_log_level get_a6o_log_level_from_str(const char *s_log_level)
 static int priority_from_level(enum a6o_log_level log_level)
 {
 	switch (log_level) {
-	case ARMADITO_LOG_LEVEL_ERROR:
+	case A6O_LOG_LEVEL_ERROR:
 		return LOG_ERR;
-	case ARMADITO_LOG_LEVEL_WARNING:
+	case A6O_LOG_LEVEL_WARNING:
 		return LOG_WARNING;
-	case ARMADITO_LOG_LEVEL_INFO:
+	case A6O_LOG_LEVEL_INFO:
 		return LOG_INFO;
-	case ARMADITO_LOG_LEVEL_DEBUG:
+	case A6O_LOG_LEVEL_DEBUG:
 		return LOG_DEBUG;
 	}
 
@@ -61,7 +61,7 @@ static int priority_from_level(enum a6o_log_level log_level)
 }
 static void a6o_syslog_handler(enum a6o_log_domain domain, enum a6o_log_level log_level, const char *message, void *user_data)
 {
-	if (log_level != ARMADITO_LOG_LEVEL_NONE)
+	if (log_level != A6O_LOG_LEVEL_NONE)
 		syslog(priority_from_level(log_level), "<%s> %s\n", a6o_log_level_str(log_level), message);
 	else
 		syslog(priority_from_level(log_level), "%s\n", message);

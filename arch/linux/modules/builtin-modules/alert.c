@@ -100,7 +100,7 @@ static void get_ip_addr(char *ip_addr)
 			(ifa->ifa_addr->sa_family == AF_INET) ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
 			mask, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
 		if (s != 0) {
-			a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "getnameinfo() failed: %s", gai_strerror(s));
+			a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_ERROR, "getnameinfo() failed: %s", gai_strerror(s));
 			break;
 		}
 
@@ -112,7 +112,7 @@ static void get_ip_addr(char *ip_addr)
 			(ifa->ifa_addr->sa_family == AF_INET) ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
 			ip_addr, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
 		if (s != 0) {
-			a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "getnameinfo() failed: %s\n", gai_strerror(s));
+			a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_ERROR, "getnameinfo() failed: %s\n", gai_strerror(s));
 			break;
 		}
 
@@ -276,7 +276,7 @@ static enum a6o_mod_status alert_init(struct a6o_module *module)
 
 	module->data = al_data;
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static enum a6o_mod_status alert_conf_alert_dir(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
@@ -284,14 +284,14 @@ static enum a6o_mod_status alert_conf_alert_dir(struct a6o_module *module, const
 	struct alert_data *al_data = (struct alert_data *)module->data;
 
 	if (!a6o_conf_value_is_string(value))
-		return ARMADITO_MOD_CONF_ERROR;
+		return A6O_MOD_CONF_ERROR;
 
 	al_data->alert_dir = strdup(a6o_conf_value_get_string(value));
 
 	if(os_mkdir_p(al_data->alert_dir) < 0)
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "unable to make alert dir : %s\n",  strerror(errno));
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_ERROR, "unable to make alert dir : %s\n",  strerror(errno));
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 void alert_callback(struct a6o_report *report, void *callback_data)
@@ -300,12 +300,12 @@ void alert_callback(struct a6o_report *report, void *callback_data)
 	struct alert *a;
 
 	switch(report->status) {
-	case ARMADITO_CLEAN:
-	case ARMADITO_UNKNOWN_FILE_TYPE:
-	case ARMADITO_EINVAL:
-	case ARMADITO_IERROR:
-	case ARMADITO_UNDECIDED:
-	case ARMADITO_WHITE_LISTED:
+	case A6O_FILE_CLEAN:
+	case A6O_FILE_UNKNOWN_FILE_TYPE:
+	case A6O_FILE_EINVAL:
+	case A6O_FILE_IERROR:
+	case A6O_FILE_UNDECIDED:
+	case A6O_FILE_WHITE_LISTED:
 		return;
 	}
 
@@ -314,7 +314,7 @@ void alert_callback(struct a6o_report *report, void *callback_data)
 	alert_send_via_file(a, al_data->alert_dir);
 	alert_free(a);
 
-	report->action |= ARMADITO_ACTION_ALERT;
+	report->action |= A6O_ACTION_ALERT;
 }
 
 static struct a6o_conf_entry alert_conf_table[] = {

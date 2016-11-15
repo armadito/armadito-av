@@ -57,14 +57,14 @@ char * GetLocationCompletepath(char * specialDir) {
 	__try {
 
 		if (!GetModuleFileNameA(NULL, (LPSTR)&filepath, MAX_PATH)) {	
-			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: GetLocationCompletepath :: GetModuleFilename failed :: GLE = %d\n",GetLastError());
+			a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_ERROR,"[-] Error :: GetLocationCompletepath :: GetModuleFilename failed :: GLE = %d\n",GetLastError());
 			return NULL;
 		}
 
 		// Remove the module filename from the complete file path
 		ptr = strrchr(filepath,'\\');
 		if (ptr == NULL) {
-			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: GetLocationCompletepath :: No backslash found in the path\n");
+			a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_ERROR,"[-] Error :: GetLocationCompletepath :: No backslash found in the path\n");
 			return NULL;
 		}
 
@@ -128,7 +128,7 @@ char * BuildLocationFilePath(char * filepath, char * specialDir) {
 
 
 	if (filepath == NULL || specialDir == NULL) {
-		a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," BuildLocationFilePath :: Invalid parameter!\n");
+		a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_ERROR," BuildLocationFilePath :: Invalid parameter!\n");
 		return NULL;
 	}
 
@@ -136,7 +136,7 @@ char * BuildLocationFilePath(char * filepath, char * specialDir) {
 
 		location_dir = GetLocationCompletepath(specialDir);
 		if (location_dir == NULL) {
-			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," BuildLocationFilePath :: Get Location complete path failed\n");			
+			a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_ERROR," BuildLocationFilePath :: Get Location complete path failed\n");			
 			return NULL;
 		}
 
@@ -144,7 +144,7 @@ char * BuildLocationFilePath(char * filepath, char * specialDir) {
 		// Get the file name from the complete file path
 		filename = strrchr(filepath,'\\');
 		if (filename == NULL) {
-			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," BuildQuarantineFilePath!strrchr() failed :: backslash not found in the path :: %s.\n",filepath);			
+			a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_ERROR," BuildQuarantineFilePath!strrchr() failed :: backslash not found in the path :: %s.\n",filepath);			
 			return NULL;
 		}
 
@@ -200,7 +200,7 @@ char * GetFilenameFromPath(char * path) {
 
 		filename = strrchr(path,'\\');
 		if (filename == NULL) {
-			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," GetFilenameFromPath!strrchr() failed :: backslash not found in the path :: %s.\n",path);			
+			a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_ERROR," GetFilenameFromPath!strrchr() failed :: backslash not found in the path :: %s.\n",path);			
 			return NULL;
 		}
 
@@ -227,7 +227,7 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct a6
 	
 
 	if (oldfilepath == NULL || quarantinePath == NULL ) {
-		a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: WriteQuarantineInfoFile :: invalid parameter\n");
+		a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_ERROR,"[-] Error :: WriteQuarantineInfoFile :: invalid parameter\n");
 		return -1;
 	}
 
@@ -241,7 +241,7 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct a6
 		strncat_s(info_path, len, quarantinePath, strnlen_s(quarantinePath ,MAX_PATH));
 		strncat_s(info_path, len, ".info", strnlen_s(".info" ,MAX_PATH));
 
-		a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_INFO,"[+] Debug :: WriteQuarantineInfoFile :: info file path = %s\n",info_path);
+		a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_INFO,"[+] Debug :: WriteQuarantineInfoFile :: info file path = %s\n",info_path);
 
 		// build information file path for quarantine.
 		alert_tmp = BuildLocationFilePath(oldfilepath, ALERT_DIR);
@@ -287,7 +287,7 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct a6
 		
 		content = json_object_to_json_string(jobj);
 		if (content == NULL) {
-			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: WriteQuarantineInfoFile :: can't build info content\n");
+			a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_ERROR,"[-] Error :: WriteQuarantineInfoFile :: can't build info content\n");
 			ret = -2;
 			__leave;
 		}
@@ -303,7 +303,7 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct a6
 		fh = CreateFile(info_path, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (fh == INVALID_HANDLE_VALUE) {
 			ret = -3;
-			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: WriteQuarantineInfoFile :: can't open the info file [%s] :: GLE = %d\n",info_path,GetLastError());
+			a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_ERROR,"[-] Error :: WriteQuarantineInfoFile :: can't open the info file [%s] :: GLE = %d\n",info_path,GetLastError());
 			__leave;
 		}
 
@@ -311,7 +311,7 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct a6
 
 		if (WriteFile(fh, content, len, &written, NULL) == FALSE) {
 			ret = -3;
-			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: WriteQuarantineInfoFile :: write failed :: GLE = %d\n",GetLastError());
+			a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_ERROR,"[-] Error :: WriteQuarantineInfoFile :: write failed :: GLE = %d\n",GetLastError());
 			__leave;
 		}
 
@@ -323,7 +323,7 @@ int WriteQuarantineInfoFile(char * oldfilepath, char * quarantinePath, struct a6
 		// copy info file in alert
 		if (CopyFile(info_path,alert_path,TRUE)  == FALSE){
 			//ret = -4;
-			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: WriteQuarantineInfoFile :: Copy info file in alert dir failed :: GLE = %d\n",GetLastError());
+			a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_ERROR,"[-] Error :: WriteQuarantineInfoFile :: Copy info file in alert dir failed :: GLE = %d\n",GetLastError());
 			//__leave;
 		}
 
@@ -366,7 +366,7 @@ int CreateAvDirectory( char * dir) {
 	char * completePath = NULL;
 
 	if (dir == NULL) {
-		a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," CreateAvDirectory :: Invalid parameter!\n");
+		a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_ERROR," CreateAvDirectory :: Invalid parameter!\n");
 		return -1;
 	}
 
@@ -374,7 +374,7 @@ int CreateAvDirectory( char * dir) {
 
 		completePath = GetLocationCompletepath(dir);
 		if (completePath == NULL) {
-			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," CreateAvDirectory :: Get Complete path failed!\n");
+			a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_ERROR," CreateAvDirectory :: Get Complete path failed!\n");
 			ret = -2;
 			__leave;
 		}
@@ -386,7 +386,7 @@ int CreateAvDirectory( char * dir) {
 		}
 
 		if (!CreateDirectoryA(completePath, NULL)) {
-			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," CreateAvDirectory :: Directory creation failed! :: GLE = %d\n",GetLastError());
+			a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_ERROR," CreateAvDirectory :: Directory creation failed! :: GLE = %d\n",GetLastError());
 			ret = -3;
 			__leave;
 		}
@@ -416,7 +416,7 @@ static int quarantine_do(struct quarantine_data *qu_data, const char *path, stru
 
 
 	if (path == NULL) {		
-		a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," quarantine_do :: Invalid file path!\n");
+		a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_ERROR," quarantine_do :: Invalid file path!\n");
 		return -1;
 	}
 
@@ -425,14 +425,14 @@ static int quarantine_do(struct quarantine_data *qu_data, const char *path, stru
 		// build quarantine file path.
 		quarantineFilepath = BuildLocationFilePath(path,qu_data->quarantine_dir);
 		if (quarantineFilepath == NULL) {			
-			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," Build Quarantine FilePath failed ! :: [%s]\n",path);
+			a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_ERROR," Build Quarantine FilePath failed ! :: [%s]\n",path);
 			ret = -2;
 			__leave;
 		}
 
 		// create quarantine folder if needed.
 		if (CreateAvDirectory(qu_data->quarantine_dir) < 0) {			
-			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," Quarantine folder creation failed!\n");
+			a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_ERROR," Quarantine folder creation failed!\n");
 			ret = -3;
 			__leave;
 		}		
@@ -450,7 +450,7 @@ static int quarantine_do(struct quarantine_data *qu_data, const char *path, stru
 
 		// Move file to quarantine directory.		
 		if (MoveFileEx(path,quarantineFilepath,MOVEFILE_REPLACE_EXISTING|MOVEFILE_FAIL_IF_NOT_TRACKABLE|MOVEFILE_COPY_ALLOWED|MOVEFILE_WRITE_THROUGH) == FALSE){			
-			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," Move file [%s] to quarantine folder failed ! :: GLE =%d\n",path,GetLastError());
+			a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_ERROR," Move file [%s] to quarantine folder failed ! :: GLE =%d\n",path,GetLastError());
 			ret = -4;
 			__leave;
 		}
@@ -458,12 +458,12 @@ static int quarantine_do(struct quarantine_data *qu_data, const char *path, stru
 		// Write quarantine .info file
 		if (WriteQuarantineInfoFile(path, quarantineFilepath, report) != 0) {
 			ret = -5;			
-			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_ERROR," Write Quarantine Information File failed! :: [%s] :: [%s]\n",path, quarantineFilepath);
+			a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_ERROR," Write Quarantine Information File failed! :: [%s] :: [%s]\n",path, quarantineFilepath);
 			__leave;
 		}
 
 		printf("[+] Debug :: File [%s] moved to quarantine folder successfully !\n", path);	
-		a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_INFO," File [%s] moved to quarantine folder successfully !\n",path );
+		a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_INFO," File [%s] moved to quarantine folder successfully !\n",path );
 		a6o_notify(NOTIF_WARNING,"File [%s] moved to quarantine!\n");
 
 
@@ -486,24 +486,24 @@ void quarantine_callback(struct a6o_report *report, void *callback_data)
   struct quarantine_data *qu_data = (struct quarantine_data *)callback_data;
   
   //printf("[+] Debug :: quarantine_callback :: enable = %d :: dir = %s :: status = %d \n", qu_data->enable, qu_data->quarantine_dir, report->status);
-  //a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_INFO, "[+] Debug :: quarantine_callback :: enable = %d :: dir = %s :: status = %d\n", qu_data->enable, qu_data->quarantine_dir, report->status);
+  //a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_INFO, "[+] Debug :: quarantine_callback :: enable = %d :: dir = %s :: status = %d\n", qu_data->enable, qu_data->quarantine_dir, report->status);
 
   if (!qu_data->enable)
     return;
 
   switch(report->status) {
-  case ARMADITO_UNDECIDED:
-  case ARMADITO_CLEAN:
-  case ARMADITO_UNKNOWN_FILE_TYPE:
-  case ARMADITO_EINVAL:
-  case ARMADITO_IERROR:
-  case ARMADITO_SUSPICIOUS:
-  case ARMADITO_WHITE_LISTED:
+  case A6O_FILE_UNDECIDED:
+  case A6O_FILE_CLEAN:
+  case A6O_FILE_UNKNOWN_TYPE:
+  case A6O_FILE_EINVAL:
+  case A6O_FILE_IERROR:
+  case A6O_FILE_SUSPICIOUS:
+  case A6O_FILE_WHITE_LISTED:
     return;
   }
 
   if (quarantine_do(qu_data, report->path, report) == 0)
-    report->action |= ARMADITO_ACTION_QUARANTINE;
+    report->action |= A6O_ACTION_QUARANTINE;
 }
 
 static enum a6o_mod_status quarantine_init(struct a6o_module *module)
@@ -515,7 +515,7 @@ static enum a6o_mod_status quarantine_init(struct a6o_module *module)
 
   module->data = qu_data;
 
-  return ARMADITO_MOD_OK;
+  return A6O_MOD_OK;
 
 
 }
@@ -526,7 +526,7 @@ static enum a6o_mod_status quarantine_conf_quarantine_dir(struct a6o_module *mod
 
 	qu_data->quarantine_dir = os_strdup(a6o_conf_value_get_string(value));
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 
 }
 
@@ -536,7 +536,7 @@ static enum a6o_mod_status quarantine_conf_enable(struct a6o_module *module, con
 
 	qu_data->enable = a6o_conf_value_get_int(value);
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 

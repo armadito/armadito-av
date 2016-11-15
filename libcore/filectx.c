@@ -84,7 +84,7 @@ enum a6o_file_context_status a6o_file_context_get(struct a6o_file_context *ctx, 
 
 		if (ctx->fd < 0) {
 			ctx->status = ARMADITO_FC_FILE_OPEN_ERROR;
-			a6o_log(ARMADITO_LOG_LIB,ARMADITO_LOG_LEVEL_WARNING, " Error :: a6o_file_context_get :: Opening file [%s] for scan failed :: err = %d\n",path,err);
+			a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_WARNING, " Error :: a6o_file_context_get :: Opening file [%s] for scan failed :: err = %d\n",path,err);
 			return ctx->status;
 		}
 	}
@@ -137,7 +137,7 @@ void a6o_file_context_close(struct a6o_file_context *ctx)
 		return;
 
 	if (os_close(ctx->fd) != 0)
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "closing file descriptor %3d failed (%s)", ctx->fd, os_strerror(errno));
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "closing file descriptor %3d failed (%s)", ctx->fd, os_strerror(errno));
 
 	ctx->fd = -1;
 }

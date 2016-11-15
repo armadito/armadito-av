@@ -23,12 +23,12 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 const char *a6o_action_pretty_str(enum a6o_action action)
 {
-	switch(action & (ARMADITO_ACTION_ALERT | ARMADITO_ACTION_QUARANTINE | ARMADITO_ACTION_REMOVE)) {
-	case ARMADITO_ACTION_ALERT:
+	switch(action & (A6O_ACTION_ALERT | A6O_ACTION_QUARANTINE | A6O_ACTION_REMOVE)) {
+	case A6O_ACTION_ALERT:
 		return "alert";
-	case ARMADITO_ACTION_ALERT | ARMADITO_ACTION_QUARANTINE:
+	case A6O_ACTION_ALERT | A6O_ACTION_QUARANTINE:
 		return "alert+quarantine";
-	case ARMADITO_ACTION_ALERT | ARMADITO_ACTION_REMOVE:
+	case A6O_ACTION_ALERT | A6O_ACTION_REMOVE:
 		return "alert+removed";
 	}
 

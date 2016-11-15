@@ -97,24 +97,24 @@ struct armadito *a6o_open(struct a6o_conf *conf, a6o_error **error)
 	u->conf = conf;
 	a6o_add_builtin_modules(u);
 
-	modules_dir = a6o_std_path(MODULES_LOCATION);
+	modules_dir = a6o_std_path(A6O_LOCATION_MODULES);
 	if (modules_dir == NULL) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "cannot get modules location, no dynamic loading of modules");
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "cannot get modules location, no dynamic loading of modules");
 	} else {
 		if (module_manager_load_path(u->module_manager, modules_dir, error))
-			a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "error during modules load");
+			a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "error during modules load");
 
 		free((void *)modules_dir);
 	}
 
 	if (module_manager_init_all(u->module_manager, error))
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "error during modules init");
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "error during modules init");
 
 	if (module_manager_configure_all(u->module_manager, conf, error))
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "error during modules configuration");
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "error during modules configuration");
 
 	if (module_manager_post_init_all(u->module_manager, error))
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "error during modules post_init");
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "error during modules post_init");
 
 	return u;
 }

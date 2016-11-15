@@ -40,12 +40,12 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #define __LIBARMADITO_STDPATHS_H_
 
 enum a6o_std_location {
-	MODULES_LOCATION,
-	CONFIG_FILE_LOCATION,
-	CONFIG_DIR_LOCATION,
-	BASES_LOCATION,
-	BINARY_LOCATION,
-	TMP_LOCATION,
+	A6O_LOCATION_MODULES,
+	A6O_LOCATION_CONFIG_FILE,
+	A6O_LOCATION_CONFIG_DIR,
+	A6O_LOCATION_BASES,
+	A6O_LOCATION_BINARY,
+	A6O_LOCATION_TMP,
 };
 
 const char *a6o_std_path(enum a6o_std_location location);

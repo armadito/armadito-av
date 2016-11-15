@@ -162,7 +162,7 @@ static struct key_entry *key_entry_add(struct a6o_conf *conf, const char *sectio
 		s = section_entry_add(conf, section);
 
 	if (key_entry_get_sect(s, key) != NULL) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "duplicate key in configuration section %s: %s", section, key);
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "duplicate key in configuration section %s: %s", section, key);
 		return NULL;
 	}
 
@@ -418,7 +418,7 @@ int a6o_conf_set_value(struct a6o_conf *conf, const char *section, const char *k
 		return 1;
 
 	if (a6o_conf_value_get_type(&k->value) != a6o_conf_value_get_type(value)) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "cannot set key to a different type in configuration section %s: %s", section, key);
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "cannot set key to a different type in configuration section %s: %s", section, key);
 		return 1;
 	}
 
@@ -435,7 +435,7 @@ int a6o_conf_set_uint(struct a6o_conf *conf, const char *section, const char *ke
 		return 1;
 
 	if (a6o_conf_value_get_type(&k->value) != CONF_TYPE_INT) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "cannot set key to a different type in configuration section %s: %s", section, key);
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "cannot set key to a different type in configuration section %s: %s", section, key);
 		return 1;
 	}
 
@@ -452,7 +452,7 @@ int a6o_conf_set_string(struct a6o_conf *conf, const char *section, const char *
 		return 1;
 
 	if (a6o_conf_value_get_type(&k->value) != CONF_TYPE_STRING) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "cannot set key to a different type in configuration section %s: %s", section, key);
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "cannot set key to a different type in configuration section %s: %s", section, key);
 		return 1;
 	}
 
@@ -470,7 +470,7 @@ int a6o_conf_set_list(struct a6o_conf *conf, const char *section, const char *ke
 		return 1;
 
 	if (a6o_conf_value_get_type(&k->value) != CONF_TYPE_LIST) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "cannot set key to a different type in configuration section %s: %s", section, key);
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "cannot set key to a different type in configuration section %s: %s", section, key);
 		return 1;
 	}
 

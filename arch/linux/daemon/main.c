@@ -163,7 +163,7 @@ static void create_pid_file(const char *pidfile)
 	return;
 
 err:
-	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR, "cannot create PID file %s (errno %d)", pidfile, errno);
+	a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR, "cannot create PID file %s (errno %d)", pidfile, errno);
 	exit(EXIT_FAILURE);
 }
 
@@ -172,9 +172,9 @@ static void load_conf(struct a6o_conf *conf)
 	const char *conf_file;
 	a6o_error *error = NULL;
 
-	conf_file = a6o_std_path(CONFIG_FILE_LOCATION);
+	conf_file = a6o_std_path(A6O_LOCATION_CONFIG_FILE);
 
-	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_INFO, "loading configuration file %s", conf_file);
+	a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_INFO, "loading configuration file %s", conf_file);
 
 	if (a6o_conf_load_file(conf, conf_file, &error)) {
 		a6o_error_print(error, stderr);
@@ -190,13 +190,13 @@ static void load_conf_dir(struct a6o_conf *conf)
 	DIR *dir;
 	struct dirent *dp;
 
-	conf_dir = a6o_std_path(CONFIG_DIR_LOCATION);
+	conf_dir = a6o_std_path(A6O_LOCATION_CONFIG_DIR);
 
-	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_INFO, "loading configuration directory %s", conf_dir);
+	a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_INFO, "loading configuration directory %s", conf_dir);
 
 	dir = opendir(conf_dir);
 	if (dir == NULL) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_WARNING, "error opening configuration directory %s (%s)", conf_dir, strerror(errno));
+		a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_WARNING, "error opening configuration directory %s (%s)", conf_dir, strerror(errno));
 		return;
 	}
 
@@ -214,7 +214,7 @@ static void load_conf_dir(struct a6o_conf *conf)
 			if (asprintf(&full_path, "%s/%s", conf_dir, file_name) == -1)
 				break;
 
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_INFO, "loading configuration file %s", full_path);
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_INFO, "loading configuration file %s", full_path);
 
 			if (a6o_conf_load_file(conf, full_path, &error)) {
 				a6o_error_print(error, stderr);
@@ -251,7 +251,7 @@ static void start_daemon(const char *progname, struct a6o_daemon_options *opts)
 	if (opts->pid_file != NULL)
 		create_pid_file(opts->pid_file);
 
-	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_NONE, "starting %s%s", progname, opts->no_daemon ? "" : " in daemon mode");
+	a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_NONE, "starting %s%s", progname, opts->no_daemon ? "" : " in daemon mode");
 
 	conf = a6o_conf_new();
 	load_conf(conf);
@@ -283,7 +283,7 @@ static void start_http_server(const char *progname, struct a6o_daemon_options *o
 	if (opts->pid_file != NULL)
 		create_pid_file(opts->pid_file);
 
-	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_NONE, "starting %s%s", progname, opts->no_daemon ? "" : " in daemon mode");
+	a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_NONE, "starting %s%s", progname, opts->no_daemon ? "" : " in daemon mode");
 
 	conf = a6o_conf_new();
 	load_conf(conf);

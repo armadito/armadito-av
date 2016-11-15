@@ -41,7 +41,7 @@ static enum a6o_mod_status mod_on_demand_conf_white_list_dir(struct a6o_module *
 			a6o_scan_conf_white_list_directory(on_demand_conf, *p);
 	}
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static enum a6o_mod_status mod_on_demand_conf_modules(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
@@ -57,7 +57,7 @@ static enum a6o_mod_status mod_on_demand_conf_modules(struct a6o_module *module,
 			a6o_scan_conf_add_module(on_demand_conf, *p, module->armadito);
 	}
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static enum a6o_mod_status mod_on_demand_conf_mime_types(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
@@ -73,7 +73,7 @@ static enum a6o_mod_status mod_on_demand_conf_mime_types(struct a6o_module *modu
 			a6o_scan_conf_add_mime_type(on_demand_conf, *p);
 	}
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static enum a6o_mod_status mod_on_demand_conf_max_size(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
@@ -82,7 +82,7 @@ static enum a6o_mod_status mod_on_demand_conf_max_size(struct a6o_module *module
 
 	a6o_scan_conf_max_file_size(on_demand_conf, a6o_conf_value_get_int(value));
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 struct a6o_conf_entry on_demand_conf_table[] = {

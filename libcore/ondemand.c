@@ -82,14 +82,14 @@ static int cancel = 0;
 
 void a6o_on_demand_cancel(struct a6o_on_demand *on_demand)
 {
-  a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "-- on_demand_cancel call !");
+  a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "-- on_demand_cancel call !");
   cancel = 1;
 
 }
 
 static int a6o_on_demand_is_canceled(struct a6o_on_demand *on_demand)
 {
- // a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "cancel = %d", cancel);
+ // a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "cancel = %d", cancel);
  
   return cancel;
 }
@@ -141,9 +141,9 @@ static void process_error(struct a6o_scan *scan, const char *full_path, int entr
 
 	a6o_report_init(&report, scan->scan_id, full_path, REPORT_PROGRESS_UNKNOWN);
 
-	a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "error processing %s (error %s)", full_path, os_strerror(entry_errno));
+	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "error processing %s (error %s)", full_path, os_strerror(entry_errno));
 
-	report.status = ARMADITO_IERROR;
+	report.status = A6O_FILE_IERROR;
 	report.mod_report = os_strdup(os_strerror(entry_errno));
 	a6o_scan_call_callbacks(scan, &report);
 
@@ -159,7 +159,7 @@ static int scan_entry(const char *full_path, enum os_file_flag flags, int entry_
 	int canceled = a6o_on_demand_is_canceled(on_demand);
 
 	if (canceled){
-		//a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "scan canceled on path %s", full_path);
+		//a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "scan canceled on path %s", full_path);
 		return 2;
 	}
 
@@ -268,7 +268,7 @@ void a6o_on_demand_run(struct a6o_on_demand *on_demand)
 	struct os_file_stat stat_buf;
 	int stat_errno;
 
-	a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_INFO, "starting %sthreaded scan of %s",
+	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_INFO, "starting %sthreaded scan of %s",
 		on_demand->flags & ARMADITO_SCAN_THREADED ? "" : "non-",
 		on_demand->root_path);
 

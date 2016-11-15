@@ -101,7 +101,7 @@ int send_notif(enum notif_type type, char * message) {
 		status = json_handler_ui_request(UI_IPC_PATH, notif, notif_len, response, response_len);
 		if (status != JSON_OK) {
 			//printf("[-] Warning :: send_notif :: notification not sent/received correctly!\n");
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_WARNING,"[-] Warning :: send_notif :: notification not sent/received correctly!\n");
+			a6o_log(A6O_LOG_SERVICE,A6O_LOG_LEVEL_WARNING,"[-] Warning :: send_notif :: notification not sent/received correctly!\n");
 			ret = -4;
 			__leave;
 		}

@@ -48,7 +48,7 @@ int get_av_info( ) {
 		// Send state request to av
 		status = json_handler_ui_request(SVC_IPC_PATH, request, request_len, response, response_len);
 		if (status != JSON_OK) {
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: get_av_info :: json_handler_ui_request failed :: status= %d \n", status);
+			a6o_log(A6O_LOG_SERVICE,A6O_LOG_LEVEL_ERROR,"[-] Error :: get_av_info :: json_handler_ui_request failed :: status= %d \n", status);
 			ret = -1;
 			__leave;
 		}

@@ -33,22 +33,22 @@ static const char *os_stdpath_tmp();
 const char *a6o_std_path(enum a6o_std_location location)
 {
 	switch(location) {
-	case MODULES_LOCATION:
+	case A6O_LOCATION_MODULES:
 		return os_stdpath_module();
 		break;
-	case CONFIG_FILE_LOCATION:
+	case A6O_LOCATION_CONFIG_FILE:
 		return os_stdpath_config_file();
 		break;
-	case CONFIG_DIR_LOCATION:
+	case A6O_LOCATION_CONFIG_DIR:
 		return os_stdpath_config_dir();
 		break;
-	case BASES_LOCATION:
+	case A6O_LOCATION_BASES:
 		return os_stdpath_bases();
 		break;
-	case BINARY_LOCATION:
+	case A6O_LOCATION_BINARY:
 		return os_stdpath_binary();
 		break;
-	case TMP_LOCATION:
+	case A6O_LOCATION_TMP:
 		return os_stdpath_tmp();
 		break;
 	}
@@ -111,14 +111,14 @@ static char * GetBinaryDirectory()
 	int len = 0;
 
 	if (!GetModuleFileNameA(NULL, (LPSTR)&filepath, MAX_PATH)) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "[-] Error :: GetBinaryDirectory!GetModuleFileName() failed :: %d\n", GetLastError());
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_ERROR, "[-] Error :: GetBinaryDirectory!GetModuleFileName() failed :: %d\n", GetLastError());
 		return NULL;
 	}
 
 	// get the file name from the complete file path
 	ptr = strrchr(filepath, '\\');
 	if (ptr == NULL) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "[-] Error :: GetBinaryDirectory!strrchr() failed :: backslash not found in the path :: %s.\n", filepath);
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "[-] Error :: GetBinaryDirectory!strrchr() failed :: backslash not found in the path :: %s.\n", filepath);
 		return NULL;
 	}
 

@@ -38,13 +38,13 @@ const char *a6o_update_status_str(enum a6o_update_status status)
 	switch(status) {
 #undef M
 #define M(S) case S: return #S
-		M(ARMADITO_UPDATE_OK);
-		M(ARMADITO_UPDATE_LATE);
-		M(ARMADITO_UPDATE_CRITICAL);
-		M(ARMADITO_UPDATE_NON_AVAILABLE);
+		M(A6O_UPDATE_OK);
+		M(A6O_UPDATE_LATE);
+		M(A6O_UPDATE_CRITICAL);
+		M(A6O_UPDATE_NON_AVAILABLE);
 	}
 
-	return "ARMADITO_UPDATE_UNKNOWN";
+	return "A6O_UPDATE_UNKNOWN";
 }
 
 
@@ -54,14 +54,14 @@ static int update_status_compare(enum a6o_update_status s1, enum a6o_update_stat
 		return 0;
 
 	switch(s1) {
-	case ARMADITO_UPDATE_NON_AVAILABLE:
+	case A6O_UPDATE_NON_AVAILABLE:
 		return -1;
-	case ARMADITO_UPDATE_OK:
-		return (s2 == ARMADITO_UPDATE_NON_AVAILABLE) ? 1 : -1;
-	case ARMADITO_UPDATE_LATE:
-		return (s2 == ARMADITO_UPDATE_NON_AVAILABLE || s2 == ARMADITO_UPDATE_OK) ? 1 : -1;
-	case ARMADITO_UPDATE_CRITICAL:
-		return (s2 == ARMADITO_UPDATE_NON_AVAILABLE || s2 == ARMADITO_UPDATE_OK || s2 == ARMADITO_UPDATE_LATE) ? 1 : -1;
+	case A6O_UPDATE_OK:
+		return (s2 == A6O_UPDATE_NON_AVAILABLE) ? 1 : -1;
+	case A6O_UPDATE_LATE:
+		return (s2 == A6O_UPDATE_NON_AVAILABLE || s2 == A6O_UPDATE_OK) ? 1 : -1;
+	case A6O_UPDATE_CRITICAL:
+		return (s2 == A6O_UPDATE_NON_AVAILABLE || s2 == A6O_UPDATE_OK || s2 == A6O_UPDATE_LATE) ? 1 : -1;
 	}
 
 	return 666;
@@ -73,7 +73,7 @@ struct a6o_info *a6o_info_new(struct armadito *armadito)
 	GArray *g_module_infos;
 	struct a6o_module **modv;
 
-	info->global_status = ARMADITO_UPDATE_NON_AVAILABLE;
+	info->global_status = A6O_UPDATE_NON_AVAILABLE;
 	info->global_update_ts = 0;
 
 	g_module_infos = g_array_new(TRUE, TRUE, sizeof(struct a6o_module_info *));
@@ -91,7 +91,7 @@ struct a6o_info *a6o_info_new(struct armadito *armadito)
 
 			mod_status = (*mod->info_fun)(mod, mod_info);
 
-			if (mod_status == ARMADITO_UPDATE_NON_AVAILABLE) {
+			if (mod_status == A6O_UPDATE_NON_AVAILABLE) {
 				free(mod_info);
 				continue;
 			}

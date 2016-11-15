@@ -126,7 +126,7 @@ static ssize_t write_n(int fd, char *buffer, size_t len)
 		int w = write(fd, buffer, to_write);
 
 		if (w < 0) {
-			a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_WARNING, "error writing response in JSON receive: %s", strerror(errno));
+			a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, "error writing response in JSON receive: %s", strerror(errno));
 
 			return w;
 		}
@@ -161,7 +161,7 @@ int json_client_process(struct json_client *cl)
 	} while (n_read > 0);
 
 	if (n_read < 0) {
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR, "error in JSON receive: %s", strerror(errno));
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, "error in JSON receive: %s", strerror(errno));
 		return -1;
 	}
 
@@ -177,7 +177,7 @@ int json_client_process(struct json_client *cl)
 	buffer_clear(&cl->input_buffer);
 
 	if (close(cl->sock) < 0)
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_WARNING, "error closing JSON socket: %s", strerror(errno));
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, "error closing JSON socket: %s", strerror(errno));
 
 	if (!status)
 		a6o_json_handler_process(cl->json_handler);

@@ -118,7 +118,7 @@ int os_file_do_not_scan(const char *path)
 
 	real_path =  realpath(path, NULL);
 	if( real_path == NULL){
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_ERROR, "realpath of %s failed : %s.", path, strerror(errno));
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_ERROR, "realpath of %s failed : %s.", path, strerror(errno));
 		return 1;
 	}
 

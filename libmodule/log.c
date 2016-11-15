@@ -46,7 +46,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #define LOG_NAME "armadito"
 
-static enum a6o_log_level current_max_level = ARMADITO_LOG_LEVEL_WARNING;
+static enum a6o_log_level current_max_level = A6O_LOG_LEVEL_WARNING;
 static a6o_log_handler_t current_handler = a6o_log_default_handler;
 static void *current_handler_user_data = NULL;
 
@@ -57,7 +57,7 @@ void a6o_log(enum a6o_log_domain domain, enum a6o_log_level level, const char *f
 	gchar *message;
 
 	/* anything to do? */
-	if (level != ARMADITO_LOG_LEVEL_NONE && level > current_max_level)
+	if (level != A6O_LOG_LEVEL_NONE && level > current_max_level)
 		return;
 
 	/* format message */
@@ -74,7 +74,7 @@ void a6o_log(enum a6o_log_domain domain, enum a6o_log_level level, const char *f
 	g_free(message);
 
 #ifndef _WIN32
-	if (level & ARMADITO_LOG_LEVEL_ERROR)
+	if (level & A6O_LOG_LEVEL_ERROR)
 		abort();
 #endif
 }
@@ -93,17 +93,17 @@ void a6o_log_set_handler(enum a6o_log_level max_level, a6o_log_handler_t handler
 
 static FILE *get_stream(enum a6o_log_level log_level)
 {
-	return log_level & (ARMADITO_LOG_LEVEL_ERROR | ARMADITO_LOG_LEVEL_WARNING) ? stderr : stdout;
+	return log_level & (A6O_LOG_LEVEL_ERROR | A6O_LOG_LEVEL_WARNING) ? stderr : stdout;
 }
 
 static const char *domain_str(enum a6o_log_domain domain)
 {
 	switch(domain) {
-	case ARMADITO_LOG_LIB:
+	case A6O_LOG_LIB:
 		return "lib";
-	case ARMADITO_LOG_MODULE:
+	case A6O_LOG_MODULE:
 		return "module";
-	case ARMADITO_LOG_SERVICE:
+	case A6O_LOG_SERVICE:
 		return "service";
 	}
 
@@ -113,15 +113,15 @@ static const char *domain_str(enum a6o_log_domain domain)
 const char *a6o_log_level_str(enum a6o_log_level log_level)
 {
 	switch (log_level) {
-	case ARMADITO_LOG_LEVEL_ERROR:
+	case A6O_LOG_LEVEL_ERROR:
 		return "error";
-	case ARMADITO_LOG_LEVEL_WARNING:
+	case A6O_LOG_LEVEL_WARNING:
 		return "warning";
-	case ARMADITO_LOG_LEVEL_INFO:
+	case A6O_LOG_LEVEL_INFO:
 		return "info";
-	case ARMADITO_LOG_LEVEL_DEBUG:
+	case A6O_LOG_LEVEL_DEBUG:
 		return "debug";
-	case ARMADITO_LOG_LEVEL_NONE:
+	case A6O_LOG_LEVEL_NONE:
 		return "";
 	}
 
@@ -153,7 +153,7 @@ void a6o_log_default_handler(enum a6o_log_domain domain, enum a6o_log_level log_
 
 	g_string_append_printf(gstring, "%s[%d]: ", LOG_NAME, os_getpid());
 
-	if (log_level != ARMADITO_LOG_LEVEL_NONE)
+	if (log_level != A6O_LOG_LEVEL_NONE)
 		g_string_append_printf(gstring, "<%s> ", a6o_log_level_str(log_level));
 
 	g_string_append(gstring, message);

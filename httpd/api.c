@@ -19,10 +19,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#define SRC_REORG
-
 #define _GNU_SOURCE
-#include <assert.h>
 #include <glib.h>
 #include <jansson.h>
 #include <errno.h>
@@ -125,8 +122,6 @@ int event_process_cb(struct api_handler *a, struct MHD_Connection *connection, j
 int scan_check_cb(struct MHD_Connection *connection, json_t *in)
 {
 	json_t *j_path;
-
-	/* check if 'in' object contains key "path" with a string value */
 
 	j_path = json_object_get(in, "path");
 	if (j_path == NULL)

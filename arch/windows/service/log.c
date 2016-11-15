@@ -72,13 +72,13 @@ void winEventHandler(enum a6o_log_domain domain, enum a6o_log_level log_level, c
 
 	// Define Log Category
 	switch(domain) {
-		case ARMADITO_LOG_LIB:
+		case A6O_LOG_LIB:
 			eventCategory = LIBARMADITO_CATEGORY;
 			break;
-		case ARMADITO_LOG_MODULE:
+		case A6O_LOG_MODULE:
 			eventCategory = MODULES_CATEGORY;
 			break;
-		case ARMADITO_LOG_SERVICE:
+		case A6O_LOG_SERVICE:
 			eventCategory = SERVICE_CATEGORY;
 			break;
 		default:
@@ -90,23 +90,23 @@ void winEventHandler(enum a6o_log_domain domain, enum a6o_log_level log_level, c
 	// TODO :: add event type :: EVENTLOG_SUCCESS - EVENTLOG_AUDIT_FAILURE - EVENTLOG_AUDIT_SUCCESS
 	switch (log_level) {
 
-		case ARMADITO_LOG_LEVEL_ERROR:
+		case A6O_LOG_LEVEL_ERROR:
 			eventLogType = EVENTLOG_ERROR_TYPE;
 			eventId = MSG_ERROR;
 			break;
-		case ARMADITO_LOG_LEVEL_WARNING:
+		case A6O_LOG_LEVEL_WARNING:
 			eventLogType = EVENTLOG_WARNING_TYPE;
 			eventId = MSG_WARNING;
 			break;
-		case ARMADITO_LOG_LEVEL_INFO:
+		case A6O_LOG_LEVEL_INFO:
 			eventLogType = EVENTLOG_INFORMATION_TYPE;
 			eventId = MSG_INFO;
 			break;
-		case ARMADITO_LOG_LEVEL_DEBUG:
+		case A6O_LOG_LEVEL_DEBUG:
 			eventLogType = EVENTLOG_INFORMATION_TYPE;
 			eventId = MSG_INFO;
 			break;
-		case ARMADITO_LOG_LEVEL_NONE:
+		case A6O_LOG_LEVEL_NONE:
 			eventLogType = EVENTLOG_INFORMATION_TYPE;
 			eventId = MSG_INFO;
 			break;

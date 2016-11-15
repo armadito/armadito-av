@@ -779,7 +779,7 @@ int disable_onaccess() {
 		status = json_handler_ui_request(SVC_IPC_PATH, request, req_len, response, response_len);
 		if (status != JSON_OK) {
 			//printf("[-] Warning :: send_notif :: notification not sent/received correctly!\n");
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_WARNING,"[-] Warning :: disable_onaccess :: notification not sent/received correctly!\n");
+			a6o_log(A6O_LOG_SERVICE,A6O_LOG_LEVEL_WARNING,"[-] Warning :: disable_onaccess :: notification not sent/received correctly!\n");
 			ret = -4;
 			__leave;
 		}
@@ -817,7 +817,7 @@ int init_configuration( ) {
 
 		// Create registry keys.
 		if (create_app_registry( ) != 0) {
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: init_configuration :: registry key creation failed!\n");
+			a6o_log(A6O_LOG_SERVICE,A6O_LOG_LEVEL_ERROR,"[-] Error :: init_configuration :: registry key creation failed!\n");
 			ret = -1;
 			__leave;
 		}
@@ -826,15 +826,15 @@ int init_configuration( ) {
 
 		// Load configuration from file.	
 		if ((conf = a6o_conf_new()) == NULL) {
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: init_configuration :: conf struct initialization failed!\n");
+			a6o_log(A6O_LOG_SERVICE,A6O_LOG_LEVEL_ERROR,"[-] Error :: init_configuration :: conf struct initialization failed!\n");
 			ret = -2;
 			__leave;
 		}
 
 		// get configuration file path.
-		conf_file = a6o_std_path(CONFIG_FILE_LOCATION);
+		conf_file = a6o_std_path(A6O_LOCATION_CONFIG_FILE);
 		if (conf_file == NULL) {
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: init_configuration :: get configuration file path failed !\n");
+			a6o_log(A6O_LOG_SERVICE,A6O_LOG_LEVEL_ERROR,"[-] Error :: init_configuration :: get configuration file path failed !\n");
 			ret = -3;
 			__leave;
 		}

@@ -26,10 +26,10 @@ struct armadito;
 struct a6o_module;
 
 enum a6o_mod_status {
-	ARMADITO_MOD_OK,
-	ARMADITO_MOD_INIT_ERROR,
-	ARMADITO_MOD_CONF_ERROR,
-	ARMADITO_MOD_CLOSE_ERROR,
+	A6O_MOD_OK,
+	A6O_MOD_INIT_ERROR,
+	A6O_MOD_CONF_ERROR,
+	A6O_MOD_CLOSE_ERROR,
 };
 
 struct a6o_conf_entry {

@@ -70,7 +70,7 @@ int ServiceLoadProcedure(start_mode mode) {
 
 		// Load configuration from registry.
 		if (restore_conf_from_registry(conf) < 0) {			
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: fail to load the configuration!\n");
+			a6o_log(A6O_LOG_SERVICE,A6O_LOG_LEVEL_ERROR,"[-] Error :: fail to load the configuration!\n");
 			ret = -1;
 			__leave;
 		}
@@ -78,15 +78,15 @@ int ServiceLoadProcedure(start_mode mode) {
 
 		// Load configuration from file.	
 		if ((conf = a6o_conf_new()) == NULL) {
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: init_configuration :: conf struct initialization failed!\n");
+			a6o_log(A6O_LOG_SERVICE,A6O_LOG_LEVEL_ERROR,"[-] Error :: init_configuration :: conf struct initialization failed!\n");
 			ret = -2;
 			__leave;
 		}
 
 		// get configuration file path.
-		conffile = a6o_std_path(CONFIG_FILE_LOCATION);
+		conffile = a6o_std_path(A6O_LOCATION_CONFIG_FILE);
 		if (conffile == NULL) {
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: init_configuration :: get configuration file path failed !\n");
+			a6o_log(A6O_LOG_SERVICE,A6O_LOG_LEVEL_ERROR,"[-] Error :: init_configuration :: get configuration file path failed !\n");
 			ret = -3;
 			__leave;
 		}
@@ -107,7 +107,7 @@ int ServiceLoadProcedure(start_mode mode) {
 		error = NULL;
 		armadito = a6o_open(conf,&error);
 		if (armadito == NULL) {
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " a6o_open() struct initialization failed!\n");
+			a6o_log(A6O_LOG_SERVICE,A6O_LOG_LEVEL_ERROR, " a6o_open() struct initialization failed!\n");
 			ret = -1;
 			__leave;
 		}
@@ -130,12 +130,12 @@ int ServiceLoadProcedure(start_mode mode) {
 			hres = UserScanInit(&gScanContext);
 			if (FAILED(hres)) {
 				//hres = UserScanFinalize(&userScanCtx);
-				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Scan Thread initialization failed!\n");
+				a6o_log(A6O_LOG_SERVICE,A6O_LOG_LEVEL_ERROR, " Scan Thread initialization failed!\n");
 				ret = -2;
 				__leave;
 			}
 
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_INFO, " Service connected to the driver successfully!\n");
+			a6o_log(A6O_LOG_SERVICE,A6O_LOG_LEVEL_INFO, " Service connected to the driver successfully!\n");
 		}
 		
 
@@ -143,12 +143,12 @@ int ServiceLoadProcedure(start_mode mode) {
 		// Notes : If you intend to use a named pipe locally only, deny access to NT AUTHORITY\NETWORK or switch to local RPC.
 		//gScanContext.onDemandCtx = &onDemandCtx;
 		if (Start_IHM_Connection(&gScanContext) < 0) {
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR," Start IHM connection failed :: %d\n",ret);
+			a6o_log(A6O_LOG_SERVICE,A6O_LOG_LEVEL_ERROR," Start IHM connection failed :: %d\n",ret);
 			ret = -3;
 			__leave;
 
 		}	
-		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_INFO, " Service connected to the GUI successfully!\n");
+		a6o_log(A6O_LOG_SERVICE,A6O_LOG_LEVEL_INFO, " Service connected to the GUI successfully!\n");
 		a6o_notify(NOTIF_INFO,"Service started!" );
 
 
@@ -693,7 +693,7 @@ void WINAPI ServiceCtrlHandler( DWORD dwCtrl ) {
 			// Unload service.
 			ret = ServiceUnloadProcedure();
 			if (ret != 0) {
-				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service unloaded with errors during pause.\n");				
+				a6o_log(A6O_LOG_SERVICE,A6O_LOG_LEVEL_ERROR, " Service unloaded with errors during pause.\n");				
 			}
 
 			ReportSvcStatus(SERVICE_PAUSED, NO_ERROR, 0);			
@@ -705,7 +705,7 @@ void WINAPI ServiceCtrlHandler( DWORD dwCtrl ) {
 			ReportSvcStatus(SERVICE_RUNNING, NO_ERROR, 0);
 			ret = ServiceLoadProcedure(SVC_MODE);
 			if (ret < 0) {
-				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service Initialization failed during continue \n");				
+				a6o_log(A6O_LOG_SERVICE,A6O_LOG_LEVEL_ERROR, " Service Initialization failed during continue \n");				
 				// Stop the service on error.
 				ServiceStop( );
 			}			
@@ -717,7 +717,7 @@ void WINAPI ServiceCtrlHandler( DWORD dwCtrl ) {
 
 			ret = ServiceUnloadProcedure();
 			if (ret != 0) {
-				a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service unloaded with errors\n");				
+				a6o_log(A6O_LOG_SERVICE,A6O_LOG_LEVEL_ERROR, " Service unloaded with errors\n");				
 			}			
 
 			 // Signal the service to stop.
@@ -745,18 +745,18 @@ void PerformServiceAction( ) {
 	int ret = 0;
 
 	// set log handler (windows log event) // move this statement to a better place.
-	a6o_log_set_handler(ARMADITO_LOG_LEVEL_NONE, winEventHandler,NULL);
+	a6o_log_set_handler(A6O_LOG_LEVEL_NONE, winEventHandler,NULL);
 
 	a6o_notify_set_handler((a6o_notify_handler_t)send_notif);
 
 	ret = ServiceLoadProcedure(SVC_MODE);
 	if (ret < 0) {
-		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service Initialization failed \n");		
+		a6o_log(A6O_LOG_SERVICE,A6O_LOG_LEVEL_ERROR, " Service Initialization failed \n");		
 		// Stop the service on error.
 		ServiceStop( );
 	}
 	else {
-		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_INFO, " Service Initializaed successfully!\n");		
+		a6o_log(A6O_LOG_SERVICE,A6O_LOG_LEVEL_INFO, " Service Initializaed successfully!\n");		
 	}
 	
 	return;
@@ -1049,7 +1049,7 @@ void ServiceStop( ) {
 	// TODO: Unload databases, + modules + others dependencies...
 	ret = ServiceUnloadProcedure( );
 	if (ret != 0) {
-		a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service unloaded with errors\n");
+		a6o_log(A6O_LOG_SERVICE,A6O_LOG_LEVEL_ERROR, " Service unloaded with errors\n");
 	}	
 
 	// Send a stop code to the service.
@@ -1291,7 +1291,7 @@ int LaunchCmdLineService(start_mode mode) {
 	__try {
 		
 		if (ServiceLoadProcedure(mode) < 0) {
-			a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service Initialization failed:\n");
+			a6o_log(A6O_LOG_SERVICE,A6O_LOG_LEVEL_ERROR, " Service Initialization failed:\n");
 			__leave;
 		}
 
@@ -1308,7 +1308,7 @@ int LaunchCmdLineService(start_mode mode) {
 
 				// pause.				
 				if (ServiceUnloadProcedure( ) != 0) {
-					a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service unloaded with errors during pause.\n");					
+					a6o_log(A6O_LOG_SERVICE,A6O_LOG_LEVEL_ERROR, " Service unloaded with errors during pause.\n");					
 					break;
 				}
 			
@@ -1318,7 +1318,7 @@ int LaunchCmdLineService(start_mode mode) {
 
 				// continue.							
 				if (ServiceLoadProcedure(mode) < 0) {
-					a6o_log(ARMADITO_LOG_SERVICE,ARMADITO_LOG_LEVEL_ERROR, " Service Initialization failed during continue \n");
+					a6o_log(A6O_LOG_SERVICE,A6O_LOG_LEVEL_ERROR, " Service Initialization failed during continue \n");
 				}
 			}
 
@@ -1328,7 +1328,7 @@ int LaunchCmdLineService(start_mode mode) {
 	__finally {
 
 		if (ServiceUnloadProcedure( ) != 0) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR, "[-] Error :: Service Unload Procedure failed! ::\n");
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR, "[-] Error :: Service Unload Procedure failed! ::\n");
 		}
 
 	}
@@ -1391,7 +1391,7 @@ int main(int argc, char ** argv) {
 		}
 
 		/* (FD) added to get all log messages */
-		a6o_log_set_handler(ARMADITO_LOG_LEVEL_DEBUG, a6o_log_default_handler, NULL);
+		a6o_log_set_handler(A6O_LOG_LEVEL_DEBUG, a6o_log_default_handler, NULL);
 		
 		ret = LaunchCmdLineService(GUI_ONLY);
 

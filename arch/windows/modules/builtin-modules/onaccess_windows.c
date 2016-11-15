@@ -36,7 +36,7 @@ static enum a6o_mod_status mod_onaccess_init(struct a6o_module *module)
 	fa_data->enable_permission = 0;
 	fa_data->state_flag = 0;
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static enum a6o_mod_status mod_onaccess_conf_set_enable_on_access(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
@@ -45,7 +45,7 @@ static enum a6o_mod_status mod_onaccess_conf_set_enable_on_access(struct a6o_mod
 
 	fa_data->enable_permission = a6o_conf_value_get_int(value);
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static enum a6o_mod_status mod_onaccess_conf_modules(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
@@ -61,7 +61,7 @@ static enum a6o_mod_status mod_onaccess_conf_modules(struct a6o_module *module, 
 			a6o_scan_conf_add_module(on_access_conf, *p, module->armadito);
 	}
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static enum a6o_mod_status mod_onaccess_conf_max_size(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
@@ -70,7 +70,7 @@ static enum a6o_mod_status mod_onaccess_conf_max_size(struct a6o_module *module,
 
 	a6o_scan_conf_max_file_size(on_access_conf, a6o_conf_value_get_int(value));
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static enum a6o_mod_status mod_onaccess_conf_mime_types(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
@@ -86,7 +86,7 @@ static enum a6o_mod_status mod_onaccess_conf_mime_types(struct a6o_module *modul
 			a6o_scan_conf_add_mime_type(on_access_conf, *p);
 	}
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static enum a6o_mod_status mod_onaccess_close(struct a6o_module *module)
@@ -98,7 +98,7 @@ static enum a6o_mod_status mod_onaccess_close(struct a6o_module *module)
 		fa_data = NULL;
 	}
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static enum a6o_update_status mod_onaccess_info(struct a6o_module *module, struct a6o_module_info *info){
@@ -113,10 +113,10 @@ static enum a6o_update_status mod_onaccess_info(struct a6o_module *module, struc
 
 	data = module->data;
 	if (data->state_flag == 0) {
-		return ARMADITO_UPDATE_NON_AVAILABLE;
+		return A6O_UPDATE_NON_AVAILABLE;
 	}
 
-	return ARMADITO_UPDATE_OK;
+	return A6O_UPDATE_OK;
 }
 
 struct a6o_conf_entry mod_onaccess_conf_table[] = {

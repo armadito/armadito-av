@@ -68,7 +68,7 @@ int inotify_monitor_start(struct inotify_monitor *im)
 
 	im->inotify_fd = inotify_init();
 	if (im->inotify_fd == -1) {
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "inotify_init failed (%s)", strerror(errno));
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "inotify_init failed (%s)", strerror(errno));
 		return -1;
 	}
 
@@ -89,7 +89,7 @@ int inotify_monitor_mark_directory(struct inotify_monitor *im, const char *path)
 
 	wd = inotify_add_watch(im->inotify_fd, path, IN_ONLYDIR | IN_MOVE | IN_DELETE | IN_CREATE);
 	if (wd == -1) {
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "adding inotify watch for %s failed (%s)", path, strerror(errno));
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "adding inotify watch for %s failed (%s)", path, strerror(errno));
 		return -1;
 	}
 
@@ -106,13 +106,13 @@ int inotify_monitor_unmark_directory(struct inotify_monitor *im, const char *pat
 	/* retrieve the watch descriptor associated to path */
 	p = g_hash_table_lookup(im->path2wd_table, path);
 	if (p == NULL) {
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "retrieving inotify watch id for %s failed", path);
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "retrieving inotify watch id for %s failed", path);
 	} else {
 		int wd = GPOINTER_TO_INT(p);
 
 		/* errors are ignored: if the watch descriptor is invalid, it means it is no longer being watched because of deletion */
 		if (inotify_rm_watch(im->inotify_fd, wd) == -1) {
-			a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "removing inotify watch %d for %s failed (%s)", wd, path, strerror(errno));
+			a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "removing inotify watch %d for %s failed (%s)", wd, path, strerror(errno));
 		}
 
 		g_hash_table_remove(im->wd2path_table, GINT_TO_POINTER(wd));
@@ -159,7 +159,7 @@ static void inotify_event_log(const struct inotify_event *e, const char *full_pa
 
 	g_string_append_printf(s, " full_path=%s", full_path != NULL ? full_path : "null");
 
-	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "%s", s->str);
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "%s", s->str);
 
 	g_string_free(s, TRUE);
 }
@@ -199,7 +199,7 @@ static void inotify_event_process(struct inotify_monitor *im, struct inotify_eve
 	full_path = inotify_event_full_path(im, event);
 
 #if 0
-	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "inotify full path %s", full_path != NULL ? full_path : "(null)");
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "inotify full path %s", full_path != NULL ? full_path : "(null)");
 #endif
 
 	if (full_path == NULL)

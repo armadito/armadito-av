@@ -25,10 +25,10 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <time.h>
 
 enum a6o_update_status {
-	ARMADITO_UPDATE_OK,
-	ARMADITO_UPDATE_LATE,
-	ARMADITO_UPDATE_CRITICAL,
-	ARMADITO_UPDATE_NON_AVAILABLE,
+	A6O_UPDATE_OK,
+	A6O_UPDATE_LATE,
+	A6O_UPDATE_CRITICAL,
+	A6O_UPDATE_NON_AVAILABLE,
 };
 
 struct a6o_base_info {

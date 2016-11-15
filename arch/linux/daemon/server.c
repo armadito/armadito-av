@@ -78,11 +78,11 @@ static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpo
 	client_sock = accept(server->listen_sock, NULL, NULL);
 
 	if (client_sock < 0) {
-		a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_ERROR, "accept() failed (%s)", strerror(errno));
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, "accept() failed (%s)", strerror(errno));
 		return FALSE;
 	}
 
-	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG, "accepted client connection: fd = %d", client_sock);
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_DEBUG, "accepted client connection: fd = %d", client_sock);
 
 	switch(server->ipc_type) {
 	case OLD_IPC:

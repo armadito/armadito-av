@@ -61,7 +61,7 @@ static gpointer watchdog_thread_fun(gpointer data)
 		n_fd = queue_pop_timeout(w->queue, &before, entries, N_FD);
 
 		if (n_fd) {
-			a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "%d file descriptors in timeout", n_fd);
+			a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "%d file descriptors in timeout", n_fd);
 
 			for(i = 0; i < n_fd; i++)
 				response_write(w->fanotify_fd, entries[i].fd, FAN_ALLOW, NULL, "timeout");

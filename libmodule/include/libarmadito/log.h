@@ -28,8 +28,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
-#ifndef LIBARMADITO_LOG_H
-#define LIBARMADITO_LOG_H
+#ifndef LIBA6O_LOG_H
+#define LIBA6O_LOG_H
 
 /**
  * \enum a6o_log_level
@@ -43,11 +43,11 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 enum a6o_log_level {
-	ARMADITO_LOG_LEVEL_ERROR      = 1 << 1,   /*!< error, operations must stop                   */
-	ARMADITO_LOG_LEVEL_WARNING    = 1 << 2,   /*!< warning, things can go on                     */
-	ARMADITO_LOG_LEVEL_INFO       = 1 << 3,   /*!< normal information                            */
-	ARMADITO_LOG_LEVEL_DEBUG      = 1 << 4,   /*!< debug message                                 */
-	ARMADITO_LOG_LEVEL_NONE       = 1 << 5,   /*!< no specific level, message will always show   */
+	A6O_LOG_LEVEL_ERROR      = 1 << 1,   /*!< error, operations must stop                   */
+	A6O_LOG_LEVEL_WARNING    = 1 << 2,   /*!< warning, things can go on                     */
+	A6O_LOG_LEVEL_INFO       = 1 << 3,   /*!< normal information                            */
+	A6O_LOG_LEVEL_DEBUG      = 1 << 4,   /*!< debug message                                 */
+	A6O_LOG_LEVEL_NONE       = 1 << 5,   /*!< no specific level, message will always show   */
 };
 
 /**
@@ -56,9 +56,9 @@ enum a6o_log_level {
  *
  */
 enum a6o_log_domain {
-	ARMADITO_LOG_LIB,               /*!< messages from the library                     */
-	ARMADITO_LOG_MODULE,            /*!< messages from the modules                     */
-	ARMADITO_LOG_SERVICE,           /*!< messages from the service or daemon           */
+	A6O_LOG_LIB,               /*!< messages from the library                     */
+	A6O_LOG_MODULE,            /*!< messages from the modules                     */
+	A6O_LOG_SERVICE,           /*!< messages from the service or daemon           */
 };
 
 /**
@@ -83,7 +83,7 @@ typedef void (*a6o_log_handler_t)(enum a6o_log_domain domain, enum a6o_log_level
  *
  * Register a log handler and set the current log level.
  * Only log levels smaller than max_level will be displayed, for example if max_level is
- * ARMADITO_LOG_LEVEL_WARNING, only calls to a6o_log with a log level of ERROR or WARNING will
+ * A6O_LOG_LEVEL_WARNING, only calls to a6o_log with a log level of ERROR or WARNING will
  * output a message
  *
  * \param[in] max_level            the maximum log level

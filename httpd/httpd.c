@@ -57,7 +57,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #define PAGE_405 "<html><head><title>not allowed!</title></head><body>Method not allowed for this ressource!</body></html>\n"
 
 /* threading model for microhttpd */
-#undef USE_GLIB_CHANNEL /* does not work */
 #undef USE_MHD_THREAD
 #define USE_MDH_SELECT
 
@@ -80,7 +79,7 @@ static int httpd_remove_client(struct httpd *h, int64_t token);
 #ifdef DEBUG
 static int value_print(void *cls, enum MHD_ValueKind kind, const char *key, const char *value)
 {
-	a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_DEBUG, "connection: key %s value %s", key, value);
+	a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_DEBUG, "connection: key %s value %s", key, value);
 
 	return MHD_YES;
 }
@@ -322,109 +321,6 @@ static int answer_to_connection_cb(void *cls, struct MHD_Connection *connection,
 	return content_serve(h, connection, url_path);
 }
 
-#ifdef USE_GLIB_CHANNEL
-static int open_listen_socket(short port)
-{
-	int sock, optval, r;
-	struct sockaddr_in listening_addr;
-
-	sock = socket(AF_INET, SOCK_STREAM, 0);
-	if (sock < 0)
-		return -1;
-
-	optval = 1;
-	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&optval, sizeof(optval)) < 0)
-		return -1;
-
-	listening_addr.sin_family = AF_INET;
-	listening_addr.sin_port = htons(port);
-	listening_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-
-	r = bind(sock, (struct sockaddr *)&listening_addr, sizeof(listening_addr));
-	if (r < 0)
-		return -1;
-
-	r = listen(sock, 5);
-	if (r < 0)
-		return -1;
-
-	return sock;
-}
-
-static gboolean httpd_listen_cb(GIOChannel *source, GIOCondition condition, gpointer data)
-{
-	struct httpd *h = (struct httpd *)data;
-	int client_sock, r;
-	struct sockaddr_in client_addr;
-	socklen_t addrlen = 0;
-
-	client_sock = accept(h->listen_sock, &client_addr, &addrlen);
-
-	if (client_sock < 0) {
-		log_e("accept() failed (%s)", strerror(errno));
-		return FALSE;
-	}
-
-	log_d("accepted client connection: fd = %d", client_sock);
-
-	r = MHD_add_connection(h->daemon, client_sock, (struct sockaddr *)&client_addr, addrlen);
-
-	if (r != MHD_YES) {
-		log_d("accepted client connection: fd = %d", client_sock);
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
-static void notify_completed_cb(void *cls, struct MHD_Connection *connection, void **con_cls, enum MHD_RequestTerminationCode toe)
-{
-	const union MHD_ConnectionInfo *info;
-
-	log_d("connection completed: toe = %d", toe);
-
-	info = MHD_get_connection_info(connection, MHD_CONNECTION_INFO_CONNECTION_FD);
-
-	switch(toe) {
-	case MHD_REQUEST_TERMINATED_COMPLETED_OK:
-		log_d("connection completed ok: fd = %d", info->connect_fd);
-		if (close(info->connect_fd) < 0) {
-			log_e("connection close failed (%s)", strerror(errno));
-		}
-		break;
-	case MHD_REQUEST_TERMINATED_WITH_ERROR:
-		break;
-	case MHD_REQUEST_TERMINATED_TIMEOUT_REACHED:
-		break;
-	case MHD_REQUEST_TERMINATED_DAEMON_SHUTDOWN:
-		break;
-	case MHD_REQUEST_TERMINATED_READ_ERROR:
-		break;
-	case MHD_REQUEST_TERMINATED_CLIENT_ABORT:
-		break;
-	}
-}
-
-static void create_daemon(struct httpd *h)
-{
-	GIOChannel *channel;
-
-	h->listen_sock = open_listen_socket(h->port);
-	if(h->listen_sock < 0) {
-		log_w("error opening server TCP socket (%s)", strerror(errno));
-		return;
-	}
-
-	h->daemon = MHD_start_daemon(MHD_USE_NO_LISTEN_SOCKET | MHD_USE_THREAD_PER_CONNECTION, 0, NULL, NULL, answer_to_connection_cb, h,
-			MHD_OPTION_NOTIFY_COMPLETED, notify_completed_cb, NULL,
-			MHD_OPTION_END);
-
-
-	channel = g_io_channel_unix_new(h->listen_sock);
-	g_io_add_watch(channel, G_IO_IN, httpd_listen_cb, h);
-}
-#endif
-
 #if defined(USE_MHD_THREAD) || defined(USE_MDH_SELECT)
 static void create_daemon(struct httpd *h)
 {
@@ -444,7 +340,6 @@ static void create_daemon(struct httpd *h)
 	h->daemon = MHD_start_daemon(flags, 0, NULL, NULL, answer_to_connection_cb, h, MHD_OPTION_SOCK_ADDR, &listening_addr, MHD_OPTION_END);
 }
 #endif
-
 
 static struct MHD_Response *create_std_response(const char *page)
 {

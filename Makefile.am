@@ -7,13 +7,12 @@ SUBDIRS=conf libmodule libcore httpd $(OPT_MAN_DIR) # libarmadito arch tools tes
 TAGDIRS=\
 $(top_srcdir)/arch \
 $(top_srcdir)/conf \
-$(top_srcdir)/json \
+$(top_srcdir)/httpd \
 $(top_srcdir)/libcore \
 $(top_srcdir)/libmodule \
-$(top_srcdir)/libarmadito \
 $(top_srcdir)/man \
-$(top_srcdir)/tools \
-$(top_srcdir)/tests 
+$(top_srcdir)/tests \
+$(top_srcdir)/tools 
 
 TAGS:
 	(for d in $(TAGDIRS) ; do find $$d -name '*.c' -o -name '*.h' -o -name '*.txt' -o -name 'Makefile.am' -o -name '*.pc.in' ; done ) | etags -

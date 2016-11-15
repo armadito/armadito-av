@@ -124,7 +124,7 @@ void a6o_scan_call_callbacks(struct a6o_scan *scan, struct a6o_report *report)
 /* 'mime_type' is the mime-type of the file */
 static enum a6o_file_status scan_apply_modules(int fd, const char *path, const char *mime_type, struct a6o_module **modules,  struct a6o_report *report)
 {
-	enum a6o_file_status current_status = ARMADITO_UNDECIDED;
+	enum a6o_file_status current_status = A6O_FILE_UNDECIDED;
 
 	/* iterate over the modules */
 	for (; *modules != NULL; modules++) {
@@ -132,17 +132,17 @@ static enum a6o_file_status scan_apply_modules(int fd, const char *path, const c
 		enum a6o_file_status mod_status;
 		char *mod_report = NULL;
 
-		//a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_DEBUG, "scanning fd %d path %s with module %s", fd, path, mod->name);
+		//a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "scanning fd %d path %s with module %s", fd, path, mod->name);
 
 		/* if module status is not OK, don't call it */
-		if (mod->status != ARMADITO_MOD_OK)
+		if (mod->status != A6O_MOD_OK)
 			continue;
 
 		/* call the scan function of the module */
 		/* but, after rewinding the file !!! */
 		if (os_lseek(fd, 0, SEEK_SET) < 0)  {
-			a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "cannot seek on file %s (error %s)", path, os_strerror(errno) );
-			return ARMADITO_IERROR;
+			a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "cannot seek on file %s (error %s)", path, os_strerror(errno) );
+			return A6O_FILE_IERROR;
 		}
 
 		mod_status = (*mod->scan_fun)(mod, fd, path, mime_type, &mod_report);
@@ -160,7 +160,7 @@ static enum a6o_file_status scan_apply_modules(int fd, const char *path, const c
 			free(mod_report);
 
 		/* if module has returned an authoritative status, no need to go on */
-		if (current_status == ARMADITO_WHITE_LISTED || current_status == ARMADITO_MALWARE)
+		if (current_status == A6O_FILE_WHITE_LISTED || current_status == A6O_FILE_MALWARE)
 			break;
 	}
 
@@ -183,7 +183,7 @@ static void scan_progress(struct a6o_scan *scan, struct a6o_report *report)
 
 	progress = (int)((100.0 * scan->scanned_count) / scan->to_scan_count);
 
-        // a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "Progress = %d = ( 100 * %d / %d ) ", progress, scan->scanned_count, scan->to_scan_count );
+        // a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "Progress = %d = ( 100 * %d / %d ) ", progress, scan->scanned_count, scan->to_scan_count );
 
 	if (progress > 100)
 		progress = 100;
@@ -195,16 +195,16 @@ static void scan_progress(struct a6o_scan *scan, struct a6o_report *report)
 static void update_counters (struct a6o_scan *scan, struct a6o_report *report, enum a6o_file_status status )
 {
        switch(status) {
-	case ARMADITO_UNDECIDED: break;
-	case ARMADITO_CLEAN: break;
-	case ARMADITO_UNKNOWN_FILE_TYPE: break;
-	case ARMADITO_EINVAL: break;
-	case ARMADITO_IERROR: break;
-	case ARMADITO_SUSPICIOUS:
+	case A6O_FILE_UNDECIDED: break;
+	case A6O_FILE_CLEAN: break;
+	case A6O_FILE_UNKNOWN_TYPE: break;
+	case A6O_FILE_EINVAL: break;
+	case A6O_FILE_IERROR: break;
+	case A6O_FILE_SUSPICIOUS:
 		scan->suspicious_count++;
 		break;
-	case ARMADITO_WHITE_LISTED: break;
-	case ARMADITO_MALWARE:
+	case A6O_FILE_WHITE_LISTED: break;
+	case A6O_FILE_MALWARE:
 		scan->malware_count++;
 		break;
       }
@@ -221,14 +221,14 @@ enum a6o_file_status a6o_scan_context(struct a6o_scan *scan, struct a6o_file_con
 	enum a6o_file_status status;
 	struct a6o_report report;
 
-	//a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_DEBUG, "scanning file %s", ctx->path);
+	//a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "scanning file %s", ctx->path);
 
 	/* initializes the structure passed to callbacks */
 	a6o_report_init(&report, scan->scan_id, ctx->path, REPORT_PROGRESS_UNKNOWN);
 
 	/* if no modules apply, then file is not handled */
 	if (ctx->applicable_modules == NULL || ctx->mime_type == NULL) {
-		status = ARMADITO_UNKNOWN_FILE_TYPE;
+		status = A6O_FILE_UNKNOWN_TYPE;
 		a6o_report_change(&report, status, NULL, NULL);
 	} else {
 		/* otherwise we scan it by applying the modules */
@@ -279,7 +279,7 @@ enum a6o_file_status a6o_scan_simple_old(struct armadito *armadito, const char *
 	int fd = -1; /* ??? */
 
 	if (os_file_do_not_scan(path))
-		return ARMADITO_CLEAN;
+		return A6O_FILE_CLEAN;
 
 	// Initialize the scan report structure.
 	if (report != NULL)
@@ -294,7 +294,7 @@ enum a6o_file_status a6o_scan_simple_old(struct armadito *armadito, const char *
 
 	if (modules == NULL || mime_type == NULL) {
 		free((void *)mime_type);
-		return ARMADITO_UNKNOWN_FILE_TYPE;
+		return A6O_FILE_UNKNOWN_TYPE;
 	}
 
 	status = scan_apply_modules(fd, path, mime_type, modules, report);
@@ -318,13 +318,13 @@ enum a6o_file_status a6o_scan_simple(struct armadito *armadito, const char *path
 
 #ifdef _WIN32
 	// only for test purpose :: TODO :: separate a6o_scan from callbacks.
-	if (report->status == ARMADITO_MALWARE) {
+	if (report->status == A6O_FILE_MALWARE) {
 		//printf("[+] Info :: a6o_scan_simple :: %d\n",report->status);
 		report->path = path;
 		scan = a6o_scan_new(armadito, -1);
 		a6o_scan_call_callbacks(scan, report);
 		a6o_scan_free(scan);
-		return ARMADITO_MALWARE;
+		return A6O_FILE_MALWARE;
 	}
 
 #endif
@@ -334,20 +334,20 @@ enum a6o_file_status a6o_scan_simple(struct armadito *armadito, const char *path
 	//context_status = a6o_file_context_get(&file_context, fd, path, a6o_scan_conf_on_demand());
 
 	if (context_status == ARMADITO_FC_WHITE_LISTED_DIRECTORY)
-		return ARMADITO_WHITE_LISTED;
+		return A6O_FILE_WHITE_LISTED;
 
 	if (context_status != ARMADITO_FC_MUST_SCAN ) {
 
 		/*if (context_status == ARMADITO_FC_MIME_TYPE_NOT_FOUND)
-		  status = ARMADITO_UNKNOWN_FILE_TYPE;
+		  status = A6O_FILE_UNKNOWN_TYPE;
 		  else if (context_status == ARMADITO_FC_FILE_OPEN_ERROR)
-		  status = ARMADITO_IERROR; // rename this error :: the file could not be opened.
+		  status = A6O_FILE_IERROR; // rename this error :: the file could not be opened.
 		  else
-		  status = ARMADITO_IERROR;
+		  status = A6O_FILE_IERROR;
 		*/
 		//a6o_log( );
-		//a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "path = %s  :: context_status = %d", path ,context_status);
-		status = ARMADITO_IERROR;
+		//a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "path = %s  :: context_status = %d", path ,context_status);
+		status = A6O_FILE_IERROR;
 		a6o_file_context_destroy(&file_context);
 		return status;
 	}

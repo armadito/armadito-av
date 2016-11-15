@@ -49,7 +49,7 @@ char * download_pub_key( ) {
 	
 	hres = URLDownloadToCacheFileA(NULL, A6O_PUB_KEY, pubkey_path,MAX_PATH, 0,NULL);
 	if (FAILED(hres)) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: download_pub_key :: URLDownloadToCacheFileA failed :: error = 0x%x\n",hres);
+		a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: download_pub_key :: URLDownloadToCacheFileA failed :: error = 0x%x\n",hres);
 		free(pubkey_path);
 		pubkey_path = NULL;
 		return pubkey_path;
@@ -74,7 +74,7 @@ BYTE * GetFileHash(char * data, int len, ALG_ID algo ) {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/aa382453%28v=vs.85%29.aspx
 	
 	if (data == NULL || len <= 0) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: GetFileHash :: Invalid parameters!\n");
+		a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: GetFileHash :: Invalid parameters!\n");
 		return NULL ; 
 	}
 
@@ -83,23 +83,23 @@ BYTE * GetFileHash(char * data, int len, ALG_ID algo ) {
 
 		// Acquire a handle to a particular key container within a particular cryptographic service provider.
 		if (CryptAcquireContextA(&hProv,NULL, NULL,PROV_RSA_FULL,CRYPT_VERIFYCONTEXT) == FALSE) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: GetFileHash :: Acquire crypt context failed. :: GLE = %d\n",GetLastError);
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: GetFileHash :: Acquire crypt context failed. :: GLE = %d\n",GetLastError);
 			__leave;
 		}
 
 		if (CryptCreateHash(hProv, algo, 0, 0, &hHash) == FALSE) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: GetFileHash :: Create hash failed. :: GLE = %d\n",GetLastError);
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: GetFileHash :: Create hash failed. :: GLE = %d\n",GetLastError);
 			__leave;
 		}
 
 		if (CryptHashData(hHash, data, len, 0) == FALSE) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: GetFileHash :: Crypt hash data failed. :: GLE = %d\n",GetLastError);
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: GetFileHash :: Crypt hash data failed. :: GLE = %d\n",GetLastError);
 			__leave;
 		}
 
 		// determine the size of the hash value
 		if (CryptGetHashParam(hHash, HP_HASHVAL, NULL, &hashsize, 0) == FALSE) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: GetFileHash :: Crypt Get hash Param failed. :: GLE = %d\n",GetLastError);
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: GetFileHash :: Crypt Get hash Param failed. :: GLE = %d\n",GetLastError);
 			__leave;
 		}
 
@@ -109,7 +109,7 @@ BYTE * GetFileHash(char * data, int len, ALG_ID algo ) {
 		hashval[hashsize] = '\0';
 
 		if (CryptGetHashParam(hHash, HP_HASHVAL, hashval, &hashsize, 0) == FALSE) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: GetFileHash :: Crypt Get hash Param failed. :: GLE = %d\n",GetLastError);
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: GetFileHash :: Crypt Get hash Param failed. :: GLE = %d\n",GetLastError);
 			ret = -1;
 			__leave;
 		}
@@ -124,7 +124,7 @@ BYTE * GetFileHash(char * data, int len, ALG_ID algo ) {
 	__finally {
 
 		if (CryptReleaseContext(hProv, 0) == FALSE) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: GetFileHash :: Release crypt context failed. :: GLE = %d\n",GetLastError);
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: GetFileHash :: Release crypt context failed. :: GLE = %d\n",GetLastError);
 			//return NULL;
 		}
 
@@ -155,7 +155,7 @@ HCRYPTKEY import_public_key(char * filename, HCRYPTPROV hProv) {
 	int size = 0 , cbPubKeyBlob = 0, buf_size = 0,  i = 0;
 
 	if (filename == NULL) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: import_public_key :: invalid parameters\n");
+		a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: import_public_key :: invalid parameters\n");
 		return 0;
 	}
 
@@ -164,7 +164,7 @@ HCRYPTKEY import_public_key(char * filename, HCRYPTPROV hProv) {
 		// import public key from file.
 		content = GetFileContent_b(filename,&size);
 		if (content == NULL) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: Get public key content failed\n");
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: Get public key content failed\n");
 			__leave;
 		}
 
@@ -172,7 +172,7 @@ HCRYPTKEY import_public_key(char * filename, HCRYPTPROV hProv) {
 
 
 		if (CryptStringToBinaryA(content, size, CRYPT_STRING_BASE64_ANY, NULL, &buf_size, 0, NULL) == FALSE) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: import_public_key :: Crypt String to Binary failed :: GLE = 0x%x\n",GetLastError());
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: import_public_key :: Crypt String to Binary failed :: GLE = 0x%x\n",GetLastError());
 			__leave;
 		}
 
@@ -181,7 +181,7 @@ HCRYPTKEY import_public_key(char * filename, HCRYPTPROV hProv) {
 		buf = (BYTE*)calloc(buf_size,sizeof(BYTE));
 
 		if (CryptStringToBinaryA(content, size, CRYPT_STRING_BASE64_ANY, buf, &buf_size, NULL, NULL) == FALSE) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: import_public_key :: Crypt String to Binary failed :: GLE = 0x%x\n",GetLastError());
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: import_public_key :: Crypt String to Binary failed :: GLE = 0x%x\n",GetLastError());
 			__leave;
 		}
 
@@ -193,7 +193,7 @@ HCRYPTKEY import_public_key(char * filename, HCRYPTPROV hProv) {
 
 
 		if (CryptDecodeObjectEx(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, RSA_CSP_PUBLICKEYBLOB, buf, buf_size,0, NULL, NULL, &cbPubKeyBlob) == FALSE) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: import_public_key :: Crypt Decode public key Object failed 1 :: GLE = 0x%x\n",GetLastError());
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: import_public_key :: Crypt Decode public key Object failed 1 :: GLE = 0x%x\n",GetLastError());
 			__leave;
 		}
 		
@@ -202,12 +202,12 @@ HCRYPTKEY import_public_key(char * filename, HCRYPTPROV hProv) {
 		pubKeyBlob = (BYTE*)calloc(cbPubKeyBlob ,sizeof(BYTE));
 
 		if (CryptDecodeObjectEx(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, RSA_CSP_PUBLICKEYBLOB, buf, buf_size,0, NULL, pubKeyBlob, &cbPubKeyBlob) == FALSE) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: import_public_key :: Crypt Decode public key Object failed 2 :: GLE = 0x%x\n",GetLastError());
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: import_public_key :: Crypt Decode public key Object failed 2 :: GLE = 0x%x\n",GetLastError());
 			__leave;
 		}
 
 		if (!CryptImportKey(hProv, pubKeyBlob, cbPubKeyBlob, 0, 0, &hPubKey)){
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: import_public_key :: CryptImportKey for public key failed :: GLE = 0x%x\n", GetLastError());
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: import_public_key :: CryptImportKey for public key failed :: GLE = 0x%x\n", GetLastError());
 			__leave;
 		}
 		
@@ -250,23 +250,23 @@ HCRYPTHASH calc_file_hash(char * filename,HCRYPTPROV hProv, ALG_ID  algo) {
 
 		content = GetFileContent_b(filename, &size);
 		if (content == NULL) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: calc_file_hash :: Get file content failed\n");
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: calc_file_hash :: Get file content failed\n");
 			__leave;
 		}
 
 		if (CryptCreateHash(hProv, algo, 0, 0, &hHash) == FALSE) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: calc_file_hash :: Create hash failed. :: GLE = 0x%x\n", GetLastError());
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: calc_file_hash :: Create hash failed. :: GLE = 0x%x\n", GetLastError());
 			__leave;
 		}
 
 		if (CryptHashData(hHash, content, size, 0) == FALSE) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: calc_file_hash :: Crypt hash data failed. :: GLE = %d\n",GetLastError);			
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: calc_file_hash :: Crypt hash data failed. :: GLE = %d\n",GetLastError);			
 			__leave;
 		}
 
 		// display file hash (for debug only).
 		if (CryptGetHashParam(hHash, HP_HASHVAL, NULL, &hashsize, 0) == FALSE) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: calc_file_hash :: Crypt Get hash Param failed. :: GLE = %d\n",GetLastError);
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: calc_file_hash :: Crypt Get hash Param failed. :: GLE = %d\n",GetLastError);
 			__leave;
 		}
 
@@ -274,7 +274,7 @@ HCRYPTHASH calc_file_hash(char * filename,HCRYPTPROV hProv, ALG_ID  algo) {
 		hashval[hashsize] = '\0';
 
 		if (CryptGetHashParam(hHash, HP_HASHVAL, hashval, &hashsize, 0) == FALSE) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: calc_file_hash :: Crypt Get hash Param failed. :: GLE = %d\n",GetLastError);
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: calc_file_hash :: Crypt Get hash Param failed. :: GLE = %d\n",GetLastError);
 			__leave;
 		}
 
@@ -320,7 +320,7 @@ int verify_file_signature(char *filename, char *sigfile){
 	int fsize = 0;
 
 	if (filename == NULL || sigfile == NULL) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: invalid parameters\n");
+		a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: invalid parameters\n");
 		return -1;
 	}
 
@@ -328,7 +328,7 @@ int verify_file_signature(char *filename, char *sigfile){
 
 		// Acquire crypt context
 		if (CryptAcquireContextA(&hProv,NULL, MS_ENHANCED_PROV,PROV_RSA_FULL,CRYPT_VERIFYCONTEXT) == FALSE) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: Acquire crypt context failed. :: GLE = 0x%x\n",GetLastError());
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: Acquire crypt context failed. :: GLE = 0x%x\n",GetLastError());
 			ret = -1;
 			__leave;
 		}
@@ -336,7 +336,7 @@ int verify_file_signature(char *filename, char *sigfile){
 		// get pub key file path.
 		pubkeyfile = download_pub_key();
 		if (pubkeyfile == NULL) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: Can't download public key from armadito server!\n");
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: Can't download public key from armadito server!\n");
 			ret = -1;
 			__leave;
 		}
@@ -345,7 +345,7 @@ int verify_file_signature(char *filename, char *sigfile){
 		// import public key from file.
 		hPubKey = import_public_key(pubkeyfile,hProv);
 		if (hPubKey == 0) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: import public key failed\n");
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: import public key failed\n");
 			ret = -2;
 			__leave;
 		}
@@ -353,7 +353,7 @@ int verify_file_signature(char *filename, char *sigfile){
 		// calc hash for the file.
 		hHash = calc_file_hash(filename,hProv, CALG_SHA1);
 		if (hHash == 0) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: calc file hash failed\n");
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: calc file hash failed\n");
 			ret = -3;
 			__leave;
 		}
@@ -361,7 +361,7 @@ int verify_file_signature(char *filename, char *sigfile){
 		// get file signature. (bytes)
 		signature = GetFileContent_b(sigfile, &sig_size);
 		if (signature == NULL) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: Get signature content failed\n");
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: Get signature content failed\n");
 			ret = -4;
 			__leave;
 		}
@@ -388,7 +388,7 @@ int verify_file_signature(char *filename, char *sigfile){
 
 		// verify signature
 		if (CryptVerifySignature(hHash, invert, sig_size, hPubKey, NULL, 0) == FALSE) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: Crypt verify Signature failed. :: GLE = %d :: 0x%x\n",GetLastError(),GetLastError());
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: Crypt verify Signature failed. :: GLE = %d :: 0x%x\n",GetLastError(),GetLastError());
 			ret = -9;
 			__leave;
 		}
@@ -414,14 +414,14 @@ int verify_file_signature(char *filename, char *sigfile){
 		}		
 		
 		if(CryptDestroyKey(hPubKey) == FALSE){
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: Crypt Destroy Key failed! :: GLE = 0x%x\n",GetLastError());
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: Crypt Destroy Key failed! :: GLE = 0x%x\n",GetLastError());
 		}
 
 		if (hHash != 0)
 			CryptDestroyHash(hHash);
 
 		if (CryptReleaseContext(hProv, 0) == FALSE) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: Release crypt context failed. :: GLE = %d\n",GetLastError);			
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR,"[-] Error :: verify_file_signature :: Release crypt context failed. :: GLE = %d\n",GetLastError);			
 		}
 
 	}

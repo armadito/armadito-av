@@ -44,9 +44,9 @@ static enum a6o_mod_status mod_oal_init(struct a6o_module *module)
 	/* have priviledge (i.e. not running as root), we don't return an error because this will make */
 	/* the scan daemon terminates */
 	/* if (fa_data->monitor == NULL) */
-	/*   return ARMADITO_MOD_INIT_ERROR; */
+	/*   return A6O_MOD_INIT_ERROR; */
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static enum a6o_mod_status mod_oal_conf_enable(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
@@ -55,7 +55,7 @@ static enum a6o_mod_status mod_oal_conf_enable(struct a6o_module *module, const 
 
 	access_monitor_enable(data->monitor, a6o_conf_value_get_int(value));
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static enum a6o_mod_status mod_oal_conf_enable_permission(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
@@ -64,7 +64,7 @@ static enum a6o_mod_status mod_oal_conf_enable_permission(struct a6o_module *mod
 
 	access_monitor_enable_permission(data->monitor, a6o_conf_value_get_int(value));
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static enum a6o_mod_status mod_oal_conf_enable_removable_media(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
@@ -73,7 +73,7 @@ static enum a6o_mod_status mod_oal_conf_enable_removable_media(struct a6o_module
 
 	access_monitor_enable_removable_media(data->monitor, a6o_conf_value_get_int(value));
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static enum a6o_mod_status mod_oal_conf_autoscan_removable_media(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
@@ -82,7 +82,7 @@ static enum a6o_mod_status mod_oal_conf_autoscan_removable_media(struct a6o_modu
 
 	access_monitor_autoscan_removable_media(data->monitor, a6o_conf_value_get_int(value));
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static enum a6o_mod_status mod_oal_conf_mount(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
@@ -98,7 +98,7 @@ static enum a6o_mod_status mod_oal_conf_mount(struct a6o_module *module, const c
 			access_monitor_add_mount(data->monitor, *p);
 	}
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static enum a6o_mod_status mod_oal_conf_directory(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
@@ -114,7 +114,7 @@ static enum a6o_mod_status mod_oal_conf_directory(struct a6o_module *module, con
 			access_monitor_add_directory(data->monitor, *p);
 	}
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static enum a6o_mod_status mod_oal_conf_white_list_dir(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
@@ -130,7 +130,7 @@ static enum a6o_mod_status mod_oal_conf_white_list_dir(struct a6o_module *module
 			a6o_scan_conf_white_list_directory(on_access_conf, *p);
 	}
       
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static enum a6o_mod_status mod_oal_conf_modules(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
@@ -146,7 +146,7 @@ static enum a6o_mod_status mod_oal_conf_modules(struct a6o_module *module, const
 			a6o_scan_conf_add_module(on_access_conf, *p, module->armadito);
 	}
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static enum a6o_mod_status mod_oal_conf_mime_types(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
@@ -162,7 +162,7 @@ static enum a6o_mod_status mod_oal_conf_mime_types(struct a6o_module *module, co
 			a6o_scan_conf_add_mime_type(on_access_conf, *p);
 	}
  
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static enum a6o_mod_status mod_oal_conf_max_size(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
@@ -171,7 +171,7 @@ static enum a6o_mod_status mod_oal_conf_max_size(struct a6o_module *module, cons
 
 	a6o_scan_conf_max_file_size(on_access_conf, a6o_conf_value_get_int(value));
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static enum a6o_mod_status mod_oal_post_init(struct a6o_module *module)
@@ -180,22 +180,22 @@ static enum a6o_mod_status mod_oal_post_init(struct a6o_module *module)
 
 #define YES_NO(v) ((v) ? "yes" : "no")
 
-	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "protection configuration:");
-	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "-> enabled: %s", YES_NO(access_monitor_is_enable(data->monitor)));
-	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "-> permission enabled: %s", YES_NO(access_monitor_is_enable_permission(data->monitor)));
-	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "-> removable media monitoring: %s", YES_NO(access_monitor_is_enable_removable_media(data->monitor)));
-	a6o_log(ARMADITO_LOG_MODULE, ARMADITO_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "-> removable media autoscan: %s", YES_NO(access_monitor_is_autoscan_removable_media(data->monitor)));
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "protection configuration:");
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "-> enabled: %s", YES_NO(access_monitor_is_enable(data->monitor)));
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "-> permission enabled: %s", YES_NO(access_monitor_is_enable_permission(data->monitor)));
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "-> removable media monitoring: %s", YES_NO(access_monitor_is_enable_removable_media(data->monitor)));
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "-> removable media autoscan: %s", YES_NO(access_monitor_is_autoscan_removable_media(data->monitor)));
 
 	access_monitor_delayed_start(data->monitor);
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 static enum a6o_mod_status mod_oal_close(struct a6o_module *module)
 {
 	struct mod_oal_data *data = (struct mod_oal_data *)module->data;
 
-	return ARMADITO_MOD_OK;
+	return A6O_MOD_OK;
 }
 
 struct a6o_conf_entry mod_oal_conf_table[] = {

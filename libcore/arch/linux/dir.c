@@ -69,7 +69,7 @@ int os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data)
 
 	d = opendir(path);
 	if (d == NULL) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "error opening directory %s (%s)", path, strerror(errno));
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "error opening directory %s (%s)", path, strerror(errno));
 
 		// Call to scan_entry()
 		 ret = (*dirent_cb)(path, FILE_FLAG_IS_ERROR, errno, data);
@@ -97,7 +97,7 @@ int os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data)
 				break;
 
 			saved_errno = errno;
-			a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "error reading directory entry in directory %s (error %s)", path, strerror(saved_errno));
+			a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "error reading directory entry in directory %s (error %s)", path, strerror(saved_errno));
 
 			// Call to scan_entry()
 			ret = (*dirent_cb)(path, FILE_FLAG_IS_ERROR, saved_errno, data);
@@ -130,7 +130,7 @@ int os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data)
 	}
 
         if (closedir(d) < 0)
-        	a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "error closing directory %s (%s)", path, strerror(errno));
+        	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "error closing directory %s (%s)", path, strerror(errno));
 
         return 0;
 }

@@ -39,7 +39,7 @@ struct poll_set *poll_set_new(void)
 	s->epoll_fd = epoll_create(42);
 
 	if (s->epoll_fd == -1) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR, "epoll_create failed (%s)", strerror(errno));
+		a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR, "epoll_create failed (%s)", strerror(errno));
 		free(s);
 		return NULL;
 	}
@@ -63,7 +63,7 @@ int poll_set_add_fd(struct poll_set *s, int fd, poll_cb_t cb, void *user_data)
 	ev.data.ptr = e;
 
 	if (epoll_ctl(s->epoll_fd, EPOLL_CTL_ADD, fd, &ev) == -1) {
-		a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR, "epoll_ctl failed (%s)", strerror(errno));
+		a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR, "epoll_ctl failed (%s)", strerror(errno));
 
 		return -1;
 	}
@@ -81,7 +81,7 @@ int poll_set_loop(struct poll_set *s)
 		n_events = epoll_wait(s->epoll_fd, events, MAX_EVENTS, -1);
 
 		if (n_events == -1) {
-			a6o_log(ARMADITO_LOG_SERVICE, ARMADITO_LOG_LEVEL_ERROR, "epoll_wait failed (%s)", strerror(errno));
+			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR, "epoll_wait failed (%s)", strerror(errno));
 			return -1;
 		}
 

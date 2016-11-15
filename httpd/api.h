@@ -33,7 +33,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "apihandler.h"
 
-
 int register_process_cb(struct api_handler *a, struct MHD_Connection *connection, json_t *in, json_t **out, void *user_data);
 
 int unregister_process_cb(struct api_handler *a, struct MHD_Connection *connection, json_t *in, json_t **out, void *user_data);

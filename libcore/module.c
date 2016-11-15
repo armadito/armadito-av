@@ -64,7 +64,7 @@ static struct a6o_module *module_new(struct a6o_module *src, struct armadito *ar
 	mod->supported_mime_types = src->supported_mime_types;
 	mod->name = os_strdup(src->name);
 	mod->size = src->size;
-	mod->status = ARMADITO_MOD_OK;
+	mod->status = A6O_MOD_OK;
 	mod->data = NULL;
 	mod->armadito = armadito;
 
@@ -90,14 +90,14 @@ static int module_load(const char *filename, struct a6o_module **pmodule, a6o_er
 	struct a6o_module *mod_loaded;
 	GModule *g_mod;
 
-	a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_DEBUG, "trying to load module object file %s", filename);
+	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "trying to load module object file %s", filename);
 
 	g_mod = g_module_open(filename, G_MODULE_BIND_LAZY);
 
 	/* this is not considered as an error: the module load path may contain */
 	/* files that are not dynamic libraries, we simply ignore them */
 	if (!g_mod) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "loading module object file %s failed", filename);
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "loading module object file %s failed", filename);
 
 		*pmodule = NULL;
 		return 0;
@@ -108,14 +108,14 @@ static int module_load(const char *filename, struct a6o_module **pmodule, a6o_er
 	if (!g_module_symbol(g_mod, "module", (gpointer *)&mod_loaded)) {
 		a6o_error_set(error, ARMADITO_ERROR_MODULE_SYMBOL_NOT_FOUND, "symbol 'module' not found in file");
 
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "symbol %s not found in file %s", "module", filename);
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "symbol %s not found in file %s", "module", filename);
 
 		*pmodule = NULL;
 
 		return ARMADITO_ERROR_MODULE_SYMBOL_NOT_FOUND;
 	}
 
-	a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_INFO, "module %s loaded from file %s", mod_loaded->name, filename);
+	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_INFO, "module %s loaded from file %s", mod_loaded->name, filename);
 
 	*pmodule = mod_loaded;
 
@@ -153,7 +153,7 @@ void module_manager_add(struct module_manager *mm, struct a6o_module *module)
 
 static int module_load_dirent_cb(const char *full_path, enum os_file_flag flags, int entry_errno, void *data)
 {
-	a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_DEBUG, "loading module from path %s flags %d", full_path, flags);
+	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "loading module from path %s flags %d", full_path, flags);
 
 	/* FIXME: must return an error */
 	if (flags & FILE_FLAG_IS_PLAIN_FILE) {
@@ -167,7 +167,7 @@ static int module_load_dirent_cb(const char *full_path, enum os_file_flag flags,
 			free(error);
 	}
 	else
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "loading module: path %s is not a plain file", full_path);
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "loading module: path %s is not a plain file", full_path);
 
 	return 0;
 
@@ -178,7 +178,7 @@ int module_manager_load_path(struct module_manager *mm, const char *path, a6o_er
 	/* FIXME: for now, dirty stuff, do nothing with error */
 	int ret = 0;
 
-	a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_DEBUG, "loading modules from directory %s", path);
+	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "loading modules from directory %s", path);
 
 	ret = os_dir_map(path, 0, module_load_dirent_cb, mm);
 
@@ -197,7 +197,7 @@ static int module_manager_all(struct module_manager *mm, int (*module_fun)(struc
 		int mod_ret;
 
 		/* module is not ok, do nothing */
-		if (mod->status != ARMADITO_MOD_OK)
+		if (mod->status != A6O_MOD_OK)
 			continue;
 
 		mod_ret = (*module_fun)(mod, error);
@@ -219,9 +219,9 @@ static int module_init(struct a6o_module *mod, a6o_error **error)
 	mod->status = (*mod->init_fun)(mod);
 
 	/* everything's ok */
-	if (mod->status != ARMADITO_MOD_OK) {
+	if (mod->status != A6O_MOD_OK) {
 		/* module init failed, set error and return NULL */
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "initialization error for module '%s'", mod->name);
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "initialization error for module '%s'", mod->name);
 
 		a6o_error_set(error, ARMADITO_ERROR_MODULE_INIT_FAILED, "initialization error for module");
 
@@ -244,7 +244,7 @@ static void module_conf_fun(const char *section, const char *key, struct a6o_con
 
 	mod = module_manager_get_module_by_name(mm, section);
 	if (mod == NULL) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "configuration: no module '%s'", section);
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "configuration: no module '%s'", section);
 		return;
 	}
 
@@ -256,18 +256,18 @@ static void module_conf_fun(const char *section, const char *key, struct a6o_con
 			break;
 
 	if (conf_entry->key == NULL || conf_entry->conf_fun == NULL) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "configuration: no key '%s' for module '%s'", key, mod->name);
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "configuration: no key '%s' for module '%s'", key, mod->name);
 		return;
 	}
 
 	/* does the type in value match the type in the configuration entry? */
 	if ((a6o_conf_value_get_type(value) & conf_entry->type) == 0) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "configuration: value type (%d) does not match declared type (%d) for key '%s' module '%s'", a6o_conf_value_get_type(value), conf_entry->type, key, mod->name);
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "configuration: value type (%d) does not match declared type (%d) for key '%s' module '%s'", a6o_conf_value_get_type(value), conf_entry->type, key, mod->name);
 		return;
 	}
 
-	if ((*conf_entry->conf_fun)(mod, key, value) != ARMADITO_MOD_OK) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "configuration: cannot assign value to key '%s' for module '%s'", key, mod->name);
+	if ((*conf_entry->conf_fun)(mod, key, value) != A6O_MOD_OK) {
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "configuration: cannot assign value to key '%s' for module '%s'", key, mod->name);
 		return;
 	}
 }
@@ -286,8 +286,8 @@ static int module_post_init(struct a6o_module *mod, a6o_error **error)
 
 	mod->status = (*mod->post_init_fun)(mod);
 
-	if (mod->status != ARMADITO_MOD_OK) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "post_init error for module '%s'", mod->name);
+	if (mod->status != A6O_MOD_OK) {
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "post_init error for module '%s'", mod->name);
 
 		a6o_error_set(error, ARMADITO_ERROR_MODULE_POST_INIT_FAILED, "post_init error for module");
 
@@ -312,8 +312,8 @@ static int module_close(struct a6o_module *mod, a6o_error **error)
 	mod->status = (*mod->close_fun)(mod);
 
 	/* if close failed, return an error */
-	if (mod->status != ARMADITO_MOD_OK) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "close error for module '%s'", mod->name);
+	if (mod->status != A6O_MOD_OK) {
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "close error for module '%s'", mod->name);
 
 		a6o_error_set(error, ARMADITO_ERROR_MODULE_CLOSE_FAILED, "close error for module");
 

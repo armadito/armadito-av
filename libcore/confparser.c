@@ -257,7 +257,7 @@ struct a6o_conf_parser *a6o_conf_parser_new(const char *filename, conf_parser_ca
 #endif
 
 	if (cp->input == NULL) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "cannot open conf file %s", filename);
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "cannot open conf file %s", filename);
 
 		return cp;
 	}
@@ -294,7 +294,7 @@ static const char *token_str(enum token_type token)
 
 static void syntax_error(struct a6o_conf_parser *cp, guint token)
 {
-	a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "syntax error: file %s line %d column %d expecting '%s' got '%s'",
+	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "syntax error: file %s line %d column %d expecting '%s' got '%s'",
 		cp->filename,
 		scanner_current_line(cp->scanner),
 		scanner_current_column(cp->scanner),
@@ -345,7 +345,7 @@ static void call_callback(struct a6o_conf_parser *cp)
 	cp->current_value_type = CONF_TYPE_VOID;
 
 	if (ret != 0) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "configuration file parser: callback return != 0 file %s line %d column %d",
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "configuration file parser: callback return != 0 file %s line %d column %d",
 			cp->filename,
 			scanner_current_line(cp->scanner),
 			scanner_current_column(cp->scanner));
@@ -447,7 +447,7 @@ static void r_value(struct a6o_conf_parser *cp)
 	if (cp->lookahead_token == TOKEN_INTEGER) {
 		r_int_value(cp);
 #ifdef DEBUG
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_DEBUG, "configuration parser: file %s, %s = %d",
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "configuration parser: file %s, %s = %d",
 			cp->filename,
 			cp->current_key,
 			cp->current_value_int);
@@ -458,7 +458,7 @@ static void r_value(struct a6o_conf_parser *cp)
 		r_opt_string_list(cp);
 #ifdef DEBUG
 		if (cp->current_value_type == CONF_TYPE_STRING)
-			a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_DEBUG, "configuration parser: file %s, %s = \"%s\"",
+			a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "configuration parser: file %s, %s = \"%s\"",
 				cp->filename,
 				cp->current_key,
 				cp->current_value_string);
@@ -467,7 +467,7 @@ static void r_value(struct a6o_conf_parser *cp)
 			GString *values = g_string_new("");
 			for (i = 0; i < cp->current_value_list->len; i++, g_string_append_printf(values, ";"))
 				g_string_append_printf(values, "\"%s\"", g_ptr_array_index(cp->current_value_list, i));
-			a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_DEBUG, "configuration parser: file %s, %s = %s",
+			a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "configuration parser: file %s, %s = %s",
 				cp->filename,
 				cp->current_key,
 				values->str);
@@ -476,13 +476,13 @@ static void r_value(struct a6o_conf_parser *cp)
 #endif
 	} else {
 		if (cp->lookahead_token == TOKEN_NONE ||cp->lookahead_token == TOKEN_EOF)
-			a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "syntax error: file %s line %d column %d expecting value for %s, got none",
+			a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "syntax error: file %s line %d column %d expecting value for %s, got none",
 				cp->filename,
 				scanner_current_line(cp->scanner),
 				scanner_current_column(cp->scanner),
 				cp->current_key);
 		else
-			a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "syntax error: file %s line %d column %d expecting value for %s, got '%c', do you forget to use double-quotes ?",
+			a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "syntax error: file %s line %d column %d expecting value for %s, got '%c', do you forget to use double-quotes ?",
 				cp->filename,
 				scanner_current_line(cp->scanner),
 				scanner_current_column(cp->scanner),

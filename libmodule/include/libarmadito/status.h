@@ -31,14 +31,14 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #define __LIBARMADITO_STATUS_H_
 
 enum a6o_file_status {
-	ARMADITO_UNDECIDED = 1,         /*!< not yet decided by scan                                */
-	ARMADITO_CLEAN,                 /*!< file is clean and does not contain a malware           */
-	ARMADITO_UNKNOWN_FILE_TYPE,     /*!< file type is not handled by any module                 */
-	ARMADITO_EINVAL,                /*!< an invalid value was passed to scan functions          */
-	ARMADITO_IERROR,                /*!< an internal error occured during file scan             */
-	ARMADITO_SUSPICIOUS,            /*!< file is suspicious: not malware but not clean also     */
-	ARMADITO_WHITE_LISTED,          /*!< file is while listed, i.e. guaranteed clean            */
-	ARMADITO_MALWARE,               /*!< file contains a malware                                */
+	A6O_FILE_UNDECIDED = 1,         /*!< not yet decided by scan                                */
+	A6O_FILE_CLEAN,                 /*!< file is clean and does not contain a malware           */
+	A6O_FILE_UNKNOWN_TYPE,          /*!< file type is not handled by any module                 */
+	A6O_FILE_EINVAL,                /*!< an invalid value was passed to scan functions          */
+	A6O_FILE_IERROR,                /*!< an internal error occured during file scan             */
+	A6O_FILE_SUSPICIOUS,            /*!< file is suspicious: not malware but not clean also     */
+	A6O_FILE_WHITE_LISTED,          /*!< file is while listed, i.e. guaranteed clean            */
+	A6O_FILE_MALWARE,               /*!< file contains a malware                                */
 };
 
 #endif

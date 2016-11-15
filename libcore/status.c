@@ -36,17 +36,17 @@ int a6o_file_status_cmp(enum a6o_file_status s1, enum a6o_file_status s2)
 		return 0;
 
 	switch(s1) {
-	case ARMADITO_UNDECIDED:
+	case A6O_FILE_UNDECIDED:
 		return -1;
-	case ARMADITO_CLEAN:
-		return (s2 == ARMADITO_UNDECIDED) ? 1 : -1;
-	case ARMADITO_IERROR:
-		return (s2 == ARMADITO_UNDECIDED || s2 == ARMADITO_CLEAN) ? 1 : -1;
-	case ARMADITO_SUSPICIOUS:
-		return (s2 == ARMADITO_UNDECIDED || s2 == ARMADITO_CLEAN || s2 == ARMADITO_IERROR) ? 1 : -1;
-	case ARMADITO_WHITE_LISTED:
-		return (s2 == ARMADITO_UNDECIDED || s2 == ARMADITO_CLEAN || s2 == ARMADITO_IERROR || s2 == ARMADITO_SUSPICIOUS) ? 1 : -1;
-	case ARMADITO_MALWARE:
+	case A6O_FILE_CLEAN:
+		return (s2 == A6O_FILE_UNDECIDED) ? 1 : -1;
+	case A6O_FILE_IERROR:
+		return (s2 == A6O_FILE_UNDECIDED || s2 == A6O_FILE_CLEAN) ? 1 : -1;
+	case A6O_FILE_SUSPICIOUS:
+		return (s2 == A6O_FILE_UNDECIDED || s2 == A6O_FILE_CLEAN || s2 == A6O_FILE_IERROR) ? 1 : -1;
+	case A6O_FILE_WHITE_LISTED:
+		return (s2 == A6O_FILE_UNDECIDED || s2 == A6O_FILE_CLEAN || s2 == A6O_FILE_IERROR || s2 == A6O_FILE_SUSPICIOUS) ? 1 : -1;
+	case A6O_FILE_MALWARE:
 		return 1;
 	}
 
@@ -60,14 +60,14 @@ const char *a6o_file_status_str(enum a6o_file_status status)
 	switch(status) {
 #undef M
 #define M(S) case S: return #S
-		M(ARMADITO_UNDECIDED);
-		M(ARMADITO_CLEAN);
-		M(ARMADITO_UNKNOWN_FILE_TYPE);
-		M(ARMADITO_EINVAL);
-		M(ARMADITO_IERROR);
-		M(ARMADITO_SUSPICIOUS);
-		M(ARMADITO_WHITE_LISTED);
-		M(ARMADITO_MALWARE);
+		M(A6O_FILE_UNDECIDED);
+		M(A6O_FILE_CLEAN);
+		M(A6O_FILE_UNKNOWN_TYPE);
+		M(A6O_FILE_EINVAL);
+		M(A6O_FILE_IERROR);
+		M(A6O_FILE_SUSPICIOUS);
+		M(A6O_FILE_WHITE_LISTED);
+		M(A6O_FILE_MALWARE);
 	}
 
 	return "UNKNOWN STATUS";
@@ -76,21 +76,21 @@ const char *a6o_file_status_str(enum a6o_file_status status)
 const char *a6o_file_status_pretty_str(enum a6o_file_status status)
 {
 	switch(status) {
-	case ARMADITO_UNDECIDED:
+	case A6O_FILE_UNDECIDED:
 		return "undecided";
-	case ARMADITO_CLEAN:
+	case A6O_FILE_CLEAN:
 		return "clean";
-	case ARMADITO_UNKNOWN_FILE_TYPE:
+	case A6O_FILE_UNKNOWN_TYPE:
 		return "ignored";
-	case ARMADITO_EINVAL:
+	case A6O_FILE_EINVAL:
 		return "invalid argument";
-	case ARMADITO_IERROR:
+	case A6O_FILE_IERROR:
 		return "internal error";
-	case ARMADITO_SUSPICIOUS:
+	case A6O_FILE_SUSPICIOUS:
 		return "suspicious";
-	case ARMADITO_WHITE_LISTED:
+	case A6O_FILE_WHITE_LISTED:
 		return "white listed";
-	case ARMADITO_MALWARE:
+	case A6O_FILE_MALWARE:
 		return "malware";
 	}
 

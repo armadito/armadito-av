@@ -39,8 +39,8 @@ void a6o_report_init(struct a6o_report *report, int scan_id, const char *path, i
 	else
 		report->path = NULL;
 	report->progress = progress;
-	report->status = ARMADITO_UNDECIDED;
-	report->action = ARMADITO_ACTION_NONE;
+	report->status = A6O_FILE_UNDECIDED;
+	report->action = A6O_ACTION_NONE;
 	report->mod_name = NULL;
 	report->mod_report = NULL;
 	report->suspicious_count = 0;

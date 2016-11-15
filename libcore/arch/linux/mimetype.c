@@ -94,7 +94,7 @@ const char *os_mime_type_guess_fd(int fd)
 	m = get_private_magic();
 
 	if ((n_read = read(fd, buffer, BUFFER_SIZE)) < 0) {
-		a6o_log(ARMADITO_LOG_LIB, ARMADITO_LOG_LEVEL_WARNING, "cannot read %d bytes from file descriptor %d", BUFFER_SIZE, fd);
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "cannot read %d bytes from file descriptor %d", BUFFER_SIZE, fd);
 		return NULL;
 	}
 
