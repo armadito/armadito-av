@@ -46,7 +46,7 @@ static int test_send_module_info(void)
 	mod->mod_update_ts = 69;
 	mod->base_infos = calloc(N_BASES + 1, sizeof(void *));
 	mod->base_infos[0] = base_info_new("daily", 1, "0.1", 0xdeadbeef, "/var/lib/clamav/daily.cld");
-	mod->base_infos[1] = base_info_new("main", 2, "0.2", 0xcacaface, "/var/lib/clamav/main.cvd");
+	mod->base_infos[1] = base_info_new("main", 2, "0.2", 0xabbaface, "/var/lib/clamav/main.cvd");
 	mod->base_infos[2] = base_info_new("bytecode", 3, "0.3", 0xfeedface, "/var/lib/clamav/bytecode.cld");
 	mod->base_infos[3] = NULL;
 
