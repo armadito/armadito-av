@@ -19,33 +19,26 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef __LIBARMADITO_INFO_H_
-#define __LIBARMADITO_INFO_H_
+#ifndef LIBARMADITO_IPC_ARMADITO_IPC_H
+#define LIBARMADITO_IPC_ARMADITO_IPC_H
 
-#include <time.h>
 #include <stddef.h>
 
-enum a6o_update_status {
-	A6O_UPDATE_OK,
-	A6O_UPDATE_LATE,
-	A6O_UPDATE_CRITICAL,
-	A6O_UPDATE_NON_AVAILABLE,
-};
+#include <libarmadito/armadito.h>
 
-struct a6o_base_info {
-	const char *name;
-	time_t base_update_ts;
-	const char *version;
-	size_t signature_count;
-	const char *full_path;
-};
+/*
+ * structure specific serialization functions
+ */
+#define IPC_DEFINE_STRUCT(S) int a6o_ipc_serialize_struct_##S(void *p, char **p_buffer, size_t *p_size);
 
-struct a6o_module_info {
-	const char *name;
-	enum a6o_update_status mod_status;
-	time_t mod_update_ts;
-	/* NULL terminated array of pointers to struct base_info */
-	struct a6o_base_info **base_infos;
-};
+#include <libarmadito-ipc/defs.h>
+
+/*
+ * functions
+ */
+
+#define a6o_ipc_serialize(STRUCT_TYPE, P, P_BUFFER, P_SIZE) a6o_ipc_serialize_struct_##STRUCT_TYPE(P, P_BUFFER, P_SIZE);
+
+int a6o_ipc_deserialize(char *buffer, size_t size, void **p);
 
 #endif

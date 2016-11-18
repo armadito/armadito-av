@@ -2,13 +2,14 @@ if COND_MAN
 OPT_MAN_DIR=man
 endif
 
-SUBDIRS=conf libmodule libcore httpd $(OPT_MAN_DIR) # libarmadito arch tools tests
+SUBDIRS=conf libmodule libcore libipc httpd $(OPT_MAN_DIR)
 
 TAGDIRS=\
 $(top_srcdir)/arch \
 $(top_srcdir)/conf \
 $(top_srcdir)/httpd \
 $(top_srcdir)/libcore \
+$(top_srcdir)/libipc \
 $(top_srcdir)/libmodule \
 $(top_srcdir)/man \
 $(top_srcdir)/tests \

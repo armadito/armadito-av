@@ -19,33 +19,15 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef __LIBARMADITO_INFO_H_
-#define __LIBARMADITO_INFO_H_
+#ifndef LIBIPC_HASH_H
+#define LIBIPC_HASH_H
 
-#include <time.h>
-#include <stddef.h>
+struct hash_table;
 
-enum a6o_update_status {
-	A6O_UPDATE_OK,
-	A6O_UPDATE_LATE,
-	A6O_UPDATE_CRITICAL,
-	A6O_UPDATE_NON_AVAILABLE,
-};
+struct hash_table *hash_table_new(size_t len);
 
-struct a6o_base_info {
-	const char *name;
-	time_t base_update_ts;
-	const char *version;
-	size_t signature_count;
-	const char *full_path;
-};
+int hash_table_insert(struct hash_table *ht, const char *key, void *value);
 
-struct a6o_module_info {
-	const char *name;
-	enum a6o_update_status mod_status;
-	time_t mod_update_ts;
-	/* NULL terminated array of pointers to struct base_info */
-	struct a6o_base_info **base_infos;
-};
+void *hash_table_search(struct hash_table *ht, const char *key);
 
 #endif

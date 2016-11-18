@@ -19,33 +19,15 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef __LIBARMADITO_INFO_H_
-#define __LIBARMADITO_INFO_H_
+#ifndef LIBIPC_COMMON_H
+#define LIBIPC_COMMON_H
 
-#include <time.h>
-#include <stddef.h>
+#define JSON_KEY_NAME "__key__"
 
-enum a6o_update_status {
-	A6O_UPDATE_OK,
-	A6O_UPDATE_LATE,
-	A6O_UPDATE_CRITICAL,
-	A6O_UPDATE_NON_AVAILABLE,
-};
-
-struct a6o_base_info {
-	const char *name;
-	time_t base_update_ts;
-	const char *version;
-	size_t signature_count;
-	const char *full_path;
-};
-
-struct a6o_module_info {
-	const char *name;
-	enum a6o_update_status mod_status;
-	time_t mod_update_ts;
-	/* NULL terminated array of pointers to struct base_info */
-	struct a6o_base_info **base_infos;
+enum deserial_error {
+	ERR_BUFFER_TOO_SMALL = 1,
+	ERR_TYPE_MISMATCH,
+	ERR_NO_SUCH_FIELD,
 };
 
 #endif
