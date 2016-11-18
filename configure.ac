@@ -169,6 +169,7 @@ json/Makefile
 json/ui/Makefile
 libcore/Makefile
 libipc/Makefile
+libipc/tests/Makefile
 libmodule/Makefile
 man/Makefile
 man/fr/Makefile

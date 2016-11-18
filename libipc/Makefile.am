@@ -1,5 +1,7 @@
 AUTOMAKE_OPTIONS=subdir-objects
 
+SUBDIRS=tests
+
 noinst_LIBRARIES=libarmadito-ipc.a
 
 libarmadito_ipc_a_SOURCES= \
