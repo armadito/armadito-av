@@ -1,3 +1,9 @@
+armadito-core (0.12.0-0ubuntu1) xenial; urgency=medium
+
+  * moving upstream version
+
+ -- François Déchelle <fdechelle@teclib.com>  Wed, 23 Nov 2016 16:53:43 +0100
+
 armadito-core (0.10.1-0ubuntu1) wily; urgency=medium
 
   * fixed link error related to dependencies fix

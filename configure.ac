@@ -1,4 +1,4 @@
-AC_INIT(armadito-core,0.12.0-exp,fdechelle@teclib.com)
+AC_INIT(armadito-core,0.12.0,fdechelle@teclib.com)
 AM_INIT_AUTOMAKE([subdir-objects foreign])
 
 # collect arguments
@@ -123,6 +123,7 @@ AC_MSG_CHECKING(for on-acces scan using fanotify)
 if test "$enable_fanotify" = "no"; then
    AC_MSG_RESULT(disabled)
 else
+	enable_fanotify="yes"
 	SAVE_CFLAGS=${CFLAGS}
 	CFLAGS=-fPIC
 	AC_MSG_RESULT(enabled)
