@@ -74,14 +74,14 @@ static void json_marshall_field_string(json_t *obj, const char *name, const char
  * Marshalling functions for fields of enum types
  *
  */
-#define IPC_DEFINE_ENUM(S)				\
+#define A6O_RPC_DEFINE_ENUM(S)				\
 static void json_marshall_field_enum_##S(json_t *obj, const char *name, int value) \
 {							\
 	json_t *field;					\
 							\
 	switch(value) {
-#define IPC_DEFINE_ENUM_VALUE(NAME) case NAME: field = json_string(#NAME); break;
-#define IPC_END_ENUM				\
+#define A6O_RPC_DEFINE_ENUM_VALUE(NAME) case NAME: field = json_string(#NAME); break;
+#define A6O_RPC_END_ENUM				\
 	}					\
 	json_object_set(obj, name, field);	\
 }
@@ -115,21 +115,22 @@ static void json_marshall_field_array(json_t *obj, const char *name, void **arra
  * Marshalling functions for struct types
  *
  */
-#define IPC_DEFINE_STRUCT(S)					\
-int json_marshall_struct_##S(struct S *p, json_t **p_obj)	\
-{								\
-	json_t *obj = json_object();				\
+#define A6O_RPC_DEFINE_STRUCT(S)			\
+int json_marshall_struct_##S(void *p, json_t **p_obj)	\
+{							\
+	struct S *s = (struct S *)p;			\
+	json_t *obj = json_object();			\
 	*p_obj = obj;
 
-#define IPC_DEFINE_FIELD_INT(INT_TYPE, NAME) json_marshall_field_##INT_TYPE(obj, #NAME, p->NAME);
+#define A6O_RPC_DEFINE_FIELD_INT(INT_TYPE, NAME) json_marshall_field_##INT_TYPE(obj, #NAME, s->NAME);
 
-#define IPC_DEFINE_FIELD_STRING(NAME) json_marshall_field_string(obj, #NAME, p->NAME);
+#define A6O_RPC_DEFINE_FIELD_STRING(NAME) json_marshall_field_string(obj, #NAME, s->NAME);
 
-#define IPC_DEFINE_FIELD_ENUM(ENUM_TYPE, NAME) json_marshall_field_enum_##ENUM_TYPE(obj, #NAME, p->NAME);
+#define A6O_RPC_DEFINE_FIELD_ENUM(ENUM_TYPE, NAME) json_marshall_field_enum_##ENUM_TYPE(obj, #NAME, s->NAME);
 
-#define IPC_DEFINE_FIELD_ARRAY(ELEM_TYPE, NAME) json_marshall_field_array(obj, #NAME, (void **)p->NAME, json_marshall_struct_##ELEM_TYPE);
+#define A6O_RPC_DEFINE_FIELD_ARRAY(ELEM_TYPE, NAME) json_marshall_field_array(obj, #NAME, (void **)s->NAME, json_marshall_struct_##ELEM_TYPE);
 
-#define IPC_END_STRUCT				\
+#define A6O_RPC_END_STRUCT			\
 	return 0;				\
 };
 

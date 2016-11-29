@@ -19,8 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef LIBIPC_HASH_H
-#define LIBIPC_HASH_H
+#ifndef LIBRPC_HASH_H
+#define LIBRPC_HASH_H
 
 struct hash_table;
 

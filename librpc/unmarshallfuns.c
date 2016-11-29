@@ -89,7 +89,7 @@ static int json_unmarshall_field_string(json_t *obj, const char *name, const cha
  * Unmarshalling functions for fields of enum types
  *
  */
-#define IPC_DEFINE_ENUM(S)						\
+#define A6O_RPC_DEFINE_ENUM(S)						\
 static int json_unmarshall_field_enum_##S(json_t *obj, const char *name, enum S *p_val) \
 {									\
 	json_t *field = json_object_get(obj, name);			\
@@ -102,8 +102,8 @@ static int json_unmarshall_field_enum_##S(json_t *obj, const char *name, enum S 
 		return ERR_TYPE_MISMATCH;				\
 									\
 	enum_string = json_string_value(field);
-#define IPC_DEFINE_ENUM_VALUE(NAME) if (!strcmp(enum_string, #NAME)) { *p_val = NAME; return 0; }
-#define IPC_END_ENUM				\
+#define A6O_RPC_DEFINE_ENUM_VALUE(NAME) if (!strcmp(enum_string, #NAME)) { *p_val = NAME; return 0; }
+#define A6O_RPC_END_ENUM				\
 	return 1;				\
 }
 
@@ -149,22 +149,22 @@ static int json_unmarshall_field_array(json_t *obj, const char *name, void ***p_
  * Unmarshalling functions for struct types
  *
  */
-#define IPC_DEFINE_STRUCT(S)			\
+#define A6O_RPC_DEFINE_STRUCT(S)			\
 int json_unmarshall_struct_##S(json_t *obj, void **pp)	\
 {						\
 	int ret;				\
 	struct S *s = malloc(sizeof(struct S));	\
 	*pp = s;
 
-#define IPC_DEFINE_FIELD_INT(INT_TYPE, NAME) if ((ret = json_unmarshall_field_##INT_TYPE(obj, #NAME, &(s->NAME))) != 0) return ret;
+#define A6O_RPC_DEFINE_FIELD_INT(INT_TYPE, NAME) if ((ret = json_unmarshall_field_##INT_TYPE(obj, #NAME, &(s->NAME))) != 0) return ret;
 
-#define IPC_DEFINE_FIELD_STRING(NAME) if ((ret = json_unmarshall_field_string(obj, #NAME, &(s->NAME))) != 0) return ret;
+#define A6O_RPC_DEFINE_FIELD_STRING(NAME) if ((ret = json_unmarshall_field_string(obj, #NAME, &(s->NAME))) != 0) return ret;
 
-#define IPC_DEFINE_FIELD_ENUM(ENUM_TYPE, NAME) if ((ret = json_unmarshall_field_enum_##ENUM_TYPE(obj, #NAME, &(s->NAME))) != 0) return ret;
+#define A6O_RPC_DEFINE_FIELD_ENUM(ENUM_TYPE, NAME) if ((ret = json_unmarshall_field_enum_##ENUM_TYPE(obj, #NAME, &(s->NAME))) != 0) return ret;
 
-#define IPC_DEFINE_FIELD_ARRAY(ELEM_TYPE, NAME) if ((ret = json_unmarshall_field_array(obj, #NAME, (void ***)&(s->NAME), json_unmarshall_struct_##ELEM_TYPE)) != 0) return ret;
+#define A6O_RPC_DEFINE_FIELD_ARRAY(ELEM_TYPE, NAME) if ((ret = json_unmarshall_field_array(obj, #NAME, (void ***)&(s->NAME), json_unmarshall_struct_##ELEM_TYPE)) != 0) return ret;
 
-#define IPC_END_STRUCT \
+#define A6O_RPC_END_STRUCT \
 	return 0;      \
 }
 

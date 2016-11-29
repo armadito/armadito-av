@@ -19,6 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
+#include <libarmadito/armadito.h>
+
 A6O_RPC_DEFINE_ENUM(a6o_file_status)
 	A6O_RPC_DEFINE_ENUM_VALUE(A6O_FILE_UNDECIDED)
 	A6O_RPC_DEFINE_ENUM_VALUE(A6O_FILE_CLEAN)
