@@ -23,22 +23,44 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #define LIBARMADITO_RPC_ARMADITO_RPC_H
 
 #include <stddef.h>
-
-#include <libarmadito/armadito.h>
+#include <jansson.h>
 
 /*
- * structure specific serialization functions
+ * Declaration of marshalling functions for struct types
  */
-#define RPC_DEFINE_STRUCT(S) int a6o_rpc_serialize_struct_##S(void *p, char **p_buffer, size_t *p_size);
+#define A6O_RPC_DEFINE_STRUCT(S) int a6o_rpc_marshall_struct_##S(void *p, json_t **p_obj);
 
 #include <libarmadito-rpc/defs.h>
 
 /*
- * functions
+ * marshalling helper macro
+ */
+#define a6o_rpc_struct2json(S, P, O) a6o_rpc_marshall_struct_##S(P, O)
+
+/*
+ * Declaration of unmarshalling functions for struct types
+ */
+#define A6O_RPC_DEFINE_STRUCT(S) int a6o_rpc_unmarshall_struct_##S(json_t *obj, void **p);
+
+#include <libarmadito-rpc/defs.h>
+
+/*
+ * umarshalling helper macro
+ */
+#define a6o_rpc_json2struct(S, O, P) a6o_rpc_unmarshall_struct_##S(O, P)
+
+/*
+ * JSON-RPC functions
  */
 
-#define a6o_rpc_serialize(STRUCT_TYPE, P, P_BUFFER, P_SIZE) a6o_rpc_serialize_struct_##STRUCT_TYPE(P, P_BUFFER, P_SIZE);
+struct a6o_rpc_connection;
 
-int a6o_rpc_deserialize(char *buffer, size_t size, void **p);
+int a6o_rpc_notify(struct a6o_rpc_connection *conn, const char *method, json_t *params);
+
+/* typedef void (*a6o_rpc_cb_t)(void *result, void *user_data); */
+
+/* int a6o_rpc_call(struct a6o_rpc_handler *m, const char *method, void *params, a6o_rpc_cb_t cb, void *user_data); */
+
+
 
 #endif

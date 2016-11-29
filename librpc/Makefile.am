@@ -6,7 +6,9 @@ noinst_LIBRARIES=libarmadito-rpc.a
 
 libarmadito_rpc_a_SOURCES= \
 common.h \
+connection.h \
 marshallfuns.c \
+rpc.c \
 unmarshallfuns.c
 
 AM_CPPFLAGS= -I$(top_srcdir)/librpc/include -I$(top_srcdir)/libmodule/include -I$(top_srcdir) @LIBJANSSON_CFLAGS@

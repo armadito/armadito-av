@@ -33,8 +33,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
  * - time_t and size_t
  *
  */
-#define JSON_MARSHALL_FIELD_INT(TYPE)					\
-static void json_marshall_field_##TYPE(json_t *obj, const char *name, TYPE val) \
+#define MARSHALL_FIELD_INT(TYPE)					\
+static void marshall_field_##TYPE(json_t *obj, const char *name, TYPE val) \
 {									\
 	json_t *field;							\
 									\
@@ -42,18 +42,18 @@ static void json_marshall_field_##TYPE(json_t *obj, const char *name, TYPE val) 
 	json_object_set(obj, name, field);				\
 }
 
-JSON_MARSHALL_FIELD_INT(int)
-JSON_MARSHALL_FIELD_INT(uint32_t)
-JSON_MARSHALL_FIELD_INT(int32_t)
-JSON_MARSHALL_FIELD_INT(time_t)
-JSON_MARSHALL_FIELD_INT(size_t)
+MARSHALL_FIELD_INT(int)
+MARSHALL_FIELD_INT(uint32_t)
+MARSHALL_FIELD_INT(int32_t)
+MARSHALL_FIELD_INT(time_t)
+MARSHALL_FIELD_INT(size_t)
 
 #ifdef UINT64_MAX
-JSON_MARSHALL_FIELD_INT(uint64_t)
+MARSHALL_FIELD_INT(uint64_t)
 #endif
 
 #ifdef INT64_MAX
-JSON_MARSHALL_FIELD_INT(int64_t)
+MARSHALL_FIELD_INT(int64_t)
 #endif
 
 /*
@@ -61,7 +61,7 @@ JSON_MARSHALL_FIELD_INT(int64_t)
  * Marshalling functions for struct fields of string type
  *
  */
-static void json_marshall_field_string(json_t *obj, const char *name, const char *val)
+static void marshall_field_string(json_t *obj, const char *name, const char *val)
 {
 	json_t *field;
 
@@ -75,7 +75,7 @@ static void json_marshall_field_string(json_t *obj, const char *name, const char
  *
  */
 #define A6O_RPC_DEFINE_ENUM(S)				\
-static void json_marshall_field_enum_##S(json_t *obj, const char *name, int value) \
+static void marshall_field_enum_##S(json_t *obj, const char *name, int value) \
 {							\
 	json_t *field;					\
 							\
@@ -93,7 +93,7 @@ static void json_marshall_field_enum_##S(json_t *obj, const char *name, int valu
  * Marshalling functions for fields of array types
  *
  */
-static void json_marshall_field_array(json_t *obj, const char *name, void **array, int (marshall_struct_cb)(void *p, json_t **))
+static void marshall_field_array(json_t *obj, const char *name, void **array, int (marshall_struct_cb)(void *p, json_t **))
 {
 	json_t *field;
 	void **p;
@@ -115,20 +115,20 @@ static void json_marshall_field_array(json_t *obj, const char *name, void **arra
  * Marshalling functions for struct types
  *
  */
-#define A6O_RPC_DEFINE_STRUCT(S)			\
-int json_marshall_struct_##S(void *p, json_t **p_obj)	\
-{							\
-	struct S *s = (struct S *)p;			\
-	json_t *obj = json_object();			\
+#define A6O_RPC_DEFINE_STRUCT(S)				\
+int a6o_rpc_marshall_struct_##S(void *p, json_t **p_obj)	\
+{								\
+	struct S *s = (struct S *)p;				\
+	json_t *obj = json_object();				\
 	*p_obj = obj;
 
-#define A6O_RPC_DEFINE_FIELD_INT(INT_TYPE, NAME) json_marshall_field_##INT_TYPE(obj, #NAME, s->NAME);
+#define A6O_RPC_DEFINE_FIELD_INT(INT_TYPE, NAME) marshall_field_##INT_TYPE(obj, #NAME, s->NAME);
 
-#define A6O_RPC_DEFINE_FIELD_STRING(NAME) json_marshall_field_string(obj, #NAME, s->NAME);
+#define A6O_RPC_DEFINE_FIELD_STRING(NAME) marshall_field_string(obj, #NAME, s->NAME);
 
-#define A6O_RPC_DEFINE_FIELD_ENUM(ENUM_TYPE, NAME) json_marshall_field_enum_##ENUM_TYPE(obj, #NAME, s->NAME);
+#define A6O_RPC_DEFINE_FIELD_ENUM(ENUM_TYPE, NAME) marshall_field_enum_##ENUM_TYPE(obj, #NAME, s->NAME);
 
-#define A6O_RPC_DEFINE_FIELD_ARRAY(ELEM_TYPE, NAME) json_marshall_field_array(obj, #NAME, (void **)s->NAME, json_marshall_struct_##ELEM_TYPE);
+#define A6O_RPC_DEFINE_FIELD_ARRAY(ELEM_TYPE, NAME) marshall_field_array(obj, #NAME, (void **)s->NAME, a6o_rpc_marshall_struct_##ELEM_TYPE);
 
 #define A6O_RPC_END_STRUCT			\
 	return 0;				\

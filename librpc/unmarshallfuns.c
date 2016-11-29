@@ -34,8 +34,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
  * - time_t and size_t
  *
  */
-#define JSON_UNMARSHALL_FIELD_INT(TYPE)						\
-static int json_unmarshall_field_##TYPE(json_t *obj, const char *name, TYPE *p_val)	\
+#define UNMARSHALL_FIELD_INT(TYPE)						\
+static int unmarshall_field_##TYPE(json_t *obj, const char *name, TYPE *p_val)	\
 {									\
 	json_t *field = json_object_get(obj, name);			\
 									\
@@ -50,18 +50,18 @@ static int json_unmarshall_field_##TYPE(json_t *obj, const char *name, TYPE *p_v
 	return 0;							\
 }
 
-JSON_UNMARSHALL_FIELD_INT(int)
-JSON_UNMARSHALL_FIELD_INT(uint32_t)
-JSON_UNMARSHALL_FIELD_INT(int32_t)
-JSON_UNMARSHALL_FIELD_INT(time_t)
-JSON_UNMARSHALL_FIELD_INT(size_t)
+UNMARSHALL_FIELD_INT(int)
+UNMARSHALL_FIELD_INT(uint32_t)
+UNMARSHALL_FIELD_INT(int32_t)
+UNMARSHALL_FIELD_INT(time_t)
+UNMARSHALL_FIELD_INT(size_t)
 
 #ifdef UINT64_MAX
-JSON_UNMARSHALL_FIELD_INT(uint64_t)
+UNMARSHALL_FIELD_INT(uint64_t)
 #endif
 
 #ifdef INT64_MAX
-JSON_UNMARSHALL_FIELD_INT(int64_t)
+UNMARSHALL_FIELD_INT(int64_t)
 #endif
 
 /*
@@ -69,7 +69,7 @@ JSON_UNMARSHALL_FIELD_INT(int64_t)
  * Unmarshalling functions for struct fields of string type
  *
  */
-static int json_unmarshall_field_string(json_t *obj, const char *name, const char **p_val)
+static int unmarshall_field_string(json_t *obj, const char *name, const char **p_val)
 {
 	json_t *field = json_object_get(obj, name);
 
@@ -90,7 +90,7 @@ static int json_unmarshall_field_string(json_t *obj, const char *name, const cha
  *
  */
 #define A6O_RPC_DEFINE_ENUM(S)						\
-static int json_unmarshall_field_enum_##S(json_t *obj, const char *name, enum S *p_val) \
+static int unmarshall_field_enum_##S(json_t *obj, const char *name, enum S *p_val) \
 {									\
 	json_t *field = json_object_get(obj, name);			\
 	const char *enum_string;					\
@@ -103,7 +103,7 @@ static int json_unmarshall_field_enum_##S(json_t *obj, const char *name, enum S 
 									\
 	enum_string = json_string_value(field);
 #define A6O_RPC_DEFINE_ENUM_VALUE(NAME) if (!strcmp(enum_string, #NAME)) { *p_val = NAME; return 0; }
-#define A6O_RPC_END_ENUM				\
+#define A6O_RPC_END_ENUM			\
 	return 1;				\
 }
 
@@ -114,7 +114,7 @@ static int json_unmarshall_field_enum_##S(json_t *obj, const char *name, enum S 
  * Unmarshalling functions for fields of array types
  *
  */
-static int json_unmarshall_field_array(json_t *obj, const char *name, void ***p_array, int (*json_unmarshall_cb)(json_t *obj, void **pp))
+static int unmarshall_field_array(json_t *obj, const char *name, void ***p_array, int (*unmarshall_struct_cb)(json_t *obj, void **pp))
 {
 	json_t *field = json_object_get(obj, name);
 	size_t index, size;
@@ -135,7 +135,8 @@ static int json_unmarshall_field_array(json_t *obj, const char *name, void ***p_
 
 	p = array;
 	json_array_foreach(field, index, elem) {
-		(*json_unmarshall_cb)(elem, p);
+		/* TODO: must check return value of callback and exit with error status if != 0 */
+		(*unmarshall_struct_cb)(elem, p);
 		p++;
 	}
 
@@ -149,23 +150,23 @@ static int json_unmarshall_field_array(json_t *obj, const char *name, void ***p_
  * Unmarshalling functions for struct types
  *
  */
-#define A6O_RPC_DEFINE_STRUCT(S)			\
-int json_unmarshall_struct_##S(json_t *obj, void **pp)	\
-{						\
-	int ret;				\
-	struct S *s = malloc(sizeof(struct S));	\
+#define A6O_RPC_DEFINE_STRUCT(S)				\
+int a6o_rpc_unmarshall_struct_##S(json_t *obj, void **pp)	\
+{								\
+	int ret;						\
+	struct S *s = malloc(sizeof(struct S));			\
 	*pp = s;
 
-#define A6O_RPC_DEFINE_FIELD_INT(INT_TYPE, NAME) if ((ret = json_unmarshall_field_##INT_TYPE(obj, #NAME, &(s->NAME))) != 0) return ret;
+#define A6O_RPC_DEFINE_FIELD_INT(INT_TYPE, NAME) if ((ret = unmarshall_field_##INT_TYPE(obj, #NAME, &(s->NAME))) != 0) return ret;
 
-#define A6O_RPC_DEFINE_FIELD_STRING(NAME) if ((ret = json_unmarshall_field_string(obj, #NAME, &(s->NAME))) != 0) return ret;
+#define A6O_RPC_DEFINE_FIELD_STRING(NAME) if ((ret = unmarshall_field_string(obj, #NAME, &(s->NAME))) != 0) return ret;
 
-#define A6O_RPC_DEFINE_FIELD_ENUM(ENUM_TYPE, NAME) if ((ret = json_unmarshall_field_enum_##ENUM_TYPE(obj, #NAME, &(s->NAME))) != 0) return ret;
+#define A6O_RPC_DEFINE_FIELD_ENUM(ENUM_TYPE, NAME) if ((ret = unmarshall_field_enum_##ENUM_TYPE(obj, #NAME, &(s->NAME))) != 0) return ret;
 
-#define A6O_RPC_DEFINE_FIELD_ARRAY(ELEM_TYPE, NAME) if ((ret = json_unmarshall_field_array(obj, #NAME, (void ***)&(s->NAME), json_unmarshall_struct_##ELEM_TYPE)) != 0) return ret;
+#define A6O_RPC_DEFINE_FIELD_ARRAY(ELEM_TYPE, NAME) if ((ret = unmarshall_field_array(obj, #NAME, (void ***)&(s->NAME), a6o_rpc_unmarshall_struct_##ELEM_TYPE)) != 0) return ret;
 
-#define A6O_RPC_END_STRUCT \
-	return 0;      \
+#define A6O_RPC_END_STRUCT			\
+	return 0;				\
 }
 
 #include <libarmadito-rpc/defs.h>
