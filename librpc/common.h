@@ -19,26 +19,13 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef LIBARMADITO_IPC_ARMADITO_IPC_H
-#define LIBARMADITO_IPC_ARMADITO_IPC_H
+#ifndef LIBRPC_COMMON_H
+#define LIBRPC_COMMON_H
 
-#include <stddef.h>
-
-#include <libarmadito/armadito.h>
-
-/*
- * structure specific serialization functions
- */
-#define IPC_DEFINE_STRUCT(S) int a6o_ipc_serialize_struct_##S(void *p, char **p_buffer, size_t *p_size);
-
-#include <libarmadito-ipc/defs.h>
-
-/*
- * functions
- */
-
-#define a6o_ipc_serialize(STRUCT_TYPE, P, P_BUFFER, P_SIZE) a6o_ipc_serialize_struct_##STRUCT_TYPE(P, P_BUFFER, P_SIZE);
-
-int a6o_ipc_deserialize(char *buffer, size_t size, void **p);
+enum deserial_error {
+	ERR_BUFFER_TOO_SMALL = 1,
+	ERR_TYPE_MISMATCH,
+	ERR_NO_SUCH_FIELD,
+};
 
 #endif

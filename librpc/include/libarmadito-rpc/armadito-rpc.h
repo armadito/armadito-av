@@ -19,15 +19,26 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef LIBIPC_COMMON_H
-#define LIBIPC_COMMON_H
+#ifndef LIBARMADITO_RPC_ARMADITO_RPC_H
+#define LIBARMADITO_RPC_ARMADITO_RPC_H
 
-#define JSON_KEY_NAME "__key__"
+#include <stddef.h>
 
-enum deserial_error {
-	ERR_BUFFER_TOO_SMALL = 1,
-	ERR_TYPE_MISMATCH,
-	ERR_NO_SUCH_FIELD,
-};
+#include <libarmadito/armadito.h>
+
+/*
+ * structure specific serialization functions
+ */
+#define RPC_DEFINE_STRUCT(S) int a6o_rpc_serialize_struct_##S(void *p, char **p_buffer, size_t *p_size);
+
+#include <libarmadito-rpc/defs.h>
+
+/*
+ * functions
+ */
+
+#define a6o_rpc_serialize(STRUCT_TYPE, P, P_BUFFER, P_SIZE) a6o_rpc_serialize_struct_##STRUCT_TYPE(P, P_BUFFER, P_SIZE);
+
+int a6o_rpc_deserialize(char *buffer, size_t size, void **p);
 
 #endif
