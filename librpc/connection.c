@@ -35,6 +35,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 struct a6o_rpc_connection {
 	int socket_fd;
+	size_t current_id;
 };
 
 struct a6o_rpc_connection *a6o_rpc_connection_new(int socket_fd)
@@ -42,8 +43,21 @@ struct a6o_rpc_connection *a6o_rpc_connection_new(int socket_fd)
 	struct a6o_rpc_connection *conn = malloc(sizeof(struct a6o_rpc_connection));
 
 	conn->socket_fd = socket_fd;
+	conn->current_id = 1;
 
 	return conn;
+}
+
+#define NOT_YET_IMPLEMENTED(F) fprintf(stderr, "%s: not yet implemented\n", F)
+
+static void connection_lock(struct a6o_rpc_connection *conn)
+{
+	NOT_YET_IMPLEMENTED(__func__);
+}
+
+static void connection_unlock(struct a6o_rpc_connection *conn)
+{
+	NOT_YET_IMPLEMENTED(__func__);
 }
 
 static ssize_t write_n(int fd, char *buffer, size_t len)
@@ -93,12 +107,19 @@ int a6o_rpc_connection_send(struct a6o_rpc_connection *conn, json_t *obj)
 
 	buffer_append(&b, "\r\n\r\n", 4);
 
-	/* TODO: lock the conn */
+	connection_lock(conn);
 	ret = write_n(conn->socket_fd, buffer_data(&b), buffer_size(&b));
+	connection_unlock(conn);
 
 end:
 	buffer_destroy(&b);
 
 	return ret;
+}
+
+size_t a6o_rpc_connection_register_callback(struct a6o_rpc_connection *conn, a6o_rpc_cb_t cb, void *user_data)
+{
+	connection_lock(conn);
+	connection_unlock(conn);
 }
 

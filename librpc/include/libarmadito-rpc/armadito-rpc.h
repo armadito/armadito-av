@@ -59,10 +59,8 @@ struct a6o_rpc_connection *a6o_rpc_connection_new(int socket_fd);
 
 int a6o_rpc_notify(struct a6o_rpc_connection *conn, const char *method, json_t *params);
 
-/* typedef void (*a6o_rpc_cb_t)(void *result, void *user_data); */
+typedef void (*a6o_rpc_cb_t)(json_t *result, void *user_data);
 
-/* int a6o_rpc_call(struct a6o_rpc_handler *m, const char *method, void *params, a6o_rpc_cb_t cb, void *user_data); */
-
-
+int a6o_rpc_call(struct a6o_rpc_connection *conn, const char *method, json_t *params, a6o_rpc_cb_t cb, void *user_data);
 
 #endif

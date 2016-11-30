@@ -1,5 +1,5 @@
 check_PROGRAMS= \
-rpc-notify-send
+rpc-client-test
 
 LDADD=$(top_builddir)/librpc/libarmadito-rpc.a @LIBJANSSON_LIBS@
 AM_CPPFLAGS=-I$(top_srcdir)/librpc/include -I$(top_srcdir)/libmodule/include @LIBJANSSON_CFLAGS@
@@ -7,7 +7,7 @@ AM_CPPFLAGS=-I$(top_srcdir)/librpc/include -I$(top_srcdir)/libmodule/include @LI
 #ipcsendtest_SOURCES=ipcsendtest.c
 #ipcreceivetest_SOURCES=ipcreceivetest.c
 
-rpc_notify_send_SOURCES= rpc-notify-send.c
+rpc_client_test_SOURCES= rpc-client-test.c
 
 
 

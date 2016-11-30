@@ -37,17 +37,39 @@ static struct a6o_module_info *module_info_new(void)
 	return mod;
 }
 
+static int test_notification(struct a6o_rpc_connection *conn)
+{
+	json_t *params;
+	struct a6o_module_info *mod = module_info_new();
+
+	A6O_RPC_STRUCT2JSON(a6o_module_info, mod, &params);
+
+	return a6o_rpc_notify(conn, "status", params);
+}
+
+static void simple_cb(json_t *result, void *user_data)
+{
+	fprintf(stderr, "The callback has been called\n");
+}
+
+static int test_call(struct a6o_rpc_connection *conn)
+{
+	json_t *params = json_object();
+
+	json_object_set(params, "path", json_string("/var/tmp"));
+
+	return a6o_rpc_call(conn, "scan", params, simple_cb, NULL);
+}
+
 int main(int argc, char **argv)
 {
-	struct a6o_module_info *mod = module_info_new();
-	json_t *params;
 	struct a6o_rpc_connection *conn;
 
 	conn = a6o_rpc_connection_new(STDOUT_FILENO);
 
-	A6O_RPC_STRUCT2JSON(a6o_module_info, mod, &params);
+	test_notification(conn);
 
-	a6o_rpc_notify(conn, "status", params);
+	test_call(conn);
 
 	return 0;
 }
