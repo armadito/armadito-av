@@ -10,6 +10,8 @@ buffer.h \
 common.h \
 connection.c \
 connection.h \
+hash.c \
+hash.h \
 marshallfuns.c \
 rpc.c \
 unmarshallfuns.c

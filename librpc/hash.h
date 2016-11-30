@@ -22,12 +22,26 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef LIBRPC_HASH_H
 #define LIBRPC_HASH_H
 
+#include <stdint.h>
+
 struct hash_table;
 
-struct hash_table *hash_table_new(size_t len);
+enum hash_table_type {
+	HASH_KEY_STR,		/* hash table maps 'const char *', using string hash function, to 'void *' */
+	HASH_KEY_SIZE,		/* hash table maps a 'size_t' contained in a 'void *', using integer hash function, to 'void *' */
+};
 
-int hash_table_insert(struct hash_table *ht, const char *key, void *value);
+/* copied from glib */
+#define H_POINTER_TO_SIZE(p)	((size_t) (p))
+#define H_SIZE_TO_POINTER(s)	((void *) (uintptr_t) (s))
 
-void *hash_table_search(struct hash_table *ht, const char *key);
+struct hash_table *hash_table_new(enum hash_table_type t);
+
+/* returns 1 if key has been inserted, 0 if not */
+int hash_table_insert(struct hash_table *ht, void *key, void *value);
+
+void *hash_table_search(struct hash_table *ht, void *key);
+
+int hash_table_remove(struct hash_table *ht, void *key, void **p_value);
 
 #endif

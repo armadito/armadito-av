@@ -24,6 +24,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "connection.h"
 #include "buffer.h"
+#include "hash.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -36,6 +37,12 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 struct a6o_rpc_connection {
 	int socket_fd;
 	size_t current_id;
+	struct hash_table *response_table;
+};
+
+struct rpc_callback_entry {
+	a6o_rpc_cb_t cb;
+	void *user_data;
 };
 
 struct a6o_rpc_connection *a6o_rpc_connection_new(int socket_fd)
@@ -60,11 +67,11 @@ static void connection_unlock(struct a6o_rpc_connection *conn)
 	NOT_YET_IMPLEMENTED(__func__);
 }
 
-static ssize_t write_n(int fd, char *buffer, size_t len)
+static ssize_t write_n(int fd, char *buffer, size_t size)
 {
-	size_t to_write = len;
+	size_t to_write = size;
 
-	assert(len > 0);
+	assert(size > 0);
 
 	while (to_write > 0) {
 		int w = write(fd, buffer, to_write);
@@ -79,7 +86,7 @@ static ssize_t write_n(int fd, char *buffer, size_t len)
 		to_write -= w;
 	}
 
-	return len;
+	return size;
 }
 
 static int json_buffer_dump_cb(const char *buffer, size_t size, void *data)
@@ -120,11 +127,20 @@ end:
 size_t a6o_rpc_connection_register_callback(struct a6o_rpc_connection *conn, a6o_rpc_cb_t cb, void *user_data)
 {
 	size_t id;
+	struct rpc_callback_entry *entry;
+
+	entry = malloc(sizeof(struct rpc_callback_entry));
+	entry->cb = cb;
+	entry->user_data = user_data;
 
 	connection_lock(conn);
 
 	id = conn->current_id;
 	conn->current_id++;
+
+	/* insertion should always work??? */
+	if (!hash_table_insert(conn->response_table, H_SIZE_TO_POINTER(id), entry))
+		free(entry);
 
 	connection_unlock(conn);
 

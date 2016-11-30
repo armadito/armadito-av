@@ -31,23 +31,27 @@ struct hash_table_entry {
 };
 
 struct hash_table {
-	size_t len;
+	enum hash_table_type type;
+	size_t size;
 	struct hash_table_entry *table;
 };
 
-struct hash_table *hash_table_new(size_t len)
+#define HASH_DEFAULT_SIZE 128
+
+struct hash_table *hash_table_new(enum hash_table_type t)
 {
 	struct hash_table *ht;
 
 	ht = malloc(sizeof(struct hash_table));
-	ht->len = len;
-	ht->table = calloc(len, sizeof(struct hash_table_entry));
+	ht->type = t;
+	ht->size = HASH_DEFAULT_SIZE;
+	ht->table = calloc(ht->size, sizeof(struct hash_table_entry));
 
 	return ht;
 }
 
-/* PJW non-cryptographic hash function */
-static uint32_t hash(const char *s)
+/* PJW non-cryptographic string hash function */
+static uint32_t hash_str(const char *s)
 {
 	uint32_t h = 0, high;
 	const char *p = s;
@@ -62,41 +66,52 @@ static uint32_t hash(const char *s)
 	return h;
 }
 
-int hash_table_insert(struct hash_table *ht, const char *key, void *value)
+static uint32_t hash_pointer(void *p)
+{
+	return 0;
+}
+
+#define HASH(HT, K) ((HT->type == HASH_KEY_STR) ? hash_str(K) : hash_pointer(K))
+#define EQUAL(HT, K1, K2) ((HT->type == HASH_KEY_STR) ? (strcmp((const char *)K1, (const char *)K2) == 0) : (K1 == K2))
+
+int hash_table_insert(struct hash_table *ht, void *key, void *value)
 {
 	size_t h, i, w;
 
-	h = hash(key) % ht->len;
+	h = HASH(ht, key) % ht->size;
 
-	for (i = 0; i < ht->len; i++) {
-		w = (h + i) % ht->len;
+	for (i = 0; i < ht->size; i++) {
+		w = (h + i) % ht->size;
 
 		if (ht->table[w].key == NULL)
 			break;
 	}
 
-	if (i == ht->len)
-		return 1; /* no NULL place found => table is full */
+	if (i == ht->size)
+		return 0; /* no NULL place found => table is full */
 
-	ht->table[w].key = strdup(key);
+	if (ht->type == HASH_KEY_STR)
+		ht->table[w].key = strdup(key);
+	else
+		ht->table[w].key = key;
 	ht->table[w].value = value;
 
-	return 0;
+	return 1;
 }
 
-void *hash_table_search(struct hash_table *ht, const char *key)
+void *hash_table_search(struct hash_table *ht, void *key)
 {
 	size_t h, i, w;
 
-	h = hash(key) % ht->len;
+	h = HASH(ht, key) % ht->size;
 
-	for (i = 0; i < ht->len; i++) {
-		w = (h + i) % ht->len;
+	for (i = 0; i < ht->size; i++) {
+		w = (h + i) % ht->size;
 
 		if (ht->table[w].key == NULL)
 			return NULL;
 
-		if (!strcmp(ht->table[w].key, key))
+		if (EQUAL(ht, ht->table[w].key, key))
 			return ht->table[w].value;
 	}
 
