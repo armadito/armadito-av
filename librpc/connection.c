@@ -43,7 +43,7 @@ struct a6o_rpc_connection *a6o_rpc_connection_new(int socket_fd)
 	struct a6o_rpc_connection *conn = malloc(sizeof(struct a6o_rpc_connection));
 
 	conn->socket_fd = socket_fd;
-	conn->current_id = 1;
+	conn->current_id = 1L;
 
 	return conn;
 }
@@ -119,7 +119,15 @@ end:
 
 size_t a6o_rpc_connection_register_callback(struct a6o_rpc_connection *conn, a6o_rpc_cb_t cb, void *user_data)
 {
+	size_t id;
+
 	connection_lock(conn);
+
+	id = conn->current_id;
+	conn->current_id++;
+
 	connection_unlock(conn);
+
+	return id;
 }
 
