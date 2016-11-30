@@ -35,7 +35,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 /*
  * marshalling helper macro
  */
-#define a6o_rpc_struct2json(S, P, O) a6o_rpc_marshall_struct_##S(P, O)
+#define A6O_RPC_STRUCT2JSON(S, P, O) a6o_rpc_marshall_struct_##S(P, O)
 
 /*
  * Declaration of unmarshalling functions for struct types
@@ -47,13 +47,15 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 /*
  * umarshalling helper macro
  */
-#define a6o_rpc_json2struct(S, O, P) a6o_rpc_unmarshall_struct_##S(O, P)
+#define A6O_RPC_JSON2STRUCT(S, O, P) a6o_rpc_unmarshall_struct_##S(O, P)
 
 /*
  * JSON-RPC functions
  */
 
 struct a6o_rpc_connection;
+
+struct a6o_rpc_connection *a6o_rpc_connection_new(int socket_fd);
 
 int a6o_rpc_notify(struct a6o_rpc_connection *conn, const char *method, json_t *params);
 

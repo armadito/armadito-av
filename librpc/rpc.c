@@ -38,12 +38,13 @@ static json_t *make_json_rpc_obj(const char *method, json_t *j_params, int id)
 	return call;
 }
 
-
 int a6o_rpc_notify(struct a6o_rpc_connection *conn, const char *method, json_t *params)
 {
 	json_t *call;
 
 	call = make_json_rpc_obj(method, params, RPC_NO_ID);
+	if (params != NULL)
+		json_object_set(call, "params", params);
 
-	return rpc_connection_send(conn, call);
+	return a6o_rpc_connection_send(conn, call);
 }

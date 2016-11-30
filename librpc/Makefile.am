@@ -5,7 +5,10 @@ SUBDIRS=tests
 noinst_LIBRARIES=libarmadito-rpc.a
 
 libarmadito_rpc_a_SOURCES= \
+buffer.c \
+buffer.h \
 common.h \
+connection.c \
 connection.h \
 marshallfuns.c \
 rpc.c \
