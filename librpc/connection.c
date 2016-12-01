@@ -144,8 +144,6 @@ size_t a6o_rpc_connection_register_callback(struct a6o_rpc_connection *conn, a6o
 	if (!hash_table_insert(conn->response_table, H_INT_TO_POINTER(id), entry))
 		free(entry);
 
-	hash_table_print(conn->response_table);
-
 	connection_unlock(conn);
 
 	return id;

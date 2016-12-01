@@ -37,13 +37,14 @@ enum hash_table_type {
 
 struct hash_table *hash_table_new(enum hash_table_type t);
 
-void hash_table_print(struct hash_table *ht);
-
 /* returns 1 if key has been inserted, 0 if not */
 int hash_table_insert(struct hash_table *ht, void *key, void *value);
 
+/* returns the value mapped to key, NULL if not found */
 void *hash_table_search(struct hash_table *ht, void *key);
 
+/* returns 1 if key was removed, 0 if not */
+/* if p_value is not NULL, it will contains the value that was mapped to the removed key */
 int hash_table_remove(struct hash_table *ht, void *key, void **p_value);
 
 #endif

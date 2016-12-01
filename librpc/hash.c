@@ -41,6 +41,8 @@ struct hash_table {
 
 #define HASH_DEFAULT_SIZE 64
 
+#define REMOVED ((void *)2)
+
 struct hash_table *hash_table_new(enum hash_table_type t)
 {
 	struct hash_table *ht;
@@ -152,7 +154,6 @@ static uint64_t fmix64(void *p)
   mult_hash            0   42     33
   mult_hash_i          0   72     32
   mult_hash_i64        0   72     28
-
 */
 
 /* #define hash_pointer(HT, K) fmix32(K) */
@@ -218,7 +219,7 @@ int hash_table_insert(struct hash_table *ht, void *key, void *value)
 	for (i = 0; i < ht->size; i++) {
 		w = (h + i) % ht->size;
 
-		if (ht->table[w].key == NULL)
+		if (ht->table[w].key == NULL || ht->table[w].key == REMOVED)
 			break;
 	}
 
@@ -237,7 +238,7 @@ int hash_table_insert(struct hash_table *ht, void *key, void *value)
 	return 1;
 }
 
-void *hash_table_search(struct hash_table *ht, void *key)
+static struct hash_table_entry *lookup_entry(struct hash_table *ht, void *key)
 {
 	size_t h, i, w;
 
@@ -249,9 +250,38 @@ void *hash_table_search(struct hash_table *ht, void *key)
 		if (ht->table[w].key == NULL)
 			return NULL;
 
+		if (ht->table[w].key == REMOVED)
+			continue;
+
 		if (EQUAL(ht, ht->table[w].key, key))
-			return ht->table[w].value;
+			return ht->table + w;
 	}
 
 	return NULL;
+}
+
+void *hash_table_search(struct hash_table *ht, void *key)
+{
+	struct hash_table_entry *p = lookup_entry(ht, key);
+
+	if (p != NULL)
+		return p->value;
+
+	return NULL;
+}
+
+int hash_table_remove(struct hash_table *ht, void *key, void **p_value)
+{
+	struct hash_table_entry *p = lookup_entry(ht, key);
+
+	if (p == NULL)
+		return 0;
+
+	if (p_value != NULL)
+		*p_value = p->value;
+
+	p->key = REMOVED;
+	p->value = NULL;
+
+	return 1;
 }
