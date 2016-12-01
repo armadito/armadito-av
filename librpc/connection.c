@@ -51,6 +51,7 @@ struct a6o_rpc_connection *a6o_rpc_connection_new(int socket_fd)
 
 	conn->socket_fd = socket_fd;
 	conn->current_id = 1L;
+	conn->response_table = hash_table_new(HASH_KEY_INT);
 
 	return conn;
 }
@@ -136,11 +137,14 @@ size_t a6o_rpc_connection_register_callback(struct a6o_rpc_connection *conn, a6o
 	connection_lock(conn);
 
 	id = conn->current_id;
+
 	conn->current_id++;
 
 	/* insertion should always work??? */
-	if (!hash_table_insert(conn->response_table, H_SIZE_TO_POINTER(id), entry))
+	if (!hash_table_insert(conn->response_table, H_INT_TO_POINTER(id), entry))
 		free(entry);
+
+	hash_table_print(conn->response_table);
 
 	connection_unlock(conn);
 

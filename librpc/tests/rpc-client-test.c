@@ -64,12 +64,14 @@ static int test_call(struct a6o_rpc_connection *conn)
 int main(int argc, char **argv)
 {
 	struct a6o_rpc_connection *conn;
+	size_t i;
 
 	conn = a6o_rpc_connection_new(STDOUT_FILENO);
 
 	test_notification(conn);
 
-	test_call(conn);
+	for(i = 0; i < 88; i++)
+		test_call(conn);
 
 	return 0;
 }

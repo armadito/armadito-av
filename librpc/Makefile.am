@@ -1,6 +1,8 @@
 AUTOMAKE_OPTIONS=subdir-objects
 
-SUBDIRS=tests
+# build current directory before tests
+#see: https://www.gnu.org/software/automake/manual/html_node/Subdirectories.html
+SUBDIRS=. tests
 
 noinst_LIBRARIES=libarmadito-rpc.a
 

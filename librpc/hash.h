@@ -28,14 +28,16 @@ struct hash_table;
 
 enum hash_table_type {
 	HASH_KEY_STR,		/* hash table maps 'const char *', using string hash function, to 'void *' */
-	HASH_KEY_SIZE,		/* hash table maps a 'size_t' contained in a 'void *', using integer hash function, to 'void *' */
+	HASH_KEY_INT,		/* hash table maps an 'int' contained in a 'void *', using integer hash function, to 'void *' */
 };
 
 /* copied from glib */
-#define H_POINTER_TO_SIZE(p)	((size_t) (p))
-#define H_SIZE_TO_POINTER(s)	((void *) (uintptr_t) (s))
+#define H_POINTER_TO_INT(p)	((uintptr_t) (p))
+#define H_INT_TO_POINTER(i)	((void *)(uintptr_t)(i))
 
 struct hash_table *hash_table_new(enum hash_table_type t);
+
+void hash_table_print(struct hash_table *ht);
 
 /* returns 1 if key has been inserted, 0 if not */
 int hash_table_insert(struct hash_table *ht, void *key, void *value);
