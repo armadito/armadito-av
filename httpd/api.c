@@ -109,10 +109,6 @@ int event_process_cb(struct api_handler *a, struct MHD_Connection *connection, j
 	if (client != NULL) {
 		api_client_pop_event(client, out);
 
-#ifdef DEBUG
-		jobj_debug(*out, "event");
-#endif
-
 		return 0;
 	}
 

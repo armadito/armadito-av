@@ -79,7 +79,7 @@ static int httpd_remove_client(struct httpd *h, int64_t token);
 #ifdef DEBUG
 static int value_print(void *cls, enum MHD_ValueKind kind, const char *key, const char *value)
 {
-	a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_DEBUG, "connection: key %s value %s", key, value);
+	/* a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_DEBUG, "connection: key %s value %s", key, value); */
 
 	return MHD_YES;
 }
