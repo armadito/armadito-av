@@ -54,9 +54,12 @@ static void simple_cb(json_t *result, void *user_data)
 
 static int test_call(struct a6o_rpc_connection *conn)
 {
-	json_t *params = json_object();
+	struct operands o;
+	json_t *params;
 
-	json_object_set(params, "path", json_string("/var/tmp"));
+	o.op1 = 1;
+	o.op2 = 2;
+	A6O_RPC_STRUCT2JSON(operands, &o, &params);
 
 	return a6o_rpc_call(conn, "scan", params, simple_cb, NULL);
 }

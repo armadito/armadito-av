@@ -21,6 +21,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <libarmadito/armadito.h>
 
+#include "test.h"
+
 A6O_RPC_DEFINE_ENUM(a6o_file_status)
 	A6O_RPC_DEFINE_ENUM_VALUE(A6O_FILE_UNDECIDED)
 	A6O_RPC_DEFINE_ENUM_VALUE(A6O_FILE_CLEAN)
@@ -53,3 +55,14 @@ A6O_RPC_DEFINE_STRUCT(a6o_module_info)
 	A6O_RPC_DEFINE_FIELD_INT(time_t, mod_update_ts)
 	A6O_RPC_DEFINE_FIELD_ARRAY(a6o_base_info, base_infos)
 A6O_RPC_END_STRUCT
+
+/* for testing */
+A6O_RPC_DEFINE_STRUCT(operands)
+	A6O_RPC_DEFINE_FIELD_INT(int, op1)
+	A6O_RPC_DEFINE_FIELD_INT(int, op2)
+A6O_RPC_END_STRUCT
+
+A6O_RPC_DEFINE_STRUCT(result)
+	A6O_RPC_DEFINE_FIELD_INT(int, res)
+A6O_RPC_END_STRUCT
+

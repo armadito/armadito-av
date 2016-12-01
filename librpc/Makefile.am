@@ -14,8 +14,11 @@ connection.c \
 connection.h \
 hash.c \
 hash.h \
+mapper.c \
+mapper.h \
+marshall.h \
 marshallfuns.c \
 rpc.c \
 unmarshallfuns.c
 
-AM_CPPFLAGS= -I$(top_srcdir)/librpc/include -I$(top_srcdir)/libmodule/include -I$(top_srcdir) @LIBJANSSON_CFLAGS@
+AM_CPPFLAGS= -I$(top_srcdir)/librpc/include -I$(top_srcdir)/libmodule/include -I$(top_srcdir) -I$(top_srcdir)/librpc @LIBJANSSON_CFLAGS@

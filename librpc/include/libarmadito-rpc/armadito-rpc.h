@@ -53,6 +53,15 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
  * JSON-RPC functions
  */
 
+/*
+ * RPC connection
+ * handles
+ * - JSON marshalling/unmarshalling
+ * - JSON objects unpacking
+ * - id generation and management
+ *
+ */
+
 struct a6o_rpc_connection;
 
 struct a6o_rpc_connection *a6o_rpc_connection_new(int socket_fd);
@@ -62,5 +71,20 @@ int a6o_rpc_notify(struct a6o_rpc_connection *conn, const char *method, json_t *
 typedef void (*a6o_rpc_cb_t)(json_t *result, void *user_data);
 
 int a6o_rpc_call(struct a6o_rpc_connection *conn, const char *method, json_t *params, a6o_rpc_cb_t cb, void *user_data);
+
+
+/*
+ * RPC mapper
+ * handles
+ * - mapping method name to method definition (callback, params un/marshalling, result un/marshalling)
+ */
+struct a6o_rpc_mapper;
+
+struct a6o_rpc_mapper *a6o_rpc_mapper_new(void);
+
+typedef int (*a6o_rpc_method_cb_t)(void *params, void **result);
+
+/* may be a macro with #P and #R ??? */
+int a6o_rpc_mapper_add(struct a6o_rpc_mapper *m, const char *method, const char *param_type, const char *return_type, a6o_rpc_method_cb_t method_cb);
 
 #endif

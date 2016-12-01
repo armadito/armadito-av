@@ -46,7 +46,6 @@ int hash_table_insert(struct hash_table *ht, void *key, void *value);
 void *hash_table_search(struct hash_table *ht, void *key);
 
 /* returns 1 if key was removed, 0 if not */
-/* if p_value is not NULL, it will contains the value that was mapped to the removed key */
-int hash_table_remove(struct hash_table *ht, void *key, void **p_value);
+int hash_table_remove(struct hash_table *ht, void *key);
 
 #endif
