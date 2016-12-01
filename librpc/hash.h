@@ -26,6 +26,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 struct hash_table;
 
+/* may be add HASH_KEY_PTR for keys that are strictly void *, as another hash function must be used */
 enum hash_table_type {
 	HASH_KEY_STR,		/* hash table maps 'const char *', using string hash function, to 'void *' */
 	HASH_KEY_INT,		/* hash table maps an 'int' contained in a 'void *', using integer hash function, to 'void *' */
@@ -35,6 +36,7 @@ enum hash_table_type {
 #define H_POINTER_TO_INT(p)	((uintptr_t) (p))
 #define H_INT_TO_POINTER(i)	((void *)(uintptr_t)(i))
 
+/* must add key and value destroy callbacks */
 struct hash_table *hash_table_new(enum hash_table_type t);
 
 /* returns 1 if key has been inserted, 0 if not */
