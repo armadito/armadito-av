@@ -36,10 +36,19 @@ struct a6o_rpc_mapper *a6o_rpc_mapper_new(void)
 	m->method_table = hash_table_new(HASH_KEY_STR, (free_cb_t)free, (free_cb_t)free);
 	m->marshall_table = hash_table_new(HASH_KEY_STR, (free_cb_t)free, (free_cb_t)free);
 
+	/* insert all struct mappings */
+#define A6O_RPC_DEFINE_STRUCT(S) \
+	a6o_rpc_mapper_add_struct(m, \
+				#S, \
+				a6o_rpc_marshall_struct_##S, \
+				a6o_rpc_unmarshall_struct_##S);
+
+#include <libarmadito-rpc/defs.h>
+
 	return m;
 }
 
-int a6o_rpc_mapped_add_struct(struct a6o_rpc_mapper *m, const char *struct_name, rpc_marshall_cb_t marshall_cb, rpc_unmarshall_cb_t unmarshall_cb)
+int a6o_rpc_mapper_add_struct(struct a6o_rpc_mapper *m, const char *struct_name, rpc_marshall_cb_t marshall_cb, rpc_unmarshall_cb_t unmarshall_cb)
 {
 	struct marshall_def *md = malloc(sizeof(struct marshall_def));
 

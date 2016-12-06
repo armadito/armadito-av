@@ -38,4 +38,6 @@ struct method_def {
 	struct marshall_def result;
 };
 
+int a6o_rpc_mapper_add_struct(struct a6o_rpc_mapper *m, const char *struct_name, rpc_marshall_cb_t marshall_cb, rpc_unmarshall_cb_t unmarshall_cb);
+
 #endif
