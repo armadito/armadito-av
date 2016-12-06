@@ -16,9 +16,10 @@ hash.c \
 hash.h \
 mapper.c \
 mapper.h \
-marshall.h \
 marshallfuns.c \
+marshallfuns.h \
 rpc.c \
-unmarshallfuns.c
+unmarshallfuns.c \
+unmarshallfuns.h
 
 AM_CPPFLAGS= -I$(top_srcdir)/librpc/include -I$(top_srcdir)/libmodule/include -I$(top_srcdir) -I$(top_srcdir)/librpc @LIBJANSSON_CFLAGS@

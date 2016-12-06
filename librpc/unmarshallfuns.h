@@ -19,23 +19,16 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef LIBRPC_MAPPER_H
-#define LIBRPC_MAPPER_H
+#ifndef LIBRPC_UNMARSHALLFUNS_H
+#define LIBRPC_UNMARSHALLFUNS_H
 
-#include <libarmadito-rpc/armadito-rpc.h>
+typedef int (*rpc_unmarshall_cb_t)(json_t *obj, void **pp);
 
-#include "marshallfuns.h"
-#include "unmarshallfuns.h"
+/*
+ * Declaration of unmarshalling functions for struct types
+ */
+#define A6O_RPC_DEFINE_STRUCT(S) int a6o_rpc_unmarshall_struct_##S(json_t *obj, void **p);
 
-struct marshall_def {
-	rpc_marshall_cb_t marshall_cb;
-	rpc_unmarshall_cb_t unmarshall_cb;
-};
-
-struct method_def {
-	a6o_rpc_method_t method_fun;
-	struct marshall_def params;
-	struct marshall_def result;
-};
+#include <libarmadito-rpc/defs.h>
 
 #endif

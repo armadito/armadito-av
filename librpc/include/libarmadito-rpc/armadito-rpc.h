@@ -26,30 +26,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <jansson.h>
 
 /*
- * Declaration of marshalling functions for struct types
- */
-#define A6O_RPC_DEFINE_STRUCT(S) int a6o_rpc_marshall_struct_##S(void *p, json_t **p_obj);
-
-#include <libarmadito-rpc/defs.h>
-
-/*
- * marshalling helper macro
- */
-#define A6O_RPC_STRUCT2JSON(S, P, O) a6o_rpc_marshall_struct_##S(P, O)
-
-/*
- * Declaration of unmarshalling functions for struct types
- */
-#define A6O_RPC_DEFINE_STRUCT(S) int a6o_rpc_unmarshall_struct_##S(json_t *obj, void **p);
-
-#include <libarmadito-rpc/defs.h>
-
-/*
- * umarshalling helper macro
- */
-#define A6O_RPC_JSON2STRUCT(S, O, P) a6o_rpc_unmarshall_struct_##S(O, P)
-
-/*
  * JSON-RPC functions
  */
 
@@ -82,9 +58,14 @@ struct a6o_rpc_mapper;
 
 struct a6o_rpc_mapper *a6o_rpc_mapper_new(void);
 
-typedef int (*a6o_rpc_method_cb_t)(void *params, void **result);
+typedef int (*a6o_rpc_method_t)(void *params, void **result, void *connection_data);
 
-/* may be a macro with #P and #R ??? */
-int a6o_rpc_mapper_add(struct a6o_rpc_mapper *m, const char *method, const char *param_type, const char *return_type, a6o_rpc_method_cb_t method_cb);
+/* may be a macro with #P and #R ???
+   + no need to have a hash table to map type names to marshall functions
+   + check is done at compile time
+   - but with an obscure link error message related to code coming from a macro expansion
+   - need to declare all marshall functions in this header
+*/
+int a6o_rpc_mapper_add(struct a6o_rpc_mapper *m, const char *method, const char *param_type, const char *return_type, a6o_rpc_method_t method_cb);
 
 #endif
