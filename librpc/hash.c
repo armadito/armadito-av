@@ -19,6 +19,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
+#include <assert.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -30,21 +31,54 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 struct hash_table_entry {
 	void *key;
 	void *value;
+	enum {
+		EMPTY = 0,
+		REMOVED,
+		OCCUPIED,
+	} state;
 };
+
+#define IS_EMPTY(T, I) (T[(I)].state == EMPTY)
+#define IS_REMOVED(T, I) (T[(I)].state == REMOVED)
+#define IS_OCCUPIED(T, I) (T[(I)].state == OCCUPIED)
+
+typedef size_t (*hash_fun_t)(void *p);
+typedef int (*equal_fun_t)(void *k1, void *k2);
 
 struct hash_table {
 	enum hash_table_type type;
 	size_t size;
 	struct hash_table_entry *table;
 	size_t key_count;
+	free_cb_t key_free_cb;
+	free_cb_t value_free_cb;
+	hash_fun_t hash_fun;
+	equal_fun_t equal_fun;
 };
 
 #define HASH_DEFAULT_SIZE 64
 
-#define KEY_VALUE_EMPTY ((void *)0)
-#define KEY_VALUE_REMOVED ((void *)1)
+#define HASH(HT, K) (*HT->hash_fun)(K)
+#define EQUAL(HT, K1, K2) (*HT->equal_fun)(K1, K2)
 
-struct hash_table *hash_table_new(enum hash_table_type t)
+static uint32_t pjw32(const char *s);
+static uint32_t hfmult32(struct hash_table *ht, void *p);
+static uint32_t himult32(void *p);
+static uint64_t himult64(void *p);
+static uint32_t fmix32(void *p);
+static uint64_t fmix64(void *p);
+
+static int equal_str(void *k1, void *k2)
+{
+	return strcmp((const char *)k1, (const char *)k2) == 0;
+}
+
+static int equal_pointer(void *k1, void *k2)
+{
+	return k1 == k2;
+}
+
+struct hash_table *hash_table_new(enum hash_table_type t, free_cb_t key_free_cb, free_cb_t value_free_cb)
 {
 	struct hash_table *ht;
 
@@ -53,6 +87,24 @@ struct hash_table *hash_table_new(enum hash_table_type t)
 	ht->size = HASH_DEFAULT_SIZE;
 	ht->table = calloc(ht->size, sizeof(struct hash_table_entry));
 	ht->key_count = 0;
+
+	ht->key_free_cb = key_free_cb;
+	ht->value_free_cb = value_free_cb;
+
+	switch(ht->type) {
+	case HASH_KEY_STR:
+		ht->hash_fun = (hash_fun_t)pjw32;
+		ht->equal_fun = equal_str;
+		break;
+	case HASH_KEY_INT:
+		ht->hash_fun = (hash_fun_t)himult64;
+		ht->equal_fun = equal_str;
+		break;
+	case HASH_KEY_PTR:
+		ht->hash_fun = (hash_fun_t)fmix64;
+		ht->equal_fun = equal_str;
+		break;
+	}
 
 	return ht;
 }
@@ -69,7 +121,7 @@ void hash_table_print(struct hash_table *ht)
 }
 
 /* PJW non-cryptographic string hash function */
-static uint32_t hash_str(const char *s)
+static uint32_t pjw32(const char *s)
 {
 	uint32_t h = 0, high;
 	const char *p = s;
@@ -157,15 +209,6 @@ static uint64_t fmix64(void *p)
   mult_hash_i64        0   72     28
 */
 
-/* #define hash_pointer(HT, K) fmix32(K) */
-/* #define hash_pointer(HT, K) fmix64(K) */
-/* #define hash_pointer(HT, K) hfmult32(HT, K) */
-/* #define hash_pointer(HT, K) himult32(K) */
-#define hash_pointer(HT, K) himult64(K)
-
-#define HASH(HT, K) ((HT->type == HASH_KEY_STR) ? hash_str(K) : hash_pointer(HT, K))
-#define EQUAL(HT, K1, K2) ((HT->type == HASH_KEY_STR) ? (strcmp((const char *)K1, (const char *)K2) == 0) : (K1 == K2))
-
 static void hash_table_rehash(struct hash_table *ht)
 {
 	size_t old_size, j;
@@ -186,12 +229,13 @@ static void hash_table_rehash(struct hash_table *ht)
 		for (i = 0; i < ht->size; i++) {
 			w = (h + i) % ht->size;
 
-			if (ht->table[w].key == KEY_VALUE_EMPTY)
+			if (IS_EMPTY(ht->table, w))
 				break;
 		}
 
 		ht->table[w].key = old_table[j].key;
 		ht->table[w].value = old_table[j].value;
+		ht->table[w].state = OCCUPIED;
 	}
 
 	free(old_table);
@@ -212,6 +256,7 @@ static void hash_table_check_overflow(struct hash_table *ht)
 int hash_table_insert(struct hash_table *ht, void *key, void *value)
 {
 	size_t h, i, w;
+	int ret;
 
 	hash_table_check_overflow(ht);
 
@@ -220,19 +265,28 @@ int hash_table_insert(struct hash_table *ht, void *key, void *value)
 	for (i = 0; i < ht->size; i++) {
 		w = (h + i) % ht->size;
 
-		if (ht->table[w].key == KEY_VALUE_EMPTY || ht->table[w].key == KEY_VALUE_REMOVED)
+		if (!IS_OCCUPIED(ht->table, w))
+			break;
+		if (EQUAL(ht, ht->table[w].key, key))
 			break;
 	}
 
 	/* this should never happen as we check overflow before inserting */
-	if (i == ht->size)
-		return 0; /* no NULL place found => table is full */
+	assert(i != ht->size);
 
+	/* TODO: update collision counter instead of printing */
 	if (i != 0)
 		fprintf(stderr, "collision for key %p\n", key);
 
+	if (ht->key_free_cb != NULL && ht->table[w].key != NULL)
+		(*ht->key_free_cb)(ht->table[w].key);
 	ht->table[w].key = key;
+
+	if (ht->value_free_cb != NULL && ht->table[w].value != NULL)
+		(*ht->value_free_cb)(ht->table[w].value);
 	ht->table[w].value = value;
+
+	ht->table[w].state = OCCUPIED;
 
 	ht->key_count++;
 
@@ -248,10 +302,10 @@ static struct hash_table_entry *lookup_entry(struct hash_table *ht, void *key)
 	for (i = 0; i < ht->size; i++) {
 		w = (h + i) % ht->size;
 
-		if (ht->table[w].key == KEY_VALUE_EMPTY)
+		if (IS_EMPTY(ht->table, w))
 			return NULL;
 
-		if (ht->table[w].key == KEY_VALUE_REMOVED)
+		if (IS_REMOVED(ht->table, w))
 			continue;
 
 		if (EQUAL(ht, ht->table[w].key, key))
@@ -278,8 +332,9 @@ int hash_table_remove(struct hash_table *ht, void *key)
 	if (p == NULL)
 		return 0;
 
-	p->key = KEY_VALUE_REMOVED;
+	p->key = NULL;
 	p->value = NULL;
+	p->state = REMOVED;
 
 	ht->key_count--;
 
