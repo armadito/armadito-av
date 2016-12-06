@@ -1,4 +1,7 @@
+#include <libarmadito/armadito.h>
 #include <libarmadito-rpc/armadito-rpc.h>
+
+#include "test.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -42,7 +45,7 @@ static int test_notification(struct a6o_rpc_connection *conn)
 	json_t *params;
 	struct a6o_module_info *mod = module_info_new();
 
-	A6O_RPC_STRUCT2JSON(a6o_module_info, mod, &params);
+	/* A6O_RPC_STRUCT2JSON(a6o_module_info, mod, &params); */
 
 	return a6o_rpc_notify(conn, "status", params);
 }
@@ -59,7 +62,7 @@ static int test_call(struct a6o_rpc_connection *conn)
 
 	o.op1 = 1;
 	o.op2 = 2;
-	A6O_RPC_STRUCT2JSON(operands, &o, &params);
+	/* A6O_RPC_STRUCT2JSON(operands, &o, &params); */
 
 	return a6o_rpc_call(conn, "scan", params, simple_cb, NULL);
 }
