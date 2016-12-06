@@ -51,7 +51,7 @@ struct a6o_rpc_connection *a6o_rpc_connection_new(int socket_fd)
 
 	conn->socket_fd = socket_fd;
 	conn->current_id = 1L;
-	conn->response_table = hash_table_new(HASH_KEY_INT);
+	conn->response_table = hash_table_new(HASH_KEY_INT, NULL, (free_cb_t)free);
 
 	return conn;
 }
