@@ -199,28 +199,83 @@ int a6o_rpc_call(struct a6o_rpc_connection *conn, const char *method, json_t *pa
 	return connection_send(conn, call);
 }
 
-enum response_type {
-	MALFORMED_RESPONSE,
+enum json_rpc_obj_type {
+	MALFORMED_JSON,
+	REQUEST,
 	ERROR_RESPONSE,
 	RESULT_RESPONSE,
 };
 
-static int rpc_obj_basic_check(json_t *obj)
+struct json_rpc_obj {
+	enum json_rpc_obj_type type;
+	union {
+		struct {
+			const char *method;
+			size_t id;
+			json_t *params;
+		} request;
+		struct {
+			json_t *result;
+			size_t id;
+		} result_response;
+		struct {
+			json_t *error;
+			size_t id;
+		} error_response;
+	} u;
+};
+
+static int json_rpc_unpack_request(json_t *o, struct json_rpc_obj *s)
 {
-	json_t *version;
+	const char *version;
+	const char *method;
+	size_t id = 0;
+	json_t *params = NULL;
 
-	if (!json_is_object(obj))
+	if (json_unpack(o, "{s:s, s:s, s?o, s?i}", "jsonrpc", &version, "method", &method, "params", &params,  "id", &id) < 0
+		|| strcmp(version, "2.0") != 0) {
+		s->type = MALFORMED_JSON;
 		return 0;
+	}
 
-	version = json_object_get(obj, "jsonrpc");
-	if (version == NULL
-		|| !json_is_string(version)
-		|| strcmp(json_string_value(version), "2.0") != 0)
-		return 0;
+	s->type = REQUEST;
+	s->u.request.method = strdup(method);
+	s->u.request.id = id;
+	s->u.request.params = params;
 
 	return 1;
 }
 
+static int json_rpc_unpack_response(json_t *o, struct json_rpc_obj *s)
+{
+	const char *version;
+	size_t id = 0;
+	json_t *result = NULL;
+	json_t *error = NULL;
+
+	if (json_unpack(o, "{s:s, s?o, s?o, s:i}", "jsonrpc", &version, "result", &result, "error", &error,  "id", &id) < 0
+		|| strcmp(version, "2.0") != 0) {
+		s->type = MALFORMED_JSON;
+		return 0;
+	}
+
+	if ((error != NULL && result != NULL) || (error == NULL && result == NULL))
+		return 0;
+
+	if (error != NULL) {
+		s->type = ERROR_RESPONSE;
+		s->u.error_response.error = error;
+		s->u.error_response.id = id;
+	} else {
+		s->type = RESULT_RESPONSE;
+		s->u.result_response.result = result;
+		s->u.result_response.id = id;
+	}
+
+	return 1;
+}
+
+#if 0
 static enum response_type rpc_obj_get_response_type(json_t *obj, size_t *p_id, json_t **p_content)
 {
 	json_t *error, *result, *id;
@@ -256,6 +311,7 @@ static enum response_type rpc_obj_get_response_type(json_t *obj, size_t *p_id, j
 	*p_content = error;
 	return ERROR_RESPONSE;
 }
+#endif
 
 static int process_result(struct a6o_rpc_connection *conn, size_t id, json_t *result)
 {
@@ -283,6 +339,7 @@ int a6o_rpc_process(struct a6o_rpc_connection *conn, const char *buffer, size_t 
 	if (obj == NULL)
 		return 1; /* TODO: error code */
 
+#if 0
 	switch(rpc_obj_get_response_type(obj, &id, &content)) {
 	case MALFORMED_RESPONSE:
 		return 1; /* TODO: error code */
@@ -291,6 +348,7 @@ int a6o_rpc_process(struct a6o_rpc_connection *conn, const char *buffer, size_t 
 	case RESULT_RESPONSE:
 		return process_result(conn, id, content);
 	}
+#endif
 
 	return 1;
 }

@@ -52,13 +52,15 @@ static int test_notification(struct a6o_rpc_connection *conn)
 
 static void simple_cb(json_t *result, void *user_data)
 {
-	fprintf(stderr, "The callback has been called\n");
+	fprintf(stderr, "The callback has been called, result is %lld\n", json_integer_value(json_object_get(result, "result")));
 }
 
 static int test_call(struct a6o_rpc_connection *conn)
 {
-	json_t *operands;
+	json_t *operands = json_object();
 
+	json_object_set(operands, "op1", json_integer(1));
+	json_object_set(operands, "op2", json_integer(2));
 	/* struct operands o; */
 	/* o.op1 = 1; */
 	/* o.op2 = 2; */
@@ -73,10 +75,7 @@ int main(int argc, char **argv)
 
 	conn = a6o_rpc_connection_new(STDOUT_FILENO);
 
-	test_notification(conn);
-
-	for(i = 0; i < 88; i++)
-		test_call(conn);
+	test_call(conn);
 
 	return 0;
 }

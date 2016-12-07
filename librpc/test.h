@@ -4,10 +4,7 @@
 struct operands {
 	int op1;
 	int op2;
-};
-
-struct result {
-	int res;
+	int result;
 };
 
 #endif

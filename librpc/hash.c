@@ -98,11 +98,11 @@ struct hash_table *hash_table_new(enum hash_table_type t, free_cb_t key_free_cb,
 		break;
 	case HASH_KEY_INT:
 		ht->hash_fun = (hash_fun_t)himult64;
-		ht->equal_fun = equal_str;
+		ht->equal_fun = equal_pointer;
 		break;
 	case HASH_KEY_PTR:
 		ht->hash_fun = (hash_fun_t)fmix64;
-		ht->equal_fun = equal_str;
+		ht->equal_fun = equal_pointer;
 		break;
 	}
 
