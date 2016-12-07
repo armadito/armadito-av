@@ -32,7 +32,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 /*
  * RPC connection
  * handles
- * - JSON marshalling/unmarshalling
  * - JSON objects unpacking
  * - id generation and management
  *
@@ -48,7 +47,6 @@ typedef void (*a6o_rpc_cb_t)(json_t *result, void *user_data);
 
 int a6o_rpc_call(struct a6o_rpc_connection *conn, const char *method, json_t *params, a6o_rpc_cb_t cb, void *user_data);
 
-
 /*
  * RPC mapper
  * handles
@@ -58,7 +56,7 @@ struct a6o_rpc_mapper;
 
 struct a6o_rpc_mapper *a6o_rpc_mapper_new(void);
 
-typedef int (*a6o_rpc_method_t)(void *params, void **result, void *connection_data);
+typedef int (*a6o_rpc_method_t)(json_t *params, json_t **result, void *connection_data);
 
 /* may be a macro with #P and #R ???
    + no need to have a hash table to map type names to marshall functions
@@ -66,6 +64,6 @@ typedef int (*a6o_rpc_method_t)(void *params, void **result, void *connection_da
    - but with an obscure link error message related to code coming from a macro expansion
    - need to declare all marshall functions in this header
 */
-int a6o_rpc_mapper_add(struct a6o_rpc_mapper *m, const char *method, const char *param_type, const char *return_type, a6o_rpc_method_t method_cb);
+int a6o_rpc_mapper_add(struct a6o_rpc_mapper *m, const char *method, a6o_rpc_method_t method_cb);
 
 #endif

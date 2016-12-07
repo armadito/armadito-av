@@ -57,14 +57,13 @@ static void simple_cb(json_t *result, void *user_data)
 
 static int test_call(struct a6o_rpc_connection *conn)
 {
-	struct operands o;
-	json_t *params;
+	json_t *operands;
 
-	o.op1 = 1;
-	o.op2 = 2;
-	/* A6O_RPC_STRUCT2JSON(operands, &o, &params); */
+	/* struct operands o; */
+	/* o.op1 = 1; */
+	/* o.op2 = 2; */
 
-	return a6o_rpc_call(conn, "scan", params, simple_cb, NULL);
+	return a6o_rpc_call(conn, "add", operands, simple_cb, NULL);
 }
 
 int main(int argc, char **argv)

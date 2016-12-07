@@ -21,82 +21,31 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <libarmadito-rpc/armadito-rpc.h>
 
-#include "mapper.h"
 #include "hash.h"
+
+#include <string.h>
 
 struct a6o_rpc_mapper {
 	struct hash_table *method_table;
-	struct hash_table *marshall_table;
 };
 
 struct a6o_rpc_mapper *a6o_rpc_mapper_new(void)
 {
 	struct a6o_rpc_mapper *m = malloc(sizeof(struct a6o_rpc_mapper));
 
-	m->method_table = hash_table_new(HASH_KEY_STR, (free_cb_t)free, (free_cb_t)free);
-	m->marshall_table = hash_table_new(HASH_KEY_STR, (free_cb_t)free, (free_cb_t)free);
-
-	/* insert all struct mappings */
-#define A6O_RPC_DEFINE_STRUCT(S) \
-	a6o_rpc_mapper_add_struct(m, \
-				#S, \
-				a6o_rpc_marshall_struct_##S, \
-				a6o_rpc_unmarshall_struct_##S);
-
-#include <libarmadito-rpc/defs.h>
+	m->method_table = hash_table_new(HASH_KEY_STR, (free_cb_t)free, NULL);
 
 	return m;
 }
 
-int a6o_rpc_mapper_add_struct(struct a6o_rpc_mapper *m, const char *struct_name, rpc_marshall_cb_t marshall_cb, rpc_unmarshall_cb_t unmarshall_cb)
+int a6o_rpc_mapper_add_method(struct a6o_rpc_mapper *m, const char *method, a6o_rpc_method_t method_fun)
 {
-	struct marshall_def *md = malloc(sizeof(struct marshall_def));
+	char *p = strdup(method);
 
-	md->marshall_cb = marshall_cb;
-	md->unmarshall_cb = unmarshall_cb;
-
-	return hash_table_insert(m->marshall_table, (void *)struct_name, md);
-}
-
-static int find_marshall(struct a6o_rpc_mapper *m, const char *type_name, rpc_marshall_cb_t *p_marshall, rpc_unmarshall_cb_t *p_unmarshall)
-{
-	struct marshall_def *md;
-
-	md = hash_table_search(m->marshall_table, (void *)type_name);
-	if (md == NULL)
-		return -1; /* TODO : define proper error code */
-
-	*p_marshall = md->marshall_cb;
-	*p_unmarshall = md->unmarshall_cb;
-
-	return 0;
-}
-
-int a6o_rpc_mapper_add_method(struct a6o_rpc_mapper *m, const char *method, const char *param_type, const char *return_type, a6o_rpc_method_t method_fun)
-{
-	struct method_def *mth_def;
-	int ret;
-
-	mth_def = calloc(1, sizeof(struct method_def));
-	mth_def->method_fun = method_fun;
-
-	if (param_type != NULL) {
-		ret = find_marshall( m, param_type, &mth_def->params.marshall_cb, &mth_def->params.unmarshall_cb);
-
-		if (!ret)
-			goto err_exit;
-	}
-
-	if (return_type != NULL) {
-		ret = find_marshall( m, return_type, &mth_def->result.marshall_cb, &mth_def->result.unmarshall_cb);
-
-		if (!ret)
-			goto err_exit;
+	if (!hash_table_insert(m->method_table, p, method_fun)) {
+		free(p);
+		return 1; /* must add error code */
 	}
 
 	return 0;
-
-err_exit:
-	free(mth_def);
-	return ret;
 }

@@ -15,10 +15,8 @@ connection.h \
 hash.c \
 hash.h \
 mapper.c \
-mapper.h \
 marshallfuns.c \
 marshallfuns.h \
-rpc.c \
 unmarshallfuns.c \
 unmarshallfuns.h
 

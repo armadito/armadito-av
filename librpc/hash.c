@@ -332,7 +332,12 @@ int hash_table_remove(struct hash_table *ht, void *key)
 	if (p == NULL)
 		return 0;
 
+	if (ht->key_free_cb != NULL && p->key != NULL)
+		(*ht->key_free_cb)(p->key);
 	p->key = NULL;
+
+	if (ht->value_free_cb != NULL && p->value != NULL)
+		(*ht->value_free_cb)(p->value);
 	p->value = NULL;
 	p->state = REMOVED;
 

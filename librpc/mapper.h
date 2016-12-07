@@ -27,17 +27,5 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "marshallfuns.h"
 #include "unmarshallfuns.h"
 
-struct marshall_def {
-	rpc_marshall_cb_t marshall_cb;
-	rpc_unmarshall_cb_t unmarshall_cb;
-};
-
-struct method_def {
-	a6o_rpc_method_t method_fun;
-	struct marshall_def params;
-	struct marshall_def result;
-};
-
-int a6o_rpc_mapper_add_struct(struct a6o_rpc_mapper *m, const char *struct_name, rpc_marshall_cb_t marshall_cb, rpc_unmarshall_cb_t unmarshall_cb);
 
 #endif

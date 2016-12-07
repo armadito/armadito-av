@@ -99,7 +99,7 @@ static int json_buffer_dump_cb(const char *buffer, size_t size, void *data)
 	return 0;
 }
 
-int a6o_rpc_connection_send(struct a6o_rpc_connection *conn, json_t *obj)
+static int connection_send(struct a6o_rpc_connection *conn, json_t *obj)
 {
 	struct buffer b;
 	int ret;
@@ -125,7 +125,7 @@ end:
 	return ret;
 }
 
-size_t a6o_rpc_connection_register_callback(struct a6o_rpc_connection *conn, a6o_rpc_cb_t cb, void *user_data)
+static size_t connection_register_callback(struct a6o_rpc_connection *conn, a6o_rpc_cb_t cb, void *user_data)
 {
 	size_t id;
 	struct rpc_callback_entry *entry;
@@ -149,3 +149,148 @@ size_t a6o_rpc_connection_register_callback(struct a6o_rpc_connection *conn, a6o
 	return id;
 }
 
+static a6o_rpc_cb_t connection_find_callback(struct a6o_rpc_connection *conn, size_t id, void **p_user_data)
+{
+	struct rpc_callback_entry *entry;
+	a6o_rpc_cb_t cb = NULL;
+
+	entry = hash_table_search(conn->response_table, H_INT_TO_POINTER(id));
+
+	if (entry != NULL) {
+		cb = entry->cb;
+		*p_user_data = entry->user_data;
+		hash_table_remove(conn->response_table, H_INT_TO_POINTER(id));
+	}
+
+	return cb;
+}
+
+static json_t *make_json_rpc_obj(const char *method, json_t *params, size_t id)
+{
+	json_t *call = json_object();
+
+	json_object_set(call, "jsonrpc", json_string("2.0"));
+	json_object_set(call, "method", json_string(method));
+
+	if (params != NULL)
+		json_object_set(call, "params", params);
+
+	if (id)
+		json_object_set(call, "id", json_integer(id));
+
+	return call;
+}
+
+int a6o_rpc_notify(struct a6o_rpc_connection *conn, const char *method, json_t *params)
+{
+	return a6o_rpc_call(conn, method, params, NULL, NULL);
+}
+
+int a6o_rpc_call(struct a6o_rpc_connection *conn, const char *method, json_t *params, a6o_rpc_cb_t cb, void *user_data)
+{
+	json_t *call;
+	size_t id = 0L;
+
+	if (cb != NULL)
+		id = connection_register_callback(conn, cb, user_data);
+
+	call = make_json_rpc_obj(method, params, id);
+
+	return connection_send(conn, call);
+}
+
+enum response_type {
+	MALFORMED_RESPONSE,
+	ERROR_RESPONSE,
+	RESULT_RESPONSE,
+};
+
+static int rpc_obj_basic_check(json_t *obj)
+{
+	json_t *version;
+
+	if (!json_is_object(obj))
+		return 0;
+
+	version = json_object_get(obj, "jsonrpc");
+	if (version == NULL
+		|| !json_is_string(version)
+		|| strcmp(json_string_value(version), "2.0") != 0)
+		return 0;
+
+	return 1;
+}
+
+static enum response_type rpc_obj_get_response_type(json_t *obj, size_t *p_id, json_t **p_content)
+{
+	json_t *error, *result, *id;
+
+	if (!rpc_obj_basic_check(obj))
+		return MALFORMED_RESPONSE;
+
+	error = json_object_get(obj, "error");
+	result = json_object_get(obj, "result");
+
+	if (error != NULL && result != NULL)
+		return MALFORMED_RESPONSE;
+
+	if (error == NULL && result == NULL)
+		return MALFORMED_RESPONSE;
+
+	if (error != NULL && !json_is_object(error))
+		return MALFORMED_RESPONSE;
+
+	if (result != NULL && !json_is_object(result))
+		return MALFORMED_RESPONSE;
+
+	id = json_object_get(obj, "id");
+	if (!json_is_integer(id))
+		return MALFORMED_RESPONSE;
+	*p_id = json_integer_value(id);
+
+	if (result != NULL) {
+		*p_content = result;
+		return RESULT_RESPONSE;
+	}
+
+	*p_content = error;
+	return ERROR_RESPONSE;
+}
+
+static int process_result(struct a6o_rpc_connection *conn, size_t id, json_t *result)
+{
+	a6o_rpc_cb_t cb;
+	void *user_data;
+
+	cb = connection_find_callback(conn, id, &user_data);
+
+	if (cb != NULL) {
+		(*cb)(result, user_data);
+		return 0;
+	}
+
+	return 1;
+}
+
+int a6o_rpc_process(struct a6o_rpc_connection *conn, const char *buffer, size_t size)
+{
+	json_t *obj, *content;
+	size_t id;
+	json_error_t error;
+
+	obj = json_loadb(buffer, size, JSON_DISABLE_EOF_CHECK, &error);
+
+	if (obj == NULL)
+		return 1; /* TODO: error code */
+
+	switch(rpc_obj_get_response_type(obj, &id, &content)) {
+	case MALFORMED_RESPONSE:
+		return 1; /* TODO: error code */
+	case ERROR_RESPONSE:
+		return 1; /* TODO : error code && process error */
+	case RESULT_RESPONSE:
+		return process_result(conn, id, content);
+	}
+
+	return 1;
+}
