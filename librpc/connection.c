@@ -22,9 +22,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <libarmadito-rpc/armadito-rpc.h>
 
-#include "connection.h"
 #include "buffer.h"
 #include "hash.h"
+#include "mapper.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -35,9 +35,12 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 
 struct a6o_rpc_connection {
-	int socket_fd;
+	struct a6o_rpc_mapper *mapper;
+	int input_fd;
+	int output_fd;
 	size_t current_id;
 	struct hash_table *response_table;
+	void *connection_data;
 };
 
 struct rpc_callback_entry {
@@ -45,13 +48,15 @@ struct rpc_callback_entry {
 	void *user_data;
 };
 
-struct a6o_rpc_connection *a6o_rpc_connection_new(int socket_fd)
+struct a6o_rpc_connection *a6o_rpc_connection_new(struct a6o_rpc_mapper *mapper, int socket_fd, void *connection_data)
 {
 	struct a6o_rpc_connection *conn = malloc(sizeof(struct a6o_rpc_connection));
 
+	conn->mapper = mapper;
 	conn->socket_fd = socket_fd;
 	conn->current_id = 1L;
 	conn->response_table = hash_table_new(HASH_KEY_INT, NULL, (free_cb_t)free);
+	conn->connection_data = connection_data;
 
 	return conn;
 }
@@ -165,20 +170,19 @@ static a6o_rpc_cb_t connection_find_callback(struct a6o_rpc_connection *conn, si
 	return cb;
 }
 
-static json_t *make_json_rpc_obj(const char *method, json_t *params, size_t id)
+static json_t *make_json_call_obj(const char *method, json_t *params, size_t id)
 {
-	json_t *call = json_object();
+	json_t *obj;
 
-	json_object_set(call, "jsonrpc", json_string("2.0"));
-	json_object_set(call, "method", json_string(method));
+	obj = json_pack("{s:s, s:s}", "jsonrpc", "2.0", "method", method);
 
 	if (params != NULL)
-		json_object_set(call, "params", params);
+		json_object_set(obj, "params", params);
 
 	if (id)
-		json_object_set(call, "id", json_integer(id));
+		json_object_set(obj, "id", json_integer(id));
 
-	return call;
+	return obj;
 }
 
 int a6o_rpc_notify(struct a6o_rpc_connection *conn, const char *method, json_t *params)
@@ -194,7 +198,7 @@ int a6o_rpc_call(struct a6o_rpc_connection *conn, const char *method, json_t *pa
 	if (cb != NULL)
 		id = connection_register_callback(conn, cb, user_data);
 
-	call = make_json_rpc_obj(method, params, id);
+	call = make_json_call_obj(method, params, id);
 
 	return connection_send(conn, call);
 }
@@ -225,93 +229,75 @@ struct json_rpc_obj {
 	} u;
 };
 
-static int json_rpc_unpack_request(json_t *o, struct json_rpc_obj *s)
+static int json_rpc_unpack(json_t *o, struct json_rpc_obj *s)
 {
-	const char *version;
-	const char *method;
+	const char *version, *method;
 	size_t id = 0;
-	json_t *params = NULL;
+	json_t *params = NULL, *result = NULL, *error = NULL;
 
-	if (json_unpack(o, "{s:s, s:s, s?o, s?i}", "jsonrpc", &version, "method", &method, "params", &params,  "id", &id) < 0
-		|| strcmp(version, "2.0") != 0) {
-		s->type = MALFORMED_JSON;
+	if (json_unpack(o, "{s:s, s:s, s?o, s?i}", "jsonrpc", &version, "method", &method, "params", &params,  "id", &id) == 0
+		&& !strcmp(version, "2.0")) {
+		s->type = REQUEST;
+		s->u.request.method = strdup(method);
+		s->u.request.id = id;
+		s->u.request.params = params;
+
 		return 0;
 	}
 
-	s->type = REQUEST;
-	s->u.request.method = strdup(method);
-	s->u.request.id = id;
-	s->u.request.params = params;
+	if (json_unpack(o, "{s:s, s?o, s?o, s:i}", "jsonrpc", &version, "result", &result, "error", &error,  "id", &id) == 0
+		&& !strcmp(version, "2.0")) {
+		if (error && result || !error && !result) {
+			s->type = MALFORMED_JSON;
+			return 0;
+		}
 
+		if (error != NULL) {
+			s->type = ERROR_RESPONSE;
+			s->u.error_response.error = error;
+			s->u.error_response.id = id;
+		} else {
+			s->type = RESULT_RESPONSE;
+			s->u.result_response.result = result;
+			s->u.result_response.id = id;
+		}
+
+		return 0;
+	}
+
+	s->type = MALFORMED_JSON;
 	return 1;
 }
 
-static int json_rpc_unpack_response(json_t *o, struct json_rpc_obj *s)
+static json_t *make_json_result_obj(json_t *result, size_t id)
 {
-	const char *version;
-	size_t id = 0;
+	return json_pack("{s:s, s:o, s:I}", "jsonrpc", "2.0", "result", result, "id", (json_int_t)id);
+}
+
+static int process_request(struct a6o_rpc_connection *conn, const char *method, size_t id, json_t *params)
+{
+	a6o_rpc_method_t method_cb;
 	json_t *result = NULL;
-	json_t *error = NULL;
+	int ret;
 
-	if (json_unpack(o, "{s:s, s?o, s?o, s:i}", "jsonrpc", &version, "result", &result, "error", &error,  "id", &id) < 0
-		|| strcmp(version, "2.0") != 0) {
-		s->type = MALFORMED_JSON;
-		return 0;
-	}
+	method_cb = a6o_rpc_mapper_find(conn->mapper, method);
 
-	if ((error != NULL && result != NULL) || (error == NULL && result == NULL))
-		return 0;
+	if (method_cb == NULL)
+		return 1;
 
-	if (error != NULL) {
-		s->type = ERROR_RESPONSE;
-		s->u.error_response.error = error;
-		s->u.error_response.id = id;
-	} else {
-		s->type = RESULT_RESPONSE;
-		s->u.result_response.result = result;
-		s->u.result_response.id = id;
-	}
+	ret = (*method_cb)(params, &result, conn->connection_data);
 
-	return 1;
-}
-
-#if 0
-static enum response_type rpc_obj_get_response_type(json_t *obj, size_t *p_id, json_t **p_content)
-{
-	json_t *error, *result, *id;
-
-	if (!rpc_obj_basic_check(obj))
-		return MALFORMED_RESPONSE;
-
-	error = json_object_get(obj, "error");
-	result = json_object_get(obj, "result");
-
-	if (error != NULL && result != NULL)
-		return MALFORMED_RESPONSE;
-
-	if (error == NULL && result == NULL)
-		return MALFORMED_RESPONSE;
-
-	if (error != NULL && !json_is_object(error))
-		return MALFORMED_RESPONSE;
-
-	if (result != NULL && !json_is_object(result))
-		return MALFORMED_RESPONSE;
-
-	id = json_object_get(obj, "id");
-	if (!json_is_integer(id))
-		return MALFORMED_RESPONSE;
-	*p_id = json_integer_value(id);
+	if (ret)
+		return ret;
 
 	if (result != NULL) {
-		*p_content = result;
-		return RESULT_RESPONSE;
+		json_t * res = make_json_result_obj(result, id);
+
+		return connection_send(conn, res);
 	}
 
-	*p_content = error;
-	return ERROR_RESPONSE;
+	return 0;
 }
-#endif
 
 static int process_result(struct a6o_rpc_connection *conn, size_t id, json_t *result)
 {
@@ -330,25 +316,28 @@ static int process_result(struct a6o_rpc_connection *conn, size_t id, json_t *re
 
 int a6o_rpc_process(struct a6o_rpc_connection *conn, const char *buffer, size_t size)
 {
-	json_t *obj, *content;
-	size_t id;
 	json_error_t error;
+	json_t *j_obj;
+	struct json_rpc_obj rpc_obj;
 
-	obj = json_loadb(buffer, size, JSON_DISABLE_EOF_CHECK, &error);
+	j_obj = json_loadb(buffer, size, JSON_DISABLE_EOF_CHECK, &error);
 
-	if (obj == NULL)
+	if (j_obj == NULL)
 		return 1; /* TODO: error code */
 
-#if 0
-	switch(rpc_obj_get_response_type(obj, &id, &content)) {
-	case MALFORMED_RESPONSE:
+	if (json_rpc_unpack(j_obj, &rpc_obj))
 		return 1; /* TODO: error code */
+
+	switch(rpc_obj.type) {
+	case REQUEST:
+		return process_request(conn, rpc_obj.u.request.method, rpc_obj.u.request.id, rpc_obj.u.request.params);
+	case RESULT_RESPONSE:
+		return process_result(conn, rpc_obj.u.result_response.id, rpc_obj.u.result_response.result);
 	case ERROR_RESPONSE:
 		return 1; /* TODO : error code && process error */
-	case RESULT_RESPONSE:
-		return process_result(conn, id, content);
+	case MALFORMED_JSON:
+		return 1; /* TODO: error code */
 	}
-#endif
 
 	return 1;
 }

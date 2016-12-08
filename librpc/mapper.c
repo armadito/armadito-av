@@ -31,21 +31,26 @@ struct a6o_rpc_mapper {
 
 struct a6o_rpc_mapper *a6o_rpc_mapper_new(void)
 {
-	struct a6o_rpc_mapper *m = malloc(sizeof(struct a6o_rpc_mapper));
+	struct a6o_rpc_mapper *mapper = malloc(sizeof(struct a6o_rpc_mapper));
 
-	m->method_table = hash_table_new(HASH_KEY_STR, (free_cb_t)free, NULL);
+	mapper->method_table = hash_table_new(HASH_KEY_STR, (free_cb_t)free, NULL);
 
-	return m;
+	return mapper;
 }
 
-int a6o_rpc_mapper_add_method(struct a6o_rpc_mapper *m, const char *method, a6o_rpc_method_t method_fun)
+int a6o_rpc_mapper_add(struct a6o_rpc_mapper *mapper, const char *method, a6o_rpc_method_t method_fun)
 {
 	char *p = strdup(method);
 
-	if (!hash_table_insert(m->method_table, p, method_fun)) {
+	if (!hash_table_insert(mapper->method_table, p, method_fun)) {
 		free(p);
 		return 1; /* must add error code */
 	}
 
 	return 0;
+}
+
+a6o_rpc_method_t a6o_rpc_mapper_find(struct a6o_rpc_mapper *mapper, const char *method)
+{
+	return hash_table_search(mapper->method_table, (void *)method);
 }

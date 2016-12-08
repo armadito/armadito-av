@@ -1,5 +1,6 @@
 check_PROGRAMS= \
-rpc-client-test
+rpc-client-test \
+rpc-server-test
 
 LDADD=$(top_builddir)/librpc/libarmadito-rpc.a @LIBJANSSON_LIBS@ -lm
 AM_CPPFLAGS=-I$(top_srcdir)/librpc/include -I$(top_srcdir)/librpc -I$(top_srcdir)/libmodule/include @LIBJANSSON_CFLAGS@
@@ -8,6 +9,7 @@ AM_CPPFLAGS=-I$(top_srcdir)/librpc/include -I$(top_srcdir)/librpc -I$(top_srcdir
 #ipcreceivetest_SOURCES=ipcreceivetest.c
 
 rpc_client_test_SOURCES= rpc-client-test.c
+rpc_server_test_SOURCES= rpc-server-test.c
 
 
 

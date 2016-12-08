@@ -24,8 +24,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <libarmadito-rpc/armadito-rpc.h>
 
-#include "marshallfuns.h"
-#include "unmarshallfuns.h"
-
+a6o_rpc_method_t a6o_rpc_mapper_find(struct a6o_rpc_mapper *mapper, const char *method);
 
 #endif

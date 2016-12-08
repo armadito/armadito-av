@@ -73,7 +73,7 @@ int main(int argc, char **argv)
 	struct a6o_rpc_connection *conn;
 	size_t i;
 
-	conn = a6o_rpc_connection_new(STDOUT_FILENO);
+	conn = a6o_rpc_connection_new(NULL, STDOUT_FILENO, NULL);
 
 	test_call(conn);
 
