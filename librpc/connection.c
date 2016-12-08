@@ -36,8 +36,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 struct a6o_rpc_connection {
 	struct a6o_rpc_mapper *mapper;
-	int input_fd;
-	int output_fd;
+	int socket_fd;
 	size_t current_id;
 	struct hash_table *response_table;
 	void *connection_data;
