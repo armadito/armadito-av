@@ -58,7 +58,15 @@ int a6o_rpc_mapper_add(struct a6o_rpc_mapper *mapper, const char *method, a6o_rp
 
 struct a6o_rpc_connection;
 
-struct a6o_rpc_connection *a6o_rpc_connection_new(struct a6o_rpc_mapper *mapper, int socket_fd, void *connection_data);
+typedef ssize_t (*a6o_rpc_write_cb_t)(const char *buffer, size_t size, void *data);
+
+typedef ssize_t (*a6o_rpc_read_cb_t)(char *buffer, size_t size, void *data);
+
+struct a6o_rpc_connection *a6o_rpc_connection_new(struct a6o_rpc_mapper *mapper, void *connection_data);
+
+void a6o_rpc_connection_set_read_cb(struct a6o_rpc_connection *conn, a6o_rpc_read_cb_t read_cb, void *data);
+
+void a6o_rpc_connection_set_write_cb(struct a6o_rpc_connection *conn, a6o_rpc_write_cb_t write_cb, void *data);
 
 int a6o_rpc_notify(struct a6o_rpc_connection *conn, const char *method, json_t *params);
 

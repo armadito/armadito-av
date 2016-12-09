@@ -2,6 +2,7 @@
 #include <libarmadito-rpc/armadito-rpc.h>
 
 #include "test.h"
+#include "libtest.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -70,10 +71,12 @@ static int test_call(struct a6o_rpc_connection *conn)
 
 int main(int argc, char **argv)
 {
+	int *pfd = malloc(sizeof(int));
 	struct a6o_rpc_connection *conn;
-	size_t i;
 
-	conn = a6o_rpc_connection_new(NULL, STDOUT_FILENO, NULL);
+	conn = a6o_rpc_connection_new(NULL, NULL);
+	*pfd = STDOUT_FILENO;
+	a6o_rpc_connection_set_write_cb(conn, unix_fd_write_cb, pfd);
 
 	test_call(conn);
 

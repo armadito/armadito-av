@@ -2,6 +2,7 @@
 #include <libarmadito-rpc/armadito-rpc.h>
 
 #include "test.h"
+#include "libtest.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -26,6 +27,7 @@ static int add_method(json_t *params, json_t **result, void *connection_data)
 int main(int argc, char **argv)
 {
 	struct a6o_rpc_mapper *server_mapper;
+	int *pfd = malloc(sizeof(int));
 	struct a6o_rpc_connection *conn;
 	char buffer[1024];
 	size_t n_read;
@@ -33,7 +35,9 @@ int main(int argc, char **argv)
 	server_mapper = a6o_rpc_mapper_new();
 	a6o_rpc_mapper_add(server_mapper, "add", add_method);
 
-	conn = a6o_rpc_connection_new(server_mapper, STDOUT_FILENO, NULL);
+	conn = a6o_rpc_connection_new(server_mapper, NULL);
+	*pfd = STDOUT_FILENO;
+	a6o_rpc_connection_set_write_cb(conn, unix_fd_write_cb, pfd);
 
 	n_read = fread(buffer, 1, sizeof(buffer), stdin);
 	if (n_read < 0)

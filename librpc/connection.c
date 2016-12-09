@@ -31,14 +31,16 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <jansson.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
 
 struct a6o_rpc_connection {
 	struct a6o_rpc_mapper *mapper;
-	int socket_fd;
 	size_t current_id;
 	struct hash_table *response_table;
+	a6o_rpc_read_cb_t read_cb;
+	void *read_cb_data;
+	a6o_rpc_write_cb_t write_cb;
+	void *write_cb_data;
 	void *connection_data;
 };
 
@@ -47,17 +49,32 @@ struct rpc_callback_entry {
 	void *user_data;
 };
 
-struct a6o_rpc_connection *a6o_rpc_connection_new(struct a6o_rpc_mapper *mapper, int socket_fd, void *connection_data)
+struct a6o_rpc_connection *a6o_rpc_connection_new(struct a6o_rpc_mapper *mapper, void *connection_data)
 {
 	struct a6o_rpc_connection *conn = malloc(sizeof(struct a6o_rpc_connection));
 
 	conn->mapper = mapper;
-	conn->socket_fd = socket_fd;
 	conn->current_id = 1L;
 	conn->response_table = hash_table_new(HASH_KEY_INT, NULL, (free_cb_t)free);
+	conn->read_cb = NULL;
+	conn->read_cb_data = NULL;
+	conn->write_cb = NULL;
+	conn->write_cb_data = NULL;
 	conn->connection_data = connection_data;
 
 	return conn;
+}
+
+void a6o_rpc_connection_set_read_cb(struct a6o_rpc_connection *conn, a6o_rpc_read_cb_t read_cb, void *data)
+{
+	conn->read_cb = read_cb;
+	conn->read_cb_data = data;
+}
+
+void a6o_rpc_connection_set_write_cb(struct a6o_rpc_connection *conn, a6o_rpc_write_cb_t write_cb, void *data)
+{
+	conn->write_cb = write_cb;
+	conn->write_cb_data = data;
 }
 
 #define NOT_YET_IMPLEMENTED(F) fprintf(stderr, "%s: not yet implemented\n", F)
@@ -70,28 +87,6 @@ static void connection_lock(struct a6o_rpc_connection *conn)
 static void connection_unlock(struct a6o_rpc_connection *conn)
 {
 	NOT_YET_IMPLEMENTED(__func__);
-}
-
-static ssize_t write_n(int fd, char *buffer, size_t size)
-{
-	size_t to_write = size;
-
-	assert(size > 0);
-
-	while (to_write > 0) {
-		int w = write(fd, buffer, to_write);
-
-		if (w < 0)
-			return w;
-
-		if (w == 0)
-			return 0;
-
-		buffer += w;
-		to_write -= w;
-	}
-
-	return size;
 }
 
 static int json_buffer_dump_cb(const char *buffer, size_t size, void *data)
@@ -108,6 +103,8 @@ static int connection_send(struct a6o_rpc_connection *conn, json_t *obj)
 	struct buffer b;
 	int ret;
 
+	assert(conn->write_cb != NULL);
+
 	buffer_init(&b, 0);
 
 	ret = json_dump_callback(obj, json_buffer_dump_cb, &b, JSON_COMPACT);
@@ -120,7 +117,7 @@ static int connection_send(struct a6o_rpc_connection *conn, json_t *obj)
 	buffer_append(&b, "\r\n\r\n", 4);
 
 	connection_lock(conn);
-	ret = write_n(conn->socket_fd, buffer_data(&b), buffer_size(&b));
+	ret = (*conn->write_cb)(buffer_data(&b), buffer_size(&b), conn->write_cb_data);
 	connection_unlock(conn);
 
 end:
