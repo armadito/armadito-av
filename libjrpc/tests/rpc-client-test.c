@@ -1,5 +1,5 @@
 #include <libarmadito/armadito.h>
-#include <libarmadito-rpc/armadito-rpc.h>
+#include <libjrpc/jrpc.h>
 
 #include "test.h"
 #include "libtest.h"

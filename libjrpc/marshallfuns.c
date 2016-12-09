@@ -86,7 +86,7 @@ static void marshall_field_enum_##S(json_t *obj, const char *name, int value) \
 	json_object_set(obj, name, field);	\
 }
 
-#include <libarmadito-rpc/defs.h>
+#include <libjrpc/defs.h>
 
 /*
  *
@@ -134,4 +134,4 @@ int jrpc_marshall_struct_##S(void *p, json_t **p_obj)	\
 	return 0;				\
 };
 
-#include <libarmadito-rpc/defs.h>
+#include <libjrpc/defs.h>

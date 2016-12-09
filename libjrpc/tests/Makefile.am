@@ -2,7 +2,7 @@ check_PROGRAMS= \
 rpc-client-test \
 rpc-server-test
 
-LDADD=$(top_builddir)/libjrpc/libarmadito-rpc.a @LIBJANSSON_LIBS@ -lm
+LDADD=$(top_builddir)/libjrpc/libjrpc.a @LIBJANSSON_LIBS@ -lm
 AM_CPPFLAGS=-I$(top_srcdir)/libjrpc/include -I$(top_srcdir)/libjrpc -I$(top_srcdir)/libmodule/include @LIBJANSSON_CFLAGS@
 
 #ipcsendtest_SOURCES=ipcsendtest.c

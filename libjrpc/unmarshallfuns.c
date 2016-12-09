@@ -107,7 +107,7 @@ static int unmarshall_field_enum_##S(json_t *obj, const char *name, enum S *p_va
 	return 1;				\
 }
 
-#include <libarmadito-rpc/defs.h>
+#include <libjrpc/defs.h>
 
 /*
  *
@@ -169,6 +169,6 @@ int jrpc_unmarshall_struct_##S(json_t *obj, void **pp)	\
 	return 0;				\
 }
 
-#include <libarmadito-rpc/defs.h>
+#include <libjrpc/defs.h>
 
 

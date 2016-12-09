@@ -47,7 +47,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #define JRPC_END_ENUM
 #endif
 
-#include <libarmadito-rpc/rpctypes.h>
+#include <libjrpc/rpctypes.h>
 
 #undef JRPC_DEFINE_STRUCT
 #undef JRPC_DEFINE_FIELD_INT

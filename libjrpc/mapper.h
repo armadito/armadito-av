@@ -22,7 +22,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef LIBJRPC_MAPPER_H
 #define LIBJRPC_MAPPER_H
 
-#include <libarmadito-rpc/armadito-rpc.h>
+#include <libjrpc/jrpc.h>
 
 jrpc_method_t jrpc_mapper_find(struct jrpc_mapper *mapper, const char *method);
 

@@ -29,6 +29,6 @@ typedef int (*rpc_unmarshall_cb_t)(json_t *obj, void **pp);
  */
 #define JRPC_DEFINE_STRUCT(S) int jrpc_unmarshall_struct_##S(json_t *obj, void **p);
 
-#include <libarmadito-rpc/defs.h>
+#include <libjrpc/defs.h>
 
 #endif

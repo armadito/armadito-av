@@ -19,8 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef LIBARMADITO_RPC_ARMADITO_RPC_H
-#define LIBARMADITO_RPC_ARMADITO_RPC_H
+#ifndef LIBJRPC_JRPC_H
+#define LIBJRPC_JRPC_H
 
 #include <stddef.h>
 #include <jansson.h>
