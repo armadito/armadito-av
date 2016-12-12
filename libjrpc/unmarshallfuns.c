@@ -103,7 +103,7 @@ static int unmarshall_field_enum_##S(json_t *obj, const char *name, enum S *p_va
 									\
 	enum_string = json_string_value(field);
 #define JRPC_DEFINE_ENUM_VALUE(NAME) if (!strcmp(enum_string, #NAME)) { *p_val = NAME; return 0; }
-#define JRPC_END_ENUM			\
+#define JRPC_END_ENUM				\
 	return 1;				\
 }
 
