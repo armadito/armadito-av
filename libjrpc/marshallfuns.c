@@ -19,6 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
+#include <libjrpc/marshall.h>
+
 #include <jansson.h>
 #include <stdint.h>
 #include <string.h>
@@ -34,12 +36,12 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 #define MARSHALL_FIELD_INT(TYPE)					\
-static void marshall_field_##TYPE(json_t *obj, const char *name, TYPE val) \
+void jrpc_marshall_field_##TYPE(json_t *obj, const char *name, TYPE val) \
 {									\
 	json_t *field;							\
 									\
 	field = json_integer(val);					\
-	json_object_set(obj, name, field);				\
+	json_object_set_new(obj, name, field);				\
 }
 
 MARSHALL_FIELD_INT(int)
@@ -61,14 +63,45 @@ MARSHALL_FIELD_INT(int64_t)
  * Marshalling functions for struct fields of string type
  *
  */
-static void marshall_field_string(json_t *obj, const char *name, const char *val)
+void jrpc_marshall_field_string(json_t *obj, const char *name, const char *val)
 {
 	json_t *field;
 
 	field = json_string(val);
-	json_object_set(obj, name, field);
+	json_object_set_new(obj, name, field);
 }
 
+/*
+ *
+ * Marshalling functions for fields of array types
+ *
+ */
+int jrpc_marshall_field_array(json_t *obj, const char *field_name, void **array, jrpc_marshall_cb_t marshall_elem_cb)
+{
+	json_t *field;
+	void **p;
+	int ret = 0;
+
+	field = json_array();
+
+	for(p = array; *p != NULL; p++) {
+		json_t *elem;
+
+		if ((ret = (*marshall_elem_cb)(*p, &elem)))
+			goto error_end;
+		json_array_append_new(field, elem);
+	}
+
+	json_object_set_new(obj, field_name, field);
+	return 0;
+
+error_end:
+	json_decref(field);
+	return ret;
+}
+
+#if 0
+moved outside
 /*
  *
  * Marshalling functions for fields of enum types
@@ -87,28 +120,6 @@ static void marshall_field_enum_##S(json_t *obj, const char *name, int value) \
 }
 
 #include <libjrpc/defs.h>
-
-/*
- *
- * Marshalling functions for fields of array types
- *
- */
-static void marshall_field_array(json_t *obj, const char *name, void **array, int (marshall_struct_cb)(void *p, json_t **))
-{
-	json_t *field;
-	void **p;
-
-	field = json_array();
-
-	for(p = array; *p != NULL; p++) {
-		json_t *elem;
-
-		(*marshall_struct_cb)(*p, &elem);
-		json_array_append_new(field, elem);
-	}
-
-	json_object_set(obj, name, field);
-}
 
 /*
  *
@@ -135,3 +146,4 @@ int jrpc_marshall_struct_##S(void *p, json_t **p_obj)	\
 };
 
 #include <libjrpc/defs.h>
+#endif

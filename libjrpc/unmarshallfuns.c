@@ -19,6 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
+#include <libjrpc/marshall.h>
+
 #include <jansson.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -34,20 +36,20 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
  * - time_t and size_t
  *
  */
-#define UNMARSHALL_FIELD_INT(TYPE)						\
-static int unmarshall_field_##TYPE(json_t *obj, const char *name, TYPE *p_val)	\
-{									\
-	json_t *field = json_object_get(obj, name);			\
-									\
-	if (field == NULL)						\
-		return ERR_NO_SUCH_FIELD;				\
-									\
-	if (!json_is_number(field))					\
-		return ERR_TYPE_MISMATCH;				\
-									\
-	*p_val = (TYPE)json_integer_value(field);			\
-									\
-	return 0;							\
+#define UNMARSHALL_FIELD_INT(TYPE)				\
+int jrpc_unmarshall_field_##TYPE(json_t *obj, const char *name, TYPE *p_val) \
+{								\
+	json_t *field = json_object_get(obj, name);		\
+								\
+	if (field == NULL)					\
+		return ERR_NO_SUCH_FIELD;			\
+								\
+	if (!json_is_number(field))				\
+		return ERR_TYPE_MISMATCH;			\
+								\
+	*p_val = (TYPE)json_integer_value(field);		\
+								\
+	return 0;						\
 }
 
 UNMARSHALL_FIELD_INT(int)
@@ -69,7 +71,7 @@ UNMARSHALL_FIELD_INT(int64_t)
  * Unmarshalling functions for struct fields of string type
  *
  */
-static int unmarshall_field_string(json_t *obj, const char *name, const char **p_val)
+int jrpc_unmarshall_field_string(json_t *obj, const char *name, const char **p_val)
 {
 	json_t *field = json_object_get(obj, name);
 
@@ -84,6 +86,44 @@ static int unmarshall_field_string(json_t *obj, const char *name, const char **p
 	return 0;
 }
 
+/*
+ *
+ * Unmarshalling functions for fields of array types
+ *
+ */
+int unmarshall_field_array(json_t *obj, const char *name, void ***p_array, jrpc_unmarshall_cb_t unmarshall_cb)
+{
+	json_t *field = json_object_get(obj, name);
+	size_t index, size;
+	json_t *elem;
+	void **array, **p;
+
+	if (field == NULL)
+		return ERR_NO_SUCH_FIELD;
+
+	if (!json_is_array(field))
+		return ERR_TYPE_MISMATCH;
+
+	size = json_array_size(field);
+	if (!size)
+		return ERR_TYPE_MISMATCH;
+
+	array = calloc(size + 1, sizeof(void *));
+
+	p = array;
+	json_array_foreach(field, index, elem) {
+		/* TODO: must check return value of callback and exit with error status if != 0 */
+		(*unmarshall_cb)(elem, p);
+		p++;
+	}
+
+	*p_array = array;
+
+	return 0;
+}
+
+#if 0
+moved out
 /*
  *
  * Unmarshalling functions for fields of enum types
@@ -111,42 +151,6 @@ static int unmarshall_field_enum_##S(json_t *obj, const char *name, enum S *p_va
 
 /*
  *
- * Unmarshalling functions for fields of array types
- *
- */
-static int unmarshall_field_array(json_t *obj, const char *name, void ***p_array, int (*unmarshall_struct_cb)(json_t *obj, void **pp))
-{
-	json_t *field = json_object_get(obj, name);
-	size_t index, size;
-	json_t *elem;
-	void **array, **p;
-
-	if (field == NULL)
-		return ERR_NO_SUCH_FIELD;
-
-	if (!json_is_array(field))
-		return ERR_TYPE_MISMATCH;
-
-	size = json_array_size(field);
-	if (!size)
-		return ERR_TYPE_MISMATCH;
-
-	array = calloc(size + 1, sizeof(void *));
-
-	p = array;
-	json_array_foreach(field, index, elem) {
-		/* TODO: must check return value of callback and exit with error status if != 0 */
-		(*unmarshall_struct_cb)(elem, p);
-		p++;
-	}
-
-	*p_array = array;
-
-	return 0;
-}
-
-/*
- *
  * Unmarshalling functions for struct types
  *
  */
@@ -171,4 +175,4 @@ int jrpc_unmarshall_struct_##S(json_t *obj, void **pp)	\
 
 #include <libjrpc/defs.h>
 
-
+#endif

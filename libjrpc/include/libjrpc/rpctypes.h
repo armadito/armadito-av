@@ -56,10 +56,3 @@ JRPC_DEFINE_STRUCT(a6o_module_info)
 	JRPC_DEFINE_FIELD_ARRAY(a6o_base_info, base_infos)
 JRPC_END_STRUCT
 
-/* for testing */
-JRPC_DEFINE_STRUCT(operands)
-	JRPC_DEFINE_FIELD_INT(int, op1)
-	JRPC_DEFINE_FIELD_INT(int, op2)
-	JRPC_DEFINE_FIELD_INT(int, result)
-JRPC_END_STRUCT
-
