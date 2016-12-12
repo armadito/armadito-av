@@ -168,8 +168,8 @@ httpd/Makefile
 json/Makefile
 json/ui/Makefile
 libcore/Makefile
-librpc/Makefile
-librpc/tests/Makefile
+libjrpc/Makefile
+libjrpc/tests/Makefile
 libmodule/Makefile
 man/Makefile
 man/fr/Makefile
