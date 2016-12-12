@@ -19,4 +19,5 @@ marshallfuns.h \
 unmarshallfuns.c \
 unmarshallfuns.h
 
-AM_CPPFLAGS= -I$(top_srcdir)/libjrpc/include -I$(top_srcdir)/libmodule/include -I$(top_srcdir) -I$(top_srcdir)/libjrpc @LIBJANSSON_CFLAGS@
+# -DDEBUG because is #defined in top-level config header
+AM_CPPFLAGS=-DDEBUG -I$(top_srcdir)/libjrpc/include -I$(top_srcdir)/libmodule/include -I$(top_srcdir) -I$(top_srcdir)/libjrpc @LIBJANSSON_CFLAGS@

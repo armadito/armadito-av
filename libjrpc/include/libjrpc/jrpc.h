@@ -74,7 +74,6 @@ typedef void (*jrpc_cb_t)(json_t *result, void *user_data);
 
 int jrpc_call(struct jrpc_connection *conn, const char *method, json_t *params, jrpc_cb_t cb, void *user_data);
 
-/* temporary */
-int jrpc_process(struct jrpc_connection *conn, const char *buffer, size_t size);
+int jrpc_process(struct jrpc_connection *conn);
 
 #endif

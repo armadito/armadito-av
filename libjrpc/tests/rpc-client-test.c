@@ -4,11 +4,14 @@
 #include "test.h"
 #include "libtest.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
+#include <fcntl.h>
 #include <jansson.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 static struct a6o_base_info *base_info_new(const char *name, time_t base_update_ts, const char *version, size_t signature_count, const char *full_path)
 {
@@ -56,29 +59,68 @@ static void simple_cb(json_t *result, void *user_data)
 	fprintf(stderr, "The callback has been called, result is %lld\n", json_integer_value(json_object_get(result, "result")));
 }
 
-static int test_call(struct jrpc_connection *conn)
+static int test_call(struct jrpc_connection *conn, int count)
 {
-	json_t *operands = json_object();
+	int op = 0, i, ret = 0;
 
-	json_object_set(operands, "op1", json_integer(1));
-	json_object_set(operands, "op2", json_integer(2));
-	/* struct operands o; */
-	/* o.op1 = 1; */
-	/* o.op2 = 2; */
+	for(i = 0; i < count; i++) {
+		json_t *operands = json_object();
 
-	return jrpc_call(conn, "add", operands, simple_cb, NULL);
+		json_object_set(operands, "op1", json_integer(op));
+		json_object_set(operands, "op2", json_integer(op + 1));
+		op++;
+
+		/* struct operands o; */
+		/* o.op1 = 1; */
+		/* o.op2 = 2; */
+
+		ret = jrpc_call(conn, "add", operands, simple_cb, NULL);
+
+		if (ret)
+			break;
+	}
+
+	return ret;
+}
+
+static void usage(int argc, char **argv)
+{
+	fprintf(stderr, "Usage: %s INPUT_PIPE OUTPUT_PIPE\n", argv[0]);
+	exit(EXIT_FAILURE);
 }
 
 int main(int argc, char **argv)
 {
-	int *pfd = malloc(sizeof(int));
 	struct jrpc_connection *conn;
+	int *p_input_fd = malloc(sizeof(int));
+	int *p_output_fd = malloc(sizeof(int));
+	int ret;
+
+	*p_output_fd = open(argv[2], O_WRONLY);
+	if (*p_output_fd < 0) {
+		perror("cannot open output pipe");
+		exit(EXIT_FAILURE);
+	}
+
+	sleep(1);
+
+	*p_input_fd = open(argv[1], O_RDONLY);
+	if (*p_input_fd < 0) {
+		perror("cannot open input pipe");
+		exit(EXIT_FAILURE);
+	}
 
 	conn = jrpc_connection_new(NULL, NULL);
-	*pfd = STDOUT_FILENO;
-	jrpc_connection_set_write_cb(conn, unix_fd_write_cb, pfd);
 
-	test_call(conn);
+	jrpc_connection_set_read_cb(conn, unix_fd_read_cb, p_input_fd);
+	jrpc_connection_set_write_cb(conn, unix_fd_write_cb, p_output_fd);
 
-	return 0;
+	test_call(conn, 10);
+
+	while((ret = jrpc_process(conn)) > 0) {
+		if (ret == 1)
+			return 1;
+	}
+
+	return ret;
 }

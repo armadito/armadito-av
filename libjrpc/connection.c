@@ -37,6 +37,7 @@ struct jrpc_connection {
 	struct jrpc_mapper *mapper;
 	size_t current_id;
 	struct hash_table *response_table;
+	struct buffer input_buffer;
 	jrpc_read_cb_t read_cb;
 	void *read_cb_data;
 	jrpc_write_cb_t write_cb;
@@ -49,6 +50,8 @@ struct rpc_callback_entry {
 	void *user_data;
 };
 
+#define DEFAULT_INPUT_BUFFER_SIZE 1024
+
 struct jrpc_connection *jrpc_connection_new(struct jrpc_mapper *mapper, void *connection_data)
 {
 	struct jrpc_connection *conn = malloc(sizeof(struct jrpc_connection));
@@ -56,6 +59,7 @@ struct jrpc_connection *jrpc_connection_new(struct jrpc_mapper *mapper, void *co
 	conn->mapper = mapper;
 	conn->current_id = 1L;
 	conn->response_table = hash_table_new(HASH_KEY_INT, NULL, (free_cb_t)free);
+	buffer_init(&conn->input_buffer, DEFAULT_INPUT_BUFFER_SIZE);
 	conn->read_cb = NULL;
 	conn->read_cb_data = NULL;
 	conn->write_cb = NULL;
@@ -114,10 +118,15 @@ static int connection_send(struct jrpc_connection *conn, json_t *obj)
 	if (ret)
 		goto end;
 
-	buffer_append(&b, "\r\n\r\n", 4);
+	/* \0 for DEBUG fprintf */
+	buffer_append(&b, "\r\n\r\n\0", 5);
 
+#ifdef DEBUG
+	fprintf(stderr, "sending buffer: %s\n", buffer_data(&b));
+#endif
 	connection_lock(conn);
-	ret = (*conn->write_cb)(buffer_data(&b), buffer_size(&b), conn->write_cb_data);
+	/* - 1 so that we don't write the trailing '\0' */
+	ret = (*conn->write_cb)(buffer_data(&b), buffer_size(&b) - 1, conn->write_cb_data);
 	connection_unlock(conn);
 
 end:
@@ -194,6 +203,9 @@ int jrpc_call(struct jrpc_connection *conn, const char *method, json_t *params, 
 	if (cb != NULL)
 		id = connection_register_callback(conn, cb, user_data);
 
+#ifdef DEBUG
+	fprintf(stderr, "call: method %s id %ld\n", method, id);
+#endif
 	call = make_json_call_obj(method, params, id);
 
 	return connection_send(conn, call);
@@ -276,6 +288,10 @@ static int process_request(struct jrpc_connection *conn, const char *method, siz
 	json_t *result = NULL;
 	int ret;
 
+#ifdef DEBUG
+	fprintf(stderr, "processing request: method %s id %ld\n", method, id);
+#endif
+
 	method_cb = jrpc_mapper_find(conn->mapper, method);
 
 	if (method_cb == NULL)
@@ -300,6 +316,9 @@ static int process_result(struct jrpc_connection *conn, size_t id, json_t *resul
 	jrpc_cb_t cb;
 	void *user_data;
 
+#ifdef DEBUG
+	fprintf(stderr, "processing result: id %ld\n", id);
+#endif
 	cb = connection_find_callback(conn, id, &user_data);
 
 	if (cb != NULL) {
@@ -310,11 +329,15 @@ static int process_result(struct jrpc_connection *conn, size_t id, json_t *resul
 	return 1;
 }
 
-int jrpc_process(struct jrpc_connection *conn, const char *buffer, size_t size)
+static int process_buffer(struct jrpc_connection *conn, const char *buffer, size_t size)
 {
 	json_error_t error;
 	json_t *j_obj;
 	struct json_rpc_obj rpc_obj;
+
+#ifdef DEBUG
+	fprintf(stderr, "received buffer: %s\n", buffer);
+#endif
 
 	j_obj = json_loadb(buffer, size, JSON_DISABLE_EOF_CHECK, &error);
 
@@ -336,4 +359,60 @@ int jrpc_process(struct jrpc_connection *conn, const char *buffer, size_t size)
 	}
 
 	return 1;
+}
+
+int jrpc_process(struct jrpc_connection *conn)
+{
+	ssize_t n_read, i;
+	char buffer[DEFAULT_INPUT_BUFFER_SIZE];
+	int state;
+
+	n_read = (*conn->read_cb)(buffer, sizeof(buffer), conn->read_cb_data);
+	if (n_read <= 0)
+		return 1;
+
+	state = 0;
+	for (i = 0; i < n_read; i++) {
+		switch(state) {
+		case 0:
+			if (buffer[i] == '\r')
+				state = 1;
+			else
+				buffer_append(&conn->input_buffer, &buffer[i], 1);
+			break;
+		case 1:
+			if (buffer[i] == '\n')
+				state = 2;
+			else {
+				buffer_append(&conn->input_buffer, &buffer[i], 1);
+				state = 0;
+			}
+			break;
+		case 2:
+			if (buffer[i] == '\r')
+				state = 3;
+			else {
+				buffer_append(&conn->input_buffer, &buffer[i], 1);
+				state = 0;
+			}
+			break;
+		case 3:
+			if (buffer[i] == '\n') {
+				/* for debug */
+				char tmp[1] = { '\0' };
+
+				buffer_append(&conn->input_buffer, tmp, 1);
+				/* - 1 because of trailing '\0' */
+				process_buffer(conn, buffer_data(&conn->input_buffer), buffer_size(&conn->input_buffer) - 1);
+				buffer_clear(&conn->input_buffer);
+				state = 0;
+			} else {
+				buffer_append(&conn->input_buffer, &buffer[i], 1);
+				state = 0;
+			}
+			break;
+		}
+	}
+
+	return 0;
 }
