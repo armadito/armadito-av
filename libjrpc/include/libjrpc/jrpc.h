@@ -26,6 +26,27 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <jansson.h>
 
 /*
+ * JSON-RPC error codes
+ *
+ * Standard JSON-RPC code defined in http://www.jsonrpc.org/specification#error_object
+ */
+
+enum jrpc_status {
+	JRPC_OK = 0,
+	JRPC_ERR_PARSE_ERROR = -32700,               /* Parse error Invalid JSON was received by the server. An error
+							occurred on the server while parsing the JSON text. */
+	JRPC_ERR_INVALID_REQUEST = -32600,           /* The JSON sent is not a valid Request object. */
+	JRPC_ERR_METHOD_NOT_FOUND = -32601,          /* The method does not exist / is not available. */
+	JRPC_ERR_INVALID_PARAMS = -32602, 	     /* Invalid params, Invalid method parameter(s). */
+	JRPC_ERR_INTERNAL_ERROR = -32603,            /* Internal error Internal JSON-RPC error. */
+
+	JRPC_ERR_MARSHALL_FIELD_NOT_FOUND = -32099,  /* when unmarshalling a structure, a field was not found in the JSON object */
+	JRPC_ERR_MARSHALL_TYPE_MISMATCH = -32098,    /* when unmarshalling a structure, the JSON object property was
+							not of the right type */
+	JRPC_ERR_MARSHALL_INVALID_ENUM = -32097,     /* when unmarshalling an enum, the JSON string was not matching any enum value */
+};
+
+/*
  * JSON-RPC functions
  */
 
