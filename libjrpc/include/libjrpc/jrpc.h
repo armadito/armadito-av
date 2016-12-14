@@ -39,11 +39,6 @@ enum jrpc_status {
 	JRPC_ERR_METHOD_NOT_FOUND = -32601,          /* The method does not exist / is not available. */
 	JRPC_ERR_INVALID_PARAMS = -32602, 	     /* Invalid params, Invalid method parameter(s). */
 	JRPC_ERR_INTERNAL_ERROR = -32603,            /* Internal error Internal JSON-RPC error. */
-
-	JRPC_ERR_MARSHALL_FIELD_NOT_FOUND = -32099,  /* when unmarshalling a structure, a field was not found in the JSON object */
-	JRPC_ERR_MARSHALL_TYPE_MISMATCH = -32098,    /* when unmarshalling a structure, the JSON object property was
-							not of the right type */
-	JRPC_ERR_MARSHALL_INVALID_ENUM = -32097,     /* when unmarshalling an enum, the JSON string was not matching any enum value */
 };
 
 /*

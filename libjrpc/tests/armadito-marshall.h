@@ -19,9 +19,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#include <libarmadito/armadito.h>
-
-#include "test.h"
+#include <libjrpc/marshall.h>
 
 JRPC_DEFINE_ENUM(a6o_file_status)
 	JRPC_DEFINE_ENUM_VALUE(A6O_FILE_UNDECIDED)

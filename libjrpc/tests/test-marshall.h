@@ -1,4 +1,4 @@
-#include <libjrpc/marshall-gen.h>
+#include <libjrpc/marshall.h>
 
 /* for testing */
 JRPC_DEFINE_STRUCT(operands)

@@ -17,3 +17,7 @@ marshall.c
 
 # -DDEBUG because is #defined in top-level config header
 AM_CPPFLAGS=-DDEBUG -I$(top_srcdir)/libjrpc/include -I$(top_srcdir)/libmodule/include -I$(top_srcdir) -I$(top_srcdir)/libjrpc @LIBJANSSON_CFLAGS@ -save-temps
+
+noinst_HEADERS= \
+include/libjrpc/jrpc.h \
+include/libjrpc/marshall.h
