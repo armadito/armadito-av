@@ -34,7 +34,7 @@ int jrpc_marshall_array(void **array, json_t **p_obj, jrpc_marshall_cb_t marshal
 {
 	json_t *obj;
 	void **p;
-	int ret = 0;
+	int ret = JRPC_MARSHALL_OK;
 
 	obj = json_array();
 
@@ -47,7 +47,7 @@ int jrpc_marshall_array(void **array, json_t **p_obj, jrpc_marshall_cb_t marshal
 	}
 
 	*p_obj = obj;
-	return 0;
+	return ret;
 
 error_end:
 	json_decref(obj);
@@ -85,6 +85,7 @@ int jrpc_unmarshall_array(json_t *obj, void ***p_array, jrpc_unmarshall_cb_t unm
 	size_t index, size;
 	json_t *elem;
 	void **array, **p;
+	int ret = JRPC_MARSHALL_OK;
 
 	size = json_array_size(obj);
 	if (!size)
@@ -94,13 +95,17 @@ int jrpc_unmarshall_array(json_t *obj, void ***p_array, jrpc_unmarshall_cb_t unm
 
 	p = array;
 	json_array_foreach(obj, index, elem) {
-		/* TODO: must check return value of callback and exit with error status if != 0 */
-		(*unmarshall_cb)(elem, p);
+		if ((ret = (*unmarshall_cb)(elem, p)))
+			goto error_end;
 		p++;
 	}
 
 	*p_array = array;
+	return ret;
 
-	return 0;
+error_end:
+	free(array);
+	*p_array = NULL;
+	return ret;
 }
 

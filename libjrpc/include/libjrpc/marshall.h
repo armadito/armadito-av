@@ -39,6 +39,9 @@ enum jrpc_marshall_status {
 
 #include <jansson.h>
 
+/*
+ * Helper functions used by the generated code
+ */
 typedef int (*jrpc_marshall_cb_t)(void *p, json_t **p_obj);
 
 int jrpc_marshall_array(void **array, json_t **p_obj, jrpc_marshall_cb_t marshall_elem_cb);
@@ -48,6 +51,16 @@ int jrpc_unmarshall_field(json_t *obj, const char *name, json_type expected_json
 typedef int (*jrpc_unmarshall_cb_t)(json_t *obj, void **pp);
 
 int jrpc_unmarshall_array(json_t *obj, void ***p_array, jrpc_unmarshall_cb_t unmarshall_cb);
+
+/*
+ * Marshalling helper macro
+ */
+#define JRPC_STRUCT2JSON(S, P, O) jrpc_marshall_struct_##S(P, O)
+
+/*
+ * Umarshalling helper macro
+ */
+#define JRPC_JSON2STRUCT(S, O, P) jrpc_unmarshall_struct_##S(O, P)
 
 #endif
 
