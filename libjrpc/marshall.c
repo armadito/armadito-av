@@ -34,7 +34,7 @@ int jrpc_marshall_array(void **array, json_t **p_obj, jrpc_marshall_cb_t marshal
 {
 	json_t *obj;
 	void **p;
-	int ret = JRPC_MARSHALL_OK;
+	int ret = JRPC_OK;
 
 	obj = json_array();
 
@@ -65,14 +65,14 @@ int jrpc_unmarshall_field(json_t *obj, const char *name, json_type expected_json
 	*p_field = json_object_get(obj, name);
 
 	if (*p_field == NULL)
-		return JRPC_MARSHALL_ERR_FIELD_NOT_FOUND;
+		return JRPC_ERR_MARSHALL_FIELD_NOT_FOUND;
 
 	if (json_typeof(*p_field) != expected_json_type) {
 		*p_field = NULL;
-		return JRPC_MARSHALL_ERR_TYPE_MISMATCH;
+		return JRPC_ERR_MARSHALL_TYPE_MISMATCH;
 	}
 
-	return JRPC_MARSHALL_OK;
+	return JRPC_OK;
 }
 
 /*
@@ -85,11 +85,9 @@ int jrpc_unmarshall_array(json_t *obj, void ***p_array, jrpc_unmarshall_cb_t unm
 	size_t index, size;
 	json_t *elem;
 	void **array, **p;
-	int ret = JRPC_MARSHALL_OK;
+	int ret = JRPC_OK;
 
 	size = json_array_size(obj);
-	if (!size)
-		return JRPC_MARSHALL_ERR_TYPE_MISMATCH;
 
 	array = calloc(size + 1, sizeof(void *));
 

@@ -22,32 +22,10 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef LIBJRPC_JRPC_H
 #define LIBJRPC_JRPC_H
 
+#include <libjrpc/error.h>
+
 #include <stddef.h>
 #include <jansson.h>
-
-/*
- * JSON-RPC error codes
- *
- * Standard JSON-RPC code defined in http://www.jsonrpc.org/specification#error_object
- */
-
-enum jrpc_status {
-	JRPC_OK = 0,
-	JRPC_ERR_PARSE_ERROR = -32700,               /* Parse error Invalid JSON was received by the server. An error
-							occurred on the server while parsing the JSON text. */
-	JRPC_ERR_INVALID_REQUEST = -32600,           /* The JSON sent is not a valid Request object. */
-	JRPC_ERR_METHOD_NOT_FOUND = -32601,          /* The method does not exist / is not available. */
-	JRPC_ERR_INVALID_PARAMS = -32602, 	     /* Invalid params, Invalid method parameter(s). */
-	JRPC_ERR_INTERNAL_ERROR = -32603,            /* Internal error Internal JSON-RPC error. */
-
-	/* -32000 to -32099 	Server error 	Reserved for implementation-defined server-errors. */
-
-	/* Error codes breakdown:  */
-	/* -32099 to -32090  reserved for marshalling errors (see marshall.h) */
-	/* -32089 to -32080  reserved for runtime errors */
-	JRPC_ERR_INVALID_RESPONSE_ID = -32089,       /* Response id is not associated with a callback */
-	/* -32079 to -32000  reserved for methods errors */
-};
 
 /*
  * JSON-RPC functions

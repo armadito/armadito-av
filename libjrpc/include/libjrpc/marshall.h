@@ -22,20 +22,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef LIBJRPC_MARSHALL_H
 #define LIBJRPC_MARSHALL_H
 
-/*
- * JSON-RPC marshalling error codes
- *
- * Uses standard JSON-RPC code defined in http://www.jsonrpc.org/specification#error_object
- */
-
-enum jrpc_marshall_status {
-	JRPC_MARSHALL_OK = 0,
-	JRPC_MARSHALL_ERR_FIELD_NOT_FOUND = -32099,      /* when unmarshalling a structure, a field was not found in the JSON object */
-	JRPC_MARSHALL_ERR_TYPE_MISMATCH = -32098,        /* when unmarshalling a structure, the JSON object property was
-							    not of the right type */
-	JRPC_MARSHALL_ERR_INVALID_ENUM_STRING = -32097,  /* when unmarshalling an enum, the JSON string was not matching any enum value */
-	JRPC_MARSHALL_ERR_INVALID_ENUM_VALUE = -32096,   /* when marshalling an enum, the value was not matching any defined value */
-};
+#include <libjrpc/error.h>
 
 #include <jansson.h>
 
@@ -105,7 +92,7 @@ int jrpc_unmarshall_array(json_t *obj, void ***p_array, jrpc_unmarshall_cb_t unm
 #define JRPC_DEFINE_STRUCT(S)				\
 int jrpc_marshall_struct_##S(void *p, json_t **p_obj)	\
 {							\
-	int ret = JRPC_MARSHALL_OK;			\
+	int ret = JRPC_OK;				\
 	struct S *s = (struct S *)p;			\
 	json_t *obj = json_object();			\
 	json_t *field;
@@ -150,12 +137,12 @@ int jrpc_marshall_enum_##S(int value, json_t **p_obj)	\
 {							\
 	switch(value) {
 
-#define JRPC_DEFINE_ENUM_VALUE(NAME) case NAME: *p_obj = json_string(#NAME); return JRPC_MARSHALL_OK;
+#define JRPC_DEFINE_ENUM_VALUE(NAME) case NAME: *p_obj = json_string(#NAME); return JRPC_OK;
 
 #define JRPC_END_ENUM					\
 	}						\
 	*p_obj = NULL;					\
-	return JRPC_MARSHALL_ERR_INVALID_ENUM_VALUE;	\
+	return JRPC_ERR_MARSHALL_INVALID_ENUM_VALUE;	\
 }
 
 /*
@@ -182,10 +169,10 @@ int jrpc_unmarshall_enum_##S(json_t *obj, enum S *p_val)	\
 {								\
 	const char *enum_string = json_string_value(obj);
 
-#define JRPC_DEFINE_ENUM_VALUE(NAME) if (!strcmp(enum_string, #NAME)) { *p_val = NAME; return JRPC_MARSHALL_OK; }
+#define JRPC_DEFINE_ENUM_VALUE(NAME) if (!strcmp(enum_string, #NAME)) { *p_val = NAME; return JRPC_OK; }
 
 #define JRPC_END_ENUM					\
-	return JRPC_MARSHALL_ERR_INVALID_ENUM_STRING;	\
+	return JRPC_ERR_MARSHALL_INVALID_ENUM_STRING;	\
 }
 
 /*
@@ -194,7 +181,7 @@ int jrpc_unmarshall_enum_##S(json_t *obj, enum S *p_val)	\
 #define JRPC_DEFINE_STRUCT(S)				\
 int jrpc_unmarshall_struct_##S(json_t *obj, void **pp)	\
 {							\
-	int ret = JRPC_MARSHALL_OK;			\
+	int ret = JRPC_OK;				\
 	struct S *s = malloc(sizeof(struct S));		\
 	json_t *field;
 
@@ -221,7 +208,7 @@ int jrpc_unmarshall_struct_##S(json_t *obj, void **pp)	\
 		goto error_end;						\
 
 #define JRPC_DEFINE_FIELD_STRUCT(STRUCT_TYPE, NAME)			\
-	if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_ARRAY, &field))) \
+	if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_OBJECT, &field))) \
 		goto error_end;						\
 	if ((ret = jrpc_unmarshall_struct_##STRUCT_TYPE(field, (void **)&(s->NAME)))) \
 		goto error_end;

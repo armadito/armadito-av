@@ -282,6 +282,23 @@ static json_t *make_json_result_obj(json_t *result, size_t id)
 	return json_pack("{s:s, s:o, s:I}", "jsonrpc", "2.0", "result", result, "id", (json_int_t)id);
 }
 
+static json_t *make_json_error_obj(int code, const char *message, json_t *data, size_t id)
+{
+	json_t *j_err, *j_id;
+
+	j_err = json_pack("{s:i, s:s}", "code", code, "message", message);
+
+	if (data != NULL)
+		json_object_set(j_err, "data", data);
+
+	if (id)
+		j_id = json_integer(id);
+	else
+		j_id = json_null();
+
+	return json_pack("{s:s, s:o, s:o}", "jsonrpc", "2.0", "error", j_err, "id", j_id);
+}
+
 static int process_request(struct jrpc_connection *conn, const char *method, size_t id, json_t *params)
 {
 	jrpc_method_t method_cb;
@@ -299,8 +316,12 @@ static int process_request(struct jrpc_connection *conn, const char *method, siz
 
 	ret = (*method_cb)(params, &result, conn->connection_data);
 
-	if (ret)
+	if (ret) {
+#ifdef DEBUG
+		fprintf(stderr, "processing request: method %s returned error %d\n", method, ret);
+#endif
 		return ret;
+	}
 
 	if (result != NULL) {
 		json_t * res = make_json_result_obj(result, id);
