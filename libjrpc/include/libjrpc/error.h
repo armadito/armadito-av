@@ -1,8 +1,3 @@
-/*
- * JSON-RPC marshalling error codes
- *
- * Uses standard JSON-RPC code defined in http://www.jsonrpc.org/specification#error_object
- */
 /***
 
 Copyright (C) 2015, 2016 Teclib'
