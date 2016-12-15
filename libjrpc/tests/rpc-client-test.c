@@ -65,21 +65,6 @@ static void simple_cb(json_t *result, void *user_data)
 	fprintf(stderr, "The callback has been called, result is %d\n", op->i_result);
 }
 
-static struct operands *operands_new(void)
-{
-	struct operands *op = calloc(1, sizeof(struct operands));
-
-	op->c_op1 = calloc(1, sizeof(struct cplx));
-	op->c_op2 = calloc(1, sizeof(struct cplx));
-	op->c_result = calloc(1, sizeof(struct cplx));
-
-	op->v_op1 = calloc(1, sizeof(struct cplx *));
-	op->v_op2 = calloc(1, sizeof(struct cplx *));
-	op->v_result = calloc(1, sizeof(struct cplx *));
-
-	return op;
-}
-
 static int test_call(struct jrpc_connection *conn, int count)
 {
 	int op = 0, i, ret = 0;

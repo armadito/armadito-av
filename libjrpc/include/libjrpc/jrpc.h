@@ -39,6 +39,14 @@ enum jrpc_status {
 	JRPC_ERR_METHOD_NOT_FOUND = -32601,          /* The method does not exist / is not available. */
 	JRPC_ERR_INVALID_PARAMS = -32602, 	     /* Invalid params, Invalid method parameter(s). */
 	JRPC_ERR_INTERNAL_ERROR = -32603,            /* Internal error Internal JSON-RPC error. */
+
+	/* -32000 to -32099 	Server error 	Reserved for implementation-defined server-errors. */
+
+	/* Error codes breakdown:  */
+	/* -32099 to -32090  reserved for marshalling errors (see marshall.h) */
+	/* -32089 to -32080  reserved for runtime errors */
+	JRPC_ERR_INVALID_RESPONSE_ID = -32089,       /* Response id is not associated with a callback */
+	/* -32079 to -32000  reserved for methods errors */
 };
 
 /*

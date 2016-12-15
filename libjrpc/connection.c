@@ -250,14 +250,14 @@ static int json_rpc_unpack(json_t *o, struct json_rpc_obj *s)
 		s->u.request.id = id;
 		s->u.request.params = params;
 
-		return 0;
+		return JRPC_OK;
 	}
 
 	if (json_unpack(o, "{s:s, s?o, s?o, s:i}", "jsonrpc", &version, "result", &result, "error", &error,  "id", &id) == 0
 		&& !strcmp(version, "2.0")) {
 		if (error && result || !error && !result) {
 			s->type = MALFORMED_JSON;
-			return 0;
+			return JRPC_OK;
 		}
 
 		if (error != NULL) {
@@ -270,11 +270,11 @@ static int json_rpc_unpack(json_t *o, struct json_rpc_obj *s)
 			s->u.result_response.id = id;
 		}
 
-		return 0;
+		return JRPC_OK;
 	}
 
 	s->type = MALFORMED_JSON;
-	return 1;
+	return JRPC_ERR_INVALID_REQUEST;
 }
 
 static json_t *make_json_result_obj(json_t *result, size_t id)
@@ -295,7 +295,7 @@ static int process_request(struct jrpc_connection *conn, const char *method, siz
 	method_cb = jrpc_mapper_find(conn->mapper, method);
 
 	if (method_cb == NULL)
-		return 1;
+		return JRPC_ERR_METHOD_NOT_FOUND;
 
 	ret = (*method_cb)(params, &result, conn->connection_data);
 
@@ -308,7 +308,7 @@ static int process_request(struct jrpc_connection *conn, const char *method, siz
 		return connection_send(conn, res);
 	}
 
-	return 0;
+	return JRPC_OK;
 }
 
 static int process_result(struct jrpc_connection *conn, size_t id, json_t *result)
@@ -321,12 +321,12 @@ static int process_result(struct jrpc_connection *conn, size_t id, json_t *resul
 #endif
 	cb = connection_find_callback(conn, id, &user_data);
 
-	if (cb != NULL) {
-		(*cb)(result, user_data);
-		return 0;
-	}
+	if (cb == NULL)
+		return JRPC_ERR_INVALID_RESPONSE_ID;
 
-	return 1;
+	(*cb)(result, user_data);
+
+	return JRPC_OK;
 }
 
 static int process_buffer(struct jrpc_connection *conn, const char *buffer, size_t size)
@@ -342,7 +342,7 @@ static int process_buffer(struct jrpc_connection *conn, const char *buffer, size
 	j_obj = json_loadb(buffer, size, JSON_DISABLE_EOF_CHECK, &error);
 
 	if (j_obj == NULL)
-		return 1; /* TODO: error code */
+		return JRPC_ERR_PARSE_ERROR;
 
 	if (json_rpc_unpack(j_obj, &rpc_obj))
 		return 1; /* TODO: error code */

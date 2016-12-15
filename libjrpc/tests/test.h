@@ -34,4 +34,6 @@ struct operands {
 #define UNMARSHALL_DECLARATIONS
 #include "test-marshall.h"
 
+struct operands *operands_new(void);
+
 #endif

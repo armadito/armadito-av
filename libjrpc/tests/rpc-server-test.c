@@ -16,7 +16,7 @@
 static int add_method(json_t *params, json_t **result, void *connection_data)
 {
 	struct operands *s_op;
-	struct operands *s_res = calloc(1, sizeof(struct operands));
+	struct operands *s_res = operands_new();
 	int ret;
 
 	if ((ret = JRPC_JSON2STRUCT(operands, params, &s_op)))
