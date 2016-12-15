@@ -19,6 +19,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
+#include "armadito-config.h"
 
 #include <libjrpc/jrpc.h>
 
@@ -32,6 +33,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef HAVE_PTHREAD
+#include <pthread.h>
+#endif
 
 struct jrpc_connection {
 	struct jrpc_mapper *mapper;
@@ -43,6 +47,9 @@ struct jrpc_connection {
 	jrpc_write_cb_t write_cb;
 	void *write_cb_data;
 	void *connection_data;
+#ifdef HAVE_PTHREAD
+	pthread_mutex_t connection_mutex;
+#endif
 };
 
 struct rpc_callback_entry {
@@ -51,6 +58,23 @@ struct rpc_callback_entry {
 };
 
 #define DEFAULT_INPUT_BUFFER_SIZE 1024
+
+#ifdef HAVE_PTHREAD
+static void connection_lock(struct jrpc_connection *conn)
+{
+	pthread_mutex_lock(&conn->connection_mutex);
+}
+
+static void connection_unlock(struct jrpc_connection *conn)
+{
+	pthread_mutex_unlock(&conn->connection_mutex);
+}
+
+static void connection_lock_init(struct jrpc_connection *conn)
+{
+	pthread_mutex_init(&conn->connection_mutex, NULL);
+}
+#endif
 
 struct jrpc_connection *jrpc_connection_new(struct jrpc_mapper *mapper, void *connection_data)
 {
@@ -82,16 +106,6 @@ void jrpc_connection_set_write_cb(struct jrpc_connection *conn, jrpc_write_cb_t 
 }
 
 #define NOT_YET_IMPLEMENTED(F) fprintf(stderr, "%s: not yet implemented\n", F)
-
-static void connection_lock(struct jrpc_connection *conn)
-{
-	NOT_YET_IMPLEMENTED(__func__);
-}
-
-static void connection_unlock(struct jrpc_connection *conn)
-{
-	NOT_YET_IMPLEMENTED(__func__);
-}
 
 static int json_buffer_dump_cb(const char *buffer, size_t size, void *data)
 {
@@ -299,7 +313,7 @@ static json_t *make_json_error_obj(int code, const char *message, json_t *data, 
 	return json_pack("{s:s, s:o, s:o}", "jsonrpc", "2.0", "error", j_err, "id", j_id);
 }
 
-static int process_request(struct jrpc_connection *conn, const char *method, size_t id, json_t *params)
+static int connection_process_request(struct jrpc_connection *conn, const char *method, size_t id, json_t *params)
 {
 	jrpc_method_t method_cb;
 	json_t *result = NULL;
@@ -332,7 +346,7 @@ static int process_request(struct jrpc_connection *conn, const char *method, siz
 	return JRPC_OK;
 }
 
-static int process_result(struct jrpc_connection *conn, size_t id, json_t *result)
+static int connection_process_result(struct jrpc_connection *conn, size_t id, json_t *result)
 {
 	jrpc_cb_t cb;
 	void *user_data;
@@ -350,7 +364,7 @@ static int process_result(struct jrpc_connection *conn, size_t id, json_t *resul
 	return JRPC_OK;
 }
 
-static int process_buffer(struct jrpc_connection *conn, const char *buffer, size_t size)
+static int connection_process_buffer(struct jrpc_connection *conn, const char *buffer, size_t size)
 {
 	json_error_t error;
 	json_t *j_obj;
@@ -370,9 +384,9 @@ static int process_buffer(struct jrpc_connection *conn, const char *buffer, size
 
 	switch(rpc_obj.type) {
 	case REQUEST:
-		return process_request(conn, rpc_obj.u.request.method, rpc_obj.u.request.id, rpc_obj.u.request.params);
+		return connection_process_request(conn, rpc_obj.u.request.method, rpc_obj.u.request.id, rpc_obj.u.request.params);
 	case RESULT_RESPONSE:
-		return process_result(conn, rpc_obj.u.result_response.id, rpc_obj.u.result_response.result);
+		return connection_process_result(conn, rpc_obj.u.result_response.id, rpc_obj.u.result_response.result);
 	case ERROR_RESPONSE:
 		return 1; /* TODO : error code && process error */
 	case MALFORMED_JSON:
@@ -424,7 +438,7 @@ int jrpc_process(struct jrpc_connection *conn)
 
 				buffer_append(&conn->input_buffer, tmp, 1);
 				/* - 1 because of trailing '\0' */
-				process_buffer(conn, buffer_data(&conn->input_buffer), buffer_size(&conn->input_buffer) - 1);
+				connection_process_buffer(conn, buffer_data(&conn->input_buffer), buffer_size(&conn->input_buffer) - 1);
 				buffer_clear(&conn->input_buffer);
 				state = 0;
 			} else {

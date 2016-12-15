@@ -2,8 +2,8 @@ check_PROGRAMS= \
 rpc-client-test \
 rpc-server-test
 
-LDADD=$(top_builddir)/libjrpc/libjrpc.a @LIBJANSSON_LIBS@ -lm
-AM_CPPFLAGS=-I$(top_srcdir)/libjrpc/include -I$(top_srcdir)/libmodule/include @LIBJANSSON_CFLAGS@ -save-temps
+LDADD=$(top_builddir)/libjrpc/libjrpc.a $(PTHREAD_LIBS) @LIBJANSSON_LIBS@ -lm
+AM_CPPFLAGS=$(PTHREAD_CFLAGS) -I$(top_srcdir)/libjrpc/include -I$(top_srcdir)/libmodule/include @LIBJANSSON_CFLAGS@ -save-temps
 
 #ipcsendtest_SOURCES=ipcsendtest.c
 #ipcreceivetest_SOURCES=ipcreceivetest.c

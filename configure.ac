@@ -54,6 +54,9 @@ if test "$enable_debug" = "yes"; then
    CFLAGS="${CFLAGS} -g"
 fi
 
+# check for posix thread
+AX_PTHREAD
+
 # check for glib stuff
 PKG_CHECK_MODULES(GLIB2, glib-2.0, [HAVE_GLIB2=yes], [HAVE_GLIB2=no])
 if test "$HAVE_GLIB2" = "no"; then
