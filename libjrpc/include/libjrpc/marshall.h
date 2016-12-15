@@ -55,12 +55,12 @@ int jrpc_unmarshall_array(json_t *obj, void ***p_array, jrpc_unmarshall_cb_t unm
 /*
  * Marshalling helper macro
  */
-#define JRPC_STRUCT2JSON(S, P, O) jrpc_marshall_struct_##S(P, O)
+#define JRPC_STRUCT2JSON(S, P, O) jrpc_marshall_struct_##S((void *)P, O)
 
 /*
  * Umarshalling helper macro
  */
-#define JRPC_JSON2STRUCT(S, O, P) jrpc_unmarshall_struct_##S(O, P)
+#define JRPC_JSON2STRUCT(S, O, P) jrpc_unmarshall_struct_##S(O, (void **)P)
 
 #endif
 
@@ -77,6 +77,7 @@ int jrpc_unmarshall_array(json_t *obj, void ***p_array, jrpc_unmarshall_cb_t unm
 #undef JRPC_DEFINE_FIELD_STRING
 #undef JRPC_DEFINE_FIELD_ENUM
 #undef JRPC_DEFINE_FIELD_ARRAY
+#undef JRPC_DEFINE_FIELD_STRUCT
 #undef JRPC_END_STRUCT
 #undef JRPC_DEFINE_ENUM
 #undef JRPC_DEFINE_ENUM_VALUE
@@ -124,6 +125,11 @@ int jrpc_marshall_struct_##S(void *p, json_t **p_obj)	\
 
 #define JRPC_DEFINE_FIELD_ARRAY(ELEMENT_TYPE, NAME)			\
 	if ((ret = jrpc_marshall_array((void **)s->NAME, &field, jrpc_marshall_struct_##ELEMENT_TYPE))) \
+		goto error_end;						\
+	json_object_set_new(obj, #NAME, field);
+
+#define JRPC_DEFINE_FIELD_STRUCT(STRUCT_TYPE, NAME)			\
+	if ((ret = jrpc_marshall_struct_##STRUCT_TYPE((void *)s->NAME, &field))) \
 		goto error_end;						\
 	json_object_set_new(obj, #NAME, field);
 
@@ -211,8 +217,14 @@ int jrpc_unmarshall_struct_##S(json_t *obj, void **pp)	\
 #define JRPC_DEFINE_FIELD_ARRAY(ELEM_TYPE, NAME)			\
 	if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_ARRAY, &field))) \
 		goto error_end;						\
-	if ((ret = jrpc_unmarshall_array(field, (void ***)&(s->NAME), jrpc_unmarshall_struct_##ELEM_TYPE)) != 0) \
+	if ((ret = jrpc_unmarshall_array(field, (void ***)&(s->NAME), jrpc_unmarshall_struct_##ELEM_TYPE))) \
 		goto error_end;						\
+
+#define JRPC_DEFINE_FIELD_STRUCT(STRUCT_TYPE, NAME)			\
+	if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_ARRAY, &field))) \
+		goto error_end;						\
+	if ((ret = jrpc_unmarshall_struct_##STRUCT_TYPE(field, (void **)&(s->NAME)))) \
+		goto error_end;
 
 #define JRPC_END_STRUCT				\
 	*pp = s;				\
@@ -222,10 +234,6 @@ error_end:					\
 	*pp = NULL;				\
 	return ret;				\
 }
-
-/* #else */
-
-/* #error either one of MARSHALL_DECLARATIONS, MARSHALL_FUNCTIONS, UNMARSHALL_DECLARATIONS, UNMARSHALL_FUNCTIONS must be defined */
 
 #endif
 
@@ -243,6 +251,9 @@ error_end:					\
 #endif
 #ifndef JRPC_DEFINE_FIELD_ARRAY
 #define JRPC_DEFINE_FIELD_ARRAY(ELEMENT_TYPE, NAME)
+#endif
+#ifndef JRPC_DEFINE_FIELD_STRUCT
+#define JRPC_DEFINE_FIELD_STRUCT(STRUCT_TYPE, NAME)
 #endif
 #ifndef JRPC_END_STRUCT
 #define JRPC_END_STRUCT

@@ -15,15 +15,24 @@
 
 static int add_method(json_t *params, json_t **result, void *connection_data)
 {
-	int op1, op2;
+	struct operands *s_op;
+	struct operands *s_res = calloc(1, sizeof(struct operands));
+	int ret;
 
-	op1 = json_integer_value(json_object_get(params, "op1"));
-	op2 = json_integer_value(json_object_get(params, "op2"));
+	if ((ret = JRPC_JSON2STRUCT(operands, params, &s_op)))
+		return ret;
 
-	*result = json_object();
-	json_object_set(*result, "result", json_integer(op1 + op2));
+	switch(s_op->opt) {
+	case OP_INT:
+		s_res->opt = OP_INT;
+		s_res->i_result = s_op->i_op1 + s_op->i_op2;
+		break;
+	}
 
-	return 0;
+	if ((ret = JRPC_STRUCT2JSON(operands, s_res, result)))
+		return ret;
+
+	return JRPC_OK;
 }
 
 static void usage(int argc, char **argv)

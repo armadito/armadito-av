@@ -56,7 +56,28 @@ static int test_notification(struct jrpc_connection *conn)
 
 static void simple_cb(json_t *result, void *user_data)
 {
-	fprintf(stderr, "The callback has been called, result is %lld\n", json_integer_value(json_object_get(result, "result")));
+	struct operands *op;
+	int ret;
+
+	if ((ret = JRPC_JSON2STRUCT(operands, result, &op)))
+		return;
+
+	fprintf(stderr, "The callback has been called, result is %d\n", op->i_result);
+}
+
+static struct operands *operands_new(void)
+{
+	struct operands *op = calloc(1, sizeof(struct operands));
+
+	op->c_op1 = calloc(1, sizeof(struct cplx));
+	op->c_op2 = calloc(1, sizeof(struct cplx));
+	op->c_result = calloc(1, sizeof(struct cplx));
+
+	op->v_op1 = calloc(1, sizeof(struct cplx *));
+	op->v_op2 = calloc(1, sizeof(struct cplx *));
+	op->v_result = calloc(1, sizeof(struct cplx *));
+
+	return op;
 }
 
 static int test_call(struct jrpc_connection *conn, int count)
@@ -64,17 +85,17 @@ static int test_call(struct jrpc_connection *conn, int count)
 	int op = 0, i, ret = 0;
 
 	for(i = 0; i < count; i++) {
-		json_t *operands = json_object();
+		struct operands *s_op = operands_new();
+		json_t *j_op;
 
-		json_object_set(operands, "op1", json_integer(op));
-		json_object_set(operands, "op2", json_integer(op + 1));
+		s_op->i_op1 = op;
+		s_op->i_op2 = op + 1;
 		op++;
 
-		/* struct operands o; */
-		/* o.op1 = 1; */
-		/* o.op2 = 2; */
+		if ((ret = JRPC_STRUCT2JSON(operands, s_op, &j_op)))
+			return ret;
 
-		ret = jrpc_call(conn, "add", operands, simple_cb, NULL);
+		ret = jrpc_call(conn, "add", j_op, simple_cb, NULL);
 
 		if (ret)
 			break;
