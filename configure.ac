@@ -165,8 +165,6 @@ arch/linux/net/Makefile
 arch/linux/service/Makefile
 conf/Makefile
 httpd/Makefile
-json/Makefile
-json/ui/Makefile
 libcore/Makefile
 libjrpc/Makefile
 libjrpc/tests/Makefile
