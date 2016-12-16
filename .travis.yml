@@ -14,6 +14,7 @@ addons:
     - libcurl4-openssl-dev
     - libjansson-dev
     - libjansson4
+    - autoconf-archive
   coverity_scan:
     project:
       name: "armadito/armadito-av"
