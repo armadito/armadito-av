@@ -47,6 +47,7 @@ struct jrpc_connection {
 	jrpc_write_cb_t write_cb;
 	void *write_cb_data;
 	void *connection_data;
+	jrpc_error_handler_t error_handler;
 #ifdef HAVE_PTHREAD
 	pthread_mutex_t connection_mutex;
 #endif
@@ -93,6 +94,11 @@ struct jrpc_connection *jrpc_connection_new(struct jrpc_mapper *mapper, void *co
 	return conn;
 }
 
+void *jrpc_get_connection_data(struct jrpc_connection *conn)
+{
+	return conn->connection_data;
+}
+
 void jrpc_connection_set_read_cb(struct jrpc_connection *conn, jrpc_read_cb_t read_cb, void *data)
 {
 	conn->read_cb = read_cb;
@@ -105,7 +111,10 @@ void jrpc_connection_set_write_cb(struct jrpc_connection *conn, jrpc_write_cb_t 
 	conn->write_cb_data = data;
 }
 
-#define NOT_YET_IMPLEMENTED(F) fprintf(stderr, "%s: not yet implemented\n", F)
+void jrpc_connection_set_error_handler(struct jrpc_connection *conn, jrpc_error_handler_t error_handler)
+{
+	conn->error_handler = error_handler;
+}
 
 static int json_buffer_dump_cb(const char *buffer, size_t size, void *data)
 {

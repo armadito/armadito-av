@@ -33,8 +33,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 /*
  * RPC mapper
- * handles
- * - mapping method name to method definition (callback, params un/marshalling, result un/marshalling)
+ * handles mapping method name to method definition
  */
 struct jrpc_mapper;
 
@@ -42,12 +41,6 @@ struct jrpc_mapper *jrpc_mapper_new(void);
 
 typedef int (*jrpc_method_t)(json_t *params, json_t **result, void *connection_data);
 
-/* may be a macro with #P and #R ???
-   + no need to have a hash table to map type names to marshall functions
-   + check is done at compile time
-   - but with an obscure link error message related to code coming from a macro expansion
-   - need to declare all marshall functions in this header
-*/
 int jrpc_mapper_add(struct jrpc_mapper *mapper, const char *method, jrpc_method_t method_cb);
 
 /*
@@ -60,15 +53,21 @@ int jrpc_mapper_add(struct jrpc_mapper *mapper, const char *method, jrpc_method_
 
 struct jrpc_connection;
 
-typedef ssize_t (*jrpc_write_cb_t)(const char *buffer, size_t size, void *data);
+struct jrpc_connection *jrpc_connection_new(struct jrpc_mapper *mapper, void *connection_data);
+
+void *jrpc_get_connection_data(struct jrpc_connection *conn);
 
 typedef ssize_t (*jrpc_read_cb_t)(char *buffer, size_t size, void *data);
 
-struct jrpc_connection *jrpc_connection_new(struct jrpc_mapper *mapper, void *connection_data);
-
 void jrpc_connection_set_read_cb(struct jrpc_connection *conn, jrpc_read_cb_t read_cb, void *data);
 
+typedef ssize_t (*jrpc_write_cb_t)(const char *buffer, size_t size, void *data);
+
 void jrpc_connection_set_write_cb(struct jrpc_connection *conn, jrpc_write_cb_t write_cb, void *data);
+
+typedef void (*jrpc_error_handler_t)(struct jrpc_connection *conn, int error_code, const char *error_msg);
+
+void jrpc_connection_set_error_handler(struct jrpc_connection *conn, jrpc_error_handler_t error_handler);
 
 int jrpc_notify(struct jrpc_connection *conn, const char *method, json_t *params);
 
