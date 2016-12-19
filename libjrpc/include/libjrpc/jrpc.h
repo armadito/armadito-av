@@ -55,7 +55,7 @@ struct jrpc_connection;
 
 struct jrpc_connection *jrpc_connection_new(struct jrpc_mapper *mapper, void *connection_data);
 
-void *jrpc_get_connection_data(struct jrpc_connection *conn);
+void *jrpc_connection_get_data(struct jrpc_connection *conn);
 
 typedef ssize_t (*jrpc_read_cb_t)(char *buffer, size_t size, void *data);
 
@@ -65,9 +65,11 @@ typedef ssize_t (*jrpc_write_cb_t)(const char *buffer, size_t size, void *data);
 
 void jrpc_connection_set_write_cb(struct jrpc_connection *conn, jrpc_write_cb_t write_cb, void *data);
 
-typedef void (*jrpc_error_handler_t)(struct jrpc_connection *conn, int error_code, const char *error_msg);
+typedef void (*jrpc_error_handler_t)(struct jrpc_connection *conn, size_t id, int code, const char *message, json_t *data);
 
 void jrpc_connection_set_error_handler(struct jrpc_connection *conn, jrpc_error_handler_t error_handler);
+
+jrpc_error_handler_t jrpc_connection_get_error_handler(struct jrpc_connection *conn);
 
 int jrpc_notify(struct jrpc_connection *conn, const char *method, json_t *params);
 

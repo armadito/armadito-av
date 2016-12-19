@@ -2,7 +2,7 @@
 #include <libjrpc/jrpc.h>
 
 #include "test.h"
-#include "libtest.h"
+#include "unix.h"
 
 #include <fcntl.h>
 #include <jansson.h>
@@ -89,37 +89,32 @@ static int test_call(struct jrpc_connection *conn, int count)
 	return ret;
 }
 
-static void usage(int argc, char **argv)
+static void client_error_handler_t(struct jrpc_connection *conn, size_t id, int code, const char *message, json_t *data)
 {
-	fprintf(stderr, "Usage: %s INPUT_PIPE OUTPUT_PIPE\n", argv[0]);
-	exit(EXIT_FAILURE);
+	fprintf(stderr, "received error: id %ld code %d message \"%s\"\n", id, code, message);
 }
 
 int main(int argc, char **argv)
 {
 	struct jrpc_connection *conn;
-	int *p_input_fd = malloc(sizeof(int));
-	int *p_output_fd = malloc(sizeof(int));
+	int client_sock;
+	int *p_client_sock;
 	int ret;
 
-	*p_output_fd = open(argv[2], O_WRONLY);
-	if (*p_output_fd < 0) {
-		perror("cannot open output pipe");
-		exit(EXIT_FAILURE);
-	}
+	client_sock = unix_client_connect(SOCKET_PATH, 10);
 
-	sleep(1);
-
-	*p_input_fd = open(argv[1], O_RDONLY);
-	if (*p_input_fd < 0) {
-		perror("cannot open input pipe");
+	if (client_sock < 0) {
+		perror("cannot connect to " SOCKET_PATH);
 		exit(EXIT_FAILURE);
 	}
 
 	conn = jrpc_connection_new(NULL, NULL);
 
-	jrpc_connection_set_read_cb(conn, unix_fd_read_cb, p_input_fd);
-	jrpc_connection_set_write_cb(conn, unix_fd_write_cb, p_output_fd);
+	p_client_sock = malloc(sizeof(int));
+	*p_client_sock = client_sock;
+
+	jrpc_connection_set_read_cb(conn, unix_fd_read_cb, p_client_sock);
+	jrpc_connection_set_write_cb(conn, unix_fd_write_cb, p_client_sock);
 
 	test_call(conn, 10);
 

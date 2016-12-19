@@ -10,8 +10,10 @@ libjrpc_a_SOURCES= \
 buffer.c \
 buffer.h \
 connection.c \
+connection.h \
 hash.c \
 hash.h \
+jrpc.c \
 mapper.c \
 marshall.c 
 

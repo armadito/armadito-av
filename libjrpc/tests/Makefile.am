@@ -1,3 +1,5 @@
+AUTOMAKE_OPTIONS=subdir-objects
+
 check_PROGRAMS= \
 rpc-client-test \
 rpc-server-test
@@ -11,11 +13,12 @@ AM_CPPFLAGS=$(PTHREAD_CFLAGS) -I$(top_srcdir)/libjrpc/include -I$(top_srcdir)/li
 COMMON_SOURCES= \
 armadito.c \
 armadito-marshall.h \
-libtest.c \
-libtest.h \
 test.h \
 test.c \
-test-marshall.h
+test-marshall.h \
+unix.c \
+unix.h
+
 
 rpc_client_test_SOURCES= \
 rpc-client-test.c \
