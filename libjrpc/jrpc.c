@@ -119,7 +119,7 @@ static int json_rpc_unpack(json_t *j_obj, struct rpc_obj *r_obj)
 		return JRPC_ERR_INVALID_REQUEST;
 
 	if (error != NULL) {
-		if (json_unpack(error, "{s:i, s:s, s?o}", "code", &code, "message", &message, "data", &data) == 0)
+		if (json_unpack(error, "{s:i, s:s, s?o}", "code", &code, "message", &message, "data", &data) != 0)
 			return JRPC_ERR_INVALID_REQUEST;
 
 		r_obj->type = ERROR_RESPONSE;
@@ -172,23 +172,24 @@ static int connection_process_request(struct jrpc_connection *conn, struct rpc_o
 #endif
 
 	method_cb = jrpc_mapper_find(connection_get_mapper(conn), method);
-
-	if (method_cb == NULL)
-		return JRPC_ERR_METHOD_NOT_FOUND;
+	if (method_cb == NULL) {
+		ret = JRPC_ERR_METHOD_NOT_FOUND;
+		connection_send(conn, make_json_error_obj(ret, "method was not found", NULL, id));
+		return ret;
+	}
 
 	ret = (*method_cb)(params, &result, jrpc_connection_get_data(conn));
 	if (ret) {
 #ifdef DEBUG
-		fprintf(stderr, "processing request: method %s returned error %d\n", method, ret);
+		fprintf(stderr, "processing request: method %s returned error\n", method);
 #endif
+		connection_send(conn, make_json_error_obj(ret, "method returned an error", NULL, id));
 		return ret;
 	}
 
-	if (result != NULL) {
-		json_t * res = make_json_result_obj(result, id);
-
-		return connection_send(conn, res);
-	}
+	/* was it a notification, i.e. id == 0? if yes, no result to send back */
+	if (id != 0)
+		connection_send(conn, make_json_result_obj(result, id));
 
 	return JRPC_OK;
 }
@@ -238,9 +239,7 @@ int jrpc_process(struct jrpc_connection *conn)
 	json_t *j_obj;
 	struct rpc_obj r_obj;
 
-	ret = connection_receive(conn, &j_obj);
-
-	if (ret)
+	if ((ret = connection_receive(conn, &j_obj)))
 		return ret;
 
 	if (json_rpc_unpack(j_obj, &r_obj))

@@ -233,6 +233,8 @@ int connection_receive(struct jrpc_connection *conn, json_t **p_obj)
 
 	assert(conn->read_cb != NULL);
 
+	memset(buffer, 0, sizeof(buffer));
+
 	n_read = (*conn->read_cb)(buffer, sizeof(buffer), conn->read_cb_data);
 	if (n_read < 0)
 		return JRPC_ERR_INTERNAL_ERROR;
@@ -244,8 +246,7 @@ int connection_receive(struct jrpc_connection *conn, json_t **p_obj)
 	fprintf(stderr, "received buffer: %s\n", buffer);
 #endif
 
-	/* TODO */
-	/* must check that the buffer terminates with "\r\n\r\n" */
+	/* TODO: must check that the buffer terminates with "\r\n\r\n" */
 
 	*p_obj = json_loadb(buffer, n_read, JSON_DISABLE_EOF_CHECK, &error);
 

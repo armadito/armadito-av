@@ -65,31 +65,35 @@ static void simple_cb(json_t *result, void *user_data)
 	fprintf(stderr, "The callback has been called, result is %d\n", op->i_result);
 }
 
-static int test_call(struct jrpc_connection *conn, int count)
+static int test_call(struct jrpc_connection *conn, const char *method, int op1, int op2)
+{
+	struct operands *s_op = operands_new();
+	json_t *j_op;
+	int ret;
+
+	s_op->i_op1 = op1;
+	s_op->i_op2 = op2;
+
+	if ((ret = JRPC_STRUCT2JSON(operands, s_op, &j_op)))
+		return ret;
+
+	return jrpc_call(conn, method, j_op, simple_cb, NULL);
+}
+
+static int test_add(struct jrpc_connection *conn, int count)
 {
 	int op = 0, i, ret = 0;
 
 	for(i = 0; i < count; i++) {
-		struct operands *s_op = operands_new();
-		json_t *j_op;
-
-		s_op->i_op1 = op;
-		s_op->i_op2 = op + 1;
-		op++;
-
-		if ((ret = JRPC_STRUCT2JSON(operands, s_op, &j_op)))
-			return ret;
-
-		ret = jrpc_call(conn, "add", j_op, simple_cb, NULL);
-
-		if (ret)
+		if ((ret = test_call(conn, "add", op, op + 1)))
 			break;
+		op++;
 	}
 
 	return ret;
 }
 
-static void client_error_handler_t(struct jrpc_connection *conn, size_t id, int code, const char *message, json_t *data)
+static void client_error_handler(struct jrpc_connection *conn, size_t id, int code, const char *message, json_t *data)
 {
 	fprintf(stderr, "received error: id %ld code %d message \"%s\"\n", id, code, message);
 }
@@ -116,7 +120,11 @@ int main(int argc, char **argv)
 	jrpc_connection_set_read_cb(conn, unix_fd_read_cb, p_client_sock);
 	jrpc_connection_set_write_cb(conn, unix_fd_write_cb, p_client_sock);
 
-	test_call(conn, 10);
+	jrpc_connection_set_error_handler(conn, client_error_handler);
+
+	test_add(conn, 10);
+	test_call(conn, "div", 9, 3);
+	test_call(conn, "div", 9, 0);
 
 	while((ret = jrpc_process(conn)) == JRPC_OK)
 		;

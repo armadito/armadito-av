@@ -51,6 +51,7 @@ enum jrpc_status {
 	/* -32089 to -32080  reserved for runtime errors */
 	JRPC_ERR_INVALID_RESPONSE_ID = -32089,       /* Response id is not associated with a callback */
 	/* -32079 to -32000  reserved for methods errors */
+	JRPC_ERR_METHOD_CALL_ERROR = -32079,         /* called method returned an error */
 };
 
 #endif

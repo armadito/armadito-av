@@ -15,7 +15,24 @@
 #include <sys/un.h>
 #include <unistd.h>
 
-static int add_method(json_t *params, json_t **result, void *connection_data)
+static int op_add(int *p_res, int op1, int op2)
+{
+	*p_res = op1 + op2;
+
+	return JRPC_OK;
+}
+
+static int op_div(int *p_res, int op1, int op2)
+{
+	if (op2 == 0)
+		return JRPC_ERR_METHOD_CALL_ERROR;
+
+	*p_res = op1 / op2;
+
+	return JRPC_OK;
+}
+
+static int operator_method(json_t *params, json_t **result, int (*operator)(int *, int, int))
 {
 	struct operands *s_op;
 	struct operands *s_res = operands_new();
@@ -27,14 +44,27 @@ static int add_method(json_t *params, json_t **result, void *connection_data)
 	switch(s_op->opt) {
 	case OP_INT:
 		s_res->opt = OP_INT;
-		s_res->i_result = s_op->i_op1 + s_op->i_op2;
+		ret = (*operator)(&s_res->i_result, s_op->i_op1, s_op->i_op2);
 		break;
 	}
+
+	if (ret)
+		return ret;
 
 	if ((ret = JRPC_STRUCT2JSON(operands, s_res, result)))
 		return ret;
 
 	return JRPC_OK;
+}
+
+static int add_method(json_t *params, json_t **result, void *connection_data)
+{
+	return operator_method(params, result, op_add);
+}
+
+static int div_method(json_t *params, json_t **result, void *connection_data)
+{
+	return operator_method(params, result, op_div);
 }
 
 int main(int argc, char **argv)
@@ -51,6 +81,7 @@ int main(int argc, char **argv)
 
 	server_mapper = jrpc_mapper_new();
 	jrpc_mapper_add(server_mapper, "add", add_method);
+	jrpc_mapper_add(server_mapper, "div", div_method);
 
 	while (1) {
 		int client_sock, ret;
