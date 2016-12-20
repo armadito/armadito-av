@@ -50,6 +50,7 @@ int jrpc_call(struct jrpc_connection *conn, const char *method, json_t *params, 
 {
 	json_t *call;
 	size_t id = 0L;
+	int ret;
 
 	if (cb != NULL)
 		id = connection_register_callback(conn, cb, user_data);
@@ -59,7 +60,11 @@ int jrpc_call(struct jrpc_connection *conn, const char *method, json_t *params, 
 #endif
 	call = make_json_call_obj(method, params, id);
 
-	return connection_send(conn, call);
+	ret = connection_send(conn, call);
+
+	json_decref(call);
+
+	return ret;
 }
 
 enum rpc_obj_type {
@@ -235,9 +240,11 @@ int jrpc_process(struct jrpc_connection *conn)
 
 	ret = connection_receive(conn, &j_obj);
 
-	if (json_rpc_unpack(j_obj, &r_obj)) {
+	if (ret)
+		return ret;
+
+	if (json_rpc_unpack(j_obj, &r_obj))
 		return JRPC_ERR_INVALID_REQUEST;
-	}
 
 	switch(r_obj.type) {
 	case REQUEST:

@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/un.h>
 #include <unistd.h>
 
 static int add_method(json_t *params, json_t **result, void *connection_data)
@@ -55,11 +56,14 @@ int main(int argc, char **argv)
 		int client_sock, ret;
 		int *p_client_sock;
 		struct jrpc_connection *conn;
+		struct sockaddr_un addr;
+		socklen_t addr_len = sizeof(addr);
 
-		if ((client_sock = accept(listen_sock, NULL, NULL)) < 0)
+		memset(&addr, 0, addr_len);
+		if ((client_sock = accept(listen_sock, (struct sockaddr *)&addr, &addr_len)) < 0)
 			exit(EXIT_FAILURE);
 
-		fprintf(stderr, "got connection\n");
+		fprintf(stderr, "got connection from %s\n", addr.sun_path);
 
 		p_client_sock = malloc(sizeof(int));
 		*p_client_sock = client_sock;
@@ -69,10 +73,11 @@ int main(int argc, char **argv)
 		jrpc_connection_set_read_cb(conn, unix_fd_read_cb, p_client_sock);
 		jrpc_connection_set_write_cb(conn, unix_fd_write_cb, p_client_sock);
 
-		while((ret = jrpc_process(conn)) >= 0) {
-			if (ret == 1)
-				return 1;
-		}
+		while((ret = jrpc_process(conn)) == JRPC_OK)
+			;
+
+		if (ret != JRPC_EOF)
+			return ret;
 	}
 
 	return 0;

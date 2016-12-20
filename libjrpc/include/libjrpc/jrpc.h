@@ -69,8 +69,6 @@ typedef void (*jrpc_error_handler_t)(struct jrpc_connection *conn, size_t id, in
 
 void jrpc_connection_set_error_handler(struct jrpc_connection *conn, jrpc_error_handler_t error_handler);
 
-jrpc_error_handler_t jrpc_connection_get_error_handler(struct jrpc_connection *conn);
-
 int jrpc_notify(struct jrpc_connection *conn, const char *method, json_t *params);
 
 typedef void (*jrpc_cb_t)(json_t *result, void *user_data);

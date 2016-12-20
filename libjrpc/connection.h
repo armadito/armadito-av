@@ -24,6 +24,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 struct jrpc_mapper *connection_get_mapper(struct jrpc_connection *conn);
 
+jrpc_error_handler_t jrpc_connection_get_error_handler(struct jrpc_connection *conn);
+
 size_t connection_register_callback(struct jrpc_connection *conn, jrpc_cb_t cb, void *user_data);
 
 jrpc_cb_t connection_find_callback(struct jrpc_connection *conn, size_t id, void **p_user_data);

@@ -118,10 +118,11 @@ int main(int argc, char **argv)
 
 	test_call(conn, 10);
 
-	while((ret = jrpc_process(conn)) > 0) {
-		if (ret == 1)
-			return 1;
-	}
+	while((ret = jrpc_process(conn)) == JRPC_OK)
+		;
 
-	return ret;
+	if (ret != JRPC_EOF)
+		return ret;
+
+	return 0;
 }

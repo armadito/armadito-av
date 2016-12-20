@@ -196,17 +196,13 @@ static int json_buffer_dump_cb(const char *buffer, size_t size, void *data)
 int connection_send(struct jrpc_connection *conn, json_t *obj)
 {
 	struct buffer b;
-	int ret;
+	int ret = JRPC_OK;
 
 	assert(conn->write_cb != NULL);
 
 	buffer_init(&b, 0);
 
-	ret = json_dump_callback(obj, json_buffer_dump_cb, &b, JSON_COMPACT);
-
-	json_decref(obj);
-
-	if (ret) {
+	if (json_dump_callback(obj, json_buffer_dump_cb, &b, JSON_COMPACT) < 0) {
 		ret = JRPC_ERR_INTERNAL_ERROR;
 		goto end;
 	}
@@ -219,11 +215,10 @@ int connection_send(struct jrpc_connection *conn, json_t *obj)
 #endif
 	connection_lock(conn);
 	/* - 1 so that we don't write the trailing '\0' */
-	ret = (*conn->write_cb)(buffer_data(&b), buffer_size(&b) - 1, conn->write_cb_data);
+	if ((*conn->write_cb)(buffer_data(&b), buffer_size(&b) - 1, conn->write_cb_data) < 0)
+		ret = JRPC_ERR_INTERNAL_ERROR;
 	connection_unlock(conn);
 
-	if (ret < 0)
-		ret = JRPC_ERR_INTERNAL_ERROR;
 end:
 	buffer_destroy(&b);
 
@@ -236,9 +231,14 @@ int connection_receive(struct jrpc_connection *conn, json_t **p_obj)
 	ssize_t n_read, i;
 	char buffer[DEFAULT_INPUT_BUFFER_SIZE];
 
+	assert(conn->read_cb != NULL);
+
 	n_read = (*conn->read_cb)(buffer, sizeof(buffer), conn->read_cb_data);
-	if (n_read <= 0)
+	if (n_read < 0)
 		return JRPC_ERR_INTERNAL_ERROR;
+
+	if (n_read == 0)
+		return JRPC_EOF;
 
 #ifdef DEBUG
 	fprintf(stderr, "received buffer: %s\n", buffer);

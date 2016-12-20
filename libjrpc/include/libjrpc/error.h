@@ -30,6 +30,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 enum jrpc_status {
 	JRPC_OK = 0,
+	JRPC_EOF = 1,
+
 	JRPC_ERR_PARSE_ERROR = -32700,               /* Parse error Invalid JSON was received by the server. An error
 							occurred on the server while parsing the JSON text. */
 	JRPC_ERR_INVALID_REQUEST = -32600,           /* The JSON sent is not a valid Request object. */

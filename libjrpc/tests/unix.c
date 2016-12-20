@@ -127,12 +127,12 @@ ssize_t unix_fd_write_cb(const char *buffer, size_t size, void *data)
 {
 	int fd = *(int *)data;
 
-	return write(fd, buffer, size);
+	return send(fd, buffer, size, MSG_EOR);
 }
 
 ssize_t unix_fd_read_cb(char *buffer, size_t size, void *data)
 {
 	int fd = *(int *)data;
 
-	return read(fd, buffer, size);
+	return recv(fd, buffer, size, 0);
 }
