@@ -93,6 +93,27 @@ static int test_add(struct jrpc_connection *conn, int count)
 	return ret;
 }
 
+static int test_notify(struct jrpc_connection *conn, const char *whot)
+{
+	struct notify_action action;
+	json_t *j_action;
+	int ret;
+
+	action.whot = whot;
+
+	if ((ret = JRPC_STRUCT2JSON(notify_action, &action, &j_action)))
+		return ret;
+
+	return jrpc_notify(conn, "notify", j_action);
+}
+
+static int do_notify_method(json_t *params, json_t **result, void *connection_data)
+{
+	fprintf(stderr, "I have been notified\n");
+
+	return JRPC_OK;
+}
+
 static void client_error_handler(struct jrpc_connection *conn, size_t id, int code, const char *message, json_t *data)
 {
 	if (JRPC_ERR_IS_METHOD_ERROR(code))
@@ -103,6 +124,7 @@ static void client_error_handler(struct jrpc_connection *conn, size_t id, int co
 
 int main(int argc, char **argv)
 {
+	struct jrpc_mapper *client_mapper;
 	struct jrpc_connection *conn;
 	int client_sock;
 	int *p_client_sock;
@@ -115,7 +137,10 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	conn = jrpc_connection_new(NULL, NULL);
+	client_mapper = jrpc_mapper_new();
+	jrpc_mapper_add(client_mapper, "do_notify", do_notify_method);
+
+	conn = jrpc_connection_new(client_mapper, NULL);
 
 	p_client_sock = malloc(sizeof(int));
 	*p_client_sock = client_sock;
@@ -130,6 +155,9 @@ int main(int argc, char **argv)
 	test_call(conn, "div", 9, 0);
 	test_call(conn, "sqrt", 4761, 0);
 	test_call(conn, "sqrt", -9, 0);
+	test_notify(conn, "start");
+	test_notify(conn, "stop");
+	test_notify(conn, "foo");
 
 	while((ret = jrpc_process(conn)) != JRPC_EOF)
 		;

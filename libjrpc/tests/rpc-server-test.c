@@ -15,9 +15,13 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
+#ifdef HAVE_PTHREAD
+#include <pthread.h>
+#endif
 
 #define ERR_DIVIDE_BY_ZERO  ((unsigned char)1)
 #define ERR_SQRT_OF_NEGATIVE  ((unsigned char)2)
+#define ERR_INVALID_ACTION  ((unsigned char)3)
 
 static int op_add(int *p_res, int op1, int op2)
 {
@@ -86,6 +90,53 @@ static int sqrt_method(json_t *params, json_t **result, void *connection_data)
 	return operator_method(params, result, op_sqrt);
 }
 
+static struct jrpc_connection *client_connection;
+
+static pthread_t notify_thread;
+
+static void *notify_thread_fun(void *arg)
+{
+	while(1) {
+		jrpc_notify(client_connection, "do_notify", NULL);
+		sleep(2);
+	}
+
+	return NULL;
+}
+
+
+static void notify_start(void)
+{
+	if (pthread_create(&notify_thread, NULL, notify_thread_fun, NULL))
+		perror("pthread_create");
+
+	fprintf(stderr, "notifications started\n");
+}
+
+static void notify_stop(void)
+{
+	fprintf(stderr, "notifications stopped\n");
+}
+
+static int notify_method(json_t *params, json_t **result, void *connection_data)
+{
+	struct notify_action *action;
+	int ret;
+
+	if ((ret = JRPC_JSON2STRUCT(notify_action, params, &action)))
+		return ret;
+
+	if (!strcmp(action->whot, "start"))
+		notify_start();
+	else if (!strcmp(action->whot, "stop"))
+		notify_stop();
+	else
+		return ERR_INVALID_ACTION;
+
+	return JRPC_OK;
+}
+
+
 int main(int argc, char **argv)
 {
 	struct jrpc_mapper *server_mapper;
@@ -102,9 +153,11 @@ int main(int argc, char **argv)
 	jrpc_mapper_add(server_mapper, "add", add_method);
 	jrpc_mapper_add(server_mapper, "div", div_method);
 	jrpc_mapper_add(server_mapper, "sqrt", sqrt_method);
+	jrpc_mapper_add(server_mapper, "notify", notify_method);
 
 	jrpc_mapper_add_error_message(server_mapper, ERR_DIVIDE_BY_ZERO, "divide by zero");
 	jrpc_mapper_add_error_message(server_mapper, ERR_SQRT_OF_NEGATIVE, "square root of negative number");
+	jrpc_mapper_add_error_message(server_mapper, ERR_INVALID_ACTION, "invalid notification action");
 
 	while (1) {
 		int client_sock, ret;
@@ -123,6 +176,8 @@ int main(int argc, char **argv)
 		*p_client_sock = client_sock;
 
 		conn = jrpc_connection_new(server_mapper, NULL);
+
+		client_connection = conn;
 
 		jrpc_connection_set_read_cb(conn, unix_fd_read_cb, p_client_sock);
 		jrpc_connection_set_write_cb(conn, unix_fd_write_cb, p_client_sock);

@@ -28,6 +28,10 @@ struct operands {
 	struct cplx **v_result;
 };
 
+struct notify_action {
+	const char *whot;
+};
+
 #define MARSHALL_DECLARATIONS
 #include "test-marshall.h"
 
