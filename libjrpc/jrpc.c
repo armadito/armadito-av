@@ -190,7 +190,7 @@ static int connection_process_request(struct jrpc_connection *conn, struct rpc_o
 		if (error_message == NULL)
 			error_message = "method returned an unknow error";
 
-		ret = JRPC_ERR_METHOD_ERROR + (mth_ret & 0xff);
+		ret = JRPC_ERR_METHOD_TO_CODE(mth_ret);
 
 		connection_send(conn, make_json_error_obj(ret, error_message, NULL, id));
 

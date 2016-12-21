@@ -52,7 +52,12 @@ enum jrpc_status {
 	JRPC_ERR_INVALID_RESPONSE_ID = -32089,       /* Response id is not associated with a callback */
 
 	/* -30000 to (-30000 + 256) reserved for called method errors */
-	JRPC_ERR_METHOD_ERROR = -30000,
+	JRPC_ERR_METHOD_ERROR = -30000,              /* Base value for method specific errors */
 };
+
+#define JRPC_ERR_IS_METHOD_ERROR(C) (JRPC_ERR_METHOD_ERROR < (C) && (C) < JRPC_ERR_METHOD_ERROR + 256)
+
+#define JRPC_ERR_METHOD_TO_CODE(E) (JRPC_ERR_METHOD_ERROR + ((E) & 0xff))
+#define JRPC_ERR_CODE_TO_METHOD(C) (((C) - JRPC_ERR_METHOD_ERROR) & 0xff)
 
 #endif

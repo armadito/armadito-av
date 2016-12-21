@@ -95,6 +95,9 @@ static int test_add(struct jrpc_connection *conn, int count)
 
 static void client_error_handler(struct jrpc_connection *conn, size_t id, int code, const char *message, json_t *data)
 {
+	if (JRPC_ERR_IS_METHOD_ERROR(code))
+		code = JRPC_ERR_CODE_TO_METHOD(code);
+
 	fprintf(stderr, "error handler: id %ld code %d message \"%s\"\n", id, code, message);
 }
 
