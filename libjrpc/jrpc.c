@@ -26,7 +26,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <string.h>
 
-static json_t *make_json_call_obj(const char *method, json_t *params, size_t id)
+static json_t *make_call_obj(const char *method, json_t *params, size_t id)
 {
 	json_t *obj;
 
@@ -58,7 +58,7 @@ int jrpc_call(struct jrpc_connection *conn, const char *method, json_t *params, 
 #ifdef DEBUG
 	fprintf(stderr, "call: method %s id %ld\n", method, id);
 #endif
-	call = make_json_call_obj(method, params, id);
+	call = make_call_obj(method, params, id);
 
 	ret = connection_send(conn, call);
 
@@ -98,29 +98,42 @@ static int json_rpc_unpack(json_t *j_obj, struct rpc_obj *r_obj)
 {
 	const char *version, *method, *message = NULL;
 	size_t id = 0;
-	json_t *params = NULL, *result = NULL, *error = NULL, *data = NULL;
+	json_t *j_method = NULL, *j_id, *params = NULL, *result = NULL, *error = NULL, *data = NULL;
 	int code;
 
-	if (json_unpack(j_obj, "{s:s, s:s, s?o, s?i}", "jsonrpc", &version, "method", &method, "params", &params,  "id", &id) == 0
-		&& !strcmp(version, "2.0")) {
-		r_obj->type = REQUEST;
-		r_obj->u.request.method = strdup(method);
-		r_obj->u.request.id = id;
-		r_obj->u.request.params = params;
+	/* does JSON object contain a "method"? if yes, it is a request */
+	j_method = json_object_get(j_obj, "method");
+	if (j_method != NULL && json_is_string(j_method)) {
+		if (json_unpack(j_obj, "{s:s, s:s, s?o, s?i}", "jsonrpc", &version, "method", &method, "params", &params,  "id", &id) == 0
+			&& !strcmp(version, "2.0")) {
+			r_obj->type = REQUEST;
+			r_obj->u.request.method = strdup(method);
+			r_obj->u.request.id = id;
+			r_obj->u.request.params = params;
 
-		return JRPC_OK;
+			return JRPC_OK;
+		} else
+			return JRPC_ERR_INVALID_REQUEST;
 	}
 
-	if (json_unpack(j_obj, "{s:s, s?o, s?o, s:i}", "jsonrpc", &version, "result", &result, "error", &error,  "id", &id) != 0
+	j_id = json_object_get(j_obj, "id");
+	if (j_id != NULL && json_is_integer(j_id))
+		id = json_integer_value(j_id);
+	else if (j_id != NULL && json_is_null(j_id))
+		id = 0;
+	else
+		return JRPC_ERR_INVALID_RESPONSE;
+
+	if (json_unpack(j_obj, "{s:s, s?o, s?o}", "jsonrpc", &version, "result", &result, "error", &error) != 0
 		|| strcmp(version, "2.0") != 0)
-		return JRPC_ERR_INVALID_REQUEST;
+		return JRPC_ERR_INVALID_RESPONSE;
 
 	if (error && result || !error && !result)
-		return JRPC_ERR_INVALID_REQUEST;
+		return JRPC_ERR_INVALID_RESPONSE;
 
 	if (error != NULL) {
 		if (json_unpack(error, "{s:i, s:s, s?o}", "code", &code, "message", &message, "data", &data) != 0)
-			return JRPC_ERR_INVALID_REQUEST;
+			return JRPC_ERR_INVALID_RESPONSE;
 
 		r_obj->type = ERROR_RESPONSE;
 		r_obj->u.error_response.id = id;
@@ -136,12 +149,12 @@ static int json_rpc_unpack(json_t *j_obj, struct rpc_obj *r_obj)
 	return JRPC_OK;
 }
 
-static json_t *make_json_result_obj(json_t *result, size_t id)
+static json_t *make_result_obj(json_t *result, size_t id)
 {
 	return json_pack("{s:s, s:o, s:I}", "jsonrpc", "2.0", "result", result, "id", (json_int_t)id);
 }
 
-static json_t *make_json_error_obj(int code, const char *message, json_t *data, size_t id)
+static json_t *make_error_obj(int code, const char *message, json_t *data, size_t id)
 {
 	json_t *j_err, *j_id;
 
@@ -174,7 +187,7 @@ static int connection_process_request(struct jrpc_connection *conn, struct rpc_o
 	method_cb = jrpc_mapper_find(connection_get_mapper(conn), method);
 	if (method_cb == NULL) {
 		ret = JRPC_ERR_METHOD_NOT_FOUND;
-		connection_send(conn, make_json_error_obj(ret, "method was not found", NULL, id));
+		connection_send(conn, make_error_obj(ret, "method was not found", NULL, id));
 		return ret;
 	}
 
@@ -192,14 +205,14 @@ static int connection_process_request(struct jrpc_connection *conn, struct rpc_o
 
 		ret = JRPC_ERR_METHOD_TO_CODE(mth_ret);
 
-		connection_send(conn, make_json_error_obj(ret, error_message, NULL, id));
+		connection_send(conn, make_error_obj(ret, error_message, NULL, id));
 
 		return ret;
 	}
 
 	/* was it a notification, i.e. id == 0? if yes, no result to send back */
 	if (id != 0)
-		connection_send(conn, make_json_result_obj(result, id));
+		connection_send(conn, make_result_obj(result, id));
 
 	return JRPC_OK;
 }
@@ -252,8 +265,11 @@ int jrpc_process(struct jrpc_connection *conn)
 	if ((ret = connection_receive(conn, &j_obj)))
 		return ret;
 
-	if (json_rpc_unpack(j_obj, &r_obj))
-		return JRPC_ERR_INVALID_REQUEST;
+	if ((ret = json_rpc_unpack(j_obj, &r_obj))) {
+		if (ret == JRPC_ERR_INVALID_REQUEST)
+			connection_send(conn, make_error_obj(ret, "invalid request", NULL, 0));
+		return ret;
+	}
 
 	switch(r_obj.type) {
 	case REQUEST:
