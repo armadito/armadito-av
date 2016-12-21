@@ -43,6 +43,8 @@ typedef int (*jrpc_method_t)(json_t *params, json_t **result, void *connection_d
 
 int jrpc_mapper_add(struct jrpc_mapper *mapper, const char *method, jrpc_method_t method_cb);
 
+int jrpc_mapper_add_error_message(struct jrpc_mapper *mapper, unsigned char error_code, const char *error_message);
+
 /*
  * RPC connection
  * handles

@@ -165,7 +165,7 @@ static int connection_process_request(struct jrpc_connection *conn, struct rpc_o
 	size_t id = r_obj->u.request.id;
 	json_t *params = r_obj->u.request.params;
 	json_t *result = NULL;
-	int ret;
+	int ret, mth_ret;
 
 #ifdef DEBUG
 	fprintf(stderr, "processing request: method %s id %ld\n", method, id);
@@ -178,12 +178,22 @@ static int connection_process_request(struct jrpc_connection *conn, struct rpc_o
 		return ret;
 	}
 
-	ret = (*method_cb)(params, &result, jrpc_connection_get_data(conn));
-	if (ret) {
+	mth_ret = (*method_cb)(params, &result, jrpc_connection_get_data(conn));
+	if (mth_ret) {
+		const char *error_message;
 #ifdef DEBUG
-		fprintf(stderr, "processing request: method %s returned error\n", method);
+		fprintf(stderr, "processing request: method %s returned error %d\n", method, mth_ret);
 #endif
-		connection_send(conn, make_json_error_obj(ret, "method returned an error", NULL, id));
+
+		error_message = jrpc_mapper_get_error_message(connection_get_mapper(conn), mth_ret);
+
+		if (error_message == NULL)
+			error_message = "method returned an unknow error";
+
+		ret = JRPC_ERR_METHOD_ERROR + (mth_ret & 0xff);
+
+		connection_send(conn, make_json_error_obj(ret, error_message, NULL, id));
+
 		return ret;
 	}
 

@@ -26,4 +26,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 jrpc_method_t jrpc_mapper_find(struct jrpc_mapper *mapper, const char *method);
 
+const char *jrpc_mapper_get_error_message(struct jrpc_mapper *mapper, unsigned char error_code);
+
 #endif

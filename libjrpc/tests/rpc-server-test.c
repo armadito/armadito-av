@@ -6,6 +6,7 @@
 
 #include <fcntl.h>
 #include <jansson.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,6 +15,9 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
+
+#define ERR_DIVIDE_BY_ZERO  ((unsigned char)1)
+#define ERR_SQRT_OF_NEGATIVE  ((unsigned char)2)
 
 static int op_add(int *p_res, int op1, int op2)
 {
@@ -25,9 +29,19 @@ static int op_add(int *p_res, int op1, int op2)
 static int op_div(int *p_res, int op1, int op2)
 {
 	if (op2 == 0)
-		return JRPC_ERR_METHOD_CALL_ERROR;
+		return ERR_DIVIDE_BY_ZERO;
 
 	*p_res = op1 / op2;
+
+	return JRPC_OK;
+}
+
+static int op_sqrt(int *p_res, int op1, int op2)
+{
+	if (op1 < 0)
+		return ERR_SQRT_OF_NEGATIVE;
+
+	*p_res = (int)sqrt(op1);
 
 	return JRPC_OK;
 }
@@ -67,6 +81,11 @@ static int div_method(json_t *params, json_t **result, void *connection_data)
 	return operator_method(params, result, op_div);
 }
 
+static int sqrt_method(json_t *params, json_t **result, void *connection_data)
+{
+	return operator_method(params, result, op_sqrt);
+}
+
 int main(int argc, char **argv)
 {
 	struct jrpc_mapper *server_mapper;
@@ -82,6 +101,10 @@ int main(int argc, char **argv)
 	server_mapper = jrpc_mapper_new();
 	jrpc_mapper_add(server_mapper, "add", add_method);
 	jrpc_mapper_add(server_mapper, "div", div_method);
+	jrpc_mapper_add(server_mapper, "sqrt", sqrt_method);
+
+	jrpc_mapper_add_error_message(server_mapper, ERR_DIVIDE_BY_ZERO, "divide by zero");
+	jrpc_mapper_add_error_message(server_mapper, ERR_SQRT_OF_NEGATIVE, "square root of negative number");
 
 	while (1) {
 		int client_sock, ret;
@@ -104,11 +127,10 @@ int main(int argc, char **argv)
 		jrpc_connection_set_read_cb(conn, unix_fd_read_cb, p_client_sock);
 		jrpc_connection_set_write_cb(conn, unix_fd_write_cb, p_client_sock);
 
-		while((ret = jrpc_process(conn)) == JRPC_OK)
+		while((ret = jrpc_process(conn)) != JRPC_EOF)
 			;
 
-		if (ret != JRPC_EOF)
-			return ret;
+		fprintf(stderr, "disconnected %s\n", addr.sun_path);
 	}
 
 	return 0;

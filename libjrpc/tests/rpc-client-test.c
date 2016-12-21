@@ -95,7 +95,7 @@ static int test_add(struct jrpc_connection *conn, int count)
 
 static void client_error_handler(struct jrpc_connection *conn, size_t id, int code, const char *message, json_t *data)
 {
-	fprintf(stderr, "received error: id %ld code %d message \"%s\"\n", id, code, message);
+	fprintf(stderr, "error handler: id %ld code %d message \"%s\"\n", id, code, message);
 }
 
 int main(int argc, char **argv)
@@ -125,12 +125,11 @@ int main(int argc, char **argv)
 	test_add(conn, 10);
 	test_call(conn, "div", 9, 3);
 	test_call(conn, "div", 9, 0);
+	test_call(conn, "sqrt", 4761, 0);
+	test_call(conn, "sqrt", -9, 0);
 
-	while((ret = jrpc_process(conn)) == JRPC_OK)
+	while((ret = jrpc_process(conn)) != JRPC_EOF)
 		;
-
-	if (ret != JRPC_EOF)
-		return ret;
 
 	return 0;
 }
