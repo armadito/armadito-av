@@ -42,6 +42,8 @@ typedef void (*free_cb_t)(void *p);
 /* must add key and value destroy callbacks */
 struct hash_table *hash_table_new(enum hash_table_type t, free_cb_t key_free_cb, free_cb_t value_free_cb);
 
+void hash_table_free(struct hash_table *ht);
+
 /* returns 1 if key has been inserted, 0 if not */
 int hash_table_insert(struct hash_table *ht, void *key, void *value);
 

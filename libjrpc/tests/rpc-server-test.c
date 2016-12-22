@@ -200,6 +200,7 @@ int main(int argc, char **argv)
 			;
 
 		client_connection = NULL;
+		jrpc_connection_free(conn);
 
 		fprintf(stderr, "disconnected %s\n", addr.sun_path);
 	}

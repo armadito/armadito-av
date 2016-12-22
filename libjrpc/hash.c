@@ -109,6 +109,25 @@ struct hash_table *hash_table_new(enum hash_table_type t, free_cb_t key_free_cb,
 	return ht;
 }
 
+void hash_table_free(struct hash_table *ht)
+{
+	size_t i;
+	struct hash_table_entry *p;
+
+	for (i = 0, p = ht->table; i < ht->size; i++, p++) {
+		if (p->state == EMPTY || p->state == REMOVED)
+			continue;
+
+		if (ht->key_free_cb != NULL && p->key != NULL)
+			(*ht->key_free_cb)(p->key);
+		if (ht->value_free_cb != NULL && p->value != NULL)
+			(*ht->value_free_cb)(p->value);
+	}
+
+	free(ht->table);
+	free(ht);
+}
+
 void hash_table_print(struct hash_table *ht)
 {
 	size_t i;

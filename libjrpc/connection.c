@@ -76,6 +76,11 @@ static void connection_lock_init(struct jrpc_connection *conn)
 {
 	pthread_mutex_init(&conn->connection_mutex, NULL);
 }
+
+static void connection_lock_destroy(struct jrpc_connection *conn)
+{
+	pthread_mutex_destroy(&conn->connection_mutex);
+}
 #else
 static void connection_lock(struct jrpc_connection *conn)
 {
@@ -86,6 +91,10 @@ static void connection_unlock(struct jrpc_connection *conn)
 }
 
 static void connection_lock_init(struct jrpc_connection *conn)
+{
+}
+
+static void connection_lock_destroy(struct jrpc_connection *conn)
 {
 }
 #endif
@@ -142,6 +151,13 @@ void jrpc_connection_set_error_handler(struct jrpc_connection *conn, jrpc_error_
 jrpc_error_handler_t jrpc_connection_get_error_handler(struct jrpc_connection *conn)
 {
 	return conn->error_handler;
+}
+
+void jrpc_connection_free(struct jrpc_connection *conn)
+{
+	hash_table_free(conn->response_table);
+	connection_lock_destroy(conn);
+	free(conn);
 }
 
 size_t connection_register_callback(struct jrpc_connection *conn, jrpc_cb_t cb, void *user_data)
