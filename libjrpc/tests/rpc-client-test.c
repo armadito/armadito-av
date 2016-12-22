@@ -67,7 +67,7 @@ static void simple_cb(json_t *result, void *user_data)
 
 static int test_call(struct jrpc_connection *conn, const char *method, int op1, int op2)
 {
-	struct operands *s_op = operands_new();
+	struct operands *s_op = operands_new(1);
 	json_t *j_op;
 	int ret;
 

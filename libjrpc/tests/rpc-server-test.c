@@ -55,7 +55,7 @@ static int op_sqrt(int *p_res, int op1, int op2)
 static int operator_method(json_t *params, json_t **result, int (*operator)(int *, int, int))
 {
 	struct operands *s_op;
-	struct operands *s_res = operands_new();
+	struct operands *s_res = operands_new(1);
 	int ret;
 
 	if ((ret = JRPC_JSON2STRUCT(operands, params, &s_op)))

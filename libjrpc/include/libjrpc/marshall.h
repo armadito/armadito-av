@@ -33,7 +33,7 @@ typedef int (*jrpc_marshall_cb_t)(void *p, json_t **p_obj);
 
 int jrpc_marshall_array(void **array, json_t **p_obj, jrpc_marshall_cb_t marshall_elem_cb);
 
-int jrpc_unmarshall_field(json_t *obj, const char *name, json_type expected_json_type, json_t **p_field);
+int jrpc_unmarshall_field(json_t *obj, const char *name, json_type expected_json_type, int allow_null, json_t **p_field);
 
 typedef int (*jrpc_unmarshall_cb_t)(json_t *obj, void **pp);
 
@@ -94,8 +94,13 @@ int jrpc_marshall_struct_##S(void *p, json_t **p_obj)	\
 {							\
 	int ret = JRPC_OK;				\
 	struct S *s = (struct S *)p;			\
-	json_t *obj = json_object();			\
-	json_t *field;
+	json_t *obj, *field;				\
+							\
+	if (s == NULL) {				\
+		*p_obj = json_null();			\
+		return JRPC_OK;				\
+	}						\
+	obj = json_object();
 
 #define JRPC_DEFINE_FIELD_INT(INT_TYPE, NAME)	\
 	field = json_integer(s->NAME);		\
@@ -182,33 +187,40 @@ int jrpc_unmarshall_enum_##S(json_t *obj, enum S *p_val)	\
 int jrpc_unmarshall_struct_##S(json_t *obj, void **pp)	\
 {							\
 	int ret = JRPC_OK;				\
-	struct S *s = malloc(sizeof(struct S));		\
-	json_t *field;
+	struct S *s;					\
+	json_t *field;					\
+							\
+	if (json_is_null(obj)) {			\
+		*pp = NULL;				\
+		return JRPC_OK;				\
+	}						\
+							\
+	s = malloc(sizeof(struct S));
 
 #define JRPC_DEFINE_FIELD_INT(INT_TYPE, NAME)				\
-	if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_INTEGER, &field))) \
+	if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_INTEGER, 0, &field))) \
 		goto error_end;						\
 	s->NAME = (INT_TYPE)json_integer_value(field);
 
 #define JRPC_DEFINE_FIELD_STRING(NAME)					\
-	if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_STRING, &field))) \
+	if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_STRING, 0, &field))) \
 		goto error_end;						\
 	s->NAME = strdup(json_string_value(field));
 
 #define JRPC_DEFINE_FIELD_ENUM(ENUM_TYPE, NAME)				\
-	if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_STRING, &field))) \
+	if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_STRING, 0, &field))) \
 		goto error_end;						\
 	if ((ret = jrpc_unmarshall_enum_##ENUM_TYPE(field, &(s->NAME))) != 0) \
 		goto error_end;
 
 #define JRPC_DEFINE_FIELD_ARRAY(ELEM_TYPE, NAME)			\
-	if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_ARRAY, &field))) \
+	if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_ARRAY, 1, &field))) \
 		goto error_end;						\
 	if ((ret = jrpc_unmarshall_array(field, (void ***)&(s->NAME), jrpc_unmarshall_struct_##ELEM_TYPE))) \
 		goto error_end;						\
 
 #define JRPC_DEFINE_FIELD_STRUCT(STRUCT_TYPE, NAME)			\
-	if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_OBJECT, &field))) \
+	if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_OBJECT, 1, &field))) \
 		goto error_end;						\
 	if ((ret = jrpc_unmarshall_struct_##STRUCT_TYPE(field, (void **)&(s->NAME)))) \
 		goto error_end;

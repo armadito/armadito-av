@@ -36,6 +36,11 @@ int jrpc_marshall_array(void **array, json_t **p_obj, jrpc_marshall_cb_t marshal
 	void **p;
 	int ret = JRPC_OK;
 
+	if (array == NULL) {
+		*p_obj = json_null();
+		return JRPC_OK;
+	}
+
 	obj = json_array();
 
 	for(p = array; *p != NULL; p++) {
@@ -60,12 +65,15 @@ error_end:
  * Unmarshalling helper for fields
  *
  */
-int jrpc_unmarshall_field(json_t *obj, const char *name, json_type expected_json_type, json_t **p_field)
+int jrpc_unmarshall_field(json_t *obj, const char *name, json_type expected_json_type, int allow_null, json_t **p_field)
 {
 	*p_field = json_object_get(obj, name);
 
 	if (*p_field == NULL)
 		return JRPC_ERR_MARSHALL_FIELD_NOT_FOUND;
+
+	if (allow_null && json_is_null(*p_field))
+		return JRPC_OK;
 
 	if (json_typeof(*p_field) != expected_json_type) {
 		*p_field = NULL;
@@ -86,6 +94,11 @@ int jrpc_unmarshall_array(json_t *obj, void ***p_array, jrpc_unmarshall_cb_t unm
 	json_t *elem;
 	void **array, **p;
 	int ret = JRPC_OK;
+
+	if (json_is_null(obj)) {
+		*p_array = NULL;
+		return JRPC_OK;
+	}
 
 	size = json_array_size(obj);
 

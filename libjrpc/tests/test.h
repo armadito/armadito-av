@@ -38,6 +38,6 @@ struct notify_action {
 #define UNMARSHALL_DECLARATIONS
 #include "test-marshall.h"
 
-struct operands *operands_new(void);
+struct operands *operands_new(int allow_null);
 
 #endif
