@@ -156,7 +156,6 @@ int main(int argc, char **argv)
 	test_call(conn, "sqrt", 4761, 0);
 	test_call(conn, "sqrt", -9, 0);
 	test_notify(conn, "start");
-	test_notify(conn, "stop");
 	test_notify(conn, "foo");
 
 	while((ret = jrpc_process(conn)) != JRPC_EOF)

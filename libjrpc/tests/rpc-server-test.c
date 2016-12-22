@@ -1,3 +1,5 @@
+#include "armadito-config.h"
+
 #include <libarmadito/armadito.h>
 #include <libjrpc/jrpc.h>
 
@@ -92,13 +94,18 @@ static int sqrt_method(json_t *params, json_t **result, void *connection_data)
 
 static struct jrpc_connection *client_connection;
 
-static pthread_t notify_thread;
+static pthread_t notify_thread_1;
+static pthread_t notify_thread_2;
 
 static void *notify_thread_fun(void *arg)
 {
+	unsigned long s = (unsigned long)arg;
+
 	while(1) {
+		if (client_connection == NULL)
+			break;
 		jrpc_notify(client_connection, "do_notify", NULL);
-		sleep(2);
+		sleep(s);
 	}
 
 	return NULL;
@@ -107,7 +114,9 @@ static void *notify_thread_fun(void *arg)
 
 static void notify_start(void)
 {
-	if (pthread_create(&notify_thread, NULL, notify_thread_fun, NULL))
+	if (pthread_create(&notify_thread_1, NULL, notify_thread_fun, (void *)2))
+		perror("pthread_create");
+	if (pthread_create(&notify_thread_2, NULL, notify_thread_fun, (void *)3))
 		perror("pthread_create");
 
 	fprintf(stderr, "notifications started\n");
@@ -115,6 +124,11 @@ static void notify_start(void)
 
 static void notify_stop(void)
 {
+	if (pthread_cancel(notify_thread_1))
+		perror("pthread_cancel");
+	if (pthread_cancel(notify_thread_2))
+		perror("pthread_cancel");
+
 	fprintf(stderr, "notifications stopped\n");
 }
 
@@ -184,6 +198,8 @@ int main(int argc, char **argv)
 
 		while((ret = jrpc_process(conn)) != JRPC_EOF)
 			;
+
+		client_connection = NULL;
 
 		fprintf(stderr, "disconnected %s\n", addr.sun_path);
 	}
