@@ -14,7 +14,7 @@ AM_CPPFLAGS= \
 	-DLIBARMADITO_BASES_DIR='"$(localstatedir)/lib/armadito/bases"' \
 	-DLIBARMADITO_TMP_DIR='"$(localstatedir)/lib/armadito/tmp"' 
 
-libarmadito_la_CFLAGS=-I$(top_srcdir)/libmodule/include -I$(top_srcdir) 
+libarmadito_la_CFLAGS=-I$(top_srcdir) -I$(top_srcdir)/libmodule/include
 libarmadito_la_LIBADD= 
 
 libarmadito_la_CFLAGS+= @GLIB2_CFLAGS@
