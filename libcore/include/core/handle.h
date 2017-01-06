@@ -32,8 +32,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _LIBARMADITO_HANDLE_H_
 #define _LIBARMADITO_HANDLE_H_
 
-#include <libarmadito/error.h>
-#include <libarmadito/conf.h>
+#include <core/error.h>
+#include <core/conf.h>
 
 /**
  * \struct struct armadito

@@ -27,7 +27,7 @@ scan_p.h \
 status.c \
 status_p.h 
 
-libcore_a_CFLAGS=-I$(top_srcdir)/libmodule/include -I$(top_srcdir)/libcore/include -I$(top_srcdir)
+libcore_a_CFLAGS=-I$(top_srcdir) -I$(top_srcdir)/libmodule/include -I$(top_srcdir)/libcore/include
 #libcore_a_LIBADD= 
 
 libcore_a_CFLAGS+= @GLIB2_CFLAGS@
