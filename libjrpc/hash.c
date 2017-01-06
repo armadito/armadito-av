@@ -62,7 +62,6 @@ struct hash_table {
 #define EQUAL(HT, K1, K2) (*HT->equal_fun)(K1, K2)
 
 static uint32_t pjw32(const char *s);
-static uint32_t hfmult32(struct hash_table *ht, void *p);
 static uint32_t himult32(void *p);
 static uint64_t himult64(void *p);
 static uint32_t fmix32(void *p);
@@ -158,16 +157,6 @@ static uint32_t pjw32(const char *s)
 /*
  * Various hash functions
  */
-
-/* Multiplication Method pointer hash function */
-#define A (0.5 * (2.23606797749978969640 - 1))
-static uint32_t hfmult32(struct hash_table *ht, void *p)
-{
-	uintptr_t k = H_POINTER_TO_INT(p);
-	double x = fmod(k * A, 1.0);
-
-	return (uint32_t)(x * ht->size);
-}
 
 /* multiplier is a prime close to 2^32 x phi */
 static uint32_t himult32(void *p)
