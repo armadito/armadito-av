@@ -2,7 +2,7 @@ if COND_MAN
 OPT_MAN_DIR=man
 endif
 
-SUBDIRS=conf libmodule libcore libjrpc httpd $(OPT_MAN_DIR)
+SUBDIRS=conf libmodule libcore libjrpc httpd arch $(OPT_MAN_DIR)
 
 TAGDIRS=\
 $(top_srcdir)/arch \
