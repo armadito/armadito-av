@@ -21,6 +21,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #define _GNU_SOURCE
 #include <libarmadito/armadito.h>
+#include <libjrpc/jrpc.h>
+
 #include "armadito-config.h"
 
 #include "log.h"
@@ -52,6 +54,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 struct a6o_daemon_options {
 	int no_daemon;
+	const char *unix_path;
 	const char *s_log_level;
 	const char *pid_file;
 };
@@ -61,8 +64,8 @@ static struct option daemon_option_defs[] = {
 	{"version",   no_argument,        0, 'V'},
 	{"no-daemon", no_argument,        0, 'n'},
 	{"log-level", required_argument,  0, 'l'},
+	{"path", required_argument, 0, 'a'},
 	{"pidfile",   required_argument,  0, 'i'},
-	{"port",      required_argument,  0, 'p'},
 	{0, 0, 0, 0}
 };
 
@@ -85,6 +88,7 @@ static void usage(void)
 	fprintf(stderr, "  --log-level=LEVEL | -l LEVEL       set log level\n");
 	fprintf(stderr, "                                     log level can be: error, warning, info, debug\n");
 	fprintf(stderr, "                                     (default is: " DEFAULT_LOG_LEVEL "\n");
+	fprintf(stderr, "  --path=PATH | -a PATH              unix socket path (default is " DEFAULT_SOCKET_PATH ")\n");
 	fprintf(stderr, "  --pidfile=PATH | -i PATH           create PID file at specified location\n");
 	fprintf(stderr, "                                     (default is: " DEFAULT_PID_FILE ")\n");
 	fprintf(stderr, "\n");
@@ -103,13 +107,14 @@ static int check_log_level(const char *s_log_level)
 static void parse_options(int argc, char **argv, struct a6o_daemon_options *opts)
 {
 	opts->no_daemon = 0;
+	opts->unix_path = DEFAULT_SOCKET_PATH;
 	opts->s_log_level = DEFAULT_LOG_LEVEL;
 	opts->pid_file = DEFAULT_PID_FILE;
 
 	while (1) {
 		int c, option_index = 0;
 
-		c = getopt_long(argc, argv, "hVnl:i:p:", daemon_option_defs, &option_index);
+		c = getopt_long(argc, argv, "hVnl:a:i:p:", daemon_option_defs, &option_index);
 
 		if (c == -1)
 			break;
@@ -129,6 +134,9 @@ static void parse_options(int argc, char **argv, struct a6o_daemon_options *opts
 				usage();
 			opts->s_log_level = strdup(optarg);
 			break;
+		case 'a': /* path */
+			opts->unix_path = strdup(optarg);
+			break;
 		case 'i': /* pidfile */
 			opts->pid_file = strdup(optarg);
 			break;
@@ -140,7 +148,6 @@ static void parse_options(int argc, char **argv, struct a6o_daemon_options *opts
 		}
 	}
 
-	/* Print any remaining command line arguments (not options). */
 	if (optind < argc)
 		usage();
 }
@@ -163,6 +170,20 @@ static void create_pid_file(const char *pidfile)
 err:
 	a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR, "cannot create PID file %s (errno %d)", pidfile, errno);
 	exit(EXIT_FAILURE);
+}
+
+static int create_server_socket(const char *unix_path)
+{
+	int server_sock = -1;
+
+	server_sock = unix_server_listen(unix_path);
+
+	if (server_sock < 0) {
+		a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_ERROR, "cannot open server socket (errno %d)", errno);
+		exit(EXIT_FAILURE);
+	}
+
+	return server_sock;
 }
 
 static void load_conf(struct a6o_conf *conf)
@@ -228,8 +249,6 @@ static void load_conf_dir(struct a6o_conf *conf)
 	free((void *)conf_dir);
 }
 
-
-#if 0
 static void start_daemon(const char *progname, struct a6o_daemon_options *opts)
 {
 	struct a6o_conf *conf;
@@ -238,8 +257,6 @@ static void start_daemon(const char *progname, struct a6o_daemon_options *opts)
 	struct server *server;
 	a6o_error *error = NULL;
 	GMainLoop *loop;
-
-	loop = g_main_loop_new(NULL, FALSE);
 
 	log_init(opts->s_log_level, !opts->no_daemon);
 
@@ -261,9 +278,12 @@ static void start_daemon(const char *progname, struct a6o_daemon_options *opts)
 		exit(EXIT_FAILURE);
 	}
 
+	server_sock = create_server_socket(opts->unix_path);
+	server = server_new(armadito, server_sock);
+
+	loop = g_main_loop_new(NULL, FALSE);
 	g_main_loop_run(loop);
 }
-#endif
 
 #if 0
 static void start_http_server(const char *progname, struct a6o_daemon_options *opts)

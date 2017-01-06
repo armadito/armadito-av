@@ -37,7 +37,6 @@ struct server {
 	struct armadito *armadito;
 	GThreadPool *thread_pool;
 	GIOChannel *channel;
-	enum ipc_type ipc_type;
 };
 
 static void client_thread(gpointer data, gpointer user_data)
@@ -100,14 +99,13 @@ static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpo
 	return TRUE;
 }
 
-struct server *server_new(struct armadito *armadito, int server_sock, enum ipc_type ipc_type)
+struct server *server_new(struct armadito *armadito, int server_sock)
 {
 	struct server *server = (struct server *)malloc(sizeof(struct server));
 	assert(server != NULL);
 
 	server->armadito = armadito;
 	server->listen_sock = server_sock;
-	server->ipc_type = ipc_type;
 
 	server->thread_pool = g_thread_pool_new(client_thread, server, -1, FALSE, NULL);
 
