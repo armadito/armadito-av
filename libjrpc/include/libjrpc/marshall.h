@@ -35,9 +35,11 @@ int jrpc_marshall_array(void **array, json_t **p_obj, jrpc_marshall_cb_t marshal
 
 int jrpc_unmarshall_field(json_t *obj, const char *name, json_type expected_json_type, int allow_null, json_t **p_field);
 
-typedef int (*jrpc_unmarshall_cb_t)(json_t *obj, void **pp);
+typedef int (*jrpc_unmarshall_cb_t)(json_t *obj, void *p);
 
-int jrpc_unmarshall_array(json_t *obj, void ***p_array, jrpc_unmarshall_cb_t unmarshall_cb);
+int jrpc_unmarshall_array(json_t *obj, void ***p_array, jrpc_unmarshall_cb_t unmarshall_cb, size_t elem_size);
+
+int jrpc_unmarshall_struct_ptr(json_t *obj, void **pp, jrpc_unmarshall_cb_t unmarshall_cb, size_t struct_size);
 
 /*
  * Marshalling helper macro
@@ -47,7 +49,7 @@ int jrpc_unmarshall_array(json_t *obj, void ***p_array, jrpc_unmarshall_cb_t unm
 /*
  * Umarshalling helper macro
  */
-#define JRPC_JSON2STRUCT(S, O, P) jrpc_unmarshall_struct_##S(O, (void **)P)
+#define JRPC_JSON2STRUCT(S, O, P) jrpc_unmarshall_struct_ptr(O, (void **)P, jrpc_unmarshall_struct_##S, sizeof(struct S))
 
 #endif
 
@@ -59,16 +61,44 @@ int jrpc_unmarshall_array(json_t *obj, void ***p_array, jrpc_unmarshall_cb_t unm
  * This file is included before including the header containing the structures and enums definitions
  */
 
+/* declaration of a structure */
 #undef JRPC_STRUCT
-#undef JRPC_FIELD_INT
-#undef JRPC_FIELD_STRING
-#undef JRPC_FIELD_ENUM
-#undef JRPC_FIELD_ARRAY
-#undef JRPC_FIELD_STRUCT
-#undef JRPC_END_STRUCT
+/* a struct field of integer type, giving the int type */
+#undef JRPC_STRUCT_FIELD_INT
+/* a struct field of type const char * */
+#undef JRPC_STRUCT_FIELD_STRING
+/* a struct field of type enum, giving the enum type */
+#undef JRPC_STRUCT_FIELD_ENUM
+/* a struct field of type null-terminated array of pointers to structures, giving the pointed structure type */
+#undef JRPC_STRUCT_FIELD_PTR_ARRAY
+/* a struct field of type struct, giving the structure type */
+#undef JRPC_STRUCT_FIELD_STRUCT
+/* a struct field of type struct pointer, giving the structure type */
+#undef JRPC_STRUCT_FIELD_STRUCT_PTR
+/* a struct field of type union, giving the union type and the tag field in the structure */
+#undef JRPC_STRUCT_FIELD_UNION
+/* end of the structure declaration */
+#undef JRPC_STRUCT_END
+
+/* declaration of an enum */
 #undef JRPC_ENUM
+/* declaration of one enum value */
 #undef JRPC_ENUM_VALUE
-#undef JRPC_END_ENUM
+/* end of the enum declaration */
+#undef JRPC_ENUM_END
+
+/* declaration of an union */
+#undef JRPC_UNION
+/* a union field of integer type, giving the int type */
+#undef JRPC_UNION_FIELD_INT
+/* a union field of type const char * */
+#undef JRPC_UNION_FIELD_STRING
+/* a union field of type struct, giving the structure type */
+#undef JRPC_UNION_FIELD_STRUCT
+/* a union field of type null-terminated array of pointers to structures, giving the pointed structure type */
+#undef JRPC_STRUCT_FIELD_PTR_ARRAY
+/* end of the union declaration */
+#undef JRPC_UNION_END
 
 /*
  * This generates the declarations of marshalling functions
@@ -76,15 +106,33 @@ int jrpc_unmarshall_array(json_t *obj, void ***p_array, jrpc_unmarshall_cb_t unm
 #if defined(MARSHALL_DECLARATIONS)
 #undef MARSHALL_DECLARATIONS
 
-#define JRPC_STRUCT(S)  int jrpc_marshall_struct_##S(void *p, json_t **p_obj);
+#define JRPC_ENUM(E) int jrpc_marshall_enum_##E(int value, json_t **p_obj);
 
-#define JRPC_ENUM(S)  int jrpc_marshall_enum_##S(int value, json_t **p_obj);
+#define JRPC_STRUCT(S) int jrpc_marshall_struct_##S(void *p, json_t **p_obj);
+
+#define JRPC_UNION(U) int jrpc_marshall_union_##U(void *p, json_t **p_obj, int tag);
 
 /*
  * This generates the definitions of marshalling functions
  */
 #elif defined(MARSHALL_FUNCTIONS)
 #undef MARSHALL_FUNCTIONS
+
+/*
+ * Marshalling functions for enum types
+ */
+#define JRPC_ENUM(E)					\
+int jrpc_marshall_enum_##E(int value, json_t **p_obj)	\
+{							\
+	switch(value) {
+
+#define JRPC_ENUM_VALUE(NAME) case NAME: *p_obj = json_string(#NAME); return JRPC_OK;
+
+#define JRPC_ENUM_END					\
+	}						\
+	*p_obj = NULL;					\
+	return JRPC_ERR_MARSHALL_INVALID_ENUM_VALUE;	\
+}
 
 /*
  * Marshalling functions for struct types
@@ -102,30 +150,40 @@ int jrpc_marshall_struct_##S(void *p, json_t **p_obj)	\
 	}						\
 	obj = json_object();
 
-#define JRPC_FIELD_INT(INT_TYPE, NAME)		\
+#define JRPC_STRUCT_FIELD_INT(INT_TYPE, NAME)	\
 	field = json_integer(s->NAME);		\
 	json_object_set_new(obj, #NAME, field);
 
-#define JRPC_FIELD_STRING(NAME)			\
+#define JRPC_STRUCT_FIELD_STRING(NAME)		\
 	field = json_string(s->NAME);		\
 	json_object_set_new(obj, #NAME, field);
 
-#define JRPC_FIELD_ENUM(ENUM_TYPE, NAME)				\
+#define JRPC_STRUCT_FIELD_ENUM(ENUM_TYPE, NAME)				\
 	if ((ret = jrpc_marshall_enum_##ENUM_TYPE(s->NAME, &field)))	\
 		goto error_end;						\
 	json_object_set_new(obj, #NAME, field);
 
-#define JRPC_FIELD_ARRAY(ELEMENT_TYPE, NAME)				\
+#define JRPC_STRUCT_FIELD_PTR_ARRAY(ELEMENT_TYPE, NAME)				\
 	if ((ret = jrpc_marshall_array((void **)s->NAME, &field, jrpc_marshall_struct_##ELEMENT_TYPE))) \
 		goto error_end;						\
 	json_object_set_new(obj, #NAME, field);
 
-#define JRPC_FIELD_STRUCT(STRUCT_TYPE, NAME)				\
+#define JRPC_STRUCT_FIELD_STRUCT(STRUCT_TYPE, NAME)			\
+	if ((ret = jrpc_marshall_struct_##STRUCT_TYPE((void *)&s->NAME, &field))) \
+		goto error_end;						\
+	json_object_set_new(obj, #NAME, field);
+
+#define JRPC_STRUCT_FIELD_STRUCT_PTR(STRUCT_TYPE, NAME)			\
 	if ((ret = jrpc_marshall_struct_##STRUCT_TYPE((void *)s->NAME, &field))) \
 		goto error_end;						\
 	json_object_set_new(obj, #NAME, field);
 
-#define JRPC_END_STRUCT				\
+#define JRPC_STRUCT_FIELD_UNION(UNION_TYPE, NAME, TAG)			\
+	if ((ret = jrpc_marshall_union_##UNION_TYPE((void *)&s->NAME, &field, s->TAG))) \
+		goto error_end;						\
+	json_object_set_new(obj, #NAME, field);
+
+#define JRPC_STRUCT_END				\
 	*p_obj = obj;				\
 	return ret;				\
 error_end:					\
@@ -135,19 +193,49 @@ error_end:					\
 }
 
 /*
- * Marshalling functions for enum types
+ * Marshalling functions for union types
  */
-#define JRPC_ENUM(S)					\
-int jrpc_marshall_enum_##S(int value, json_t **p_obj)	\
-{							\
-	switch(value) {
+#define JRPC_UNION(U)					\
+int jrpc_marshall_union_##U(void *p, json_t **p_obj, int tag)	\
+{								\
+	int ret = JRPC_OK;					\
+	union U *u = (union U *)p;				\
+	json_t *obj, *field;					\
+								\
+	if (u == NULL) {					\
+		*p_obj = json_null();				\
+		return JRPC_OK;					\
+	}							\
+	obj = json_object();					\
+	switch(tag) {
 
-#define JRPC_ENUM_VALUE(NAME) case NAME: *p_obj = json_string(#NAME); return JRPC_OK;
+#define JRPC_UNION_FIELD_INT(INT_TYPE, NAME, TAG_VALUE) \
+	case TAG_VALUE:					\
+		field = json_integer(u->NAME);		\
+		json_object_set_new(obj, #NAME, field);	\
+		break;
 
-#define JRPC_END_ENUM					\
-	}						\
-	*p_obj = NULL;					\
-	return JRPC_ERR_MARSHALL_INVALID_ENUM_VALUE;	\
+#define JRPC_UNION_FIELD_STRING(NAME, TAG_VALUE)	\
+	case TAG_VALUE:					\
+		field = json_string(u->NAME);		\
+		json_object_set_new(obj, #NAME, field);	\
+		break;
+
+#define JRPC_UNION_FIELD_STRUCT(STRUCT_TYPE, NAME, TAG_VALUE)		\
+	case TAG_VALUE:							\
+		if ((ret = jrpc_marshall_struct_##STRUCT_TYPE((void *)&u->NAME, &field))) \
+			goto error_end;					\
+		json_object_set_new(obj, #NAME, field);			\
+		break;
+
+#define JRPC_UNION_END				\
+	} /* end switch */			\
+	*p_obj = obj;				\
+	return ret;				\
+error_end:					\
+	json_decref(obj);			\
+	*p_obj = NULL;				\
+	return ret;				\
 }
 
 /*
@@ -156,9 +244,11 @@ int jrpc_marshall_enum_##S(int value, json_t **p_obj)	\
 #elif defined(UNMARSHALL_DECLARATIONS)
 #undef UNMARSHALL_DECLARATIONS
 
-#define JRPC_STRUCT(S) int jrpc_unmarshall_struct_##S(json_t *obj, void **pp);
+#define JRPC_ENUM(E) int jrpc_unmarshall_enum_##E(json_t *obj, enum E *p_val);
 
-#define JRPC_ENUM(S) int jrpc_unmarshall_enum_##S(json_t *obj, enum S *p_val);
+#define JRPC_STRUCT(S) int jrpc_unmarshall_struct_##S(json_t *obj, void *p);
+
+#define JRPC_UNION(U) int jrpc_unmarshall_union_##U(json_t *obj, void *p, int tag);
 
 /*
  * This generates the definitions of unmarshalling functions
@@ -169,14 +259,14 @@ int jrpc_marshall_enum_##S(int value, json_t **p_obj)	\
 /*
  * Unmarshalling functions for enum types
  */
-#define JRPC_ENUM(S)						\
-int jrpc_unmarshall_enum_##S(json_t *obj, enum S *p_val)	\
+#define JRPC_ENUM(E)						\
+int jrpc_unmarshall_enum_##E(json_t *obj, enum E *p_val)	\
 {								\
 	const char *enum_string = json_string_value(obj);
 
 #define JRPC_ENUM_VALUE(NAME) if (!strcmp(enum_string, #NAME)) { *p_val = NAME; return JRPC_OK; }
 
-#define JRPC_END_ENUM					\
+#define JRPC_ENUM_END					\
 	return JRPC_ERR_MARSHALL_INVALID_ENUM_STRING;	\
 }
 
@@ -184,53 +274,90 @@ int jrpc_unmarshall_enum_##S(json_t *obj, enum S *p_val)	\
  * Unmarshalling functions for struct types
  */
 #define JRPC_STRUCT(S)					\
-int jrpc_unmarshall_struct_##S(json_t *obj, void **pp)	\
+int jrpc_unmarshall_struct_##S(json_t *obj, void *p)	\
 {							\
 	int ret = JRPC_OK;				\
-	struct S *s;					\
-	json_t *field;					\
-							\
-	if (json_is_null(obj)) {			\
-		*pp = NULL;				\
-		return JRPC_OK;				\
-	}						\
-							\
-	s = malloc(sizeof(struct S));
+	struct S *s = (struct S *)p;			\
+	json_t *field;
 
-#define JRPC_FIELD_INT(INT_TYPE, NAME)					\
+#define JRPC_STRUCT_FIELD_INT(INT_TYPE, NAME)				\
 	if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_INTEGER, 0, &field))) \
 		goto error_end;						\
 	s->NAME = (INT_TYPE)json_integer_value(field);
 
-#define JRPC_FIELD_STRING(NAME)						\
+#define JRPC_STRUCT_FIELD_STRING(NAME)					\
 	if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_STRING, 0, &field))) \
 		goto error_end;						\
 	s->NAME = strdup(json_string_value(field));
 
-#define JRPC_FIELD_ENUM(ENUM_TYPE, NAME)				\
+#define JRPC_STRUCT_FIELD_ENUM(ENUM_TYPE, NAME)				\
 	if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_STRING, 0, &field))) \
 		goto error_end;						\
 	if ((ret = jrpc_unmarshall_enum_##ENUM_TYPE(field, &(s->NAME))) != 0) \
 		goto error_end;
 
-#define JRPC_FIELD_ARRAY(ELEM_TYPE, NAME)				\
+#define JRPC_STRUCT_FIELD_PTR_ARRAY(ELEM_TYPE, NAME)			\
 	if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_ARRAY, 1, &field))) \
 		goto error_end;						\
-	if ((ret = jrpc_unmarshall_array(field, (void ***)&(s->NAME), jrpc_unmarshall_struct_##ELEM_TYPE))) \
+	if ((ret = jrpc_unmarshall_array(field, (void ***)&(s->NAME), jrpc_unmarshall_struct_##ELEM_TYPE, sizeof(struct ELEM_TYPE)))) \
 		goto error_end;
 
-#define JRPC_FIELD_STRUCT(STRUCT_TYPE, NAME)				\
+#define JRPC_STRUCT_FIELD_STRUCT(STRUCT_TYPE, NAME)			\
 	if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_OBJECT, 1, &field))) \
 		goto error_end;						\
-	if ((ret = jrpc_unmarshall_struct_##STRUCT_TYPE(field, (void **)&(s->NAME)))) \
+	if ((ret = jrpc_unmarshall_struct_##STRUCT_TYPE(field, (void *)&(s->NAME)))) \
 		goto error_end;
 
-#define JRPC_END_STRUCT				\
-	*pp = s;				\
-	return ret;				\
+#define JRPC_STRUCT_FIELD_STRUCT_PTR(STRUCT_TYPE, NAME)			\
+	if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_OBJECT, 1, &field))) \
+		goto error_end;						\
+	if ((ret = jrpc_unmarshall_struct_ptr(field, (void **)&(s->NAME), jrpc_unmarshall_struct_##S, sizeof(struct S))))	\
+		goto error_end;
+
+#define JRPC_STRUCT_FIELD_UNION(UNION_TYPE, NAME, TAG)
+
+#define JRPC_STRUCT_END				\
 error_end:					\
-	free(s);				\
-	*pp = NULL;				\
+	return ret;				\
+}
+
+/*
+ * Unmarshalling functions for union types
+ */
+#define JRPC_UNION(U)						\
+int jrpc_unmarshall_union_##U(json_t *obj, void *p, int tag)	\
+{								\
+	int ret = JRPC_OK;					\
+	union U *u = (union U *)p;				\
+	json_t *field;						\
+								\
+	switch(tag) {
+
+#define JRPC_UNION_FIELD_INT(INT_TYPE, NAME, TAG_VALUE)			\
+	case TAG_VALUE:							\
+		if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_INTEGER, 0, &field))) \
+			goto error_end;					\
+		u->NAME = (INT_TYPE)json_integer_value(field);		\
+		break;
+
+#define JRPC_UNION_FIELD_STRING(NAME, TAG_VALUE)			\
+	case TAG_VALUE:							\
+		if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_INTEGER, 0, &field))) \
+			goto error_end;					\
+		u->NAME = strdup(json_string_value(field));		\
+		break;
+
+#define JRPC_UNION_FIELD_STRUCT(STRUCT_TYPE, NAME, TAG_VALUE)		\
+	case TAG_VALUE:							\
+		if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_OBJECT, 0, &field))) \
+			goto error_end;					\
+		if ((ret = jrpc_unmarshall_struct_##STRUCT_TYPE(field, (void *)&(u->NAME)))) \
+			goto error_end;					\
+		break;
+
+#define JRPC_UNION_END				\
+	} /* end switch */			\
+error_end:					\
 	return ret;				\
 }
 
@@ -239,30 +366,56 @@ error_end:					\
 #ifndef JRPC_STRUCT
 #define JRPC_STRUCT(S)
 #endif
-#ifndef JRPC_FIELD_INT
-#define JRPC_FIELD_INT(INT_TYPE, NAME)
+#ifndef JRPC_STRUCT_FIELD_INT
+#define JRPC_STRUCT_FIELD_INT(INT_TYPE, NAME)
 #endif
-#ifndef JRPC_FIELD_STRING
-#define JRPC_FIELD_STRING(NAME)
+#ifndef JRPC_STRUCT_FIELD_STRING
+#define JRPC_STRUCT_FIELD_STRING(NAME)
 #endif
-#ifndef JRPC_FIELD_ENUM
-#define JRPC_FIELD_ENUM(ENUM_TYPE, NAME)
+#ifndef JRPC_STRUCT_FIELD_ENUM
+#define JRPC_STRUCT_FIELD_ENUM(ENUM_TYPE, NAME)
 #endif
-#ifndef JRPC_FIELD_ARRAY
-#define JRPC_FIELD_ARRAY(ELEMENT_TYPE, NAME)
+#ifndef JRPC_STRUCT_FIELD_PTR_ARRAY
+#define JRPC_STRUCT_FIELD_PTR_ARRAY(ELEMENT_TYPE, NAME)
 #endif
-#ifndef JRPC_FIELD_STRUCT
-#define JRPC_FIELD_STRUCT(STRUCT_TYPE, NAME)
+#ifndef JRPC_STRUCT_FIELD_STRUCT
+#define JRPC_STRUCT_FIELD_STRUCT(STRUCT_TYPE, NAME)
 #endif
-#ifndef JRPC_END_STRUCT
-#define JRPC_END_STRUCT
+#ifndef JRPC_STRUCT_FIELD_STRUCT_PTR
+#define JRPC_STRUCT_FIELD_STRUCT_PTR(STRUCT_TYPE, NAME)
 #endif
+#ifndef JRPC_STRUCT_FIELD_UNION
+#define JRPC_STRUCT_FIELD_UNION(UNION_TYPE, NAME, TAG)
+#endif
+#ifndef JRPC_STRUCT_END
+#define JRPC_STRUCT_END
+#endif
+
 #ifndef JRPC_ENUM
 #define JRPC_ENUM(E)
 #endif
 #ifndef JRPC_ENUM_VALUE
 #define JRPC_ENUM_VALUE(NAME)
 #endif
-#ifndef JRPC_END_ENUM
-#define JRPC_END_ENUM
+#ifndef JRPC_ENUM_END
+#define JRPC_ENUM_END
+#endif
+
+#ifndef JRPC_UNION
+#define JRPC_UNION(U)
+#endif
+#ifndef JRPC_UNION_FIELD_INT
+#define JRPC_UNION_FIELD_INT(INT_TYPE, NAME, TAG_VALUE)
+#endif
+#ifndef JRPC_UNION_FIELD_STRING
+#define JRPC_UNION_FIELD_STRING(NAME, TAG_VALUE)
+#endif
+#ifndef JRPC_UNION_FIELD_STRUCT
+#define JRPC_UNION_FIELD_STRUCT(STRUCT_TYPE, NAME, TAG_VALUE)
+#endif
+#ifndef JRPC_UNION_FIELD_PTR_ARRAY
+#define JRPC_UNION_FIELD_PTR_ARRAY(ELEMENT_TYPE, NAME, TAG_VALUE)
+#endif
+#ifndef JRPC_UNION_END
+#define JRPC_UNION_END
 #endif

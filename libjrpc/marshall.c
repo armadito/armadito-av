@@ -88,7 +88,7 @@ int jrpc_unmarshall_field(json_t *obj, const char *name, json_type expected_json
  * Unmarshalling functions for array types
  *
  */
-int jrpc_unmarshall_array(json_t *obj, void ***p_array, jrpc_unmarshall_cb_t unmarshall_cb)
+int jrpc_unmarshall_array(json_t *obj, void ***p_array, jrpc_unmarshall_cb_t unmarshall_cb, size_t elem_size)
 {
 	size_t index, size;
 	json_t *elem;
@@ -106,8 +106,12 @@ int jrpc_unmarshall_array(json_t *obj, void ***p_array, jrpc_unmarshall_cb_t unm
 
 	p = array;
 	json_array_foreach(obj, index, elem) {
-		if ((ret = (*unmarshall_cb)(elem, p)))
+		*p = calloc(1, elem_size);
+		if ((ret = (*unmarshall_cb)(elem, *p))) {
+			free(*p);
+			*p = NULL;
 			goto error_end;
+		}
 		p++;
 	}
 
@@ -120,3 +124,30 @@ error_end:
 	return ret;
 }
 
+/*
+ *
+ * Unmarshalling functions for struct pointers
+ *
+ */
+int jrpc_unmarshall_struct_ptr(json_t *obj, void **pp, jrpc_unmarshall_cb_t unmarshall_cb, size_t struct_size)
+{
+	void *s;
+	int ret;
+
+	if (json_is_null(obj)) {
+		*pp = NULL;
+		return JRPC_OK;
+	}
+
+	s = malloc(struct_size);
+
+	if ((ret = (*unmarshall_cb)(obj, s))) {
+		free(s);
+		*pp = NULL;
+		return ret;
+	}
+
+	*pp = s;
+
+	return JRPC_OK;
+}

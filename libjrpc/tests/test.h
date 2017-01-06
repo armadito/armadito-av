@@ -28,6 +28,19 @@ struct operands {
 	struct cplx **v_result;
 };
 
+union u_operand {
+	int i_op;
+	struct cplx c_op;
+	struct cplx **v_op;
+};
+
+struct operands_with_union {
+	enum op_type opt;
+	union u_operand op1;
+	union u_operand op2;
+	union u_operand result;
+};
+
 struct notify_action {
 	const char *whot;
 };
