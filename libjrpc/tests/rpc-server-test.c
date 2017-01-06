@@ -196,7 +196,7 @@ int main(int argc, char **argv)
 		jrpc_connection_set_read_cb(conn, unix_fd_read_cb, p_client_sock);
 		jrpc_connection_set_write_cb(conn, unix_fd_write_cb, p_client_sock);
 
-		while((ret = jrpc_process(conn)) != JRPC_EOF)
+		while ((ret = jrpc_process(conn)) != JRPC_EOF)
 			;
 
 		client_connection = NULL;

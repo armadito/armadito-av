@@ -59,7 +59,7 @@ static void client_thread(gpointer data, gpointer user_data)
 	int ret;
 	struct jrpc_connection *conn = (struct jrpc_connection *)data;
 
-	while((ret = jrpc_process(conn)) != JRPC_EOF)
+	while ((ret = jrpc_process(conn)) != JRPC_EOF)
 		;
 
 	jrpc_connection_free(conn);
