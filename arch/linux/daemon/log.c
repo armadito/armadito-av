@@ -19,12 +19,13 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#include <libarmadito.h>
+#include <libarmadito/armadito.h>
 
 #include <glib.h>
 #include <syslog.h>
 #include <stdio.h>
 #include <sys/types.h>
+#include <string.h>
 #include <unistd.h>
 
 static enum a6o_log_level get_a6o_log_level_from_str(const char *s_log_level)

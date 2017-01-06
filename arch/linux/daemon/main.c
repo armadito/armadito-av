@@ -20,7 +20,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 ***/
 
 #define _GNU_SOURCE
-#include <libarmadito.h>
+#include <libarmadito/armadito.h>
 #include "armadito-config.h"
 
 #include "log.h"
@@ -28,6 +28,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "daemonize.h"
 #include "unixsockserver.h"
 #include "net/netdefaults.h"
+#include "core/conf.h"
+#include "core/handle.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,6 +39,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <glib.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <dirent.h>
@@ -83,7 +86,6 @@ static void usage(void)
 	fprintf(stderr, "                                     log level can be: error, warning, info, debug\n");
 	fprintf(stderr, "                                     (default is: " DEFAULT_LOG_LEVEL "\n");
 	fprintf(stderr, "  --pidfile=PATH | -i PATH           create PID file at specified location\n");
-	fprintf(stderr, "  --port=PORT | -p PORT              listening TCP port (default is " S_DEFAULT_PORT ")\n");
 	fprintf(stderr, "                                     (default is: " DEFAULT_PID_FILE ")\n");
 	fprintf(stderr, "\n");
 
@@ -103,7 +105,6 @@ static void parse_options(int argc, char **argv, struct a6o_daemon_options *opts
 	opts->no_daemon = 0;
 	opts->s_log_level = DEFAULT_LOG_LEVEL;
 	opts->pid_file = DEFAULT_PID_FILE;
-	opts->port = DEFAULT_PORT;
 
 	while (1) {
 		int c, option_index = 0;
@@ -127,9 +128,6 @@ static void parse_options(int argc, char **argv, struct a6o_daemon_options *opts
 			if (check_log_level(optarg))
 				usage();
 			opts->s_log_level = strdup(optarg);
-			break;
-		case 'p': /* port */
-			opts->port = (unsigned short)atoi(optarg);
 			break;
 		case 'i': /* pidfile */
 			opts->pid_file = strdup(optarg);
@@ -267,6 +265,7 @@ static void start_daemon(const char *progname, struct a6o_daemon_options *opts)
 }
 #endif
 
+#if 0
 static void start_http_server(const char *progname, struct a6o_daemon_options *opts)
 {
 	struct a6o_conf *conf;
@@ -300,6 +299,7 @@ static void start_http_server(const char *progname, struct a6o_daemon_options *o
 	loop = g_main_loop_new(NULL, FALSE);
 	g_main_loop_run(loop);
 }
+#endif
 
 int main(int argc, char **argv)
 {
@@ -311,7 +311,9 @@ int main(int argc, char **argv)
 
 	parse_options(argc, argv, &opts);
 
+#if 0
 	start_http_server(argv[0], &opts);
+#endif
 
 	return EXIT_SUCCESS;
 }

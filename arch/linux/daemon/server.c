@@ -19,11 +19,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#include <libarmadito.h>
+#include <libarmadito/armadito.h>
 
 #include "server.h"
-#include "ipcclient.h"
-#include "jsonclient.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -46,6 +44,7 @@ static void client_thread(gpointer data, gpointer user_data)
 {
 	struct server *server = (struct server *)user_data;
 
+#if 0
 	switch(server->ipc_type) {
 	case OLD_IPC:
 	{
@@ -67,6 +66,7 @@ static void client_thread(gpointer data, gpointer user_data)
 	}
 	break;
 	}
+#endif
 }
 
 static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpointer data)
@@ -84,6 +84,7 @@ static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpo
 
 	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_DEBUG, "accepted client connection: fd = %d", client_sock);
 
+#if 0
 	switch(server->ipc_type) {
 	case OLD_IPC:
 		client = ipc_client_new(client_sock, server->armadito);
@@ -92,6 +93,7 @@ static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpo
 		client = json_client_new(client_sock, server->armadito);
 		break;
 	}
+#endif
 
 	g_thread_pool_push(server->thread_pool, (gpointer)client, NULL);
 
