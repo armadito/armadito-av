@@ -20,6 +20,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 ***/
 
 #include <libarmadito/armadito.h>
+#include <libjrpc/jrpc.h>
 
 #include "server.h"
 
@@ -39,33 +40,29 @@ struct server {
 	GIOChannel *channel;
 };
 
+static ssize_t unix_fd_write_cb(const char *buffer, size_t size, void *data)
+{
+	int fd = *(int *)data;
+
+	return send(fd, buffer, size, MSG_EOR);
+}
+
+static ssize_t unix_fd_read_cb(char *buffer, size_t size, void *data)
+{
+	int fd = *(int *)data;
+
+	return recv(fd, buffer, size, 0);
+}
+
 static void client_thread(gpointer data, gpointer user_data)
 {
-	struct server *server = (struct server *)user_data;
+	int ret;
+	struct jrpc_connection *conn = (struct jrpc_connection *)data;
 
-#if 0
-	switch(server->ipc_type) {
-	case OLD_IPC:
-	{
-		struct ipc_client *client = (struct ipc_client *)data;
+	while((ret = jrpc_process(conn)) != JRPC_EOF)
+		;
 
-		while (ipc_client_process(client) > 0)
-			;
-
-		ipc_client_free(client);
-	}
-	break;
-	case JSON_IPC:
-	{
-		struct json_client *client = (struct json_client *)data;
-
-		json_client_process(client);
-
-		json_client_free(client);
-	}
-	break;
-	}
-#endif
+	jrpc_connection_free(conn);
 }
 
 static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpointer data)
@@ -73,6 +70,8 @@ static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpo
 	struct server *server = (struct server *)data;
 	void *client;
 	int client_sock;
+	int *p_client_sock;
+	struct jrpc_connection *conn;
 
 	client_sock = accept(server->listen_sock, NULL, NULL);
 
@@ -83,18 +82,16 @@ static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpo
 
 	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_DEBUG, "accepted client connection: fd = %d", client_sock);
 
-#if 0
-	switch(server->ipc_type) {
-	case OLD_IPC:
-		client = ipc_client_new(client_sock, server->armadito);
-		break;
-	case JSON_IPC:
-		client = json_client_new(client_sock, server->armadito);
-		break;
-	}
-#endif
+	p_client_sock = malloc(sizeof(int));
+	*p_client_sock = client_sock;
 
-	g_thread_pool_push(server->thread_pool, (gpointer)client, NULL);
+	/* conn = jrpc_connection_new(server_mapper, NULL); */
+	conn = jrpc_connection_new(NULL, NULL);
+
+	jrpc_connection_set_read_cb(conn, unix_fd_read_cb, p_client_sock);
+	jrpc_connection_set_write_cb(conn, unix_fd_write_cb, p_client_sock);
+
+	g_thread_pool_push(server->thread_pool, (gpointer)conn, NULL);
 
 	return TRUE;
 }
