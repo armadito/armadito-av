@@ -169,9 +169,10 @@ arch/linux/service/Makefile
 conf/Makefile
 httpd/Makefile
 libcore/Makefile
-libjrpc/Makefile
-libjrpc/tests/Makefile
 libmodule/Makefile
+librpc/Makefile
+librpc/jrpc/Makefile
+librpc/jrpc/tests/Makefile
 man/Makefile
 man/fr/Makefile
 tests/Makefile

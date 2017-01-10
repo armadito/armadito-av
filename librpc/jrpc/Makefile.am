@@ -18,7 +18,7 @@ mapper.c \
 marshall.c 
 
 # -DDEBUG because is #defined in top-level config header
-AM_CPPFLAGS=$(PTHREAD_CFLAGS) -DDEBUG -I$(top_srcdir)/libjrpc/include -I$(top_srcdir)/libmodule/include -I$(top_srcdir) -I$(top_srcdir)/libjrpc @LIBJANSSON_CFLAGS@ -save-temps 
+AM_CPPFLAGS=$(PTHREAD_CFLAGS) -DDEBUG -I$(srcdir)/include -I$(srcdir)  -I$(top_srcdir)/libmodule/include -I$(top_srcdir) @LIBJANSSON_CFLAGS@ -save-temps 
 
 noinst_HEADERS= \
 include/libjrpc/jrpc.h \
