@@ -21,6 +21,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <libarmadito/armadito.h>
 
+#include "core/action.h"
+#include "core/event.h"
+
 #define MARSHALL_DECLARATIONS
 #include "rpcdefs.h"
 

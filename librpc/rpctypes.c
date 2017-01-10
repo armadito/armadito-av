@@ -19,7 +19,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#include <libarmadito/armadito.h>
+#include "rpctypes.h"
 
 #define MARSHALL_FUNCTIONS
 #include "rpcdefs.h"
