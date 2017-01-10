@@ -19,8 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _LIBARMADITO_ACTION_H_
-#define _LIBARMADITO_ACTION_H_
+#ifndef ARMADITO_CORE_ACTION_H
+#define ARMADITO_CORE_ACTION_H
 
 enum a6o_action {
 	A6O_ACTION_NONE         = 0,

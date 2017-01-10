@@ -43,8 +43,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
-#ifndef _LIBARMADITO_CONF_H_
-#define _LIBARMADITO_CONF_H_
+#ifndef ARMADITO_CORE_CONF_H
+#define ARMADITO_CORE_CONF_H
 
 #include <core/error.h>
 

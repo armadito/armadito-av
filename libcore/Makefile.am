@@ -51,6 +51,7 @@ include/core/action.h \
 include/core/conf.h \
 include/core/dir.h \
 include/core/error.h \
+include/core/event.h \
 include/core/filectx.h \
 include/core/file.h \
 include/core/handle.h \

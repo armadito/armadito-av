@@ -19,8 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _LIBARMADITO_ONDEMAND_H_
-#define _LIBARMADITO_ONDEMAND_H_
+#ifndef ARMADITO_CORE_ONDEMAND_H
+#define ARMADITO_CORE_ONDEMAND_H
 
 #include <libarmadito/scan.h>
 

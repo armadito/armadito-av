@@ -19,8 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _LIBARMADITO_OS_IO_H_
-#define _LIBARMADITO_OS_IO_H_
+#ifndef ARMADITO_CORE_OS_IO_H
+#define ARMADITO_CORE_OS_IO_H
 
 #include "armadito-config.h"
 

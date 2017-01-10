@@ -19,8 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _LIBARMADITO_SCANCONF_H_
-#define _LIBARMADITO_SCANCONF_H_
+#ifndef ARMADITO_CORE_SCANCONF_H
+#define ARMADITO_CORE_SCANCONF_H
 
 struct a6o_scan_conf;
 

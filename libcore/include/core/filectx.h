@@ -19,8 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _LIBARMADITO_FILECTX_H_
-#define _LIBARMADITO_FILECTX_H_
+#ifndef ARMADITO_CORE_FILECTX_H
+#define ARMADITO_CORE_FILECTX_H
 
 #include <core/scanconf.h>
 

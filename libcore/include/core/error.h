@@ -35,8 +35,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
  * - a value != 0, meaning a real error
  */
 
-#ifndef _LIBARMADITO_ERROR_H_
-#define _LIBARMADITO_ERROR_H_
+#ifndef ARMADITO_CORE_ERROR_H
+#define ARMADITO_CORE_ERROR_H
 
 #include <stdio.h>  /* for FILE * */
 

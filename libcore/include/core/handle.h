@@ -29,8 +29,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
  * TO BE COMPLETED
  *
  */
-#ifndef _LIBARMADITO_HANDLE_H_
-#define _LIBARMADITO_HANDLE_H_
+#ifndef ARMADITO_CORE_HANDLE_H
+#define ARMADITO_CORE_HANDLE_H
 
 #include <core/error.h>
 #include <core/conf.h>

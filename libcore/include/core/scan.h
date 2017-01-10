@@ -40,8 +40,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
-#ifndef _LIBARMADITO_SCAN_H_
-#define _LIBARMADITO_SCAN_H_
+#ifndef ARMADITO_CORE_SCAN_H
+#define ARMADITO_CORE_SCAN_H
 
 #include <core/filectx.h>
 #include <core/report.h>

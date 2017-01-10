@@ -19,8 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _LIBARMADITO_REPORTP_H_
-#define _LIBARMADITO_REPORTP_H_
+#ifndef ARMADITO_CORE_REPORTP_H
+#define ARMADITO_CORE_REPORTP_H
 
 #include <libarmadito/armadito.h>
 #include <core/action.h>
