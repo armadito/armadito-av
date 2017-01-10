@@ -9,8 +9,6 @@ LDADD=$(top_builddir)/librpc/jrpc/libjrpc.a $(PTHREAD_LIBS) @LIBJANSSON_LIBS@ -l
 AM_CPPFLAGS=$(PTHREAD_CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/librpc/jrpc/include -I$(top_srcdir)/libmodule/include @LIBJANSSON_CFLAGS@ -save-temps $(PTHREAD_LIBS)
 
 COMMON_SOURCES= \
-armadito.c \
-armadito-marshall.h \
 test.h \
 test.c \
 test-marshall.h \
