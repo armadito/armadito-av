@@ -5,8 +5,8 @@ rpc-client-test \
 rpc-server-test
 
 LDFLAGS=$(PTHREAD_CFLAGS)
-LDADD=$(top_builddir)/libjrpc/libjrpc.a $(PTHREAD_LIBS) @LIBJANSSON_LIBS@ -lm
-AM_CPPFLAGS=$(PTHREAD_CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/libjrpc/include -I$(top_srcdir)/libmodule/include @LIBJANSSON_CFLAGS@ -save-temps $(PTHREAD_LIBS)
+LDADD=$(top_builddir)/librpc/jrpc/libjrpc.a $(PTHREAD_LIBS) @LIBJANSSON_LIBS@ -lm
+AM_CPPFLAGS=$(PTHREAD_CFLAGS) -I$(top_srcdir) -I$(top_srcdir)/librpc/jrpc/include -I$(top_srcdir)/libmodule/include @LIBJANSSON_CFLAGS@ -save-temps $(PTHREAD_LIBS)
 
 COMMON_SOURCES= \
 armadito.c \
