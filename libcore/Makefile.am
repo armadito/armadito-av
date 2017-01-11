@@ -13,6 +13,7 @@ conf.c \
 confparser.c \
 confparser.h \
 error.c \
+event.c \
 filectx.c \
 info.c \
 module.c \

@@ -24,14 +24,16 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <time.h>
 
+#include <core/action.h>
+
 enum a6o_event_type {
-	EVENT_DETECTION,
-	EVENT_ON_DEMAND_START,
-	EVENT_ON_DEMAND_COMPLETED,
-	EVENT_ON_DEMAND_PROGRESS,
-	EVENT_QUARANTINE,
-	EVENT_REAL_TIME_PROT,
-	EVENT_AV_UPDATE,
+	EVENT_DETECTION              = 1 << 0,
+	EVENT_ON_DEMAND_START        = 1 << 1,
+	EVENT_ON_DEMAND_COMPLETED    = 1 << 2,
+	EVENT_ON_DEMAND_PROGRESS     = 1 << 3,
+	EVENT_QUARANTINE             = 1 << 4,
+	EVENT_REAL_TIME_PROT         = 1 << 5,
+	EVENT_AV_UPDATE              = 1 << 6,
 };
 
 enum a6o_detection_context {
@@ -84,7 +86,7 @@ struct a6o_real_time_prot_event {
 struct a6o_av_update_event {
 };
 
-union u_event {
+union a6o_event_union {
 	struct a6o_detection_event ev_detection;
 	struct a6o_on_demand_start_event ev_on_demand_start;
 	struct a6o_on_demand_completed_event ev_on_demand_completed;
@@ -96,8 +98,26 @@ union u_event {
 
 struct a6o_event {
 	time_t timestamp;
-	enum a6o_event_type ev_type;
-	union u_event u_ev;
+	enum a6o_event_type type;
+	union a6o_event_union u;
 };
+
+struct a6o_event *a6o_event_new(enum a6o_event_type ev_type, union a6o_event_union *u);
+
+void a6o_event_free(struct a6o_event *ev);
+
+struct a6o_event_source;
+
+void a6o_event_source_init(struct a6o_event_source *src);
+
+void a6o_event_source_destroy(struct a6o_event_source *src);
+
+typedef void (*a6o_event_cb_t)(struct a6o_event *ev, void *data);
+
+void a6o_event_source_add_cb(struct a6o_event_source *src, enum a6o_event_type ev_types, a6o_event_cb_t cb, void *data);
+
+/* remove the listener??? */
+
+void a6o_event_source_fire_event(struct a6o_event_source *ev_src, struct a6o_event *ev);
 
 #endif
