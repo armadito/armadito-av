@@ -121,7 +121,7 @@ JRPC_STRUCT_END
 JRPC_STRUCT(a6o_av_update_event)
 JRPC_STRUCT_END
 
-JRPC_UNION(u_event)
+JRPC_UNION(a6o_event_union)
 	JRPC_UNION_FIELD_STRUCT(a6o_detection_event, ev_detection, EVENT_DETECTION)
 	JRPC_UNION_FIELD_STRUCT(a6o_on_demand_start_event, ev_on_demand_start, EVENT_ON_DEMAND_START)
 	JRPC_UNION_FIELD_STRUCT(a6o_on_demand_completed_event, ev_on_demand_completed, EVENT_ON_DEMAND_COMPLETED)
@@ -133,7 +133,7 @@ JRPC_UNION_END
 
 JRPC_STRUCT(a6o_event)
 	JRPC_STRUCT_FIELD_INT(time_t, timestamp)
-	JRPC_STRUCT_FIELD_ENUM(a6o_event_type, ev_type)
-	JRPC_STRUCT_FIELD_UNION(u_event, u_ev, ev_type)
+	JRPC_STRUCT_FIELD_ENUM(a6o_event_type, type)
+	JRPC_STRUCT_FIELD_UNION(a6o_event_union, u, type)
 JRPC_STRUCT_END
 
