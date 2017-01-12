@@ -60,6 +60,7 @@ struct a6o_on_demand_start_event {
 };
 
 struct a6o_on_demand_completed_event {
+	int cancelled;
 	size_t total_malware_count;
 	size_t total_suspicious_count;
 	size_t total_scanned_count;
@@ -102,7 +103,7 @@ struct a6o_event {
 	union a6o_event_union u;
 };
 
-struct a6o_event *a6o_event_new(enum a6o_event_type ev_type, union a6o_event_union *u);
+struct a6o_event *a6o_event_new(enum a6o_event_type ev_type, void *ev);
 
 void a6o_event_free(struct a6o_event *ev);
 
@@ -114,7 +115,7 @@ void a6o_event_source_destroy(struct a6o_event_source *src);
 
 typedef void (*a6o_event_cb_t)(struct a6o_event *ev, void *data);
 
-void a6o_event_source_add_cb(struct a6o_event_source *src, enum a6o_event_type ev_types, a6o_event_cb_t cb, void *data);
+void a6o_event_source_add_cb(struct a6o_event_source *src, enum a6o_event_type ev_mask, a6o_event_cb_t cb, void *data);
 
 /* remove the listener??? */
 
