@@ -29,6 +29,17 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <string.h>
 
+struct callback_entry {
+	enum a6o_event_type mask;
+	a6o_event_cb_t cb;
+	void *data;
+	struct callback_entry *next;
+};
+
+struct a6o_event_source {
+	struct callback_entry *callbacks;
+};
+
 static void detection_event_clone(struct a6o_detection_event *dst, const struct a6o_detection_event *src)
 {
 	dst->context = src->context;
@@ -159,3 +170,40 @@ void a6o_event_free(struct a6o_event *ev)
 
 	free(ev);
 }
+
+void a6o_event_source_init(struct a6o_event_source *s)
+{
+	s->callbacks = NULL;
+}
+
+void a6o_event_source_destroy(struct a6o_event_source *s)
+{
+	struct callback_entry *p, *next;
+
+	for (p = s->callbacks; p != NULL; p = next) {
+		next = p->next;
+		free((void *)p);
+	}
+
+	free((void *)s);
+}
+
+void a6o_event_source_add_cb(struct a6o_event_source *s, enum a6o_event_type ev_mask, a6o_event_cb_t cb, void *data)
+{
+	struct callback_entry *p = malloc(sizeof(struct callback_entry));
+
+	p->mask = ev_mask;
+	p->cb = cb;
+	p->data = data;
+	p->next = s->callbacks;
+}
+
+void a6o_event_source_fire_event(struct a6o_event_source *s, struct a6o_event *ev)
+{
+	struct callback_entry *p;
+
+	for (p = s->callbacks; p != NULL; p = p->next)
+		if (p->mask & ev->type)
+			(*p->cb)(ev, p->data);
+}
+
