@@ -24,6 +24,10 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "core/action.h"
 #include "core/event.h"
 
+struct a6o_rpc_scan_param {
+	const char *root_path;
+};
+
 #define MARSHALL_DECLARATIONS
 #include "rpcdefs.h"
 

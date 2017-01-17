@@ -1,0 +1,65 @@
+/***
+
+Copyright (C) 2015, 2016 Teclib'
+
+This file is part of Armadito core.
+
+Armadito core is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Armadito core is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
+
+***/
+
+#include "armadito-config.h"
+
+#include <libjrpc/jrpc.h>
+
+#include "rpctypes.h"
+
+static int scan_method(json_t *params, json_t **result, void *connection_data)
+{
+	struct armadito *armadito = (struct armadito *)connection_data;
+	int ret;
+	struct a6o_rpc_scan_param *s_param;
+
+	if ((ret = JRPC_JSON2STRUCT(a6o_rpc_scan_param, params, &s_param)))
+		return ret;
+
+	/* g_thread_new("scan thread", scan_api_thread, scan_data); */
+
+	return JRPC_OK;
+}
+
+static int status_method(json_t *params, json_t **result, void *connection_data)
+{
+}
+
+static struct jrpc_mapper *rpcbe_mapper;
+
+static void create_rpcbe_mapper(void)
+{
+	rpcbe_mapper = jrpc_mapper_new();
+	jrpc_mapper_add(rpcbe_mapper, "scan", scan_method);
+	jrpc_mapper_add(rpcbe_mapper, "status", status_method);
+
+	/* jrpc_mapper_add_error_message(rpcbe_mapper, ERR_DIVIDE_BY_ZERO, "divide by zero"); */
+	/* jrpc_mapper_add_error_message(rpcbe_mapper, ERR_SQRT_OF_NEGATIVE, "square root of negative number"); */
+	/* jrpc_mapper_add_error_message(rpcbe_mapper, ERR_INVALID_ACTION, "invalid notification action"); */
+}
+
+struct jrpc_mapper *a6o_get_rpcbe_mapper(void)
+{
+	if (rpcbe_mapper == NULL)
+		create_rpcbe_mapper();
+
+	return rpcbe_mapper;
+}
