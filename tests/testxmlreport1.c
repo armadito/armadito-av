@@ -179,9 +179,9 @@ int main(int argc, char **argv)
 
 	doc = document_new();
 
-	report_fill(&report, ARMADITO_MALWARE, "/home/francois/zob", "module_pi", "virus de la grippe");
+	report_fill(&report, A6O_FILE_MALWARE, "/home/francois/zob", "module_pi", "virus de la grippe");
 	document_add_alert(doc, &report);
-	report_fill(&report, ARMADITO_SUSPICIOUS, "/home/francois/zobi", "module_e", "virus de la chtouille");
+	report_fill(&report, A6O_FILE_SUSPICIOUS, "/home/francois/zobi", "module_e", "virus de la chtouille");
 	document_add_alert(doc, &report);
 
 	document_save(doc, argc > 1 ? argv[1] : "-");
