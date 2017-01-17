@@ -117,7 +117,7 @@ typedef void (*a6o_event_cb_t)(struct a6o_event *ev, void *data);
 
 void a6o_event_source_add_cb(struct a6o_event_source *s, enum a6o_event_type ev_mask, a6o_event_cb_t cb, void *data);
 
-/* remove the listener??? */
+void a6o_event_source_remove_cb(struct a6o_event_source *s, enum a6o_event_type ev_mask, a6o_event_cb_t cb, void *data);
 
 void a6o_event_source_fire_event(struct a6o_event_source *s, struct a6o_event *ev);
 

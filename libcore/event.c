@@ -198,6 +198,22 @@ void a6o_event_source_add_cb(struct a6o_event_source *s, enum a6o_event_type ev_
 	p->next = s->callbacks;
 }
 
+void a6o_event_source_remove_cb(struct a6o_event_source *s, enum a6o_event_type ev_mask, a6o_event_cb_t cb, void *data)
+{
+	struct callback_entry **p = &s->callbacks;
+
+	while (*p != NULL) {
+		if ((*p)->mask == ev_mask && (*p)->cb == cb && (*p)->data == data) {
+			struct callback_entry *to_free = *p, *next = (*p)->next;
+
+			free(to_free);
+			*p = next;
+		}
+		else
+			p = &(*p)->next;
+	}
+}
+
 void a6o_event_source_fire_event(struct a6o_event_source *s, struct a6o_event *ev)
 {
 	struct callback_entry *p;
