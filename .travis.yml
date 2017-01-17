@@ -47,4 +47,4 @@ before_script:
 script:
 - "./configure"
 - build-wrapper-linux-x86-64 --out-dir build-wrapper-out make clean all
-- sonar-scanner -e -X -Dsonar.host.url=https://sonarqube.com -Dsonar.login=$SONAR_TOKEN
+- sonar-scanner -X -Dsonar.host.url=https://sonarqube.com -Dsonar.login=$SONAR_TOKEN
