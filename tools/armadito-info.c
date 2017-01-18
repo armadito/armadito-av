@@ -35,6 +35,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #define PROGRAM_NAME "armadito-scan"
 #define PROGRAM_VERSION PACKAGE_VERSION
@@ -163,6 +164,8 @@ static void info_cb(json_t *result, void *user_data)
 		return;
 
 	info_print(info);
+
+	*(int *)user_data = 1;
 }
 
 static int do_info(struct info_options *opts)
@@ -171,6 +174,7 @@ static int do_info(struct info_options *opts)
 	int client_sock;
 	int *p_client_sock;
 	int ret;
+	static int done = 0;
 
 	client_sock = unix_client_connect(opts->unix_path, 10);
 
@@ -187,15 +191,19 @@ static int do_info(struct info_options *opts)
 	jrpc_connection_set_read_cb(conn, unix_fd_read_cb, p_client_sock);
 	jrpc_connection_set_write_cb(conn, unix_fd_write_cb, p_client_sock);
 
-	ret = jrpc_call(conn, "status", NULL, info_cb, NULL);
+	/* jrpc_connection_set_error_handler(conn, client_error_handler); */
+
+	ret = jrpc_call(conn, "status", NULL, info_cb, &done);
 	if (ret)
 		return ret;
 
-	while((ret = jrpc_process(conn)) != JRPC_EOF)
+	while((ret = jrpc_process(conn)) != JRPC_EOF && !done)
 		;
 
+	if (close(client_sock) < 0)
+		perror("closing connection");
+
 	return 0;
-	/* jrpc_connection_set_error_handler(conn, client_error_handler); */
 }
 
 int main(int argc, char **argv)

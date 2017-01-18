@@ -56,15 +56,23 @@ static ssize_t unix_fd_read_cb(char *buffer, size_t size, void *data)
 	return recv(fd, buffer, size, 0);
 }
 
+struct client_data {
+	int client_sock;
+	struct jrpc_connection *conn;
+};
+
 static void client_thread(gpointer data, gpointer user_data)
 {
 	int ret;
-	struct jrpc_connection *conn = (struct jrpc_connection *)data;
+	struct client_data *cd = (struct client_dat *)data;
 
-	while ((ret = jrpc_process(conn)) != JRPC_EOF)
+	while ((ret = jrpc_process(cd->conn)) != JRPC_EOF)
 		;
 
-	jrpc_connection_free(conn);
+	if (close(cd->client_sock) < 0)
+		a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_WARNING, "closing client socket failed (%s)", strerror(errno));
+
+	jrpc_connection_free(cd->conn);
 }
 
 static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpointer data)
@@ -74,6 +82,7 @@ static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpo
 	int client_sock;
 	int *p_client_sock;
 	struct jrpc_connection *conn;
+	struct client_data *cd;
 
 	client_sock = accept(server->listen_sock, NULL, NULL);
 
@@ -92,7 +101,11 @@ static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpo
 	jrpc_connection_set_read_cb(conn, unix_fd_read_cb, p_client_sock);
 	jrpc_connection_set_write_cb(conn, unix_fd_write_cb, p_client_sock);
 
-	g_thread_pool_push(server->thread_pool, (gpointer)conn, NULL);
+	cd = malloc(sizeof(struct client_data));
+	cd->client_sock = client_sock;
+	cd->conn = conn;
+
+	g_thread_pool_push(server->thread_pool, (gpointer)cd, NULL);
 
 	return TRUE;
 }
