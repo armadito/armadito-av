@@ -54,6 +54,12 @@ JRPC_STRUCT(a6o_module_info)
 	JRPC_STRUCT_FIELD_PTR_ARRAY(a6o_base_info, base_infos)
 JRPC_STRUCT_END
 
+JRPC_STRUCT(a6o_info)
+	JRPC_STRUCT_FIELD_ENUM(a6o_update_status, global_status)
+	JRPC_STRUCT_FIELD_INT(time_t, global_update_ts)
+	JRPC_STRUCT_FIELD_PTR_ARRAY(a6o_module_info, module_infos)
+JRPC_STRUCT_END
+
 JRPC_ENUM(a6o_action)
 	JRPC_ENUM_VALUE(A6O_ACTION_NONE)
 	JRPC_ENUM_VALUE(A6O_ACTION_ALERT)

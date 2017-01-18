@@ -19,18 +19,24 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
+#ifndef ARMADITO_CORE_INFO_H
+#define ARMADITO_CORE_INFO_H
+
 #include <libarmadito/armadito.h>
 
-#include "core/action.h"
-#include "core/event.h"
-#include "core/info.h"
-
-struct a6o_rpc_scan_param {
-	const char *root_path;
+struct a6o_info {
+	enum a6o_update_status global_status;
+	time_t global_update_ts;
+	/* NULL terminated array of pointers to struct a6o_module_info */
+	struct a6o_module_info **module_infos;
 };
 
-#define MARSHALL_DECLARATIONS
-#include "rpcdefs.h"
+const char *a6o_update_status_str(enum a6o_update_status status);
 
-#define UNMARSHALL_DECLARATIONS
-#include "rpcdefs.h"
+struct a6o_info *a6o_info_new(struct armadito *armadito);
+
+void a6o_info_to_stdout(struct a6o_info *info);
+
+void a6o_info_free(struct a6o_info *info);
+
+#endif

@@ -56,6 +56,7 @@ include/core/event.h \
 include/core/filectx.h \
 include/core/file.h \
 include/core/handle.h \
+include/core/info.h \
 include/core/io.h \
 include/core/mimetype.h \
 include/core/ondemand.h \

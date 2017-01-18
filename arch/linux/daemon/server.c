@@ -87,8 +87,7 @@ static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpo
 	p_client_sock = malloc(sizeof(int));
 	*p_client_sock = client_sock;
 
-	conn = jrpc_connection_new(a6o_get_rpcbe_mapper(), NULL);
-	/* conn = jrpc_connection_new(NULL, NULL); */
+	conn = jrpc_connection_new(a6o_get_rpcbe_mapper(), server->armadito);
 
 	jrpc_connection_set_read_cb(conn, unix_fd_read_cb, p_client_sock);
 	jrpc_connection_set_write_cb(conn, unix_fd_write_cb, p_client_sock);

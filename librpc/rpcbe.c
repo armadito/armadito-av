@@ -19,9 +19,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#include "armadito-config.h"
-
 #include <libjrpc/jrpc.h>
+
+#include "core/info.h"
 
 #include "rpctypes.h"
 
@@ -41,6 +41,18 @@ static int scan_method(json_t *params, json_t **result, void *connection_data)
 
 static int status_method(json_t *params, json_t **result, void *connection_data)
 {
+	struct armadito *armadito = (struct armadito *)connection_data;
+	int ret;
+	struct a6o_info *info;
+
+	info = a6o_info_new(armadito);
+
+	if ((ret = JRPC_STRUCT2JSON(a6o_info, info, result)))
+		return ret;
+
+	a6o_info_free(info);
+
+	return JRPC_OK;
 }
 
 static struct jrpc_mapper *rpcbe_mapper;
