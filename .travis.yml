@@ -25,6 +25,7 @@ addons:
   sonarqube:
     branches:
     - DEV
+
 deploy:
   skip_cleanup: true
   provider: launchpad
@@ -35,20 +36,25 @@ deploy:
     secure: EPzKYtYTZqa4gNPQ5FnpT1XW1m4kEMeoILyjakzpCFfECX9Nx6TJmedM8jC/2uPh1fPovGMCDKAv3Xs04Gu1wjjq1fhSBd4Lfg3AM29rDpBkCI+Opx2MOMM7e/6mrBPQ30bJQ990+rMboaK2vLHs71rb2+AYaqXeWhwRcj9P07cpKd4Y/Ucv6cocdk5jnae96s86H1h0/VwehLfbBB+J3sj3/JPsWAXaWAxrnMADpDhCqRP7Pn+QUosRfcT5CL7FzKqqRBbQF1Mu8KvH5LJENk6bIvaKo2u5K45MBJx03VpyCOJ6PgZrYh3x77H08oLIEpwnNL38zLTR/CHXMtGHJzFKZK+CiZbavMZ5kNYWaIu3ABI2XpSo99LHgbKdZE2L6QUzRTpravGw1A/PDpKPpYv3FNuHpQciAFtM/1js+VfxQT2/FYThaJrn90IBc3BIrA5Bpp0YOp/J6DF0MYOA1DQI0etXDUjCvOwfVkoob0hP85L8Bw7DebyHR9xklmOie0QHtT1eFJ7JUp6It0TtzHWKSF5q0lWaweImbkbDIMsjPsgn0qON3rov44Hk/CcutBFiXmRmoOnEAvz8pdP8ICTcOmTLyxpDSBCbJ6FqwAPmKsSVc7o9OkmH8axRNXeijcRy2vr4iBNCwm020G/HF+2UGt1Sb0ZYVP9WXabImck=
   on:
     branch: release
+
 env:
   global:
   - secure: VoHY4zThCD1+/AaAMi5dAU6lS9EA8jUo2Bi0t0WExTf6CJfR9sbLi5A6wizfsiJOuPSTrgoSooJ+HeKj4s9nk8+UYOXDaWMCnBj4iWwepcp7f4DxWvlYiItjaoO7c7/8gzd/8Fx9iSoy8k5ZD5sTdp34qJrrYs08y5lcSq+GZLKQP5Wfbe24Js1Z8zqVjDoPgC6vEf2ntrJzBoV81g5oofReSVYQL5+UcRvxmAZm2nqzFsyk/QFlVaeLA/J6qQfINZOMJaXpvpEdBdb1XnBZbHt3wXNrSQbUKf4qvVvKcA2zg0I2+1P222DrpC82Ogqz1I7tgm2f37GrEn7sqCtO+3N4rqEdMPScn41W0/i49xigKMvGPxEzMqSVYNF171KIV+qqBlm7bGXPvJHLuctAqxnwSYzr4k+tahn2ZVt7IRtHw64tE+W8OJzU+RLK1rWaGZ4z7MSxvnqlURn6X0SzMI8V4/pE2bFSOpd7srlnu6+bncrN22BYQYc/X9IYaa+4esRI9PlTimE7Dcp+Au8ovZa5JQyORUjl414zRMdJtglmropxdKY1+nBhzNh10/jbGKtUMizG1PUPlPWSODwJHRXVEyI72SMtYn/OjNUgzhw2yE8kfYt5hE3CN9racS1TkzafIo2BLsxHEFnUBuI6G1uwwNfu1sjDEAvjfwHYlFo=
   - secure: jaoDidvyYDmX1DuapIbRpQDVW0oKz/qHuW7zvRVkDSuZ76sFv+TDh8J1GoqfIVcI9wZfoMYv0xHfTR66tKVGXkA7x+8cn94pqcNo8FP2UASKQnXNgYJ01SapU9Kp/g+QddxrGOjmrs6WnS1Je0RyjHUWomfrMxVQMYfHIWwS8sYUsQDydkQHy63iokLIjFs8Vp5BkSj/ZIHw86DHaqkvPTSIPb60fcuL3rR+/pnYTgxGGICIZr3Ga64p7V4pbFFOhY5f0meUzBMX4iqZMWO7Z09scYkHph9/741tbfwQSI7vd/1eSbhHXaaXMEIeWBHjHfo2m0Ihfp3xolEyE/NnXbv3UK99Hl1o/GRlb+m2WRD1xF+XNg3lBsXiMZV2nGiDz2fEjc+KrGfUHinLk1CXAkOrBeDHfeeu/zolDIv50HRpG8vWXe3ls8kvi4k+Yn5hlIFRCow6ejZcBIC50HFXiEYYm581rhamPK/rHUzUGEdr1m2ZktODSoj1uXLZ+r0xYHcXMvROdE5tGsbwacQ0WmoeLIQRW3Im0uYiXh0ncc1LdVyg4ing++L45g6XfdhZJiw16ZRGWad2Pc/+HyaDsyKSPv/I80DIF6C0U5B/rINN5shmVMo8LvrVus9S3ILF3sezrurAE9342BGxVF03p2rhOwYrp6LFmvW42zczW38=
+
 before_install:
 - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END
   CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
 - wget https://sonarqube.com/static/cpp/build-wrapper-linux-x86.zip
 - unzip build-wrapper-linux-x86.zip
 - export PATH=$PWD/build-wrapper-linux-x86:$PATH
+
 compiler:
 - gcc
+
 before_script:
 - "./autogen.sh"
+
 script:
 - "./configure"
 - build-wrapper-linux-x86-64 --out-dir build-wrapper-out make clean all
