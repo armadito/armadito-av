@@ -22,8 +22,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <libjrpc/jrpc.h>
 
 #include "core/info.h"
-
-#include "rpctypes.h"
+#include "rpc/rpctypes.h"
 
 static int scan_method(json_t *params, json_t **result, void *connection_data)
 {

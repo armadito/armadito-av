@@ -19,10 +19,10 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#include "rpctypes.h"
+#include "rpc/rpctypes.h"
 
 #define MARSHALL_FUNCTIONS
-#include "rpcdefs.h"
+#include "rpc/rpcdefs.h"
 
 #define UNMARSHALL_FUNCTIONS
-#include "rpcdefs.h"
+#include "rpc/rpcdefs.h"

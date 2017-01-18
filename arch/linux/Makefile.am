@@ -1,2 +1,2 @@
-SUBDIRS=daemon net service #modules
+SUBDIRS=daemon net service  #modules
 

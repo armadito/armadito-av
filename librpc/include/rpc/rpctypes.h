@@ -30,7 +30,7 @@ struct a6o_rpc_scan_param {
 };
 
 #define MARSHALL_DECLARATIONS
-#include "rpcdefs.h"
+#include "rpc/rpcdefs.h"
 
 #define UNMARSHALL_DECLARATIONS
-#include "rpcdefs.h"
+#include "rpc/rpcdefs.h"

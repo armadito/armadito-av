@@ -5,12 +5,13 @@ AUTOMAKE_OPTIONS=subdir-objects
 noinst_LIBRARIES=librpc.a
 
 librpc_a_SOURCES= \
-rpcdefs.h \
 rpctypes.c \
-rpctypes.h \
-rpcbe.c 
+rpcbe.c \
+unixio.c
 
-librpc_a_CFLAGS=-I$(top_srcdir) -I$(top_srcdir)/libmodule/include -I$(top_srcdir)/libcore/include -I$(top_srcdir)/librpc/jrpc/include @LIBJANSSON_CFLAGS@
+librpc_a_CFLAGS=-I$(top_srcdir) -I$(top_srcdir)/libmodule/include -I$(top_srcdir)/libcore/include -I$(top_srcdir)/librpc/include -I$(top_srcdir)/librpc/jrpc/include @LIBJANSSON_CFLAGS@
 
 noinst_HEADERS= \
-include/rpc/rpcbe.h
+include/rpc/rpcbe.h \
+include/rpc/rpcdefs.h \
+include/rpc/rpctypes.h 

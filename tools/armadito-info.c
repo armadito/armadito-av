@@ -21,26 +21,26 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "armadito-config.h"
 
+#include <net/netdefaults.h>
+#include <net/unixsockclient.h>
+#include <rpc/io.h>
+#include <rpc/rpctypes.h>
+#include <libjrpc/jrpc.h>
+
 #include <assert.h>
 #include <getopt.h>
 #include <errno.h>
-#include <json.h>
+#include <jansson.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
-#include "apiclient.h"
-#include "jutil.h"
-
-#define DEFAULT_PORT          8888
-#define S_DEFAULT_PORT        "8888"
-
 #define PROGRAM_NAME "armadito-scan"
 #define PROGRAM_VERSION PACKAGE_VERSION
 
 struct info_options {
-	unsigned short port;
+	const char *unix_path;
 	int verbose;
 };
 
@@ -48,7 +48,7 @@ static struct option info_option_defs[] = {
 	{"help",      no_argument,        0, 'h'},
 	{"version",   no_argument,        0, 'V'},
 	{"verbose",   no_argument,        0, 'v'},
-	{"port",      required_argument,  0, 'p'},
+	{"path",      required_argument, 0, 'a'},
 	{0, 0, 0, 0}
 };
 
@@ -68,7 +68,7 @@ static void usage(void)
 	fprintf(stderr, "  --help  -h                    print help and quit\n");
 	fprintf(stderr, "  --version -V                  print program version\n");
 	fprintf(stderr, "  --verbose -v                  print HTTP trafic\n");
-	fprintf(stderr, "  --port=PORT | -p PORT         TCP port to connect to Armadito-AV (default is " S_DEFAULT_PORT ")\n");
+	fprintf(stderr, "  --path=PATH | -a PATH         unix socket path (default is " DEFAULT_SOCKET_PATH ")\n");
 	fprintf(stderr, "\n");
 
 	exit(1);
@@ -76,8 +76,8 @@ static void usage(void)
 
 static void parse_options(int argc, char **argv, struct info_options *opts)
 {
-	opts->port = DEFAULT_PORT;
 	opts->verbose = 0;
+	opts->unix_path = DEFAULT_SOCKET_PATH;
 
 	while (1) {
 		int c, option_index = 0;
@@ -97,8 +97,8 @@ static void parse_options(int argc, char **argv, struct info_options *opts)
 		case 'v': /* verbose */
 			opts->verbose = 1;
 			break;
-		case 'p': /* port */
-			opts->port = (unsigned short)atoi(optarg);
+		case 'a': /* path */
+			opts->unix_path = strdup(optarg);
 			break;
 		case '?':
 			/* getopt_long already printed an error message. */
@@ -118,6 +118,7 @@ static void time_2_date(int64_t timestamp, char *buf, size_t len)
 	strftime(buf, len, "%FT%TZ", gmtime(&timestamp));
 }
 
+#if 0
 static void status_print(struct json_object *j_ev)
 {
 	int n_mods, m;
@@ -163,57 +164,67 @@ static void status_print(struct json_object *j_ev)
 		}
 	}
 }
+#endif
 
-static void do_info(struct info_options *opts, struct api_client *client)
+static void info_cb(json_t *result, void *user_data)
 {
-	int end_of_info = 0;
+	int ret;
 
-	if (api_client_register(client) != 0) {
-		fprintf(stderr, "cannot register client: %s\n", api_client_get_error(client));
-		return;
+	/* if ((ret = JRPC_JSON2STRUCT(operands, result, &op))) */
+	/* 	return; */
+
+}
+
+
+#if 0
+static int test_call(struct jrpc_connection *conn, const char *method, int op1, int op2)
+{
+	struct operands *s_op = operands_new(1);
+	json_t *j_op;
+	int ret;
+
+	s_op->i_op1 = op1;
+	s_op->i_op2 = op2;
+
+	if ((ret = JRPC_STRUCT2JSON(operands, s_op, &j_op)))
+		return ret;
+
+	return jrpc_call(conn, method, j_op, simple_cb, NULL);
+}
+#endif
+
+static void do_info(struct info_options *opts)
+{
+	struct jrpc_connection *conn;
+	int client_sock;
+	int *p_client_sock;
+	int ret;
+
+	client_sock = unix_client_connect(opts->unix_path, 10);
+
+	if (client_sock < 0) {
+		perror("cannot connect");
+		exit(EXIT_FAILURE);
 	}
 
-	if (api_client_call(client, "/status", NULL, NULL) != 0) {
-		fprintf(stderr, "cannot get status from server: %s\n", api_client_get_error(client));
-		return;
-	}
+	conn = jrpc_connection_new(NULL, NULL);
 
-	while (!end_of_info) {
-		struct json_object *j_response = NULL;
+	p_client_sock = malloc(sizeof(int));
+	*p_client_sock = client_sock;
 
-		if (api_client_call(client, "/event", NULL, &j_response) != 0) {
-			fprintf(stderr, "cannot get event from server: %s\n", api_client_get_error(client));
-			return;
-		}
+	jrpc_connection_set_read_cb(conn, unix_fd_read_cb, p_client_sock);
+	jrpc_connection_set_write_cb(conn, unix_fd_write_cb, p_client_sock);
 
-		if (j_response == NULL)
-			continue;
-
-		if (api_client_is_verbose(client)) {
-			json_object_to_file("/dev/stderr", j_response);
-			fprintf(stderr, "\n");
-		}
-
-		if (!strcmp(j_get_string(j_response, "event_type"), "StatusEvent")) {
-			status_print(j_response);
-			end_of_info = 1;
-		}
-	}
-
-	if (api_client_unregister(client) != 0)
-		fprintf(stderr, "cannot unregister client: %s\n", api_client_get_error(client));
+	/* jrpc_connection_set_error_handler(conn, client_error_handler); */
 }
 
 int main(int argc, char **argv)
 {
 	struct info_options *opts = (struct info_options *)malloc(sizeof(struct info_options));
-	struct api_client *client;
 
 	parse_options(argc, argv, opts);
 
-	client = api_client_new(opts->port, opts->verbose);
-
-	do_info(opts, client);
+	do_info(opts);
 
 	return 0;
 }
