@@ -153,12 +153,11 @@ void module_manager_add(struct module_manager *mm, struct a6o_module *module)
 
 static int module_load_dirent_cb(const char *full_path, enum os_file_flag flags, int entry_errno, void *data)
 {
-	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "loading module from path %s flags %d", full_path, flags);
-
-	/* FIXME: must return an error */
 	if (flags & FILE_FLAG_IS_PLAIN_FILE) {
 		struct a6o_module *mod_loaded;
 		a6o_error *error = NULL;
+
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "loading module from path %s flags %d", full_path, flags);
 
 		if (!module_load(full_path, &mod_loaded, &error) && mod_loaded != NULL)
 			module_manager_add((struct module_manager *)data, mod_loaded);
@@ -166,11 +165,8 @@ static int module_load_dirent_cb(const char *full_path, enum os_file_flag flags,
 		if(error != NULL)
 			free(error);
 	}
-	else
-		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "loading module: path %s is not a plain file", full_path);
 
 	return 0;
-
 }
 
 int module_manager_load_path(struct module_manager *mm, const char *path, a6o_error **error)
@@ -178,7 +174,7 @@ int module_manager_load_path(struct module_manager *mm, const char *path, a6o_er
 	/* FIXME: for now, dirty stuff, do nothing with error */
 	int ret = 0;
 
-	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "loading modules from directory %s", path);
+	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_INFO, "loading modules from directory %s", path);
 
 	ret = os_dir_map(path, 0, module_load_dirent_cb, mm);
 
