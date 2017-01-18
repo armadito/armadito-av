@@ -28,7 +28,7 @@ addons:
 deploy:
   skip_cleanup: true
   provider: launchpad
-  slug: "~armadito/armadito-av/+git/main"
+  slug: "armadito-av"
   oauth_token:
     secure: WbReFuwJ5Hxh5GtZ7/dS0QWw2dKdp21JpusbXYzoneJTk1yZ4YgODWnsG+qWEg3JGYrdn8i2szVM+2OvNrezpsrm5iH3dKYIp1l9hXKphHBi271iHXyAmmUt5MPIYxbcVZg6sRnGlenje7M6vs3k26B8c8L9fcGZtMCHfWuJ5j/nJRrmxUyc3eVXhCA71p83/YvgRfS+G9Vs4IlIH1UOIN5RJ8bwJGHZNKLNYA8ZZHocHsJ+EKnXRBEX5vP9bqshhG+swLf5wjfUdcg3jX4MWNBj34iF4DUsDGJ175YJBmQhBWoYFpWYdDcFzhvSNkVjU3/WdWIJE47TzwA531RNdPXw8AynCN93dBrOA3R4Pkodfd4gD0187KPRBbA7nVsI/2XqV5oosvlR4tgcgWx2q1vHyuQpBde3BlIqm4eHj+aK44Sgyjf8KWHa4EWnASreMgZX5t40n1FWv/kirDOD2w4yCTEXCfn9ZPIY/x736QFHkXGSVqJ/K2jwbAKHzfuOoZyXNK3VzoxvhEEwdl/sh0X7ED1gkU59e5TUzz2vKk6iQPlRzCd2bR9oTk8Q9fcqVIdW1j61AVKgvDhtLETNDy4vAhjQGI04RG3vQFk7vAFCau2Orh4rbxaZfWmPHvhOtHCoz9y7WCb0a98qIOdjMCHq5py3IGPITBucnrV93oU=
   oauth_token_secret:
@@ -53,5 +53,3 @@ script:
 - "./configure"
 - build-wrapper-linux-x86-64 --out-dir build-wrapper-out make clean all
 - sonar-scanner -X -Dsonar.host.url=https://sonarqube.com -Dsonar.login=$SONAR_TOKEN
-- echo $TOKEN
-- echo $TOKEN_SECURE
