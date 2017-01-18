@@ -118,82 +118,54 @@ static void time_2_date(int64_t timestamp, char *buf, size_t len)
 	strftime(buf, len, "%FT%TZ", gmtime(&timestamp));
 }
 
-#if 0
-static void status_print(struct json_object *j_ev)
+static void info_print(struct a6o_info *info)
 {
-	int n_mods, m;
-	struct json_object *j_mod_array;
 	char buf[sizeof("1970-01-01T00:00:00Z!")];
+	struct a6o_module_info **p_mod_info;
 
 	printf( "--- Armadito info --- \n");
-	printf( "global status : %s\n", j_get_string(j_ev, "global_status"));
-	time_2_date(j_get_int64(j_ev, "global_update_timestamp"), buf, sizeof(buf));
+	printf( "global status : %s\n", a6o_update_status_str(info->global_status));
+	time_2_date(info->global_update_ts, buf, sizeof(buf));
 	printf( "global update date : %s\n", buf);
 
-	json_object_object_get_ex(j_ev, "modules", &j_mod_array);
-	n_mods = json_object_array_length(j_mod_array);
+	for (p_mod_info = info->module_infos; *p_mod_info != NULL; p_mod_info++) {
+		struct a6o_module_info *mod_info = *p_mod_info;
+		struct a6o_base_info **p_base_info;
 
-	for(m = 0; m < n_mods; m++) {
-		struct json_object *j_mod, *j_base_array;
-		int n_bases, b;
-
-		j_mod = json_object_array_get_idx(j_mod_array, m);
-		printf( "Module %s \n",  j_get_string(j_mod, "name"));
-		printf( "- Update status : %s\n", j_get_string(j_mod, "mod_status"));
-		time_2_date(j_get_int64(j_mod, "mod_update_timestamp"), buf, sizeof(buf));
+		printf( "Module %s \n",  mod_info->name);
+		printf( "- Update status : %s\n", a6o_update_status_str(mod_info->mod_status));
+		time_2_date(mod_info->mod_update_ts, buf, sizeof(buf));
 		printf( "- Update date : %s\n", buf);
 
-		if (!json_object_object_get_ex(j_mod, "bases", &j_base_array))
+		if (mod_info->base_infos == NULL)
 			continue;
 
-		n_bases = json_object_array_length(j_base_array);
+		for (p_base_info = mod_info->base_infos; *p_base_info != NULL; p_base_info++) {
+			struct a6o_base_info *base_info = *p_base_info;
 
-		for(b = 0; b < n_bases; b++) {
-			struct json_object *j_base;
-			const char *version;
-
-			j_base = json_object_array_get_idx(j_base_array, b);
-			printf( "-- Base %s \n", j_get_string(j_base, "name"));
-			time_2_date(j_get_int64(j_base, "base_update_ts"), buf, sizeof(buf));
+			printf( "-- Base %s \n", base_info->name);
+			time_2_date(base_info->base_update_ts, buf, sizeof(buf));
 			printf( "--- Update date : %s\n", buf);
-			version = j_get_string(j_base, "version");
-			if (version != NULL)
-				printf( "--- Version : %s\n", version);
-			printf( "--- Signature count : %d\n", j_get_int(j_base, "signature_count"));
-			printf( "--- Full path : %s\n", j_get_string(j_base, "full_path"));
+			if (base_info->version != NULL)
+				printf( "--- Version : %s\n", base_info->version);
+			printf( "--- Signature count : %ld\n", base_info->signature_count);
+			printf( "--- Full path : %s\n", base_info->full_path);
 		}
 	}
 }
-#endif
 
 static void info_cb(json_t *result, void *user_data)
 {
 	int ret;
+	struct a6o_info *info;
 
-	/* if ((ret = JRPC_JSON2STRUCT(operands, result, &op))) */
-	/* 	return; */
+	if ((ret = JRPC_JSON2STRUCT(a6o_info, result, &info)))
+		return;
 
+	info_print(info);
 }
 
-
-#if 0
-static int test_call(struct jrpc_connection *conn, const char *method, int op1, int op2)
-{
-	struct operands *s_op = operands_new(1);
-	json_t *j_op;
-	int ret;
-
-	s_op->i_op1 = op1;
-	s_op->i_op2 = op2;
-
-	if ((ret = JRPC_STRUCT2JSON(operands, s_op, &j_op)))
-		return ret;
-
-	return jrpc_call(conn, method, j_op, simple_cb, NULL);
-}
-#endif
-
-static void do_info(struct info_options *opts)
+static int do_info(struct info_options *opts)
 {
 	struct jrpc_connection *conn;
 	int client_sock;
@@ -215,6 +187,14 @@ static void do_info(struct info_options *opts)
 	jrpc_connection_set_read_cb(conn, unix_fd_read_cb, p_client_sock);
 	jrpc_connection_set_write_cb(conn, unix_fd_write_cb, p_client_sock);
 
+	ret = jrpc_call(conn, "status", NULL, info_cb, NULL);
+	if (ret)
+		return ret;
+
+	while((ret = jrpc_process(conn)) != JRPC_EOF)
+		;
+
+	return 0;
 	/* jrpc_connection_set_error_handler(conn, client_error_handler); */
 }
 
