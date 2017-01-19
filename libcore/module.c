@@ -182,7 +182,7 @@ int module_manager_load_path(struct module_manager *mm, const char *path, a6o_er
 }
 
 /* apply `module_fun` to all modules that have an OK status */
-/* breaks if a module returns an error and return it */
+/* continue if a module returns an error and return error */
 static int module_manager_all(struct module_manager *mm, int (*module_fun)(struct a6o_module *, a6o_error **error), a6o_error **error)
 {
 	struct a6o_module **modv;
@@ -207,6 +207,8 @@ static int module_manager_all(struct module_manager *mm, int (*module_fun)(struc
 
 static int module_init(struct a6o_module *mod, a6o_error **error)
 {
+	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "initializing module %s", mod->name);
+
 	/* module has no init_fun, nothing else to do */
 	if (mod->init_fun == NULL)
 		return 0;
@@ -277,6 +279,8 @@ int module_manager_configure_all(struct module_manager *mm, struct a6o_conf *con
 
 static int module_post_init(struct a6o_module *mod, a6o_error **error)
 {
+	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "post-initializing module %s", mod->name);
+
 	if (mod->post_init_fun == NULL)
 		return 0;
 

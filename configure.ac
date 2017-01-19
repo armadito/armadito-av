@@ -13,10 +13,8 @@ AC_ARG_ENABLE([fanotify],
 # configuration header
 AM_CONFIG_HEADER(armadito-config-autoconf.h)
 
-# for now, add builtin modules by hand
-# to be move somewhere else
-dnl AC_DEFINE([HAVE_ALERT_MODULE],[1],[Define to compile builtin module alert])
-dnl AC_DEFINE([HAVE_ONDEMAND_MODULE],[1],[Define to compile builtin module on-demand])
+# define builtin modules 
+AC_DEFINE([HAVE_ON_DEMAND_MODULE],[1],[Define to compile builtin module on-demand])
 dnl AC_DEFINE([HAVE_QUARANTINE_MODULE],[1],[Define to compile builtin module quarantine])
 
 # This is needed when the first PKG_CHECK_MODULES call is inside a conditional (not the case here, but who knows)
@@ -160,11 +158,6 @@ Makefile
 arch/Makefile
 arch/linux/Makefile
 arch/linux/daemon/Makefile
-arch/linux/modules/Makefile
-arch/linux/modules/on-access-linux/Makefile
-arch/linux/modules/on-access-linux/conf/Makefile
-arch/linux/modules/on-access-linux/src/Makefile
-arch/linux/modules/on-access-linux/tests/Makefile
 arch/linux/net/Makefile
 arch/linux/service/Makefile
 conf/Makefile

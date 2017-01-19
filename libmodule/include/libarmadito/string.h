@@ -30,9 +30,11 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #define __LIBARMADITO_STRING_H_
 
 #include <stdlib.h>
+#include <string.h>
 
 char *a6o_vstrcat(const char *src1, ...);
 
-#define a6o_strdup(S) a6o_vstrcat((S), NULL)
+/* #define a6o_strdup(S) a6o_vstrcat((S), NULL) */
+#define a6o_strdup(S) strdup(S)
 
 #endif

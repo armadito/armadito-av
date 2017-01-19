@@ -9,7 +9,7 @@ $(top_srcdir)/arch \
 $(top_srcdir)/conf \
 $(top_srcdir)/httpd \
 $(top_srcdir)/libcore \
-$(top_srcdir)/libjrpc \
+$(top_srcdir)/librpc \
 $(top_srcdir)/libmodule \
 $(top_srcdir)/man \
 $(top_srcdir)/tests \

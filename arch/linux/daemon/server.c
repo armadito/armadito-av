@@ -34,6 +34,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
 struct server {
 	int listen_sock;
@@ -64,7 +65,7 @@ struct client_data {
 static void client_thread(gpointer data, gpointer user_data)
 {
 	int ret;
-	struct client_data *cd = (struct client_dat *)data;
+	struct client_data *cd = (struct client_data *)data;
 
 	while ((ret = jrpc_process(cd->conn)) != JRPC_EOF)
 		;

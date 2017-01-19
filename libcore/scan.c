@@ -33,9 +33,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "core/filectx.h"
 #include "core/mimetype.h"
 
-#ifdef HAVE_ALERT_MODULE
-#include "builtin-modules/alert.h"
-#endif
 #ifdef HAVE_QUARANTINE_MODULE
 #include "builtin-modules/quarantine.h"
 #endif
@@ -57,16 +54,8 @@ struct callback_entry {
 /* so that there will be no need to add the callbacks by hand */
 static void a6o_scan_add_builtin_callbacks(struct a6o_scan *scan, struct armadito *armadito)
 {
-#ifdef HAVE_ALERT_MODULE
-	struct a6o_module *alert_module;
-#endif
 #ifdef HAVE_QUARANTINE_MODULE
 	struct a6o_module *quarantine_module;
-#endif
-
-#ifdef HAVE_ALERT_MODULE
-	alert_module = a6o_get_module_by_name(armadito, "alert");
-	a6o_scan_add_callback(scan, alert_callback, alert_module->data);
 #endif
 
 #ifdef HAVE_QUARANTINE_MODULE

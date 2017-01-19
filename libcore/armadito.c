@@ -29,14 +29,11 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "core/mimetype.h"
 #include "core/dir.h"
 #include "core/error.h"
-#ifdef HAVE_ONDEMAND_MODULE
-#include "builtin-modules/ondemandmod.h"
-#endif
-#ifdef HAVE_ALERT_MODULE
-#include "builtin-modules/alert.h"
+#ifdef HAVE_ON_DEMAND_MODULE
+#include "builtin-modules/on-demand/ondemandmod.h"
 #endif
 #ifdef HAVE_QUARANTINE_MODULE
-#include "builtin-modules/quarantine.h"
+#include "builtin-modules/quarantine/quarantine.h"
 #endif
 #ifdef HAVE_ON_ACCESS_WINDOWS_MODULE
 #include "builtin-modules/onaccess_windows.h"
@@ -69,14 +66,11 @@ static void a6o_free(struct armadito *u)
 
 static void a6o_add_builtin_modules(struct armadito *u)
 {
-#ifdef HAVE_ONDEMAND_MODULE
+#ifdef HAVE_ON_DEMAND_MODULE
 	module_manager_add(u->module_manager, &on_demand_module);
 #endif
 #ifdef HAVE_ON_ACCESS_WINDOWS_MODULE
 	module_manager_add(u->module_manager, &on_access_win_module);
-#endif
-#ifdef HAVE_ALERT_MODULE
-	module_manager_add(u->module_manager, &alert_module);
 #endif
 #ifdef HAVE_QUARANTINE_MODULE
 	module_manager_add(u->module_manager, &quarantine_module);
