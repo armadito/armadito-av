@@ -22,7 +22,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef ARMADITO_CORE_ONDEMAND_H
 #define ARMADITO_CORE_ONDEMAND_H
 
-#include <libarmadito/scan.h>
+#include <core/scan.h>
 
 struct a6o_on_demand;
 

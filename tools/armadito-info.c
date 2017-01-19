@@ -30,7 +30,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <assert.h>
 #include <getopt.h>
 #include <errno.h>
-#include <jansson.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -41,15 +40,15 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #define PROGRAM_VERSION PACKAGE_VERSION
 
 struct info_options {
-	const char *unix_path;
+	const char *unix_socket_path;
 	int verbose;
 };
 
 static struct option info_option_defs[] = {
-	{"help",      no_argument,        0, 'h'},
-	{"version",   no_argument,        0, 'V'},
-	{"verbose",   no_argument,        0, 'v'},
-	{"path",      required_argument, 0, 'a'},
+	{"help",         no_argument,        0, 'h'},
+	{"version",      no_argument,        0, 'V'},
+	{"verbose",      no_argument,        0, 'v'},
+	{"socket-path",  required_argument,  0, 'a'},
 	{0, 0, 0, 0}
 };
 
@@ -69,7 +68,7 @@ static void usage(void)
 	fprintf(stderr, "  --help  -h                    print help and quit\n");
 	fprintf(stderr, "  --version -V                  print program version\n");
 	fprintf(stderr, "  --verbose -v                  print HTTP trafic\n");
-	fprintf(stderr, "  --path=PATH | -a PATH         unix socket path (default is " DEFAULT_SOCKET_PATH ")\n");
+	fprintf(stderr, "  --socket-path=PATH | -a PATH  unix socket path (default is " DEFAULT_SOCKET_PATH ")\n");
 	fprintf(stderr, "\n");
 
 	exit(1);
@@ -78,12 +77,12 @@ static void usage(void)
 static void parse_options(int argc, char **argv, struct info_options *opts)
 {
 	opts->verbose = 0;
-	opts->unix_path = DEFAULT_SOCKET_PATH;
+	opts->unix_socket_path = DEFAULT_SOCKET_PATH;
 
 	while (1) {
 		int c, option_index = 0;
 
-		c = getopt_long(argc, argv, "hVvp:", info_option_defs, &option_index);
+		c = getopt_long(argc, argv, "hVva:", info_option_defs, &option_index);
 
 		if (c == -1)
 			break;
@@ -99,7 +98,7 @@ static void parse_options(int argc, char **argv, struct info_options *opts)
 			opts->verbose = 1;
 			break;
 		case 'a': /* path */
-			opts->unix_path = strdup(optarg);
+			opts->unix_socket_path = strdup(optarg);
 			break;
 		case '?':
 			/* getopt_long already printed an error message. */
@@ -165,6 +164,8 @@ static void info_cb(json_t *result, void *user_data)
 
 	info_print(info);
 
+	a6o_info_free(info);
+
 	*(int *)user_data = 1;
 }
 
@@ -176,7 +177,7 @@ static int do_info(struct info_options *opts)
 	int ret;
 	static int done = 0;
 
-	client_sock = unix_client_connect(opts->unix_path, 10);
+	client_sock = unix_client_connect(opts->unix_socket_path, 10);
 
 	if (client_sock < 0) {
 		perror("cannot connect");
