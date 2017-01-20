@@ -28,6 +28,8 @@ enum a6o_scan_flags {
 	A6O_SCAN_STANDARD   = A6O_SCAN_THREADED | A6O_SCAN_RECURSE,
 };
 
+#define A6O_ON_DEMAND_PROGRESS_UNKNOWN (-1)
+
 struct a6o_on_demand;
 
 struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, int scan_id, const char *root_path, enum a6o_scan_flags flags);

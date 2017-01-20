@@ -20,7 +20,6 @@ info.c \
 module.c \
 module_p.h \
 ondemand.c \
-ondemand_p.h \
 report.c \
 report_p.h \
 scanconf.c \

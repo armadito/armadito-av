@@ -180,7 +180,7 @@ enum a6o_file_status a6o_scan_context_scan(struct a6o_scan_context *ctx)
 
 	/* initializes the structure passed to callbacks */
 	/* FIXME */
-	a6o_report_init(&report, 42 /* scan->scan_id */, ctx->path, REPORT_PROGRESS_UNKNOWN);
+	a6o_report_init(&report, ctx->path);
 
 	/* if no modules apply, then file is not handled */
 	if (ctx->applicable_modules == NULL || ctx->mime_type == NULL) {
