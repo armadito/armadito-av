@@ -53,7 +53,7 @@ struct a6o_on_demand {
         int malware_count;                  /* detected as malicious counter */
 	int suspicious_count;               /* detected as suspicious counter */
 
-	time_t progress_send_period;
+	time_t progress_period;
 	time_t last_progress_time;
 	int last_progress_value;
 };
@@ -64,7 +64,7 @@ static void process_error(const char *full_path, int entry_errno);
 const char *a6o_scan_conf_debug(struct a6o_scan_conf *c);
 #endif
 
-struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, int scan_id, const char *root_path, enum a6o_scan_flags flags)
+struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, const char *root_path, enum a6o_scan_flags flags, int progress_period)
 {
 	struct a6o_on_demand *on_demand = (struct a6o_on_demand *)malloc(sizeof(struct a6o_on_demand));
 
@@ -92,8 +92,7 @@ struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, int scan_id, 
         on_demand->malware_count = 0;
 	on_demand->suspicious_count = 0;
 
-	/* FIXME */
-	on_demand->progress_send_period = 200 /* period */;
+	on_demand->progress_period = progress_period;
 	on_demand->last_progress_time = 0L;
 	on_demand->last_progress_value = A6O_ON_DEMAND_PROGRESS_UNKNOWN;
 

@@ -27,21 +27,13 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <glib.h>
 
-struct scan_data {
-	time_t last_send_time;
-	int last_send_progress;
-	struct a6o_on_demand *on_demand;
-};
-
 static gpointer scan_thread_fun(gpointer data)
 {
-	struct scan_data *scan_data = (struct scan_data *)data;
+	struct a6o_on_demand *on_demand = (struct a6o_on_demand *)data;
 
-	a6o_on_demand_run(scan_data->on_demand);
+	a6o_on_demand_run(on_demand);
 
-	a6o_on_demand_free(scan_data->on_demand);
-
-	free(scan_data);
+	a6o_on_demand_free(on_demand);
 
 	return NULL;
 }
@@ -51,22 +43,18 @@ static int scan_method(json_t *params, json_t **result, void *connection_data)
 	struct armadito *armadito = (struct armadito *)connection_data;
 	int ret;
 	struct a6o_rpc_scan_param *s_param;
-	struct scan_data *scan_data;
+	struct a6o_on_demand *on_demand;
 
 	if ((ret = JRPC_JSON2STRUCT(a6o_rpc_scan_param, params, &s_param)))
 		return ret;
 
 	a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_DEBUG, "scan path %s", s_param->root_path);
 
-	scan_data = malloc(sizeof(struct scan_data));
-	scan_data->last_send_time = 0L;
 	/* FIXME */
-#if 0
-	scan_data->last_send_progress = REPORT_PROGRESS_UNKNOWN;
-#endif
-	scan_data->on_demand = a6o_on_demand_new(armadito, 42, s_param->root_path, A6O_SCAN_RECURSE | A6O_SCAN_THREADED);
+	/* must get period from params */
+	on_demand = a6o_on_demand_new(armadito, s_param->root_path, A6O_SCAN_RECURSE | A6O_SCAN_THREADED, 0);
 
-	g_thread_new("scan thread", scan_thread_fun, scan_data);
+	g_thread_new("scan thread", scan_thread_fun, on_demand);
 
 	return JRPC_OK;
 }

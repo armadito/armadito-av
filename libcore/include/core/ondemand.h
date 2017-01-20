@@ -32,7 +32,7 @@ enum a6o_scan_flags {
 
 struct a6o_on_demand;
 
-struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, int scan_id, const char *root_path, enum a6o_scan_flags flags);
+struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, const char *root_path, enum a6o_scan_flags flags, int progress_period);
 
 void a6o_on_demand_cancel(struct a6o_on_demand *on_demand);
 
