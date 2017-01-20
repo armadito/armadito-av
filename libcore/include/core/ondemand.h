@@ -22,7 +22,11 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef ARMADITO_CORE_ONDEMAND_H
 #define ARMADITO_CORE_ONDEMAND_H
 
-#include <core/scan.h>
+enum a6o_scan_flags {
+	A6O_SCAN_THREADED   = 1 << 0,
+	A6O_SCAN_RECURSE    = 1 << 1,
+	A6O_SCAN_STANDARD   = A6O_SCAN_THREADED | A6O_SCAN_RECURSE,
+};
 
 struct a6o_on_demand;
 

@@ -19,20 +19,27 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _LIBARMADITO_ONDEMANDP_H_
-#define _LIBARMADITO_ONDEMANDP_H_
+#ifndef LIBCORE_ONDEMANDP_H
+#define LIBCORE_ONDEMANDP_H
 
 #include <glib.h>
 
-#include <core/scan.h>
-
 struct a6o_on_demand {
 	struct a6o_scan_conf *scan_conf;
+
+	/* FIXME */
 	struct a6o_scan *scan;
-	GThread *count_thread;              /* thread used to count the files to compute progress */
+
 	const char *root_path;              /* root path of the scan */
 	enum a6o_scan_flags flags;        /* scan flags (recursive, threaded, etc) */
+
+	GThread *count_thread;              /* thread used to count the files to compute progress */
 	GThreadPool *thread_pool;           /* the thread pool if multi-threaded */
+
+	int to_scan_count;                  /* files to scan counter, to compute progress */
+	int scanned_count;                  /* already scanned counter, to compute progress */
+        int malware_count;                  /* detected as malicious counter */
+	int suspicious_count;               /* detected as suspicious counter */
 };
 
 #endif

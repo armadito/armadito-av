@@ -407,7 +407,7 @@ static gpointer scan_media_thread_fun(gpointer data)
 
 	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "starting scan of removable media mounted on %s", mount_data->path);
 
-	on_demand = a6o_on_demand_new(mount_data->monitor->ar, -1, mount_data->path, ARMADITO_SCAN_THREADED | ARMADITO_SCAN_RECURSE);
+	on_demand = a6o_on_demand_new(mount_data->monitor->ar, -1, mount_data->path, A6O_SCAN_THREADED | A6O_SCAN_RECURSE);
 	a6o_on_demand_run(on_demand);
 
 	a6o_on_demand_free(on_demand);

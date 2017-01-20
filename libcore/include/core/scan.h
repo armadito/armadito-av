@@ -53,9 +53,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 struct a6o_scan;
 
 enum a6o_scan_flags {
-	ARMADITO_SCAN_THREADED   = 1 << 0,
-	ARMADITO_SCAN_RECURSE    = 1 << 1,
-	ARMADITO_SCAN_STANDARD   = ARMADITO_SCAN_THREADED | ARMADITO_SCAN_RECURSE,
+	A6O_SCAN_THREADED   = 1 << 0,
+	A6O_SCAN_RECURSE    = 1 << 1,
+	A6O_SCAN_STANDARD   = A6O_SCAN_THREADED | A6O_SCAN_RECURSE,
 };
 
 /**
@@ -70,7 +70,7 @@ enum a6o_scan_flags {
  * \param[in] armadito        armadito handle that was returned by a6o_open()
  * \param[in] scan_id      the scan id for the user interface
  * \param[in] root_path    the root path of the scan, can be a file or a directory
- * \param[in] flags        the scan flags, specifying in particular if directory must be scanned recursively. It is recommended to pass ARMADITO_SCAN_STANDARD as flags value
+ * \param[in] flags        the scan flags, specifying in particular if directory must be scanned recursively. It is recommended to pass A6O_SCAN_STANDARD as flags value
  *
  * \return  a pointer to the scan opaque structure
  *
@@ -115,8 +115,8 @@ void a6o_scan_add_callback(struct a6o_scan *scan, a6o_scan_callback_t callback, 
  *
  * This function starts a scan and waits for its completion.
  * After each file scan, the callbacks that were registered by a6o_scan_add_callback() are called
- * This function can start threads if ARMADITO_SCAN_THREADED was defined in scan's flags
- * This function will recurse into sub-directories if ARMADITO_SCAN_RECURSE was defined in scan's flags
+ * This function can start threads if A6O_SCAN_THREADED was defined in scan's flags
+ * This function will recurse into sub-directories if A6O_SCAN_RECURSE was defined in scan's flags
  * Execution of this function can be lengthy, if scanning large directories.
  * BEWARE: calling this function will *block* caller, even if scan is multi-threaded
  *
@@ -125,7 +125,7 @@ void a6o_scan_add_callback(struct a6o_scan *scan, a6o_scan_callback_t callback, 
  */
 /* void a6o_scan_run(struct a6o_scan *scan); */
 
-enum a6o_file_status a6o_scan_context(struct a6o_scan *scan, struct a6o_file_context *ctx);
+enum a6o_file_status a6o_scan_context(struct a6o_scan *scan, struct a6o_scan_context *ctx);
 
 /**
  * \fn void a6o_scan_run(struct a6o_scan *scan);

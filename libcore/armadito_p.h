@@ -19,8 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _LIBARMADITO_ARMADITOP_H_
-#define _LIBARMADITO_ARMADITOP_H_
+#ifndef LIBCORE_ARMADITOP_H
+#define LIBCORE_ARMADITOP_H
 
 struct a6o_module **a6o_get_modules(struct armadito *u);
 

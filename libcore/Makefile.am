@@ -16,7 +16,6 @@ confparser.c \
 confparser.h \
 error.c \
 event.c \
-filectx.c \
 info.c \
 module.c \
 module_p.h \
@@ -24,9 +23,8 @@ ondemand.c \
 ondemand_p.h \
 report.c \
 report_p.h \
-scan.c \
 scanconf.c \
-scan_p.h \
+scanctx.c \
 status.c \
 status_p.h 
 
@@ -55,7 +53,6 @@ include/core/conf.h \
 include/core/dir.h \
 include/core/error.h \
 include/core/event.h \
-include/core/filectx.h \
 include/core/file.h \
 include/core/handle.h \
 include/core/info.h \
@@ -63,4 +60,5 @@ include/core/io.h \
 include/core/mimetype.h \
 include/core/ondemand.h \
 include/core/scanconf.h \
+include/core/scanctx.h \
 include/core/scan.h

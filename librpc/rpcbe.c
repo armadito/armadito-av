@@ -60,8 +60,11 @@ static int scan_method(json_t *params, json_t **result, void *connection_data)
 
 	scan_data = malloc(sizeof(struct scan_data));
 	scan_data->last_send_time = 0L;
+	/* FIXME */
+#if 0
 	scan_data->last_send_progress = REPORT_PROGRESS_UNKNOWN;
-	scan_data->on_demand = a6o_on_demand_new(armadito, 42, s_param->root_path, ARMADITO_SCAN_RECURSE | ARMADITO_SCAN_THREADED);
+#endif
+	scan_data->on_demand = a6o_on_demand_new(armadito, 42, s_param->root_path, A6O_SCAN_RECURSE | A6O_SCAN_THREADED);
 
 	g_thread_new("scan thread", scan_thread_fun, scan_data);
 

@@ -19,8 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _LIBARMADITO_CONFPARSER_H_
-#define _LIBARMADITO_CONFPARSER_H_
+#ifndef LIBCORE_CONFPARSER_H
+#define LIBCORE_CONFPARSER_H
 
 #include <stddef.h>
 
