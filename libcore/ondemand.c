@@ -25,7 +25,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "core/report.h"
 #include "core/ondemand.h"
 #include "ondemand_p.h"
-#include "scan_p.h"
 #include "string_p.h"
 #include "core/file.h"
 #include "core/scanctx.h"
@@ -40,7 +39,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <Windows.h>
 #endif
 
-static void process_error(struct a6o_scan *scan, const char *full_path, int entry_errno);
+static void process_error(const char *full_path, int entry_errno);
 
 #ifdef DEBUG
 const char *a6o_scan_conf_debug(struct a6o_scan_conf *c);
@@ -52,9 +51,6 @@ struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, int scan_id, 
 
 	/* in future, can have many scan configurations */
 	on_demand->scan_conf = a6o_scan_conf_on_demand();
-
-	/* FIXME */
-	on_demand->scan = NULL;
 
 	on_demand->count_thread = NULL;
 
@@ -74,11 +70,6 @@ struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, int scan_id, 
 	on_demand->thread_pool = NULL;
 
 	return on_demand;
-}
-
-struct a6o_scan *a6o_on_demand_get_scan(struct a6o_on_demand *on_demand)
-{
-	return on_demand->scan;
 }
 
 void a6o_on_demand_cancel(struct a6o_on_demand *on_demand)
@@ -107,7 +98,7 @@ static void scan_file(struct a6o_on_demand *on_demand, const char *path)
 	if (context_status == A6O_SC_MUST_SCAN)
 		a6o_scan_context_scan(&file_context);
 	else if (context_status == A6O_SC_FILE_OPEN_ERROR)
-		process_error(on_demand->scan, path, errno);
+		process_error(path, errno);
 
 	a6o_scan_context_destroy(&file_context);
 }
@@ -139,7 +130,7 @@ static void scan_entry_thread_fun(gpointer data, gpointer user_data)
 }
 
 /* this function is called when an error is found during directory traversal */
-static void process_error(struct a6o_scan *scan, const char *full_path, int entry_errno)
+static void process_error(const char *full_path, int entry_errno)
 {
 	struct a6o_report report;
 
@@ -168,7 +159,7 @@ static int scan_entry(const char *full_path, enum os_file_flag flags, int entry_
 	}
 
 	if (flags & FILE_FLAG_IS_ERROR) {
-		process_error(on_demand->scan, full_path, entry_errno);
+		process_error(full_path, entry_errno);
 		return 1;
 	}
 
@@ -222,10 +213,9 @@ static gpointer count_thread_fun(gpointer data)
 #endif
 
 	os_dir_map(on_demand->root_path, recurse, count_entry, &count);
-	/* set the counter inside the a6o_scan struct only at the end, so */
+	/* set the counter inside the struct only at the end, so */
 	/* that the scan function does not see the intermediate values, only the last one */
-	/* FIXME */
-	/* on_demand->scan->to_scan_count = count; */
+	on_demand->to_scan_count = count;
 
 #ifdef WIN32
 	if (Wow64RevertWow64FsRedirection(OldValue) == FALSE ) {
@@ -246,7 +236,7 @@ static void count_to_scan(struct a6o_on_demand *on_demand)
 }
 
 /* this function is called at the end of a scan, to send the 100% progress */
-static void final_progress(struct a6o_scan *scan)
+static void final_progress(void)
 {
 	struct a6o_report report;
 
@@ -311,7 +301,7 @@ void a6o_on_demand_run(struct a6o_on_demand *on_demand)
 		g_thread_pool_free(on_demand->thread_pool, FALSE, TRUE);
 
 	/* send the final progress (100%) */
-	final_progress(on_demand->scan);
+	final_progress();
 
 	if (on_demand->count_thread != NULL)
 		g_thread_join(on_demand->count_thread);

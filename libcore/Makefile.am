@@ -60,5 +60,4 @@ include/core/io.h \
 include/core/mimetype.h \
 include/core/ondemand.h \
 include/core/scanconf.h \
-include/core/scanctx.h \
-include/core/scan.h
+include/core/scanctx.h

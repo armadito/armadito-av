@@ -27,9 +27,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 struct a6o_on_demand {
 	struct a6o_scan_conf *scan_conf;
 
-	/* FIXME */
-	struct a6o_scan *scan;
-
 	const char *root_path;              /* root path of the scan */
 	enum a6o_scan_flags flags;        /* scan flags (recursive, threaded, etc) */
 
