@@ -129,7 +129,7 @@ static enum a6o_mod_status mod_oal_conf_white_list_dir(struct a6o_module *module
 		for (p = a6o_conf_value_get_list(value); *p != NULL; p++)
 			a6o_scan_conf_white_list_directory(on_access_conf, *p);
 	}
-      
+
 	return A6O_MOD_OK;
 }
 
@@ -161,7 +161,7 @@ static enum a6o_mod_status mod_oal_conf_mime_types(struct a6o_module *module, co
 		for (p = a6o_conf_value_get_list(value); *p != NULL; p++)
 			a6o_scan_conf_add_mime_type(on_access_conf, *p);
 	}
- 
+
 	return A6O_MOD_OK;
 }
 

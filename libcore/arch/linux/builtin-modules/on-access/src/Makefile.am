@@ -20,7 +20,7 @@ queue.c \
 queue.h \
 stamp.h \
 watchdog.c \
-watchdog.h 
+watchdog.h
 
 on_access_linux_la_LDFLAGS= -module -avoid-version
 on_access_linux_la_LIBADD= @GLIB2_LIBS@ @GIO2_LIBS@

@@ -117,7 +117,7 @@ static void *push_thread_fun(void *arg)
 
 	memset(statebuf, 0, STATEBUFSZ);
 	memset(&buf, 0, sizeof(buf));
-	
+
 	if (initstate_r(0xdeadbeef, statebuf, STATEBUFSZ, &buf)) {
 		fprintf(stderr, "initstate_r failed (%s)\n", strerror(errno));
 		exit(EXIT_FAILURE);
@@ -135,7 +135,7 @@ static void *push_thread_fun(void *arg)
 		fd %= 128;
 
 		queue_push(q, fd, &now);
-    
+
 		random_r(&buf, &r);
 		sleep_duration.tv_sec = 0;
 		sleep_duration.tv_nsec = (r % 3 + 1) * ONE_MILLISECOND;

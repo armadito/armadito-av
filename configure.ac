@@ -13,7 +13,7 @@ AC_ARG_ENABLE([fanotify],
 # configuration header
 AM_CONFIG_HEADER(armadito-config-autoconf.h)
 
-# define builtin modules 
+# define builtin modules
 AC_DEFINE([HAVE_ON_DEMAND_MODULE],[1],[Define to compile builtin module on-demand])
 dnl AC_DEFINE([HAVE_QUARANTINE_MODULE],[1],[Define to compile builtin module quarantine])
 

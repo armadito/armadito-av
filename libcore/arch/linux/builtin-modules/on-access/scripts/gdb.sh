@@ -9,4 +9,4 @@ HERE=$(dirname $0)
 CONF=$PREFIX/etc/armadito/conf.d/fanotify.conf
 [ -f $CONF ] && rm $CONF
 
-LD_LIBRARY_PATH=$PREFIX/lib PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig gdb --eval-command=run --args $PREFIX/sbin/armadito-scand --no-daemon --log-level=debug 
+LD_LIBRARY_PATH=$PREFIX/lib PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig gdb --eval-command=run --args $PREFIX/sbin/armadito-scand --no-daemon --log-level=debug
