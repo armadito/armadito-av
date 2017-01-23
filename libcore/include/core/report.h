@@ -34,22 +34,15 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
-#define REPORT_PROGRESS_UNKNOWN (-1)
-
 struct a6o_report {
-	int scan_id;                          /*!< the id of the scan this report belongs to                          */
 	char *path;                           /*!< the path of the scanned file                                       */
-	int progress;                         /*!< the progress, can be an int (0 <= <= 100), or PROGRESS_UNKNOWN     */
-	enum a6o_file_status status;        /*!< the scan status of the file (i.e. clean, malware, etc)             */
-	enum a6o_action action;             /*!< the action that was executed on this file (alert, quarantine, etc) */
+	enum a6o_file_status status;          /*!< the scan status of the file (i.e. clean, malware, etc)             */
+	enum a6o_action action;               /*!< the action that was executed on this file (alert, quarantine, etc) */
 	char *mod_name;                       /*!< name of the module that decided the file scan status               */
 	char *mod_report;                     /*!< the report of this module, usually a malware name                  */
-	int malware_count;                   /*!<  number of malwares detected since scan started                     */
-	int suspicious_count;                 /*!< number of suspicious files detected since scan started            */
-	int scanned_count;                    /*!< number of scanned files */ 
 };
 
-void a6o_report_init(struct a6o_report *report, int scan_id, const char *path, int progress);
+void a6o_report_init(struct a6o_report *report, const char *path);
 
 void a6o_report_destroy(struct a6o_report *report);
 

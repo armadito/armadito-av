@@ -19,8 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _LIBARMADITO_MODULEP_H_
-#define _LIBARMADITO_MODULEP_H_
+#ifndef LIBCORE_MODULEP_H
+#define LIBCORE_MODULEP_H
 
 #include <libarmadito/armadito.h>
 

@@ -19,28 +19,60 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#include "armadito-config.h"
-
 #include <libjrpc/jrpc.h>
 
-#include "rpctypes.h"
+#include "core/info.h"
+#include "core/ondemand.h"
+#include "rpc/rpctypes.h"
+
+#include <glib.h>
+
+static gpointer scan_thread_fun(gpointer data)
+{
+	struct a6o_on_demand *on_demand = (struct a6o_on_demand *)data;
+
+	a6o_on_demand_run(on_demand);
+
+	a6o_on_demand_free(on_demand);
+
+	return NULL;
+}
 
 static int scan_method(json_t *params, json_t **result, void *connection_data)
 {
 	struct armadito *armadito = (struct armadito *)connection_data;
 	int ret;
 	struct a6o_rpc_scan_param *s_param;
+	struct a6o_on_demand *on_demand;
 
 	if ((ret = JRPC_JSON2STRUCT(a6o_rpc_scan_param, params, &s_param)))
 		return ret;
 
-	/* g_thread_new("scan thread", scan_api_thread, scan_data); */
+	a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_DEBUG, "scan path %s", s_param->root_path);
+
+	/* FIXME */
+	/* must get period from params */
+	on_demand = a6o_on_demand_new(armadito, s_param->root_path, A6O_SCAN_RECURSE | A6O_SCAN_THREADED, 0);
+
+	g_thread_new("scan thread", scan_thread_fun, on_demand);
 
 	return JRPC_OK;
 }
 
 static int status_method(json_t *params, json_t **result, void *connection_data)
 {
+	struct armadito *armadito = (struct armadito *)connection_data;
+	int ret;
+	struct a6o_info *info;
+
+	info = a6o_info_new(armadito);
+
+	if ((ret = JRPC_STRUCT2JSON(a6o_info, info, result)))
+		return ret;
+
+	a6o_info_free(info);
+
+	return JRPC_OK;
 }
 
 static struct jrpc_mapper *rpcbe_mapper;

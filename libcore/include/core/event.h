@@ -109,9 +109,9 @@ void a6o_event_free(struct a6o_event *ev);
 
 struct a6o_event_source;
 
-void a6o_event_source_init(struct a6o_event_source *s);
+struct a6o_event_source *a6o_event_source_new(void);
 
-void a6o_event_source_destroy(struct a6o_event_source *s);
+void a6o_event_source_free(struct a6o_event_source *s);
 
 typedef void (*a6o_event_cb_t)(struct a6o_event *ev, void *data);
 

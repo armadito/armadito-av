@@ -22,13 +22,17 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef ARMADITO_CORE_ONDEMAND_H
 #define ARMADITO_CORE_ONDEMAND_H
 
-#include <libarmadito/scan.h>
+enum a6o_scan_flags {
+	A6O_SCAN_THREADED   = 1 << 0,
+	A6O_SCAN_RECURSE    = 1 << 1,
+	A6O_SCAN_STANDARD   = A6O_SCAN_THREADED | A6O_SCAN_RECURSE,
+};
+
+#define A6O_ON_DEMAND_PROGRESS_UNKNOWN (-1)
 
 struct a6o_on_demand;
 
-struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, int scan_id, const char *root_path, enum a6o_scan_flags flags);
-
-struct a6o_scan *a6o_on_demand_get_scan(struct a6o_on_demand *on_demand);
+struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, const char *root_path, enum a6o_scan_flags flags, int progress_period);
 
 void a6o_on_demand_cancel(struct a6o_on_demand *on_demand);
 

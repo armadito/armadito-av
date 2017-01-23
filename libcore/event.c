@@ -84,10 +84,6 @@ static void real_time_prot_event_clone(struct a6o_real_time_prot_event *dst, con
 	dst->rt_prot_new_state = src->rt_prot_new_state;
 }
 
-static void av_update_event_clone(struct a6o_av_update_event *dst, const struct a6o_av_update_event *src)
-{
-}
-
 struct a6o_event *a6o_event_new(enum a6o_event_type ev_type, void *ev)
 {
 	struct a6o_event *e = malloc(sizeof(struct a6o_event));
@@ -115,7 +111,6 @@ struct a6o_event *a6o_event_new(enum a6o_event_type ev_type, void *ev)
 		real_time_prot_event_clone(&e->u.ev_real_time_prot, (struct a6o_real_time_prot_event *)ev);
 		break;
 	case EVENT_AV_UPDATE:
-		av_update_event_clone(&e->u.ev_av_update, (struct a6o_av_update_event *)ev);
 		break;
 	}
 
@@ -171,12 +166,16 @@ void a6o_event_free(struct a6o_event *ev)
 	free(ev);
 }
 
-void a6o_event_source_init(struct a6o_event_source *s)
+struct a6o_event_source *a6o_event_source_new(void)
 {
+	struct a6o_event_source *s = malloc(sizeof(struct a6o_event_source));
+
 	s->callbacks = NULL;
+
+	return s;
 }
 
-void a6o_event_source_destroy(struct a6o_event_source *s)
+void a6o_event_source_free(struct a6o_event_source *s)
 {
 	struct callback_entry *p, *next;
 
@@ -193,7 +192,7 @@ void a6o_event_source_add_cb(struct a6o_event_source *s, enum a6o_event_type ev_
 	struct callback_entry *p = malloc(sizeof(struct callback_entry));
 
 	p->mask = ev_mask;
-	p->cb = cb;
+ 	p->cb = cb;
 	p->data = data;
 	p->next = s->callbacks;
 }
@@ -214,6 +213,14 @@ void a6o_event_source_remove_cb(struct a6o_event_source *s, enum a6o_event_type 
 	}
 }
 
+/*
+  must add a threaded event firing:
+  listeners list can be updated while events are fired
+  => must lock the listener list
+  1) locking from the event source thread: may delay scan threads
+  2) locking from another thread dedicated to event firing: needs
+  an async queue between the source thread and the event thread
+ */
 void a6o_event_source_fire_event(struct a6o_event_source *s, struct a6o_event *ev)
 {
 	struct callback_entry *p;

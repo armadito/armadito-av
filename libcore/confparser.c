@@ -446,34 +446,10 @@ static void r_value(struct a6o_conf_parser *cp)
 {
 	if (cp->lookahead_token == TOKEN_INTEGER) {
 		r_int_value(cp);
-#ifdef DEBUG
-		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "configuration parser: file %s, %s = %d",
-			cp->filename,
-			cp->current_key,
-			cp->current_value_int);
-#endif
 	}
 	else if (cp->lookahead_token == TOKEN_STRING) {
 		r_string_value(cp);
 		r_opt_string_list(cp);
-#ifdef DEBUG
-		if (cp->current_value_type == CONF_TYPE_STRING)
-			a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "configuration parser: file %s, %s = \"%s\"",
-				cp->filename,
-				cp->current_key,
-				cp->current_value_string);
-		else {
-			int i;
-			GString *values = g_string_new("");
-			for (i = 0; i < cp->current_value_list->len; i++, g_string_append_printf(values, ";"))
-				g_string_append_printf(values, "\"%s\"", g_ptr_array_index(cp->current_value_list, i));
-			a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "configuration parser: file %s, %s = %s",
-				cp->filename,
-				cp->current_key,
-				values->str);
-			g_string_free(values, TRUE);
-		}
-#endif
 	} else {
 		if (cp->lookahead_token == TOKEN_NONE ||cp->lookahead_token == TOKEN_EOF)
 			a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "syntax error: file %s line %d column %d expecting value for %s, got none",

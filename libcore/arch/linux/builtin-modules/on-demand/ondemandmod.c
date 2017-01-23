@@ -19,9 +19,11 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#include <libarmadito.h>
+#include <libarmadito/armadito.h>
 #include "ondemandmod.h"
-#include "armaditop.h"
+/* #include "armaditop.h" */
+
+#include "core/scanconf.h"
 
 #include <assert.h>
 #include <glib.h>

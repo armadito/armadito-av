@@ -4,9 +4,11 @@ noinst_LIBRARIES=libcore.a
 
 libcore_a_SOURCES= \
 action.c \
-arch/linux/dir.c \
-arch/linux/file.c \
-arch/linux/mimetype.c \
+arch/linux/os/dir.c \
+arch/linux/os/file.c \
+arch/linux/os/mimetype.c \
+arch/linux/builtin-modules/on-demand/ondemandmod.c \
+arch/linux/builtin-modules/on-demand/ondemandmod.h \
 armadito.c \
 armadito_p.h \
 conf.c \
@@ -14,21 +16,18 @@ confparser.c \
 confparser.h \
 error.c \
 event.c \
-filectx.c \
 info.c \
 module.c \
 module_p.h \
 ondemand.c \
-ondemand_p.h \
 report.c \
 report_p.h \
-scan.c \
 scanconf.c \
-scan_p.h \
+scanctx.c \
 status.c \
 status_p.h 
 
-libcore_a_CFLAGS=-I$(top_srcdir) -I$(top_srcdir)/libmodule/include -I$(top_srcdir)/libcore/include
+libcore_a_CFLAGS=-I$(top_srcdir) -I$(top_srcdir)/libmodule/include -I$(top_srcdir)/libcore/include -I$(top_srcdir)/libcore/arch/linux
 #libcore_a_LIBADD= 
 
 libcore_a_CFLAGS+= @GLIB2_CFLAGS@
@@ -53,11 +52,11 @@ include/core/conf.h \
 include/core/dir.h \
 include/core/error.h \
 include/core/event.h \
-include/core/filectx.h \
 include/core/file.h \
 include/core/handle.h \
+include/core/info.h \
 include/core/io.h \
 include/core/mimetype.h \
 include/core/ondemand.h \
 include/core/scanconf.h \
-include/core/scan.h
+include/core/scanctx.h

@@ -31,21 +31,16 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <string.h>
 
-void a6o_report_init(struct a6o_report *report, int scan_id, const char *path, int progress)
+void a6o_report_init(struct a6o_report *report, const char *path)
 {
-	report->scan_id = scan_id;
 	if (path != NULL)
 		report->path = os_strdup(path);
 	else
 		report->path = NULL;
-	report->progress = progress;
 	report->status = A6O_FILE_UNDECIDED;
 	report->action = A6O_ACTION_NONE;
 	report->mod_name = NULL;
 	report->mod_report = NULL;
-	report->suspicious_count = 0;
-        report->malware_count = 0;
-	report->scanned_count = 0;
 }
 
 void a6o_report_destroy(struct a6o_report *report)

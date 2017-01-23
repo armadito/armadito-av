@@ -19,8 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _LIBARMADITO_STRING_P_H_
-#define _LIBARMADITO_STRING_P_H_
+#ifndef LIBCORE_STRING_P_H
+#define LIBCORE_STRING_P_H
 
 #include "armadito-config.h"
 

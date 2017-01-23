@@ -19,11 +19,18 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _LIBARMADITO_ONDEMANDMOD_H_
-#define _LIBARMADITO_ONDEMANDMOD_H_
+#include <libarmadito/armadito.h>
 
-#include <libarmadito.h>
+#include "core/action.h"
+#include "core/event.h"
+#include "core/info.h"
 
-extern struct a6o_module on_demand_module;
+struct a6o_rpc_scan_param {
+	const char *root_path;
+};
 
-#endif
+#define MARSHALL_DECLARATIONS
+#include "rpc/rpcdefs.h"
+
+#define UNMARSHALL_DECLARATIONS
+#include "rpc/rpcdefs.h"

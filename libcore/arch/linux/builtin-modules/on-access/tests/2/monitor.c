@@ -209,7 +209,7 @@ static int perm_event_process(struct access_monitor *m, struct fanotify_event_me
 
 	write_response(m, event->fd, FAN_ALLOW, p, "checked MIME type");
 
-	/* g_thread_pool_push(m->thread_pool, a6o_file_context_clone(&file_context), NULL); */
+	/* g_thread_pool_push(m->thread_pool, a6o_scan_context_clone(&file_context), NULL); */
 
 	return 0;
 }

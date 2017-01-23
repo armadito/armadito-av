@@ -64,7 +64,7 @@ static struct option daemon_option_defs[] = {
 	{"version",   no_argument,        0, 'V'},
 	{"no-daemon", no_argument,        0, 'n'},
 	{"log-level", required_argument,  0, 'l'},
-	{"path", required_argument, 0, 'a'},
+	{"path",      required_argument, 0, 'a'},
 	{"pidfile",   required_argument,  0, 'i'},
 	{0, 0, 0, 0}
 };
@@ -331,9 +331,7 @@ int main(int argc, char **argv)
 
 	parse_options(argc, argv, &opts);
 
-#if 0
-	start_http_server(argv[0], &opts);
-#endif
+	start_daemon(argv[0], &opts);
 
 	return EXIT_SUCCESS;
 }

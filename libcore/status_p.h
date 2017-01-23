@@ -19,8 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _LIBARMADITO_STATUSP_H_
-#define _LIBARMADITO_STATUSP_H_
+#ifndef LIBCORE_STATUSP_H
+#define LIBCORE_STATUSP_H
 
 int a6o_file_status_cmp(enum a6o_file_status s1, enum a6o_file_status s2);
 

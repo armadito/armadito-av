@@ -23,36 +23,53 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "armadito-config.h"
 
 #include "core/report.h"
-#include "ondemand_p.h"
-#include "scan_p.h"
+#include "core/ondemand.h"
 #include "string_p.h"
 #include "core/file.h"
-#include "core/filectx.h"
+#include "core/scanctx.h"
 #include "core/io.h"
 #include "core/dir.h"
 
 #include <errno.h>
 #include <glib.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 #ifdef _WIN32
 #include <Windows.h>
 #endif
 
-static void process_error(struct a6o_scan *scan, const char *full_path, int entry_errno);
+struct a6o_on_demand {
+	struct a6o_scan_conf *scan_conf;
+
+	const char *root_path;              /* root path of the scan */
+	enum a6o_scan_flags flags;        /* scan flags (recursive, threaded, etc) */
+
+	GThread *count_thread;              /* thread used to count the files to compute progress */
+	GThreadPool *thread_pool;           /* the thread pool if multi-threaded */
+
+	int to_scan_count;                  /* files to scan counter, to compute progress */
+	int scanned_count;                  /* already scanned counter, to compute progress */
+        int malware_count;                  /* detected as malicious counter */
+	int suspicious_count;               /* detected as suspicious counter */
+
+	time_t progress_period;
+	time_t last_progress_time;
+	int last_progress_value;
+};
+
+static void process_error(const char *full_path, int entry_errno);
 
 #ifdef DEBUG
 const char *a6o_scan_conf_debug(struct a6o_scan_conf *c);
 #endif
 
-struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, int scan_id, const char *root_path, enum a6o_scan_flags flags)
+struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, const char *root_path, enum a6o_scan_flags flags, int progress_period)
 {
 	struct a6o_on_demand *on_demand = (struct a6o_on_demand *)malloc(sizeof(struct a6o_on_demand));
 
 	/* in future, can have many scan configurations */
 	on_demand->scan_conf = a6o_scan_conf_on_demand();
-	on_demand->scan = a6o_scan_new(armadito, scan_id);
-	on_demand->count_thread = NULL;
 
 #ifdef HAVE_REALPATH
 	on_demand->root_path = (const char *)realpath(root_path, NULL);
@@ -67,46 +84,154 @@ struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, int scan_id, 
 
 	on_demand->flags = flags;
 
+	on_demand->count_thread = NULL;
 	on_demand->thread_pool = NULL;
+
+	on_demand->to_scan_count = 0;
+	on_demand->scanned_count = 0;
+        on_demand->malware_count = 0;
+	on_demand->suspicious_count = 0;
+
+	on_demand->progress_period = progress_period;
+	on_demand->last_progress_time = 0L;
+	on_demand->last_progress_value = A6O_ON_DEMAND_PROGRESS_UNKNOWN;
 
 	return on_demand;
 }
 
-struct a6o_scan *a6o_on_demand_get_scan(struct a6o_on_demand *on_demand)
-{
-	return on_demand->scan;
-}
-
-/* DIRTY */
-static int cancel = 0;
-
 void a6o_on_demand_cancel(struct a6o_on_demand *on_demand)
 {
   a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "-- on_demand_cancel call !");
-  cancel = 1;
 
+  /* to be reimplemented cleanly in scan.c */
 }
 
 static int a6o_on_demand_is_canceled(struct a6o_on_demand *on_demand)
 {
  // a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "cancel = %d", cancel);
- 
-  return cancel;
+
+  /* to be reimplemented cleanly */
+
+  return 0;
+}
+
+static void update_counters(struct a6o_on_demand *on_demand, enum a6o_file_status status)
+{
+       switch(status) {
+	case A6O_FILE_UNDECIDED:
+	case A6O_FILE_CLEAN:
+	case A6O_FILE_UNKNOWN_TYPE:
+	case A6O_FILE_EINVAL:
+	case A6O_FILE_IERROR:
+	case A6O_FILE_WHITE_LISTED:
+		break;
+	case A6O_FILE_SUSPICIOUS:
+		on_demand->suspicious_count++;
+		break;
+	case A6O_FILE_MALWARE:
+		on_demand->malware_count++;
+		break;
+      }
+}
+
+static void update_progress(struct a6o_on_demand *on_demand)
+{
+	int progress;
+
+	/* update the progress */
+	/* may be not thread safe, but who cares about precise values? */
+	on_demand->scanned_count++;
+
+	if (on_demand->to_scan_count == 0) {
+		progress = A6O_ON_DEMAND_PROGRESS_UNKNOWN;
+		return;
+	}
+
+	progress = (int)((100.0 * on_demand->scanned_count) / on_demand->to_scan_count);
+
+	if (progress > 100)
+		progress = 100;
+}
+
+#ifdef linux
+static time_t get_milliseconds(void)
+{
+	struct timeval now;
+
+	if (gettimeofday(&now, NULL) < 0) {
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, "error getting time IHM (%s)", strerror(errno));
+		return 0;
+	}
+
+	return now.tv_sec * 1000 + now.tv_usec / 1000;
+}
+#endif
+
+#ifdef _WIN32
+static time_t get_milliseconds( ) {
+
+	time_t ms = 0;
+	struct _timeb tb;
+
+	_ftime64_s(&tb);
+	ms = tb.time * 1000 + tb.millitm;
+
+	return ms;
+}
+#endif
+
+#define SEND_PERIOD 200  /* milliseconds */
+
+static int must_send_progress_event(struct a6o_on_demand *on_demand, struct a6o_report *report, time_t now)
+{
+	/* FIXME */
+	int progress = 42;
+
+	if (report->path == NULL)
+		return 0;
+
+	if (on_demand->last_progress_value == A6O_ON_DEMAND_PROGRESS_UNKNOWN)
+		return 1;
+
+	if (on_demand->last_progress_value != progress)
+		return 1;
+
+	if (on_demand->last_progress_time == 0)
+		return 1;
+
+	if((now - on_demand->last_progress_time) >= SEND_PERIOD)
+		return 1;
+
+	return 0;
+}
+
+static void fire_progress_event(struct a6o_on_demand *on_demand, struct a6o_report *report, int progress)
+{
+	time_t now;
+
+	now = get_milliseconds();
+	if (must_send_progress_event(on_demand, report, now)) {
+		/* FIXME */
+		/* create event and fire it */
+
+		on_demand->last_progress_time = now;
+		on_demand->last_progress_value = progress;
+	}
 }
 
 static void scan_file(struct a6o_on_demand *on_demand, const char *path)
 {
-	struct a6o_file_context file_context;
-	enum a6o_file_context_status context_status;
+	struct a6o_scan_context file_context;
+	enum a6o_scan_context_status context_status;
 
-	context_status = a6o_file_context_get(&file_context, -1, path, on_demand->scan_conf);
+	context_status = a6o_scan_context_get(&file_context, -1, path, on_demand->scan_conf);
 
-	if (context_status == ARMADITO_FC_MUST_SCAN)
-		a6o_scan_context(on_demand->scan, &file_context);
-	else if (context_status == ARMADITO_FC_FILE_OPEN_ERROR)
-		process_error(on_demand->scan, path, errno);
+	if (context_status == A6O_SC_MUST_SCAN)
+		a6o_scan_context_scan(&file_context);
+	else if (context_status == A6O_SC_FILE_OPEN_ERROR)
+		process_error(path, errno);
 
-	a6o_file_context_destroy(&file_context);
+	a6o_scan_context_destroy(&file_context);
 }
 
 /* the thread function called by the thread pool, in case of threaded scan */
@@ -121,8 +246,9 @@ static void scan_entry_thread_fun(gpointer data, gpointer user_data)
 		return;
 	}
 #endif
-	if(!cancel)
-	   scan_file(on_demand, path);
+
+	/* must check cancellation */
+	scan_file(on_demand, path);
 
 	/* path was strdup'ed, so free it */
 	free(path);
@@ -135,19 +261,21 @@ static void scan_entry_thread_fun(gpointer data, gpointer user_data)
 }
 
 /* this function is called when an error is found during directory traversal */
-static void process_error(struct a6o_scan *scan, const char *full_path, int entry_errno)
+static void process_error(const char *full_path, int entry_errno)
 {
+	/* must send a detection event? */
+	/* FIXME */
+#if 0
 	struct a6o_report report;
 
-	a6o_report_init(&report, scan->scan_id, full_path, REPORT_PROGRESS_UNKNOWN);
-
+	a6o_report_init(&report, 42 /* scan->scan_id */, full_path, A6O_ON_DEMAND_PROGRESS_UNKNOWN);
 	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "error processing %s (error %s)", full_path, os_strerror(entry_errno));
 
 	report.status = A6O_FILE_IERROR;
 	report.mod_report = os_strdup(os_strerror(entry_errno));
-	a6o_scan_call_callbacks(scan, &report);
 
 	a6o_report_destroy(&report);
+#endif
 }
 
 /* scan one entry of the directory traversal */
@@ -164,7 +292,7 @@ static int scan_entry(const char *full_path, enum os_file_flag flags, int entry_
 	}
 
 	if (flags & FILE_FLAG_IS_ERROR) {
-		process_error(on_demand->scan, full_path, entry_errno);
+		process_error(full_path, entry_errno);
 		return 1;
 	}
 
@@ -172,11 +300,10 @@ static int scan_entry(const char *full_path, enum os_file_flag flags, int entry_
 		return 1;
 
 	/* if scan is multi thread, just queue the scan to the thread pool, otherwise do it here */
-	if (on_demand->flags & ARMADITO_SCAN_THREADED){
-		
-		if(full_path != NULL)
+	if (on_demand->flags & A6O_SCAN_THREADED) {
+		if( full_path != NULL)
 		   g_thread_pool_push(on_demand->thread_pool, (gpointer)os_strdup(full_path), NULL);
-		/* 
+		/*
 		   full_path can be NULL if AV is launched as normal user and file rights are 700 for example.
 		   In this case, we just skip these files to avoid segfault. To be improved.
 		*/
@@ -208,7 +335,7 @@ static int count_entry(const char *full_path, enum os_file_flag flags, int entry
 static gpointer count_thread_fun(gpointer data)
 {
 	struct a6o_on_demand *on_demand = (struct a6o_on_demand *)data;
-	int recurse = on_demand->flags & ARMADITO_SCAN_RECURSE;
+	int recurse = on_demand->flags & A6O_SCAN_RECURSE;
 	int count = 0;
 
 #ifdef WIN32
@@ -219,9 +346,9 @@ static gpointer count_thread_fun(gpointer data)
 #endif
 
 	os_dir_map(on_demand->root_path, recurse, count_entry, &count);
-	/* set the counter inside the a6o_scan struct only at the end, so */
+	/* set the counter inside the struct only at the end, so */
 	/* that the scan function does not see the intermediate values, only the last one */
-	on_demand->scan->to_scan_count = count;
+	on_demand->to_scan_count = count;
 
 #ifdef WIN32
 	if (Wow64RevertWow64FsRedirection(OldValue) == FALSE ) {
@@ -242,18 +369,21 @@ static void count_to_scan(struct a6o_on_demand *on_demand)
 }
 
 /* this function is called at the end of a scan, to send the 100% progress */
-static void final_progress(struct a6o_scan *scan)
+static void final_progress(void)
 {
+	/* must send a on_demand_completed_event */
+	/* FIXME */
+#if 0
 	struct a6o_report report;
 
-	a6o_report_init(&report, scan->scan_id, NULL, 100);
+	a6o_report_init(&report, 42/* scan->scan_id */, NULL, 100);
 
         report.scanned_count = scan->scanned_count;
-        report.suspicious_count = scan->suspicious_count;	
+        report.suspicious_count = scan->suspicious_count;
         report.malware_count = scan->malware_count;
 
-	a6o_scan_call_callbacks(scan, &report);
 	a6o_report_destroy(&report);
+#endif
 }
 
 /* NOTE: this function has several shortcomings: */
@@ -269,11 +399,11 @@ void a6o_on_demand_run(struct a6o_on_demand *on_demand)
 	int stat_errno;
 
 	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_INFO, "starting %sthreaded scan of %s",
-		on_demand->flags & ARMADITO_SCAN_THREADED ? "" : "non-",
+		on_demand->flags & A6O_SCAN_THREADED ? "" : "non-",
 		on_demand->root_path);
 
 	/* create the thread pool now */
-	if (on_demand->flags & ARMADITO_SCAN_THREADED)
+	if (on_demand->flags & A6O_SCAN_THREADED)
 		on_demand->thread_pool = g_thread_pool_new(scan_entry_thread_fun, on_demand, get_max_threads(), FALSE, NULL);
 
 	/* what is scan root_path? a file or a directory? */
@@ -282,13 +412,14 @@ void a6o_on_demand_run(struct a6o_on_demand *on_demand)
 	/* it is a file, scan it, in a thread if scan is threaded */
 	/* otherwise, walk through the directory and apply 'scan_entry' function to each entry (either file or directory) */
 	if (stat_buf.flags & FILE_FLAG_IS_PLAIN_FILE) {
-		on_demand->scan->to_scan_count = 1;
-		if (on_demand->flags & ARMADITO_SCAN_THREADED)
+		on_demand->to_scan_count = 1;
+
+		if (on_demand->flags & A6O_SCAN_THREADED)
 			g_thread_pool_push(on_demand->thread_pool, (gpointer)os_strdup(on_demand->root_path), NULL);
 		else
 			scan_file(on_demand, on_demand->root_path);
 	} else if (stat_buf.flags & FILE_FLAG_IS_DIRECTORY) {
-		int recurse = on_demand->flags & ARMADITO_SCAN_RECURSE;
+		int recurse = on_demand->flags & A6O_SCAN_RECURSE;
 
 		count_to_scan(on_demand);
 		os_dir_map(on_demand->root_path, recurse, scan_entry, on_demand);
@@ -296,11 +427,11 @@ void a6o_on_demand_run(struct a6o_on_demand *on_demand)
 
 	/* if threaded, free the thread_pool */
 	/* this has a side effect to wait for completion of *all* the scans queue'd in the thread pool */
-	if (on_demand->flags & ARMADITO_SCAN_THREADED)
+	if (on_demand->flags & A6O_SCAN_THREADED)
 		g_thread_pool_free(on_demand->thread_pool, FALSE, TRUE);
 
 	/* send the final progress (100%) */
-	final_progress(on_demand->scan);
+	final_progress();
 
 	if (on_demand->count_thread != NULL)
 		g_thread_join(on_demand->count_thread);
@@ -308,14 +439,6 @@ void a6o_on_demand_run(struct a6o_on_demand *on_demand)
 
 void a6o_on_demand_free(struct a6o_on_demand *on_demand)
 {
-	/* (FD) NO!!!!! yet, scan_conf are allocated once for all and must NOT be freed, */
-	/* otherwise next on-demand scan will get a memory corruption */
-	// a6o_scan_conf_free(on_demand->scan_conf);
-
-	cancel = 0;
-
-	a6o_scan_free(on_demand->scan);
-
 	free(on_demand);
 }
 

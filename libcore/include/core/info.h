@@ -19,22 +19,24 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _LIBARMADITO_SCANP_H_
-#define _LIBARMADITO_SCANP_H_
+#ifndef ARMADITO_CORE_INFO_H
+#define ARMADITO_CORE_INFO_H
 
-#include <glib.h>
+#include <libarmadito/armadito.h>
 
-struct a6o_scan {
-	GArray *callbacks;                  /* array of struct callback_entry */
-
-	int scan_id;                        /* scan id for GUI */
-
-	int to_scan_count;                  /* files to scan counter, to compute progress */
-	int scanned_count;                  /* already scanned counter, to compute progress */
-        int malware_count;                /* detected as malicious counter */
-	int suspicious_count;               /* detected as suspicious counter */
+struct a6o_info {
+	enum a6o_update_status global_status;
+	time_t global_update_ts;
+	/* NULL terminated array of pointers to struct a6o_module_info */
+	struct a6o_module_info **module_infos;
 };
 
-void a6o_scan_call_callbacks(struct a6o_scan *scan, struct a6o_report *report);
+const char *a6o_update_status_str(enum a6o_update_status status);
+
+struct a6o_info *a6o_info_new(struct armadito *armadito);
+
+void a6o_info_to_stdout(struct a6o_info *info);
+
+void a6o_info_free(struct a6o_info *info);
 
 #endif

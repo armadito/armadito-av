@@ -24,9 +24,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <libarmadito/armadito.h>
 
 #include "armadito_p.h"
-#include "info_p.h"
 #include "string_p.h"
 #include "core/io.h"
+#include "core/info.h"
 
 #include <assert.h>
 #include <glib.h>
