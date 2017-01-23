@@ -11,7 +11,7 @@ include /usr/share/dpkg/default.mk
 #export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 
 %:
-	dh $@  --with autotools-dev
+	dh $@  --with autotools-dev,autoreconf
 
 #override_dh_installinit:
 #	dh_installinit -plibarmadito-daemon --onlyscripts --name=armadito-scand
