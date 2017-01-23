@@ -1,2 +1,2 @@
-debian/tmp/usr/lib/*/libarmadito.so.*
-debian/tmp/etc/armadito/*.conf
+debian/armadito-core/usr/lib/*/libarmadito.so.*
+debian/armadito-core/etc/armadito/*.conf
