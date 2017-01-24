@@ -52,7 +52,10 @@ static int scan_method(json_t *params, json_t **result, void *connection_data)
 
 	/* FIXME */
 	/* must get period from params */
-	on_demand = a6o_on_demand_new(armadito, s_param->root_path, A6O_SCAN_RECURSE | A6O_SCAN_THREADED, 0);
+	/* on_demand = a6o_on_demand_new(armadito, s_param->root_path, A6O_SCAN_RECURSE | A6O_SCAN_THREADED, 0); */
+	/* FIXME */
+	/* not threaded for debug */
+	on_demand = a6o_on_demand_new(armadito, s_param->root_path, A6O_SCAN_RECURSE, 0);
 
 	g_thread_new("scan thread", scan_thread_fun, on_demand);
 

@@ -115,42 +115,20 @@ static int a6o_on_demand_is_canceled(struct a6o_on_demand *on_demand)
   return 0;
 }
 
-static void update_counters(struct a6o_on_demand *on_demand, enum a6o_file_status status)
+static void update_counters(struct a6o_on_demand *on_demand, struct a6o_report *report)
 {
-       switch(status) {
-	case A6O_FILE_UNDECIDED:
-	case A6O_FILE_CLEAN:
-	case A6O_FILE_UNKNOWN_TYPE:
-	case A6O_FILE_EINVAL:
-	case A6O_FILE_IERROR:
-	case A6O_FILE_WHITE_LISTED:
-		break;
+	g_atomic_int_inc(&on_demand->scanned_count);
+
+	switch(report->status) {
 	case A6O_FILE_SUSPICIOUS:
-		on_demand->suspicious_count++;
+		g_atomic_int_inc(&on_demand->suspicious_count);
 		break;
 	case A6O_FILE_MALWARE:
-		on_demand->malware_count++;
+		g_atomic_int_inc(&on_demand->malware_count);
+		break;
+	default:
 		break;
       }
-}
-
-static void update_progress(struct a6o_on_demand *on_demand)
-{
-	int progress;
-
-	/* update the progress */
-	/* may be not thread safe, but who cares about precise values? */
-	on_demand->scanned_count++;
-
-	if (on_demand->to_scan_count == 0) {
-		progress = A6O_ON_DEMAND_PROGRESS_UNKNOWN;
-		return;
-	}
-
-	progress = (int)((100.0 * on_demand->scanned_count) / on_demand->to_scan_count);
-
-	if (progress > 100)
-		progress = 100;
 }
 
 #ifdef linux
@@ -182,11 +160,8 @@ static time_t get_milliseconds( ) {
 
 #define SEND_PERIOD 200  /* milliseconds */
 
-static int must_send_progress_event(struct a6o_on_demand *on_demand, struct a6o_report *report, time_t now)
+static int must_send_progress_event(struct a6o_on_demand *on_demand, struct a6o_report *report, int progress, time_t now)
 {
-	/* FIXME */
-	int progress = 42;
-
 	if (report->path == NULL)
 		return 0;
 
@@ -207,13 +182,31 @@ static int must_send_progress_event(struct a6o_on_demand *on_demand, struct a6o_
 
 static void fire_progress_event(struct a6o_on_demand *on_demand, struct a6o_report *report, int progress)
 {
+	/* FIXME */
+	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "fire_progress_event(path=%s, progress=%s)", report->path, progress);
+
+	/* create event and fire it */
+}
+
+static void update_progress(struct a6o_on_demand *on_demand, struct a6o_report *report)
+{
+	int progress;
 	time_t now;
 
-	now = get_milliseconds();
-	if (must_send_progress_event(on_demand, report, now)) {
-		/* FIXME */
-		/* create event and fire it */
+	if (on_demand->to_scan_count == 0) {
+		progress = A6O_ON_DEMAND_PROGRESS_UNKNOWN;
+		return;
+	}
 
+	progress = (int)((100.0 * on_demand->scanned_count) / on_demand->to_scan_count);
+
+	if (progress > 100)
+		progress = 100;
+
+	now = get_milliseconds();
+
+	if (must_send_progress_event(on_demand, report, progress, now)) {
+		fire_progress_event(on_demand, report, progress);
 		on_demand->last_progress_time = now;
 		on_demand->last_progress_value = progress;
 	}
@@ -223,15 +216,23 @@ static void scan_file(struct a6o_on_demand *on_demand, const char *path)
 {
 	struct a6o_scan_context file_context;
 	enum a6o_scan_context_status context_status;
+	struct a6o_report report;
 
 	context_status = a6o_scan_context_get(&file_context, -1, path, on_demand->scan_conf);
 
 	if (context_status == A6O_SC_MUST_SCAN)
-		a6o_scan_context_scan(&file_context);
+		a6o_scan_context_scan(&file_context, &report);
 	else if (context_status == A6O_SC_FILE_OPEN_ERROR)
 		process_error(path, errno);
 
+	/* update counters */
+	update_counters(on_demand, &report);
+
+	/* update progress */
+	update_counters(on_demand, &report);
+
 	a6o_scan_context_destroy(&file_context);
+	a6o_report_destroy(&report);
 }
 
 /* the thread function called by the thread pool, in case of threaded scan */

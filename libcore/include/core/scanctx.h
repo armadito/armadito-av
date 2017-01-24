@@ -22,6 +22,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef ARMADITO_CORE_FILECTX_H
 #define ARMADITO_CORE_FILECTX_H
 
+#include <core/report.h>
 #include <core/scanconf.h>
 
 enum a6o_scan_context_status {
@@ -45,7 +46,7 @@ struct a6o_scan_context {
 
 enum a6o_scan_context_status a6o_scan_context_get(struct a6o_scan_context *ctx, int fd, const char *path, struct a6o_scan_conf *conf);
 
-enum a6o_file_status a6o_scan_context_scan(struct a6o_scan_context *ctx);
+enum a6o_file_status a6o_scan_context_scan(struct a6o_scan_context *ctx, struct a6o_report *report);
 
 /* FIXME */
 /* should it be merged with _destroy ?*/

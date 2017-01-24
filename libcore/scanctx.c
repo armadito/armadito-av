@@ -170,37 +170,24 @@ static enum a6o_file_status scan_apply_modules(int fd, const char *path, const c
 
 /* scan a file context: */
 /* - apply the modules to scan the file */
-/* - and call the callbacks  */
-enum a6o_file_status a6o_scan_context_scan(struct a6o_scan_context *ctx)
+enum a6o_file_status a6o_scan_context_scan(struct a6o_scan_context *ctx, struct a6o_report *report)
 {
 	enum a6o_file_status status;
-	struct a6o_report report;
 
-	//a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "scanning file %s", ctx->path);
+	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "scanning file %s", ctx->path);
 
-	/* initializes the structure passed to callbacks */
-	/* FIXME */
-	a6o_report_init(&report, ctx->path);
+	/* initializes the structure */
+	a6o_report_init(report, ctx->path);
 
 	/* if no modules apply, then file is not handled */
 	if (ctx->applicable_modules == NULL || ctx->mime_type == NULL) {
 		status = A6O_FILE_UNKNOWN_TYPE;
-		a6o_report_change(&report, status, NULL, NULL);
-	} else {
-		/* otherwise we scan it by applying the modules */
-		status = scan_apply_modules(ctx->fd, ctx->path, ctx->mime_type, ctx->applicable_modules, &report);
+		a6o_report_change(report, status, NULL, NULL);
+		return status;
 	}
 
-	/* FIXME */
-#if 0
-	/* compute progress if have one */
-	scan_progress(scan, &report);
-
-	update_counters(scan, &report, status);
-#endif
-
-	/* and free the report (it may contain a strdup'ed string) */
-	a6o_report_destroy(&report);
+	/* otherwise we scan it by applying the modules */
+	status = scan_apply_modules(ctx->fd, ctx->path, ctx->mime_type, ctx->applicable_modules, report);
 
 	return status;
 }
