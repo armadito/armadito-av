@@ -1,10 +1,10 @@
-debian/armadito-core/usr/bin/armadito-info
-debian/armadito-core/usr/bin/armadito-scan
-debian/armadito-core/etc/armadito/conf.d/on-access-linux.conf
-debian/armadito-core/etc/default/armadito-scand-def
-debian/armadito-core/etc/init.d/armadito-scand
-debian/armadito-core/etc/logrotate.d/armadito
-debian/armadito-core/etc/rsyslog.d/15-armadito.conf
-debian/armadito-core/usr/lib/*/armadito/modules/on-access-linux.so
-debian/armadito-core/usr/sbin/armadito-scand
+debian/tmp/usr/bin/armadito-info
+debian/tmp/usr/bin/armadito-scan
+debian/tmp/etc/armadito/conf.d/on-access-linux.conf
+debian/tmp/etc/default/armadito-scand-def
+debian/tmp/etc/init.d/armadito-scand
+debian/tmp/etc/logrotate.d/armadito
+debian/tmp/etc/rsyslog.d/15-armadito.conf
+debian/tmp/usr/lib/*/armadito/modules/on-access-linux.so
+debian/tmp/usr/sbin/armadito-scand
 

@@ -1,7 +1,7 @@
-debian/libarmadito-dev/usr/lib/*/libarmadito.so
-debian/libarmadito-dev/usr/include/libarmadito
-debian/libarmadito-dev/usr/include/libarmadito.h
-debian/libarmadito-dev/usr/lib/*/pkgconfig/libarmadito.pc
+debian/tmp/usr/lib/*/libarmadito.so
+debian/tmp/usr/include/libarmadito
+debian/tmp/usr/include/libarmadito.h
+debian/tmp/usr/lib/*/pkgconfig/libarmadito.pc
 
 
 
