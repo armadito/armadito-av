@@ -38,6 +38,11 @@ static gpointer scan_thread_fun(gpointer data)
 	return NULL;
 }
 
+static void progress_event_cb(struct a6o_event *ev, void *data)
+{
+	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "progress_event_cb: path=%s progress=%d", ev->u.ev_on_demand_progress.path, ev->u.ev_on_demand_progress.progress);
+}
+
 static int scan_method(json_t *params, json_t **result, void *connection_data)
 {
 	struct armadito *armadito = (struct armadito *)connection_data;
@@ -52,10 +57,9 @@ static int scan_method(json_t *params, json_t **result, void *connection_data)
 
 	/* FIXME */
 	/* must get period from params */
-	/* on_demand = a6o_on_demand_new(armadito, s_param->root_path, A6O_SCAN_RECURSE | A6O_SCAN_THREADED, 0); */
-	/* FIXME */
-	/* not threaded for debug */
-	on_demand = a6o_on_demand_new(armadito, s_param->root_path, A6O_SCAN_RECURSE, 0);
+	on_demand = a6o_on_demand_new(armadito, s_param->root_path, A6O_SCAN_RECURSE | A6O_SCAN_THREADED, 0);
+
+	a6o_event_source_add_cb(a6o_on_demand_get_event_source(on_demand), EVENT_ON_DEMAND_PROGRESS, progress_event_cb, NULL);
 
 	g_thread_new("scan thread", scan_thread_fun, on_demand);
 

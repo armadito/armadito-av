@@ -24,11 +24,13 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "core/report.h"
 #include "core/ondemand.h"
-#include "string_p.h"
 #include "core/file.h"
 #include "core/scanctx.h"
 #include "core/io.h"
 #include "core/dir.h"
+#include "core/event.h"
+
+#include "string_p.h"
 
 #include <errno.h>
 #include <glib.h>
@@ -41,6 +43,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 struct a6o_on_demand {
 	struct a6o_scan_conf *scan_conf;
+
+	struct a6o_event_source *event_source;
 
 	const char *root_path;              /* root path of the scan */
 	enum a6o_scan_flags flags;        /* scan flags (recursive, threaded, etc) */
@@ -71,6 +75,8 @@ struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, const char *r
 	/* in future, can have many scan configurations */
 	on_demand->scan_conf = a6o_scan_conf_on_demand();
 
+	on_demand->event_source = a6o_event_source_new();
+
 #ifdef HAVE_REALPATH
 	on_demand->root_path = (const char *)realpath(root_path, NULL);
 	if (on_demand->root_path == NULL) {
@@ -99,11 +105,16 @@ struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, const char *r
 	return on_demand;
 }
 
+struct a6o_event_source *a6o_on_demand_get_event_source(struct a6o_on_demand *on_demand)
+{
+	return on_demand->event_source;
+}
+
 void a6o_on_demand_cancel(struct a6o_on_demand *on_demand)
 {
   a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "-- on_demand_cancel call !");
 
-  /* to be reimplemented cleanly in scan.c */
+  /* to be reimplemented cleanly */
 }
 
 static int a6o_on_demand_is_canceled(struct a6o_on_demand *on_demand)
@@ -182,10 +193,20 @@ static int must_send_progress_event(struct a6o_on_demand *on_demand, struct a6o_
 
 static void fire_progress_event(struct a6o_on_demand *on_demand, struct a6o_report *report, int progress)
 {
-	/* FIXME */
-	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "fire_progress_event(path=%s, progress=%s)", report->path, progress);
+	struct a6o_on_demand_progress_event progress_ev;
+	struct a6o_event *ev;
 
-	/* create event and fire it */
+	/* should strdup? */
+	progress_ev.path = report->path;
+	progress_ev.progress = progress;
+	progress_ev.malware_count = on_demand->malware_count;
+	progress_ev.suspicious_count = on_demand->suspicious_count;
+	progress_ev.scanned_count = on_demand->scanned_count;
+
+	ev = a6o_event_new(EVENT_ON_DEMAND_PROGRESS, &progress_ev);
+
+	a6o_event_source_fire_event(a6o_on_demand_get_event_source(on_demand), ev);
+	a6o_event_free(ev);
 }
 
 static void update_progress(struct a6o_on_demand *on_demand, struct a6o_report *report)
@@ -229,7 +250,7 @@ static void scan_file(struct a6o_on_demand *on_demand, const char *path)
 	update_counters(on_demand, &report);
 
 	/* update progress */
-	update_counters(on_demand, &report);
+	update_progress(on_demand, &report);
 
 	a6o_scan_context_destroy(&file_context);
 	a6o_report_destroy(&report);

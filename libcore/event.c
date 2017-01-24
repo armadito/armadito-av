@@ -195,6 +195,8 @@ void a6o_event_source_add_cb(struct a6o_event_source *s, enum a6o_event_type ev_
  	p->cb = cb;
 	p->data = data;
 	p->next = s->callbacks;
+
+	s->callbacks = p;
 }
 
 void a6o_event_source_remove_cb(struct a6o_event_source *s, enum a6o_event_type ev_mask, a6o_event_cb_t cb, void *data)
