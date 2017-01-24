@@ -1,6 +1,5 @@
 debian/tmp/usr/lib/*/libarmadito.so
 debian/tmp/usr/include/libarmadito
-debian/tmp/usr/include/libarmadito.h
 debian/tmp/usr/lib/*/pkgconfig/libarmadito.pc
 
 

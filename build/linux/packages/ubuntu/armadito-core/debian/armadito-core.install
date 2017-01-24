@@ -1,10 +1,8 @@
 debian/tmp/usr/bin/armadito-info
 debian/tmp/usr/bin/armadito-scan
-debian/tmp/etc/armadito/conf.d/on-access-linux.conf
 debian/tmp/etc/default/armadito-scand-def
 debian/tmp/etc/init.d/armadito-scand
 debian/tmp/etc/logrotate.d/armadito
 debian/tmp/etc/rsyslog.d/15-armadito.conf
-debian/tmp/usr/lib/*/armadito/modules/on-access-linux.so
 debian/tmp/usr/sbin/armadito-scand
 
