@@ -53,7 +53,7 @@ static void rpcbe_event_cb(struct a6o_event *ev, void *data)
 static int scan_method(struct jrpc_connection *conn, json_t *params, json_t **result)
 {
 	struct armadito *armadito = (struct armadito *)jrpc_connection_get_data(conn);
-	int ret;
+	int ret, event_mask;
 	struct a6o_rpc_scan_param *s_param;
 	struct a6o_on_demand *on_demand;
 
@@ -64,7 +64,11 @@ static int scan_method(struct jrpc_connection *conn, json_t *params, json_t **re
 
 	on_demand = a6o_on_demand_new(armadito, s_param->root_path, A6O_SCAN_RECURSE | A6O_SCAN_THREADED, s_param->send_progress);
 
-	a6o_event_source_add_cb(a6o_on_demand_get_event_source(on_demand), EVENT_DETECTION | EVENT_ON_DEMAND_PROGRESS, rpcbe_event_cb, conn);
+	event_mask = EVENT_DETECTION | EVENT_ON_DEMAND_COMPLETED;
+	if (s_param->send_progress)
+		event_mask |= EVENT_ON_DEMAND_PROGRESS;
+
+	a6o_event_source_add_cb(a6o_on_demand_get_event_source(on_demand),  event_mask, rpcbe_event_cb, conn);
 
 	g_thread_new("scan thread", scan_thread_fun, on_demand);
 

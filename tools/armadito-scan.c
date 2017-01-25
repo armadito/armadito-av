@@ -169,19 +169,19 @@ static void detection_event_print(struct a6o_detection_event *ev)
 		a6o_action_pretty_str(ev->scan_action));
 }
 
-static void on_demand_progress_event_print(struct a6o_on_demand_progress_event *ev)
+static void on_demand_completed_event_print(struct a6o_on_demand_completed_event *ev)
 {
-	/* ev->progress; */
-	/* ev->path; */
-	/* ev->malware_count; */
-	/* ev->suspicious_count; */
-	/* ev->scanned_count; */
+	printf("\nSCAN SUMMARY:\n");
+	printf("scanned files     : %ld\n", ev->total_scanned_count);
+	printf("malware files     : %ld\n", ev->total_malware_count);
+	printf("suspicious files  : %ld\n\n", ev->total_suspicious_count);
 }
 
 static int notify_event_method(struct jrpc_connection *conn, json_t *params, json_t **result)
 {
 	struct a6o_event *ev;
 	int ret;
+	int *p_done = (int *)jrpc_connection_get_data(conn);
 
 	if ((ret = JRPC_JSON2STRUCT(a6o_event, params, &ev)))
 		return ret;
@@ -189,9 +189,13 @@ static int notify_event_method(struct jrpc_connection *conn, json_t *params, jso
 	switch(ev->type) {
 	case EVENT_DETECTION:
 		detection_event_print(&ev->u.ev_detection);
-		break;
+ 		break;
 	case EVENT_ON_DEMAND_PROGRESS:
-		on_demand_progress_event_print(&ev->u.ev_on_demand_progress);
+		/* */
+		break;
+	case EVENT_ON_DEMAND_COMPLETED:
+		on_demand_completed_event_print(&ev->u.ev_on_demand_completed);
+		*p_done = 1;
 		break;
 	}
 
@@ -225,7 +229,7 @@ static int do_scan(struct scan_options *opts)
 		exit(EXIT_FAILURE);
 	}
 
-	conn = jrpc_connection_new(create_rpcfe_mapper(), NULL);
+	conn = jrpc_connection_new(create_rpcfe_mapper(), (void *)&done);
 
 	p_client_sock = malloc(sizeof(int));
 	*p_client_sock = client_sock;

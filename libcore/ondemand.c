@@ -57,6 +57,8 @@ struct a6o_on_demand {
         int malware_count;                  /* detected as malicious counter */
 	int suspicious_count;               /* detected as suspicious counter */
 
+	int was_cancelled;
+
 	time_t progress_period;
 	time_t last_progress_time;
 	int last_progress_value;
@@ -100,6 +102,8 @@ struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, const char *r
         on_demand->malware_count = 0;
 	on_demand->suspicious_count = 0;
 
+	on_demand->was_cancelled = 0;
+
 	if (send_progress)
 		on_demand->progress_period = DEFAULT_PROGRESS_PERIOD;
 	else
@@ -122,7 +126,7 @@ void a6o_on_demand_cancel(struct a6o_on_demand *on_demand)
   /* to be reimplemented cleanly */
 }
 
-static int a6o_on_demand_is_canceled(struct a6o_on_demand *on_demand)
+static int a6o_on_demand_is_cancelled(struct a6o_on_demand *on_demand)
 {
  // a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "cancel = %d", cancel);
 
@@ -256,6 +260,22 @@ static void fire_detection_event(struct a6o_on_demand *on_demand, struct a6o_rep
 	a6o_event_free(ev);
 }
 
+static void fire_on_demand_completed_event(struct a6o_on_demand *on_demand)
+{
+	struct a6o_on_demand_completed_event completed_ev;
+	struct a6o_event *ev;
+
+	completed_ev.cancelled = on_demand->was_cancelled;
+	completed_ev.total_malware_count = on_demand->malware_count;
+	completed_ev.total_suspicious_count = on_demand->suspicious_count;
+	completed_ev.total_scanned_count = on_demand->scanned_count;
+
+	ev = a6o_event_new(EVENT_ON_DEMAND_COMPLETED, &completed_ev);
+
+	a6o_event_source_fire_event(a6o_on_demand_get_event_source(on_demand), ev);
+	a6o_event_free(ev);
+}
+
 static void scan_file(struct a6o_on_demand *on_demand, const char *path)
 {
 	struct a6o_scan_context file_context;
@@ -333,7 +353,7 @@ static void process_error(const char *full_path, int entry_errno)
 static int scan_entry(const char *full_path, enum os_file_flag flags, int entry_errno, void *data)
 {
 	struct a6o_on_demand *on_demand = (struct a6o_on_demand *)data;
-	int canceled = a6o_on_demand_is_canceled(on_demand);
+	int canceled = a6o_on_demand_is_cancelled(on_demand);
 
 	if (canceled){
 		//a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "scan canceled on path %s", full_path);
@@ -380,7 +400,6 @@ static int count_entry(const char *full_path, enum os_file_flag flags, int entry
 	return 0;
 }
 
-
 static gpointer count_thread_fun(gpointer data)
 {
 	struct a6o_on_demand *on_demand = (struct a6o_on_demand *)data;
@@ -414,24 +433,6 @@ static void count_to_scan(struct a6o_on_demand *on_demand)
 	on_demand->count_thread = g_thread_new("to_scan_count_thread", count_thread_fun, on_demand);
 #elif defined(HAVE_GTHREAD_CREATE)
 	on_demand->count_thread = g_thread_create(count_thread_fun, on_demand, TRUE, NULL);
-#endif
-}
-
-/* this function is called at the end of a scan, to send the 100% progress */
-static void final_progress(void)
-{
-	/* must send a on_demand_completed_event */
-	/* FIXME */
-#if 0
-	struct a6o_report report;
-
-	a6o_report_init(&report, 42/* scan->scan_id */, NULL, 100);
-
-        report.scanned_count = scan->scanned_count;
-        report.suspicious_count = scan->suspicious_count;
-        report.malware_count = scan->malware_count;
-
-	a6o_report_destroy(&report);
 #endif
 }
 
@@ -481,8 +482,8 @@ void a6o_on_demand_run(struct a6o_on_demand *on_demand)
 	if (on_demand->flags & A6O_SCAN_THREADED)
 		g_thread_pool_free(on_demand->thread_pool, FALSE, TRUE);
 
-	/* send the final progress (100%) */
-	final_progress();
+	/* signal completion */
+	fire_on_demand_completed_event(on_demand);
 
 	if (on_demand->count_thread != NULL)
 		g_thread_join(on_demand->count_thread);
