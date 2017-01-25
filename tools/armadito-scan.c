@@ -185,6 +185,7 @@ static int do_scan(struct scan_options *opts)
 	/* jrpc_connection_set_error_handler(conn, client_error_handler); */
 
 	param.root_path = opts->path_to_scan;
+	param.send_progress = 1;
 	if ((ret = JRPC_STRUCT2JSON(a6o_rpc_scan_param, &param, &j_param)))
 		return ret;
 

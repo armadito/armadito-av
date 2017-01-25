@@ -64,8 +64,6 @@ static int scan_method(struct jrpc_connection *conn, json_t *params, json_t **re
 
 	a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_DEBUG, "scan path %s", s_param->root_path);
 
-	/* FIXME */
-	/* must get progress period from params */
 	on_demand = a6o_on_demand_new(armadito, s_param->root_path, A6O_SCAN_RECURSE | A6O_SCAN_THREADED, s_param->send_progress);
 
 	a6o_event_source_add_cb(a6o_on_demand_get_event_source(on_demand), EVENT_DETECTION | EVENT_ON_DEMAND_PROGRESS, rpcbe_event_cb, conn);
