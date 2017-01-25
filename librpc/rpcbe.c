@@ -44,8 +44,6 @@ static void rpcbe_event_cb(struct a6o_event *ev, void *data)
 	json_t *j_ev;
 	int ret;
 
-	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "progress_event_cb: path=%s progress=%d", ev->u.ev_on_demand_progress.path, ev->u.ev_on_demand_progress.progress);
-
 	if ((ret = JRPC_STRUCT2JSON(a6o_event, ev, &j_ev)))
 		return;
 

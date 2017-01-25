@@ -55,7 +55,7 @@ int jrpc_call(struct jrpc_connection *conn, const char *method, json_t *params, 
 	if (cb != NULL)
 		id = connection_register_callback(conn, cb, user_data);
 
-#ifdef DEBUG
+#ifdef JRPC_DEBUG
 	fprintf(stderr, "call: method %s id %ld\n", method, id);
 #endif
 	call = make_call_obj(method, params, id);
@@ -181,7 +181,7 @@ static int connection_process_request(struct jrpc_connection *conn, struct rpc_o
 	json_t *result = NULL;
 	int ret, mth_ret;
 
-#ifdef DEBUG
+#ifdef JRPC_DEBUG
 	fprintf(stderr, "processing request: method %s id %ld\n", method, id);
 #endif
 
@@ -197,7 +197,7 @@ static int connection_process_request(struct jrpc_connection *conn, struct rpc_o
 	mth_ret = (*method_cb)(conn, params, &result);
 	if (mth_ret) {
 		const char *error_message;
-#ifdef DEBUG
+#ifdef JRPC_DEBUG
 		fprintf(stderr, "processing request: method %s returned error %d\n", method, mth_ret);
 #endif
 
@@ -227,7 +227,7 @@ static int connection_process_result(struct jrpc_connection *conn, struct rpc_ob
 	size_t id = r_obj->u.result_response.id;
 	json_t *result = r_obj->u.result_response.result;
 
-#ifdef DEBUG
+#ifdef JRPC_DEBUG
 	fprintf(stderr, "processing result: id %ld\n", id);
 #endif
 	cb = connection_find_callback(conn, id, &user_data);
@@ -249,7 +249,7 @@ static int connection_process_error(struct jrpc_connection *conn, struct rpc_obj
 	json_t *data = r_obj->u.error_response.data;
 	jrpc_error_handler_t error_handler = jrpc_connection_get_error_handler(conn);
 
-#ifdef DEBUG
+#ifdef JRPC_DEBUG
 	fprintf(stderr, "processing error: id %ld\n", id);
 #endif
 

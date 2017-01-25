@@ -17,7 +17,7 @@ jrpc.c \
 mapper.c \
 marshall.c 
 
-# -DDEBUG because is #defined in top-level config header
+# add -DJRPC_DEBUG for debug
 AM_CPPFLAGS=$(PTHREAD_CFLAGS) -I$(srcdir)/include -I$(srcdir) -I$(top_srcdir)/libmodule/include -I$(top_srcdir) @LIBJANSSON_CFLAGS@ -save-temps 
 
 noinst_HEADERS= \

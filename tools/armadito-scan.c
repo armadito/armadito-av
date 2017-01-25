@@ -26,6 +26,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <rpc/io.h>
 #include <rpc/rpctypes.h>
 #include <libjrpc/jrpc.h>
+#include <core/status.h>
+#include <core/action.h>
 
 #include <assert.h>
 #include <getopt.h>
@@ -159,12 +161,12 @@ static void scan_cb(json_t *result, void *user_data)
 
 static void detection_event_print(struct a6o_detection_event *ev)
 {
-	printf("%s: %d [%s - %s] (action %d)\n",
+	printf("%s: %s [%s - %s] (action %s)\n",
 		ev->path,
-		ev->scan_status,
+		a6o_file_status_pretty_str(ev->scan_status),
 		ev->module_name,
 		ev->module_report,
-		ev->scan_action);
+		a6o_action_pretty_str(ev->scan_action));
 }
 
 static void on_demand_progress_event_print(struct a6o_on_demand_progress_event *ev)

@@ -226,7 +226,7 @@ int connection_send(struct jrpc_connection *conn, json_t *obj)
 	/* \0 for DEBUG fprintf */
 	buffer_append(&b, "\r\n\r\n\0", 5);
 
-#ifdef DEBUG
+#ifdef JRPC_DEBUG
 	fprintf(stderr, "sending buffer: %s\n", buffer_data(&b));
 #endif
 	connection_lock(conn);
@@ -258,7 +258,7 @@ int connection_receive(struct jrpc_connection *conn, json_t **p_obj)
 	if (n_read == 0)
 		return JRPC_EOF;
 
-#ifdef DEBUG
+#ifdef JRPC_DEBUG
 	fprintf(stderr, "received buffer: %s\n", buffer);
 #endif
 
