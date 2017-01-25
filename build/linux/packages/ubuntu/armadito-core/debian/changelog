@@ -1,3 +1,9 @@
+armadito-core (0.12.7.1) UNRELEASED; urgency=medium
+
+  * Fixed failed package build on launchpad (missing files)
+
+ -- François Déchelle <fdechelle@teclib.com>  Wed, 25 Jan 2017 17:28:08 +0100
+
 armadito-core (0.12.7-0ubuntu1) xenial; urgency=medium
 
   * moving upstream version
