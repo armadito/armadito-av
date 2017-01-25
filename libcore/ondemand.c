@@ -68,7 +68,9 @@ static void process_error(const char *full_path, int entry_errno);
 const char *a6o_scan_conf_debug(struct a6o_scan_conf *c);
 #endif
 
-struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, const char *root_path, enum a6o_scan_flags flags, int progress_period)
+#define DEFAULT_PROGRESS_PERIOD 200  /* milliseconds */
+
+struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, const char *root_path, enum a6o_scan_flags flags, int send_progress)
 {
 	struct a6o_on_demand *on_demand = (struct a6o_on_demand *)malloc(sizeof(struct a6o_on_demand));
 
@@ -98,7 +100,10 @@ struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, const char *r
         on_demand->malware_count = 0;
 	on_demand->suspicious_count = 0;
 
-	on_demand->progress_period = progress_period;
+	if (send_progress)
+		on_demand->progress_period = DEFAULT_PROGRESS_PERIOD;
+	else
+		on_demand->progress_period = 0;
 	on_demand->last_progress_time = 0L;
 	on_demand->last_progress_value = A6O_ON_DEMAND_PROGRESS_UNKNOWN;
 
@@ -169,8 +174,6 @@ static time_t get_milliseconds( ) {
 }
 #endif
 
-#define SEND_PERIOD 200  /* milliseconds */
-
 static int must_send_progress_event(struct a6o_on_demand *on_demand, struct a6o_report *report, int progress, time_t now)
 {
 	if (report->path == NULL)
@@ -185,7 +188,7 @@ static int must_send_progress_event(struct a6o_on_demand *on_demand, struct a6o_
 	if (on_demand->last_progress_time == 0)
 		return 1;
 
-	if((now - on_demand->last_progress_time) >= SEND_PERIOD)
+	if((now - on_demand->last_progress_time) >= on_demand->progress_period)
 		return 1;
 
 	return 0;
@@ -214,10 +217,11 @@ static void update_progress(struct a6o_on_demand *on_demand, struct a6o_report *
 	int progress;
 	time_t now;
 
-	if (on_demand->to_scan_count == 0) {
-		progress = A6O_ON_DEMAND_PROGRESS_UNKNOWN;
+	if (on_demand->progress_period == 0)
 		return;
-	}
+
+	if (on_demand->to_scan_count == 0)
+		return;
 
 	progress = (int)((100.0 * on_demand->scanned_count) / on_demand->to_scan_count);
 
@@ -233,6 +237,25 @@ static void update_progress(struct a6o_on_demand *on_demand, struct a6o_report *
 	}
 }
 
+static void fire_detection_event(struct a6o_on_demand *on_demand, struct a6o_report *report)
+{
+	struct a6o_detection_event detection_ev;
+	struct a6o_event *ev;
+
+	detection_ev.context = CONTEXT_ON_DEMAND;
+	/* should strdup? */
+	detection_ev.path = report->path;
+	detection_ev.scan_status = report->status;
+	detection_ev.scan_action = report->action;
+	detection_ev.module_name = report->module_name;
+	detection_ev.module_report = report->module_report;
+
+	ev = a6o_event_new(EVENT_DETECTION, &detection_ev);
+
+	a6o_event_source_fire_event(a6o_on_demand_get_event_source(on_demand), ev);
+	a6o_event_free(ev);
+}
+
 static void scan_file(struct a6o_on_demand *on_demand, const char *path)
 {
 	struct a6o_scan_context file_context;
@@ -245,6 +268,10 @@ static void scan_file(struct a6o_on_demand *on_demand, const char *path)
 		a6o_scan_context_scan(&file_context, &report);
 	else if (context_status == A6O_SC_FILE_OPEN_ERROR)
 		process_error(path, errno);
+
+	if ((report.status == A6O_FILE_MALWARE || report.status == A6O_FILE_SUSPICIOUS)
+		&& report.path != NULL)
+		fire_detection_event(on_demand, &report);
 
 	/* update counters */
 	update_counters(on_demand, &report);
@@ -294,7 +321,7 @@ static void process_error(const char *full_path, int entry_errno)
 	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "error processing %s (error %s)", full_path, os_strerror(entry_errno));
 
 	report.status = A6O_FILE_IERROR;
-	report.mod_report = os_strdup(os_strerror(entry_errno));
+	report.module_report = os_strdup(os_strerror(entry_errno));
 
 	a6o_report_destroy(&report);
 #endif
@@ -443,7 +470,9 @@ void a6o_on_demand_run(struct a6o_on_demand *on_demand)
 	} else if (stat_buf.flags & FILE_FLAG_IS_DIRECTORY) {
 		int recurse = on_demand->flags & A6O_SCAN_RECURSE;
 
-		count_to_scan(on_demand);
+		if (on_demand->progress_period != 0)
+			count_to_scan(on_demand);
+
 		os_dir_map(on_demand->root_path, recurse, scan_entry, on_demand);
 	}
 

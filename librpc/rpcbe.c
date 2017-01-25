@@ -38,7 +38,7 @@ static gpointer scan_thread_fun(gpointer data)
 	return NULL;
 }
 
-static void progress_event_cb(struct a6o_event *ev, void *data)
+static void rpcbe_event_cb(struct a6o_event *ev, void *data)
 {
 	struct jrpc_connection *conn = (struct jrpc_connection *)data;
 	json_t *j_ev;
@@ -66,9 +66,9 @@ static int scan_method(struct jrpc_connection *conn, json_t *params, json_t **re
 
 	/* FIXME */
 	/* must get progress period from params */
-	on_demand = a6o_on_demand_new(armadito, s_param->root_path, A6O_SCAN_RECURSE | A6O_SCAN_THREADED, 0);
+	on_demand = a6o_on_demand_new(armadito, s_param->root_path, A6O_SCAN_RECURSE | A6O_SCAN_THREADED, s_param->send_progress);
 
-	a6o_event_source_add_cb(a6o_on_demand_get_event_source(on_demand), EVENT_ON_DEMAND_PROGRESS, progress_event_cb, conn);
+	a6o_event_source_add_cb(a6o_on_demand_get_event_source(on_demand), EVENT_DETECTION | EVENT_ON_DEMAND_PROGRESS, rpcbe_event_cb, conn);
 
 	g_thread_new("scan thread", scan_thread_fun, on_demand);
 

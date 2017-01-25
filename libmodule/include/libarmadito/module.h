@@ -45,7 +45,7 @@ struct a6o_module {
 
 	enum a6o_mod_status (*post_init_fun)(struct a6o_module *module);
 
-	enum a6o_file_status (*scan_fun)(struct a6o_module *module, int fd, const char *path, const char *mime_type, char **pmod_report);
+	enum a6o_file_status (*scan_fun)(struct a6o_module *module, int fd, const char *path, const char *mime_type, char **pmodule_report);
 
 	enum a6o_mod_status (*close_fun)(struct a6o_module *module);
 

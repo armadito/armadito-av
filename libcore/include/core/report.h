@@ -38,14 +38,14 @@ struct a6o_report {
 	char *path;                           /*!< the path of the scanned file                                       */
 	enum a6o_file_status status;          /*!< the scan status of the file (i.e. clean, malware, etc)             */
 	enum a6o_action action;               /*!< the action that was executed on this file (alert, quarantine, etc) */
-	char *mod_name;                       /*!< name of the module that decided the file scan status               */
-	char *mod_report;                     /*!< the report of this module, usually a malware name                  */
+	char *module_name;                       /*!< name of the module that decided the file scan status               */
+	char *module_report;                     /*!< the report of this module, usually a malware name                  */
 };
 
 void a6o_report_init(struct a6o_report *report, const char *path);
 
 void a6o_report_destroy(struct a6o_report *report);
 
-void a6o_report_change(struct a6o_report *report, enum a6o_file_status status, const char *mod_name, const char *mod_report);
+void a6o_report_change(struct a6o_report *report, enum a6o_file_status status, const char *module_name, const char *module_report);
 
 #endif

@@ -131,7 +131,7 @@ static enum a6o_file_status scan_apply_modules(int fd, const char *path, const c
 	for (; *modules != NULL; modules++) {
 		struct a6o_module *mod = *modules;
 		enum a6o_file_status mod_status;
-		char *mod_report = NULL;
+		char *module_report = NULL;
 
 		//a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "scanning fd %d path %s with module %s", fd, path, mod->name);
 
@@ -146,7 +146,7 @@ static enum a6o_file_status scan_apply_modules(int fd, const char *path, const c
 			return A6O_FILE_IERROR;
 		}
 
-		mod_status = (*mod->scan_fun)(mod, fd, path, mime_type, &mod_report);
+		mod_status = (*mod->scan_fun)(mod, fd, path, mime_type, &module_report);
 
 		/* then compare the status that was returned by the module with current status */
 		/* if current status is 'less than' (see status.c for comparison meaning) */
@@ -156,9 +156,9 @@ static enum a6o_file_status scan_apply_modules(int fd, const char *path, const c
 		if (a6o_file_status_cmp(current_status, mod_status) < 0) {
 			current_status = mod_status;
 			if (report != NULL)
-				a6o_report_change(report, mod_status, (char *)mod->name, mod_report);
-		} else if (mod_report != NULL)
-			free(mod_report);
+				a6o_report_change(report, mod_status, (char *)mod->name, module_report);
+		} else if (module_report != NULL)
+			free(module_report);
 
 		/* if module has returned an authoritative status, no need to go on */
 		if (current_status == A6O_FILE_WHITE_LISTED || current_status == A6O_FILE_MALWARE)

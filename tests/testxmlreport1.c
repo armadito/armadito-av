@@ -148,8 +148,8 @@ void document_add_alert(xmlDocPtr doc, struct a6o_report *report)
 	xmlNewChild(alert_node, NULL, "level", "2");
 	node = xmlNewChild(alert_node, NULL, "uri", report->path);
 	xmlNewProp(node, "type", "path");
-	xmlNewChild(alert_node, NULL, "module", report->mod_name);
-	xmlNewChild(alert_node, NULL, "module_specific", report->mod_report);
+	xmlNewChild(alert_node, NULL, "module", report->module_name);
+	xmlNewChild(alert_node, NULL, "module_specific", report->module_report);
 }
 
 void document_save(xmlDocPtr doc, const char *filename)
@@ -162,12 +162,12 @@ void document_free(xmlDocPtr doc)
 	xmlFreeDoc(doc);
 }
  
-static void report_fill(struct a6o_report *report, enum a6o_file_status status, const char *path, const char *mod_name, const char *mod_report)
+static void report_fill(struct a6o_report *report, enum a6o_file_status status, const char *path, const char *module_name, const char *module_report)
 {
 	report->status = status;
 	report->path = (char *)path;
-	report->mod_name = (char *)mod_name;
-	report->mod_report = (char *)mod_report;
+	report->module_name = (char *)module_name;
+	report->module_report = (char *)module_report;
 }
 
 int main(int argc, char **argv)

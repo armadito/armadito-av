@@ -139,7 +139,7 @@ int jrpc_unmarshall_struct_ptr(json_t *obj, void **pp, jrpc_unmarshall_cb_t unma
 		return JRPC_OK;
 	}
 
-	s = malloc(struct_size);
+	s = calloc(1, struct_size);
 
 	if ((ret = (*unmarshall_cb)(obj, s))) {
 		free(s);

@@ -145,4 +145,5 @@ JRPC_STRUCT_END
 
 JRPC_STRUCT(a6o_rpc_scan_param)
 	JRPC_STRUCT_FIELD_STRING(root_path)
+	JRPC_STRUCT_FIELD_INT(int, send_progress)
 JRPC_STRUCT_END

@@ -32,7 +32,7 @@ enum a6o_scan_flags {
 
 struct a6o_on_demand;
 
-struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, const char *root_path, enum a6o_scan_flags flags, int progress_period);
+struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, const char *root_path, enum a6o_scan_flags flags, int send_progress);
 
 struct a6o_event_source *a6o_on_demand_get_event_source(struct a6o_on_demand *on_demand);
 

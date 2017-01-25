@@ -39,29 +39,29 @@ void a6o_report_init(struct a6o_report *report, const char *path)
 		report->path = NULL;
 	report->status = A6O_FILE_UNDECIDED;
 	report->action = A6O_ACTION_NONE;
-	report->mod_name = NULL;
-	report->mod_report = NULL;
+	report->module_name = NULL;
+	report->module_report = NULL;
 }
 
 void a6o_report_destroy(struct a6o_report *report)
 {
 	if (report->path != NULL)
 		free(report->path);
-	if (report->mod_report != NULL)
-		free(report->mod_report);
+	if (report->module_report != NULL)
+		free(report->module_report);
 }
 
-void a6o_report_change(struct a6o_report *report, enum a6o_file_status status, const char *mod_name, const char *mod_report)
+void a6o_report_change(struct a6o_report *report, enum a6o_file_status status, const char *module_name, const char *module_report)
 {
 	report->status = status;
 
-	if (mod_name != NULL)
-		report->mod_name = (char *)mod_name;
+	if (module_name != NULL)
+		report->module_name = (char *)module_name;
 
-	if (mod_report != NULL) {
-		if (report->mod_report != NULL)
-			free(report->mod_report);
+	if (module_report != NULL) {
+		if (report->module_report != NULL)
+			free(report->module_report);
 
-		report->mod_report = (char *)mod_report;
+		report->module_report = (char *)module_report;
 	}
 }
