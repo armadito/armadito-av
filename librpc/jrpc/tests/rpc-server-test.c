@@ -77,17 +77,17 @@ static int operator_method(json_t *params, json_t **result, int (*operator)(int 
 	return JRPC_OK;
 }
 
-static int add_method(json_t *params, json_t **result, void *connection_data)
+static int add_method(struct jrpc_connection *conn, json_t *params, json_t **result)
 {
 	return operator_method(params, result, op_add);
 }
 
-static int div_method(json_t *params, json_t **result, void *connection_data)
+static int div_method(struct jrpc_connection *conn, json_t *params, json_t **result)
 {
 	return operator_method(params, result, op_div);
 }
 
-static int sqrt_method(json_t *params, json_t **result, void *connection_data)
+static int sqrt_method(struct jrpc_connection *conn, json_t *params, json_t **result)
 {
 	return operator_method(params, result, op_sqrt);
 }
@@ -132,7 +132,7 @@ static void notify_stop(void)
 	fprintf(stderr, "notifications stopped\n");
 }
 
-static int notify_method(json_t *params, json_t **result, void *connection_data)
+static int notify_method(struct jrpc_connection *conn, json_t *params, json_t **result)
 {
 	struct notify_action *action;
 	int ret;

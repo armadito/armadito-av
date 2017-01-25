@@ -40,12 +40,21 @@ static gpointer scan_thread_fun(gpointer data)
 
 static void progress_event_cb(struct a6o_event *ev, void *data)
 {
+	struct jrpc_connection *conn = (struct jrpc_connection *)data;
+	json_t *j_ev;
+	int ret;
+
 	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "progress_event_cb: path=%s progress=%d", ev->u.ev_on_demand_progress.path, ev->u.ev_on_demand_progress.progress);
+
+	if ((ret = JRPC_STRUCT2JSON(a6o_event, ev, &j_ev)))
+		return;
+
+	jrpc_notify(conn, "notify", j_ev);
 }
 
-static int scan_method(json_t *params, json_t **result, void *connection_data)
+static int scan_method(struct jrpc_connection *conn, json_t *params, json_t **result)
 {
-	struct armadito *armadito = (struct armadito *)connection_data;
+	struct armadito *armadito = (struct armadito *)jrpc_connection_get_data(conn);
 	int ret;
 	struct a6o_rpc_scan_param *s_param;
 	struct a6o_on_demand *on_demand;
@@ -56,19 +65,19 @@ static int scan_method(json_t *params, json_t **result, void *connection_data)
 	a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_DEBUG, "scan path %s", s_param->root_path);
 
 	/* FIXME */
-	/* must get period from params */
+	/* must get progress period from params */
 	on_demand = a6o_on_demand_new(armadito, s_param->root_path, A6O_SCAN_RECURSE | A6O_SCAN_THREADED, 0);
 
-	a6o_event_source_add_cb(a6o_on_demand_get_event_source(on_demand), EVENT_ON_DEMAND_PROGRESS, progress_event_cb, NULL);
+	a6o_event_source_add_cb(a6o_on_demand_get_event_source(on_demand), EVENT_ON_DEMAND_PROGRESS, progress_event_cb, conn);
 
 	g_thread_new("scan thread", scan_thread_fun, on_demand);
 
 	return JRPC_OK;
 }
 
-static int status_method(json_t *params, json_t **result, void *connection_data)
+static int status_method(struct jrpc_connection *conn, json_t *params, json_t **result)
 {
-	struct armadito *armadito = (struct armadito *)connection_data;
+	struct armadito *armadito = (struct armadito *)jrpc_connection_get_data(conn);
 	int ret;
 	struct a6o_info *info;
 

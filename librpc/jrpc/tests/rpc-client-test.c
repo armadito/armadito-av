@@ -107,7 +107,7 @@ static int test_notify(struct jrpc_connection *conn, const char *whot)
 	return jrpc_notify(conn, "notify", j_action);
 }
 
-static int do_notify_method(json_t *params, json_t **result, void *connection_data)
+static int do_notify_method(struct jrpc_connection *conn, json_t *params, json_t **result)
 {
 	fprintf(stderr, "I have been notified\n");
 

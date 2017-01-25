@@ -31,15 +31,17 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
  * JSON-RPC functions
  */
 
+struct jrpc_mapper;
+struct jrpc_connection;
+
 /*
  * RPC mapper
  * handles mapping method name to method definition
  */
-struct jrpc_mapper;
 
 struct jrpc_mapper *jrpc_mapper_new(void);
 
-typedef int (*jrpc_method_t)(json_t *params, json_t **result, void *connection_data);
+typedef int (*jrpc_method_t)(struct jrpc_connection *conn, json_t *params, json_t **result);
 
 int jrpc_mapper_add(struct jrpc_mapper *mapper, const char *method, jrpc_method_t method_cb);
 
@@ -55,7 +57,7 @@ int jrpc_mapper_add_error_message(struct jrpc_mapper *mapper, unsigned char erro
 
 struct jrpc_connection;
 
-struct jrpc_connection *jrpc_connection_new(struct jrpc_mapper *mapper, void *connection_data);
+struct jrpc_connection *jrpc_connection_new(struct jrpc_mapper *mapper, void *data);
 
 void *jrpc_connection_get_data(struct jrpc_connection *conn);
 

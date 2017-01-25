@@ -173,7 +173,8 @@ static json_t *make_error_obj(int code, const char *message, json_t *data, size_
 
 static int connection_process_request(struct jrpc_connection *conn, struct rpc_obj *r_obj)
 {
-	jrpc_method_t method_cb;
+	struct jrpc_mapper *mapper;
+	jrpc_method_t method_cb = NULL;
 	const char *method = r_obj->u.request.method;
 	size_t id = r_obj->u.request.id;
 	json_t *params = r_obj->u.request.params;
@@ -184,14 +185,16 @@ static int connection_process_request(struct jrpc_connection *conn, struct rpc_o
 	fprintf(stderr, "processing request: method %s id %ld\n", method, id);
 #endif
 
-	method_cb = jrpc_mapper_find(connection_get_mapper(conn), method);
+	mapper = connection_get_mapper(conn);
+	if (mapper != NULL)
+		method_cb = jrpc_mapper_find(mapper, method);
 	if (method_cb == NULL) {
 		ret = JRPC_ERR_METHOD_NOT_FOUND;
 		connection_send(conn, make_error_obj(ret, "method was not found", NULL, id));
 		return ret;
 	}
 
-	mth_ret = (*method_cb)(params, &result, jrpc_connection_get_data(conn));
+	mth_ret = (*method_cb)(conn, params, &result);
 	if (mth_ret) {
 		const char *error_message;
 #ifdef DEBUG
