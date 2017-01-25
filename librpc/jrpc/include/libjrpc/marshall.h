@@ -314,7 +314,11 @@ int jrpc_unmarshall_struct_##S(json_t *obj, void *p)	\
 	if ((ret = jrpc_unmarshall_struct_ptr(field, (void **)&(s->NAME), jrpc_unmarshall_struct_##S, sizeof(struct S))))	\
 		goto error_end;
 
-#define JRPC_STRUCT_FIELD_UNION(UNION_TYPE, NAME, TAG)
+#define JRPC_STRUCT_FIELD_UNION(UNION_TYPE, NAME, TAG)			\
+	if ((ret = jrpc_unmarshall_field(obj, #NAME, JSON_OBJECT, 0, &field))) \
+		goto error_end;						\
+	if ((ret = jrpc_unmarshall_union_##UNION_TYPE(field, (void *)&(s->NAME), s->TAG))) \
+		goto error_end;
 
 #define JRPC_STRUCT_END				\
 error_end:					\

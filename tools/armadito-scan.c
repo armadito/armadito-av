@@ -157,6 +157,55 @@ static void scan_cb(json_t *result, void *user_data)
 	*(int *)user_data = 1;
 }
 
+static void detection_event_print(struct a6o_detection_event *ev)
+{
+	printf("%s: %d [%s - %s] (action %d)\n",
+		ev->path,
+		ev->scan_status,
+		ev->module_name,
+		ev->module_report,
+		ev->scan_action);
+}
+
+static void on_demand_progress_event_print(struct a6o_on_demand_progress_event *ev)
+{
+	/* ev->progress; */
+	/* ev->path; */
+	/* ev->malware_count; */
+	/* ev->suspicious_count; */
+	/* ev->scanned_count; */
+}
+
+static int notify_event_method(struct jrpc_connection *conn, json_t *params, json_t **result)
+{
+	struct a6o_event *ev;
+	int ret;
+
+	if ((ret = JRPC_JSON2STRUCT(a6o_event, params, &ev)))
+		return ret;
+
+	switch(ev->type) {
+	case EVENT_DETECTION:
+		detection_event_print(&ev->u.ev_detection);
+		break;
+	case EVENT_ON_DEMAND_PROGRESS:
+		on_demand_progress_event_print(&ev->u.ev_on_demand_progress);
+		break;
+	}
+
+	return JRPC_OK;
+}
+
+static struct jrpc_mapper *create_rpcfe_mapper(void)
+{
+	struct jrpc_mapper *rpcfe_mapper;
+
+	rpcfe_mapper = jrpc_mapper_new();
+	jrpc_mapper_add(rpcfe_mapper, "notify_event", notify_event_method);
+
+	return rpcfe_mapper;
+}
+
 static int do_scan(struct scan_options *opts)
 {
 	struct jrpc_connection *conn;
@@ -174,7 +223,7 @@ static int do_scan(struct scan_options *opts)
 		exit(EXIT_FAILURE);
 	}
 
-	conn = jrpc_connection_new(NULL, NULL);
+	conn = jrpc_connection_new(create_rpcfe_mapper(), NULL);
 
 	p_client_sock = malloc(sizeof(int));
 	*p_client_sock = client_sock;

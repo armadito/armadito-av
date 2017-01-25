@@ -49,7 +49,7 @@ static void rpcbe_event_cb(struct a6o_event *ev, void *data)
 	if ((ret = JRPC_STRUCT2JSON(a6o_event, ev, &j_ev)))
 		return;
 
-	jrpc_notify(conn, "notify", j_ev);
+	jrpc_notify(conn, "notify_event", j_ev);
 }
 
 static int scan_method(struct jrpc_connection *conn, json_t *params, json_t **result)
