@@ -23,7 +23,7 @@ Description: Armadito core library - development files
 Package: armadito-core
 Section: libs
 Architecture: i386 amd64
-Depends: ${shlibs:Depends}, ${misc:Depends}, libarmadito (>= 0.10.0), libmicrohttpd, libcurl
+Depends: ${shlibs:Depends}, ${misc:Depends}, libarmadito (>= 0.10.0), libmicrohttpd10, libcurl3
 Description: Armadito core
  The package contains the Armadito daemon, the command line tools and the real-time protection module for Linux
 
