@@ -137,6 +137,36 @@ int scan_check_cb(struct MHD_Connection *connection, json_t *in)
 
 int scan_process_cb(struct api_handler *a, struct MHD_Connection *connection, json_t *in, json_t **out, void *user_data)
 {
+	json_t *j_path, *j_param;
+	const char *path, *token;
+	struct api_client *client;
+	struct a6o_rpc_scan_param param;
+	int ret;
+
+	token = api_get_token(connection);
+	/* this should not happen because the token presence has already been tested in API handler */
+	if (token == NULL)
+		return 1;
+
+	client = api_handler_get_client(a, token);
+	if (client == NULL)
+		return 1;
+
+	/* check of parameters has already been done in scan_check_cb */
+	j_path = json_object_get(in, "path");
+	path = json_string_value(j_path);
+
+	if (api_client_connect(client) < 0)
+		return 1;
+
+	param.root_path = path;
+	param.send_progress = 1;
+	if ((ret = JRPC_STRUCT2JSON(a6o_rpc_scan_param, &param, &j_param)))
+		return ret;
+
+	if ((ret = jrpc_call(api_client_get_connection(client), "scan", j_param, NULL, NULL)))
+		return ret;
+
 	return 1;
 }
 

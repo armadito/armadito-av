@@ -22,13 +22,20 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef HTTPD_APICLIENT_H
 #define HTTPD_APICLIENT_H
 
+#include <jansson.h>
+#include <libjrpc/jrpc.h>
+
 struct api_client;
 
 struct api_client *api_client_new(void);
 
-void api_client_free(struct api_client *c);
+void api_client_free(struct api_client *client);
 
-void api_client_start_thread(struct api_client *c);
+int api_client_connect(struct api_client *client);
+
+struct jrpc_connection *api_client_get_connection(struct api_client *client);
+
+void api_client_start_thread(struct api_client *client);
 
 void api_client_push_event(struct api_client *client, json_t *event);
 
