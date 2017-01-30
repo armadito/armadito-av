@@ -26,14 +26,16 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #define _GNU_SOURCE
 
-#include <libarmadito.h>
+#include <libarmadito/armadito.h>
 #include "armadito-config.h"
+
+#include "core/ondemand.h"
 
 #include "monitor.h"
 #include "famonitor.h"
 #include "imonitor.h"
 #include "mount.h"
-#include "onaccessmod.h"
+#include "modname.h"
 
 #include <assert.h>
 #include <dirent.h>
@@ -407,7 +409,7 @@ static gpointer scan_media_thread_fun(gpointer data)
 
 	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "starting scan of removable media mounted on %s", mount_data->path);
 
-	on_demand = a6o_on_demand_new(mount_data->monitor->ar, -1, mount_data->path, A6O_SCAN_THREADED | A6O_SCAN_RECURSE);
+	on_demand = a6o_on_demand_new(mount_data->monitor->ar, mount_data->path, A6O_SCAN_THREADED | A6O_SCAN_RECURSE, 0);
 	a6o_on_demand_run(on_demand);
 
 	a6o_on_demand_free(on_demand);

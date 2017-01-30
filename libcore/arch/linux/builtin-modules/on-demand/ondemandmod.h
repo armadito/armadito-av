@@ -19,8 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _LIBARMADITO_ONDEMANDMOD_H_
-#define _LIBARMADITO_ONDEMANDMOD_H_
+#ifndef LIBCORE_ONDEMANDMOD_H
+#define LIBCORE_ONDEMANDMOD_H
 
 #include <libarmadito/armadito.h>
 

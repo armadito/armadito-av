@@ -19,10 +19,13 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#include <libarmadito.h>
+#include <libarmadito/armadito.h>
+
+#include "core/scanconf.h"
 
 #include "monitor.h"
 #include "onaccessmod.h"
+#include "modname.h"
 
 #include <glib.h>
 #include <stdlib.h>
@@ -212,7 +215,7 @@ struct a6o_conf_entry mod_oal_conf_table[] = {
 	{ NULL, 0, NULL},
 };
 
-struct a6o_module module = {
+struct a6o_module on_access_linux_module = {
 	.init_fun = mod_oal_init,
 	.conf_table = mod_oal_conf_table,
 	.post_init_fun = mod_oal_post_init,

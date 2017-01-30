@@ -27,6 +27,28 @@ scanctx.c \
 status.c \
 status_p.h 
 
+if COND_FANOTIFY
+libcore_a_SOURCES += \
+arch/linux/builtin-modules/on-access/famonitor.c \
+arch/linux/builtin-modules/on-access/famonitor.h \
+arch/linux/builtin-modules/on-access/imonitor.c \
+arch/linux/builtin-modules/on-access/imonitor.h \
+arch/linux/builtin-modules/on-access/onaccessmod.c \
+arch/linux/builtin-modules/on-access/onaccessmod.h \
+arch/linux/builtin-modules/on-access/modname.h \
+arch/linux/builtin-modules/on-access/monitor.c \
+arch/linux/builtin-modules/on-access/monitor.h \
+arch/linux/builtin-modules/on-access/mount.c \
+arch/linux/builtin-modules/on-access/mount.h \
+arch/linux/builtin-modules/on-access/response.c \
+arch/linux/builtin-modules/on-access/response.h \
+arch/linux/builtin-modules/on-access/queue.c \
+arch/linux/builtin-modules/on-access/queue.h \
+arch/linux/builtin-modules/on-access/stamp.h \
+arch/linux/builtin-modules/on-access/watchdog.c \
+arch/linux/builtin-modules/on-access/watchdog.h
+endif
+
 libcore_a_CFLAGS=-I$(top_srcdir) -I$(top_srcdir)/libmodule/include -I$(top_srcdir)/libcore/include -I$(top_srcdir)/libcore/arch/linux
 #libcore_a_LIBADD= 
 

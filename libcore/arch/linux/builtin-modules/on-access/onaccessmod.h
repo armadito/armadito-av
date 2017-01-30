@@ -19,6 +19,11 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#define MODULE_NAME "on-access-linux"
-/* #define MODULE_LOG_NAME "OAL" */
-#define MODULE_LOG_NAME "on-access for linux"
+#ifndef LIBCORE_ONACCESSMOD_H
+#define LIBCORE_ONACCESSMOD_H
+
+#include <libarmadito/armadito.h>
+
+extern struct a6o_module on_access_linux_module;
+
+#endif
