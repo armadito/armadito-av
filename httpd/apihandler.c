@@ -28,6 +28,10 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <string.h>
 
+#include <rpc/io.h>
+#include <rpc/rpctypes.h>
+#include <libjrpc/jrpc.h>
+
 #include "api.h"
 #include "httpd.h"
 #include "log.h"
@@ -53,8 +57,6 @@ struct api_handler {
 	struct MHD_Response *response_422;
 	void *user_data;
 };
-
-static void api_client_free(struct api_client *c);
 
 static struct api_endpoint {
 	const char *path;
@@ -311,26 +313,6 @@ struct api_handler *api_handler_new(void *user_data)
 	return a;
 }
 
-struct api_client {
-	GAsyncQueue *event_queue;
-};
-
-static struct api_client *api_client_new(void)
-{
-	struct api_client *c = malloc(sizeof(struct api_client));
-
-	c->event_queue = g_async_queue_new();
-
-	return c;
-}
-
-static void api_client_free(struct api_client *c)
-{
-	g_async_queue_unref(c->event_queue);
-
-	free((void *)c);
-}
-
 int api_handler_add_client(struct api_handler *a, const char *token)
 {
 	struct api_client *client;
@@ -371,15 +353,5 @@ int api_handler_remove_client(struct api_handler *a, const char *token)
 	}
 
 	return 0;
-}
-
-void api_client_push_event(struct api_client *client, json_t *event)
-{
-	g_async_queue_push(client->event_queue, event);
-}
-
-void api_client_pop_event(struct api_client *client, json_t **p_event)
-{
-	*p_event = g_async_queue_pop(client->event_queue);
 }
 

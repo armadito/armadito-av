@@ -32,6 +32,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <jansson.h>
 
 #include "httpd.h"
+#include "apiclient.h"
 
 struct api_handler;
 
@@ -47,13 +48,8 @@ const char *api_get_user_agent(struct MHD_Connection *connection);
 const char *api_get_token(struct MHD_Connection *connection);
 const char *api_get_argument(struct MHD_Connection *connection, const char *key);
 
-struct api_client;
-
 int api_handler_add_client(struct api_handler *a, const char *token);
 struct api_client *api_handler_get_client(struct api_handler *a, const char *token);
 int api_handler_remove_client(struct api_handler *a, const char *token);
-
-void api_client_push_event(struct api_client *client, json_t *event);
-void api_client_pop_event(struct api_client *client, json_t **p_event);
 
 #endif

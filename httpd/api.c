@@ -20,6 +20,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 ***/
 
 #define _GNU_SOURCE
+
+#include "armadito-config.h"
+
 #include <glib.h>
 #include <jansson.h>
 #include <errno.h>
@@ -28,7 +31,10 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "armadito-config.h"
+#include <rpc/io.h>
+#include <rpc/rpctypes.h>
+#include <libjrpc/jrpc.h>
+
 #include "api.h"
 #include "log.h"
 
