@@ -165,9 +165,12 @@ int scan_process_cb(struct api_handler *a, struct MHD_Connection *connection, js
 		return ret;
 
 	if ((ret = jrpc_call(api_client_get_connection(client), "scan", j_param, NULL, NULL)))
-		return ret;
+		return 1;
 
-	return 1;
+	*out = json_object();
+	json_object_set(*out, "status", json_string("ok"));
+
+	return 0;
 }
 
 int status_process_cb(struct api_handler *a, struct MHD_Connection *connection, json_t *in, json_t **out, void *user_data)

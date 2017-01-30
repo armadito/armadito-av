@@ -43,27 +43,27 @@ function long_polling() {
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
             var ev = JSON.parse(xmlhttp.responseText);
-            if (ev.event_type == "OnDemandProgressEvent") {
-		document.getElementById("progress").innerHTML = ev.progress;
-		document.getElementById("current_path").innerHTML = ev.path;
-		document.getElementById("malware_count").innerHTML = ev.malware_count;
-		document.getElementById("suspicious_count").innerHTML = ev.suspicious_count;
-		document.getElementById("scanned_count").innerHTML = ev.scanned_count;
+            if (ev.type == "EVENT_ON_DEMAND_PROGRESS") {
+		document.getElementById("progress").innerHTML = ev.u.ev_on_demand_progress.progress;
+		document.getElementById("current_path").innerHTML = ev.u.ev_on_demand_progress.path;
+		document.getElementById("malware_count").innerHTML = ev.u.ev_on_demand_progress.malware_count;
+		document.getElementById("suspicious_count").innerHTML = ev.u.ev_on_demand_progress.suspicious_count;
+		document.getElementById("scanned_count").innerHTML = ev.u.ev_on_demand_progress.scanned_count;
 
 		long_polling();
-            } else if (ev.event_type == "DetectionEvent") {
+            } else if (ev.type == "EVENT_DETECTION") {
 		var results = document.getElementById("results")
 		var row = results.insertRow(1);
 		var path = row.insertCell(0);
-		path.innerHTML = ev.path;
+		path.innerHTML = ev.u.ev_detection.path;
 		var status = row.insertCell(1);
-		status.innerHTML = ev.scan_status;
+		status.innerHTML = ev.u.ev_detection.scan_status;
 		var action = row.insertCell(2);
-		action.innerHTML = ev.scan_action;
+		action.innerHTML = ev.u.ev_detection.scan_action;
 		var module = row.insertCell(3);
-		module.innerHTML = ev.module_name;
+		module.innerHTML = ev.u.ev_detection.module_name;
 		var module_report = row.insertCell(4);
-		module_report.innerHTML = ev.module_report;
+		module_report.innerHTML = ev.u.ev_detection.module_report;
 
 		long_polling();
             } else if (ev.event_type == "StatusEvent") {

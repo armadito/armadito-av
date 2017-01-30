@@ -2,7 +2,7 @@ if COND_MAN
 OPT_MAN_DIR=man
 endif
 
-SUBDIRS=conf libmodule libcore librpc httpd arch tools $(OPT_MAN_DIR)
+SUBDIRS=conf libmodule libcore librpc httpd arch tools tests $(OPT_MAN_DIR)
 
 TAGDIRS=\
 $(top_srcdir)/arch \

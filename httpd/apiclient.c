@@ -108,7 +108,6 @@ static gpointer api_client_thread(gpointer data)
 
 int api_client_connect(struct api_client *client)
 {
-	struct jrpc_connection *conn;
 	int client_sock;
 
 	client_sock = unix_client_connect(DEFAULT_SOCKET_PATH, 10);
@@ -118,12 +117,12 @@ int api_client_connect(struct api_client *client)
 		return -1;
 	}
 
-	conn = jrpc_connection_new(create_rpcfe_mapper(), client);
-
 	client->client_sock = client_sock;
 
-	jrpc_connection_set_read_cb(conn, unix_fd_read_cb, &client->client_sock);
-	jrpc_connection_set_write_cb(conn, unix_fd_write_cb, &client->client_sock);
+	client->conn = jrpc_connection_new(create_rpcfe_mapper(), client);
+
+	jrpc_connection_set_read_cb(client->conn, unix_fd_read_cb, &client->client_sock);
+	jrpc_connection_set_write_cb(client->conn, unix_fd_write_cb, &client->client_sock);
 
 	g_thread_new("api client thread", api_client_thread, client);
 

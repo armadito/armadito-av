@@ -19,7 +19,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#include <libarmadito.h>
+#include <libarmadito/armadito.h>
 
 int main(int argc, char **argv)
 {
