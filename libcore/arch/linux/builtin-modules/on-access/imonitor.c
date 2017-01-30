@@ -19,12 +19,12 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#include <libarmadito.h>
+#include <libarmadito/armadito.h>
 #include <armadito-config.h>
 
 #include "imonitor.h"
 #include "monitor.h"
-#include "onaccessmod.h"
+#include "modname.h"
 
 #include <assert.h>
 #include <errno.h>

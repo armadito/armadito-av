@@ -19,11 +19,11 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#include <libarmadito.h>
+#include <libarmadito/armadito.h>
 #include <armadito-config.h>
 
 #include "response.h"
-#include "onaccessmod.h"
+#include "modname.h"
 
 #include <errno.h>
 #include <linux/fanotify.h>

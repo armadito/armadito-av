@@ -13,10 +13,6 @@ AC_ARG_ENABLE([fanotify],
 # configuration header
 AM_CONFIG_HEADER(armadito-config-autoconf.h)
 
-# define builtin modules
-AC_DEFINE([HAVE_ON_DEMAND_MODULE],[1],[Define to compile builtin module on-demand])
-dnl AC_DEFINE([HAVE_QUARANTINE_MODULE],[1],[Define to compile builtin module quarantine])
-
 # This is needed when the first PKG_CHECK_MODULES call is inside a conditional (not the case here, but who knows)
 PKG_PROG_PKG_CONFIG
 
@@ -139,6 +135,13 @@ else
 	unset SAVE_CFLAGS
 fi
 AM_CONDITIONAL([COND_FANOTIFY], [test "$enable_fanotify" = "yes" -a "$HAVE_FANOTIFY_INIT" = "yes"])
+if test "$enable_fanotify" = "yes" -a "$HAVE_FANOTIFY_INIT" = "yes"; then
+   AC_DEFINE([HAVE_LINUX_ON_ACCESS_MODULE],[1],[Defined if builtin module on-access is compiled])
+fi
+
+# define builtin modules
+AC_DEFINE([HAVE_ON_DEMAND_MODULE],[1],[Define to compile builtin module on-demand])
+dnl AC_DEFINE([HAVE_QUARANTINE_MODULE],[1],[Define to compile builtin module quarantine])
 
 # check for jansson library (JSON)
 PKG_CHECK_MODULES(LIBJANSSON, jansson, [HAVE_LIBJANSSON=yes], [HAVE_LIBJANSSON=no])

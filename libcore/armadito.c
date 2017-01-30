@@ -32,6 +32,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef HAVE_ON_DEMAND_MODULE
 #include "builtin-modules/on-demand/ondemandmod.h"
 #endif
+#ifdef HAVE_LINUX_ON_ACCESS_MODULE
+#include "builtin-modules/on-access/onaccessmod.h"
+#endif
 #ifdef HAVE_QUARANTINE_MODULE
 #include "builtin-modules/quarantine/quarantine.h"
 #endif
@@ -68,6 +71,9 @@ static void a6o_add_builtin_modules(struct armadito *u)
 {
 #ifdef HAVE_ON_DEMAND_MODULE
 	module_manager_add(u->module_manager, &on_demand_module);
+#endif
+#ifdef HAVE_LINUX_ON_ACCESS_MODULE
+	module_manager_add(u->module_manager, &on_access_linux_module);
 #endif
 #ifdef HAVE_ON_ACCESS_WINDOWS_MODULE
 	module_manager_add(u->module_manager, &on_access_win_module);

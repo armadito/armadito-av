@@ -24,10 +24,13 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <libarmadito/armadito.h>
 #include <armadito-config.h>
 
+#include "core/scanconf.h"
+#include "core/scanctx.h"
+
 #include "monitor.h"
 #include "response.h"
 #include "watchdog.h"
-#include "onaccessmod.h"
+#include "modname.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -133,27 +136,25 @@ static void scan_file_thread_fun(gpointer data, gpointer user_data)
 {
 	struct fanotify_monitor *f = (struct fanotify_monitor *)user_data;
 	struct a6o_scan_context *file_context = (struct a6o_scan_context *)data;
-	struct a6o_scan *scan;
 	enum a6o_file_status status;
 	__u32 fan_r;
 
 	/* FIXME */
-	scan = a6o_scan_new(f->armadito, -1);
-	/* FIXME */
-	status = a6o_scan_context(scan, file_context);
+	/* initialize report */
+	status = a6o_scan_context_scan(file_context, NULL);
 	fan_r = status == A6O_FILE_MALWARE ? FAN_DENY : FAN_ALLOW;
 
 	if (watchdog_remove(f->watchdog, file_context->fd, NULL))
 		response_write(f->fanotify_fd, file_context->fd, fan_r, file_context->path, "scanned");
 
 	file_context->fd = -1; /* this will prevent a6o_scan_context_free from closing the file descriptor twice :( */
-	a6o_scan_context_free(file_context);
-	a6o_scan_free(scan);
+	a6o_scan_context_destroy(file_context);
+	free(file_context);
 }
 
 static void fanotify_perm_event_process(struct fanotify_monitor *f, struct fanotify_event_metadata *event, const char *path)
 {
-	struct a6o_scan_context file_context;
+	struct a6o_scan_context *file_context;
 	enum a6o_scan_context_status context_status;
 	struct stat buf;
 
@@ -175,23 +176,24 @@ static void fanotify_perm_event_process(struct fanotify_monitor *f, struct fanot
 		return;
 	}
 
-	context_status = a6o_scan_context_get(&file_context, event->fd, path, f->scan_conf);
+	file_context = malloc(sizeof(struct a6o_scan_context));
+	context_status = a6o_scan_context_get(file_context, event->fd, path, f->scan_conf);
 
 	if (context_status) {   /* means file must not be scanned */
 		if (watchdog_remove(f->watchdog, event->fd, NULL))
 			response_write(f->fanotify_fd, event->fd, FAN_ALLOW, path, "not scanned");
 
 #if 0
-		a6o_scan_context_close(&file_context);
+		a6o_scan_context_close(file_context);
 #endif
-
+		a6o_scan_context_destroy(file_context);
+		free(file_context);
 		return;
 	}
 
 #ifdef ENABLE_THREAD_POOL
 	/* scan in thread pool */
-	/* FIXME: clone by hand the structure, or allocate it before */
-	g_thread_pool_push(f->thread_pool, a6o_scan_context_clone(&file_context), NULL);
+	g_thread_pool_push(f->thread_pool, file_context, NULL);
 #else
 	if (watchdog_remove(f->watchdog, event->fd, NULL))
 		response_write(f->fanotify_fd, event->fd, FAN_ALLOW, path, "thread pool disabled");

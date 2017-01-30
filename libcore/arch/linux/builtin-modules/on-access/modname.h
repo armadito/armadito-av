@@ -19,23 +19,11 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _FAMONITOR_H_
-#define _FAMONITOR_H_
+#ifndef LIBCORE_MODNAME_H
+#define LIBCORE_MODNAME_H
 
-#include <libarmadito/armadito.h>
+#define MODULE_NAME "on-access-linux"
 
-struct fanotify_monitor;
-
-struct fanotify_monitor *fanotify_monitor_new(struct access_monitor *m, struct armadito *u);
-
-int fanotify_monitor_start(struct fanotify_monitor *f);
-
-int fanotify_monitor_mark_directory(struct fanotify_monitor *f, const char *path, int enable_permission);
-
-int fanotify_monitor_unmark_directory(struct fanotify_monitor *f, const char *path, int enable_permission);
-
-int fanotify_monitor_mark_mount(struct fanotify_monitor *f, const char *path, int enable_permission);
-
-int fanotify_monitor_unmark_mount(struct fanotify_monitor *f, const char *path, int enable_permission);
+#define MODULE_LOG_NAME "on-access for linux"
 
 #endif
