@@ -156,6 +156,7 @@ static void fanotify_perm_event_process(struct fanotify_monitor *f, struct fanot
 {
 	struct a6o_scan_context *file_context;
 	enum a6o_scan_context_status context_status;
+	struct a6o_report report;
 	struct stat buf;
 
 	/* the 2 following tests could be removed: */
@@ -177,7 +178,7 @@ static void fanotify_perm_event_process(struct fanotify_monitor *f, struct fanot
 	}
 
 	file_context = malloc(sizeof(struct a6o_scan_context));
-	context_status = a6o_scan_context_get(file_context, event->fd, path, f->scan_conf);
+	context_status = a6o_scan_context_get(file_context, event->fd, path, f->scan_conf, &report);
 
 	if (context_status) {   /* means file must not be scanned */
 		if (watchdog_remove(f->watchdog, event->fd, NULL))
