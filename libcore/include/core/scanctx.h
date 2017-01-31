@@ -44,7 +44,7 @@ struct a6o_scan_context {
 	struct a6o_module **applicable_modules;
 };
 
-enum a6o_scan_context_status a6o_scan_context_get(struct a6o_scan_context *ctx, int fd, const char *path, struct a6o_scan_conf *conf);
+enum a6o_scan_context_status a6o_scan_context_get(struct a6o_scan_context *ctx, int fd, const char *path, struct a6o_scan_conf *conf, struct a6o_report *report);
 
 enum a6o_file_status a6o_scan_context_scan(struct a6o_scan_context *ctx, struct a6o_report *report);
 

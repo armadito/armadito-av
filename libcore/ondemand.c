@@ -64,8 +64,6 @@ struct a6o_on_demand {
 	int last_progress_value;
 };
 
-static void process_error(const char *full_path, int entry_errno);
-
 #ifdef DEBUG
 const char *a6o_scan_conf_debug(struct a6o_scan_conf *c);
 #endif
@@ -276,18 +274,37 @@ static void fire_on_demand_completed_event(struct a6o_on_demand *on_demand)
 	a6o_event_free(ev);
 }
 
+/* this function is called when an error is found during directory traversal */
+/* or when an error occur during file scan */
+static void process_error(struct a6o_on_demand *on_demand, const char *path, int entry_errno)
+{
+	/* FIXME */
+	/* must send a detection event? */
+#if 0
+	struct a6o_report report;
+
+	a6o_report_init(&report, 42 /* scan->scan_id */, full_path, A6O_ON_DEMAND_PROGRESS_UNKNOWN);
+	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "error processing %s (error %s)", full_path, os_strerror(entry_errno));
+
+	report.status = A6O_FILE_IERROR;
+	report.module_report = os_strdup(os_strerror(entry_errno));
+
+	a6o_report_destroy(&report);
+#endif
+}
+
 static void scan_file(struct a6o_on_demand *on_demand, const char *path)
 {
 	struct a6o_scan_context file_context;
 	enum a6o_scan_context_status context_status;
 	struct a6o_report report;
 
-	context_status = a6o_scan_context_get(&file_context, -1, path, on_demand->scan_conf);
+	context_status = a6o_scan_context_get(&file_context, -1, path, on_demand->scan_conf, &report);
 
 	if (context_status == A6O_SC_MUST_SCAN)
 		a6o_scan_context_scan(&file_context, &report);
 	else if (context_status == A6O_SC_FILE_OPEN_ERROR)
-		process_error(path, errno);
+		process_error(on_demand, report.path, errno);
 
 	if ((report.status == A6O_FILE_MALWARE || report.status == A6O_FILE_SUSPICIOUS)
 		&& report.path != NULL)
@@ -329,24 +346,6 @@ static void scan_entry_thread_fun(gpointer data, gpointer user_data)
 #endif
 }
 
-/* this function is called when an error is found during directory traversal */
-static void process_error(const char *full_path, int entry_errno)
-{
-	/* must send a detection event? */
-	/* FIXME */
-#if 0
-	struct a6o_report report;
-
-	a6o_report_init(&report, 42 /* scan->scan_id */, full_path, A6O_ON_DEMAND_PROGRESS_UNKNOWN);
-	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "error processing %s (error %s)", full_path, os_strerror(entry_errno));
-
-	report.status = A6O_FILE_IERROR;
-	report.module_report = os_strdup(os_strerror(entry_errno));
-
-	a6o_report_destroy(&report);
-#endif
-}
-
 /* scan one entry of the directory traversal */
 /* entry can be either a directory, a file or anything else */
 /* we scan only plain files, but also signal errors */
@@ -361,7 +360,7 @@ static int scan_entry(const char *full_path, enum os_file_flag flags, int entry_
 	}
 
 	if (flags & FILE_FLAG_IS_ERROR) {
-		process_error(full_path, entry_errno);
+		process_error(on_demand, full_path, entry_errno);
 		return 1;
 	}
 
