@@ -24,6 +24,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <libarmadito/armadito.h>
 #include <armadito-config.h>
 
+#include "core/event.h"
+#include "core/handle.h"
 #include "core/scanconf.h"
 #include "core/scanctx.h"
 
@@ -43,9 +45,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
-/* #undef ENABLE_THREAD_POOL */
-#define ENABLE_THREAD_POOL
 
 struct fanotify_monitor {
 	struct access_monitor *monitor;
@@ -98,9 +97,7 @@ int fanotify_monitor_start(struct fanotify_monitor *f)
 
 	f->watchdog = watchdog_new(f->fanotify_fd);
 
-#ifdef ENABLE_THREAD_POOL
 	f->thread_pool = g_thread_pool_new(scan_file_thread_fun, f, -1, FALSE, NULL);
-#endif
 
 	/* add the fanotify file desc to the thread loop */
 	fanotify_channel = g_io_channel_unix_new(f->fanotify_fd);
@@ -132,31 +129,61 @@ static char *get_file_path_from_fd(int fd, char *buffer, size_t buffer_size)
 	return buffer;
 }
 
+struct scan_thread_data {
+	struct a6o_scan_context *file_context;
+	struct a6o_report *report;
+};
+
+static void fire_detection_event(struct fanotify_monitor *f, struct a6o_report *report)
+{
+	struct a6o_detection_event detection_ev;
+	struct a6o_event *ev;
+
+	detection_ev.context = CONTEXT_REAL_TIME;
+	/* should strdup? */
+	detection_ev.path = report->path;
+	detection_ev.scan_status = report->status;
+	detection_ev.scan_action = report->action;
+	detection_ev.module_name = report->module_name;
+	detection_ev.module_report = report->module_report;
+
+	ev = a6o_event_new(EVENT_DETECTION, &detection_ev);
+
+	a6o_event_source_fire_event(a6o_get_event_source(f->armadito), ev);
+	a6o_event_free(ev);
+}
+
 static void scan_file_thread_fun(gpointer data, gpointer user_data)
 {
 	struct fanotify_monitor *f = (struct fanotify_monitor *)user_data;
-	struct a6o_scan_context *file_context = (struct a6o_scan_context *)data;
+	struct scan_thread_data *thread_data = (struct scan_thread_data *)data;
+	struct a6o_scan_context *file_context = thread_data->file_context;
+	struct a6o_report *report = thread_data->report;
 	enum a6o_file_status status;
 	__u32 fan_r;
 
-	/* FIXME */
-	/* initialize report */
-	status = a6o_scan_context_scan(file_context, NULL);
+	status = a6o_scan_context_scan(file_context, report);
 	fan_r = status == A6O_FILE_MALWARE ? FAN_DENY : FAN_ALLOW;
 
 	if (watchdog_remove(f->watchdog, file_context->fd, NULL))
 		response_write(f->fanotify_fd, file_context->fd, fan_r, file_context->path, "scanned");
 
-	file_context->fd = -1; /* this will prevent a6o_scan_context_free from closing the file descriptor twice :( */
+	file_context->fd = -1; /* this will prevent a6o_scan_context_destroy from closing the file descriptor twice :( */
 	a6o_scan_context_destroy(file_context);
 	free(file_context);
+
+	if ((status == A6O_FILE_MALWARE || status == A6O_FILE_SUSPICIOUS)
+		&& report->path != NULL)
+		fire_detection_event(f, report);
+
+	a6o_report_destroy(report);
+	free(report);
+
+	free(thread_data);
 }
 
-static void fanotify_perm_event_process(struct fanotify_monitor *f, struct fanotify_event_metadata *event, const char *path)
+static int stat_check(struct fanotify_monitor *f, int fd, const char *path)
 {
-	struct a6o_scan_context *file_context;
-	enum a6o_scan_context_status context_status;
-	struct a6o_report report;
 	struct stat buf;
 
 	/* the 2 following tests could be removed: */
@@ -165,40 +192,56 @@ static void fanotify_perm_event_process(struct fanotify_monitor *f, struct fanot
 	/* BUT: this gives a lot of warning in os_mime_type_guess() */
 	/* and the read() in os_mime_type_guess() could be successfull for a device for instance */
 	/* so for now I keep the fstat() */
-	if (fstat(event->fd, &buf) < 0) {
-		if (watchdog_remove(f->watchdog, event->fd, NULL))
-			response_write(f->fanotify_fd, event->fd, FAN_ALLOW, path, "stat failed");
-		return;
+	if (fstat(fd, &buf) < 0) {
+		if (watchdog_remove(f->watchdog, fd, NULL))
+			response_write(f->fanotify_fd, fd, FAN_ALLOW, path, "stat failed");
+		return 1;
 	}
 
 	if (!S_ISREG(buf.st_mode)) {
-		if (watchdog_remove(f->watchdog, event->fd, NULL))
-			response_write(f->fanotify_fd, event->fd, FAN_ALLOW, path, "not a file");
-		return;
+		if (watchdog_remove(f->watchdog, fd, NULL))
+			response_write(f->fanotify_fd, fd, FAN_ALLOW, path, "not a file");
+		return 1;
 	}
 
-	file_context = malloc(sizeof(struct a6o_scan_context));
-	context_status = a6o_scan_context_get(file_context, event->fd, path, f->scan_conf, &report);
+	return 0;
+}
 
-	if (context_status) {   /* means file must not be scanned */
+static void fanotify_perm_event_process(struct fanotify_monitor *f, struct fanotify_event_metadata *event, const char *path)
+{
+	struct scan_thread_data *thread_data;
+	struct a6o_scan_context *file_context;
+	struct a6o_report *report;
+
+	if (stat_check(f, event->fd, path))
+		return;
+
+	file_context = malloc(sizeof(struct a6o_scan_context));
+	report = malloc(sizeof(struct a6o_report));
+
+	if (a6o_scan_context_get(file_context, event->fd, path, f->scan_conf, report)) {   /* means file must not be scanned */
 		if (watchdog_remove(f->watchdog, event->fd, NULL))
 			response_write(f->fanotify_fd, event->fd, FAN_ALLOW, path, "not scanned");
 
-#if 0
-		a6o_scan_context_close(file_context);
-#endif
+		/* FIXME */
+		/* should same stuff as in scan_file_thread_fun be applied? */
+		/* as response_write closes the file descriptor */
+		file_context->fd = -1; /* this will prevent a6o_scan_context_destroy from closing the file descriptor twice :( */
 		a6o_scan_context_destroy(file_context);
 		free(file_context);
+
+		a6o_report_destroy(report);
+		free(report);
+
 		return;
 	}
 
-#ifdef ENABLE_THREAD_POOL
 	/* scan in thread pool */
-	g_thread_pool_push(f->thread_pool, file_context, NULL);
-#else
-	if (watchdog_remove(f->watchdog, event->fd, NULL))
-		response_write(f->fanotify_fd, event->fd, FAN_ALLOW, path, "thread pool disabled");
-#endif
+	thread_data = malloc(sizeof(struct scan_thread_data));
+	thread_data->file_context = file_context;
+	thread_data->report = report;
+
+	g_thread_pool_push(f->thread_pool, thread_data, NULL);
 }
 
 static void fanotify_notify_event_process(struct fanotify_monitor *m, struct fanotify_event_metadata *event)

@@ -86,4 +86,6 @@ int a6o_close(struct armadito *u, a6o_error **error);
 
 struct a6o_conf *a6o_get_conf(struct armadito *u);
 
+struct a6o_event_source *a6o_get_event_source(struct armadito *u);
+
 #endif

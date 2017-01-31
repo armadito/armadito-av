@@ -27,17 +27,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <glib.h>
 
-static gpointer scan_thread_fun(gpointer data)
-{
-	struct a6o_on_demand *on_demand = (struct a6o_on_demand *)data;
-
-	a6o_on_demand_run(on_demand);
-
-	a6o_on_demand_free(on_demand);
-
-	return NULL;
-}
-
 static void rpcbe_event_cb(struct a6o_event *ev, void *data)
 {
 	struct jrpc_connection *conn = (struct jrpc_connection *)data;
@@ -48,6 +37,17 @@ static void rpcbe_event_cb(struct a6o_event *ev, void *data)
 		return;
 
 	jrpc_notify(conn, "notify_event", j_ev);
+}
+
+static gpointer scan_thread_fun(gpointer data)
+{
+	struct a6o_on_demand *on_demand = (struct a6o_on_demand *)data;
+
+	a6o_on_demand_run(on_demand);
+
+	a6o_on_demand_free(on_demand);
+
+	return NULL;
 }
 
 static int scan_method(struct jrpc_connection *conn, json_t *params, json_t **result)

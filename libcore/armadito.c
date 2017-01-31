@@ -27,6 +27,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "status_p.h"
 #include "armadito_p.h"
 #include "core/mimetype.h"
+#include "core/event.h"
 #include "core/dir.h"
 #include "core/error.h"
 #ifdef HAVE_ON_DEMAND_MODULE
@@ -50,6 +51,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 struct armadito {
 	struct module_manager *module_manager;
 	struct a6o_conf *conf;
+	struct a6o_event_source *event_source;
 };
 
 static struct armadito *a6o_new(void)
@@ -57,6 +59,7 @@ static struct armadito *a6o_new(void)
 	struct armadito *u = g_new(struct armadito, 1);
 
 	u->module_manager = module_manager_new(u);
+	u->event_source = a6o_event_source_new();
 
 	return u;
 }
@@ -64,7 +67,13 @@ static struct armadito *a6o_new(void)
 static void a6o_free(struct armadito *u)
 {
 	module_manager_free(u->module_manager);
+	a6o_event_source_free(u->event_source);
 	g_free(u);
+}
+
+struct a6o_event_source *a6o_get_event_source(struct armadito *u)
+{
+	return u->event_source;
 }
 
 static void a6o_add_builtin_modules(struct armadito *u)

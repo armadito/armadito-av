@@ -490,6 +490,7 @@ void a6o_on_demand_run(struct a6o_on_demand *on_demand)
 
 void a6o_on_demand_free(struct a6o_on_demand *on_demand)
 {
+	a6o_event_source_free(on_demand->event_source);
 	free(on_demand);
 }
 
