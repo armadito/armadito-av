@@ -219,5 +219,7 @@ int main(int argc, char **argv)
 
 	do_info(opts);
 
+	free(opts);
+
 	return 0;
 }
