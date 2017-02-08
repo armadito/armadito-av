@@ -120,7 +120,7 @@ static char *get_file_path_from_fd(int fd, char *buffer, size_t buffer_size)
 	if (fd <= 0)
 		return NULL;
 
-	sprintf(buffer, "/proc/self/fd/%d", fd);
+	snprintf(buffer, sizeof(buffer), "/proc/self/fd/%d", fd);
 	if ((len = readlink(buffer, buffer, buffer_size - 1)) < 0)
 		return NULL;
 
