@@ -114,14 +114,14 @@ struct access_monitor *access_monitor_new(struct armadito *armadito)
 	/* so that the monitor thread does not start before all modules are initialized  */
 	/* and the daemon main loop is entered */
 	if (pipe(m->start_pipe) < 0) {
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "pipe failed (%s)", strerror(errno));
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": pipe failed (%s)", strerror(errno));
 		g_free(m);
 		return NULL;
 	}
 
 	/* this pipe will be used to send commands to the monitor thread */
 	if (pipe(m->command_pipe) < 0) {
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "pipe failed (%s)", strerror(errno));
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": pipe failed (%s)", strerror(errno));
 		g_free(m);
 		return NULL;
 	}
@@ -137,7 +137,7 @@ struct access_monitor *access_monitor_new(struct armadito *armadito)
 
 	m->monitor_thread = g_thread_new("access monitor thread", monitor_thread_fun, m);
 
-	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "created monitor thread %p", m->monitor_thread);
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": created monitor thread %p", m->monitor_thread);
 
 	return m;
 }
@@ -222,18 +222,18 @@ void access_monitor_add_mount(struct access_monitor *m, const char *mount_point)
 	/* check that mount_point is not in the same partition as / */
 	slash_dev_id = get_dev_id("/");
 	if (slash_dev_id < 0) {
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "cannot get device id for / (%s)", strerror(errno));
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": cannot get device id for / (%s)", strerror(errno));
 		return;
 	}
 
 	mount_dev_id = get_dev_id(mount_point);
 	if (mount_dev_id < 0) {
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "cannot get device id for %s (%s)", mount_point, strerror(errno));
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": cannot get device id for %s (%s)", mount_point, strerror(errno));
 		return;
 	}
 
 	if (mount_dev_id == slash_dev_id) {
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "\"%s\" is in same partition as \"/\"; adding \"/\" as monitored mount point is not supported", mount_point);
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": \"%s\" is in same partition as \"/\"; adding \"/\" as monitored mount point is not supported", mount_point);
 		return;
 	}
 
@@ -264,13 +264,13 @@ static gboolean delayed_start_cb(GIOChannel *source, GIOCondition condition, gpo
 	char c;
 
 	if (read(m->start_pipe[0], &c, 1) < 0) {
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "read() in activation callback failed (%s)", strerror(errno));
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": read() in activation callback failed (%s)", strerror(errno));
 
 		return FALSE;
 	}
 
 	if (c != 'A') {
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "unexpected character ('%c' (0x%x) != 'A')", c, c);
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": unexpected character ('%c' (0x%x) != 'A')", c, c);
 		return FALSE;
 	}
 
@@ -292,7 +292,7 @@ static void mark_directory(struct access_monitor *m, const char *path)
 	if (inotify_monitor_mark_directory(m->inotify_monitor, path) < 0)
 		return;
 
-	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "added mark for directory %s", path);
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": added mark for directory %s", path);
 }
 
 int access_monitor_unmark_directory(struct access_monitor *m, const char *path)
@@ -303,7 +303,7 @@ int access_monitor_unmark_directory(struct access_monitor *m, const char *path)
 	if (inotify_monitor_unmark_directory(m->inotify_monitor, path) < 0)
 		return -1;
 
-	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "removed mark for directory %s", path);
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": removed mark for directory %s", path);
 
 	return 0;
 }
@@ -317,7 +317,7 @@ int access_monitor_recursive_mark_directory(struct access_monitor *m, const char
 	mark_directory(m, path);
 
 	if ((dir = opendir(path)) == NULL) {
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "error opening directory %s (%s)", path, strerror(errno));
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": error opening directory %s (%s)", path, strerror(errno));
 		return -1;
 	}
 
@@ -335,7 +335,7 @@ int access_monitor_recursive_mark_directory(struct access_monitor *m, const char
 	g_string_free(entry_path, TRUE);
 
 	if (closedir(dir) < 0)
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "error closing directory %s (%s)", path, strerror(errno));
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": error closing directory %s (%s)", path, strerror(errno));
 
 	return 0;
 }
@@ -345,7 +345,7 @@ static void mark_mount_point(struct access_monitor *m, const char *path)
 	if (fanotify_monitor_mark_mount(m->fanotify_monitor, path, m->enable_permission) < 0)
 		return;
 
-	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "added mark for mount point %s", path);
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": added mark for mount point %s", path);
 }
 
 static void unmark_mount_point(struct access_monitor *m, const char *path)
@@ -356,7 +356,7 @@ static void unmark_mount_point(struct access_monitor *m, const char *path)
 	if (fanotify_monitor_unmark_mount(m->fanotify_monitor, path, m->enable_permission) < 0)
 		return;
 
-	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": " "removed mark for mount point %s", path);
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": removed mark for mount point %s", path);
 }
 
 static void mark_entries(struct access_monitor *m)
@@ -407,14 +407,14 @@ static gpointer scan_media_thread_fun(gpointer data)
 	struct mount_data *mount_data = data;
 	struct a6o_on_demand *on_demand;
 
-	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "starting scan of removable media mounted on %s", mount_data->path);
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": starting scan of removable media mounted on %s", mount_data->path);
 
 	on_demand = a6o_on_demand_new(mount_data->monitor->ar, mount_data->path, A6O_SCAN_THREADED | A6O_SCAN_RECURSE, 0);
 	a6o_on_demand_run(on_demand);
 
 	a6o_on_demand_free(on_demand);
 
-	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "finished scan of removable media mounted on %s", mount_data->path);
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": finished scan of removable media mounted on %s", mount_data->path);
 
 	mount_data_free(mount_data);
 
@@ -436,7 +436,7 @@ static gboolean mount_idle_cb(gpointer user_data)
 
 	assert(g_main_context_is_owner(access_monitor_get_main_context(data->monitor)));
 
-	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "received mount notification for %s (%s)", data->path, data->ev_type == EVENT_MOUNT ? "mount" : "umount");
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": received mount notification for %s (%s)", data->path, data->ev_type == EVENT_MOUNT ? "mount" : "umount");
 
 	if (data->ev_type == EVENT_MOUNT) {
 		if (access_monitor_is_autoscan_removable_media(data->monitor))
@@ -502,12 +502,12 @@ static void access_monitor_start_command(struct access_monitor *m)
 	/* init all fanotify and inotify marks */
 	mark_entries(m);
 
-	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "on-access protection started");
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": on-access protection started");
 }
 
 static void access_monitor_stop_command(struct access_monitor *m)
 {
-	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "on-access protection stopped (Not Yet Implemented)");
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": on-access protection stopped (Not Yet Implemented)");
 }
 
 static void access_monitor_status_command(struct access_monitor *m)
@@ -523,7 +523,7 @@ static gboolean command_cb(GIOChannel *source, GIOCondition condition, gpointer 
 	assert(g_main_context_is_owner(m->monitor_thread_context));
 
 	if (read(m->command_pipe[0], &cmd, 1) < 0) {
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": " "read() in command callback failed (%s)", strerror(errno));
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": read() in command callback failed (%s)", strerror(errno));
 
 		return FALSE;
 	}
@@ -546,7 +546,7 @@ static gboolean command_cb(GIOChannel *source, GIOCondition condition, gpointer 
 int access_monitor_send_command(struct access_monitor *m, char command)
 {
 	if (write(m->command_pipe[1], &command, 1) < 0) {
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": " "error sending command to access monitor thread (%s)", strerror(errno));
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": error sending command to access monitor thread (%s)", strerror(errno));
 		return -1;
 	}
 
