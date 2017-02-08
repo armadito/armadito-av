@@ -49,7 +49,8 @@ static gpointer watchdog_thread_fun(gpointer data)
 	struct timespec timeout = { 0, TIMEOUT * ONE_MICROSECOND};
 	struct timespec sleep_duration = { 0, SLEEP * ONE_MICROSECOND};
 	struct timespec before;
-	int i, n_fd;
+	int i;
+	int n_fd;
 	struct queue_entry entries[N_FD];
 
 	while (1) {

@@ -274,7 +274,8 @@ int a6o_conf_save_file(struct a6o_conf *conf, const char *path, a6o_error **erro
 const char **a6o_conf_get_sections(struct a6o_conf *conf, size_t *p_len)
 {
 	const char **ret;
-	size_t len, i;
+	size_t len;
+	size_t i;
 
 	len = conf->sections->len;
 	ret = malloc((len + 1)*sizeof(const char *));
@@ -297,7 +298,8 @@ const char **a6o_conf_get_keys(struct a6o_conf *conf, const char *section, size_
 {
 	struct section_entry *s;
 	const char **ret;
-	size_t len, i;
+	size_t len;
+	size_t i;
 
 	s = section_entry_get(conf, section);
 	if (s == NULL)

@@ -177,7 +177,8 @@ struct a6o_event_source *a6o_event_source_new(void)
 
 void a6o_event_source_free(struct a6o_event_source *s)
 {
-	struct callback_entry *p, *next;
+	struct callback_entry *p;
+	struct callback_entry *next;
 
 	for (p = s->callbacks; p != NULL; p = next) {
 		next = p->next;
@@ -205,7 +206,8 @@ void a6o_event_source_remove_cb(struct a6o_event_source *s, enum a6o_event_type 
 
 	while (*p != NULL) {
 		if ((*p)->mask == ev_mask && (*p)->cb == cb && (*p)->data == data) {
-			struct callback_entry *to_free = *p, *next = (*p)->next;
+			struct callback_entry *to_free = *p;
+			struct callback_entry *next = (*p)->next;
 
 			free(to_free);
 			*p = next;

@@ -96,9 +96,16 @@ struct rpc_obj {
 
 static int json_rpc_unpack(json_t *j_obj, struct rpc_obj *r_obj)
 {
-	const char *version, *method, *message = NULL;
+	const char *version;
+	const char *method;
+	const char *message = NULL;
+	json_t *j_method = NULL;
+	json_t *params = NULL;
+	json_t *result = NULL;
+	json_t *error = NULL;
+	json_t *data = NULL;
+	json_t *j_id;
 	size_t id = 0;
-	json_t *j_method = NULL, *j_id, *params = NULL, *result = NULL, *error = NULL, *data = NULL;
 	int code;
 
 	/* does JSON object contain a "method"? if yes, it is a request */
@@ -156,7 +163,8 @@ static json_t *make_result_obj(json_t *result, size_t id)
 
 static json_t *make_error_obj(int code, const char *message, json_t *data, size_t id)
 {
-	json_t *j_err, *j_id;
+	json_t *j_err;
+	json_t *j_id;
 
 	j_err = json_pack("{s:i, s:s}", "code", code, "message", message);
 
@@ -179,7 +187,8 @@ static int connection_process_request(struct jrpc_connection *conn, struct rpc_o
 	size_t id = r_obj->u.request.id;
 	json_t *params = r_obj->u.request.params;
 	json_t *result = NULL;
-	int ret, mth_ret;
+	int ret;
+	int mth_ret;
 
 #ifdef JRPC_DEBUG
 	fprintf(stderr, "processing request: method %s id %ld\n", method, id);

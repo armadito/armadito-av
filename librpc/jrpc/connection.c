@@ -246,7 +246,7 @@ end:
 int connection_receive(struct jrpc_connection *conn, json_t **p_obj)
 {
 	json_error_t error;
-	ssize_t n_read, i;
+	ssize_t n_read;
 	char buffer[DEFAULT_INPUT_BUFFER_SIZE];
 
 	assert(conn->read_cb != NULL);

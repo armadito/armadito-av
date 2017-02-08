@@ -84,7 +84,8 @@ int os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data)
 	}
 
 	while(1) {
-		char *entry_path, *real_entry_path;
+		char *entry_path;
+		char *real_entry_path;
 		struct dirent *entry;
 		int saved_errno;
 
@@ -153,7 +154,9 @@ static int stat_dir(const char *path)
 
 int os_mkdir_p(const char *path)
 {
-	char *token, *full, *end;
+	char *token;
+	char *full;
+	char *end;
 	int ret = 0;
 
 	token = full = strdup(path);

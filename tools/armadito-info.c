@@ -80,7 +80,8 @@ static void parse_options(int argc, char **argv, struct info_options *opts)
 	opts->unix_socket_path = DEFAULT_SOCKET_PATH;
 
 	while (1) {
-		int c, option_index = 0;
+		int c;
+		int option_index = 0;
 
 		c = getopt_long(argc, argv, "hVva:", info_option_defs, &option_index);
 

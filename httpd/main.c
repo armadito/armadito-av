@@ -86,7 +86,8 @@ static void parse_options(int argc, char **argv, struct httpd_options *opts)
 	opts->port = DEFAULT_PORT;
 
 	while (1) {
-		int c, option_index = 0;
+		int c;
+		int option_index = 0;
 
 		c = getopt_long(argc, argv, "hVl:p:", daemon_option_defs, &option_index);
 

@@ -104,7 +104,8 @@ static void parse_options(int argc, char **argv, struct scan_options *opts)
 	opts->verbose = 0;
 
 	while (1) {
-		int c, option_index = 0;
+		int c;
+		int option_index = 0;
 
 		c = getopt_long(argc, argv, "hVvrtna:", scan_option_defs, &option_index);
 

@@ -63,7 +63,10 @@ static void debug_variant(GVariant *parameters, const char *msg)
 
 static int get_mount_event(GVariant *parameters, enum mount_event_type *pev_type, const char **pmount_point)
 {
-	GVariant *arg0, *arg1, *arg2, *val;
+	GVariant *arg0;
+	GVariant *arg1;
+	GVariant *arg2;
+	GVariant *val;
 	const char *prop_name;
 	const char **mount_points;
 	gsize n_mount_points;

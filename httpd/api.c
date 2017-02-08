@@ -137,8 +137,10 @@ int scan_check_cb(struct MHD_Connection *connection, json_t *in)
 
 int scan_process_cb(struct api_handler *a, struct MHD_Connection *connection, json_t *in, json_t **out, void *user_data)
 {
-	json_t *j_path, *j_param;
-	const char *path, *token;
+	json_t *j_path;
+	json_t *j_param;
+	const char *path;
+	const char *token;
 	struct api_client *client;
 	struct a6o_rpc_scan_param param;
 	int ret;
@@ -210,8 +212,10 @@ static char *get_root_path(const char *path)
 static int browse_path(const char *path, json_t *result)
 {
 	DIR *d;
-	json_t *j_entries, *j_entry;
-	char *root_path, *entry_path;
+	json_t *j_entries;
+	json_t *j_entry;
+	char *root_path;
+	char *entry_path;
 
 	if (path == NULL)
 		path = "/";

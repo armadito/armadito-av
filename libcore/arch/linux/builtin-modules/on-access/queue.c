@@ -129,7 +129,8 @@ int queue_pop_timeout(struct queue *q, struct timespec *before, struct queue_ent
 {
 	struct queue_node *n;
 	struct queue_node **to_free;
-	int count = 0, i;
+	int count = 0;
+	int i;
 
 	to_free = alloca(n_entries * sizeof(struct queue_node *));
 

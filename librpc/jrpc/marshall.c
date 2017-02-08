@@ -90,9 +90,11 @@ int jrpc_unmarshall_field(json_t *obj, const char *name, json_type expected_json
  */
 int jrpc_unmarshall_array(json_t *obj, void ***p_array, jrpc_unmarshall_cb_t unmarshall_cb, size_t elem_size)
 {
-	size_t index, size;
+	size_t index;
+	size_t size;
 	json_t *elem;
-	void **array, **p;
+	void **array;
+	void **p;
 	int ret = JRPC_OK;
 
 	if (json_is_null(obj)) {

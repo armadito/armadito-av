@@ -245,8 +245,10 @@ int api_handler_serve(struct api_handler *a, struct MHD_Connection *connection,
 {
 	struct api_endpoint *endpoint;
 	struct MHD_Response *response;
-	int http_status_code, ret;
-	json_t *j_request = NULL, *j_response = NULL;
+	int http_status_code;
+	int ret;
+	json_t *j_request = NULL;
+	json_t *j_response = NULL;
 
 	log_d("request to API: path %s", path);
 

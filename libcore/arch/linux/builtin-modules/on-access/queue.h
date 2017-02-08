@@ -32,11 +32,13 @@ struct queue_entry {
 
 struct queue_node {
 	struct queue_entry entry;
-	struct queue_node *prev, *next;
+	struct queue_node *prev;
+	struct queue_node *next;
 };
 
 struct queue {
-	struct queue_node *head, *tail;
+	struct queue_node *head;
+	struct queue_node *tail;
 	pthread_mutex_t queue_lock;
 };
 

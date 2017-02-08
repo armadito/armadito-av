@@ -53,7 +53,8 @@ static gpointer scan_thread_fun(gpointer data)
 static int scan_method(struct jrpc_connection *conn, json_t *params, json_t **result)
 {
 	struct armadito *armadito = (struct armadito *)jrpc_connection_get_data(conn);
-	int ret, event_mask;
+	int ret;
+	int event_mask;
 	struct a6o_rpc_scan_param *s_param;
 	struct a6o_on_demand *on_demand;
 

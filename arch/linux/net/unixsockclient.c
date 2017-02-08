@@ -36,7 +36,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 int unix_client_connect(const char *socket_path, int max_retry)
 {
-	int fd, r, retry_count = 0;
+	int fd;
+	int r;
+	int retry_count = 0;
 	struct sockaddr_un connect_addr;
 	socklen_t addrlen;
 	size_t path_len;

@@ -217,7 +217,8 @@ static dev_t get_dev_id(const char *path)
 
 void access_monitor_add_mount(struct access_monitor *m, const char *mount_point)
 {
-	dev_t mount_dev_id, slash_dev_id;
+	dev_t mount_dev_id;
+	dev_t slash_dev_id;
 
 	/* check that mount_point is not in the same partition as / */
 	slash_dev_id = get_dev_id("/");

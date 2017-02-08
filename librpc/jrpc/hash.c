@@ -141,7 +141,8 @@ void hash_table_print(struct hash_table *ht)
 /* PJW non-cryptographic string hash function */
 static uint32_t pjw32(const char *s)
 {
-	uint32_t h = 0, high;
+	uint32_t h = 0;
+	uint32_t high;
 	const char *p = s;
 
 	while (*p) {
@@ -219,7 +220,8 @@ static uint64_t fmix64(void *p)
 
 static void hash_table_rehash(struct hash_table *ht)
 {
-	size_t old_size, j;
+	size_t old_size;
+	size_t j;
 	struct hash_table_entry *old_table;
 
 	fprintf(stderr, "rehashing: %ld keys vs. %ld size\n", ht->key_count, ht->size);
@@ -230,7 +232,9 @@ static void hash_table_rehash(struct hash_table *ht)
 	ht->table = calloc(ht->size, sizeof(struct hash_table_entry));
 
 	for(j = 0; j < old_size; j++) {
-		size_t h, i, w;
+		size_t h;
+		size_t i;
+		size_t w;
 
 		h = HASH(ht, old_table[j].key) % ht->size;
 
@@ -263,7 +267,9 @@ static void hash_table_check_overflow(struct hash_table *ht)
 
 int hash_table_insert(struct hash_table *ht, void *key, void *value)
 {
-	size_t h, i, w;
+	size_t h;
+	size_t i;
+	size_t w;
 	int ret;
 
 	hash_table_check_overflow(ht);
@@ -303,7 +309,9 @@ int hash_table_insert(struct hash_table *ht, void *key, void *value)
 
 static struct hash_table_entry *lookup_entry(struct hash_table *ht, void *key)
 {
-	size_t h, i, w;
+	size_t h;
+	size_t i;
+	size_t w;
 
 	h = HASH(ht, key) % ht->size;
 
