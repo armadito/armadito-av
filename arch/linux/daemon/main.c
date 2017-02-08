@@ -112,7 +112,8 @@ static void parse_options(int argc, char **argv, struct a6o_daemon_options *opts
 	opts->pid_file = DEFAULT_PID_FILE;
 
 	while (1) {
-		int c, option_index = 0;
+		int c;
+		int option_index = 0;
 
 		c = getopt_long(argc, argv, "hVnl:a:i:p:", daemon_option_defs, &option_index);
 
