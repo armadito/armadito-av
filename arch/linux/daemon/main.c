@@ -159,8 +159,10 @@ static void create_pid_file(const char *pidfile)
 	if (f == NULL)
 		goto err;
 
-	if (fprintf(f, "%d\n", getpid()) < 0)
+	if (fprintf(f, "%d\n", getpid()) < 0) {
+		fclose(f);
 		goto err;
+	}
 
 	if (fclose(f) != 0)
 		goto err;
