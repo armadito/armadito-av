@@ -31,7 +31,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 int daemonize(void)
 {
-	pid_t pid, sid;
+	pid_t pid;
+	pid_t sid;
 
 	pid = fork();
 	if (pid < 0) {
