@@ -187,9 +187,9 @@ static const char *dirent_type(struct dirent *entry)
 		return "link";
 	case DT_REG:
 		return "file";
+	default:
+		return "other";
 	}
-
-	return "other";
 }
 
 static char *get_root_path(const char *path)
