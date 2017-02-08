@@ -226,6 +226,7 @@ static int do_scan(struct scan_options *opts)
 
 	if (client_sock < 0) {
 		perror("cannot connect");
+		free(opts);
 		exit(EXIT_FAILURE);
 	}
 
@@ -269,6 +270,8 @@ int main(int argc, char **argv)
 	parse_options(argc, argv, opts);
 
 	do_scan(opts);
+
+	free(opts);
 
 	return 0;
 }
