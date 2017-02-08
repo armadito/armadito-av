@@ -74,7 +74,6 @@ int inotify_monitor_start(struct inotify_monitor *im)
 
 	inotify_channel = g_io_channel_unix_new(im->inotify_fd);
 
-	/* g_io_add_watch(inotify_channel, G_IO_IN, inotify_cb, im); */
 	source = g_io_create_watch(inotify_channel, G_IO_IN);
 	g_source_set_callback(source, (GSourceFunc)inotify_cb, im, NULL);
 	g_source_attach(source, access_monitor_get_main_context(im->monitor));
