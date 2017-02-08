@@ -86,7 +86,7 @@ int inotify_monitor_mark_directory(struct inotify_monitor *im, const char *path)
 {
 	int wd;
 
-	wd = inotify_add_watch(im->inotify_fd, path, IN_ONLYDIR | IN_MOVE | IN_DELETE | IN_CREATE);
+	wd = inotify_add_watch(im->inotify_fd, path, (uint64_t)IN_ONLYDIR | (uint64_t)IN_MOVE | (uint64_t)IN_DELETE | (uint64_t)IN_CREATE);
 	if (wd == -1) {
 		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": adding inotify watch for %s failed (%s)", path, strerror(errno));
 		return -1;
