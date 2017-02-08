@@ -195,14 +195,18 @@ static int do_info(struct info_options *opts)
 	/* jrpc_connection_set_error_handler(conn, client_error_handler); */
 
 	ret = jrpc_call(conn, "status", NULL, info_cb, &done);
-	if (ret)
+	if (ret) {
+		jrpc_connection_free(conn);
 		return ret;
+	}
 
 	while((ret = jrpc_process(conn)) != JRPC_EOF && !done)
 		;
 
 	if (close(client_sock) < 0)
 		perror("closing connection");
+
+	jrpc_connection_free(conn);
 
 	return 0;
 }

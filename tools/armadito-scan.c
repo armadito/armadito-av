@@ -241,17 +241,23 @@ static int do_scan(struct scan_options *opts)
 
 	param.root_path = opts->path_to_scan;
 	param.send_progress = 1;
-	if ((ret = JRPC_STRUCT2JSON(a6o_rpc_scan_param, &param, &j_param)))
+	if ((ret = JRPC_STRUCT2JSON(a6o_rpc_scan_param, &param, &j_param))) {
+		jrpc_connection_free(conn);
 		return ret;
+	}
 
-	if ((ret = jrpc_call(conn, "scan", j_param, scan_cb, &done)))
+	if ((ret = jrpc_call(conn, "scan", j_param, scan_cb, &done))) {
+		jrpc_connection_free(conn);
 		return ret;
+	}
 
 	while((ret = jrpc_process(conn)) != JRPC_EOF && !done)
 		;
 
 	if (close(client_sock) < 0)
 		perror("closing connection");
+
+	jrpc_connection_free(conn);
 
 	return 0;
 }
