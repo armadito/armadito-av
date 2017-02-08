@@ -56,10 +56,11 @@ static int priority_from_level(enum a6o_log_level log_level)
 		return LOG_INFO;
 	case A6O_LOG_LEVEL_DEBUG:
 		return LOG_DEBUG;
+	default:
+		return LOG_INFO;
 	}
-
-	return LOG_INFO;
 }
+
 static void a6o_syslog_handler(enum a6o_log_domain domain, enum a6o_log_level log_level, const char *message, void *user_data)
 {
 	if (log_level != A6O_LOG_LEVEL_NONE)
