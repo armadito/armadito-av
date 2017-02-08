@@ -65,7 +65,7 @@ static void system_log(enum httpd_log_level log_level, const char *message)
 }
 #endif
 
-static void stderr_log(enum httpd_log_level log_level, const char *message)
+static void stderr_log(const char *message)
 {
 	fputs(message, stderr);
 }
@@ -91,7 +91,7 @@ static void do_log(enum httpd_log_level level, const char *s_level, const char *
 		system_log(level, message);
 		break;
 	case LOG_TO_STDERR:
-		stderr_log(level, message);
+		stderr_log(message);
 		break;
 	default:
 		break;
