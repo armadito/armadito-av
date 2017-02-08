@@ -202,8 +202,7 @@ static char *get_root_path(const char *path)
 		return strdup(path);
 
 	root_path = malloc(len + 2);
-	strcpy(root_path, path);
-	strcat(root_path, "/");
+	snprintf(root_path, sizeof(root_path), "%s/", path);
 
 	return root_path;
 }
