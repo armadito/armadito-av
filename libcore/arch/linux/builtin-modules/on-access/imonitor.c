@@ -166,7 +166,7 @@ static void inotify_event_log(const struct inotify_event *e, const char *full_pa
 
 static char *inotify_event_full_path(struct inotify_monitor *im, struct inotify_event *event)
 {
-	char *dir
+	char *dir;
 	char *full_path;
 
 	dir = (char *)g_hash_table_lookup(im->wd2path_table, GINT_TO_POINTER(event->wd));
