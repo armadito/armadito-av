@@ -65,14 +65,14 @@ static struct api_endpoint {
 	process_cb_t process_cb;
 	check_cb_t check_cb;
 } api_endpoint_table[] = {
-	{ "/register", HTTP_METHOD_GET, 0, register_process_cb, NULL},
-	{ "/unregister", HTTP_METHOD_GET, 1, unregister_process_cb, NULL},
-	{ "/ping", HTTP_METHOD_GET, 1, ping_process_cb, NULL},
-	{ "/event", HTTP_METHOD_GET, 1, event_process_cb, NULL},
-	{ "/scan", HTTP_METHOD_POST, 1, scan_process_cb, scan_check_cb},
-	{ "/status", HTTP_METHOD_GET, 1, status_process_cb, NULL},
-	{ "/browse", HTTP_METHOD_GET, 0, browse_process_cb, NULL},
-	{ "/version", HTTP_METHOD_GET, 0, version_process_cb, NULL},
+	{ "/register", HTTP_METHOD_GET, 0, &register_process_cb, NULL},
+	{ "/unregister", HTTP_METHOD_GET, 1, &unregister_process_cb, NULL},
+	{ "/ping", HTTP_METHOD_GET, 1, &ping_process_cb, NULL},
+	{ "/event", HTTP_METHOD_GET, 1, &event_process_cb, NULL},
+	{ "/scan", HTTP_METHOD_POST, 1, &scan_process_cb, &scan_check_cb},
+	{ "/status", HTTP_METHOD_GET, 1, &status_process_cb, NULL},
+	{ "/browse", HTTP_METHOD_GET, 0, &browse_process_cb, NULL},
+	{ "/version", HTTP_METHOD_GET, 0, &version_process_cb, NULL},
 	{ NULL, 0, 0, NULL, NULL},
 };
 

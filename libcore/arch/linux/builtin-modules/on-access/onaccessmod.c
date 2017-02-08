@@ -202,25 +202,25 @@ static enum a6o_mod_status mod_oal_close(struct a6o_module *module)
 }
 
 struct a6o_conf_entry mod_oal_conf_table[] = {
-	{ "enable", CONF_TYPE_INT, mod_oal_conf_enable},
-	{ "enable-permission", CONF_TYPE_INT, mod_oal_conf_enable_permission},
-	{ "enable-removable-media", CONF_TYPE_INT, mod_oal_conf_enable_removable_media},
-	{ "autoscan-removable-media", CONF_TYPE_INT, mod_oal_conf_autoscan_removable_media},
-	{ "mount", CONF_TYPE_STRING | CONF_TYPE_LIST, mod_oal_conf_mount},
-	{ "directory", CONF_TYPE_STRING | CONF_TYPE_LIST, mod_oal_conf_directory},
-	{ "white-list-dir", CONF_TYPE_STRING | CONF_TYPE_LIST, mod_oal_conf_white_list_dir},
-	{ "mime-types", CONF_TYPE_STRING | CONF_TYPE_LIST, mod_oal_conf_mime_types},
-	{ "modules", CONF_TYPE_STRING | CONF_TYPE_LIST, mod_oal_conf_modules},
-	{ "max-size", CONF_TYPE_INT, mod_oal_conf_max_size},
+	{ "enable", CONF_TYPE_INT, &mod_oal_conf_enable},
+	{ "enable-permission", CONF_TYPE_INT, &mod_oal_conf_enable_permission},
+	{ "enable-removable-media", CONF_TYPE_INT, &mod_oal_conf_enable_removable_media},
+	{ "autoscan-removable-media", CONF_TYPE_INT, &mod_oal_conf_autoscan_removable_media},
+	{ "mount", CONF_TYPE_STRING | CONF_TYPE_LIST, &mod_oal_conf_mount},
+	{ "directory", CONF_TYPE_STRING | CONF_TYPE_LIST, &mod_oal_conf_directory},
+	{ "white-list-dir", CONF_TYPE_STRING | CONF_TYPE_LIST, &mod_oal_conf_white_list_dir},
+	{ "mime-types", CONF_TYPE_STRING | CONF_TYPE_LIST, &mod_oal_conf_mime_types},
+	{ "modules", CONF_TYPE_STRING | CONF_TYPE_LIST, &mod_oal_conf_modules},
+	{ "max-size", CONF_TYPE_INT, &mod_oal_conf_max_size},
 	{ NULL, 0, NULL},
 };
 
 struct a6o_module on_access_linux_module = {
-	.init_fun = mod_oal_init,
+	.init_fun = &mod_oal_init,
 	.conf_table = mod_oal_conf_table,
-	.post_init_fun = mod_oal_post_init,
+	.post_init_fun = &mod_oal_post_init,
 	.scan_fun = NULL,
-	.close_fun = mod_oal_close,
+	.close_fun = &mod_oal_close,
 	.info_fun = NULL,
 	.name = MODULE_NAME,
 	.size = sizeof(struct mod_oal_data),

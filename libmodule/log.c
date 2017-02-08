@@ -47,7 +47,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #define LOG_NAME "armadito"
 
 static enum a6o_log_level current_max_level = A6O_LOG_LEVEL_WARNING;
-static a6o_log_handler_t current_handler = a6o_log_default_handler;
+static a6o_log_handler_t current_handler = &a6o_log_default_handler;
 static void *current_handler_user_data = NULL;
 
 void a6o_log(enum a6o_log_domain domain, enum a6o_log_level level, const char *format, ...)
@@ -86,7 +86,7 @@ void a6o_log_set_handler(enum a6o_log_level max_level, a6o_log_handler_t handler
 	if (handler != NULL)
 		current_handler = handler;
 	else
-		current_handler = a6o_log_default_handler;
+		current_handler = &a6o_log_default_handler;
 
 	current_handler_user_data = user_data;
 }

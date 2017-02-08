@@ -88,10 +88,10 @@ static enum a6o_mod_status mod_on_demand_conf_max_size(struct a6o_module *module
 }
 
 struct a6o_conf_entry on_demand_conf_table[] = {
-	{ "white-list-dir", CONF_TYPE_STRING | CONF_TYPE_LIST, mod_on_demand_conf_white_list_dir},
-	{ "modules", CONF_TYPE_STRING | CONF_TYPE_LIST, mod_on_demand_conf_modules},
-	{ "mime-types", CONF_TYPE_STRING | CONF_TYPE_LIST, mod_on_demand_conf_mime_types},
-	{ "max-size", CONF_TYPE_INT, mod_on_demand_conf_max_size},
+	{ "white-list-dir", CONF_TYPE_STRING | CONF_TYPE_LIST, &mod_on_demand_conf_white_list_dir},
+	{ "modules", CONF_TYPE_STRING | CONF_TYPE_LIST, &mod_on_demand_conf_modules},
+	{ "mime-types", CONF_TYPE_STRING | CONF_TYPE_LIST, &mod_on_demand_conf_mime_types},
+	{ "max-size", CONF_TYPE_INT, &mod_on_demand_conf_max_size},
 	{ NULL, 0, NULL},
 };
 
