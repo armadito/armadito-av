@@ -183,11 +183,11 @@ static enum a6o_mod_status mod_oal_post_init(struct a6o_module *module)
 
 #define YES_NO(v) ((v) ? "yes" : "no")
 
-	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "protection configuration:");
-	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "-> enabled: %s", YES_NO(access_monitor_is_enable(data->monitor)));
-	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "-> permission enabled: %s", YES_NO(access_monitor_is_enable_permission(data->monitor)));
-	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "-> removable media monitoring: %s", YES_NO(access_monitor_is_enable_removable_media(data->monitor)));
-	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": " "-> removable media autoscan: %s", YES_NO(access_monitor_is_autoscan_removable_media(data->monitor)));
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": protection configuration:");
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": -> enabled: %s", YES_NO(access_monitor_is_enable(data->monitor)));
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": -> permission enabled: %s", YES_NO(access_monitor_is_enable_permission(data->monitor)));
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": -> removable media monitoring: %s", YES_NO(access_monitor_is_enable_removable_media(data->monitor)));
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": -> removable media autoscan: %s", YES_NO(access_monitor_is_autoscan_removable_media(data->monitor)));
 
 	access_monitor_delayed_start(data->monitor);
 
