@@ -54,7 +54,7 @@ struct a6o_on_demand {
 
 	int to_scan_count;                  /* files to scan counter, to compute progress */
 	int scanned_count;                  /* already scanned counter, to compute progress */
-        int malware_count;                  /* detected as malicious counter */
+	int malware_count;                  /* detected as malicious counter */
 	int suspicious_count;               /* detected as suspicious counter */
 
 	int was_cancelled;
@@ -97,7 +97,7 @@ struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, const char *r
 
 	on_demand->to_scan_count = 0;
 	on_demand->scanned_count = 0;
-        on_demand->malware_count = 0;
+	on_demand->malware_count = 0;
 	on_demand->suspicious_count = 0;
 
 	on_demand->was_cancelled = 0;
@@ -146,7 +146,7 @@ static void update_counters(struct a6o_on_demand *on_demand, struct a6o_report *
 		break;
 	default:
 		break;
-      }
+	}
 }
 
 #ifdef linux
@@ -379,7 +379,7 @@ static int scan_entry(const char *full_path, enum os_file_flag flags, int entry_
 	else
 		scan_file(on_demand, full_path);
 
-        return 0;
+	return 0;
 }
 
 /* dummy function, should use platform (# of cores) or configuration data */

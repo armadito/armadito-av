@@ -58,8 +58,8 @@ my_func_data_free (MyFuncData *data)
 
 static void
 my_func (const gchar *some_string,
-         guint        some_int,
-         GObject     *some_object)
+	guint        some_int,
+	GObject     *some_object)
 {
   /* Do something long and CPU intensive! */
 }

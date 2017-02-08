@@ -134,7 +134,7 @@ struct module_manager *module_manager_new(struct armadito *armadito)
 
 void module_manager_free(struct module_manager *mm)
 {
-        struct a6o_module **modv;
+	struct a6o_module **modv;
 
 	for (modv = module_manager_get_modules(mm); *modv != NULL; modv++)
 	   module_free(*modv);

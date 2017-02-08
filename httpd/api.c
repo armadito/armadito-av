@@ -264,8 +264,8 @@ static int browse_path(const char *path, json_t *result)
 
 	free((void *)root_path);
 
-        if (closedir(d) < 0)
-        	log_w("error closing directory %s (%s)", path, strerror(errno));
+	if (closedir(d) < 0)
+		log_w("error closing directory %s (%s)", path, strerror(errno));
 
 	return 0;
 }

@@ -119,20 +119,20 @@ int os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data)
 			break;
 		      }
 		}
-                else{
-                        // Call to scan_entry()
-                        real_entry_path = realpath(entry_path, NULL);
-                        (*dirent_cb)(real_entry_path, dirent_flags(entry), 0, data);
-                        free(real_entry_path);
-                }
+		else {
+			/* Call to scan_entry() */
+			real_entry_path = realpath(entry_path, NULL);
+			(*dirent_cb)(real_entry_path, dirent_flags(entry), 0, data);
+			free(real_entry_path);
+		}
 
 		free(entry_path);
 	}
 
-        if (closedir(d) < 0)
-        	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "error closing directory %s (%s)", path, strerror(errno));
+	if (closedir(d) < 0)
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "error closing directory %s (%s)", path, strerror(errno));
 
-        return 0;
+	return 0;
 }
 
 /*
@@ -174,9 +174,9 @@ int os_mkdir_p(const char *path)
 		token = end + 1;
 	} while (end != NULL && ret >= 0);
 
-        if(full != NULL){
-	   free(full);
-        }
+	if (full != NULL) {
+		free(full);
+	}
 
 	return ret;
 }

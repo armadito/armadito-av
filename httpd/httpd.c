@@ -139,22 +139,22 @@ static int do_open(const char *path, off_t *p_file_size)
 
 static const char *get_mime_type(magic_t magic, int fd, const char *path)
 {
-      char header[MAGIC_HEADER_SIZE];
-      ssize_t nread;
-      const char *mime_type = NULL;
-      const char *dot;
+	char header[MAGIC_HEADER_SIZE];
+	ssize_t nread;
+	const char *mime_type = NULL;
+	const char *dot;
 
-      dot = strrchr(path, '.');
-      if (dot != NULL && dot != path && !strcmp(dot + 1, "css"))
-	      return "text/css";
+	dot = strrchr(path, '.');
+	if (dot != NULL && dot != path && !strcmp(dot + 1, "css"))
+		return "text/css";
 
-      nread = read(fd, header, MAGIC_HEADER_SIZE);
-      if (nread != -1)
-	mime_type = magic_buffer(magic, header, nread);
+	nread = read(fd, header, MAGIC_HEADER_SIZE);
+	if (nread != -1)
+		mime_type = magic_buffer(magic, header, nread);
 
-      lseek(fd, 0, SEEK_SET);
+	lseek(fd, 0, SEEK_SET);
 
-      return mime_type;
+	return mime_type;
 }
 
 static int content_serve(struct httpd *h, struct MHD_Connection *connection, const char *url)
@@ -346,7 +346,7 @@ static struct MHD_Response *create_std_response(const char *page)
 	struct MHD_Response *resp;
 
 	resp = MHD_create_response_from_buffer(strlen(page), (char *)page, MHD_RESPMEM_PERSISTENT);
-	MHD_add_response_header(resp,  MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
+	MHD_add_response_header(resp, MHD_HTTP_HEADER_CONTENT_TYPE, "text/html");
 	MHD_add_response_header(resp, MHD_HTTP_HEADER_CONNECTION, "close");
 
 	return resp;

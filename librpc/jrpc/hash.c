@@ -207,8 +207,8 @@ static uint64_t fmix64(void *p)
 
   doing 89 insertions in a table of length 128 (89 is 128 x 0.7)
 
-                      id  update  method
-                      ++   += 8   random()
+  			id  update  method
+			++   += 8   random()
   function
   fmix32              28   33     28
   fmix64              30   25     33
