@@ -177,7 +177,7 @@ err:
 
 static int create_server_socket(const char *unix_path)
 {
-	int server_sock = -1;
+	int server_sock;
 
 	server_sock = unix_server_listen(unix_path);
 
