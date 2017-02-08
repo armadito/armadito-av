@@ -157,6 +157,8 @@ void jrpc_connection_free(struct jrpc_connection *conn)
 {
 	hash_table_free(conn->response_table);
 	connection_lock_destroy(conn);
+	free(conn->read_cb_data);
+	free(conn->write_cb_data);
 	free(conn);
 }
 

@@ -74,6 +74,7 @@ static void client_thread(gpointer data, gpointer user_data)
 		a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_WARNING, "closing client socket failed (%s)", strerror(errno));
 
 	jrpc_connection_free(cd->conn);
+	free(cd);
 }
 
 static gboolean server_listen_cb(GIOChannel *source, GIOCondition condition, gpointer data)
