@@ -22,12 +22,10 @@ $(top_srcdir)/tools
 TAGS:
 	(for d in $(TAGDIRS) ; do find $$d -name '*.c' -o -name '*.h' -o -name '*.txt' -o -name 'Makefile.am' -o -name '*.pc.in' ; done ) | etags -
 
-
-
-GCOV_FILES=$(shell for file in `find $(top_buildir) -name '*.gcda'`;do echo $$file; done)
+GCOV_FILES=$(shell for file in `find $(top_builddir) -name '*.gcda'`;do echo $$file; done)
 
 coverage:
-	@echo Collecting coverage data from $(top_buildir)
+	@echo Collecting coverage data from $(top_builddir)
 	mkdir -p coverage
 	for d in $(basename $(GCOV_FILES)) ; do gcov -l $$d ; done
 	mv -f *.gcov coverage
