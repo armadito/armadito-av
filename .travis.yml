@@ -51,7 +51,7 @@ compiler:
 before_script:
 - "./autogen.sh"
 script:
-- "./configure"
+- "./configure --enable-gcov"
 - build-wrapper-linux-x86-64 --out-dir build-wrapper-out make clean all
 - make check || true
 - make coverage || true
