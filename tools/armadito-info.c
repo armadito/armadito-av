@@ -124,19 +124,20 @@ static void info_print(struct a6o_info *info)
 	char buf[sizeof("1970-01-01T00:00:00Z!")];
 	struct a6o_module_info **p_mod_info;
 
-	printf( "--- Armadito info --- \n");
-	printf( "global status : %s\n", a6o_update_status_str(info->global_status));
+	printf("--- Armadito info --- \n");
+	printf("antivirus version: %s\n", info->antivirus_version);
+	printf("global status : %s\n", a6o_update_status_str(info->global_status));
 	time_2_date(info->global_update_ts, buf, sizeof(buf));
-	printf( "global update date : %s\n", buf);
+	printf("global update date : %s\n", buf);
 
 	for (p_mod_info = info->module_infos; *p_mod_info != NULL; p_mod_info++) {
 		struct a6o_module_info *mod_info = *p_mod_info;
 		struct a6o_base_info **p_base_info;
 
-		printf( "Module %s \n",  mod_info->name);
-		printf( "- Update status : %s\n", a6o_update_status_str(mod_info->mod_status));
+		printf("Module %s \n",  mod_info->name);
+		printf("- Update status : %s\n", a6o_update_status_str(mod_info->mod_status));
 		time_2_date(mod_info->mod_update_ts, buf, sizeof(buf));
-		printf( "- Update date : %s\n", buf);
+		printf("- Update date : %s\n", buf);
 
 		if (mod_info->base_infos == NULL)
 			continue;
@@ -144,13 +145,13 @@ static void info_print(struct a6o_info *info)
 		for (p_base_info = mod_info->base_infos; *p_base_info != NULL; p_base_info++) {
 			struct a6o_base_info *base_info = *p_base_info;
 
-			printf( "-- Base %s \n", base_info->name);
+			printf("-- Base %s \n", base_info->name);
 			time_2_date(base_info->base_update_ts, buf, sizeof(buf));
-			printf( "--- Update date : %s\n", buf);
+			printf("--- Update date : %s\n", buf);
 			if (base_info->version != NULL)
-				printf( "--- Version : %s\n", base_info->version);
-			printf( "--- Signature count : %ld\n", base_info->signature_count);
-			printf( "--- Full path : %s\n", base_info->full_path);
+				printf("--- Version : %s\n", base_info->version);
+			printf("--- Signature count : %ld\n", base_info->signature_count);
+			printf("--- Full path : %s\n", base_info->full_path);
 		}
 	}
 }
