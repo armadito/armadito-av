@@ -9,8 +9,12 @@ function compile()
 	echo "-------MAKE INSTALL-------"
 	make install
 	echo "-------COMPILE OKAY $PACKAGE_NAME-------"
+
+	set +e
 	make check
 	echo "-------TESTS OKAY-------"
+	make coverage
+	echo "-------COVERAGE OKAY-------"
 }
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
