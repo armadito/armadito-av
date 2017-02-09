@@ -20,7 +20,7 @@ function configure()
 
 	if [[ $PACKAGE_NAME == "core" ]];
 	then
-		A_OPTS='--enable-debug --enable-fanotify'
+		A_OPTS='--enable-debug --enable-fanotify --enable-gcov'
 	fi
 
 	cd $OUT_DIR/build/armadito-av/$PACKAGE_NAME

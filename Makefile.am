@@ -13,11 +13,23 @@ $(top_srcdir)/librpc \
 $(top_srcdir)/libmodule \
 $(top_srcdir)/man \
 $(top_srcdir)/tests \
-$(top_srcdir)/tools 
+$(top_srcdir)/tools
+
+
+
+.PHONY: TAGS coverage
 
 TAGS:
 	(for d in $(TAGDIRS) ; do find $$d -name '*.c' -o -name '*.h' -o -name '*.txt' -o -name 'Makefile.am' -o -name '*.pc.in' ; done ) | etags -
-.PHONY: TAGS
 
+
+
+GCOV_FILES=$(shell for file in `find $(top_buildir) -name '*.gcda'`;do echo $$file; done)
+
+coverage:
+	@echo Collecting coverage data
+	mkdir -p coverage
+	for d in $(basename $(GCOV_FILES)) ; do gcov -l $$d ; done
+	mv -f *.gcov coverage
 
 EXTRA_DIST=armadito-config.h armadito-config-win32.h
