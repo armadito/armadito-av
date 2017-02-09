@@ -25,6 +25,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <libarmadito/armadito.h>
 
 struct a6o_info {
+	const char *antivirus_version;
 	enum a6o_update_status global_status;
 	time_t global_update_ts;
 	/* NULL terminated array of pointers to struct a6o_module_info */
