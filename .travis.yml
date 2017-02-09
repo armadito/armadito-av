@@ -13,6 +13,7 @@ addons:
     - libjansson-dev
     - libjansson4
     - autoconf-archive
+    - lcov
   coverity_scan:
     project:
       name: armadito/armadito-av
