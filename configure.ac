@@ -16,6 +16,9 @@ AM_CONFIG_HEADER(armadito-config-autoconf.h)
 # This is needed when the first PKG_CHECK_MODULES call is inside a conditional (not the case here, but who knows)
 PKG_PROG_PKG_CONFIG
 
+# local macros
+AC_CONFIG_MACRO_DIRS([m4])
+
 # check for needed programs
 AC_PROG_CC([gcc])
 AC_PROG_LIBTOOL
@@ -154,6 +157,13 @@ fi
 AC_PATH_PROG(ASCIIDOC, asciidoc)
 AC_PATH_PROG(A2X, a2x)
 AM_CONDITIONAL([COND_MAN], [test ! -z "$ASCIIDOC" -a ! -z "$A2X" ])
+
+# gcov coverage reporting
+m4_include([m4/gcov.m4])
+AC_TDD_GCOV
+AC_SUBST(COVERAGE_CFLAGS)
+AC_SUBST(COVERAGE_CXXFLAGS)
+AC_SUBST(COVERAGE_LDFLAGS)
 
 # Output files
 AC_CONFIG_FILES([
