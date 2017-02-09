@@ -27,7 +27,7 @@ TAGS:
 GCOV_FILES=$(shell for file in `find $(top_buildir) -name '*.gcda'`;do echo $$file; done)
 
 coverage:
-	@echo Collecting coverage data
+	@echo Collecting coverage data from $(top_buildir)
 	mkdir -p coverage
 	for d in $(basename $(GCOV_FILES)) ; do gcov -l $$d ; done
 	mv -f *.gcov coverage
