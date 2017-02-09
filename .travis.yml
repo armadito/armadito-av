@@ -54,4 +54,7 @@ script:
 - build-wrapper-linux-x86-64 --out-dir build-wrapper-out make clean all
 - make check || true
 - make coverage || true
+- ls -al .
+- tree
+- ls -al /home/travis/build/armadito
 - sonar-scanner -X -Dsonar.host.url=https://sonarqube.com -Dsonar.login=$SONAR_TOKEN
