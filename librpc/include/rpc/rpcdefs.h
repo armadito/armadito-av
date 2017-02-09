@@ -55,6 +55,7 @@ JRPC_STRUCT(a6o_module_info)
 JRPC_STRUCT_END
 
 JRPC_STRUCT(a6o_info)
+	JRPC_STRUCT_FIELD_STRING(antivirus_version)
 	JRPC_STRUCT_FIELD_ENUM(a6o_update_status, global_status)
 	JRPC_STRUCT_FIELD_INT(time_t, global_update_ts)
 	JRPC_STRUCT_FIELD_PTR_ARRAY(a6o_module_info, module_infos)
