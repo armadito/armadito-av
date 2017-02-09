@@ -14,6 +14,7 @@ addons:
     - libjansson4
     - autoconf-archive
     - lcov
+    - tree
   coverity_scan:
     project:
       name: armadito/armadito-av
@@ -56,5 +57,4 @@ script:
 - make coverage || true
 - ls -al .
 - tree
-- ls -al /home/travis/build/armadito
 - sonar-scanner -X -Dsonar.host.url=https://sonarqube.com -Dsonar.login=$SONAR_TOKEN
