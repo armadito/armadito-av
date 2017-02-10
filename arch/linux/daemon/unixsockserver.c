@@ -58,7 +58,7 @@ int unix_server_listen(const char *socket_path)
 	if (socket_path[0] == '@')
 		listening_addr.sun_path[0] = '\0';
 
-	if (socket_path[0] != '\0')
+	if (socket_path[0] != '@')
 		unlink(socket_path);
 
 	addrlen = offsetof(struct sockaddr_un, sun_path) + path_len + 1;
@@ -76,7 +76,7 @@ int unix_server_listen(const char *socket_path)
 	}
 
 	/* TODO : use guid instead of giving full access */
-	if (socket_path[0] != '\0' && chmod(socket_path, 0777) < 0)
+	if (socket_path[0] != '@' && chmod(socket_path, 0777) < 0)
 		perror("chmod on socket failed");
 
 	return fd;

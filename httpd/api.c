@@ -175,9 +175,38 @@ int scan_process_cb(struct api_handler *a, struct MHD_Connection *connection, js
 	return 0;
 }
 
+static void status_jrpc_cb(json_t *result, void *user_data)
+{
+	struct api_client *client = (struct api_client *)user_data;
+
+	api_client_push_event(client, result);
+}
+
 int status_process_cb(struct api_handler *a, struct MHD_Connection *connection, json_t *in, json_t **out, void *user_data)
 {
-	return 1;
+	struct api_client *client;
+	const char *token;
+	int ret;
+
+	token = api_get_token(connection);
+	/* this should not happen because the token presence has already been tested in API handler */
+	if (token == NULL)
+		return 1;
+
+	client = api_handler_get_client(a, token);
+	if (client == NULL)
+		return 1;
+
+	if (api_client_connect(client) < 0)
+		return 1;
+
+	if ((ret = jrpc_call(api_client_get_connection(client), "status", NULL, status_jrpc_cb, client)))
+		return 1;
+
+	*out = json_object();
+	json_object_set(*out, "status", json_string("ok"));
+
+	return 0;
 }
 
 static const char *dirent_type(struct dirent *entry)
