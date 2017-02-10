@@ -10,6 +10,12 @@ function compile()
 	make install
 	echo "-------COMPILE OKAY $PACKAGE_NAME-------"
 
+	if [[ $PACKAGE_NAME == "webui" ]];
+	then
+		make bower
+		make install-bower
+	fi
+
 	set +e
 	make check
 	echo "-------TESTS OKAY-------"
