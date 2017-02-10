@@ -27,7 +27,7 @@ GCOV_FILES=$(shell for file in `find $(top_builddir) -name '*.gcda'`;do echo $$f
 coverage:
 	@echo Collecting coverage data from $(top_builddir)
 	mkdir -p coverage
-	for d in $(basename $(GCOV_FILES)) ; do gcov -l $$d ; done
+	for d in $(basename $(GCOV_FILES)) ; do gcov -l -p $$d ; done
 	mv -f *.gcov coverage
 
 EXTRA_DIST=armadito-config.h armadito-config-win32.h
