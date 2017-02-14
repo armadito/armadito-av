@@ -204,6 +204,7 @@ static int connection_process_request(struct jrpc_connection *conn, struct rpc_o
 	}
 
 	mth_ret = (*method_cb)(conn, params, &result);
+
 	if (mth_ret) {
 		const char *error_message;
 #ifdef JRPC_DEBUG

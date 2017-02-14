@@ -62,6 +62,7 @@ int register_process_cb(struct api_handler *a, struct MHD_Connection *connection
 	const char *user_agent;
 	time_t now;
 	char *s_token;
+	struct api_client *client;
 
 	time(&now);
 	hash_buff((const char *)&now, sizeof(time_t), &token);
@@ -77,7 +78,9 @@ int register_process_cb(struct api_handler *a, struct MHD_Connection *connection
 	asprintf(&s_token, "%ld", token);
 	json_object_set(*out, "token", json_string(s_token));
 
-	return api_handler_add_client(a, s_token);
+	client = api_client_new(CLIENT_THREADED);
+
+	return api_handler_add_client(a, s_token, client);
 }
 
 int unregister_process_cb(struct api_handler *a, struct MHD_Connection *connection, json_t *in, json_t **out, void *user_data)
@@ -98,7 +101,6 @@ int ping_process_cb(struct api_handler *a, struct MHD_Connection *connection, js
 
 	return 0;
 }
-
 
 int event_process_cb(struct api_handler *a, struct MHD_Connection *connection, json_t *in, json_t **out, void *user_data)
 {
@@ -135,6 +137,33 @@ int scan_check_cb(struct MHD_Connection *connection, json_t *in)
 	return 0;
 }
 
+static int notify_event_method(struct jrpc_connection *conn, json_t *params, json_t **result)
+{
+	struct api_client *client = (struct api_client *)jrpc_connection_get_data(conn);
+	struct a6o_event *ev;
+	int ret;
+
+	if ((ret = JRPC_JSON2STRUCT(a6o_event, params, &ev)))
+		return ret;
+
+	api_client_push_event(client, params);
+
+	if (ev->type == EVENT_ON_DEMAND_COMPLETED)
+		api_client_done(client);
+
+	return JRPC_OK;
+}
+
+static struct jrpc_mapper *create_scan_mapper(void)
+{
+	struct jrpc_mapper *mapper;
+
+	mapper = jrpc_mapper_new();
+	jrpc_mapper_add(mapper, "notify_event", notify_event_method);
+
+	return mapper;
+}
+
 int scan_process_cb(struct api_handler *a, struct MHD_Connection *connection, json_t *in, json_t **out, void *user_data)
 {
 	json_t *j_path;
@@ -158,7 +187,7 @@ int scan_process_cb(struct api_handler *a, struct MHD_Connection *connection, js
 	j_path = json_object_get(in, "path");
 	path = json_string_value(j_path);
 
-	if (api_client_connect(client) < 0)
+	if (api_client_connect(client, create_scan_mapper()) < 0)
 		return 1;
 
 	param.root_path = path;
@@ -175,36 +204,20 @@ int scan_process_cb(struct api_handler *a, struct MHD_Connection *connection, js
 	return 0;
 }
 
-static void status_jrpc_cb(json_t *result, void *user_data)
-{
-	struct api_client *client = (struct api_client *)user_data;
-
-	api_client_push_event(client, result);
-}
-
 int status_process_cb(struct api_handler *a, struct MHD_Connection *connection, json_t *in, json_t **out, void *user_data)
 {
 	struct api_client *client;
-	const char *token;
 	int ret;
 
-	token = api_get_token(connection);
-	/* this should not happen because the token presence has already been tested in API handler */
-	if (token == NULL)
-		return 1;
-
-	client = api_handler_get_client(a, token);
+	client = api_client_new(CLIENT_NON_THREADED);
 	if (client == NULL)
 		return 1;
 
-	if (api_client_connect(client) < 0)
+	if (api_client_connect(client, NULL) < 0)
 		return 1;
 
-	if ((ret = jrpc_call(api_client_get_connection(client), "status", NULL, status_jrpc_cb, client)))
+	if ((ret = api_client_sync_call(client, "status", NULL, out)))
 		return 1;
-
-	*out = json_object();
-	json_object_set(*out, "status", json_string("ok"));
 
 	return 0;
 }

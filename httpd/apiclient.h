@@ -27,15 +27,22 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 struct api_client;
 
-struct api_client *api_client_new(void);
+enum api_client_mode {
+	CLIENT_THREADED,
+	CLIENT_NON_THREADED,
+};
+
+struct api_client *api_client_new(enum api_client_mode mode);
 
 void api_client_free(struct api_client *client);
 
-int api_client_connect(struct api_client *client);
+int api_client_connect(struct api_client *client, struct jrpc_mapper *mapper);
+
+int api_client_sync_call(struct api_client *client, const char *method, json_t *params, json_t **result);
 
 struct jrpc_connection *api_client_get_connection(struct api_client *client);
 
-void api_client_start_thread(struct api_client *client);
+void api_client_done(struct api_client *client);
 
 void api_client_push_event(struct api_client *client, json_t *event);
 

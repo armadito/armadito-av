@@ -37,17 +37,26 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "apiclient.h"
 
 struct api_client {
+	enum api_client_mode mode;
 	GAsyncQueue *event_queue;
 	struct jrpc_connection *conn;
+	json_t *sync_call_result;
 	int client_sock;
 	int done;
 };
 
-struct api_client *api_client_new(void)
+static int api_client_poll(struct api_client *client);
+
+struct api_client *api_client_new(enum api_client_mode mode)
 {
 	struct api_client *client = malloc(sizeof(struct api_client));
 
-	client->event_queue = g_async_queue_new();
+	client->mode = mode;
+	if (client->mode == CLIENT_THREADED)
+		client->event_queue = g_async_queue_new();
+	else
+		client->event_queue = NULL;
+
 	client->conn = NULL;
 	client->client_sock = -1;
 	client->done = 0;
@@ -62,51 +71,16 @@ void api_client_free(struct api_client *client)
 	free((void *)client);
 }
 
-static int notify_event_method(struct jrpc_connection *conn, json_t *params, json_t **result)
-{
-	struct api_client *client = (struct api_client *)jrpc_connection_get_data(conn);
-	struct a6o_event *ev;
-	int ret;
-
-	if ((ret = JRPC_JSON2STRUCT(a6o_event, params, &ev)))
-		return ret;
-
-	api_client_push_event(client, params);
-
-	switch(ev->type) {
-	case EVENT_ON_DEMAND_COMPLETED:
-		client->done = 1;
-		break;
-	}
-
-	return JRPC_OK;
-}
-
-static struct jrpc_mapper *create_rpcfe_mapper(void)
-{
-	struct jrpc_mapper *rpcfe_mapper;
-
-	rpcfe_mapper = jrpc_mapper_new();
-	jrpc_mapper_add(rpcfe_mapper, "notify_event", notify_event_method);
-
-	return rpcfe_mapper;
-}
-
 static gpointer api_client_thread(gpointer data)
 {
 	struct api_client *client = (struct api_client *)data;
-	int ret;
 
-	while((ret = jrpc_process(client->conn)) != JRPC_EOF && !client->done)
-		;
-
-	if (close(client->client_sock) < 0)
-		perror("closing connection");
+	api_client_poll(client);
 
 	return NULL;
 }
 
-int api_client_connect(struct api_client *client)
+int api_client_connect(struct api_client *client, struct jrpc_mapper *mapper)
 {
 	int client_sock;
 
@@ -119,12 +93,63 @@ int api_client_connect(struct api_client *client)
 
 	client->client_sock = client_sock;
 
-	client->conn = jrpc_connection_new(create_rpcfe_mapper(), client);
+	client->conn = jrpc_connection_new(mapper, client);
 
 	jrpc_connection_set_read_cb(client->conn, unix_fd_read_cb, &client->client_sock);
 	jrpc_connection_set_write_cb(client->conn, unix_fd_write_cb, &client->client_sock);
 
-	g_thread_new("api client thread", api_client_thread, client);
+	if (client->mode == CLIENT_THREADED)
+		g_thread_new("api client thread", api_client_thread, client);
+
+	return 0;
+}
+
+static int api_client_poll(struct api_client *client)
+{
+	int ret = 0;
+
+	fprintf(stderr, "before poll\n");
+	while (1) {
+		ret = jrpc_process(client->conn);
+
+		if (ret == JRPC_EOF)
+			break;
+
+		if (client->done)
+			break;
+	}
+
+	fprintf(stderr, "after poll\n");
+	if (close(client->client_sock) < 0)
+		perror("closing connection");
+
+	return ret;
+}
+
+static void sync_call_cb(json_t *result, void *user_data)
+{
+	struct api_client *client = (struct api_client *)user_data;
+
+	fprintf(stderr, "in sync_call_cb\n");
+
+	client->sync_call_result = result;
+
+	api_client_done(client);
+}
+
+int api_client_sync_call(struct api_client *client, const char *method, json_t *params, json_t **result)
+{
+	int ret;
+
+	*result = NULL;
+
+	if ((ret = jrpc_call(api_client_get_connection(client), method, params, sync_call_cb, client)))
+		return ret;
+
+	if ((ret = api_client_poll(client)))
+		return ret;
+
+	*result = client->sync_call_result;
 
 	return 0;
 }
@@ -132,6 +157,11 @@ int api_client_connect(struct api_client *client)
 struct jrpc_connection *api_client_get_connection(struct api_client *client)
 {
 	return client->conn;
+}
+
+void api_client_done(struct api_client *client)
+{
+	client->done = 1;
 }
 
 void api_client_push_event(struct api_client *client, json_t *event)

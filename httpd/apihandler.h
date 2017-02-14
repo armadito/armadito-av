@@ -48,7 +48,7 @@ const char *api_get_user_agent(struct MHD_Connection *connection);
 const char *api_get_token(struct MHD_Connection *connection);
 const char *api_get_argument(struct MHD_Connection *connection, const char *key);
 
-int api_handler_add_client(struct api_handler *a, const char *token);
+int api_handler_add_client(struct api_handler *a, const char *token, struct api_client *client);
 struct api_client *api_handler_get_client(struct api_handler *a, const char *token);
 int api_handler_remove_client(struct api_handler *a, const char *token);
 

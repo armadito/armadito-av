@@ -32,10 +32,23 @@ function status() {
     console.log("status");
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.open("GET", "/api/status", true);
-    xmlhttp.setRequestHeader("X-Armadito-Token", token);
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            var s = JSON.parse(xmlhttp.responseText);
+	    document.getElementById("antivirus_version").innerHTML = s.antivirus_version;
+	    document.getElementById("global_status").innerHTML = s.global_status;
+	    document.getElementById("global_update_ts").innerHTML = s.global_update_ts;
+	    var modules = document.getElementById("modules")
+	    var row = modules.insertRow(1);
+	    var mod_name = row.insertCell(0);
+	    mod_name.innerHTML = s.module_infos[0].name;
+	    var mod_status = row.insertCell(1);
+	    mod_status.innerHTML = s.module_infos[0].mod_status;
+	    var mod_updated = row.insertCell(2);
+	    mod_updated.innerHTML = s.module_infos[0].mod_update_ts;
+	}
+    }
     xmlhttp.send(null);
-    
-    long_polling();
 }
 
 function long_polling() {
@@ -66,13 +79,10 @@ function long_polling() {
 		module_report.innerHTML = ev.u.ev_detection.module_report;
 
 		long_polling();
-            } else if (ev.event_type == "StatusEvent") {
-		document.getElementById("status").innerHTML = ev.global_status;
-		document.getElementById("update_timestamp").innerHTML = ev.global_update_timestamp;
             }
         }
     };
-    console.log("sending request");
+    console.log("event");
     xmlhttp.open("GET", "/api/event", true);
     xmlhttp.setRequestHeader("X-Armadito-Token", token);
     xmlhttp.send(null);

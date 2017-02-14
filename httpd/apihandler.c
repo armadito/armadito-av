@@ -70,7 +70,7 @@ static struct api_endpoint {
 	{ "/ping", HTTP_METHOD_GET, 1, &ping_process_cb, NULL},
 	{ "/event", HTTP_METHOD_GET, 1, &event_process_cb, NULL},
 	{ "/scan", HTTP_METHOD_POST, 1, &scan_process_cb, &scan_check_cb},
-	{ "/status", HTTP_METHOD_GET, 1, &status_process_cb, NULL},
+	{ "/status", HTTP_METHOD_GET, 0, &status_process_cb, NULL},
 	{ "/browse", HTTP_METHOD_GET, 0, &browse_process_cb, NULL},
 	{ "/version", HTTP_METHOD_GET, 0, &version_process_cb, NULL},
 	{ NULL, 0, 0, NULL, NULL},
@@ -315,16 +315,12 @@ struct api_handler *api_handler_new(void *user_data)
 	return a;
 }
 
-int api_handler_add_client(struct api_handler *a, const char *token)
+int api_handler_add_client(struct api_handler *a, const char *token, struct api_client *client)
 {
-	struct api_client *client;
-
 	if (g_hash_table_contains(a->client_table, token)) {
 		log_w("API token %s already registered", token);
 		return 1;
 	}
-
-	client = api_client_new();
 
 	g_hash_table_insert(a->client_table, strdup(token), client);
 
