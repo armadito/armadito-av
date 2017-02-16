@@ -10,7 +10,7 @@ function configure()
 
 	set -e
 	cd $SRC_DIR/
-	sudo chmod +x autogen.sh
+	chmod +x autogen.sh
 	./autogen.sh	
 
 	if [[ $PACKAGE_NAME == "prelude" ]];
