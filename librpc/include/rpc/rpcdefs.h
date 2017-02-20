@@ -19,7 +19,11 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
+#ifndef GENERATE_JSON_SCHEMA
 #include <libjrpc/marshall.h>
+#else
+#include <libjrpc/jsonschema.h>
+#endif
 
 JRPC_ENUM(a6o_file_status)
 	JRPC_ENUM_VALUE(A6O_FILE_UNDECIDED)
