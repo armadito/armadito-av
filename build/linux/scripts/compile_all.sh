@@ -9,7 +9,6 @@ CLAMAV_SRC=$REPO/armadito-mod-clamav
 H1_SRC=$REPO/armadito-mod-h1
 PDF_SRC=$REPO/armadito-mod-pdf
 WEBUI_SRC=$REPO/armadito-web-ui
-PRELUDE_SRC=$REPO/armadito-prelude/python
 SYSTRAY_SRC=$REPO/armadito-systray-ui/gtk
 
 set -e
@@ -36,12 +35,6 @@ if [[ $PACKAGE == "modulePDF" || $PACKAGE == "" ]];
 then
 	./configure.sh -i $PDF_SRC -p modulePDF
 	./compile.sh -p modulePDF
-fi
-
-if [[ $PACKAGE == "python-prelude" ]];
-then
-	./configure.sh -i $PRELUDE_SRC -p prelude
-	./compile.sh -p prelude
 fi
 
 if [[ $PACKAGE == "webui" || $PACKAGE == "" ]];
