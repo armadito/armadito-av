@@ -10,12 +10,15 @@ REPO=$DIR
 SCRIPTS=$REPO/core/build/linux/scripts
 
 # Modify git repositories' paths here
-CORE_SRC=$REPO/armadito-av
-CLAMAV_SRC=$REPO/armadito-mod-clamav
-H1_SRC=$REPO/armadito-mod-h1
-PDF_SRC=$REPO/armadito-mod-pdf
-WEBUI_SRC=$REPO/armadito-web-ui
-SYSTRAY_SRC=$REPO/armadito-systray-ui/gtk
+CORE_SRC=$REPO/core
+CLAMAV_SRC=$REPO/modules/mod-clamav
+H1_SRC=$REPO/modules/mod-h1
+PDF_SRC=$REPO/modules/mod-pdf
+WEBUI_SRC=$REPO/ui/web-ui
+SYSTRAY_SRC=$REPO/ui/systray-ui/gtk
+
+CONFIGURESH=$SCRIPTS/configure.sh
+COMPILESH=$SCRIPTS/compile.sh
 
 set -e
 
