@@ -10,16 +10,12 @@ REPO=$DIR
 SCRIPTS=$REPO/core/build/linux/scripts
 
 # Modify git repositories' paths here
-CORE_SRC=$REPO/core
-CLAMAV_SRC=$REPO/modules/mod-clamav
-H1_SRC=$REPO/modules/mod-h1
-PDF_SRC=$REPO/modules/mod-pdf
-WEBUI_SRC=$REPO/ui/web-ui
-PRELUDE_SRC=$REPO/agents/prelude/python
-SYSTRAY_SRC=$REPO/ui/systray-ui/gtk
-
-CONFIGURESH=$SCRIPTS/configure.sh
-COMPILESH=$SCRIPTS/compile.sh
+CORE_SRC=$REPO/armadito-av
+CLAMAV_SRC=$REPO/armadito-mod-clamav
+H1_SRC=$REPO/armadito-mod-h1
+PDF_SRC=$REPO/armadito-mod-pdf
+WEBUI_SRC=$REPO/armadito-web-ui
+SYSTRAY_SRC=$REPO/armadito-systray-ui/gtk
 
 set -e
 
@@ -45,12 +41,6 @@ if [[ $PACKAGE_NAME == "modulePDF" || $PACKAGE_NAME == "ALL" ]];
 then
 	. $CONFIGURESH -i $PDF_SRC -p modulePDF
 	. $COMPILESH -p modulePDF
-fi
-
-if [[ $PACKAGE_NAME == "python-prelude" ]];
-then
-	. $CONFIGURESH -i $PRELUDE_SRC -p prelude
-	. $COMPILESH -p prelude
 fi
 
 if [[ $PACKAGE_NAME == "webui" || $PACKAGE_NAME == "ALL" ]];
