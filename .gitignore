@@ -1,6 +1,7 @@
 *.zip
 *~
 BUILD/
+m4/
 INSTALL
 Makefile
 Makefile.in
