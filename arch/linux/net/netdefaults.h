@@ -22,7 +22,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _NETDEFAULTS_H_
 #define _NETDEFAULTS_H_
 
+#define DEFAULT_SOCKET_PATH   "/tmp/.armadito-daemon"
 /* use this definition for abstract socket address */
-#define DEFAULT_SOCKET_PATH   "@/tmp/.armadito-daemon"
+/* #define DEFAULT_SOCKET_PATH   "@/tmp/.armadito-daemon" */
 
 #endif

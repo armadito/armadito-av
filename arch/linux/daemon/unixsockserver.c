@@ -50,8 +50,8 @@ int unix_server_listen(const char *socket_path)
 		return -1;
 	}
 
-	memset(&listening_addr, 0, sizeof(listening_addr));
 	listening_addr.sun_family = AF_UNIX;
+	memset(&listening_addr.sun_path, 0, sizeof(listening_addr.sun_path));
 	strncpy(listening_addr.sun_path, socket_path, path_len);
 
 	/* is socket_path abstract? (see man 7 unix) */
@@ -61,7 +61,8 @@ int unix_server_listen(const char *socket_path)
 	if (socket_path[0] != '@')
 		unlink(socket_path);
 
-	addrlen = offsetof(struct sockaddr_un, sun_path) + path_len + 1;
+	/* addrlen = offsetof(struct sockaddr_un, sun_path) + path_len + 1; */
+	addrlen = sizeof(struct sockaddr_un);
 
 	if (bind(fd, (struct sockaddr *)&listening_addr, addrlen) < 0) {
 		close(fd);
