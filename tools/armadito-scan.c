@@ -84,6 +84,8 @@ static void usage(void)
 	fprintf(stderr, "  --threaded -t                 scan using multiple threads\n");
 	fprintf(stderr, "  --no-summary -n               disable summary at end of scanning\n");
 	fprintf(stderr, "  --socket-path=PATH | -a PATH  unix socket path (default is " DEFAULT_SOCKET_PATH ")\n");
+	fprintf(stderr, "                                Prefix the path with @ for a Linux abstract socket path (see man 7 unix)\n");
+	fprintf(stderr, "                                Example: --socket-path=@/org/armadito-daemon\n");
 #if O
 	/* yet not available with rpc api */
 	fprintf(stderr, "  --print-clean -c              print also clean files as they are scanned\n");

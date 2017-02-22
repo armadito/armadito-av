@@ -69,6 +69,8 @@ static void usage(void)
 	fprintf(stderr, "  --version -V                  print program version\n");
 	fprintf(stderr, "  --verbose -v                  print HTTP trafic\n");
 	fprintf(stderr, "  --socket-path=PATH | -a PATH  unix socket path (default is " DEFAULT_SOCKET_PATH ")\n");
+	fprintf(stderr, "                                Prefix the path with @ for a Linux abstract socket path (see man 7 unix)\n");
+	fprintf(stderr, "                                Example: --socket-path=@/org/armadito-daemon\n");
 	fprintf(stderr, "\n");
 
 	exit(1);

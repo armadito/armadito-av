@@ -61,8 +61,13 @@ int unix_server_listen(const char *socket_path)
 	if (socket_path[0] != '@')
 		unlink(socket_path);
 
-	/* addrlen = offsetof(struct sockaddr_un, sun_path) + path_len + 1; */
-	addrlen = sizeof(struct sockaddr_un);
+	/*
+	   man page unix(7) says that:
+	   addrlen = offsetof(struct sockaddr_un, sun_path) + path_len + 1;
+	   but this does not work when using the socket from python or perl
+	   because the real socket name is foobar\0 and not foobar
+	*/
+	addrlen = offsetof(struct sockaddr_un, sun_path) + path_len;
 
 	if (bind(fd, (struct sockaddr *)&listening_addr, addrlen) < 0) {
 		close(fd);

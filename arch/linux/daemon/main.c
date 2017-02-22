@@ -60,12 +60,12 @@ struct a6o_daemon_options {
 };
 
 static struct option daemon_option_defs[] = {
-	{"help",      no_argument,        0, 'h'},
-	{"version",   no_argument,        0, 'V'},
-	{"no-daemon", no_argument,        0, 'n'},
-	{"log-level", required_argument,  0, 'l'},
-	{"path",      required_argument, 0, 'a'},
-	{"pidfile",   required_argument,  0, 'i'},
+	{"help",         no_argument,        0, 'h'},
+	{"version",      no_argument,        0, 'V'},
+	{"no-daemon",    no_argument,        0, 'n'},
+	{"log-level",    required_argument,  0, 'l'},
+	{"socket-path",  required_argument,  0, 'a'},
+	{"pidfile",      required_argument,  0, 'i'},
 	{0, 0, 0, 0}
 };
 
@@ -88,7 +88,9 @@ static void usage(void)
 	fprintf(stderr, "  --log-level=LEVEL | -l LEVEL       set log level\n");
 	fprintf(stderr, "                                     log level can be: error, warning, info, debug\n");
 	fprintf(stderr, "                                     (default is: " DEFAULT_LOG_LEVEL "\n");
-	fprintf(stderr, "  --path=PATH | -a PATH              unix socket path (default is " DEFAULT_SOCKET_PATH ")\n");
+	fprintf(stderr, "  --socket-path=PATH | -a PATH       unix socket path (default is " DEFAULT_SOCKET_PATH ")\n");
+	fprintf(stderr, "                                     Prefix the path with @ for a Linux abstract socket path (see man 7 unix)\n");
+	fprintf(stderr, "                                     Example: --socket-path=@/org/armadito-daemon\n");
 	fprintf(stderr, "  --pidfile=PATH | -i PATH           create PID file at specified location\n");
 	fprintf(stderr, "                                     (default is: " DEFAULT_PID_FILE ")\n");
 	fprintf(stderr, "\n");

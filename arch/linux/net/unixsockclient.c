@@ -62,7 +62,8 @@ int unix_client_connect(const char *socket_path, int max_retry)
 	if (socket_path[0] == '@')
 		connect_addr.sun_path[0] = '\0';
 
-	addrlen = offsetof(struct sockaddr_un, sun_path) + path_len + 1;
+	/* see comment in unixsockserver.c */
+	addrlen = offsetof(struct sockaddr_un, sun_path) + path_len;
 
 	do {
 		r = connect(fd, (struct sockaddr *)&connect_addr, addrlen);
