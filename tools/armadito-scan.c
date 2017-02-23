@@ -187,7 +187,7 @@ static void event_print(struct a6o_event *ev)
 static void event_print_json(json_t *j_ev)
 {
 	json_dumpf(j_ev, stdout, JSON_INDENT(4));
-	fprintf(stdout, "\n");
+	fprintf(stdout, "\n\n");
 }
 
 struct scan_data {
