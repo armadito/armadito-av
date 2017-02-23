@@ -73,6 +73,8 @@ static void client_thread(gpointer data, gpointer user_data)
 	if (close(*(cd->p_client_sock)) < 0)
 		a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_WARNING, "closing client socket failed (%s)", strerror(errno));
 
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_DEBUG, "closed client connection: fd = %d", *(cd->p_client_sock));
+
 	free(cd->p_client_sock);
 	jrpc_connection_free(cd->conn);
 	free(cd);
