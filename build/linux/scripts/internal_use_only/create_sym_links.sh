@@ -6,6 +6,11 @@ PACKAGE=$1
 
 PREFIX=$OUT_DIR/install/armadito-av
 
+# bases
 mkdir -p $PREFIX/var/lib/armadito/bases/
 ln -s /var/lib/clamav $PREFIX/var/lib/armadito/bases/clamav
 ln -s /var/lib/armadito/bases/moduleH1/ $PREFIX/var/lib/armadito/bases/moduleH1
+
+# binaries
+ln -s  $PREFIX/bin/armadito-info /usr/bin/armadito-info
+ln -s  $PREFIX/bin/armadito-scan /usr/bin/armadito-scan
