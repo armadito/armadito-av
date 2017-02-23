@@ -70,7 +70,7 @@ static void usage(void)
 	fprintf(stderr, "  --socket-path=PATH | -a PATH  unix socket path (default is " DEFAULT_SOCKET_PATH ")\n");
 	fprintf(stderr, "                                prefix the path with @ for a Linux abstract socket path (see man 7 unix)\n");
 	fprintf(stderr, "                                example: --socket-path=@/org/armadito-daemon\n");
-	fprintf(stderr, "  --json                        format output as JSON\n");
+	fprintf(stderr, "  --json -j                     format output as JSON\n");
 	fprintf(stderr, "\n");
 
 	exit(EXIT_FAILURE);
