@@ -36,19 +36,19 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <time.h>
 #include <unistd.h>
 
-#define PROGRAM_NAME "armadito-scan"
+#define PROGRAM_NAME "armadito-info"
 #define PROGRAM_VERSION PACKAGE_VERSION
 
 struct info_options {
 	const char *unix_socket_path;
-	int verbose;
+	int format_json;
 };
 
 static struct option info_option_defs[] = {
 	{"help",         no_argument,        0, 'h'},
 	{"version",      no_argument,        0, 'V'},
-	{"verbose",      no_argument,        0, 'v'},
 	{"socket-path",  required_argument,  0, 'a'},
+	{"json",         no_argument,        0, 'j'},
 	{0, 0, 0, 0}
 };
 
@@ -60,54 +60,53 @@ static void version(void)
 
 static void usage(void)
 {
-	fprintf(stderr, "usage: armadito-info [options]\n");
+	fprintf(stderr, "usage: " PROGRAM_NAME " [options]\n");
 	fprintf(stderr, "\n");
 	fprintf(stderr, "Armadito antivirus information\n");
 	fprintf(stderr, "\n");
 	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "  --help  -h                    print help and quit\n");
 	fprintf(stderr, "  --version -V                  print program version\n");
-	fprintf(stderr, "  --verbose -v                  print HTTP trafic\n");
 	fprintf(stderr, "  --socket-path=PATH | -a PATH  unix socket path (default is " DEFAULT_SOCKET_PATH ")\n");
-	fprintf(stderr, "                                Prefix the path with @ for a Linux abstract socket path (see man 7 unix)\n");
-	fprintf(stderr, "                                Example: --socket-path=@/org/armadito-daemon\n");
+	fprintf(stderr, "                                prefix the path with @ for a Linux abstract socket path (see man 7 unix)\n");
+	fprintf(stderr, "                                example: --socket-path=@/org/armadito-daemon\n");
+	fprintf(stderr, "  --json                        format output as JSON\n");
 	fprintf(stderr, "\n");
 
-	exit(1);
+	exit(EXIT_FAILURE);
 }
 
 static void parse_options(int argc, char **argv, struct info_options *opts)
 {
-	opts->verbose = 0;
 	opts->unix_socket_path = DEFAULT_SOCKET_PATH;
+	opts->format_json = 0;
 
 	while (1) {
 		int c;
-		int option_index = 0;
 
-		c = getopt_long(argc, argv, "hVva:", info_option_defs, &option_index);
+		c = getopt_long(argc, argv, "hVva:j", info_option_defs, NULL);
 
 		if (c == -1)
 			break;
 
 		switch (c) {
+		case '?':
+			/* getopt_long already printed an error message. */
+			break;
 		case 'h': /* help */
 			usage();
 			break;
 		case 'V': /* version */
 			version();
 			break;
-		case 'v': /* verbose */
-			opts->verbose = 1;
-			break;
 		case 'a': /* path */
 			opts->unix_socket_path = strdup(optarg);
 			break;
-		case '?':
-			/* getopt_long already printed an error message. */
+		case 'j': /* json */
+			opts->format_json = 1;
 			break;
 		default:
-			abort ();
+			abort();
 		}
 	}
 
@@ -158,19 +157,31 @@ static void info_print(struct a6o_info *info)
 	}
 }
 
+struct info_cb_data {
+	int done;
+	int format_json;
+};
+
 static void info_cb(json_t *result, void *user_data)
 {
-	int ret;
-	struct a6o_info *info;
+	struct info_cb_data *cb_data = (struct info_cb_data *)user_data;
 
-	if ((ret = JRPC_JSON2STRUCT(a6o_info, result, &info)))
-		return;
+	if (cb_data->format_json) {
+		json_dumpf(result, stdout, JSON_INDENT(4));
+		fprintf(stdout, "\n");
+	} else {
+		int ret;
+		struct a6o_info *info;
 
-	info_print(info);
+		if ((ret = JRPC_JSON2STRUCT(a6o_info, result, &info)))
+			return;
 
-	a6o_info_free(info);
+		info_print(info);
 
-	*(int *)user_data = 1;
+		a6o_info_free(info);
+	}
+
+	cb_data->done = 1;
 }
 
 static int do_info(struct info_options *opts)
@@ -179,7 +190,7 @@ static int do_info(struct info_options *opts)
 	int client_sock;
 	int *p_client_sock;
 	int ret;
-	static int done = 0;
+	struct info_cb_data cb_data;
 
 	client_sock = unix_client_connect(opts->unix_socket_path, 10);
 
@@ -198,13 +209,16 @@ static int do_info(struct info_options *opts)
 
 	/* jrpc_connection_set_error_handler(conn, client_error_handler); */
 
-	ret = jrpc_call(conn, "status", NULL, info_cb, &done);
+	cb_data.done = 0;
+	cb_data.format_json = opts->format_json;
+
+	ret = jrpc_call(conn, "status", NULL, info_cb, &cb_data);
 	if (ret) {
 		jrpc_connection_free(conn);
 		return ret;
 	}
 
-	while((ret = jrpc_process(conn)) != JRPC_EOF && !done)
+	while ((ret = jrpc_process(conn)) != JRPC_EOF && !cb_data.done)
 		;
 
 	if (close(client_sock) < 0)
