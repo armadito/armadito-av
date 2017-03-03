@@ -45,7 +45,6 @@ AC_CHECK_HEADERS([syslog.h])
 AC_MSG_CHECKING(for debug)
 AC_MSG_RESULT($enable_debug)
 AM_CONDITIONAL([DEBUG], [test "$enable_debug" = "yes"])
-CFLAGS=
 if test "$enable_debug" = "yes"; then
    AC_DEFINE(DEBUG,1,[Define DEBUG to enable debug messages])
    CFLAGS="${CFLAGS} -g"
