@@ -20,11 +20,11 @@ module.c \
 module_p.h \
 ondemand.c \
 report.c \
-report_p.h \
 scanconf.c \
 scanctx.c \
 status.c \
-status_p.h 
+status_p.h \
+string_p.h 
 
 if COND_FANOTIFY
 libcore_a_SOURCES += \

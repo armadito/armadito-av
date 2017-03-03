@@ -106,7 +106,7 @@ int queue_pop_fd(struct queue *q, int fd, struct queue_entry *pop_entry)
 	queue_lock(q);
 
 	n = q->head;
-	while (n != NULL & n->entry.fd != fd)
+	while (n != NULL && n->entry.fd != fd)
 		n = n->next;
 
 	if (n == NULL) {

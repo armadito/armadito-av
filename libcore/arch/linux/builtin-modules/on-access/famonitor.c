@@ -255,11 +255,12 @@ static void fanotify_pass_1(struct fanotify_monitor *f, struct fanotify_event_me
 
 	/* first pass: allow all PERM events from myself, enqueue other PERM events */
 	for(event = buf; FAN_EVENT_OK(event, len); event = FAN_EVENT_NEXT(event, len)) {
-		if ((event->mask & FAN_OPEN_PERM))
+		if ((event->mask & FAN_OPEN_PERM)) {
 			if (event->pid == f->my_pid)
 				response_write(f->fanotify_fd, event->fd, FAN_ALLOW, NULL, "PID is myself");
 			else
 				watchdog_add(f->watchdog, event->fd);
+		}
 	}
 }
 
