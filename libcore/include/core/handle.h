@@ -32,7 +32,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef ARMADITO_CORE_HANDLE_H
 #define ARMADITO_CORE_HANDLE_H
 
-#include <core/error.h>
 #include <core/conf.h>
 
 /**
@@ -43,7 +42,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 struct armadito;
 
 /**
- * \fn struct armadito *a6o_open(struct a6o_conf *conf, a6o_error **error);
+ * \fn struct armadito *a6o_open(struct a6o_conf *conf);
  * \brief allocate and initialize a armadito handle
  *
  * This function allocates a `armadito` structure and initializes it.
@@ -57,17 +56,16 @@ struct armadito;
  * - loading the configuration file located in configuration path (platform dependant)
  *
  *
- * If any step fails, the function returns NULL and fills the error if error return location is non NULL.
+ * If any step fails, the function returns NULL.
  *
  * \param[in] conf       the configuration
- * \param[out] error     return location for a a6o_error, or NULL
  *
  * \return               a pointer to the allocated handle, or NULL if error occured
  */
-struct armadito *a6o_open(struct a6o_conf *conf, a6o_error **error);
+struct armadito *a6o_open(struct a6o_conf *conf);
 
 /**
- * \fn struct armadito *a6o_open(a6o_error **error);
+ * \fn int a6o_close(struct armadito *u)
  * \brief de-initialize and de-allocate a armadito handle
  *
  * This function de-initializes and de-allocates a `armadito` structure.
@@ -76,13 +74,11 @@ struct armadito *a6o_open(struct a6o_conf *conf, a6o_error **error);
  * - calling the `close` function of each module
  * - de-allocating the module data
  *
- * If any step fails, the function returns an error code and fills the error if error return location is non NULL.
- *
- * \param[out] error     return location for a a6o_error, or NULL
+ * If any step fails, the function returns an error code.
  *
  * \return               0 if OK, error code if an error occured
  */
-int a6o_close(struct armadito *u, a6o_error **error);
+int a6o_close(struct armadito *u);
 
 struct a6o_conf *a6o_get_conf(struct armadito *u);
 

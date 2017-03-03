@@ -206,7 +206,7 @@ static int conf_load_parser_cb(const char *section, const char *key, struct a6o_
 	return a6o_conf_add_value(conf, section, key, value);
 }
 
-int a6o_conf_load_file(struct a6o_conf *conf, const char *path, a6o_error **error)
+int a6o_conf_load_file(struct a6o_conf *conf, const char *path)
 {
 	struct a6o_conf_parser *cp = a6o_conf_parser_new(path, conf_load_parser_cb, conf);
 
@@ -251,7 +251,7 @@ static void conf_save_fun(const char *section, const char *key, struct a6o_conf_
 	fprintf(data->f, "\n");
 }
 
-int a6o_conf_save_file(struct a6o_conf *conf, const char *path, a6o_error **error)
+int a6o_conf_save_file(struct a6o_conf *conf, const char *path)
 {
 	FILE *f = NULL;
 	struct conf_save_data data;

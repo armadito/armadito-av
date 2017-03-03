@@ -194,14 +194,13 @@ static int create_server_socket(const char *unix_path)
 static void load_conf(struct a6o_conf *conf)
 {
 	const char *conf_file;
-	a6o_error *error = NULL;
 
 	conf_file = a6o_std_path(A6O_LOCATION_CONFIG_FILE);
 
 	a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_INFO, "loading configuration file %s", conf_file);
 
-	if (a6o_conf_load_file(conf, conf_file, &error)) {
-		a6o_error_print(error, stderr);
+	if (a6o_conf_load_file(conf, conf_file)) {
+		a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_WARNING, "loading configuration failed");
 		exit(EXIT_FAILURE);
 	}
 
@@ -228,7 +227,6 @@ static void load_conf_dir(struct a6o_conf *conf)
 		const char *file_name = dp->d_name;
 		size_t len;
 		char *full_path;
-		a6o_error *error = NULL;
 
 		if ( !strcmp(file_name, ".") || !strcmp(file_name, ".."))
 			continue;
@@ -240,8 +238,8 @@ static void load_conf_dir(struct a6o_conf *conf)
 
 			a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_INFO, "loading configuration file %s", full_path);
 
-			if (a6o_conf_load_file(conf, full_path, &error)) {
-				a6o_error_print(error, stderr);
+			if (a6o_conf_load_file(conf, full_path)) {
+				a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_WARNING, "loading configuration failed");
 				exit(EXIT_FAILURE);
 			}
 
@@ -260,7 +258,6 @@ static void start_daemon(const char *progname, struct a6o_daemon_options *opts)
 	struct armadito *armadito;
 	int server_sock;
 	struct server *server;
-	a6o_error *error = NULL;
 	GMainLoop *loop;
 
 	log_init(opts->s_log_level, !opts->no_daemon);
@@ -277,9 +274,8 @@ static void start_daemon(const char *progname, struct a6o_daemon_options *opts)
 	load_conf(conf);
 	load_conf_dir(conf);
 
-	armadito = a6o_open(conf, &error);
+	armadito = a6o_open(conf);
 	if (armadito == NULL) {
-		a6o_error_print(error, stderr);
 		exit(EXIT_FAILURE);
 	}
 
@@ -289,42 +285,6 @@ static void start_daemon(const char *progname, struct a6o_daemon_options *opts)
 	loop = g_main_loop_new(NULL, FALSE);
 	g_main_loop_run(loop);
 }
-
-#if 0
-static void start_http_server(const char *progname, struct a6o_daemon_options *opts)
-{
-	struct a6o_conf *conf;
-	struct armadito *armadito;
-	a6o_error *error = NULL;
-	struct httpd *h;
-	GMainLoop *loop;
-
-	log_init(opts->s_log_level, !opts->no_daemon);
-
-	if (!opts->no_daemon)
-		daemonize();
-
-	if (opts->pid_file != NULL)
-		create_pid_file(opts->pid_file);
-
-	a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_NONE, "starting %s%s", progname, opts->no_daemon ? "" : " in daemon mode");
-
-	conf = a6o_conf_new();
-	load_conf(conf);
-	load_conf_dir(conf);
-
-	armadito = a6o_open(conf, &error);
-	if (armadito == NULL) {
-		a6o_error_print(error, stderr);
-		exit(EXIT_FAILURE);
-	}
-
-	h = httpd_new(opts->port, armadito);
-
-	loop = g_main_loop_new(NULL, FALSE);
-	g_main_loop_run(loop);
-}
-#endif
 
 int main(int argc, char **argv)
 {

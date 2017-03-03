@@ -14,7 +14,6 @@ armadito_p.h \
 conf.c \
 confparser.c \
 confparser.h \
-error.c \
 event.c \
 info.c \
 module.c \
@@ -72,7 +71,6 @@ noinst_HEADERS= \
 include/core/action.h \
 include/core/conf.h \
 include/core/dir.h \
-include/core/error.h \
 include/core/event.h \
 include/core/file.h \
 include/core/handle.h \

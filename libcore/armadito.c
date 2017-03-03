@@ -29,7 +29,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "core/mimetype.h"
 #include "core/event.h"
 #include "core/dir.h"
-#include "core/error.h"
 #ifdef HAVE_ON_DEMAND_MODULE
 #include "builtin-modules/on-demand/ondemandmod.h"
 #endif
@@ -92,7 +91,7 @@ static void a6o_add_builtin_modules(struct armadito *u)
 #endif
 }
 
-struct armadito *a6o_open(struct a6o_conf *conf, a6o_error **error)
+struct armadito *a6o_open(struct a6o_conf *conf)
 {
 	struct armadito *u;
 	const char *modules_dir;
@@ -110,19 +109,19 @@ struct armadito *a6o_open(struct a6o_conf *conf, a6o_error **error)
 	if (modules_dir == NULL) {
 		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "cannot get modules location, no dynamic loading of modules");
 	} else {
-		if (module_manager_load_path(u->module_manager, modules_dir, error))
+		if (module_manager_load_path(u->module_manager, modules_dir))
 			a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "error during modules load");
 
 		free((void *)modules_dir);
 	}
 
-	if (module_manager_init_all(u->module_manager, error))
+	if (module_manager_init_all(u->module_manager))
 		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "error during modules init");
 
-	if (module_manager_configure_all(u->module_manager, conf, error))
+	if (module_manager_configure_all(u->module_manager, conf))
 		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "error during modules configuration");
 
-	if (module_manager_post_init_all(u->module_manager, error))
+	if (module_manager_post_init_all(u->module_manager))
 		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "error during modules post_init");
 
 	return u;
@@ -143,9 +142,9 @@ struct a6o_module *a6o_get_module_by_name(struct armadito *u, const char *name)
 	return module_manager_get_module_by_name(u->module_manager, name);
 }
 
-int a6o_close(struct armadito *u, a6o_error **error)
+int a6o_close(struct armadito *u)
 {
-	return module_manager_close_all(u->module_manager, error);
+	return module_manager_close_all(u->module_manager);
 }
 
 #ifdef DEBUG

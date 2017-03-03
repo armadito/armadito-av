@@ -46,8 +46,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef ARMADITO_CORE_CONF_H
 #define ARMADITO_CORE_CONF_H
 
-#include <core/error.h>
-
 struct a6o_conf;
 
 struct a6o_conf *a6o_conf_new(void);
@@ -58,9 +56,9 @@ typedef void (*a6o_conf_fun_t)(const char *section, const char *key, struct a6o_
 
 void a6o_conf_apply(struct a6o_conf *conf, a6o_conf_fun_t fun, void *user_data);
 
-int a6o_conf_load_file(struct a6o_conf *conf, const char *path, a6o_error **error);
+int a6o_conf_load_file(struct a6o_conf *conf, const char *path);
 
-int a6o_conf_save_file(struct a6o_conf *conf, const char *path, a6o_error **error);
+int a6o_conf_save_file(struct a6o_conf *conf, const char *path);
 
 const char **a6o_conf_get_sections(struct a6o_conf *conf, size_t *length);
 

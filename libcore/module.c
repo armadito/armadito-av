@@ -85,7 +85,7 @@ static void module_free(struct a6o_module *mod)
 	free(mod);
 }
 
-static int module_load(const char *filename, struct a6o_module **pmodule, a6o_error **error)
+static int module_load(const char *filename, struct a6o_module **pmodule)
 {
 	struct a6o_module *mod_loaded;
 	GModule *g_mod;
@@ -106,13 +106,11 @@ static int module_load(const char *filename, struct a6o_module **pmodule, a6o_er
 	/* the module must export a "module" symbol that is a struct a6o_module */
 	/* if the symbol is not found, then module cannot be loaded */
 	if (!g_module_symbol(g_mod, "module", (gpointer *)&mod_loaded)) {
-		a6o_error_set(error, ARMADITO_ERROR_MODULE_SYMBOL_NOT_FOUND, "symbol 'module' not found in file");
-
 		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "symbol %s not found in file %s", "module", filename);
 
 		*pmodule = NULL;
 
-		return ARMADITO_ERROR_MODULE_SYMBOL_NOT_FOUND;
+		return A6O_MOD_INIT_ERROR;
 	}
 
 	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_INFO, "module %s loaded from file %s", mod_loaded->name, filename);
@@ -155,21 +153,17 @@ static int module_load_dirent_cb(const char *full_path, enum os_file_flag flags,
 {
 	if (flags & FILE_FLAG_IS_PLAIN_FILE) {
 		struct a6o_module *mod_loaded;
-		a6o_error *error = NULL;
 
 		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "loading module from path %s flags %d", full_path, flags);
 
-		if (!module_load(full_path, &mod_loaded, &error) && mod_loaded != NULL)
+		if (!module_load(full_path, &mod_loaded) && mod_loaded != NULL)
 			module_manager_add((struct module_manager *)data, mod_loaded);
-
-		if(error != NULL)
-			free(error);
 	}
 
 	return 0;
 }
 
-int module_manager_load_path(struct module_manager *mm, const char *path, a6o_error **error)
+int module_manager_load_path(struct module_manager *mm, const char *path)
 {
 	/* FIXME: for now, dirty stuff, do nothing with error */
 	int ret = 0;
@@ -183,7 +177,7 @@ int module_manager_load_path(struct module_manager *mm, const char *path, a6o_er
 
 /* apply `module_fun` to all modules that have an OK status */
 /* continue if a module returns an error and return error */
-static int module_manager_all(struct module_manager *mm, int (*module_fun)(struct a6o_module *, a6o_error **error), a6o_error **error)
+static int module_manager_all(struct module_manager *mm, int (*module_fun)(struct a6o_module *))
 {
 	struct a6o_module **modv;
 	int global_ret = 0;
@@ -196,7 +190,7 @@ static int module_manager_all(struct module_manager *mm, int (*module_fun)(struc
 		if (mod->status != A6O_MOD_OK)
 			continue;
 
-		mod_ret = (*module_fun)(mod, error);
+		mod_ret = (*module_fun)(mod);
 
 		if (mod_ret)
 			global_ret = mod_ret;
@@ -205,7 +199,7 @@ static int module_manager_all(struct module_manager *mm, int (*module_fun)(struc
 	return global_ret;
 }
 
-static int module_init(struct a6o_module *mod, a6o_error **error)
+static int module_init(struct a6o_module *mod)
 {
 	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "initializing module %s", mod->name);
 
@@ -221,17 +215,15 @@ static int module_init(struct a6o_module *mod, a6o_error **error)
 		/* module init failed, set error and return NULL */
 		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "initialization error for module '%s'", mod->name);
 
-		a6o_error_set(error, ARMADITO_ERROR_MODULE_INIT_FAILED, "initialization error for module");
-
-		return ARMADITO_ERROR_MODULE_INIT_FAILED;
+		return A6O_MOD_INIT_ERROR;
 	}
 
 	return 0;
 }
 
-int module_manager_init_all(struct module_manager *mm, a6o_error **error)
+int module_manager_init_all(struct module_manager *mm)
 {
-	return module_manager_all(mm, module_init, error);
+	return module_manager_all(mm, module_init);
 }
 
 static void module_conf_fun(const char *section, const char *key, struct a6o_conf_value *value, void *user_data)
@@ -270,14 +262,14 @@ static void module_conf_fun(const char *section, const char *key, struct a6o_con
 	}
 }
 
-int module_manager_configure_all(struct module_manager *mm, struct a6o_conf *conf, a6o_error **error)
+int module_manager_configure_all(struct module_manager *mm, struct a6o_conf *conf)
 {
 	a6o_conf_apply(conf, module_conf_fun, mm);
 
 	return 0;
 }
 
-static int module_post_init(struct a6o_module *mod, a6o_error **error)
+static int module_post_init(struct a6o_module *mod)
 {
 	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "post-initializing module %s", mod->name);
 
@@ -289,20 +281,18 @@ static int module_post_init(struct a6o_module *mod, a6o_error **error)
 	if (mod->status != A6O_MOD_OK) {
 		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "post_init error for module '%s'", mod->name);
 
-		a6o_error_set(error, ARMADITO_ERROR_MODULE_POST_INIT_FAILED, "post_init error for module");
-
-		return ARMADITO_ERROR_MODULE_POST_INIT_FAILED;
+		return A6O_MOD_INIT_ERROR;
 	}
 
 	return 0;
 }
 
-int module_manager_post_init_all(struct module_manager *mm, a6o_error **error)
+int module_manager_post_init_all(struct module_manager *mm)
 {
-	return module_manager_all(mm, module_post_init, error);
+	return module_manager_all(mm, module_post_init);
 }
 
-static int module_close(struct a6o_module *mod, a6o_error **error)
+static int module_close(struct a6o_module *mod)
 {
 	/* module has no close_fun, do nothing */
 	if (mod->close_fun == NULL)
@@ -315,17 +305,15 @@ static int module_close(struct a6o_module *mod, a6o_error **error)
 	if (mod->status != A6O_MOD_OK) {
 		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_WARNING, "close error for module '%s'", mod->name);
 
-		a6o_error_set(error, ARMADITO_ERROR_MODULE_CLOSE_FAILED, "close error for module");
-
-		return ARMADITO_ERROR_MODULE_CLOSE_FAILED;
+		return A6O_MOD_CLOSE_ERROR;
 	}
 
 	return 0;
 }
 
-int module_manager_close_all(struct module_manager *mm, a6o_error **error)
+int module_manager_close_all(struct module_manager *mm)
 {
-	return module_manager_all(mm, module_close, error);
+	return module_manager_all(mm, module_close);
 }
 
 struct a6o_module **module_manager_get_modules(struct module_manager *mm)
