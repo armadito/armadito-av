@@ -25,14 +25,63 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdarg.h>
 
+#define DEFAULT_INITIAL_SIZE 128
+
+struct buffer {
+	size_t alloced_size;
+	size_t filled_size;
+	char *buff;
+};
+
+static void init(struct buffer *b)
+{
+	b->alloced_size = DEFAULT_INITIAL_SIZE;
+	b->buff = malloc(b->alloced_size);
+	b->filled_size = 0;
+}
+
+static void grow_by_1(struct buffer *b)
+{
+	if (b->filled_size + 1 >= b->alloced_size) {
+		b->alloced_size *= 2;
+		b->buff = realloc(b->buff, b->alloced_size);
+	}
+}
+
+static void append(struct buffer *b, char c)
+{
+	grow_by_1(b);
+	b->buff[b->filled_size] = c;
+	b->filled_size++;
+}
+
 char *a6o_vstrcat(const char *src, ...)
 {
 	va_list args;
+	const char *current_arg;
+	struct buffer b;
+
+	if (src == NULL)
+		return NULL;
+
+	init(&b);
 
 	va_start(args, src);
+	current_arg = src;
+	while (current_arg != NULL) {
+		const char *p = current_arg;
 
+		while (*p) {
+			append(&b, *p);
+			p++;
+		}
+
+		current_arg = va_arg(args, const char *);
+	}
+
+	append(&b, '\0');
 	va_end(args);
 
-	return NULL;
+	return b.buff;
 }
 
