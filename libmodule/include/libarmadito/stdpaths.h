@@ -50,6 +50,6 @@ enum a6o_std_location {
 
 const char *a6o_std_path(enum a6o_std_location location);
 
-char a6o_path_sep(void);
+const char *a6o_path_sep(void);
 
 #endif

@@ -89,9 +89,9 @@ const char *os_stdpath_tmp()
 	return NULL;
 }
 
-char a6o_path_sep(void)
+const char *a6o_path_sep(void)
 {
-	return '/';
+	return "/";
 }
 #endif
 
@@ -254,8 +254,8 @@ const char *os_stdpath_tmp()
 	return NULL;
 }
 
-char a6o_path_sep() {
-	return '\\';
+const char *a6o_path_sep() {
+	return "\\";
 }
 
 #endif

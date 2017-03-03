@@ -55,7 +55,7 @@ static void append(struct buffer *b, char c)
 	b->filled_size++;
 }
 
-char *a6o_vstrcat(const char *src, ...)
+char *a6o_strcat_(const char *src, ...)
 {
 	va_list args;
 	const char *current_arg;
@@ -76,7 +76,7 @@ char *a6o_vstrcat(const char *src, ...)
 			p++;
 		}
 
-		current_arg = va_arg(args, const char *);
+		current_arg = va_arg(args, char *);
 	}
 
 	append(&b, '\0');

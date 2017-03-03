@@ -31,21 +31,26 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 /**
- * \fn char *a6o_vstrcat(const char *src, ...);
+ * \fn char *a6o_strcat_(const char *src, ...);
  * \brief varargs string concatenation with allocation
  *
  * Concatenates a NULL terminated argument list of strings.
  * The result is allocated using malloc() and must therefore be free()d after use.
  *
+ * NOTE: this function should not be called directly. The macro a6o_strcat must
+ * be used instead, so that the NULL terminating argument is always there.
+ *
  * \param[in] src               the first argument
  *
  * \return the concatenation, or NULL if src argument is NULL
  */
-char *a6o_vstrcat(const char *src, ...);
+char *a6o_strcat_(const char *src, ...);
 
-/* #define a6o_strdup(S) a6o_vstrcat((S), NULL) */
-#define a6o_strdup(S) strdup(S)
+#define a6o_strcat(SRC, ...) a6o_strcat_((SRC), __VA_ARGS__, NULL)
+
+#define a6o_strdup(S) a6o_strcat_((S), NULL)
 
 #endif
