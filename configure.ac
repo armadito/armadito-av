@@ -183,7 +183,6 @@ librpc/jrpc/tests/Makefile
 man/Makefile
 man/fr/Makefile
 tests/Makefile
-tests/web/Makefile
 tools/Makefile
 ])
 AC_OUTPUT
