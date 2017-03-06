@@ -152,3 +152,12 @@ JRPC_STRUCT(a6o_rpc_scan_param)
 	JRPC_STRUCT_FIELD_STRING(root_path)
 	JRPC_STRUCT_FIELD_INT(int, send_progress)
 JRPC_STRUCT_END
+
+JRPC_STRUCT(a6o_rpc_listen_param)
+	JRPC_STRUCT_FIELD_INT(int, detection)
+	JRPC_STRUCT_FIELD_INT(int, on_demand)
+	JRPC_STRUCT_FIELD_INT(int, on_demand_progress)
+	JRPC_STRUCT_FIELD_INT(int, quarantine)
+	JRPC_STRUCT_FIELD_INT(int, real_time_prot)
+	JRPC_STRUCT_FIELD_INT(int, av_update)
+JRPC_STRUCT_END

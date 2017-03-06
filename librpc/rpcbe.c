@@ -19,8 +19,11 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
+#include <libarmadito/armadito.h>
 #include <libjrpc/jrpc.h>
 
+#include "core/event.h"
+#include "core/handle.h"
 #include "core/info.h"
 #include "core/ondemand.h"
 #include "rpc/rpctypes.h"
@@ -92,6 +95,34 @@ static int status_method(struct jrpc_connection *conn, json_t *params, json_t **
 	return JRPC_OK;
 }
 
+static int listen_method(struct jrpc_connection *conn, json_t *params, json_t **result)
+{
+	struct armadito *armadito = (struct armadito *)jrpc_connection_get_data(conn);
+	struct a6o_rpc_listen_param *l_param;
+	int event_mask = 0;
+	int ret;
+
+	if ((ret = JRPC_JSON2STRUCT(a6o_rpc_listen_param, params, &l_param)))
+		return ret;
+
+	if (l_param->detection)
+		event_mask |= EVENT_DETECTION;
+	if (l_param->on_demand)
+		event_mask |= (EVENT_ON_DEMAND_START | EVENT_ON_DEMAND_COMPLETED);
+	if (l_param->on_demand_progress)
+		event_mask |= EVENT_ON_DEMAND_PROGRESS;
+	if (l_param->quarantine)
+		event_mask |= EVENT_QUARANTINE;
+	if (l_param->real_time_prot)
+		event_mask |= EVENT_REAL_TIME_PROT;
+	if (l_param->av_update)
+		event_mask |= EVENT_AV_UPDATE;
+
+	a6o_event_source_add_cb(a6o_get_event_source(armadito),  event_mask, rpcbe_event_cb, conn);
+
+	return JRPC_OK;
+}
+
 static struct jrpc_mapper *rpcbe_mapper;
 
 static void create_rpcbe_mapper(void)
@@ -99,10 +130,7 @@ static void create_rpcbe_mapper(void)
 	rpcbe_mapper = jrpc_mapper_new();
 	jrpc_mapper_add(rpcbe_mapper, "scan", scan_method);
 	jrpc_mapper_add(rpcbe_mapper, "status", status_method);
-
-	/* jrpc_mapper_add_error_message(rpcbe_mapper, ERR_DIVIDE_BY_ZERO, "divide by zero"); */
-	/* jrpc_mapper_add_error_message(rpcbe_mapper, ERR_SQRT_OF_NEGATIVE, "square root of negative number"); */
-	/* jrpc_mapper_add_error_message(rpcbe_mapper, ERR_INVALID_ACTION, "invalid notification action"); */
+	jrpc_mapper_add(rpcbe_mapper, "listen", listen_method);
 }
 
 struct jrpc_mapper *a6o_get_rpcbe_mapper(void)

@@ -30,6 +30,15 @@ struct a6o_rpc_scan_param {
 	int send_progress;
 };
 
+struct a6o_rpc_listen_param {
+	int detection;
+	int on_demand;
+	int on_demand_progress;
+	int quarantine;
+	int real_time_prot;
+	int av_update;
+};
+
 #define MARSHALL_DECLARATIONS
 #include "rpc/rpcdefs.h"
 
