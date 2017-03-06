@@ -2,19 +2,17 @@ if COND_MAN
 OPT_MAN_DIR=man
 endif
 
-SUBDIRS=conf libmodule libcore librpc httpd arch tools tests $(OPT_MAN_DIR)
+SUBDIRS=conf libmodule libcore librpc arch tools tests $(OPT_MAN_DIR)
 
 TAGDIRS=\
 $(top_srcdir)/arch \
 $(top_srcdir)/conf \
-$(top_srcdir)/httpd \
 $(top_srcdir)/libcore \
 $(top_srcdir)/librpc \
 $(top_srcdir)/libmodule \
 $(top_srcdir)/man \
 $(top_srcdir)/tests \
 $(top_srcdir)/tools
-
 
 
 .PHONY: TAGS coverage

@@ -88,24 +88,6 @@ unset SAVE_LDFLAGS
 # for now, disable deprecations, will need more tests in configure.ac
 AC_DEFINE([GLIB_DISABLE_DEPRECATION_WARNINGS], [1], [Disable glib deprecation warnings])
 
-# check for libxml2
-PKG_CHECK_MODULES(LIBXML2, libxml-2.0, [HAVE_LIBXML2=yes], [HAVE_LIBXML2=no])
-if test "$HAVE_LIBXML2" = "no"; then
-   AC_MSG_ERROR("cannot find libxml2 library")
-fi
-
-# check for libmicrohttpd
-PKG_CHECK_MODULES(LIBMICROHTTPD, libmicrohttpd, [HAVE_LIBMICROHTTPD=yes], [HAVE_LIBMICROHTTPD=no])
-if test "$HAVE_LIBMICROHTTPD" = "no"; then
-   AC_MSG_ERROR("cannot find libmicrohttpd library")
-fi
-
-# check for libcurl
-PKG_CHECK_MODULES(LIBCURL, libcurl, [HAVE_LIBCURL=yes], [HAVE_LIBCURL=no])
-if test "$HAVE_LIBCURL" = "no"; then
-   AC_MSG_ERROR("cannot find libcurl library")
-fi
-
 # check for libmagic, that has no pkg-config
 SAVE_CFLAGS=${CFLAGS}
 CFLAGS=-fPIC
@@ -173,7 +155,6 @@ arch/linux/daemon/Makefile
 arch/linux/net/Makefile
 arch/linux/service/Makefile
 conf/Makefile
-httpd/Makefile
 libcore/Makefile
 libmodule/Makefile
 librpc/Makefile
