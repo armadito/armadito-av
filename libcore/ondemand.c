@@ -25,6 +25,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "core/report.h"
 #include "core/ondemand.h"
 #include "core/file.h"
+#include "core/handle.h"
 #include "core/scanctx.h"
 #include "core/io.h"
 #include "core/dir.h"
@@ -42,12 +43,12 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 struct a6o_on_demand {
+	struct armadito *armadito;
 	struct a6o_scan_conf *scan_conf;
 
-	struct a6o_event_source *event_source;
-
 	const char *root_path;              /* root path of the scan */
-	enum a6o_scan_flags flags;        /* scan flags (recursive, threaded, etc) */
+	unsigned int scan_id;               /* scan id for client */
+	enum a6o_scan_flags flags;          /* scan flags (recursive, threaded, etc) */
 
 	GThread *count_thread;              /* thread used to count the files to compute progress */
 	GThreadPool *thread_pool;           /* the thread pool if multi-threaded */
@@ -70,14 +71,12 @@ const char *a6o_scan_conf_debug(struct a6o_scan_conf *c);
 
 #define DEFAULT_PROGRESS_PERIOD 200  /* milliseconds */
 
-struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, const char *root_path, enum a6o_scan_flags flags, int send_progress)
+struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, const char *root_path, unsigned int scan_id, enum a6o_scan_flags flags, int send_progress)
 {
 	struct a6o_on_demand *on_demand = (struct a6o_on_demand *)malloc(sizeof(struct a6o_on_demand));
 
-	/* in future, can have many scan configurations */
+	on_demand->armadito = armadito;
 	on_demand->scan_conf = a6o_scan_conf_on_demand();
-
-	on_demand->event_source = a6o_event_source_new();
 
 #ifdef HAVE_REALPATH
 	on_demand->root_path = (const char *)realpath(root_path, NULL);
@@ -89,7 +88,7 @@ struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, const char *r
 #else
 	on_demand->root_path = os_strdup(root_path);
 #endif
-
+	on_demand->scan_id = scan_id;
 	on_demand->flags = flags;
 
 	on_demand->count_thread = NULL;
@@ -112,9 +111,9 @@ struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, const char *r
 	return on_demand;
 }
 
-struct a6o_event_source *a6o_on_demand_get_event_source(struct a6o_on_demand *on_demand)
+unsigned int a6o_on_demand_get_id(struct a6o_on_demand *on_demand)
 {
-	return on_demand->event_source;
+	return on_demand->scan_id;
 }
 
 void a6o_on_demand_cancel(struct a6o_on_demand *on_demand)
@@ -203,6 +202,7 @@ static void fire_progress_event(struct a6o_on_demand *on_demand, struct a6o_repo
 
 	/* should strdup? */
 	progress_ev.path = report->path;
+	progress_ev.scan_id = on_demand->scan_id;
 	progress_ev.progress = progress;
 	progress_ev.malware_count = on_demand->malware_count;
 	progress_ev.suspicious_count = on_demand->suspicious_count;
@@ -210,7 +210,7 @@ static void fire_progress_event(struct a6o_on_demand *on_demand, struct a6o_repo
 
 	ev = a6o_event_new(EVENT_ON_DEMAND_PROGRESS, &progress_ev);
 
-	a6o_event_source_fire_event(a6o_on_demand_get_event_source(on_demand), ev);
+	a6o_event_source_fire_event(a6o_get_event_source(on_demand->armadito), ev);
 	a6o_event_free(ev);
 }
 
@@ -245,6 +245,7 @@ static void fire_detection_event(struct a6o_on_demand *on_demand, struct a6o_rep
 	struct a6o_event *ev;
 
 	detection_ev.context = CONTEXT_ON_DEMAND;
+	detection_ev.scan_id = on_demand->scan_id;
 	/* should strdup? */
 	detection_ev.path = report->path;
 	detection_ev.scan_status = report->status;
@@ -254,7 +255,7 @@ static void fire_detection_event(struct a6o_on_demand *on_demand, struct a6o_rep
 
 	ev = a6o_event_new(EVENT_DETECTION, &detection_ev);
 
-	a6o_event_source_fire_event(a6o_on_demand_get_event_source(on_demand), ev);
+	a6o_event_source_fire_event(a6o_get_event_source(on_demand->armadito), ev);
 	a6o_event_free(ev);
 }
 
@@ -263,14 +264,16 @@ static void fire_on_demand_completed_event(struct a6o_on_demand *on_demand)
 	struct a6o_on_demand_completed_event completed_ev;
 	struct a6o_event *ev;
 
+	completed_ev.scan_id = on_demand->scan_id;
 	completed_ev.cancelled = on_demand->was_cancelled;
 	completed_ev.total_malware_count = on_demand->malware_count;
 	completed_ev.total_suspicious_count = on_demand->suspicious_count;
 	completed_ev.total_scanned_count = on_demand->scanned_count;
+	completed_ev.duration = 0L;
 
 	ev = a6o_event_new(EVENT_ON_DEMAND_COMPLETED, &completed_ev);
 
-	a6o_event_source_fire_event(a6o_on_demand_get_event_source(on_demand), ev);
+	a6o_event_source_fire_event(a6o_get_event_source(on_demand->armadito), ev);
 	a6o_event_free(ev);
 }
 
@@ -447,8 +450,9 @@ void a6o_on_demand_run(struct a6o_on_demand *on_demand)
 	struct os_file_stat stat_buf;
 	int stat_errno;
 
-	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_INFO, "starting %sthreaded scan of %s",
+	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_INFO, "starting %sthreaded scan %d of %s",
 		on_demand->flags & A6O_SCAN_THREADED ? "" : "non-",
+		on_demand->scan_id,
 		on_demand->root_path);
 
 	/* create the thread pool now */
@@ -490,7 +494,6 @@ void a6o_on_demand_run(struct a6o_on_demand *on_demand)
 
 void a6o_on_demand_free(struct a6o_on_demand *on_demand)
 {
-	a6o_event_source_free(on_demand->event_source);
 	free(on_demand);
 }
 

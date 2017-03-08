@@ -28,6 +28,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 struct a6o_rpc_scan_param {
 	const char *root_path;
 	int send_progress;
+	int recursive;
+	int threaded;
+	unsigned int scan_id;
 };
 
 struct a6o_rpc_listen_param {

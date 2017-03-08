@@ -61,6 +61,7 @@ static void on_demand_completed_event_clone(struct a6o_on_demand_completed_event
 	dst->total_malware_count = src->total_malware_count;
 	dst->total_suspicious_count = src->total_suspicious_count;
 	dst->total_scanned_count = src->total_scanned_count;
+	dst->duration = src->duration;
 }
 
 static void on_demand_progress_event_clone(struct a6o_on_demand_progress_event *dst, const struct a6o_on_demand_progress_event *src)

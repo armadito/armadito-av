@@ -94,6 +94,7 @@ JRPC_ENUM_END
 
 JRPC_STRUCT(a6o_detection_event)
 	JRPC_STRUCT_FIELD_ENUM(a6o_detection_context, context)
+	JRPC_STRUCT_FIELD_INT(unsigned int, scan_id)
 	JRPC_STRUCT_FIELD_STRING(path)
 	JRPC_STRUCT_FIELD_ENUM(a6o_file_status, scan_status)
 	JRPC_STRUCT_FIELD_ENUM(a6o_action, scan_action)
@@ -103,15 +104,20 @@ JRPC_STRUCT_END
 
 JRPC_STRUCT(a6o_on_demand_start_event)
 	JRPC_STRUCT_FIELD_STRING(root_path)
+	JRPC_STRUCT_FIELD_INT(unsigned int, scan_id)
 JRPC_STRUCT_END
 
 JRPC_STRUCT(a6o_on_demand_completed_event)
+	JRPC_STRUCT_FIELD_INT(unsigned int, scan_id)
+	JRPC_STRUCT_FIELD_INT(int, cancelled)
 	JRPC_STRUCT_FIELD_INT(size_t, total_malware_count)
 	JRPC_STRUCT_FIELD_INT(size_t, total_suspicious_count)
 	JRPC_STRUCT_FIELD_INT(size_t, total_scanned_count)
+	JRPC_STRUCT_FIELD_INT(time_t, duration)
 JRPC_STRUCT_END
 
 JRPC_STRUCT(a6o_on_demand_progress_event)
+	JRPC_STRUCT_FIELD_INT(unsigned int, scan_id)
 	JRPC_STRUCT_FIELD_INT(int, progress)
 	JRPC_STRUCT_FIELD_STRING(path)
 	JRPC_STRUCT_FIELD_INT(size_t, malware_count)
@@ -151,6 +157,9 @@ JRPC_STRUCT_END
 JRPC_STRUCT(a6o_rpc_scan_param)
 	JRPC_STRUCT_FIELD_STRING(root_path)
 	JRPC_STRUCT_FIELD_INT(int, send_progress)
+	JRPC_STRUCT_FIELD_INT(int, recursive)
+	JRPC_STRUCT_FIELD_INT(int, threaded)
+	JRPC_STRUCT_FIELD_INT(unsigned int, scan_id)
 JRPC_STRUCT_END
 
 JRPC_STRUCT(a6o_rpc_listen_param)

@@ -30,16 +30,37 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <glib.h>
 
-static void rpcbe_event_cb(struct a6o_event *ev, void *data)
+struct scan_event_data {
+	struct jrpc_connection *conn;
+	struct a6o_on_demand *on_demand;
+};
+
+static void scan_event_cb(struct a6o_event *ev, void *data)
 {
-	struct jrpc_connection *conn = (struct jrpc_connection *)data;
+	struct scan_event_data *ev_data = (struct scan_event_data *)data;
 	json_t *j_ev;
+	unsigned int expected_scan_id = a6o_on_demand_get_id(ev_data->on_demand);
 	int ret;
+
+	switch(ev->type) {
+	case EVENT_DETECTION:
+		if (ev->u.ev_detection.scan_id != expected_scan_id)
+			return;
+		break;
+	case EVENT_ON_DEMAND_COMPLETED:
+		if (ev->u.ev_on_demand_completed.scan_id != expected_scan_id)
+			return;
+		break;
+	case EVENT_ON_DEMAND_PROGRESS:
+		if (ev->u.ev_on_demand_progress.scan_id != expected_scan_id)
+			return;
+		break;
+	}
 
 	if ((ret = JRPC_STRUCT2JSON(a6o_event, ev, &j_ev)))
 		return;
 
-	jrpc_notify(conn, "notify_event", j_ev);
+	jrpc_notify(ev_data->conn, "notify_event", j_ev);
 }
 
 static gpointer scan_thread_fun(gpointer data)
@@ -60,19 +81,29 @@ static int scan_method(struct jrpc_connection *conn, json_t *params, json_t **re
 	int event_mask;
 	struct a6o_rpc_scan_param *s_param;
 	struct a6o_on_demand *on_demand;
+	struct scan_event_data *ev_data;
+	enum a6o_scan_flags flags = 0;
 
 	if ((ret = JRPC_JSON2STRUCT(a6o_rpc_scan_param, params, &s_param)))
 		return ret;
 
 	a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_DEBUG, "scan path %s", s_param->root_path);
 
-	on_demand = a6o_on_demand_new(armadito, s_param->root_path, A6O_SCAN_RECURSE | A6O_SCAN_THREADED, s_param->send_progress);
+	if (s_param->threaded)
+		flags |= A6O_SCAN_THREADED;
+	if (s_param->recursive)
+		flags |= A6O_SCAN_RECURSE;
+	on_demand = a6o_on_demand_new(armadito, s_param->root_path, s_param->scan_id, flags, s_param->send_progress);
 
 	event_mask = EVENT_DETECTION | EVENT_ON_DEMAND_COMPLETED;
 	if (s_param->send_progress)
 		event_mask |= EVENT_ON_DEMAND_PROGRESS;
 
-	a6o_event_source_add_cb(a6o_on_demand_get_event_source(on_demand),  event_mask, rpcbe_event_cb, conn);
+	ev_data = malloc(sizeof(struct scan_event_data));
+	ev_data->conn = conn;
+	ev_data->on_demand = on_demand;
+
+	a6o_event_source_add_cb(a6o_get_event_source(armadito), event_mask, scan_event_cb, ev_data);
 
 	g_thread_new("scan thread", scan_thread_fun, on_demand);
 
@@ -93,6 +124,18 @@ static int status_method(struct jrpc_connection *conn, json_t *params, json_t **
 	a6o_info_free(info);
 
 	return JRPC_OK;
+}
+
+static void listen_event_cb(struct a6o_event *ev, void *data)
+{
+	struct jrpc_connection *conn = (struct jrpc_connection *)data;
+	json_t *j_ev;
+	int ret;
+
+	if ((ret = JRPC_STRUCT2JSON(a6o_event, ev, &j_ev)))
+		return;
+
+	jrpc_notify(conn, "notify_event", j_ev);
 }
 
 static int listen_method(struct jrpc_connection *conn, json_t *params, json_t **result)
@@ -118,7 +161,7 @@ static int listen_method(struct jrpc_connection *conn, json_t *params, json_t **
 	if (l_param->av_update)
 		event_mask |= EVENT_AV_UPDATE;
 
-	a6o_event_source_add_cb(a6o_get_event_source(armadito),  event_mask, rpcbe_event_cb, conn);
+	a6o_event_source_add_cb(a6o_get_event_source(armadito),  event_mask, listen_event_cb, conn);
 
 	return JRPC_OK;
 }
