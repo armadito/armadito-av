@@ -22,22 +22,19 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <libarmadito/armadito.h>
 
 #include "core/event.h"
+#include "core/handle.h"
+#include "core/status.h"
 
 #include <syslog.h>
+#include <stdio.h>
 
 /* name="/home/malwares/contagio-malware/jar/MALWARE_JAR_200_files/Mal_Java_64FD14CEF0026D4240A4550E6A6F9E83.jar » ZIP » a/kors.class", threat="a variant of Java/Exploit.Agent.OKJ trojan", action="action selection postponed until scan completion", info="" */
 
 static void detection_event_journal(struct a6o_detection_event *ev)
 {
-#if 0
-	ev->context;
-	ev->scan_id;
-	ev->path;
-	ev->scan_status;
-	ev->scan_action;
-	ev->module_name;
-	ev->module_report;
-#endif
+	syslog( LOG_INFO,
+		"path=\"%s\", scan_status=\"%s\", scan_action=\"%s\", module_name=\"%s\", module_report=\"%s\", scan_id=%d",
+		ev->path, a6o_file_status_str(ev->scan_status), a6o_action_pretty_str(ev->scan_action), ev->module_name, ev->module_report, ev->scan_id);
 }
 
 static void on_demand_start_event_journal(struct a6o_on_demand_start_event *ev)
@@ -117,6 +114,8 @@ static void journal_event_cb(struct a6o_event *ev, void *data)
 void journal_init(struct armadito *armadito)
 {
 	int event_mask;
+
+	openlog("armadito-journal", LOG_PID, LOG_USER);
 
 	event_mask = EVENT_DETECTION
 		| EVENT_ON_DEMAND_START

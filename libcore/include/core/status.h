@@ -22,6 +22,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef ARMADITO_CORE_STATUS_H
 #define ARMADITO_CORE_STATUS_H
 
+const char *a6o_file_status_str(enum a6o_file_status status);
+
 const char *a6o_file_status_pretty_str(enum a6o_file_status status);
 
 #endif

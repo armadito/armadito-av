@@ -25,6 +25,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "armadito-config.h"
 
+#include "journal.h"
 #include "log.h"
 #include "server.h"
 #include "daemonize.h"
@@ -278,6 +279,8 @@ static void start_daemon(const char *progname, struct a6o_daemon_options *opts)
 	if (armadito == NULL) {
 		exit(EXIT_FAILURE);
 	}
+
+	journal_init(armadito);
 
 	server_sock = create_server_socket(opts->unix_path);
 	server = server_new(armadito, server_sock);
