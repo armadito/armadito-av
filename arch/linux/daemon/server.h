@@ -19,8 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _DAEMON_SERVER_H_
-#define _DAEMON_SERVER_H_
+#ifndef DAEMON_SERVER_H
+#define DAEMON_SERVER_H
 
 struct server;
 

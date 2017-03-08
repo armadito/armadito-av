@@ -19,9 +19,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef UNIXSOCKSERVER_H
-#define UNIXSOCKSERVER_H
+#ifndef DAEMON_JOURNAL_H
+#define DAEMON_JOURNAL_H
 
-int unix_server_listen(const char *socket_path);
+void journal_init(struct armadito *armadito);
 
 #endif

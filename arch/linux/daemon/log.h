@@ -19,8 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _DAEMON_LOG_H_
-#define _DAEMON_LOG_H_
+#ifndef DAEMON_LOG_H
+#define DAEMON_LOG_H
 
 void log_init(const char *s_log_level, int use_syslog);
 

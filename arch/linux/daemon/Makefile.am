@@ -8,6 +8,8 @@ armadito_scand_LDADD=$(PTHREAD_CFLAGS) $(top_builddir)/libmodule/libarmadito.la 
 
 armadito_scand_SOURCES= \
 main.c \
+journal.c \
+journal.h \
 log.c \
 log.h \
 server.c \
