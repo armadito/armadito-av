@@ -43,6 +43,7 @@ struct a6o_event_source {
 static void detection_event_clone(struct a6o_detection_event *dst, const struct a6o_detection_event *src)
 {
 	dst->context = src->context;
+	dst->scan_id = src->scan_id;
 	dst->path = strdup(src->path);
 	dst->scan_status = src->scan_status;
 	dst->scan_action = src->scan_action;
@@ -53,10 +54,12 @@ static void detection_event_clone(struct a6o_detection_event *dst, const struct 
 static void on_demand_start_event_clone(struct a6o_on_demand_start_event *dst, const struct a6o_on_demand_start_event *src)
 {
 	dst->root_path = strdup(src->root_path);
+	dst->scan_id = src->scan_id;
 }
 
 static void on_demand_completed_event_clone(struct a6o_on_demand_completed_event *dst, const struct a6o_on_demand_completed_event *src)
 {
+	dst->scan_id = src->scan_id;
 	dst->cancelled = src->cancelled;
 	dst->total_malware_count = src->total_malware_count;
 	dst->total_suspicious_count = src->total_suspicious_count;
@@ -66,6 +69,7 @@ static void on_demand_completed_event_clone(struct a6o_on_demand_completed_event
 
 static void on_demand_progress_event_clone(struct a6o_on_demand_progress_event *dst, const struct a6o_on_demand_progress_event *src)
 {
+	dst->scan_id = src->scan_id;
 	dst->progress = src->progress;
 	dst->path = strdup(src->path);
 	dst->malware_count = src->malware_count;
