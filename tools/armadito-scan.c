@@ -169,7 +169,8 @@ static void on_demand_completed_event_print(struct a6o_on_demand_completed_event
 	printf("\nSCAN SUMMARY:\n");
 	printf("scanned files     : %ld\n", ev->total_scanned_count);
 	printf("malware files     : %ld\n", ev->total_malware_count);
-	printf("suspicious files  : %ld\n\n", ev->total_suspicious_count);
+	printf("suspicious files  : %ld\n", ev->total_suspicious_count);
+	printf("duration          : %.5fs\n\n", ev->duration / 1000.0);
 }
 
 static void event_print(struct a6o_event *ev)
@@ -193,6 +194,7 @@ static void event_print_json(json_t *j_ev)
 struct scan_data {
 	int done;
 	int format_json;
+	int no_summary;
 };
 
 static int notify_event_method(struct jrpc_connection *conn, json_t *params, json_t **result)
@@ -204,16 +206,25 @@ static int notify_event_method(struct jrpc_connection *conn, json_t *params, jso
 	if ((ret = JRPC_JSON2STRUCT(a6o_event, params, &ev)))
 		return ret;
 
-	if (ev->type == EVENT_ON_DEMAND_PROGRESS)
+	switch(ev->type) {
+	case EVENT_ON_DEMAND_PROGRESS:
 		return JRPC_OK;
-
- 	if (sc_data->format_json)
-		event_print_json(params);
-	else
-		event_print(ev);
-
-	if (ev->type == EVENT_ON_DEMAND_COMPLETED)
+	case EVENT_DETECTION:
+		if (sc_data->format_json)
+			event_print_json(params);
+		else
+			detection_event_print(&ev->u.ev_detection);
+		break;
+	case EVENT_ON_DEMAND_COMPLETED:
 		sc_data->done = 1;
+		if (!sc_data->no_summary) {
+			if (sc_data->format_json)
+				event_print_json(params);
+			else
+				on_demand_completed_event_print(&ev->u.ev_on_demand_completed);
+		}
+		break;
+	}
 
 	return JRPC_OK;
 }
@@ -248,6 +259,7 @@ static int do_scan(struct scan_options *opts)
 
 	sc_data.done = 0;
 	sc_data.format_json = opts->format_json;
+	sc_data.no_summary = opts->no_summary;
 
 	conn = jrpc_connection_new(create_rpcfe_mapper(), (void *)&sc_data);
 

@@ -53,6 +53,9 @@ struct a6o_on_demand {
 	GThread *count_thread;              /* thread used to count the files to compute progress */
 	GThreadPool *thread_pool;           /* the thread pool if multi-threaded */
 
+	time_t start_time;                  /* start time in milliseconds */
+	time_t duration;                    /* duration in milliseconds */
+
 	int to_scan_count;                  /* files to scan counter, to compute progress */
 	int scanned_count;                  /* already scanned counter, to compute progress */
 	int malware_count;                  /* detected as malicious counter */
@@ -283,7 +286,7 @@ static void fire_on_demand_completed_event(struct a6o_on_demand *on_demand)
 	completed_ev.total_malware_count = on_demand->malware_count;
 	completed_ev.total_suspicious_count = on_demand->suspicious_count;
 	completed_ev.total_scanned_count = on_demand->scanned_count;
-	completed_ev.duration = 0L;
+	completed_ev.duration = on_demand->duration;
 
 	ev = a6o_event_new(EVENT_ON_DEMAND_COMPLETED, &completed_ev);
 
@@ -469,6 +472,8 @@ void a6o_on_demand_run(struct a6o_on_demand *on_demand)
 		on_demand->scan_id,
 		on_demand->root_path);
 
+	on_demand->start_time = get_milliseconds();
+
 	/* create the thread pool now */
 	if (on_demand->flags & A6O_SCAN_THREADED)
 		on_demand->thread_pool = g_thread_pool_new(scan_entry_thread_fun, on_demand, get_max_threads(), FALSE, NULL);
@@ -502,6 +507,7 @@ void a6o_on_demand_run(struct a6o_on_demand *on_demand)
 	if (on_demand->flags & A6O_SCAN_THREADED)
 		g_thread_pool_free(on_demand->thread_pool, FALSE, TRUE);
 
+	on_demand->duration = get_milliseconds() - on_demand->start_time;
 	/* signal completion */
 	fire_on_demand_completed_event(on_demand);
 
