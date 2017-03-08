@@ -259,6 +259,20 @@ static void fire_detection_event(struct a6o_on_demand *on_demand, struct a6o_rep
 	a6o_event_free(ev);
 }
 
+static void fire_on_demand_start_event(struct a6o_on_demand *on_demand)
+{
+	struct a6o_on_demand_start_event start_ev;
+	struct a6o_event *ev;
+
+	start_ev.root_path = strdup(on_demand->root_path);
+	start_ev.scan_id = on_demand->scan_id;
+
+	ev = a6o_event_new(EVENT_ON_DEMAND_START, &start_ev);
+
+	a6o_event_source_fire_event(a6o_get_event_source(on_demand->armadito), ev);
+	a6o_event_free(ev);
+}
+
 static void fire_on_demand_completed_event(struct a6o_on_demand *on_demand)
 {
 	struct a6o_on_demand_completed_event completed_ev;
@@ -458,6 +472,9 @@ void a6o_on_demand_run(struct a6o_on_demand *on_demand)
 	/* create the thread pool now */
 	if (on_demand->flags & A6O_SCAN_THREADED)
 		on_demand->thread_pool = g_thread_pool_new(scan_entry_thread_fun, on_demand, get_max_threads(), FALSE, NULL);
+
+	/* signal start */
+	fire_on_demand_start_event(on_demand);
 
 	/* what is scan root_path? a file or a directory? */
 	os_file_stat(on_demand->root_path, &stat_buf, &stat_errno);
