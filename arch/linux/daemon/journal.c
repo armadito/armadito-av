@@ -28,83 +28,77 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <syslog.h>
 #include <stdio.h>
 
-/* name="/home/malwares/contagio-malware/jar/MALWARE_JAR_200_files/Mal_Java_64FD14CEF0026D4240A4550E6A6F9E83.jar » ZIP » a/kors.class", threat="a variant of Java/Exploit.Agent.OKJ trojan", action="action selection postponed until scan completion", info="" */
+/* format like:
+name="/home/malwares/contagio-malware/jar/MALWARE_JAR_200_files/Mal_Java_64FD14CEF0026D4240A4550E6A6F9E83.jar » ZIP » a/kors.class", threat="a variant of Java/Exploit.Agent.OKJ trojan", action="action selection postponed until scan completion", info="" */
 
-static void detection_event_journal(struct a6o_detection_event *ev)
+static void detection_event_journal(struct a6o_event *ev)
 {
-	syslog( LOG_INFO,
-		"path=\"%s\", scan_status=\"%s\", scan_action=\"%s\", module_name=\"%s\", module_report=\"%s\", scan_id=%d",
-		ev->path, a6o_file_status_str(ev->scan_status), a6o_action_pretty_str(ev->scan_action), ev->module_name, ev->module_report, ev->scan_id);
+	syslog(LOG_INFO,
+		"type=\"detection\", path=\"%s\", scan_status=\"%s\", scan_action=\"%s\", module_name=\"%s\", module_report=\"%s\", scan_id=%d",
+		ev->u.ev_detection.path,
+		a6o_file_status_pretty_str(ev->u.ev_detection.scan_status),
+		a6o_action_pretty_str(ev->u.ev_detection.scan_action),
+		ev->u.ev_detection.module_name,
+		ev->u.ev_detection.module_report,
+		ev->u.ev_detection.scan_id);
 }
 
-static void on_demand_start_event_journal(struct a6o_on_demand_start_event *ev)
+static void on_demand_start_event_journal(struct a6o_event *ev)
 {
-#if 0
-	ev->root_path
-		ev->scan_id
-#endif
+	syslog(LOG_INFO,
+		"type=\"on_demand_start\", root_path=\"%s\", scan_id=%d",
+		ev->u.ev_on_demand_start.root_path,
+		ev->u.ev_on_demand_start.scan_id);
 }
 
-static void on_demand_completed_event_journal(struct a6o_on_demand_completed_event *ev)
+static void on_demand_completed_event_journal(struct a6o_event *ev)
 {
-#if 0
-	ev->scan_id
-		ev->cancelled
-		ev->total_malware_count
-		ev->total_suspicious_count
-		ev->total_scanned_count
-		ev->duration
-#endif
+	syslog(LOG_INFO,
+		"type=\"on_demand_completed\", scan_id=%d, cancelled=%d, total_malware_count=%ld, total_suspicious_count=%ld, total_scanned_count=%ld, duration=%ld",
+		ev->u.ev_on_demand_completed.scan_id,
+		ev->u.ev_on_demand_completed.cancelled,
+		ev->u.ev_on_demand_completed.total_malware_count,
+		ev->u.ev_on_demand_completed.total_suspicious_count,
+		ev->u.ev_on_demand_completed.total_scanned_count,
+		ev->u.ev_on_demand_completed.duration);
 }
 
-static void on_demand_progress_event_journal(struct a6o_on_demand_progress_event *ev)
+static void quarantine_event_journal(struct a6o_event *ev)
 {
-#if 0
-	ev->scan_id
-		ev->progress
-		ev->path
-		ev->malware_count
-		ev->suspicious_count
-		ev->scanned_count
-#endif
+	syslog(LOG_INFO,
+		"type=\"quarantine\", action=\"%s\", orig_path=\"%s\", quarantine_path=\"%s\"",
+		ev->u.ev_quarantine.quarantine_action == QUARANTINE_ENTER ? "enter" : "exit",
+		ev->u.ev_quarantine.orig_path,
+		ev->u.ev_quarantine.quarantine_path);
 }
 
-static void quarantine_event_journal(struct a6o_quarantine_event *ev)
+static void real_time_prot_event_journal(struct a6o_event *ev)
 {
-#if 0
-	ev->quarantine_action
-		ev->orig_path
-		ev->quarantine_path
-#endif
-}
-
-static void real_time_prot_event_journal(struct a6o_real_time_prot_event *ev)
-{
-#if 0
-	ev->rt_prot_new_state
-#endif
+	syslog(LOG_INFO,
+		"type=\"real_time_prot\", rt_prot_new_state=\"%d\"",
+		ev->u.ev_real_time_prot.rt_prot_new_state);
 }
 
 static void journal_event_cb(struct a6o_event *ev, void *data)
 {
 	switch(ev->type) {
 	case EVENT_DETECTION:
-		detection_event_journal(&ev->u.ev_detection);
+		detection_event_journal(ev);
 		break;
 	case EVENT_ON_DEMAND_START:
-		on_demand_start_event_journal(&ev->u.ev_on_demand_start);
+		on_demand_start_event_journal(ev);
 		break;
 	case EVENT_ON_DEMAND_COMPLETED:
-		on_demand_completed_event_journal(&ev->u.ev_on_demand_completed);
+		on_demand_completed_event_journal(ev);
 		break;
 	case EVENT_ON_DEMAND_PROGRESS:
-		on_demand_progress_event_journal(&ev->u.ev_on_demand_progress);
+		/* not logged */
 		break;
 	case EVENT_QUARANTINE:
-		quarantine_event_journal(&ev->u.ev_quarantine);
+		quarantine_event_journal(ev);
 		break;
 	case EVENT_REAL_TIME_PROT:
-		real_time_prot_event_journal(&ev->u.ev_real_time_prot);
+		real_time_prot_event_journal(ev);
 		break;
 	case EVENT_AV_UPDATE:
 		break;
@@ -120,7 +114,6 @@ void journal_init(struct armadito *armadito)
 	event_mask = EVENT_DETECTION
 		| EVENT_ON_DEMAND_START
 		| EVENT_ON_DEMAND_COMPLETED
-		| EVENT_ON_DEMAND_PROGRESS
 		| EVENT_QUARANTINE
 		| EVENT_REAL_TIME_PROT
 		| EVENT_AV_UPDATE;
