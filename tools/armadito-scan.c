@@ -36,6 +36,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <time.h>
 
 #define PROGRAM_NAME "armadito-scan"
 #define PROGRAM_VERSION PACKAGE_VERSION
@@ -239,6 +241,20 @@ static struct jrpc_mapper *create_rpcfe_mapper(void)
 	return rpcfe_mapper;
 }
 
+static unsigned int create_scan_id()
+{
+	int i;
+	pid_t pid;
+
+	srandom(time(NULL));
+
+	pid = getpid();
+	for(i = 0; i < pid / 41; i++)
+		random();
+
+	return random();
+}
+
 static int do_scan(struct scan_options *opts)
 {
 	struct jrpc_connection *conn;
@@ -275,7 +291,7 @@ static int do_scan(struct scan_options *opts)
 	param.recursive = opts->recursive;
 	param.threaded = opts->threaded;
 	param.send_progress = 1;
-	param.scan_id = random();
+	param.scan_id = create_scan_id();
 	if ((ret = JRPC_STRUCT2JSON(a6o_rpc_scan_param, &param, &j_param))) {
 		jrpc_connection_free(conn);
 		return ret;
