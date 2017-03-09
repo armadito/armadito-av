@@ -7,10 +7,10 @@ then
 fi
 
 REPO=$DIR
-SCRIPTS=$REPO/core/build/linux/scripts
+SCRIPTS=$REPO/armadito-core/build/linux/scripts
 
 # Modify git repositories' paths here
-CORE_SRC=$REPO/core
+CORE_SRC=$REPO/armadito-core
 CLAMAV_SRC=$REPO/modules/mod-clamav
 H1_SRC=$REPO/modules/mod-h1
 PDF_SRC=$REPO/modules/mod-pdf
