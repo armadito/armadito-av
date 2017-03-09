@@ -57,8 +57,8 @@ struct a6o_detection_event {
 };
 
 struct a6o_on_demand_start_event {
-	const char *root_path;
 	unsigned int scan_id;
+	const char *root_path;
 };
 
 struct a6o_on_demand_completed_event {

@@ -28,27 +28,38 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <syslog.h>
 #include <stdio.h>
 
-/* format like:
-name="/home/malwares/contagio-malware/jar/MALWARE_JAR_200_files/Mal_Java_64FD14CEF0026D4240A4550E6A6F9E83.jar » ZIP » a/kors.class", threat="a variant of Java/Exploit.Agent.OKJ trojan", action="action selection postponed until scan completion", info="" */
+/*
+ * NOTE:
+ *
+ * the journal format is like this:
+ * Mar  9 14:31:43 joebar armadito-journal[1339]: type="detection", context="on-demand", scan_id=316020368, path="/home/joebar/EICAR/eicar.com", scan_status="malware", scan_action="none", module_name="clamav", module_report="Eicar-Test-Signature"
+ *
+ * be carefull:
+ * - to add new fields AT THE END of the format in order not to break log file parsing
+ * - to include event type at the beginning of the format
+ *
+ * The event timestamp stored in the a6o_event structure is not logged, we consider that the syslog timestamp is the same.
+ */
 
 static void detection_event_journal(struct a6o_event *ev)
 {
 	syslog(LOG_INFO,
-		"type=\"detection\", path=\"%s\", scan_status=\"%s\", scan_action=\"%s\", module_name=\"%s\", module_report=\"%s\", scan_id=%d",
+		"type=\"detection\", context=\"%s\", scan_id=%d, path=\"%s\", scan_status=\"%s\", scan_action=\"%s\", module_name=\"%s\", module_report=\"%s\"",
+		ev->u.ev_detection.context == CONTEXT_REAL_TIME ? "real-time" : "on-demand",
+		ev->u.ev_detection.scan_id,
 		ev->u.ev_detection.path,
 		a6o_file_status_pretty_str(ev->u.ev_detection.scan_status),
 		a6o_action_pretty_str(ev->u.ev_detection.scan_action),
 		ev->u.ev_detection.module_name,
-		ev->u.ev_detection.module_report,
-		ev->u.ev_detection.scan_id);
+		ev->u.ev_detection.module_report);
 }
 
 static void on_demand_start_event_journal(struct a6o_event *ev)
 {
 	syslog(LOG_INFO,
-		"type=\"on_demand_start\", root_path=\"%s\", scan_id=%d",
-		ev->u.ev_on_demand_start.root_path,
-		ev->u.ev_on_demand_start.scan_id);
+		"type=\"on_demand_start\", scan_id=%d, root_path=\"%s\"",
+		ev->u.ev_on_demand_start.scan_id,
+		ev->u.ev_on_demand_start.root_path);
 }
 
 static void on_demand_completed_event_journal(struct a6o_event *ev)
