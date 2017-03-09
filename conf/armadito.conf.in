@@ -1,35 +1,73 @@
- #
- # Armadito Linux configuration file
- #
+#
+# Armadito Linux configuration file
+#
  
- [on-demand]
+[on-demand]
  
- # white list of directories: files in these directories will never be scanned
- white-list-dir = "/boot"; "/dev"; "/etc"; "/proc"; "/run"; "/sys"; "/var"
+# white list of directories: files in these directories will never be scanned
+white-list-dir = "/boot"; "/dev"; "/etc"; "/proc"; "/run"; "/sys"; "/var"
  
- # scanned mime types: scan everything
-	
- mime-types="*"
+# scanned mime types: scan everything
+mime-types="*"
  
- # scan modules: scan with clamav, modulePDF and moduleH1
- modules=clamav; moduleH1; modulePDF
+# scan modules: scan with clamav, yara, modulePDF
+modules=clamav; yara; modulePDF
  
- # 1M, must support units
- #max-size = 1048576 
+# 1M, must support units
+#max-size = 1048576 
  
- [alert]
+#
+# quarantine module configuration
+#
+[quarantine]
  
- alert-dir = "@localstatedir@/spool/armadito"
+# is quarantine enabled?
+enable = 0
  
- 
- [quarantine]
- 
- # is quarantine enabled?
- enable = 0
- 
- # quarantine directory
- # files containing malware will be moved to this directory, renamed and made 
- # non-readable
- # quarantine directory must be mode 333 octal. This is normaly managed by 
- # package installation scripts
- quarantine-dir = "@localstatedir@/lib/armadito/quarantine"
+# quarantine directory
+# files containing malware will be moved to this directory, renamed and made 
+# non-readable
+# quarantine directory must be mode 333 octal. This is normaly managed by 
+# package installation scripts
+quarantine-dir = "@localstatedir@/lib/armadito/quarantine"
+
+#
+# on-access scan using fanotify : module configuration
+#
+[on-access-linux]
+
+# enable on-access scan
+enable=1
+
+# enable permission check
+# if 1, will block access to file if opened file contains a virus
+# if 0, will only notify if opened file contains a virus
+enable-permission=1
+
+# enable removable media monitoring
+# if 1, removable media mount points will be added on the fly to the monitoring list
+enable-removable-media=1
+
+# autoscan removable media
+# if 1, removable media will be scanned entirely when mounted
+# this option can in theory be used at the same time as enable-removable-media
+autoscan-removable-media=0
+
+# monitored mount points
+# file access inside these mount points will be monitored
+mount="/home"
+
+# monitored directories
+directory="/var/tmp"; "/tmp"
+
+# white list of directories: files in these directories will never be scanned for on-access scan
+white-list-dir="/bin"; "/boot"; "/dev"; "/etc"; "/lib"; "/lib32"; "/lib64"; "/libx32"; "/opt"; "/proc"; "/run"; "/sbin"; "/sys"; "/usr"
+
+# scanned mime types: scan executables, PDF documents 
+mime-types="application/x-executable"; "application/pdf"
+
+# scan modules: scan with clamav only
+modules= "clamav"
+
+# 1M, must support units ;-)
+#max-size=1048576
