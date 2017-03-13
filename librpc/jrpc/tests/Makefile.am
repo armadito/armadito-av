@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS=subdir-objects
 
-TESTS = rpc-client-test
+#TESTS = rpc-client-test
 
 check_PROGRAMS= \
 rpc-client-test \
