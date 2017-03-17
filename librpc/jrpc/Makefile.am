@@ -18,8 +18,8 @@ mapper.c \
 marshall.c 
 
 # for debug, add:
-# -DJRPC_DEBUG 
-AM_CPPFLAGS= $(PTHREAD_CFLAGS) -I$(srcdir)/include -I$(srcdir) -I$(top_srcdir)/libmodule/include -I$(top_srcdir) @LIBJANSSON_CFLAGS@ -save-temps 
+#JRPC_DEBUG=-DJRPC_DEBUG 
+AM_CPPFLAGS= $(JRPC_DEBUG) $(PTHREAD_CFLAGS) -I$(srcdir)/include -I$(srcdir) -I$(top_srcdir)/libmodule/include -I$(top_srcdir) @LIBJANSSON_CFLAGS@ -save-temps 
 
 noinst_HEADERS= \
 include/libjrpc/jrpc.h \
