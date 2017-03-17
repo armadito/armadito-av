@@ -511,6 +511,10 @@ void a6o_on_demand_run(struct a6o_on_demand *on_demand)
 	/* signal completion */
 	fire_on_demand_completed_event(on_demand);
 
+	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_INFO, "finished scan %d of %s",
+		on_demand->scan_id,
+		on_demand->root_path);
+
 	if (on_demand->count_thread != NULL)
 		g_thread_join(on_demand->count_thread);
 }
