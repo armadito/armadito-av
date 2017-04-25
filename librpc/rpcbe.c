@@ -87,7 +87,7 @@ static int scan_method(struct jrpc_connection *conn, json_t *params, json_t **re
 	if ((ret = JRPC_JSON2STRUCT(a6o_rpc_scan_param, params, &s_param)))
 		return ret;
 
-	a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_DEBUG, "scan path %s", s_param->root_path);
+	a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_DEBUG, "scan path %s id %ld", s_param->root_path, s_param->scan_id);
 
 	if (s_param->threaded)
 		flags |= A6O_SCAN_THREADED;

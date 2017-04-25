@@ -47,7 +47,7 @@ struct a6o_on_demand {
 	struct a6o_scan_conf *scan_conf;
 
 	const char *root_path;              /* root path of the scan */
-	unsigned int scan_id;               /* scan id for client */
+	time_t scan_id;                     /* scan id for client */
 	enum a6o_scan_flags flags;          /* scan flags (recursive, threaded, etc) */
 
 	GThread *count_thread;              /* thread used to count the files to compute progress */
@@ -74,7 +74,7 @@ const char *a6o_scan_conf_debug(struct a6o_scan_conf *c);
 
 #define DEFAULT_PROGRESS_PERIOD 200  /* milliseconds */
 
-struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, const char *root_path, unsigned int scan_id, enum a6o_scan_flags flags, int send_progress)
+struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, const char *root_path, time_t scan_id, enum a6o_scan_flags flags, int send_progress)
 {
 	struct a6o_on_demand *on_demand = (struct a6o_on_demand *)malloc(sizeof(struct a6o_on_demand));
 
@@ -114,7 +114,7 @@ struct a6o_on_demand *a6o_on_demand_new(struct armadito *armadito, const char *r
 	return on_demand;
 }
 
-unsigned int a6o_on_demand_get_id(struct a6o_on_demand *on_demand)
+time_t a6o_on_demand_get_id(struct a6o_on_demand *on_demand)
 {
 	return on_demand->scan_id;
 }
@@ -467,7 +467,7 @@ void a6o_on_demand_run(struct a6o_on_demand *on_demand)
 	struct os_file_stat stat_buf;
 	int stat_errno;
 
-	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_INFO, "starting %sthreaded scan %d of %s",
+	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_INFO, "starting %sthreaded scan %ld of %s",
 		on_demand->flags & A6O_SCAN_THREADED ? "" : "non-",
 		on_demand->scan_id,
 		on_demand->root_path);
@@ -511,7 +511,7 @@ void a6o_on_demand_run(struct a6o_on_demand *on_demand)
 	/* signal completion */
 	fire_on_demand_completed_event(on_demand);
 
-	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_INFO, "finished scan %d of %s",
+	a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_INFO, "finished scan %ld of %s",
 		on_demand->scan_id,
 		on_demand->root_path);
 

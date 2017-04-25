@@ -159,7 +159,7 @@ JRPC_STRUCT(a6o_rpc_scan_param)
 	JRPC_STRUCT_FIELD_INT(int, send_progress)
 	JRPC_STRUCT_FIELD_INT(int, recursive)
 	JRPC_STRUCT_FIELD_INT(int, threaded)
-	JRPC_STRUCT_FIELD_INT(unsigned int, scan_id)
+	JRPC_STRUCT_FIELD_INT(time_t, scan_id)
 JRPC_STRUCT_END
 
 JRPC_STRUCT(a6o_rpc_listen_param)

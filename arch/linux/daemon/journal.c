@@ -44,7 +44,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 static void detection_event_journal(struct a6o_event *ev)
 {
 	syslog(LOG_INFO,
-		"type=\"detection\", context=\"%s\", scan_id=%d, path=\"%s\", scan_status=\"%s\", scan_action=\"%s\", module_name=\"%s\", module_report=\"%s\"",
+		"type=\"detection\", context=\"%s\", scan_id=%ld, path=\"%s\", scan_status=\"%s\", scan_action=\"%s\", module_name=\"%s\", module_report=\"%s\"",
 		ev->u.ev_detection.context == CONTEXT_REAL_TIME ? "real-time" : "on-demand",
 		ev->u.ev_detection.scan_id,
 		ev->u.ev_detection.path,
@@ -57,7 +57,7 @@ static void detection_event_journal(struct a6o_event *ev)
 static void on_demand_start_event_journal(struct a6o_event *ev)
 {
 	syslog(LOG_INFO,
-		"type=\"on_demand_start\", scan_id=%d, root_path=\"%s\"",
+		"type=\"on_demand_start\", scan_id=%ld, root_path=\"%s\"",
 		ev->u.ev_on_demand_start.scan_id,
 		ev->u.ev_on_demand_start.root_path);
 }
@@ -65,7 +65,7 @@ static void on_demand_start_event_journal(struct a6o_event *ev)
 static void on_demand_completed_event_journal(struct a6o_event *ev)
 {
 	syslog(LOG_INFO,
-		"type=\"on_demand_completed\", scan_id=%d, cancelled=%d, total_malware_count=%ld, total_suspicious_count=%ld, total_scanned_count=%ld, duration=%ld",
+		"type=\"on_demand_completed\", scan_id=%ld, cancelled=%d, total_malware_count=%ld, total_suspicious_count=%ld, total_scanned_count=%ld, duration=%ld",
 		ev->u.ev_on_demand_completed.scan_id,
 		ev->u.ev_on_demand_completed.cancelled,
 		ev->u.ev_on_demand_completed.total_malware_count,

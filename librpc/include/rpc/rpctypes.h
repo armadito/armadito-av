@@ -30,7 +30,7 @@ struct a6o_rpc_scan_param {
 	int send_progress;
 	int recursive;
 	int threaded;
-	unsigned int scan_id;
+	time_t scan_id;
 };
 
 struct a6o_rpc_listen_param {

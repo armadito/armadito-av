@@ -48,7 +48,7 @@ enum a6o_quarantine_action {
 
 struct a6o_detection_event {
 	enum a6o_detection_context context;
-	unsigned int scan_id;  /* only used if on-demand scan */
+	time_t scan_id;  /* only used if on-demand scan */
 	const char *path;
 	enum a6o_file_status scan_status;
 	enum a6o_action scan_action;
@@ -57,12 +57,12 @@ struct a6o_detection_event {
 };
 
 struct a6o_on_demand_start_event {
-	unsigned int scan_id;
+	time_t scan_id;
 	const char *root_path;
 };
 
 struct a6o_on_demand_completed_event {
-	unsigned int scan_id;
+	time_t scan_id;
 	int cancelled;
 	size_t total_malware_count;
 	size_t total_suspicious_count;
@@ -71,7 +71,7 @@ struct a6o_on_demand_completed_event {
 };
 
 struct a6o_on_demand_progress_event {
-	unsigned int scan_id;
+	time_t scan_id;
 	int progress;
 	const char *path;
 	size_t malware_count;
