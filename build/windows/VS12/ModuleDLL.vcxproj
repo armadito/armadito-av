@@ -143,13 +143,11 @@ REM if errorlevel 1 goto BuildEventFailed
 
 REM copy the include files
 
-if not exist "$(TargetDir)include" mkdir "$(TargetDir)include"
-
-xcopy /i /y $(A6oRoot)core\libarmadito\include\libarmadito.h $(TargetDir)include
+if not exist "$(TargetDir)include\libarmadito" mkdir "$(TargetDir)include\libarmadito"
 
 if errorlevel 1 goto BuildEventFailed
 
-xcopy /i /y $(A6oRoot)core\libarmadito\include\libarmadito\*.h $(TargetDir)include\libarmadito
+xcopy /i /y $(A6oRoot)armadito-core\libmodule\include\libarmadito\*.h $(TargetDir)include\libarmadito
 
 if errorlevel 1 goto BuildEventFailed
 
@@ -296,13 +294,11 @@ REM if errorlevel 1 goto BuildEventFailed
 
 REM copy the include files
 
-if not exist "$(TargetDir)include" mkdir "$(TargetDir)include"
-
-xcopy /i /y $(A6oRoot)core\libarmadito\include\libarmadito.h $(TargetDir)include
+if not exist "$(TargetDir)include\libarmadito" mkdir "$(TargetDir)include\libarmadito"
 
 if errorlevel 1 goto BuildEventFailed
 
-xcopy /i /y $(A6oRoot)core\libarmadito\include\libarmadito\*.h $(TargetDir)include\libarmadito
+xcopy /i /y $(A6oRoot)armadito-core\libmodule\include\libarmadito\*.h $(TargetDir)include\libarmadito
 
 if errorlevel 1 goto BuildEventFailed
 
