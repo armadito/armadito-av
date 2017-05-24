@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <A6oRoot>$(SolutionDir)..\..\..\..\</A6oRoot>
+    <A6oRoot>$(SolutionDir)..\..\..\</A6oRoot>
     <A6oDeps>$(SolutionDir)..\..\deps\</A6oDeps>
     <A6oOut>$(A6oRoot)..\OUT\$(Platform)\$(Configuration)\</A6oOut>
     <A6oInclude>$(A6oRoot)core\libarmadito\include</A6oInclude>

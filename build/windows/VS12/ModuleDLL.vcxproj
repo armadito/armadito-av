@@ -18,6 +18,22 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\libmodule\confval.c" />
+    <ClCompile Include="..\..\..\libmodule\log.c" />
+    <ClCompile Include="..\..\..\libmodule\stdpaths.c" />
+    <ClCompile Include="..\..\..\libmodule\string.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\libmodule\include\libarmadito\armadito.h" />
+    <ClInclude Include="..\..\..\libmodule\include\libarmadito\confval.h" />
+    <ClInclude Include="..\..\..\libmodule\include\libarmadito\info.h" />
+    <ClInclude Include="..\..\..\libmodule\include\libarmadito\log.h" />
+    <ClInclude Include="..\..\..\libmodule\include\libarmadito\module.h" />
+    <ClInclude Include="..\..\..\libmodule\include\libarmadito\status.h" />
+    <ClInclude Include="..\..\..\libmodule\include\libarmadito\stdpaths.h" />
+    <ClInclude Include="..\..\..\libmodule\include\libarmadito\string.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8A108A73-1029-45C1-AC8D-993025690CB2}</ProjectGuid>
     <RootNamespace>libarmadito</RootNamespace>
@@ -333,54 +349,6 @@ echo post-build step for $(ProjectName) OK
       <Message>copy files to target directory</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\action.c" />
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\armadito.c" />
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\conf.c" />
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\confparser.c" />
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\error.c" />
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\filectx.c" />
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\info.c" />
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\log.c" />
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\module.c" />
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\notify.c" />
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\ondemand.c" />
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\report.c" />
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\scan.c" />
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\scanconf.c" />
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\status.c" />
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\stdpaths.c" />
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\windows\builtin-modules\onaccess_windows.c" />
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\windows\builtin-modules\ondemandmod.c" />
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\windows\builtin-modules\quarantine_windows.c" />
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\windows\os\dir.c" />
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\windows\os\file.c" />
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\windows\os\mimetype.c" />
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\windows\os\stdpaths_win.c" />
-    <ClCompile Include="..\..\..\..\core\libarmadito\src\windows\os\string.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\..\..\core\libarmadito\include\libarmadito\stdpaths.h" />
-    <ClInclude Include="..\..\..\..\core\libarmadito\include\os\dir.h" />
-    <ClInclude Include="..\..\..\..\core\libarmadito\include\os\file.h" />
-    <ClInclude Include="..\..\..\..\core\libarmadito\include\os\io.h" />
-    <ClInclude Include="..\..\..\..\core\libarmadito\include\os\mimetype.h" />
-    <ClInclude Include="..\..\..\..\core\libarmadito\include\os\stdpaths.h" />
-    <ClInclude Include="..\..\..\..\core\libarmadito\include\os\string.h" />
-    <ClInclude Include="..\..\..\..\core\libarmadito\src\armaditop.h" />
-    <ClInclude Include="..\..\..\..\core\libarmadito\src\confparser.h" />
-    <ClInclude Include="..\..\..\..\core\libarmadito\src\modulep.h" />
-    <ClInclude Include="..\..\..\..\core\libarmadito\src\ondemandp.h" />
-    <ClInclude Include="..\..\..\..\core\libarmadito\src\reportp.h" />
-    <ClInclude Include="..\..\..\..\core\libarmadito\src\scanp.h" />
-    <ClInclude Include="..\..\..\..\core\libarmadito\src\statusp.h" />
-    <ClInclude Include="..\..\..\..\core\libarmadito\src\windows\builtin-modules\onaccess_windows.h" />
-    <ClInclude Include="..\..\..\..\core\libarmadito\src\windows\builtin-modules\ondemandmod.h" />
-    <ClInclude Include="..\..\..\..\core\libarmadito\src\windows\builtin-modules\quarantine.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ArmaditoLibrary.def" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
