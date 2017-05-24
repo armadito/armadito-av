@@ -3,9 +3,8 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
     <A6oRoot>$(SolutionDir)..\..\..\</A6oRoot>
-    <A6oDeps>$(SolutionDir)..\..\deps\</A6oDeps>
-    <A6oOut>$(A6oRoot)..\OUT\$(Platform)\$(Configuration)\</A6oOut>
-    <A6oInclude>$(A6oRoot)core\libarmadito\include</A6oInclude>
+    <A6oDeps>$(A6oRoot)build\windows\deps\</A6oDeps>
+    <A6oOut>$(A6oRoot)out\$(Platform)\$(Configuration)\</A6oOut>
     <A6oInstall>$(SolutionDir)..\</A6oInstall>
     <A6oInstalledIncludes>$(A6oInstall)include\libarmadito.h</A6oInstalledIncludes>
     <A6oInstalledLibs>$(A6oInstall)lib\$(Platform)\$(Configuration)\libarmadito.lib</A6oInstalledLibs>
@@ -27,9 +26,6 @@
     </BuildMacro>
     <BuildMacro Include="A6oOut">
       <Value>$(A6oOut)</Value>
-    </BuildMacro>
-    <BuildMacro Include="A6oInclude">
-      <Value>$(A6oInclude)</Value>
     </BuildMacro>
     <BuildMacro Include="A6oInstall">
       <Value>$(A6oInstall)</Value>

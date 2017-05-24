@@ -86,11 +86,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(A6oInclude);$(A6oRoot)core\libarmadito\include\config;$(A6oRoot)core\libarmadito\src;$(A6oRoot)core\libarmadito\src\windows;$(IncludePath)</IncludePath>
+    <IncludePath>$(A6oInclude);$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(GlibLib);$(JsoncLib);$(LibraryPath)</LibraryPath>
     <OutDir>$(A6oOut)</OutDir>
-    <IntDir>$(SolutionDir)$(ProjectName)\$(Platform)\$(Configuration)\obj</IntDir>
-    <TargetName>Armadito</TargetName>
+    <IntDir>$(SolutionDir)$(ProjectName)\$(Platform)\$(Configuration)\obj\</IntDir>
+    <TargetName>ArmaditoMod</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(A6oInclude);$(A6oRoot)core\libarmadito\include\config;$(A6oRoot)core\libarmadito\src;$(A6oRoot)core\libarmadito\src\windows;$(IncludePath)</IncludePath>
@@ -100,11 +100,11 @@
     <TargetName>Armadito</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(A6oInclude);$(A6oRoot)core\libarmadito\include\config;$(A6oRoot)core\libarmadito\src;$(A6oRoot)core\libarmadito\src\windows;$(IncludePath)</IncludePath>
+    <IncludePath>$(A6oInclude);$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(GlibLib);$(JsoncLib);$(LibraryPath)</LibraryPath>
     <OutDir>$(A6oOut)</OutDir>
-    <IntDir>$(SolutionDir)$(ProjectName)\$(Platform)\$(Configuration)\obj</IntDir>
-    <TargetName>Armadito</TargetName>
+    <IntDir>$(SolutionDir)$(ProjectName)\$(Platform)\$(Configuration)\obj\</IntDir>
+    <TargetName>ArmaditoMod</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(A6oInclude);$(A6oRoot)core\libarmadito\include\config;$(A6oRoot)core\libarmadito\src;$(A6oRoot)core\libarmadito\src\windows;$(IncludePath)</IncludePath>
@@ -122,8 +122,9 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(GlibLibraries);urlmon.lib;json-c.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>ArmaditoLibrary.def</ModuleDefinitionFile>
+      <AdditionalDependencies>$(GlibLibraries);urlmon.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
     </Link>
     <PostBuildEvent />
     <PostBuildEvent>
@@ -240,8 +241,9 @@ echo post-build step for $(ProjectName) OK
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ModuleDefinitionFile>ArmaditoLibrary.def</ModuleDefinitionFile>
-      <AdditionalDependencies>$(GlibLibraries);urlmon.lib;json-c.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <AdditionalDependencies>$(GlibLibraries);urlmon.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent />
     <PostBuildEvent>

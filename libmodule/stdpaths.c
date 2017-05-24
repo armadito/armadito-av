@@ -178,8 +178,6 @@ const char *os_stdpath_config_file()
 	memcpy_s(confdir + strnlen_s(dirpath, _MAX_PATH) + 1, len, LIBARMADITO_CONF_DIR, strnlen_s(LIBARMADITO_CONF_DIR, _MAX_PATH));
 	memcpy_s(confdir + strnlen_s(dirpath, _MAX_PATH) + strnlen_s(LIBARMADITO_CONF_DIR, _MAX_PATH) + 1, len, conffile, strnlen_s(conffile, _MAX_PATH));
 
-	printf("Conf_file = %s ", confdir);
-
 	free(dirpath);
 
 	return confdir;
@@ -203,8 +201,6 @@ const char *os_stdpath_config_dir()
 	memcpy_s(confdir, len, dirpath, strnlen_s(dirpath, _MAX_PATH));
 	confdir[strnlen_s(dirpath, _MAX_PATH)] = '\\';
 	memcpy_s(confdir + strnlen_s(dirpath, _MAX_PATH) + 1, len, LIBARMADITO_CONF_DIR, strnlen_s(LIBARMADITO_CONF_DIR, _MAX_PATH));
-
-	printf("Conf_file = %s ", confdir);
 
 	free(dirpath);
 	dirpath = NULL;
