@@ -90,7 +90,7 @@
     <LibraryPath>$(GlibLib);$(JsoncLib);$(LibraryPath)</LibraryPath>
     <OutDir>$(A6oOut)</OutDir>
     <IntDir>$(SolutionDir)$(ProjectName)\$(Platform)\$(Configuration)\obj\</IntDir>
-    <TargetName>ArmaditoMod</TargetName>
+    <TargetName>ArmaditoModule</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(A6oInclude);$(A6oRoot)core\libarmadito\include\config;$(A6oRoot)core\libarmadito\src;$(A6oRoot)core\libarmadito\src\windows;$(IncludePath)</IncludePath>
