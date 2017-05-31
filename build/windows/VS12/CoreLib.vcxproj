@@ -19,23 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\libmodule\confval.c" />
-    <ClCompile Include="..\..\..\libmodule\log.c" />
-    <ClCompile Include="..\..\..\libmodule\stdpaths.c" />
-    <ClCompile Include="..\..\..\libmodule\string.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\..\libmodule\include\libarmadito\armadito.h" />
-    <ClInclude Include="..\..\..\libmodule\include\libarmadito\confval.h" />
-    <ClInclude Include="..\..\..\libmodule\include\libarmadito\info.h" />
-    <ClInclude Include="..\..\..\libmodule\include\libarmadito\log.h" />
-    <ClInclude Include="..\..\..\libmodule\include\libarmadito\module.h" />
-    <ClInclude Include="..\..\..\libmodule\include\libarmadito\status.h" />
-    <ClInclude Include="..\..\..\libmodule\include\libarmadito\stdpaths.h" />
-    <ClInclude Include="..\..\..\libmodule\include\libarmadito\string.h" />
+    <ClCompile Include="..\..\..\libcore\action.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{8A108A73-1029-45C1-AC8D-993025690CB2}</ProjectGuid>
+    <ProjectGuid>{9DC12C13-FBEF-4C96-A218-20EE73DFFE78}</ProjectGuid>
     <RootNamespace>libarmadito</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -86,45 +73,45 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(GlibInclude);$(IncludePath)</IncludePath>
-    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IncludePath>$(A6oInclude);$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(GlibLib);$(LibraryPath)</LibraryPath>
     <OutDir>$(A6oOut)</OutDir>
     <IntDir>$(ProjectDir)$(ProjectName)\$(Platform)\$(Configuration)\obj\</IntDir>
     <TargetName>ArmaditoModule</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(GlibInclude);$(IncludePath)</IncludePath>
-    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IncludePath>$(A6oInclude);$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(GlibLib);$(LibraryPath)</LibraryPath>
     <OutDir>$(A6oOut)</OutDir>
-    <IntDir>$(ProjectDir)$(ProjectName)\$(Platform)\$(Configuration)\obj\</IntDir>
-    <TargetName>ArmaditoModule</TargetName>
+    <IntDir>$(SolutionDir)$(ProjectName)\$(Platform)\$(Configuration)\obj</IntDir>
+    <TargetName>Armadito</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(GlibInclude);$(IncludePath)</IncludePath>
-    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IncludePath>$(A6oInclude);$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(GlibLib);$(LibraryPath)</LibraryPath>
     <OutDir>$(A6oOut)</OutDir>
-    <IntDir>$(ProjectDir)$(ProjectName)\$(Platform)\$(Configuration)\obj\</IntDir>
-    <TargetName>ArmaditoModule</TargetName>
+    <IntDir>$(SolutionDir)$(ProjectName)\$(Platform)\$(Configuration)\obj\</IntDir>
+    <TargetName>ArmaditoMod</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(GlibInclude);$(IncludePath)</IncludePath>
-    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IncludePath>$(A6oInclude);$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(GlibLib);$(LibraryPath)</LibraryPath>
     <OutDir>$(A6oOut)</OutDir>
-    <IntDir>$(ProjectDir)$(ProjectName)\$(Platform)\$(Configuration)\obj\</IntDir>
-    <TargetName>ArmaditoModule</TargetName>
+    <IntDir>$(SolutionDir)$(ProjectName)\$(Platform)\$(Configuration)\obj</IntDir>
+    <TargetName>Armadito</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(GlibInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>$(GlibLibraries);urlmon.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
-      <AdditionalLibraryDirectories>$(GlibLib);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent />
     <PostBuildEvent>
@@ -208,13 +195,12 @@ echo post-build step for $(ProjectName) OK
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(GlibInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(GlibLibraries);urlmon.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>
-      </ModuleDefinitionFile>
-      <AdditionalLibraryDirectories>$(GlibLib);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(GlibLibraries);urlmon.lib;json-c.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>ArmaditoLibrary.def</ModuleDefinitionFile>
     </Link>
     <PostBuildEvent />
     <PostBuildEvent>
@@ -268,6 +254,7 @@ echo post-build step for $(ProjectName) OK
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(GlibInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -276,7 +263,6 @@ echo post-build step for $(ProjectName) OK
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <AdditionalDependencies>$(GlibLibraries);urlmon.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(GlibLib);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent />
     <PostBuildEvent>
@@ -362,15 +348,14 @@ echo post-build step for $(ProjectName) OK
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(GlibInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <ModuleDefinitionFile>
-      </ModuleDefinitionFile>
-      <AdditionalDependencies>$(GlibLibraries);urlmon.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(GlibLib);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ModuleDefinitionFile>ArmaditoLibrary.def</ModuleDefinitionFile>
+      <AdditionalDependencies>$(GlibLibraries);urlmon.lib;json-c.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent />
     <PostBuildEvent>

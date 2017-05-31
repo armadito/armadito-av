@@ -1,6 +1,5 @@
 *.zip
 *~
-BUILD/
 m4/
 INSTALL
 Makefile
@@ -9,9 +8,6 @@ aclocal.m4
 armadito-config-autoconf.h.in
 autom4te.cache/*
 build/linux/out/*
-build/windows/VS12/include
-build/windows/VS12/lib
-build/windows/deps
 compile
 config.guess
 config.log
