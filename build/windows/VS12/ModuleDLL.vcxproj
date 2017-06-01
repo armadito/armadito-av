@@ -142,37 +142,37 @@ REM if errorlevel 1 goto BuildEventFailed
 
 REM copy the include files
 
-if not exist "$(TargetDir)include\libarmadito" mkdir "$(TargetDir)include\libarmadito"
+REM if not exist "$(TargetDir)include\libarmadito" mkdir "$(TargetDir)include\libarmadito"
 
-if errorlevel 1 goto BuildEventFailed
+REM if errorlevel 1 goto BuildEventFailed
 
-xcopy /i /y $(A6oRoot)armadito-core\libmodule\include\libarmadito\*.h $(TargetDir)include\libarmadito
+REM xcopy /i /y $(A6oRoot)armadito-core\libmodule\include\libarmadito\*.h $(TargetDir)include\libarmadito
 
-if errorlevel 1 goto BuildEventFailed
+REM if errorlevel 1 goto BuildEventFailed
 
 
 
 REM copy the glib DLLs
 
-xcopy "$(GlibBin)glib-2-vs12.dll"  "$(TargetDir)" /D /I /Y
+REM xcopy "$(GlibBin)glib-2-vs12.dll"  "$(TargetDir)" /D /I /Y
 
-if errorlevel 1 goto BuildEventFailed
+REM if errorlevel 1 goto BuildEventFailed
 
-xcopy "$(GlibBin)gmodule-2-vs12.dll"  "$(TargetDir)" /D /I /Y
+REM xcopy "$(GlibBin)gmodule-2-vs12.dll"  "$(TargetDir)" /D /I /Y
 
-if errorlevel 1 goto BuildEventFailed
+REM if errorlevel 1 goto BuildEventFailed
 
-xcopy "$(GlibBin)gthread-2-vs12.dll"  "$(TargetDir)" /D /I /Y
+REM xcopy "$(GlibBin)gthread-2-vs12.dll"  "$(TargetDir)" /D /I /Y
 
-if errorlevel 1 goto BuildEventFailed
+REM if errorlevel 1 goto BuildEventFailed
 
-xcopy "$(A6oDeps)libintl\lib\libintl3.dll" "$(TargetDir)" /D /I /Y
+REM xcopy "$(A6oDeps)libintl\lib\libintl3.dll" "$(TargetDir)" /D /I /Y
 
-if errorlevel 1 goto BuildEventFailed
+REM if errorlevel 1 goto BuildEventFailed
 
-xcopy "$(A6oDeps)libiconv\lib\libiconv2.dll" "$(TargetDir)" /D /I /Y
+REM xcopy "$(A6oDeps)libiconv\lib\libiconv2.dll" "$(TargetDir)" /D /I /Y
 
-if errorlevel 1 goto BuildEventFailed
+REM if errorlevel 1 goto BuildEventFailed
 
 
 
@@ -220,40 +220,72 @@ echo post-build step for $(ProjectName) OK
     <PostBuildEvent>
       <Command>echo post-build step for $(ProjectName) -  Copying files to $(TargetDir)
 
+
 REM copy the conf file
-if not exist "$(TargetDir)conf" mkdir "$(TargetDir)conf"
-xcopy "$(A6oRoot)\core\libarmadito\conf\armadito.conf"  "$(TargetDir)conf" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
+
+REM if not exist "$(TargetDir)conf" mkdir "$(TargetDir)conf"
+
+REM xcopy "$(A6oRoot)\core\libarmadito\conf\armadito.conf"  "$(TargetDir)conf" /D /I /Y
+
+REM if errorlevel 1 goto BuildEventFailed
+
+
 
 REM copy the include files
-if not exist "$(TargetDir)include" mkdir "$(TargetDir)include"
-xcopy /i /y $(A6oRoot)core\libarmadito\include\libarmadito.h $(TargetDir)include
-if errorlevel 1 goto BuildEventFailed
-xcopy /i /y $(A6oRoot)core\libarmadito\include\libarmadito\*.h $(TargetDir)include\libarmadito
-if errorlevel 1 goto BuildEventFailed
+
+REM if not exist "$(TargetDir)include\libarmadito" mkdir "$(TargetDir)include\libarmadito"
+
+REM if errorlevel 1 goto BuildEventFailed
+
+REM xcopy /i /y $(A6oRoot)armadito-core\libmodule\include\libarmadito\*.h $(TargetDir)include\libarmadito
+
+REM if errorlevel 1 goto BuildEventFailed
+
+
 
 REM copy the glib DLLs
-xcopy "$(GlibBin)glib-2-vs12.dll"  "$(TargetDir)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
-xcopy "$(GlibBin)gmodule-2-vs12.dll"  "$(TargetDir)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
-xcopy "$(GlibBin)gthread-2-vs12.dll"  "$(TargetDir)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
-xcopy "$(A6oDeps)libintl\lib\libintl3.dll" "$(TargetDir)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
-xcopy "$(A6oDeps)libiconv\lib\libiconv2.dll" "$(TargetDir)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
+
+REM xcopy "$(GlibBin)glib-2-vs12.dll"  "$(TargetDir)" /D /I /Y
+
+REM if errorlevel 1 goto BuildEventFailed
+
+REM xcopy "$(GlibBin)gmodule-2-vs12.dll"  "$(TargetDir)" /D /I /Y
+
+REM if errorlevel 1 goto BuildEventFailed
+
+REM xcopy "$(GlibBin)gthread-2-vs12.dll"  "$(TargetDir)" /D /I /Y
+
+REM if errorlevel 1 goto BuildEventFailed
+
+REM xcopy "$(A6oDeps)libintl\lib\libintl3.dll" "$(TargetDir)" /D /I /Y
+
+REM if errorlevel 1 goto BuildEventFailed
+
+REM xcopy "$(A6oDeps)libiconv\lib\libiconv2.dll" "$(TargetDir)" /D /I /Y
+
+REM if errorlevel 1 goto BuildEventFailed
+
+
 
 REM Exit properly because the build will not fail 
+
 REM unless the final step exits with an error code
+
 
 goto BuildEventOK
 
+
+
 :BuildEventFailed
+
 echo post-build step for $(ProjectName) FAILED
+
 exit 1
 
+
+
 :BuildEventOK
+
 echo post-build step for $(ProjectName) OK
 </Command>
     </PostBuildEvent>
@@ -296,37 +328,37 @@ REM if errorlevel 1 goto BuildEventFailed
 
 REM copy the include files
 
-if not exist "$(TargetDir)include\libarmadito" mkdir "$(TargetDir)include\libarmadito"
+REM if not exist "$(TargetDir)include\libarmadito" mkdir "$(TargetDir)include\libarmadito"
 
-if errorlevel 1 goto BuildEventFailed
+REM if errorlevel 1 goto BuildEventFailed
 
-xcopy /i /y $(A6oRoot)armadito-core\libmodule\include\libarmadito\*.h $(TargetDir)include\libarmadito
+REM xcopy /i /y $(A6oRoot)armadito-core\libmodule\include\libarmadito\*.h $(TargetDir)include\libarmadito
 
-if errorlevel 1 goto BuildEventFailed
+REM if errorlevel 1 goto BuildEventFailed
 
 
 
 REM copy the glib DLLs
 
-xcopy "$(GlibBin)glib-2-vs12.dll"  "$(TargetDir)" /D /I /Y
+REM xcopy "$(GlibBin)glib-2-vs12.dll"  "$(TargetDir)" /D /I /Y
 
-if errorlevel 1 goto BuildEventFailed
+REM if errorlevel 1 goto BuildEventFailed
 
-xcopy "$(GlibBin)gmodule-2-vs12.dll"  "$(TargetDir)" /D /I /Y
+REM xcopy "$(GlibBin)gmodule-2-vs12.dll"  "$(TargetDir)" /D /I /Y
 
-if errorlevel 1 goto BuildEventFailed
+REM if errorlevel 1 goto BuildEventFailed
 
-xcopy "$(GlibBin)gthread-2-vs12.dll"  "$(TargetDir)" /D /I /Y
+REM xcopy "$(GlibBin)gthread-2-vs12.dll"  "$(TargetDir)" /D /I /Y
 
-if errorlevel 1 goto BuildEventFailed
+REM if errorlevel 1 goto BuildEventFailed
 
-xcopy "$(A6oDeps)libintl\lib\libintl3.dll" "$(TargetDir)" /D /I /Y
+REM xcopy "$(A6oDeps)libintl\lib\libintl3.dll" "$(TargetDir)" /D /I /Y
 
-if errorlevel 1 goto BuildEventFailed
+REM if errorlevel 1 goto BuildEventFailed
 
-xcopy "$(A6oDeps)libiconv\lib\libiconv2.dll" "$(TargetDir)" /D /I /Y
+REM xcopy "$(A6oDeps)libiconv\lib\libiconv2.dll" "$(TargetDir)" /D /I /Y
 
-if errorlevel 1 goto BuildEventFailed
+REM if errorlevel 1 goto BuildEventFailed
 
 
 
@@ -378,40 +410,72 @@ echo post-build step for $(ProjectName) OK
     <PostBuildEvent>
       <Command>echo post-build step for $(ProjectName) -  Copying files to $(TargetDir)
 
+
 REM copy the conf file
+
 REM if not exist "$(TargetDir)conf" mkdir "$(TargetDir)conf"
+
 REM xcopy "$(A6oRoot)\core\libarmadito\conf\armadito.conf"  "$(TargetDir)conf" /D /I /Y
+
 REM if errorlevel 1 goto BuildEventFailed
 
+
+
 REM copy the include files
-if not exist "$(TargetDir)include" mkdir "$(TargetDir)include"
-xcopy /i /y $(A6oRoot)core\libarmadito\include\libarmadito.h $(TargetDir)include
-if errorlevel 1 goto BuildEventFailed
-xcopy /i /y $(A6oRoot)core\libarmadito\include\libarmadito\*.h $(TargetDir)include\libarmadito
-if errorlevel 1 goto BuildEventFailed
+
+REM if not exist "$(TargetDir)include\libarmadito" mkdir "$(TargetDir)include\libarmadito"
+
+REM if errorlevel 1 goto BuildEventFailed
+
+REM xcopy /i /y $(A6oRoot)armadito-core\libmodule\include\libarmadito\*.h $(TargetDir)include\libarmadito
+
+REM if errorlevel 1 goto BuildEventFailed
+
+
 
 REM copy the glib DLLs
-xcopy "$(GlibBin)glib-2-vs12.dll"  "$(TargetDir)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
-xcopy "$(GlibBin)gmodule-2-vs12.dll"  "$(TargetDir)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
-xcopy "$(GlibBin)gthread-2-vs12.dll"  "$(TargetDir)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
-xcopy "$(A6oDeps)libintl\lib\libintl3.dll" "$(TargetDir)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
-xcopy "$(A6oDeps)libiconv\lib\libiconv2.dll" "$(TargetDir)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
+
+REM xcopy "$(GlibBin)glib-2-vs12.dll"  "$(TargetDir)" /D /I /Y
+
+REM if errorlevel 1 goto BuildEventFailed
+
+REM xcopy "$(GlibBin)gmodule-2-vs12.dll"  "$(TargetDir)" /D /I /Y
+
+REM if errorlevel 1 goto BuildEventFailed
+
+REM xcopy "$(GlibBin)gthread-2-vs12.dll"  "$(TargetDir)" /D /I /Y
+
+REM if errorlevel 1 goto BuildEventFailed
+
+REM xcopy "$(A6oDeps)libintl\lib\libintl3.dll" "$(TargetDir)" /D /I /Y
+
+REM if errorlevel 1 goto BuildEventFailed
+
+REM xcopy "$(A6oDeps)libiconv\lib\libiconv2.dll" "$(TargetDir)" /D /I /Y
+
+REM if errorlevel 1 goto BuildEventFailed
+
+
 
 REM Exit properly because the build will not fail 
+
 REM unless the final step exits with an error code
+
 
 goto BuildEventOK
 
+
+
 :BuildEventFailed
+
 echo post-build step for $(ProjectName) FAILED
+
 exit 1
 
+
+
 :BuildEventOK
+
 echo post-build step for $(ProjectName) OK
 </Command>
     </PostBuildEvent>

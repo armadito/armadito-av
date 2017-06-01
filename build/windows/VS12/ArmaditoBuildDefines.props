@@ -12,8 +12,8 @@
     <GlibInclude>$(A6oDeps)glib\Win32\$(Configuration)\include;$(A6oDeps)glib\Win32\$(Configuration)\include\glib-2.0;$(A6oDeps)glib\Win32\$(Configuration)\lib\glib-2.0\include</GlibInclude>
     <GlibLib>$(A6oDeps)glib\Win32\$(Configuration)\bin;$(A6oDeps)glib\Win32\$(Configuration)\lib</GlibLib>
     <GlibLibraries>glib-2.0.lib;gmodule-2.0.lib;gthread-2.0.lib</GlibLibraries>
-    <JsoncInclude>$(A6oDeps)json-c\$(Platform)\$(Configuration)\include</JsoncInclude>
-    <JsoncLib>$(A6oDeps)json-c\$(Platform)\$(Configuration)\lib</JsoncLib>
+    <JanssonInclude>$(A6oDeps)jansson\$(Platform)\$(Configuration)\include</JanssonInclude>
+    <JanssonLib>$(A6oDeps)jansson\$(Platform)\$(Configuration)\lib</JanssonLib>
   </PropertyGroup>
   <PropertyGroup />
   <ItemDefinitionGroup />
@@ -48,11 +48,11 @@
     <BuildMacro Include="GlibLibraries">
       <Value>$(GlibLibraries)</Value>
     </BuildMacro>
-    <BuildMacro Include="JsoncInclude">
-      <Value>$(JsoncInclude)</Value>
+    <BuildMacro Include="JanssonInclude">
+      <Value>$(JanssonInclude)</Value>
     </BuildMacro>
-    <BuildMacro Include="JsoncLib">
-      <Value>$(JsoncLib)</Value>
+    <BuildMacro Include="JanssonLib">
+      <Value>$(JanssonLib)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>
