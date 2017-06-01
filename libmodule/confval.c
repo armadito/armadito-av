@@ -25,12 +25,12 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <string.h>
 
-void a6o_conf_value_init(struct a6o_conf_value *cv)
+A6O_API void a6o_conf_value_init(struct a6o_conf_value *cv)
 {
 	a6o_conf_value_set_void(cv);
 }
 
-void a6o_conf_value_destroy(struct a6o_conf_value *cv)
+A6O_API void a6o_conf_value_destroy(struct a6o_conf_value *cv)
 {
 	const char **p;
 
@@ -53,7 +53,7 @@ void a6o_conf_value_destroy(struct a6o_conf_value *cv)
 	cv->type = CONF_TYPE_VOID;
 }
 
-void a6o_conf_value_set(struct a6o_conf_value *cv, const struct a6o_conf_value *src)
+A6O_API void a6o_conf_value_set(struct a6o_conf_value *cv, const struct a6o_conf_value *src)
 {
 	switch (src->type) {
 	case CONF_TYPE_VOID:
@@ -71,26 +71,26 @@ void a6o_conf_value_set(struct a6o_conf_value *cv, const struct a6o_conf_value *
 	}
 }
 
-void a6o_conf_value_set_void(struct a6o_conf_value *cv)
+A6O_API void a6o_conf_value_set_void(struct a6o_conf_value *cv)
 {
 	cv->type = CONF_TYPE_VOID;
 }
 
-void a6o_conf_value_set_int(struct a6o_conf_value *cv, unsigned int val)
+A6O_API void a6o_conf_value_set_int(struct a6o_conf_value *cv, unsigned int val)
 {
 	cv->type = CONF_TYPE_INT;
 	cv->v.int_v = val;
 }
 
-void a6o_conf_value_set_string(struct a6o_conf_value *cv, const char *val)
+A6O_API void a6o_conf_value_set_string(struct a6o_conf_value *cv, const char *val)
 {
 	cv->type = CONF_TYPE_STRING;
 	cv->v.str_v = a6o_strdup(val);
 }
 
-void a6o_conf_value_set_list(struct a6o_conf_value *cv, const char **val, size_t len)
+A6O_API void a6o_conf_value_set_list(struct a6o_conf_value *cv, const char **val, size_t len)
 {
-	int i;
+	size_t i;
 
 	cv->type = CONF_TYPE_LIST;
 	cv->v.list_v.len = len;

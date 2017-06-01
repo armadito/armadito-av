@@ -48,8 +48,8 @@ enum a6o_std_location {
 	A6O_LOCATION_TMP,
 };
 
-const char *a6o_std_path(enum a6o_std_location location);
+A6O_API const char *a6o_std_path(enum a6o_std_location location);
 
-const char *a6o_path_sep(void);
+A6O_API const char *a6o_path_sep(void);
 
 #endif

@@ -30,7 +30,7 @@ static const char *os_stdpath_bases();
 static const char *os_stdpath_binary();
 static const char *os_stdpath_tmp();
 
-const char *a6o_std_path(enum a6o_std_location location)
+A6O_API const char *a6o_std_path(enum a6o_std_location location)
 {
 	switch(location) {
 	case A6O_LOCATION_MODULES:
@@ -89,7 +89,7 @@ const char *os_stdpath_tmp()
 	return NULL;
 }
 
-const char *a6o_path_sep(void)
+A6O_API const char *a6o_path_sep(void)
 {
 	return "/";
 }
@@ -250,7 +250,7 @@ const char *os_stdpath_tmp()
 	return NULL;
 }
 
-const char *a6o_path_sep() {
+A6O_API const char *a6o_path_sep() {
 	return "\\";
 }
 

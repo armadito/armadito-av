@@ -51,9 +51,9 @@ struct a6o_conf_value {
 	} v;
 };
 
-void a6o_conf_value_init(struct a6o_conf_value *cv);
+A6O_API void a6o_conf_value_init(struct a6o_conf_value *cv);
 
-void a6o_conf_value_destroy(struct a6o_conf_value *cv);
+A6O_API void a6o_conf_value_destroy(struct a6o_conf_value *cv);
 
 #define a6o_conf_value_get_type(cv) ((cv)->type)
 
@@ -66,14 +66,14 @@ void a6o_conf_value_destroy(struct a6o_conf_value *cv);
 #define a6o_conf_value_get_list(cv) ((cv)->v.list_v.values)
 #define a6o_conf_value_get_list_len(cv) ((cv)->v.list_v.len)
 
-void a6o_conf_value_set(struct a6o_conf_value *cv, const struct a6o_conf_value *src);
+A6O_API void a6o_conf_value_set(struct a6o_conf_value *cv, const struct a6o_conf_value *src);
 
-void a6o_conf_value_set_void(struct a6o_conf_value *cv);
+A6O_API void a6o_conf_value_set_void(struct a6o_conf_value *cv);
 
-void a6o_conf_value_set_int(struct a6o_conf_value *cv, unsigned int val);
+A6O_API void a6o_conf_value_set_int(struct a6o_conf_value *cv, unsigned int val);
 
-void a6o_conf_value_set_string(struct a6o_conf_value *cv, const char *val);
+A6O_API void a6o_conf_value_set_string(struct a6o_conf_value *cv, const char *val);
 
-void a6o_conf_value_set_list(struct a6o_conf_value *cv, const char **val, size_t len);
+A6O_API void a6o_conf_value_set_list(struct a6o_conf_value *cv, const char **val, size_t len);
 
 #endif

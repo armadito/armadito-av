@@ -55,7 +55,7 @@ static void append(struct buffer *b, char c)
 	b->filled_size++;
 }
 
-char *a6o_strcat_(const char *src, ...)
+A6O_API char *a6o_strcat_(const char *src, ...)
 {
 	va_list args;
 	const char *current_arg;

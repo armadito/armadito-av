@@ -47,7 +47,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
  *
  * \return the concatenation, or NULL if src argument is NULL
  */
-char *a6o_strcat_(const char *src, ...);
+A6O_API char *a6o_strcat_(const char *src, ...);
 
 #define a6o_strcat(SRC, ...) a6o_strcat_((SRC), __VA_ARGS__, NULL)
 

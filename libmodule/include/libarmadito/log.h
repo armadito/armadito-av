@@ -73,7 +73,7 @@ enum a6o_log_domain {
  * \param[in] format               printf like format
  *
  */
-void a6o_log(enum a6o_log_domain domain, enum a6o_log_level level, const char *format, ...);
+A6O_API void a6o_log(enum a6o_log_domain domain, enum a6o_log_level level, const char *format, ...);
 
 typedef void (*a6o_log_handler_t)(enum a6o_log_domain domain, enum a6o_log_level log_level, const char *message, void *user_data);
 
@@ -91,10 +91,10 @@ typedef void (*a6o_log_handler_t)(enum a6o_log_domain domain, enum a6o_log_level
  * \param[in] user_data            generic pointer that will be passed to the handler
  *
  */
-void a6o_log_set_handler(enum a6o_log_level max_level, a6o_log_handler_t handler, void *user_data);
+A6O_API void a6o_log_set_handler(enum a6o_log_level max_level, a6o_log_handler_t handler, void *user_data);
 
-const char *a6o_log_level_str(enum a6o_log_level log_level);
+A6O_API const char *a6o_log_level_str(enum a6o_log_level log_level);
 
-void a6o_log_default_handler(enum a6o_log_domain domain, enum a6o_log_level log_level, const char *message, void *user_data);
+A6O_API void a6o_log_default_handler(enum a6o_log_domain domain, enum a6o_log_level log_level, const char *message, void *user_data);
 
 #endif

@@ -19,8 +19,30 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef __ARMADITO_H_
-#define __ARMADITO_H_
+#ifndef ARMADITO_H
+#define ARMADITO_H
+
+#if defined _WIN32
+#define A6O_DLL_IMPORT __declspec(dllimport)
+#define A6O_DLL_EXPORT __declspec(dllexport)
+#define A6O_DLL_LOCAL
+#else
+#if __GNUC__ >= 4
+#define A6O_DLL_IMPORT __attribute__ ((visibility ("default")))
+#define A6O_DLL_EXPORT __attribute__ ((visibility ("default")))
+#define A6O_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
+#else
+#define A6O_DLL_IMPORT
+#define A6O_DLL_EXPORT
+#define A6O_DLL_LOCAL
+#endif
+#endif
+#ifdef A6O_DLL_EXPORTS // defined if we are building the ARMADITO DLL (instead of using it)
+#define A6O_API A6O_DLL_EXPORT
+#else
+#define A6O_API A6O_DLL_IMPORT
+#endif
+#define A6O_LOCAL A6O_DLL_LOCAL
 
 #ifdef __cplusplus
 extern "C" {
