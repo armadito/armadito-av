@@ -88,7 +88,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(GlibInclude);$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
-    <OutDir>$(A6oOut)</OutDir>
     <IntDir>$(ProjectDir)$(ProjectName)\$(Platform)\$(Configuration)\obj\</IntDir>
     <TargetName>ArmaditoModule</TargetName>
   </PropertyGroup>
@@ -102,7 +101,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(GlibInclude);$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
-    <OutDir>$(A6oOut)</OutDir>
     <IntDir>$(ProjectDir)$(ProjectName)\$(Platform)\$(Configuration)\obj\</IntDir>
     <TargetName>ArmaditoModule</TargetName>
   </PropertyGroup>
