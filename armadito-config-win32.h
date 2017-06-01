@@ -58,15 +58,15 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #define MAXPATHLEN _MAX_PATH
 
 /* modules */
-#define HAVE_ONDEMAND_MODULE
+#undef HAVE_ONDEMAND_MODULE
 #undef HAVE_ALERT_MODULE
-#define HAVE_QUARANTINE_MODULE
-#define HAVE_ON_ACCESS_WINDOWS_MODULE
+#undef HAVE_QUARANTINE_MODULE
+#undef HAVE_ON_ACCESS_WINDOWS_MODULE
 /* glib (current version of glib on windows is 2.28.8, which had g_thread_create) */
 #define HAVE_GTHREAD_NEW
 #undef HAVE_GTHREAD_CREATE
 #undef HAVE_GTHREAD_INIT
 
-
+#include "version-win.h"
 
 #endif

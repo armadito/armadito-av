@@ -54,7 +54,7 @@ typedef int (*cmp_fun_t)(void *element, const char *name);
 /* a little utility function for GPtrArrays */
 static void *array_search(GPtrArray *array, cmp_fun_t cmp_fun, const char *name)
 {
-	int i;
+	size_t i;
 
 	for (i = 0; i < array->len; i++) {
 		void *element = g_ptr_array_index(array, i);
@@ -185,11 +185,11 @@ void a6o_conf_free(struct a6o_conf *conf)
 
 void a6o_conf_apply(struct a6o_conf *conf, a6o_conf_fun_t fun, void *user_data)
 {
-	int i;
+	size_t i;
 
 	for(i = 0; i < conf->sections->len; i++) {
 		struct section_entry *s = g_ptr_array_index(conf->sections, i);
-		int j;
+		size_t j;
 
 		for(j = 0; j < s->keys->len; j++) {
 			struct key_entry *k = g_ptr_array_index(s->keys, j);
@@ -225,7 +225,7 @@ struct conf_save_data {
 static void conf_save_fun(const char *section, const char *key, struct a6o_conf_value *value, void *user_data)
 {
 	struct conf_save_data *data = (struct conf_save_data *)user_data;
-	int n;
+	size_t n;
 	const char **p;
 
 	if (data->p == NULL || strcmp(data->p, section)) {

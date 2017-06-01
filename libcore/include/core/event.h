@@ -90,6 +90,7 @@ struct a6o_real_time_prot_event {
 };
 
 struct a6o_av_update_event {
+	int foo;
 };
 
 union a6o_event_union {

@@ -36,7 +36,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <errno.h>
 #include <glib.h>
 #include <stdlib.h>
-#include <sys/time.h>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -152,6 +151,7 @@ static void update_counters(struct a6o_on_demand *on_demand, struct a6o_report *
 }
 
 #ifdef linux
+#include <sys/time.h>
 static time_t get_milliseconds(void)
 {
 	struct timeval now;
@@ -166,15 +166,15 @@ static time_t get_milliseconds(void)
 #endif
 
 #ifdef _WIN32
-static time_t get_milliseconds( ) {
-
-	time_t ms = 0;
-	struct _timeb tb;
+#include <sys/types.h>
+#include <sys/timeb.h>
+static time_t get_milliseconds( )
+{
+	struct __timeb64 tb;
 
 	_ftime64_s(&tb);
-	ms = tb.time * 1000 + tb.millitm;
 
-	return ms;
+	return tb.time * 1000 + tb.millitm;
 }
 #endif
 
@@ -267,7 +267,7 @@ static void fire_on_demand_start_event(struct a6o_on_demand *on_demand)
 	struct a6o_on_demand_start_event start_ev;
 	struct a6o_event *ev;
 
-	start_ev.root_path = strdup(on_demand->root_path);
+	start_ev.root_path = os_strdup(on_demand->root_path);
 	start_ev.scan_id = on_demand->scan_id;
 
 	ev = a6o_event_new(EVENT_ON_DEMAND_START, &start_ev);

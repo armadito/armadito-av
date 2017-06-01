@@ -26,6 +26,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifdef HAVE_IO_H
 #include <io.h>
+#include <stdio.h>  /* to have SEEK_SET on windows */
 #endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>

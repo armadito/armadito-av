@@ -20,6 +20,40 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\libcore\action.c" />
+    <ClCompile Include="..\..\..\libcore\armadito.c" />
+    <ClCompile Include="..\..\..\libcore\conf.c" />
+    <ClCompile Include="..\..\..\libcore\confparser.c" />
+    <ClCompile Include="..\..\..\libcore\event.c" />
+    <ClCompile Include="..\..\..\libcore\info.c" />
+    <ClCompile Include="..\..\..\libcore\module.c" />
+    <ClCompile Include="..\..\..\libcore\ondemand.c" />
+    <ClCompile Include="..\..\..\libcore\report.c" />
+    <ClCompile Include="..\..\..\libcore\scanconf.c" />
+    <ClCompile Include="..\..\..\libcore\scanctx.c" />
+    <ClCompile Include="..\..\..\libcore\status.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\armadito-config-win32.h" />
+    <ClInclude Include="..\..\..\armadito-config.h" />
+    <ClInclude Include="..\..\..\libcore\armadito_p.h" />
+    <ClInclude Include="..\..\..\libcore\confparser.h" />
+    <ClInclude Include="..\..\..\libcore\include\core\action.h" />
+    <ClInclude Include="..\..\..\libcore\include\core\conf.h" />
+    <ClInclude Include="..\..\..\libcore\include\core\dir.h" />
+    <ClInclude Include="..\..\..\libcore\include\core\event.h" />
+    <ClInclude Include="..\..\..\libcore\include\core\file.h" />
+    <ClInclude Include="..\..\..\libcore\include\core\handle.h" />
+    <ClInclude Include="..\..\..\libcore\include\core\info.h" />
+    <ClInclude Include="..\..\..\libcore\include\core\io.h" />
+    <ClInclude Include="..\..\..\libcore\include\core\mimetype.h" />
+    <ClInclude Include="..\..\..\libcore\include\core\ondemand.h" />
+    <ClInclude Include="..\..\..\libcore\include\core\report.h" />
+    <ClInclude Include="..\..\..\libcore\include\core\scanconf.h" />
+    <ClInclude Include="..\..\..\libcore\include\core\scanctx.h" />
+    <ClInclude Include="..\..\..\libcore\include\core\status.h" />
+    <ClInclude Include="..\..\..\libcore\module_p.h" />
+    <ClInclude Include="..\..\..\libcore\status_p.h" />
+    <ClInclude Include="..\..\..\libcore\string_p.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9DC12C13-FBEF-4C96-A218-20EE73DFFE78}</ProjectGuid>
@@ -27,26 +61,26 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -73,32 +107,32 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(A6oInclude);$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(A6oInclude);$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(A6oRoot)armadito-core\libcore\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(GlibLib);$(LibraryPath)</LibraryPath>
     <OutDir>$(A6oOut)</OutDir>
     <IntDir>$(ProjectDir)$(ProjectName)\$(Platform)\$(Configuration)\obj\</IntDir>
-    <TargetName>ArmaditoModule</TargetName>
+    <TargetName>ArmaditoCore</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(A6oInclude);$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(A6oInclude);$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(A6oRoot)armadito-core\libcore\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(GlibLib);$(LibraryPath)</LibraryPath>
     <OutDir>$(A6oOut)</OutDir>
-    <IntDir>$(SolutionDir)$(ProjectName)\$(Platform)\$(Configuration)\obj</IntDir>
-    <TargetName>Armadito</TargetName>
+    <IntDir>$(ProjectDir)$(ProjectName)\$(Platform)\$(Configuration)\obj\</IntDir>
+    <TargetName>ArmaditoCore</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(A6oInclude);$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(A6oInclude);$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(A6oRoot)armadito-core\libcore\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(GlibLib);$(LibraryPath)</LibraryPath>
     <OutDir>$(A6oOut)</OutDir>
-    <IntDir>$(SolutionDir)$(ProjectName)\$(Platform)\$(Configuration)\obj\</IntDir>
-    <TargetName>ArmaditoMod</TargetName>
+    <IntDir>$(ProjectDir)$(ProjectName)\$(Platform)\$(Configuration)\obj\</IntDir>
+    <TargetName>ArmaditoCore</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(A6oInclude);$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(A6oInclude);$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(A6oRoot)armadito-core\libcore\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(GlibLib);$(LibraryPath)</LibraryPath>
     <OutDir>$(A6oOut)</OutDir>
-    <IntDir>$(SolutionDir)$(ProjectName)\$(Platform)\$(Configuration)\obj</IntDir>
-    <TargetName>Armadito</TargetName>
+    <IntDir>$(ProjectDir)$(ProjectName)\$(Platform)\$(Configuration)\obj\</IntDir>
+    <TargetName>ArmaditoCore</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -106,6 +140,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(GlibInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -120,47 +155,15 @@
 
 REM copy the conf file
 
-REM if not exist "$(TargetDir)conf" mkdir "$(TargetDir)conf"
-
-REM xcopy "$(A6oRoot)\core\libarmadito\conf\armadito.conf"  "$(TargetDir)conf" /D /I /Y
-
-REM if errorlevel 1 goto BuildEventFailed
 
 
 
 REM copy the include files
 
-if not exist "$(TargetDir)include\libarmadito" mkdir "$(TargetDir)include\libarmadito"
-
-if errorlevel 1 goto BuildEventFailed
-
-xcopy /i /y $(A6oRoot)armadito-core\libmodule\include\libarmadito\*.h $(TargetDir)include\libarmadito
-
-if errorlevel 1 goto BuildEventFailed
 
 
 
 REM copy the glib DLLs
-
-xcopy "$(GlibBin)glib-2-vs12.dll"  "$(TargetDir)" /D /I /Y
-
-if errorlevel 1 goto BuildEventFailed
-
-xcopy "$(GlibBin)gmodule-2-vs12.dll"  "$(TargetDir)" /D /I /Y
-
-if errorlevel 1 goto BuildEventFailed
-
-xcopy "$(GlibBin)gthread-2-vs12.dll"  "$(TargetDir)" /D /I /Y
-
-if errorlevel 1 goto BuildEventFailed
-
-xcopy "$(A6oDeps)libintl\lib\libintl3.dll" "$(TargetDir)" /D /I /Y
-
-if errorlevel 1 goto BuildEventFailed
-
-xcopy "$(A6oDeps)libiconv\lib\libiconv2.dll" "$(TargetDir)" /D /I /Y
-
-if errorlevel 1 goto BuildEventFailed
 
 
 
@@ -189,6 +192,12 @@ echo post-build step for $(ProjectName) OK
     <PostBuildEvent>
       <Message>copy files to target directory</Message>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>findstr AC_INIT $(A6oRoot)\armadito-core\configure.ac &gt; versiontmp.txt
+(for /f "tokens=2 delims=," %%a in (versiontmp.txt) do echo #define VERSION  "%%a") &gt; $(A6oRoot)\armadito-core\version-win.h
+
+</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -196,6 +205,7 @@ echo post-build step for $(ProjectName) OK
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(GlibInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -206,46 +216,52 @@ echo post-build step for $(ProjectName) OK
     <PostBuildEvent>
       <Command>echo post-build step for $(ProjectName) -  Copying files to $(TargetDir)
 
+
 REM copy the conf file
-if not exist "$(TargetDir)conf" mkdir "$(TargetDir)conf"
-xcopy "$(A6oRoot)\core\libarmadito\conf\armadito.conf"  "$(TargetDir)conf" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
+
+
+
 
 REM copy the include files
-if not exist "$(TargetDir)include" mkdir "$(TargetDir)include"
-xcopy /i /y $(A6oRoot)core\libarmadito\include\libarmadito.h $(TargetDir)include
-if errorlevel 1 goto BuildEventFailed
-xcopy /i /y $(A6oRoot)core\libarmadito\include\libarmadito\*.h $(TargetDir)include\libarmadito
-if errorlevel 1 goto BuildEventFailed
+
+
+
 
 REM copy the glib DLLs
-xcopy "$(GlibBin)glib-2-vs12.dll"  "$(TargetDir)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
-xcopy "$(GlibBin)gmodule-2-vs12.dll"  "$(TargetDir)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
-xcopy "$(GlibBin)gthread-2-vs12.dll"  "$(TargetDir)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
-xcopy "$(A6oDeps)libintl\lib\libintl3.dll" "$(TargetDir)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
-xcopy "$(A6oDeps)libiconv\lib\libiconv2.dll" "$(TargetDir)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
+
+
 
 REM Exit properly because the build will not fail 
+
 REM unless the final step exits with an error code
+
 
 goto BuildEventOK
 
+
+
 :BuildEventFailed
+
 echo post-build step for $(ProjectName) FAILED
+
 exit 1
 
+
+
 :BuildEventOK
+
 echo post-build step for $(ProjectName) OK
 </Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>copy files to target directory</Message>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>findstr AC_INIT $(A6oRoot)\armadito-core\configure.ac &gt; versiontmp.txt
+(for /f "tokens=2 delims=," %%a in (versiontmp.txt) do echo #define VERSION  "%%a") &gt; $(A6oRoot)\armadito-core\version-win.h
+
+</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -255,6 +271,7 @@ echo post-build step for $(ProjectName) OK
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(GlibInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -271,47 +288,15 @@ echo post-build step for $(ProjectName) OK
 
 REM copy the conf file
 
-REM if not exist "$(TargetDir)conf" mkdir "$(TargetDir)conf"
-
-REM xcopy "$(A6oRoot)\core\libarmadito\conf\armadito.conf"  "$(TargetDir)conf" /D /I /Y
-
-REM if errorlevel 1 goto BuildEventFailed
 
 
 
 REM copy the include files
 
-if not exist "$(TargetDir)include\libarmadito" mkdir "$(TargetDir)include\libarmadito"
-
-if errorlevel 1 goto BuildEventFailed
-
-xcopy /i /y $(A6oRoot)armadito-core\libmodule\include\libarmadito\*.h $(TargetDir)include\libarmadito
-
-if errorlevel 1 goto BuildEventFailed
 
 
 
 REM copy the glib DLLs
-
-xcopy "$(GlibBin)glib-2-vs12.dll"  "$(TargetDir)" /D /I /Y
-
-if errorlevel 1 goto BuildEventFailed
-
-xcopy "$(GlibBin)gmodule-2-vs12.dll"  "$(TargetDir)" /D /I /Y
-
-if errorlevel 1 goto BuildEventFailed
-
-xcopy "$(GlibBin)gthread-2-vs12.dll"  "$(TargetDir)" /D /I /Y
-
-if errorlevel 1 goto BuildEventFailed
-
-xcopy "$(A6oDeps)libintl\lib\libintl3.dll" "$(TargetDir)" /D /I /Y
-
-if errorlevel 1 goto BuildEventFailed
-
-xcopy "$(A6oDeps)libiconv\lib\libiconv2.dll" "$(TargetDir)" /D /I /Y
-
-if errorlevel 1 goto BuildEventFailed
 
 
 
@@ -340,6 +325,12 @@ echo post-build step for $(ProjectName) OK
     <PostBuildEvent>
       <Message>copy files to target directory</Message>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>findstr AC_INIT $(A6oRoot)\armadito-core\configure.ac &gt; versiontmp.txt
+(for /f "tokens=2 delims=," %%a in (versiontmp.txt) do echo #define VERSION  "%%a") &gt; $(A6oRoot)\armadito-core\version-win.h
+
+</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -349,6 +340,7 @@ echo post-build step for $(ProjectName) OK
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(GlibInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -361,46 +353,52 @@ echo post-build step for $(ProjectName) OK
     <PostBuildEvent>
       <Command>echo post-build step for $(ProjectName) -  Copying files to $(TargetDir)
 
+
 REM copy the conf file
-REM if not exist "$(TargetDir)conf" mkdir "$(TargetDir)conf"
-REM xcopy "$(A6oRoot)\core\libarmadito\conf\armadito.conf"  "$(TargetDir)conf" /D /I /Y
-REM if errorlevel 1 goto BuildEventFailed
+
+
+
 
 REM copy the include files
-if not exist "$(TargetDir)include" mkdir "$(TargetDir)include"
-xcopy /i /y $(A6oRoot)core\libarmadito\include\libarmadito.h $(TargetDir)include
-if errorlevel 1 goto BuildEventFailed
-xcopy /i /y $(A6oRoot)core\libarmadito\include\libarmadito\*.h $(TargetDir)include\libarmadito
-if errorlevel 1 goto BuildEventFailed
+
+
+
 
 REM copy the glib DLLs
-xcopy "$(GlibBin)glib-2-vs12.dll"  "$(TargetDir)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
-xcopy "$(GlibBin)gmodule-2-vs12.dll"  "$(TargetDir)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
-xcopy "$(GlibBin)gthread-2-vs12.dll"  "$(TargetDir)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
-xcopy "$(A6oDeps)libintl\lib\libintl3.dll" "$(TargetDir)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
-xcopy "$(A6oDeps)libiconv\lib\libiconv2.dll" "$(TargetDir)" /D /I /Y
-if errorlevel 1 goto BuildEventFailed
+
+
 
 REM Exit properly because the build will not fail 
+
 REM unless the final step exits with an error code
+
 
 goto BuildEventOK
 
+
+
 :BuildEventFailed
+
 echo post-build step for $(ProjectName) FAILED
+
 exit 1
 
+
+
 :BuildEventOK
+
 echo post-build step for $(ProjectName) OK
 </Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>copy files to target directory</Message>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>findstr AC_INIT $(A6oRoot)\armadito-core\configure.ac &gt; versiontmp.txt
+(for /f "tokens=2 delims=," %%a in (versiontmp.txt) do echo #define VERSION  "%%a") &gt; $(A6oRoot)\armadito-core\version-win.h
+
+</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -73,7 +73,7 @@ struct a6o_info *a6o_info_new(struct armadito *armadito)
 	GArray *g_module_infos;
 	struct a6o_module **modv;
 
-	info->antivirus_version = strdup(VERSION);
+	info->antivirus_version = os_strdup(VERSION);
 	info->global_status = A6O_UPDATE_NON_AVAILABLE;
 	info->global_update_ts = 0;
 

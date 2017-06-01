@@ -25,6 +25,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "core/event.h"
 
+#include "string_p.h"
+
 #include <time.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,16 +46,16 @@ static void detection_event_clone(struct a6o_detection_event *dst, const struct 
 {
 	dst->context = src->context;
 	dst->scan_id = src->scan_id;
-	dst->path = strdup(src->path);
+	dst->path = os_strdup(src->path);
 	dst->scan_status = src->scan_status;
 	dst->scan_action = src->scan_action;
-	dst->module_name = strdup(src->module_name);
-	dst->module_report = strdup(src->module_report);
+	dst->module_name = os_strdup(src->module_name);
+	dst->module_report = os_strdup(src->module_report);
 }
 
 static void on_demand_start_event_clone(struct a6o_on_demand_start_event *dst, const struct a6o_on_demand_start_event *src)
 {
-	dst->root_path = strdup(src->root_path);
+	dst->root_path = os_strdup(src->root_path);
 	dst->scan_id = src->scan_id;
 }
 
@@ -71,7 +73,7 @@ static void on_demand_progress_event_clone(struct a6o_on_demand_progress_event *
 {
 	dst->scan_id = src->scan_id;
 	dst->progress = src->progress;
-	dst->path = strdup(src->path);
+	dst->path = os_strdup(src->path);
 	dst->malware_count = src->malware_count;
 	dst->suspicious_count = src->suspicious_count;
 	dst->scanned_count = src->scanned_count;
@@ -80,8 +82,8 @@ static void on_demand_progress_event_clone(struct a6o_on_demand_progress_event *
 static void quarantine_event_clone(struct a6o_quarantine_event *dst, const struct a6o_quarantine_event *src)
 {
 	dst->quarantine_action = src->quarantine_action;
-	dst->orig_path = strdup(src->orig_path);
-	dst->quarantine_path = strdup(src->quarantine_path);
+	dst->orig_path = os_strdup(src->orig_path);
+	dst->quarantine_path = os_strdup(src->quarantine_path);
 }
 
 static void real_time_prot_event_clone(struct a6o_real_time_prot_event *dst, const struct a6o_real_time_prot_event *src)
