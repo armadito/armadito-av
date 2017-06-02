@@ -20,6 +20,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\libcore\action.c" />
+    <ClCompile Include="..\..\..\libcore\arch\windows\os\dir.c" />
+    <ClCompile Include="..\..\..\libcore\arch\windows\os\file.c" />
+    <ClCompile Include="..\..\..\libcore\arch\windows\os\mimetype.c" />
+    <ClCompile Include="..\..\..\libcore\arch\windows\os\string.c" />
     <ClCompile Include="..\..\..\libcore\armadito.c" />
     <ClCompile Include="..\..\..\libcore\conf.c" />
     <ClCompile Include="..\..\..\libcore\confparser.c" />
@@ -107,26 +111,26 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(A6oInclude);$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(A6oRoot)armadito-core\libcore\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(A6oInclude);$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(A6oRoot)armadito-core\libcore\include;$(A6oRoot)armadito-core\libcore;$(IncludePath)</IncludePath>
     <LibraryPath>$(GlibLib);$(LibraryPath)</LibraryPath>
     <IntDir>$(ProjectDir)$(ProjectName)\$(Platform)\$(Configuration)\obj\</IntDir>
     <TargetName>ArmaditoCore</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(A6oInclude);$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(A6oRoot)armadito-core\libcore\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(A6oInclude);$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(A6oRoot)armadito-core\libcore\include;$(A6oRoot)armadito-core\libcore;$(IncludePath)</IncludePath>
     <LibraryPath>$(GlibLib);$(LibraryPath)</LibraryPath>
     <OutDir>$(A6oOut)</OutDir>
     <IntDir>$(ProjectDir)$(ProjectName)\$(Platform)\$(Configuration)\obj\</IntDir>
     <TargetName>ArmaditoCore</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(A6oInclude);$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(A6oRoot)armadito-core\libcore\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(A6oInclude);$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(A6oRoot)armadito-core\libcore\include;$(A6oRoot)armadito-core\libcore;$(IncludePath)</IncludePath>
     <LibraryPath>$(GlibLib);$(LibraryPath)</LibraryPath>
     <IntDir>$(ProjectDir)$(ProjectName)\$(Platform)\$(Configuration)\obj\</IntDir>
     <TargetName>ArmaditoCore</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(A6oInclude);$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(A6oRoot)armadito-core\libcore\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(A6oInclude);$(A6oRoot)armadito-core;$(A6oRoot)armadito-core\libmodule\include;$(A6oRoot)armadito-core\libcore\include;$(A6oRoot)armadito-core\libcore;$(IncludePath)</IncludePath>
     <LibraryPath>$(GlibLib);$(LibraryPath)</LibraryPath>
     <OutDir>$(A6oOut)</OutDir>
     <IntDir>$(ProjectDir)$(ProjectName)\$(Platform)\$(Configuration)\obj\</IntDir>

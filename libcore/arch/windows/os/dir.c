@@ -19,11 +19,14 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#include <libarmadito.h>
+#include <libarmadito/armadito.h>
 #include "armadito-config.h"
-#include "os/string.h"
-#include "os/dir.h"
-#include "Windows.h"
+
+#include "string_p.h"
+#include <core/dir.h>
+
+#include <Windows.h>
+
 #include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>

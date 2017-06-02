@@ -21,23 +21,47 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "armadito-config.h"
 
-#include "os/string.h"
+#include "core/file.h"
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <errno.h>
-#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
-// Windows specific strerror
-char *os_strerror(int errnum)
+FILE * os_fopen(char * filename, char * mode) {
+
+	FILE * f = NULL;
+	errno_t err = 0;
+
+	err = fopen_s(&f,filename,mode);
+	if (err != 0) {
+		return NULL;
+	}
+
+	return f;
+
+}
+
+int os_file_stat(const char *path, struct os_file_stat *buf, int *pfile_errno)
 {
-  char * msg = NULL;
-  int size = MAXPATHLEN;
+	struct stat sb;
 
-  msg = (char*)calloc(size + 1, sizeof(char));
-  msg[size] = '\0';
+	if (_stat(path, &sb) == -1) {
+		*pfile_errno = errno;
+		buf->flags = FILE_FLAG_IS_ERROR;
+		return -1;
+	}
 
-  strerror_s(msg,size,errno);
-  
-  return msg;
+	if (sb.st_mode & S_IFDIR)
+		buf->flags = FILE_FLAG_IS_DIRECTORY;
+	else if (sb.st_mode & S_IFREG)
+		buf->flags = FILE_FLAG_IS_PLAIN_FILE;
+	else
+		buf->flags = FILE_FLAG_IS_UNKNOWN;
+
+	return 0;
+}
+
+int os_file_do_not_scan(const char *path)
+{
+  return 0;
 }
