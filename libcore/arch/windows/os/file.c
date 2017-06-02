@@ -27,7 +27,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <sys/types.h>
 #include <sys/stat.h>
 
-FILE * os_fopen(char * filename, char * mode) {
+FILE * os_fopen(const char *filename, const char *mode) {
 
 	FILE * f = NULL;
 	errno_t err = 0;

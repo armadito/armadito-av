@@ -138,7 +138,7 @@ const char *os_stdpath_module()
 {
 	char *dirpath = NULL;
 	char *modulesdir = NULL;
-	int len = 0;
+	size_t len = 0;
 
 	dirpath = GetBinaryDirectory();
 	if (dirpath == NULL)
@@ -162,7 +162,7 @@ const char *os_stdpath_config_file()
 	char *dirpath = NULL;
 	char *confdir = NULL;
 	char * conffile = "\\armadito.conf";
-	int len = 0;
+	size_t len = 0;
 
 	/* FIXME: error checking */
 	dirpath = GetBinaryDirectory();
@@ -187,7 +187,7 @@ const char *os_stdpath_config_dir()
 {
 	char *dirpath = NULL;
 	char *confdir = NULL;
-	int len = 0;
+	size_t len = 0;
 
 	/* FIXME: error checking */
 	dirpath = GetBinaryDirectory();
@@ -212,7 +212,7 @@ const char *os_stdpath_bases()
 {
 	char *dirpath = NULL;
 	char *dbdir = NULL;
-	int len = 0, off = 0;
+	size_t len = 0, off = 0;
 
 	dirpath = GetBinaryDirectory();
 	if (dirpath == NULL)

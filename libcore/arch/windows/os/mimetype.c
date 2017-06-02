@@ -85,7 +85,7 @@ const char *os_mime_type_guess(const char *path)
 {
 	char *mime_type;
 	HANDLE fh;
-	int size=0;
+	size_t size = 0;
 	void * buf = NULL;
 	LPWSTR mt = 0;
 	LPDWORD high = NULL;

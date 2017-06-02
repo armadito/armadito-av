@@ -39,7 +39,7 @@ static void scan_event_cb(struct a6o_event *ev, void *data)
 {
 	struct scan_event_data *ev_data = (struct scan_event_data *)data;
 	json_t *j_ev;
-	unsigned int expected_scan_id = a6o_on_demand_get_id(ev_data->on_demand);
+	time_t expected_scan_id = a6o_on_demand_get_id(ev_data->on_demand);
 	int ret;
 
 	switch(ev->type) {

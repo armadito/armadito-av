@@ -101,7 +101,7 @@ int os_dir_map(const char *path, int recurse, dirent_cb_t dirent_cb, void *data)
 	int ret = 0;
 
 	HANDLE fh = NULL;
-	int size = 0;
+	size_t size = 0;
 	WIN32_FIND_DATAA fdata;
 	WIN32_FIND_DATAA tmp;
 	enum os_file_flag flags;
