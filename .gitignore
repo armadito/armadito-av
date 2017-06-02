@@ -1,3 +1,5 @@
+version-win.h
+build/windows/VS12/versiontmp.txt
 *.zip
 *~
 m4/
