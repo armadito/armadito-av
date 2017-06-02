@@ -19,8 +19,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#include "armadito-config.h"
-
 #include <libjrpc/jrpc.h>
 
 #include "buffer.h"

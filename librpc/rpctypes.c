@@ -21,6 +21,10 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "rpc/rpctypes.h"
 
+#if defined(_MSC_VER)
+#pragma warning(disable: 4102)
+#endif
+
 #define MARSHALL_FUNCTIONS
 #include "rpc/rpcdefs.h"
 

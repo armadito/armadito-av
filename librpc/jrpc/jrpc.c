@@ -252,7 +252,6 @@ static int connection_process_result(struct jrpc_connection *conn, struct rpc_ob
 
 static int connection_process_error(struct jrpc_connection *conn, struct rpc_obj *r_obj)
 {
-	void *user_data;
 	size_t id = r_obj->u.error_response.id;
 	int code = r_obj->u.error_response.code;
 	const char *message = r_obj->u.error_response.message;

@@ -136,6 +136,7 @@ JRPC_STRUCT(a6o_real_time_prot_event)
 JRPC_STRUCT_END
 
 JRPC_STRUCT(a6o_av_update_event)
+	JRPC_STRUCT_FIELD_INT(int, foo)
 JRPC_STRUCT_END
 
 JRPC_UNION(a6o_event_union)

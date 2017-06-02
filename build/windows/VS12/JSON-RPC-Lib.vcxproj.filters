@@ -13,78 +13,69 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Fichiers d%27en-tête privés">
-      <UniqueIdentifier>{1348986f-da7b-4b1a-8515-d41593b3a6cd}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
+    <ClCompile Include="..\..\..\librpc\jrpc\buffer.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\librpc\jrpc\connection.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\librpc\jrpc\hash.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\librpc\jrpc\jrpc.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\librpc\jrpc\mapper.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\librpc\jrpc\marshall.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\librpc\rpcbe.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\librpc\rpctypes.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\librpc\jrpc\include\libjrpc\error.h">
+    <ClInclude Include="..\..\..\librpc\jrpc\buffer.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\librpc\jrpc\include\libjrpc\jrpc.h">
+    <ClInclude Include="..\..\..\librpc\jrpc\connection.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\librpc\jrpc\include\libjrpc\jsonschema.h">
+    <ClInclude Include="..\..\..\librpc\jrpc\hash.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\librpc\jrpc\include\libjrpc\marshall.h">
+    <ClInclude Include="..\..\..\librpc\jrpc\mapper.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\librpc\include\rpc\io.h">
+    <ClInclude Include="..\..\..\librpc\jrpc\include\libjrpc\error.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\librpc\include\rpc\rpcbe.h">
+    <ClInclude Include="..\..\..\librpc\jrpc\include\libjrpc\jrpc.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\librpc\include\rpc\rpcdefs.h">
+    <ClInclude Include="..\..\..\librpc\jrpc\include\libjrpc\jsonschema.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\librpc\include\rpc\rpcschema.h">
+    <ClInclude Include="..\..\..\librpc\jrpc\include\libjrpc\marshall.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\librpc\include\rpc\rpctypes.h">
+    <ClInclude Include="..\..\..\librpc\include\rpc\rpcbe.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\librpc\jrpc\buffer.h">
-      <Filter>Fichiers d%27en-tête privés</Filter>
+    <ClInclude Include="..\..\..\librpc\include\rpc\rpcdefs.h">
+      <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\librpc\jrpc\connection.h">
-      <Filter>Fichiers d%27en-tête privés</Filter>
+    <ClInclude Include="..\..\..\librpc\include\rpc\rpcschema.h">
+      <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\librpc\jrpc\hash.h">
-      <Filter>Fichiers d%27en-tête privés</Filter>
+    <ClInclude Include="..\..\..\librpc\include\rpc\rpctypes.h">
+      <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\librpc\jrpc\mapper.h">
-      <Filter>Fichiers d%27en-tête privés</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\..\..\librpc\jrpc\buffer.c">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\librpc\jrpc\connection.c">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\librpc\jrpc\hash.c">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\librpc\jrpc\jrpc.c">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\librpc\jrpc\mapper.c">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\librpc\jrpc\marshall.c">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\librpc\rpcbe.c">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\librpc\rpctypes.c">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

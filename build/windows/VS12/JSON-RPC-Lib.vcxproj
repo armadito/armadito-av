@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -17,6 +17,30 @@
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\librpc\jrpc\buffer.c" />
+    <ClCompile Include="..\..\..\librpc\jrpc\connection.c" />
+    <ClCompile Include="..\..\..\librpc\jrpc\hash.c" />
+    <ClCompile Include="..\..\..\librpc\jrpc\jrpc.c" />
+    <ClCompile Include="..\..\..\librpc\jrpc\mapper.c" />
+    <ClCompile Include="..\..\..\librpc\jrpc\marshall.c" />
+    <ClCompile Include="..\..\..\librpc\rpcbe.c" />
+    <ClCompile Include="..\..\..\librpc\rpctypes.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\librpc\include\rpc\rpcbe.h" />
+    <ClInclude Include="..\..\..\librpc\include\rpc\rpcdefs.h" />
+    <ClInclude Include="..\..\..\librpc\include\rpc\rpcschema.h" />
+    <ClInclude Include="..\..\..\librpc\include\rpc\rpctypes.h" />
+    <ClInclude Include="..\..\..\librpc\jrpc\buffer.h" />
+    <ClInclude Include="..\..\..\librpc\jrpc\connection.h" />
+    <ClInclude Include="..\..\..\librpc\jrpc\hash.h" />
+    <ClInclude Include="..\..\..\librpc\jrpc\include\libjrpc\error.h" />
+    <ClInclude Include="..\..\..\librpc\jrpc\include\libjrpc\jrpc.h" />
+    <ClInclude Include="..\..\..\librpc\jrpc\include\libjrpc\jsonschema.h" />
+    <ClInclude Include="..\..\..\librpc\jrpc\include\libjrpc\marshall.h" />
+    <ClInclude Include="..\..\..\librpc\jrpc\mapper.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -100,6 +124,8 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(GlibInclude);$(JanssonInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -112,6 +138,8 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(GlibInclude);$(JanssonInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -126,6 +154,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(GlibInclude);$(JanssonInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -142,6 +172,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(GlibInclude);$(JanssonInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -149,34 +181,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\..\librpc\include\rpc\io.h" />
-    <ClInclude Include="..\..\..\librpc\include\rpc\rpcbe.h" />
-    <ClInclude Include="..\..\..\librpc\include\rpc\rpcdefs.h" />
-    <ClInclude Include="..\..\..\librpc\include\rpc\rpcschema.h" />
-    <ClInclude Include="..\..\..\librpc\include\rpc\rpctypes.h" />
-    <ClInclude Include="..\..\..\librpc\jrpc\buffer.h" />
-    <ClInclude Include="..\..\..\librpc\jrpc\connection.h" />
-    <ClInclude Include="..\..\..\librpc\jrpc\hash.h" />
-    <ClInclude Include="..\..\..\librpc\jrpc\include\libjrpc\error.h" />
-    <ClInclude Include="..\..\..\librpc\jrpc\include\libjrpc\jrpc.h" />
-    <ClInclude Include="..\..\..\librpc\jrpc\include\libjrpc\jsonschema.h" />
-    <ClInclude Include="..\..\..\librpc\jrpc\include\libjrpc\marshall.h" />
-    <ClInclude Include="..\..\..\librpc\jrpc\mapper.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\..\librpc\jrpc\buffer.c" />
-    <ClCompile Include="..\..\..\librpc\jrpc\connection.c" />
-    <ClCompile Include="..\..\..\librpc\jrpc\hash.c" />
-    <ClCompile Include="..\..\..\librpc\jrpc\jrpc.c" />
-    <ClCompile Include="..\..\..\librpc\jrpc\mapper.c" />
-    <ClCompile Include="..\..\..\librpc\jrpc\marshall.c" />
-    <ClCompile Include="..\..\..\librpc\rpcbe.c" />
-    <ClCompile Include="..\..\..\librpc\rpctypes.c" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -46,7 +46,7 @@ int jrpc_mapper_add(struct jrpc_mapper *mapper, const char *method, jrpc_method_
 
 	if (!hash_table_insert(mapper->method_table, p, method_fun)) {
 		free(p);
-		return 1; /* must add error code */
+		return 1;
 	}
 
 	return 0;

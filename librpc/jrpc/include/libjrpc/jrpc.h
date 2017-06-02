@@ -27,6 +27,15 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <stddef.h>
 #include <jansson.h>
 
+#if defined(_MSC_VER)
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
  * JSON-RPC functions
  */
@@ -82,5 +91,9 @@ typedef void (*jrpc_cb_t)(json_t *result, void *user_data);
 int jrpc_call(struct jrpc_connection *conn, const char *method, json_t *params, jrpc_cb_t cb, void *user_data);
 
 int jrpc_process(struct jrpc_connection *conn);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

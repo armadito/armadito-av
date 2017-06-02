@@ -164,7 +164,7 @@ static uint32_t himult32(void *p)
 {
 	uintptr_t k = H_POINTER_TO_INT(p);
 
-	return k * 2654435761;
+	return (uint32_t)k * 2654435761;
 }
 
 /* for 64 bits, use 11400712997709160919 which is a prime close to 2^64 x phi */
@@ -192,7 +192,7 @@ static uint32_t fmix32(void *p)
 
 static uint64_t fmix64(void *p)
 {
-	uintptr_t k = H_POINTER_TO_INT(p);
+	uint64_t k = H_POINTER_TO_INT(p);
 
 	k ^= k >> 33;
 	k *= UINT64_C(0xff51afd7ed558ccd);
@@ -270,7 +270,6 @@ int hash_table_insert(struct hash_table *ht, void *key, void *value)
 	size_t h;
 	size_t i;
 	size_t w;
-	int ret;
 
 	hash_table_check_overflow(ht);
 
