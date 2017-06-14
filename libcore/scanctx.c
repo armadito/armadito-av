@@ -141,7 +141,7 @@ static enum a6o_file_status scan_apply_modules(int fd, const char *path, const c
 		enum a6o_file_status mod_status;
 		char *module_report = NULL;
 
-		//a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "scanning fd %d path %s with module %s", fd, path, mod->name);
+		a6o_log(A6O_LOG_LIB, A6O_LOG_LEVEL_DEBUG, "scanning fd %d path %s with module %s", fd, path, mod->name);
 
 		/* if module status is not OK, don't call it */
 		if (mod->status != A6O_MOD_OK)

@@ -11,7 +11,8 @@ white-list-dir = "/boot"; "/dev"; "/etc"; "/proc"; "/run"; "/sys"; "/var"
 mime-types="*"
  
 # scan modules: scan with clamav, yara, modulePDF
-modules=clamav; yara; modulePDF
+# python is experimental
+modules=clamav; yara; modulePDF; modpython
  
 # 1M, must support units
 #max-size = 1048576 
