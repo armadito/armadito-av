@@ -9,6 +9,9 @@ AC_ARG_ENABLE([debug],
 AC_ARG_ENABLE([fanotify],
 	AS_HELP_STRING([--enable-fanotify],[enable on-access scan using fanotify (see man 7 fanotify) @<:@default is no@:>@.
 	The Linux kernel must be compiled with fanotify support]))
+# nsjail
+AC_ARG_ENABLE([nsjail],
+	AS_HELP_STRING([--enable-nsjail],[enable running the daemon in isolation using nsjail  @<:@default is no@:>@]))
 
 # configuration header
 AM_CONFIG_HEADER(armadito-config-autoconf.h)
@@ -123,6 +126,11 @@ if test "$enable_fanotify" = "yes" -a "$HAVE_FANOTIFY_INIT" = "yes"; then
    AC_DEFINE([HAVE_LINUX_ON_ACCESS_MODULE],[1],[Defined if builtin module on-access is compiled])
 fi
 
+# nsjail argument check
+AC_MSG_CHECKING(for isolated execution using nsjail)
+AC_MSG_RESULT($enable_nsjail)
+AM_CONDITIONAL([COND_NSJAIL], [test "$enable_nsjail" = "yes"])
+
 # define builtin modules
 AC_DEFINE([HAVE_ON_DEMAND_MODULE],[1],[Define to compile builtin module on-demand])
 dnl AC_DEFINE([HAVE_QUARANTINE_MODULE],[1],[Define to compile builtin module quarantine])
@@ -153,6 +161,7 @@ arch/Makefile
 arch/linux/Makefile
 arch/linux/daemon/Makefile
 arch/linux/net/Makefile
+arch/linux/nsjail/Makefile
 arch/linux/service/Makefile
 conf/Makefile
 libcore/Makefile

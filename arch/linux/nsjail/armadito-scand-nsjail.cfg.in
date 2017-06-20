@@ -1,0 +1,8 @@
+name: "armadito-scand"
+description:
+"A policy which allows to execute armadito daemon in a jail.
+"
+mode: ONCE
+
+
+./nsjail --verbose -Mo -R /bin/ -R /lib -R /lib64/ -R /usr/ -R /sbin/ -T /dev -R /dev/urandom -B /home -B /tmp -R /var --keep_caps -N -- $HOME/projects/armadito/install/sbin/armadito-scand --no-daemon --log-level=debug --socket-path=/tmp/foobar
