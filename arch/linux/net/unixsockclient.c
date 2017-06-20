@@ -46,7 +46,10 @@ int unix_client_connect(const char *socket_path, int max_retry)
 	path_len = strlen(socket_path);
 	assert(path_len < UNIX_PATH_MAX);
 
+#if 0
 	fd = socket( AF_UNIX, SOCK_SEQPACKET, 0);
+#endif
+	fd = socket( AF_UNIX, SOCK_STREAM, 0);
 	if (fd < 0) {
 		perror("socket() failed");
 		return -1;

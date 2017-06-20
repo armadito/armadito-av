@@ -75,7 +75,6 @@ mount {
       rw: true
 }
 
-
 exec_bin {
 	path: "/usr/sbin/armadito-scand"
 	arg: "--no-daemon"

@@ -45,7 +45,10 @@ int unix_server_listen(const char *socket_path)
 	path_len = strlen(socket_path);
 	assert(path_len < UNIX_PATH_MAX);
 
+#if 0
 	if ((fd = socket(AF_UNIX, SOCK_SEQPACKET, 0)) < 0) {
+#endif
+	if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
 		perror("socket() failed");
 		return -1;
 	}
