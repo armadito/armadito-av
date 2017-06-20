@@ -284,6 +284,7 @@ static void start_daemon(const char *progname, struct a6o_daemon_options *opts)
 
 	server_sock = create_server_socket(opts->unix_path);
 	server = server_new(armadito, server_sock);
+	a6o_log(A6O_LOG_SERVICE, A6O_LOG_LEVEL_INFO, "listening on %s", opts->unix_path);
 
 	loop = g_main_loop_new(NULL, FALSE);
 	g_main_loop_run(loop);
