@@ -5,7 +5,9 @@ EDIT = sed \
         -e 's,@bindir\@,$(bindir),g' \
         -e 's,@sbindir\@,$(sbindir),g' \
         -e 's,@libdir\@,$(libdir),g' \
-        -e 's,@localstatedir\@,$(localstatedir),g' 
+        -e 's,@localstatedir\@,$(localstatedir),g' \
+        -e 's,@sysconfdir\@,$(sysconfdir),g' 
+
 
 %.cfg: $(srcdir)/%.cfg.in Makefile
 	$(EDIT) $< > $@

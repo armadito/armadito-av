@@ -34,6 +34,20 @@ mount {
 }
 
 mount {
+	src: "/usr/share"
+	dst: "/usr/share"
+	is_bind: true
+	rw: false
+}
+
+mount {
+	src: "/tmp"
+	dst: "/tmp"
+	is_bind: true
+	rw: true
+}
+
+mount {
       src: "@sbindir@"
       dst: "/usr/sbin"
       is_bind: true
@@ -43,6 +57,13 @@ mount {
 mount {
       src: "@libdir@"
       dst: "@libdir@"
+      is_bind: true
+      rw: false
+}
+
+mount {
+      src: "@sysconfdir@"
+      dst: "@sysconfdir@"
       is_bind: true
       rw: false
 }
@@ -59,5 +80,6 @@ exec_bin {
 	path: "/usr/sbin/armadito-scand"
 	arg: "--no-daemon"
 	arg: "--log-level=debug"
+	arg: "--socket-path=/tmp/armadito"
 }
 
