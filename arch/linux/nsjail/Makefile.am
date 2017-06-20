@@ -2,9 +2,12 @@ nsjailconfdir=$(sysconfdir)/armadito/nsjail
 nsjailconf_DATA=armadito-scand-nsjail.cfg
 
 EDIT = sed \
-        -e 's,@bindir\@,$(bindir),g' 
+        -e 's,@bindir\@,$(bindir),g' \
+        -e 's,@sbindir\@,$(sbindir),g' \
+        -e 's,@libdir\@,$(libdir),g' \
+        -e 's,@localstatedir\@,$(localstatedir),g' 
 
-%.cfg: Makefile $(srcdir)/%.cfg.in
+%.cfg: $(srcdir)/%.cfg.in Makefile
 	$(EDIT) $< > $@
 
 EXTRA_DIST=armadito-scand-nsjail.cfg.in

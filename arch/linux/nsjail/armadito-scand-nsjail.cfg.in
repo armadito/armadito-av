@@ -1,8 +1,63 @@
 name: "armadito-scand"
 description:
 "A policy which allows to execute armadito daemon in a jail.
-"
-mode: ONCE
 
-
+Command line:
 ./nsjail --verbose -Mo -R /bin/ -R /lib -R /lib64/ -R /usr/ -R /sbin/ -T /dev -R /dev/urandom -B /home -B /tmp -R /var --keep_caps -N -- $HOME/projects/armadito/install/sbin/armadito-scand --no-daemon --log-level=debug --socket-path=/tmp/foobar
+
+"
+
+mode: ONCE
+log_level: DEBUG
+
+mount_proc: false
+
+mount {
+	src: "/lib"
+	dst: "/lib"
+	is_bind: true
+	rw: false
+}
+
+mount {
+	src: "/lib64"
+	dst: "/lib64"
+	is_bind: true
+	rw: false
+}
+
+mount {
+	src: "/usr/lib/x86_64-linux-gnu"
+	dst: "/usr/lib/x86_64-linux-gnu"
+	is_bind: true
+	rw: false
+}
+
+mount {
+      src: "@sbindir@"
+      dst: "/usr/sbin"
+      is_bind: true
+      rw: false
+}
+
+mount {
+      src: "@libdir@"
+      dst: "@libdir@"
+      is_bind: true
+      rw: false
+}
+
+mount {
+      src: "@localstatedir@/run"
+      dst: "@localstatedir@/run"
+      is_bind: true
+      rw: true
+}
+
+
+exec_bin {
+	path: "/usr/sbin/armadito-scand"
+	arg: "--no-daemon"
+	arg: "--log-level=debug"
+}
+
