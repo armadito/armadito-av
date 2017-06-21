@@ -27,8 +27,8 @@ mount {
 }
 
 mount {
-	src: "/usr/lib/x86_64-linux-gnu"
-	dst: "/usr/lib/x86_64-linux-gnu"
+	src: "/usr/lib"
+	dst: "/usr/lib"
 	is_bind: true
 	rw: false
 }
@@ -36,6 +36,13 @@ mount {
 mount {
 	src: "/usr/share"
 	dst: "/usr/share"
+	is_bind: true
+	rw: false
+}
+
+mount {
+	src: "/var/lib/clamav"
+	dst: "/var/lib/clamav"
 	is_bind: true
 	rw: false
 }
@@ -74,6 +81,16 @@ mount {
       is_bind: true
       rw: true
 }
+
+seccomp_string: "
+	POLICY armadito {
+	       ALLOW { execve, access, SYSCALL[4], SYSCALL[5], SYSCALL[6], pipe, mprotect, open, dup, read, write, lseek, fcntl, close, brk, mmap, munmap, statfs, arch_prctl, set_tid_address, set_robust_list, rt_sigaction, rt_sigprocmask, getrlimit, futex, clock_gettime, getdents, eventfd2, clone, SYSCALL[63], getcwd, sysinfo, socket, unlink, bind, listen, accept, chmod, poll }
+	}
+	USE armadito DEFAULT KILL
+"
+
+rlimit_as: 1024
+rlimit_fsize: 64
 
 exec_bin {
 	path: "/usr/sbin/armadito-scand"
