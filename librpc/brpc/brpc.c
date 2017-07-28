@@ -164,8 +164,12 @@ brpc_buffer_t *brpc_buffer_new(enum brpc_buffer_type buffer_type, const char *fm
 	const char *p, *s;
 	uint16_t off;
 	int arg_count;
+	size_t approximate_size;
 
-	b = buffer_new(brpc_buffer_approximate_size(fmt));
+	approximate_size = brpc_buffer_approximate_size(fmt);
+	if (approximate_size == 0)
+		return NULL;
+	b = buffer_new(approximate_size);
 	buffer_fill(b, 0, ARG_OFF);
 
 	va_start(args, fmt);
