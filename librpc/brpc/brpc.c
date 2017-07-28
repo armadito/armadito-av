@@ -1,11 +1,14 @@
 /* compile with:
    make brpc CFLAGS='-g -Iinclude/'
 */
+
 #include <brpc.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "buffer.h"
 
 /*
 
@@ -83,9 +86,9 @@
 #define METHOD_SIZE                  1
 #define ID_OFF                       (METHOD_OFF + METHOD_SIZE)
 #define ID_SIZE                      4
+#define ATABLE_OFF                   (ID_OFF + ID_SIZE)
 #define ATABLE_MAX_ENTRIES           16
 #define ATABLE_ENTRY_SIZE            2
-#define ATABLE_OFF                   (ID_OFF + ID_SIZE)
 #define ATABLE_SIZE                  (ATABLE_MAX_ENTRIES * ATABLE_ENTRY_SIZE)
 #define ARG0_OFF                     (ATABLE_OFF + ATABLE_SIZE)
 
