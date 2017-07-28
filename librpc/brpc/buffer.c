@@ -1,3 +1,10 @@
+#include "buffer.h"
+
+#include <stdlib.h>
+#include <string.h>
+
+#define DEFAULT_INITIAL_SIZE 128
+
 void buffer_init(struct buffer *b, size_t initial_size)
 {
 	if (initial_size == 0)
@@ -8,7 +15,31 @@ void buffer_init(struct buffer *b, size_t initial_size)
 	b->alloced_end = b->base + initial_size;
 }
 
-void buffer_grow(struct buffer *b, size_t needed)
+void buffer_destroy(struct buffer *b, int free_data)
+{
+	b->filled = NULL;
+	b->alloced_end = NULL;
+	if (free_data)
+		free(b->base);
+	b->base = NULL;
+}
+
+struct buffer *buffer_new(size_t initial_size)
+{
+	struct buffer *b = malloc(sizeof(struct buffer));
+
+	buffer_init(b, initial_size);
+
+	return b;
+}
+
+void buffer_free(struct buffer *b, int free_data)
+{
+	buffer_destroy(b, free_data);
+	free(b);
+}
+
+void buffer_make_room(struct buffer *b, size_t needed)
 {
 	size_t old_size, new_size;
 
@@ -21,7 +52,25 @@ void buffer_grow(struct buffer *b, size_t needed)
 		new_size *= 2;
 
 	b->base = realloc(b->base, new_size);
-	b->filled = b->_base + old_size;
+	b->filled = b->base + old_size;
 	b->alloced_end = b->base + new_size;
+}
+
+void buffer_append(struct buffer *b, const char *data, size_t size)
+{
+	buffer_make_room(b, size);
+
+	memcpy(buffer_end(b), data, size);
+
+	buffer_increment(b, size);
+}
+
+void buffer_fill(struct buffer *b, int c, size_t size)
+{
+	buffer_make_room(b, size);
+
+	memset(buffer_end(b), c, size);
+
+	buffer_increment(b, size);
 }
 
