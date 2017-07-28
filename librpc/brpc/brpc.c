@@ -1,3 +1,6 @@
+/* compile with:
+   make brpc CFLAGS='-g -Iinclude/'
+*/
 #include <brpc.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -139,11 +142,11 @@ static size_t brpc_buffer_size(const char *fmt, va_list args)
 			break;
 		case 'l':
 			i64 = va_arg(args, int64_t);
-			size = align(size, ARG_INT64_ALIGN, ARG_INT64_SIZE);
+			size = align_and_increment(size, ARG_INT64_ALIGN, ARG_INT64_SIZE);
 			break;
 		case 's':
 			s = va_arg(args, char *);
-			size = align(size, ARG_STR_ALIGN, strlen(s) + 1);
+			size = align_and_increment(size, ARG_STR_ALIGN, strlen(s) + 1);
 			break;
 		default:
 			return 0;
