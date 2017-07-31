@@ -124,11 +124,6 @@
 #define ATENTRY_GET_OFFSET(B, I)     GETBITS(*ATENTRY_ADDR(B, I), ATENTRY_OFFSET_SHIFT, ATENTRY_OFFSET_BITS)
 #define ATENTRY_MAX_OFFSET           (1 << ATENTRY_OFFSET_BITS)
 
-/* internal functions */
-static void brpc_buffer_set_type(brpc_buffer_t *b, uint8_t type);
-static void brpc_buffer_set_method(brpc_buffer_t *b, uint8_t method);
-static void brpc_buffer_set_id(brpc_buffer_t *b, uint32_t id);
-
 static size_t align_gap(size_t offset, size_t alignment)
 {
 	return (offset % alignment == 0) ? 0 : alignment - offset % alignment;
@@ -303,6 +298,22 @@ void brpc_buffer_print(brpc_buffer_t *b)
 
 		argc++;
 	}
+}
+
+/* internal functions */
+static void brpc_buffer_set_type(brpc_buffer_t *b, uint8_t type)
+{
+	*BTYPE_ADDR(b) = type;
+}
+
+static void brpc_buffer_set_method(brpc_buffer_t *b, uint8_t method)
+{
+	*METHOD_ADDR(b) = method;
+}
+
+static void brpc_buffer_set_id(brpc_buffer_t *b, uint32_t id)
+{
+	*ID_ADDR(b) = id;
 }
 
 #ifdef DO_TEST_DEBUG_MAIN
