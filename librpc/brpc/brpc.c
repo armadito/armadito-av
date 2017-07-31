@@ -1,5 +1,6 @@
-/* compile with:
-   gcc -g -Iinclude/ -o brpc buffer.c brpc.c
+/*
+  compile with:
+  gcc -g -Iinclude/ -o brpc buffer.c brpc.c
 */
 
 #include <brpc.h>
@@ -112,9 +113,9 @@
 #define ATENTRY_OFFSET_SHIFT         0
 #define MASK(B)                      (~(~0 << (B)))
 #define GETBITS(V, S, B)             (((V) >> S) & MASK(B))
-#define brpc_arg_type(B, I)          GETBITS(((uint16t *)((B) + ATABLE_OFF))[I], ATENTRY_TYPE_SHIFT, ATENTRY_TYPE_BITS)
-#define brpc_arg_off(B, I)           GETBITS(((uint16t *)((B) + ATABLE_OFF))[I], ATENTRY_OFF_SHIFT, ATENTRY_OFF_BITS)
 #define ATENTRY(TYPE, OFFSET)        ((((OFFSET) & MASK(ATENTRY_OFFSET_BITS)) << ATENTRY_OFFSET_SHIFT) | (((TYPE) & MASK(ATENTRY_TYPE_BITS)) << ATENTRY_TYPE_SHIFT))
+#define ATENTRY_GET_TYPE(B, I)       GETBITS(((uint16_t *)((B) + ATABLE_OFF))[I], ATENTRY_TYPE_SHIFT, ATENTRY_TYPE_BITS)
+#define ATENTRY_GET_OFFSET(B, I)     GETBITS(((uint16_t *)((B) + ATABLE_OFF))[I], ATENTRY_OFFSET_SHIFT, ATENTRY_OFFSET_BITS)
 
 /* internal functions */
 static void brpc_buffer_set_method(brpc_buffer_t *b, uint8_t method);
@@ -156,15 +157,29 @@ static size_t brpc_buffer_approximate_size(const char *fmt)
 	return size;
 }
 
+static char *add_arg(struct buffer *b, int arg_count, char arg_type, size_t arg_size, size_t arg_alignment)
+{
+	char *arg_p;
+
+	buffer_fill(b, 0, align_gap(buffer_size(b), arg_alignment));
+	buffer_make_room(b, arg_size);
+	arg_p = buffer_end(b);
+	((uint16_t *)(buffer_data(b) + ATABLE_OFF))[arg_count] = ATENTRY(arg_type, buffer_size(b));
+	buffer_increment(b, arg_size);
+
+	return arg_p;
+}
+
+
 brpc_buffer_t *brpc_buffer_new(enum brpc_buffer_type buffer_type, const char *fmt, ...)
 {
 	va_list args;
 	struct buffer *b;
 	brpc_buffer_t *ret;
 	const char *p, *s;
-	uint16_t off;
 	int arg_count;
-	size_t approximate_size;
+	char *arg_p;
+	size_t approximate_size, l;
 
 	approximate_size = brpc_buffer_approximate_size(fmt);
 	if (approximate_size == 0)
@@ -176,32 +191,27 @@ brpc_buffer_t *brpc_buffer_new(enum brpc_buffer_type buffer_type, const char *fm
 	for(p = fmt, arg_count = 0; *p; p++, arg_count++) {
 		switch(*p) {
 		case 'i':
-			buffer_fill(b, 0, align_gap(buffer_size(b), ARG_INT32_ALIGN));
-			buffer_make_room(b, ARG_INT32_SIZE);
-			*(int32_t *)buffer_end(b) = va_arg(args, int32_t);
-			((uint16_t *)(buffer_data(b) + ATABLE_OFF))[arg_count] = ATENTRY(ARG_INT32, buffer_size(b));
-			buffer_increment(b, ARG_INT32_SIZE);
+			arg_p = add_arg(b, arg_count, ARG_INT32, ARG_INT32_SIZE, ARG_INT32_ALIGN);
+			*(int32_t *)arg_p = va_arg(args, int32_t);
 			break;
 		case 'l':
-			buffer_fill(b, 0, align_gap(buffer_size(b), ARG_INT64_ALIGN));
-			buffer_make_room(b, ARG_INT64_SIZE);
-			*(int64_t *)buffer_end(b) = va_arg(args, int64_t);
-			((uint16_t *)(buffer_data(b) + ATABLE_OFF))[arg_count] = ATENTRY(ARG_INT64, buffer_size(b));
-			buffer_increment(b, ARG_INT64_SIZE);
+			arg_p = add_arg(b, arg_count, ARG_INT64, ARG_INT64_SIZE, ARG_INT64_ALIGN);
+			*(int64_t *)arg_p = va_arg(args, int64_t);
 			break;
 		case 's':
-			buffer_fill(b, 0, align_gap(buffer_size(b), ARG_STR_ALIGN));
 			s = va_arg(args, const char *);
-			off = buffer_size(b);
-			buffer_append(b, s, strlen(s) + 1);
-			((uint16_t *)(buffer_data(b) + ATABLE_OFF))[arg_count] = ATENTRY(ARG_STR, off);
+			l = strlen(s) + 1;
+			arg_p = add_arg(b, arg_count, ARG_STR, l, ARG_STR_ALIGN);
+			strncpy(arg_p, s, l);
 			break;
 		default:
+			buffer_free(b, 1);
 			return NULL;
 		}
 	}
 	va_end(args);
 
+	*(uint16_t *)buffer_data(b) = buffer_size(b);
 	ret = buffer_data(b);
 	buffer_free(b, 0);
 
@@ -210,6 +220,25 @@ brpc_buffer_t *brpc_buffer_new(enum brpc_buffer_type buffer_type, const char *fm
 
 void brpc_buffer_print(brpc_buffer_t *b)
 {
+	int argc = 0;
+
+	while (ATENTRY_GET_TYPE(b, argc) != ARG_NONE) {
+		size_t off = ATENTRY_GET_OFFSET(b, argc);
+
+		switch(ATENTRY_GET_TYPE(b, argc)) {
+		case ARG_INT32:
+			printf("[%d] 0x%lx %d\n", argc, off, *(int32_t *)(b + off));
+			break;
+		case ARG_INT64:
+			printf("[%d] 0x%lx %ld\n", argc, off, *(int64_t *)(b + off));
+			break;
+		case ARG_STR:
+			printf("[%d] 0x%lx \"%s\"\n", argc, off, (char *)(b + off));
+			break;
+		}
+
+		argc++;
+	}
 }
 
 int main(int argc, char **argv)
@@ -217,6 +246,7 @@ int main(int argc, char **argv)
 	brpc_buffer_t *b;
 
 	b = brpc_buffer_new(REQUEST, "sissi", "foo", 66, "bar", "joe", 99);
+	brpc_buffer_print(b);
 
 	return 0;
 }
