@@ -5,7 +5,7 @@
 
 struct buffer {
 	char *base;
-	char *filled;
+	char *end;
 	char *alloced_end;
 };
 
@@ -21,22 +21,22 @@ void buffer_make_room(struct buffer *b, size_t needed);
 
 static inline int buffer_overflow(struct buffer *b, size_t needed)
 {
-	return b->filled + needed >= b->alloced_end;
+	return b->end + needed >= b->alloced_end;
 }
 
 static inline void buffer_increment(struct buffer *b, size_t size)
 {
-	b->filled += size;
+	b->end += size;
 }
 
 static inline char *buffer_end(struct buffer *b)
 {
-	return b->filled;
+	return b->end;
 }
 
 static inline size_t buffer_size(struct buffer *b)
 {
-	return b->filled - b->base;
+	return b->end - b->base;
 }
 
 static inline char *buffer_data(struct buffer *b)
@@ -46,7 +46,7 @@ static inline char *buffer_data(struct buffer *b)
 
 static inline void buffer_clear(struct buffer *b)
 {
-	b->filled = b->base;
+	b->end = b->base;
 }
 
 void buffer_append(struct buffer *b, const char *data, size_t size);

@@ -11,13 +11,13 @@ void buffer_init(struct buffer *b, size_t initial_size)
 		initial_size = DEFAULT_INITIAL_SIZE;
 
 	b->base = malloc(initial_size);
-	b->filled = b->base;
+	b->end = b->base;
 	b->alloced_end = b->base + initial_size;
 }
 
 void buffer_destroy(struct buffer *b, int free_data)
 {
-	b->filled = NULL;
+	b->end = NULL;
 	b->alloced_end = NULL;
 	if (free_data)
 		free(b->base);
@@ -43,7 +43,7 @@ void buffer_make_room(struct buffer *b, size_t needed)
 {
 	size_t old_size, new_size;
 
-	if (b->filled + needed < b->alloced_end)
+	if (b->end + needed < b->alloced_end)
 		return;
 
 	old_size = b->alloced_end - b->base;
@@ -52,7 +52,7 @@ void buffer_make_room(struct buffer *b, size_t needed)
 		new_size *= 2;
 
 	b->base = realloc(b->base, new_size);
-	b->filled = b->base + old_size;
+	b->end = b->base + old_size;
 	b->alloced_end = b->base + new_size;
 }
 
