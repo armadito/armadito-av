@@ -125,6 +125,7 @@
 #define ATENTRY_MAX_OFFSET           (1 << ATENTRY_OFFSET_BITS)
 
 /* internal functions */
+static void brpc_buffer_set_type(brpc_buffer_t *b, uint8_t type);
 static void brpc_buffer_set_method(brpc_buffer_t *b, uint8_t method);
 static void brpc_buffer_set_id(brpc_buffer_t *b, uint32_t id);
 
@@ -164,7 +165,7 @@ static size_t brpc_buffer_approximate_size(const char *fmt)
 	return size;
 }
 
-static char *add_arg(struct buffer *b, int arg_count, char arg_type, size_t arg_size, size_t arg_alignment)
+static char *add_arg(struct buffer *b, int arg_count, uint8_t arg_type, size_t arg_size, size_t arg_alignment)
 {
 	char *arg_p;
 	size_t arg_offset;
@@ -241,22 +242,62 @@ ret_error:
 	return NULL;
 }
 
+static int check_arg(const brpc_buffer_t *b, uint8_t index, uint8_t arg_type, int *error)
+{
+	if (index >= ATABLE_MAX_ENTRIES) {
+		if (error != NULL)
+			*error = BRPC_ERROR_ARGC_OUT_OF_BOUND;
+		return 1;
+	}
+
+	if (ATENTRY_GET_TYPE(b, index) != arg_type) {
+		if (error != NULL)
+			*error = BRPC_ERROR_INVALID_ARGUMENT_TYPE;
+		return 1;
+	}
+
+	return 0;
+}
+
+
+int32_t brpc_buffer_get_int32(const brpc_buffer_t *b, uint8_t index, int *error)
+{
+	if (check_arg(b, index, ARG_INT32, error))
+		return -1;
+
+	return *(int32_t *)(b + ATENTRY_GET_OFFSET(b, index));
+}
+
+int64_t brpc_buffer_get_int64(const brpc_buffer_t *b, uint8_t index, int *error)
+{
+	if (check_arg(b, index, ARG_INT64, error))
+		return -1;
+
+	return *(int64_t *)(b + ATENTRY_GET_OFFSET(b, index));
+}
+
+char *brpc_buffer_get_str(const brpc_buffer_t *b, uint8_t index, int *error)
+{
+	if (check_arg(b, index, ARG_STR, error))
+		return "";
+
+	return (char *)(b + ATENTRY_GET_OFFSET(b, index));
+}
+
 void brpc_buffer_print(brpc_buffer_t *b)
 {
 	int argc = 0;
 
-	while (ATENTRY_GET_TYPE(b, argc) != ARG_NONE) {
-		size_t off = ATENTRY_GET_OFFSET(b, argc);
-
+	while (argc < ATABLE_MAX_ENTRIES && ATENTRY_GET_TYPE(b, argc) != ARG_NONE) {
 		switch(ATENTRY_GET_TYPE(b, argc)) {
 		case ARG_INT32:
-			printf("[%d] 0x%lx %d\n", argc, off, *(int32_t *)(b + off));
+			printf("[%d] %d\n", argc, brpc_buffer_get_int32(b, argc, NULL));
 			break;
 		case ARG_INT64:
-			printf("[%d] 0x%lx %ld\n", argc, off, *(int64_t *)(b + off));
+			printf("[%d] %ld\n", argc, brpc_buffer_get_int64(b, argc, NULL));
 			break;
 		case ARG_STR:
-			printf("[%d] 0x%lx \"%s\"\n", argc, off, (char *)(b + off));
+			printf("[%d] \"%s\"\n", argc, brpc_buffer_get_str(b, argc, NULL));
 			break;
 		}
 
@@ -272,7 +313,7 @@ int main(int argc, char **argv)
 {
 	brpc_buffer_t *b;
 
-	b = brpc_buffer_new("sissi", "foo", 66, "bar", "joe", 99);
+	b = brpc_buffer_new("sissil", "foo", 66, "bar", "joe", 99, 0xdeadbeeffeedfaceL);
 	assert(b != NULL);
 	brpc_buffer_print(b);
 
