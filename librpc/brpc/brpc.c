@@ -81,16 +81,22 @@
 
 #define BSIZE_OFF                    0
 #define BSIZE_SIZE                   2
+#define BSIZE_ADDR(B)                ((uint16_t *)((B) + BSIZE_OFF))
 #define BTYPE_OFF                    (BSIZE_OFF + BSIZE_SIZE)
 #define BTYPE_SIZE                   1
+#define BTYPE_ADDR(B)                ((char *)((B) + BTYPE_OFF))
 #define METHOD_OFF                   (BTYPE_OFF + BTYPE_SIZE)
 #define METHOD_SIZE                  1
+#define METHOD_ADDR(B)               ((char *)((B) + METHOD_OFF))
 #define ID_OFF                       (METHOD_OFF + METHOD_SIZE)
 #define ID_SIZE                      4
+#define ID_ADDR(B)                   ((uint32_t *)((B) + ID_OFF))
 #define ATABLE_OFF                   (ID_OFF + ID_SIZE)
 #define ATABLE_MAX_ENTRIES           16
 #define ATENTRY_SIZE                 2
 #define ATABLE_SIZE                  (ATABLE_MAX_ENTRIES * ATENTRY_SIZE)
+#define ATABLE_ADDR(B)               ((uint16_t *)((B) + ATABLE_OFF))
+#define ATENTRY_ADDR(B, I)           (ATABLE_ADDR(B) + (I))
 #define ARG_OFF                      (ATABLE_OFF + ATABLE_SIZE)
 
 #define ARG_NONE                     0
@@ -114,8 +120,8 @@
 #define MASK(B)                      (~(~0 << (B)))
 #define GETBITS(V, S, B)             (((V) >> S) & MASK(B))
 #define ATENTRY(TYPE, OFFSET)        ((((OFFSET) & MASK(ATENTRY_OFFSET_BITS)) << ATENTRY_OFFSET_SHIFT) | (((TYPE) & MASK(ATENTRY_TYPE_BITS)) << ATENTRY_TYPE_SHIFT))
-#define ATENTRY_GET_TYPE(B, I)       GETBITS(((uint16_t *)((B) + ATABLE_OFF))[I], ATENTRY_TYPE_SHIFT, ATENTRY_TYPE_BITS)
-#define ATENTRY_GET_OFFSET(B, I)     GETBITS(((uint16_t *)((B) + ATABLE_OFF))[I], ATENTRY_OFFSET_SHIFT, ATENTRY_OFFSET_BITS)
+#define ATENTRY_GET_TYPE(B, I)       GETBITS(*ATENTRY_ADDR(B, I), ATENTRY_TYPE_SHIFT, ATENTRY_TYPE_BITS)
+#define ATENTRY_GET_OFFSET(B, I)     GETBITS(*ATENTRY_ADDR(B, I), ATENTRY_OFFSET_SHIFT, ATENTRY_OFFSET_BITS)
 #define ATENTRY_MAX_OFFSET           (1 << ATENTRY_OFFSET_BITS)
 
 /* internal functions */
@@ -173,11 +179,10 @@ static char *add_arg(struct buffer *b, int arg_count, char arg_type, size_t arg_
 	arg_p = buffer_end(b);
 	buffer_increment(b, arg_size);
 
-	((uint16_t *)(buffer_data(b) + ATABLE_OFF))[arg_count] = ATENTRY(arg_type, arg_offset);
+	*ATENTRY_ADDR(buffer_data(b), arg_count) = ATENTRY(arg_type, arg_offset);
 
 	return arg_p;
 }
-
 
 brpc_buffer_t *brpc_buffer_new(const char *fmt, ...)
 {
@@ -224,7 +229,7 @@ brpc_buffer_t *brpc_buffer_new(const char *fmt, ...)
 	}
 	va_end(args);
 
-	*(uint16_t *)buffer_data(b) = buffer_size(b);
+	*BSIZE_ADDR(buffer_data(b)) = buffer_size(b);
 	ret = buffer_data(b);
 	buffer_free(b, 0);
 
