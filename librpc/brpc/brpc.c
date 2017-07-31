@@ -179,7 +179,7 @@ static char *add_arg(struct buffer *b, int arg_count, char arg_type, size_t arg_
 }
 
 
-brpc_buffer_t *brpc_buffer_new(enum brpc_buffer_type buffer_type, const char *fmt, ...)
+brpc_buffer_t *brpc_buffer_new(const char *fmt, ...)
 {
 	va_list args;
 	struct buffer *b;
@@ -265,11 +265,11 @@ int main(int argc, char **argv)
 {
 	brpc_buffer_t *b;
 
-	b = brpc_buffer_new(REQUEST, "sissi", "foo", 66, "bar", "joe", 99);
+	b = brpc_buffer_new("sissi", "foo", 66, "bar", "joe", 99);
 	assert(b != NULL);
 	brpc_buffer_print(b);
 
-	b = brpc_buffer_new(REQUEST, "zob", "foo", 66, "bar", "joe", 99);
+	b = brpc_buffer_new("zob", "foo", 66, "bar", "joe", 99);
 	assert(b != NULL);
 	brpc_buffer_print(b);
 

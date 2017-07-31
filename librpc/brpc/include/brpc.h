@@ -21,7 +21,7 @@ enum brpc_buffer_type {
 	ERROR,
 };
 
-brpc_buffer_t *brpc_buffer_new(enum brpc_buffer_type buffer_type, const char *fmt, ...);
+brpc_buffer_t *brpc_buffer_new(const char *fmt, ...);
 
 int32_t brpc_buffer_get_int32(const brpc_buffer_t *b, uint8_t index, int *error);
 int64_t brpc_buffer_get_int64(const brpc_buffer_t *b, uint8_t index, int *error);
