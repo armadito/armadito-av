@@ -124,6 +124,18 @@
 #define ATENTRY_GET_OFFSET(B, I)     GETBITS(*ATENTRY_ADDR(B, I), ATENTRY_OFFSET_SHIFT, ATENTRY_OFFSET_BITS)
 #define ATENTRY_MAX_OFFSET           (1 << ATENTRY_OFFSET_BITS)
 
+/*
+   1) compute buffer length by walking through the arguments
+   2) allocate buffer
+   3) fill buffer by walking again through the arguments (make 2 functions taking va_list arguments)
+*/
+enum brpc_buffer_type {
+	REQUEST = 1,
+	NOTIFY,
+	RESPONSE,
+	ERROR,
+};
+
 static size_t align_gap(size_t offset, size_t alignment)
 {
 	return (offset % alignment == 0) ? 0 : alignment - offset % alignment;
@@ -334,4 +346,5 @@ int main(int argc, char **argv)
 
 	return 0;
 }
+
 #endif
