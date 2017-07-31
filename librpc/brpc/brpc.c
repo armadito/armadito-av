@@ -1,6 +1,6 @@
 /*
   compile with:
-  gcc -g -Iinclude/ -o brpc buffer.c brpc.c
+  gcc -g -Iinclude/ -DDO_TEST_DEBUG_MAIN -o brpc buffer.c brpc.c
 */
 
 #include <brpc.h>
@@ -264,6 +264,8 @@ void brpc_buffer_print(brpc_buffer_t *b)
 	}
 }
 
+#ifdef DO_TEST_DEBUG_MAIN
+
 #include <assert.h>
 
 int main(int argc, char **argv)
@@ -280,3 +282,4 @@ int main(int argc, char **argv)
 
 	return 0;
 }
+#endif
