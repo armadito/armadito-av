@@ -107,15 +107,16 @@
 #define ARG_STR_ALIGN                8
 
 #define ATENTRY_BITS                 (ATENTRY_SIZE * 8)
-#define ATENTRY_TYPE_BITS            2
-#define ATENTRY_OFFSET_BITS          (ATENTRY_BITS - ATENTRY_TYPE_BITS)
-#define ATENTRY_TYPE_SHIFT           ATENTRY_OFFSET_BITS
 #define ATENTRY_OFFSET_SHIFT         0
+#define ATENTRY_OFFSET_BITS          14
+#define ATENTRY_TYPE_SHIFT           ATENTRY_OFFSET_BITS
+#define ATENTRY_TYPE_BITS            (ATENTRY_BITS - ATENTRY_OFFSET_BITS)
 #define MASK(B)                      (~(~0 << (B)))
 #define GETBITS(V, S, B)             (((V) >> S) & MASK(B))
 #define ATENTRY(TYPE, OFFSET)        ((((OFFSET) & MASK(ATENTRY_OFFSET_BITS)) << ATENTRY_OFFSET_SHIFT) | (((TYPE) & MASK(ATENTRY_TYPE_BITS)) << ATENTRY_TYPE_SHIFT))
 #define ATENTRY_GET_TYPE(B, I)       GETBITS(((uint16_t *)((B) + ATABLE_OFF))[I], ATENTRY_TYPE_SHIFT, ATENTRY_TYPE_BITS)
 #define ATENTRY_GET_OFFSET(B, I)     GETBITS(((uint16_t *)((B) + ATABLE_OFF))[I], ATENTRY_OFFSET_SHIFT, ATENTRY_OFFSET_BITS)
+#define ATENTRY_MAX_OFFSET           (1 << ATENTRY_OFFSET_BITS)
 
 /* internal functions */
 static void brpc_buffer_set_method(brpc_buffer_t *b, uint8_t method);
@@ -160,12 +161,19 @@ static size_t brpc_buffer_approximate_size(const char *fmt)
 static char *add_arg(struct buffer *b, int arg_count, char arg_type, size_t arg_size, size_t arg_alignment)
 {
 	char *arg_p;
+	size_t arg_offset;
 
 	buffer_fill(b, 0, align_gap(buffer_size(b), arg_alignment));
 	buffer_make_room(b, arg_size);
+
+	arg_offset = buffer_size(b);
+	if (arg_offset >= ATENTRY_MAX_OFFSET)
+		return NULL;
+
 	arg_p = buffer_end(b);
-	((uint16_t *)(buffer_data(b) + ATABLE_OFF))[arg_count] = ATENTRY(arg_type, buffer_size(b));
 	buffer_increment(b, arg_size);
+
+	((uint16_t *)(buffer_data(b) + ATABLE_OFF))[arg_count] = ATENTRY(arg_type, arg_offset);
 
 	return arg_p;
 }
@@ -192,21 +200,26 @@ brpc_buffer_t *brpc_buffer_new(enum brpc_buffer_type buffer_type, const char *fm
 		switch(*p) {
 		case 'i':
 			arg_p = add_arg(b, arg_count, ARG_INT32, ARG_INT32_SIZE, ARG_INT32_ALIGN);
+			if (arg_p == NULL)
+				goto ret_error;
 			*(int32_t *)arg_p = va_arg(args, int32_t);
 			break;
 		case 'l':
 			arg_p = add_arg(b, arg_count, ARG_INT64, ARG_INT64_SIZE, ARG_INT64_ALIGN);
+			if (arg_p == NULL)
+				goto ret_error;
 			*(int64_t *)arg_p = va_arg(args, int64_t);
 			break;
 		case 's':
 			s = va_arg(args, const char *);
 			l = strlen(s) + 1;
 			arg_p = add_arg(b, arg_count, ARG_STR, l, ARG_STR_ALIGN);
+			if (arg_p == NULL)
+				goto ret_error;
 			strncpy(arg_p, s, l);
 			break;
 		default:
-			buffer_free(b, 1);
-			return NULL;
+			goto ret_error;
 		}
 	}
 	va_end(args);
@@ -216,6 +229,11 @@ brpc_buffer_t *brpc_buffer_new(enum brpc_buffer_type buffer_type, const char *fm
 	buffer_free(b, 0);
 
 	return ret;
+
+ret_error:
+	va_end(args);
+	buffer_free(b, 1);
+	return NULL;
 }
 
 void brpc_buffer_print(brpc_buffer_t *b)
@@ -241,11 +259,18 @@ void brpc_buffer_print(brpc_buffer_t *b)
 	}
 }
 
+#include <assert.h>
+
 int main(int argc, char **argv)
 {
 	brpc_buffer_t *b;
 
 	b = brpc_buffer_new(REQUEST, "sissi", "foo", 66, "bar", "joe", 99);
+	assert(b != NULL);
+	brpc_buffer_print(b);
+
+	b = brpc_buffer_new(REQUEST, "zob", "foo", 66, "bar", "joe", 99);
+	assert(b != NULL);
 	brpc_buffer_print(b);
 
 	return 0;
