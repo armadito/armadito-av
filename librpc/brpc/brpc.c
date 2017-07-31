@@ -328,6 +328,40 @@ static void brpc_buffer_set_id(brpc_buffer_t *b, uint32_t id)
 	*ID_ADDR(b) = id;
 }
 
+#define MAPPER_MAX_METHODS 64
+
+struct brpc_mapper {
+	brpc_method_t method_table[MAPPER_MAX_METHODS];
+};
+
+struct brpc_mapper *brpc_mapper_new(void)
+{
+	struct brpc_mapper *m = calloc(1, sizeof(struct brpc_mapper));
+
+	return m;
+}
+
+int brpc_mapper_add(struct brpc_mapper *mapper, uint8_t method, brpc_method_t method_cb)
+{
+	if (method >= MAPPER_MAX_METHODS)
+		return 1;
+
+	if (mapper->method_table[method] != NULL)
+		return 1;
+
+	mapper->method_table[method] = method_cb;
+
+	return 0;
+}
+
+static brpc_method_t brpc_mapper_get(struct brpc_mapper *mapper, uint8_t method)
+{
+	if (method >= MAPPER_MAX_METHODS)
+		return NULL;
+
+	return mapper->method_table[method];
+}
+
 #ifdef DO_TEST_DEBUG_MAIN
 
 #include <assert.h>
