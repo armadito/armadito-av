@@ -10,9 +10,6 @@
 typedef SSIZE_T ssize_t;
 #endif
 
-#define BRPC_ERROR_ARGC_OUT_OF_BOUND       2
-#define BRPC_ERROR_INVALID_ARGUMENT_TYPE   3
-
 typedef char brpc_buffer_t;
 
 brpc_buffer_t *brpc_buffer_new(const char *fmt, ...);
@@ -68,6 +65,9 @@ int brpc_connection_process(struct brpc_connection *conn);
 #define BRPC_EOF                              1
 #define BRPC_ERR_INTERNAL_ERROR               2
 #define BRPC_ERR_METHOD_NOT_FOUND             3
+#define BRPC_ERR_ARGC_OUT_OF_BOUND            4
+#define BRPC_ERR_INVALID_ARGUMENT_TYPE        5
+#define BRPC_ERR_INVALID_BUFFER_TYPE          6
 
 int brpc_notify(struct brpc_connection *conn, uint8_t method, const brpc_buffer_t *params);
 

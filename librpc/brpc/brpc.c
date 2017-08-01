@@ -293,13 +293,13 @@ static int brpc_buffer_check_arg(const brpc_buffer_t *b, uint8_t index, uint8_t 
 {
 	if (index >= ATABLE_MAX_ENTRIES) {
 		if (error != NULL)
-			*error = BRPC_ERROR_ARGC_OUT_OF_BOUND;
+			*error = BRPC_ERR_ARGC_OUT_OF_BOUND;
 		return 1;
 	}
 
 	if (ATENTRY_GET_TYPE(b, index) != arg_type) {
 		if (error != NULL)
-			*error = BRPC_ERROR_INVALID_ARGUMENT_TYPE;
+			*error = BRPC_ERR_INVALID_ARGUMENT_TYPE;
 		return 1;
 	}
 
@@ -517,13 +517,12 @@ static brpc_cb_t brpc_connection_find_callback(struct brpc_connection *conn, uin
 	struct rpc_callback_entry *entry;
 	brpc_cb_t cb = NULL;
 
-	brpc_connection_lock(conn);
-
 	/*
 	   connection must be locked before searching for the callback because hash_table_search may
 	   walk through a hash table that is being modified at the same time by hash_table_insert;
 	   hash_table_insert may realloc the hash table, hence corrupting the memory accessed by hash_table_search
 	*/
+	brpc_connection_lock(conn);
 
 	entry = hash_table_search(conn->response_table, H_INT_TO_POINTER(id));
 
@@ -570,7 +569,7 @@ static int brpc_connection_receive(struct brpc_connection *conn, brpc_buffer_t *
 	n_read = (*conn->read_cb)(b + BSIZE_SIZE, (size_t)(b_size - BSIZE_SIZE), conn->read_cb_data);
 	if (n_read == 0)
 		return BRPC_EOF;
-	else if (n_read != b_size - BSIZE_SIZE)
+	else if (n_read < b_size - BSIZE_SIZE)
 		return BRPC_ERR_INTERNAL_ERROR;
 
 	brpc_buffer_set_size(b, b_size);
@@ -615,14 +614,22 @@ int brpc_connection_process(struct brpc_connection *conn)
 
 	switch(brpc_buffer_get_type(b)) {
 	case REQUEST:
-		return brpc_connection_process_request(conn, b);
+		ret = brpc_connection_process_request(conn, b);
+		break;
 	case RESPONSE:
-		return brpc_connection_process_result(conn, b);
+		ret = brpc_connection_process_result(conn, b);
+		break;
 	case ERROR:
-		return brpc_connection_process_error(conn, b);
+		ret = brpc_connection_process_error(conn, b);
+		break;
+	default:
+		ret = BRPC_ERR_INVALID_BUFFER_TYPE;
+		break;
 	}
 
-	return BRPC_OK;
+	free(b);
+
+	return ret;
 }
 
 int brpc_notify(struct brpc_connection *conn, uint8_t method, const brpc_buffer_t *params)
