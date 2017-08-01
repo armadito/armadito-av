@@ -580,6 +580,7 @@ static int brpc_connection_receive(struct brpc_connection *conn, brpc_buffer_t *
 
 static int brpc_connection_process_request(struct brpc_connection *conn, brpc_buffer_t *b)
 {
+
 	/*
 	  get method via mapper
 	  ret = call method
