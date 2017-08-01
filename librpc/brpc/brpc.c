@@ -4,6 +4,7 @@
 */
 
 #include <brpc.h>
+#include <assert.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -486,6 +487,72 @@ void brpc_connection_free(struct brpc_connection *conn)
 	hash_table_free(conn->response_table);
 	connection_lock_destroy(conn);
 	free(conn);
+}
+
+size_t connection_register_callback(struct brpc_connection *conn, brpc_cb_t cb, void *user_data)
+{
+	size_t id;
+	struct rpc_callback_entry *entry;
+
+	entry = malloc(sizeof(struct rpc_callback_entry));
+	entry->cb = cb;
+	entry->user_data = user_data;
+
+	connection_lock(conn);
+
+	id = conn->current_id;
+
+	conn->current_id++;
+
+	/* insertion should always work??? */
+	if (!hash_table_insert(conn->response_table, H_INT_TO_POINTER(id), entry))
+		free(entry);
+
+	connection_unlock(conn);
+
+	return id;
+}
+
+brpc_cb_t connection_find_callback(struct brpc_connection *conn, size_t id, void **p_user_data)
+{
+	struct rpc_callback_entry *entry;
+	brpc_cb_t cb = NULL;
+
+	entry = hash_table_search(conn->response_table, H_INT_TO_POINTER(id));
+
+	if (entry != NULL) {
+		cb = entry->cb;
+		*p_user_data = entry->user_data;
+		hash_table_remove(conn->response_table, H_INT_TO_POINTER(id));
+	}
+
+	return cb;
+}
+
+static int connection_send(struct brpc_connection *conn, brpc_buffer_t *buff)
+{
+	/* int ret = JRPC_OK; */
+	int ret = 0;
+
+	assert(conn->write_cb != NULL);
+
+	return ret;
+}
+
+static int connection_receive(struct brpc_connection *conn, brpc_buffer_t **buff)
+{
+	ssize_t n_read;
+
+	assert(conn->read_cb != NULL);
+
+	/* n_read = (*conn->read_cb)(buffer, sizeof(buffer), conn->read_cb_data); */
+	/* if (n_read < 0) */
+	/* 	return JRPC_ERR_INTERNAL_ERROR; */
+
+	/* if (n_read == 0) */
+	/* 	return JRPC_EOF; */
+
+	return 0;
 }
 
 #ifdef DO_TEST_DEBUG_MAIN

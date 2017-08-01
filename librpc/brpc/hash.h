@@ -19,16 +19,13 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef LIBJRPC_HASH_H
-#define LIBJRPC_HASH_H
+#ifndef HASH_H
+#define HASH_H
 
 #include <stdint.h>
 
-typedef void (*destroy_cb_t)(void *p);
 typedef size_t (*hash_fun_t)(void *k);
 typedef int (*equal_fun_t)(void *p, void *q);
-
-struct hash_table;
 
 size_t hash_int(void *k);
 int equal_int(void *p, void *q);
@@ -42,6 +39,10 @@ int equal_str(void *p, void *q);
 /* copied from glib */
 #define H_POINTER_TO_INT(p)	((uintptr_t) (p))
 #define H_INT_TO_POINTER(i)	((void *)(uintptr_t)(i))
+
+struct hash_table;
+
+typedef void (*destroy_cb_t)(void *p);
 
 struct hash_table *hash_table_new(hash_fun_t hash_fun, equal_fun_t equal_fun, destroy_cb_t key_destroy_cb, destroy_cb_t value_destroy_cb);
 
