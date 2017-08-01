@@ -60,11 +60,11 @@ void brpc_connection_set_write_cb(struct brpc_connection *conn, brpc_write_cb_t 
 
 void brpc_connection_free(struct brpc_connection *conn);
 
-int brpc_notify(struct brpc_connection *conn, const char *method, const brpc_buffer_t *params);
+int brpc_notify(struct brpc_connection *conn, uint8_t method, const brpc_buffer_t *params);
 
 typedef void (*brpc_cb_t)(const brpc_buffer_t *result, void *user_data);
 
-int brpc_call(struct brpc_connection *conn, const char *method, const brpc_buffer_t *params, brpc_cb_t cb, void *user_data);
+int brpc_call(struct brpc_connection *conn, uint8_t method, const brpc_buffer_t *params, brpc_cb_t cb, void *user_data);
 
 int brpc_process(struct brpc_connection *conn);
 

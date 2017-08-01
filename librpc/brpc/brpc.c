@@ -312,7 +312,6 @@ void brpc_buffer_print(brpc_buffer_t *b)
 	}
 }
 
-/* internal functions */
 static void brpc_buffer_set_type(brpc_buffer_t *b, uint8_t type)
 {
 	*BTYPE_ADDR(b) = type;
