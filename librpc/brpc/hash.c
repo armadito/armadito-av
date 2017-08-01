@@ -97,7 +97,7 @@ size_t hash_str(void *k)
 
 	while (*p) {
 		h = (h << 4) + *p++;
-		if (high = h & 0xF0000000)
+		if ((high = h & 0xF0000000))
 			h ^= high >> 24;
 		h &= ~high;
 	}
