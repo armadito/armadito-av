@@ -44,6 +44,8 @@ int brpc_mapper_add(struct brpc_mapper *mapper, uint8_t method, brpc_method_t me
 */
 struct brpc_connection *brpc_connection_new(struct brpc_mapper *mapper, void *data);
 
+void brpc_connection_free(struct brpc_connection *conn);
+
 void *brpc_connection_get_data(struct brpc_connection *conn);
 
 typedef ssize_t (*brpc_read_cb_t)(void *buffer, size_t size, void *data);
@@ -58,7 +60,7 @@ void brpc_connection_set_write_cb(struct brpc_connection *conn, brpc_write_cb_t 
 
 /* void brpc_connection_set_error_handler(struct brpc_connection *conn, brpc_error_handler_t error_handler); */
 
-void brpc_connection_free(struct brpc_connection *conn);
+int brpc_connection_process(struct brpc_connection *conn);
 
 /* error codes */
 
@@ -72,7 +74,5 @@ int brpc_notify(struct brpc_connection *conn, uint8_t method, const brpc_buffer_
 typedef void (*brpc_cb_t)(const brpc_buffer_t *result, void *user_data);
 
 int brpc_call(struct brpc_connection *conn, uint8_t method, const brpc_buffer_t *params, brpc_cb_t cb, void *user_data);
-
-int brpc_process(struct brpc_connection *conn);
 
 #endif

@@ -212,7 +212,7 @@ static size_t brpc_buffer_approximate_size(const char *fmt)
 	return size;
 }
 
-static char *add_arg(struct buffer *b, int arg_count, uint8_t arg_type, size_t arg_size, size_t arg_alignment)
+static char *brpc_buffer_add_arg(struct buffer *b, int arg_count, uint8_t arg_type, size_t arg_size, size_t arg_alignment)
 {
 	char *arg_p;
 	size_t arg_offset;
@@ -252,13 +252,13 @@ brpc_buffer_t *brpc_buffer_new(const char *fmt, ...)
 	for(p = fmt, arg_count = 0; *p; p++, arg_count++) {
 		switch(*p) {
 		case 'i':
-			arg_p = add_arg(b, arg_count, ARG_INT32, ARG_INT32_SIZE, ARG_INT32_ALIGN);
+			arg_p = brpc_buffer_add_arg(b, arg_count, ARG_INT32, ARG_INT32_SIZE, ARG_INT32_ALIGN);
 			if (arg_p == NULL)
 				goto ret_error;
 			*(int32_t *)arg_p = va_arg(args, int32_t);
 			break;
 		case 'l':
-			arg_p = add_arg(b, arg_count, ARG_INT64, ARG_INT64_SIZE, ARG_INT64_ALIGN);
+			arg_p = brpc_buffer_add_arg(b, arg_count, ARG_INT64, ARG_INT64_SIZE, ARG_INT64_ALIGN);
 			if (arg_p == NULL)
 				goto ret_error;
 			*(int64_t *)arg_p = va_arg(args, int64_t);
@@ -266,7 +266,7 @@ brpc_buffer_t *brpc_buffer_new(const char *fmt, ...)
 		case 's':
 			s = va_arg(args, const char *);
 			l = strlen(s) + 1;
-			arg_p = add_arg(b, arg_count, ARG_STR, l, ARG_STR_ALIGN);
+			arg_p = brpc_buffer_add_arg(b, arg_count, ARG_STR, l, ARG_STR_ALIGN);
 			if (arg_p == NULL)
 				goto ret_error;
 			strncpy(arg_p, s, l);
@@ -289,7 +289,7 @@ ret_error:
 	return NULL;
 }
 
-static int check_arg(const brpc_buffer_t *b, uint8_t index, uint8_t arg_type, int *error)
+static int brpc_buffer_check_arg(const brpc_buffer_t *b, uint8_t index, uint8_t arg_type, int *error)
 {
 	if (index >= ATABLE_MAX_ENTRIES) {
 		if (error != NULL)
@@ -309,7 +309,7 @@ static int check_arg(const brpc_buffer_t *b, uint8_t index, uint8_t arg_type, in
 
 int32_t brpc_buffer_get_int32(const brpc_buffer_t *b, uint8_t index, int *error)
 {
-	if (check_arg(b, index, ARG_INT32, error))
+	if (brpc_buffer_check_arg(b, index, ARG_INT32, error))
 		return -1;
 
 	return *(int32_t *)(b + ATENTRY_GET_OFFSET(b, index));
@@ -317,7 +317,7 @@ int32_t brpc_buffer_get_int32(const brpc_buffer_t *b, uint8_t index, int *error)
 
 int64_t brpc_buffer_get_int64(const brpc_buffer_t *b, uint8_t index, int *error)
 {
-	if (check_arg(b, index, ARG_INT64, error))
+	if (brpc_buffer_check_arg(b, index, ARG_INT64, error))
 		return -1;
 
 	return *(int64_t *)(b + ATENTRY_GET_OFFSET(b, index));
@@ -325,31 +325,10 @@ int64_t brpc_buffer_get_int64(const brpc_buffer_t *b, uint8_t index, int *error)
 
 char *brpc_buffer_get_str(const brpc_buffer_t *b, uint8_t index, int *error)
 {
-	if (check_arg(b, index, ARG_STR, error))
+	if (brpc_buffer_check_arg(b, index, ARG_STR, error))
 		return "";
 
 	return (char *)(b + ATENTRY_GET_OFFSET(b, index));
-}
-
-void brpc_buffer_print(brpc_buffer_t *b)
-{
-	int argc = 0;
-
-	while (argc < ATABLE_MAX_ENTRIES && ATENTRY_GET_TYPE(b, argc) != ARG_NONE) {
-		switch(ATENTRY_GET_TYPE(b, argc)) {
-		case ARG_INT32:
-			printf("[%d] %d\n", argc, brpc_buffer_get_int32(b, argc, NULL));
-			break;
-		case ARG_INT64:
-			printf("[%d] %ld\n", argc, brpc_buffer_get_int64(b, argc, NULL));
-			break;
-		case ARG_STR:
-			printf("[%d] \"%s\"\n", argc, brpc_buffer_get_str(b, argc, NULL));
-			break;
-		}
-
-		argc++;
-	}
 }
 
 #define MAPPER_MAX_METHODS 64
@@ -407,41 +386,41 @@ struct rpc_callback_entry {
 };
 
 #ifdef HAVE_PTHREAD
-static void connection_lock(struct brpc_connection *conn)
+static void brpc_connection_lock(struct brpc_connection *conn)
 {
 	if (pthread_mutex_lock(&conn->connection_mutex))
 		perror("pthread_mutex_lock");
 }
 
-static void connection_unlock(struct brpc_connection *conn)
+static void brpc_connection_unlock(struct brpc_connection *conn)
 {
 	if (pthread_mutex_unlock(&conn->connection_mutex))
 		perror("pthread_mutex_unlock");
 }
 
-static void connection_lock_init(struct brpc_connection *conn)
+static void brpc_connection_lock_init(struct brpc_connection *conn)
 {
 	pthread_mutex_init(&conn->connection_mutex, NULL);
 }
 
-static void connection_lock_destroy(struct brpc_connection *conn)
+static void brpc_connection_lock_destroy(struct brpc_connection *conn)
 {
 	pthread_mutex_destroy(&conn->connection_mutex);
 }
 #else
-static void connection_lock(struct brpc_connection *conn)
+static void brpc_connection_lock(struct brpc_connection *conn)
 {
 }
 
-static void connection_unlock(struct brpc_connection *conn)
+static void brpc_connection_unlock(struct brpc_connection *conn)
 {
 }
 
-static void connection_lock_init(struct brpc_connection *conn)
+static void brpc_connection_lock_init(struct brpc_connection *conn)
 {
 }
 
-static void connection_lock_destroy(struct brpc_connection *conn)
+static void brpc_connection_lock_destroy(struct brpc_connection *conn)
 {
 }
 #endif
@@ -463,9 +442,16 @@ struct brpc_connection *brpc_connection_new(struct brpc_mapper *mapper, void *co
 	conn->connection_data = connection_data;
 	/* conn->error_handler = NULL; */
 
-	connection_lock_init(conn);
+	brpc_connection_lock_init(conn);
 
 	return conn;
+}
+
+void brpc_connection_free(struct brpc_connection *conn)
+{
+	hash_table_free(conn->response_table);
+	brpc_connection_lock_destroy(conn);
+	free(conn);
 }
 
 void *brpc_connection_get_data(struct brpc_connection *conn)
@@ -502,14 +488,7 @@ brpc_error_handler_t brpc_connection_get_error_handler(struct brpc_connection *c
 }
 #endif
 
-void brpc_connection_free(struct brpc_connection *conn)
-{
-	hash_table_free(conn->response_table);
-	connection_lock_destroy(conn);
-	free(conn);
-}
-
-size_t connection_register_callback(struct brpc_connection *conn, brpc_cb_t cb, void *user_data)
+static size_t brpc_connection_register_callback(struct brpc_connection *conn, brpc_cb_t cb, void *user_data)
 {
 	size_t id;
 	struct rpc_callback_entry *entry;
@@ -518,7 +497,7 @@ size_t connection_register_callback(struct brpc_connection *conn, brpc_cb_t cb, 
 	entry->cb = cb;
 	entry->user_data = user_data;
 
-	connection_lock(conn);
+	brpc_connection_lock(conn);
 
 	id = conn->current_id;
 
@@ -528,15 +507,23 @@ size_t connection_register_callback(struct brpc_connection *conn, brpc_cb_t cb, 
 	if (!hash_table_insert(conn->response_table, H_INT_TO_POINTER(id), entry))
 		free(entry);
 
-	connection_unlock(conn);
+	brpc_connection_unlock(conn);
 
 	return id;
 }
 
-brpc_cb_t connection_find_callback(struct brpc_connection *conn, size_t id, void **p_user_data)
+static brpc_cb_t brpc_connection_find_callback(struct brpc_connection *conn, size_t id, void **p_user_data)
 {
 	struct rpc_callback_entry *entry;
 	brpc_cb_t cb = NULL;
+
+	brpc_connection_lock(conn);
+
+	/*
+	   connection must be locked before searching for the callback because hash_table_search may
+	   walk through a hash table that is being modified at the same time by hash_table_insert:
+	   hash_table_insert may realloc the hash table, hence corrupting the memory accessed by hash_table_search
+	*/
 
 	entry = hash_table_search(conn->response_table, H_INT_TO_POINTER(id));
 
@@ -546,24 +533,26 @@ brpc_cb_t connection_find_callback(struct brpc_connection *conn, size_t id, void
 		hash_table_remove(conn->response_table, H_INT_TO_POINTER(id));
 	}
 
+	brpc_connection_unlock(conn);
+
 	return cb;
 }
 
-static int connection_send(struct brpc_connection *conn, brpc_buffer_t *b)
+static int brpc_connection_send(struct brpc_connection *conn, brpc_buffer_t *b)
 {
 	int ret = BRPC_OK;
 
 	assert(conn->write_cb != NULL);
 
-	connection_lock(conn);
+	brpc_connection_lock(conn);
 	if ((*conn->write_cb)(b, brpc_buffer_get_size(b), conn->write_cb_data) < 0)
 		ret = BRPC_ERR_INTERNAL_ERROR;
-	connection_unlock(conn);
+	brpc_connection_unlock(conn);
 
 	return ret;
 }
 
-static int connection_receive(struct brpc_connection *conn, brpc_buffer_t **p_b)
+static int brpc_connection_receive(struct brpc_connection *conn, brpc_buffer_t **p_b)
 {
 	ssize_t n_read;
 	uint16_t b_size;
@@ -590,7 +579,38 @@ static int connection_receive(struct brpc_connection *conn, brpc_buffer_t **p_b)
 	return BRPC_OK;
 }
 
+int brpc_notify(struct brpc_connection *conn, uint8_t method, const brpc_buffer_t *params)
+{
+	return BRPC_OK;
+}
+
+int brpc_call(struct brpc_connection *conn, uint8_t method, const brpc_buffer_t *params, brpc_cb_t cb, void *user_data)
+{
+	return BRPC_OK;
+}
+
 #ifdef DO_TEST_DEBUG_MAIN
+
+void brpc_buffer_print(brpc_buffer_t *b)
+{
+	int argc = 0;
+
+	while (argc < ATABLE_MAX_ENTRIES && ATENTRY_GET_TYPE(b, argc) != ARG_NONE) {
+		switch(ATENTRY_GET_TYPE(b, argc)) {
+		case ARG_INT32:
+			printf("[%d] %d\n", argc, brpc_buffer_get_int32(b, argc, NULL));
+			break;
+		case ARG_INT64:
+			printf("[%d] 0x%lx\n", argc, brpc_buffer_get_int64(b, argc, NULL));
+			break;
+		case ARG_STR:
+			printf("[%d] \"%s\"\n", argc, brpc_buffer_get_str(b, argc, NULL));
+			break;
+		}
+
+		argc++;
+	}
+}
 
 #include <assert.h>
 
@@ -598,7 +618,7 @@ int main(int argc, char **argv)
 {
 	brpc_buffer_t *b;
 
-	b = brpc_buffer_new("sissil", "foo", 66, "bar", "joe", 99, 0xdeadbeeffeedfaceL);
+	b = brpc_buffer_new("sissil", "foo", 66, "bar", "joe", 99, 0xdeadbeefcacafaceL);
 	assert(b != NULL);
 	brpc_buffer_print(b);
 
