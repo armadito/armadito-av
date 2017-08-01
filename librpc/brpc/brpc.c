@@ -521,7 +521,7 @@ static brpc_cb_t brpc_connection_find_callback(struct brpc_connection *conn, siz
 
 	/*
 	   connection must be locked before searching for the callback because hash_table_search may
-	   walk through a hash table that is being modified at the same time by hash_table_insert:
+	   walk through a hash table that is being modified at the same time by hash_table_insert;
 	   hash_table_insert may realloc the hash table, hence corrupting the memory accessed by hash_table_search
 	*/
 
@@ -575,6 +575,41 @@ static int brpc_connection_receive(struct brpc_connection *conn, brpc_buffer_t *
 
 	brpc_buffer_set_size(b, b_size);
 	*p_b = b;
+
+	return BRPC_OK;
+}
+
+static int brpc_connection_process_request(struct brpc_connection *conn, brpc_buffer_t *b)
+{
+	return BRPC_OK;
+}
+
+static int brpc_connection_process_result(struct brpc_connection *conn, brpc_buffer_t *b)
+{
+	return BRPC_OK;
+}
+
+static int brpc_connection_process_error(struct brpc_connection *conn, brpc_buffer_t *b)
+{
+	return BRPC_OK;
+}
+
+int brpc_connection_process(struct brpc_connection *conn)
+{
+	int ret;
+	brpc_buffer_t *b;
+
+	if ((ret = brpc_connection_receive(conn, &b)))
+		return ret;
+
+	switch(brpc_buffer_get_type(b)) {
+	case REQUEST:
+		return brpc_connection_process_request(conn, b);
+	case RESPONSE:
+		return brpc_connection_process_result(conn, b);
+	case ERROR:
+		return brpc_connection_process_error(conn, b);
+	}
 
 	return BRPC_OK;
 }
