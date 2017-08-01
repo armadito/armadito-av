@@ -544,8 +544,10 @@ static int brpc_connection_send(struct brpc_connection *conn, const brpc_buffer_
 	assert(conn->write_cb != NULL);
 
 	brpc_connection_lock(conn);
+
 	if ((*conn->write_cb)(b, brpc_buffer_get_size(b), conn->write_cb_data) < 0)
 		ret = BRPC_ERR_INTERNAL_ERROR;
+
 	brpc_connection_unlock(conn);
 
 	return ret;
@@ -610,8 +612,18 @@ static int brpc_connection_process_request(struct brpc_connection *conn, brpc_bu
 	return BRPC_OK;
 }
 
-static int brpc_connection_process_result(struct brpc_connection *conn, brpc_buffer_t *b)
+static int brpc_connection_process_result(struct brpc_connection *conn, brpc_buffer_t *result)
 {
+	brpc_cb_t cb;
+	void *user_data;
+
+	cb = brpc_connection_find_callback(conn, brpc_buffer_get_id(result), &user_data);
+
+	if (cb == NULL)
+		return BRPC_ERR_INVALID_RESPONSE_ID;
+
+	(*cb)(result, user_data);
+
 	return BRPC_OK;
 }
 

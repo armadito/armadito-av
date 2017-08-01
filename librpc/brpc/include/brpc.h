@@ -25,7 +25,7 @@ char *brpc_buffer_get_str(const brpc_buffer_t *b, uint8_t index, int *error);
 
 struct brpc_connection;
 
-typedef int (*brpc_method_t)(struct brpc_connection *conn, const brpc_buffer_t *params, brpc_buffer_t **res);
+typedef int (*brpc_method_t)(struct brpc_connection *conn, const brpc_buffer_t *params, brpc_buffer_t **result);
 
 struct brpc_mapper;
 
@@ -68,6 +68,7 @@ int brpc_connection_process(struct brpc_connection *conn);
 #define BRPC_ERR_ARGC_OUT_OF_BOUND            4
 #define BRPC_ERR_INVALID_ARGUMENT_TYPE        5
 #define BRPC_ERR_INVALID_BUFFER_TYPE          6
+#define BRPC_ERR_INVALID_RESPONSE_ID          7
 
 int brpc_notify(struct brpc_connection *conn, uint8_t method, brpc_buffer_t *params);
 
