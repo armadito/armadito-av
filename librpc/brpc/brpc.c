@@ -1,6 +1,6 @@
 /*
   compile with:
-  gcc -g -Iinclude/ -DDO_TEST_DEBUG_MAIN -o brpc buffer.c brpc.c
+  gcc -g -Iinclude/ -DDO_TEST_DEBUG_MAIN -o brpc buffer.c hash.c brpc.c
 */
 
 #include <brpc.h>
@@ -8,8 +8,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#ifdef HAVE_PTHREAD
+#include <pthread.h>
+#endif
 
 #include "buffer.h"
+#include "hash.h"
 
 /*
 
@@ -359,6 +363,129 @@ static brpc_method_t brpc_mapper_get(struct brpc_mapper *mapper, uint8_t method)
 		return NULL;
 
 	return mapper->method_table[method];
+}
+
+struct brpc_connection {
+	struct brpc_mapper *mapper;
+	size_t current_id;
+	struct hash_table *response_table;
+	brpc_read_cb_t read_cb;
+	void *read_cb_data;
+	brpc_write_cb_t write_cb;
+	void *write_cb_data;
+	void *connection_data;
+	/* brpc_error_handler_t error_handler; */
+#ifdef HAVE_PTHREAD
+	pthread_mutex_t connection_mutex;
+#endif
+};
+
+struct rpc_callback_entry {
+	brpc_cb_t cb;
+	void *user_data;
+};
+
+#ifdef HAVE_PTHREAD
+static void connection_lock(struct brpc_connection *conn)
+{
+	if (pthread_mutex_lock(&conn->connection_mutex))
+		perror("pthread_mutex_lock");
+}
+
+static void connection_unlock(struct brpc_connection *conn)
+{
+	if (pthread_mutex_unlock(&conn->connection_mutex))
+		perror("pthread_mutex_unlock");
+}
+
+static void connection_lock_init(struct brpc_connection *conn)
+{
+	pthread_mutex_init(&conn->connection_mutex, NULL);
+}
+
+static void connection_lock_destroy(struct brpc_connection *conn)
+{
+	pthread_mutex_destroy(&conn->connection_mutex);
+}
+#else
+static void connection_lock(struct brpc_connection *conn)
+{
+}
+
+static void connection_unlock(struct brpc_connection *conn)
+{
+}
+
+static void connection_lock_init(struct brpc_connection *conn)
+{
+}
+
+static void connection_lock_destroy(struct brpc_connection *conn)
+{
+}
+#endif
+
+struct brpc_connection *brpc_connection_new(struct brpc_mapper *mapper, void *connection_data)
+{
+	struct brpc_connection *conn = malloc(sizeof(struct brpc_connection));
+
+	conn->mapper = mapper;
+
+	conn->current_id = 1L;
+	conn->response_table = hash_table_new(hash_int, equal_int, NULL, (destroy_cb_t)free);
+
+	conn->read_cb = NULL;
+	conn->read_cb_data = NULL;
+	conn->write_cb = NULL;
+	conn->write_cb_data = NULL;
+
+	conn->connection_data = connection_data;
+	/* conn->error_handler = NULL; */
+
+	connection_lock_init(conn);
+
+	return conn;
+}
+
+void *brpc_connection_get_data(struct brpc_connection *conn)
+{
+	return conn->connection_data;
+}
+
+static struct brpc_mapper *connection_get_mapper(struct brpc_connection *conn)
+{
+	return conn->mapper;
+}
+
+void brpc_connection_set_read_cb(struct brpc_connection *conn, brpc_read_cb_t read_cb, void *data)
+{
+	conn->read_cb = read_cb;
+	conn->read_cb_data = data;
+}
+
+void brpc_connection_set_write_cb(struct brpc_connection *conn, brpc_write_cb_t write_cb, void *data)
+{
+	conn->write_cb = write_cb;
+	conn->write_cb_data = data;
+}
+
+#if 0
+void brpc_connection_set_error_handler(struct brpc_connection *conn, brpc_error_handler_t error_handler)
+{
+	conn->error_handler = error_handler;
+}
+
+brpc_error_handler_t brpc_connection_get_error_handler(struct brpc_connection *conn)
+{
+	return conn->error_handler;
+}
+#endif
+
+void brpc_connection_free(struct brpc_connection *conn)
+{
+	hash_table_free(conn->response_table);
+	connection_lock_destroy(conn);
+	free(conn);
 }
 
 #ifdef DO_TEST_DEBUG_MAIN
