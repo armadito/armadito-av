@@ -136,7 +136,7 @@ enum brpc_buffer_type {
 	ERROR,
 };
 
-static uint16_t brpc_buffer_get_size(brpc_buffer_t *b)
+static uint16_t brpc_buffer_get_size(const brpc_buffer_t *b)
 {
 	return *BSIZE_ADDR(b);
 }
@@ -146,7 +146,7 @@ static void brpc_buffer_set_size(brpc_buffer_t *b, uint16_t size)
 	*BSIZE_ADDR(b) = size;
 }
 
-static uint8_t brpc_buffer_get_type(brpc_buffer_t *b)
+static uint8_t brpc_buffer_get_type(const brpc_buffer_t *b)
 {
 	return *BTYPE_ADDR(b);
 }
@@ -156,7 +156,7 @@ static void brpc_buffer_set_type(brpc_buffer_t *b, uint8_t type)
 	*BTYPE_ADDR(b) = type;
 }
 
-static uint8_t brpc_buffer_get_method(brpc_buffer_t *b)
+static uint8_t brpc_buffer_get_method(const brpc_buffer_t *b)
 {
 	return *METHOD_ADDR(b);
 }
@@ -166,7 +166,7 @@ static void brpc_buffer_set_method(brpc_buffer_t *b, uint8_t method)
 	*METHOD_ADDR(b) = method;
 }
 
-static uint32_t brpc_buffer_get_id(brpc_buffer_t *b)
+static uint32_t brpc_buffer_get_id(const brpc_buffer_t *b)
 {
 	return *ID_ADDR(b);
 }
@@ -367,7 +367,7 @@ static brpc_method_t brpc_mapper_get(struct brpc_mapper *mapper, uint8_t method)
 
 struct brpc_connection {
 	struct brpc_mapper *mapper;
-	size_t current_id;
+	uint32_t current_id;
 	struct hash_table *response_table;
 	brpc_read_cb_t read_cb;
 	void *read_cb_data;
@@ -488,9 +488,9 @@ brpc_error_handler_t brpc_connection_get_error_handler(struct brpc_connection *c
 }
 #endif
 
-static size_t brpc_connection_register_callback(struct brpc_connection *conn, brpc_cb_t cb, void *user_data)
+static uint32_t brpc_connection_register_callback(struct brpc_connection *conn, brpc_cb_t cb, void *user_data)
 {
-	size_t id;
+	uint32_t id;
 	struct rpc_callback_entry *entry;
 
 	entry = malloc(sizeof(struct rpc_callback_entry));
@@ -512,7 +512,7 @@ static size_t brpc_connection_register_callback(struct brpc_connection *conn, br
 	return id;
 }
 
-static brpc_cb_t brpc_connection_find_callback(struct brpc_connection *conn, size_t id, void **p_user_data)
+static brpc_cb_t brpc_connection_find_callback(struct brpc_connection *conn, uint32_t id, void **p_user_data)
 {
 	struct rpc_callback_entry *entry;
 	brpc_cb_t cb = NULL;
@@ -538,7 +538,7 @@ static brpc_cb_t brpc_connection_find_callback(struct brpc_connection *conn, siz
 	return cb;
 }
 
-static int brpc_connection_send(struct brpc_connection *conn, brpc_buffer_t *b)
+static int brpc_connection_send(struct brpc_connection *conn, const brpc_buffer_t *b)
 {
 	int ret = BRPC_OK;
 
@@ -581,6 +581,17 @@ static int brpc_connection_receive(struct brpc_connection *conn, brpc_buffer_t *
 
 static int brpc_connection_process_request(struct brpc_connection *conn, brpc_buffer_t *b)
 {
+	/*
+	  get method via mapper
+	  ret = call method
+	  if ret
+	     format error buffer
+	     send it
+	     return
+	  if not a notification
+	     send result
+	 */
+
 	return BRPC_OK;
 }
 
@@ -616,12 +627,17 @@ int brpc_connection_process(struct brpc_connection *conn)
 
 int brpc_notify(struct brpc_connection *conn, uint8_t method, const brpc_buffer_t *params)
 {
-	return BRPC_OK;
+	return brpc_call(conn, method, params, NULL, NULL);
 }
 
 int brpc_call(struct brpc_connection *conn, uint8_t method, const brpc_buffer_t *params, brpc_cb_t cb, void *user_data)
 {
-	return BRPC_OK;
+	uint32_t id = 0;
+
+	if (cb != NULL)
+		id = brpc_connection_register_callback(conn, cb, user_data);
+
+	return brpc_connection_send(conn, params);
 }
 
 #ifdef DO_TEST_DEBUG_MAIN

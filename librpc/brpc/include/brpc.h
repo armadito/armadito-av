@@ -52,7 +52,7 @@ typedef ssize_t (*brpc_read_cb_t)(void *buffer, size_t size, void *data);
 
 void brpc_connection_set_read_cb(struct brpc_connection *conn, brpc_read_cb_t read_cb, void *data);
 
-typedef ssize_t (*brpc_write_cb_t)(void *buffer, size_t size, void *data);
+typedef ssize_t (*brpc_write_cb_t)(const void *buffer, size_t size, void *data);
 
 void brpc_connection_set_write_cb(struct brpc_connection *conn, brpc_write_cb_t write_cb, void *data);
 
