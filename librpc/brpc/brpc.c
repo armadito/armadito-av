@@ -459,7 +459,7 @@ void *brpc_connection_get_data(struct brpc_connection *conn)
 	return conn->connection_data;
 }
 
-static struct brpc_mapper *connection_get_mapper(struct brpc_connection *conn)
+static struct brpc_mapper *brpc_connection_get_mapper(struct brpc_connection *conn)
 {
 	return conn->mapper;
 }
@@ -578,19 +578,34 @@ static int brpc_connection_receive(struct brpc_connection *conn, brpc_buffer_t *
 	return BRPC_OK;
 }
 
-static int brpc_connection_process_request(struct brpc_connection *conn, brpc_buffer_t *b)
+static int brpc_connection_process_request(struct brpc_connection *conn, brpc_buffer_t *params)
 {
+	struct brpc_mapper *mapper;
+	brpc_method_t method_cb = NULL;
+	brpc_buffer_t *result;
+	uint32_t id;
+	int ret, mth_ret;
 
-	/*
-	  get method via mapper
-	  ret = call method
-	  if ret
-	     format error buffer
-	     send it
-	     return
-	  if not a notification
-	     send result
-	 */
+	mapper = brpc_connection_get_mapper(conn);
+	if (mapper != NULL)
+		method_cb = brpc_mapper_get(mapper, brpc_buffer_get_method(params));
+	if (method_cb == NULL) {
+		ret = BRPC_ERR_METHOD_NOT_FOUND;
+		/* connection_send(conn, make_error_obj(ret, "method was not found", NULL, id)); */
+		return BRPC_OK;
+	}
+
+	mth_ret = (*method_cb)(conn, params, &result);
+
+	if (mth_ret) {
+	}
+
+	id = brpc_buffer_get_id(params);
+	if (id != 0) {
+		brpc_buffer_set_type(result, RESPONSE);
+		brpc_buffer_set_id(result, id);
+		/* brpc_connection_send(conn, make_result_obj(result, id)); */
+	}
 
 	return BRPC_OK;
 }
@@ -633,17 +648,21 @@ int brpc_connection_process(struct brpc_connection *conn)
 	return ret;
 }
 
-int brpc_notify(struct brpc_connection *conn, uint8_t method, const brpc_buffer_t *params)
+int brpc_notify(struct brpc_connection *conn, uint8_t method, brpc_buffer_t *params)
 {
 	return brpc_call(conn, method, params, NULL, NULL);
 }
 
-int brpc_call(struct brpc_connection *conn, uint8_t method, const brpc_buffer_t *params, brpc_cb_t cb, void *user_data)
+int brpc_call(struct brpc_connection *conn, uint8_t method, brpc_buffer_t *params, brpc_cb_t cb, void *user_data)
 {
 	uint32_t id = 0;
 
 	if (cb != NULL)
 		id = brpc_connection_register_callback(conn, cb, user_data);
+
+	brpc_buffer_set_type(params, REQUEST);
+	brpc_buffer_set_method(params, method);
+	brpc_buffer_set_id(params, id);
 
 	return brpc_connection_send(conn, params);
 }

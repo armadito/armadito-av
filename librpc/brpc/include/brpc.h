@@ -69,10 +69,10 @@ int brpc_connection_process(struct brpc_connection *conn);
 #define BRPC_ERR_INVALID_ARGUMENT_TYPE        5
 #define BRPC_ERR_INVALID_BUFFER_TYPE          6
 
-int brpc_notify(struct brpc_connection *conn, uint8_t method, const brpc_buffer_t *params);
+int brpc_notify(struct brpc_connection *conn, uint8_t method, brpc_buffer_t *params);
 
 typedef void (*brpc_cb_t)(const brpc_buffer_t *result, void *user_data);
 
-int brpc_call(struct brpc_connection *conn, uint8_t method, const brpc_buffer_t *params, brpc_cb_t cb, void *user_data);
+int brpc_call(struct brpc_connection *conn, uint8_t method, brpc_buffer_t *params, brpc_cb_t cb, void *user_data);
 
 #endif
