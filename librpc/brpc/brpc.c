@@ -549,30 +549,45 @@ brpc_cb_t connection_find_callback(struct brpc_connection *conn, size_t id, void
 	return cb;
 }
 
-static int connection_send(struct brpc_connection *conn, brpc_buffer_t *buff)
+static int connection_send(struct brpc_connection *conn, brpc_buffer_t *b)
 {
-	/* int ret = JRPC_OK; */
-	int ret = 0;
+	int ret = BRPC_OK;
 
 	assert(conn->write_cb != NULL);
+
+	connection_lock(conn);
+	if ((*conn->write_cb)(b, brpc_buffer_get_size(b), conn->write_cb_data) < 0)
+		ret = BRPC_ERR_INTERNAL_ERROR;
+	connection_unlock(conn);
 
 	return ret;
 }
 
-static int connection_receive(struct brpc_connection *conn, brpc_buffer_t **buff)
+static int connection_receive(struct brpc_connection *conn, brpc_buffer_t **p_b)
 {
 	ssize_t n_read;
+	uint16_t b_size;
+	brpc_buffer_t *b;
 
 	assert(conn->read_cb != NULL);
 
-	/* n_read = (*conn->read_cb)(buffer, sizeof(buffer), conn->read_cb_data); */
-	/* if (n_read < 0) */
-	/* 	return JRPC_ERR_INTERNAL_ERROR; */
+	n_read = (*conn->read_cb)(&b_size, BSIZE_SIZE, conn->read_cb_data);
+	if (n_read == 0)
+		return BRPC_EOF;
+	else if (n_read < BSIZE_SIZE)
+		return BRPC_ERR_INTERNAL_ERROR;
 
-	/* if (n_read == 0) */
-	/* 	return JRPC_EOF; */
+	b = malloc((size_t)b_size);
+	n_read = (*conn->read_cb)(b + BSIZE_SIZE, (size_t)(b_size - BSIZE_SIZE), conn->read_cb_data);
+	if (n_read == 0)
+		return BRPC_EOF;
+	else if (n_read != b_size - BSIZE_SIZE)
+		return BRPC_ERR_INTERNAL_ERROR;
 
-	return 0;
+	brpc_buffer_set_size(b, b_size);
+	*p_b = b;
+
+	return BRPC_OK;
 }
 
 #ifdef DO_TEST_DEBUG_MAIN

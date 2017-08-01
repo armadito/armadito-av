@@ -46,11 +46,11 @@ struct brpc_connection *brpc_connection_new(struct brpc_mapper *mapper, void *da
 
 void *brpc_connection_get_data(struct brpc_connection *conn);
 
-typedef ssize_t (*brpc_read_cb_t)(char *buffer, size_t size, void *data);
+typedef ssize_t (*brpc_read_cb_t)(void *buffer, size_t size, void *data);
 
 void brpc_connection_set_read_cb(struct brpc_connection *conn, brpc_read_cb_t read_cb, void *data);
 
-typedef ssize_t (*brpc_write_cb_t)(const char *buffer, size_t size, void *data);
+typedef ssize_t (*brpc_write_cb_t)(void *buffer, size_t size, void *data);
 
 void brpc_connection_set_write_cb(struct brpc_connection *conn, brpc_write_cb_t write_cb, void *data);
 
@@ -59,6 +59,13 @@ void brpc_connection_set_write_cb(struct brpc_connection *conn, brpc_write_cb_t 
 /* void brpc_connection_set_error_handler(struct brpc_connection *conn, brpc_error_handler_t error_handler); */
 
 void brpc_connection_free(struct brpc_connection *conn);
+
+/* error codes */
+
+#define BRPC_OK                               0
+#define BRPC_EOF                              1
+#define BRPC_ERR_INTERNAL_ERROR               2
+#define BRPC_ERR_METHOD_NOT_FOUND             3
 
 int brpc_notify(struct brpc_connection *conn, uint8_t method, const brpc_buffer_t *params);
 
