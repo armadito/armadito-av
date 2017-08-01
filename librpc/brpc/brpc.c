@@ -129,17 +129,52 @@
 #define ATENTRY_GET_OFFSET(B, I)     GETBITS(*ATENTRY_ADDR(B, I), ATENTRY_OFFSET_SHIFT, ATENTRY_OFFSET_BITS)
 #define ATENTRY_MAX_OFFSET           (1 << ATENTRY_OFFSET_BITS)
 
-/*
-   1) compute buffer length by walking through the arguments
-   2) allocate buffer
-   3) fill buffer by walking again through the arguments (make 2 functions taking va_list arguments)
-*/
 enum brpc_buffer_type {
 	REQUEST = 1,
 	NOTIFY,
 	RESPONSE,
 	ERROR,
 };
+
+static uint16_t brpc_buffer_get_size(brpc_buffer_t *b)
+{
+	return *BSIZE_ADDR(b);
+}
+
+static void brpc_buffer_set_size(brpc_buffer_t *b, uint16_t size)
+{
+	*BSIZE_ADDR(b) = size;
+}
+
+static uint8_t brpc_buffer_get_type(brpc_buffer_t *b)
+{
+	return *BTYPE_ADDR(b);
+}
+
+static void brpc_buffer_set_type(brpc_buffer_t *b, uint8_t type)
+{
+	*BTYPE_ADDR(b) = type;
+}
+
+static uint8_t brpc_buffer_get_method(brpc_buffer_t *b)
+{
+	return *METHOD_ADDR(b);
+}
+
+static void brpc_buffer_set_method(brpc_buffer_t *b, uint8_t method)
+{
+	*METHOD_ADDR(b) = method;
+}
+
+static uint32_t brpc_buffer_get_id(brpc_buffer_t *b)
+{
+	return *ID_ADDR(b);
+}
+
+static void brpc_buffer_set_id(brpc_buffer_t *b, uint32_t id)
+{
+	*ID_ADDR(b) = id;
+}
 
 static size_t align_gap(size_t offset, size_t alignment)
 {
@@ -242,7 +277,7 @@ brpc_buffer_t *brpc_buffer_new(const char *fmt, ...)
 	}
 	va_end(args);
 
-	*BSIZE_ADDR(buffer_data(b)) = buffer_size(b);
+	brpc_buffer_set_size(buffer_data(b), buffer_size(b));
 	ret = buffer_data(b);
 	buffer_free(b, 0);
 
@@ -315,21 +350,6 @@ void brpc_buffer_print(brpc_buffer_t *b)
 
 		argc++;
 	}
-}
-
-static void brpc_buffer_set_type(brpc_buffer_t *b, uint8_t type)
-{
-	*BTYPE_ADDR(b) = type;
-}
-
-static void brpc_buffer_set_method(brpc_buffer_t *b, uint8_t method)
-{
-	*METHOD_ADDR(b) = method;
-}
-
-static void brpc_buffer_set_id(brpc_buffer_t *b, uint32_t id)
-{
-	*ID_ADDR(b) = id;
 }
 
 #define MAPPER_MAX_METHODS 64
