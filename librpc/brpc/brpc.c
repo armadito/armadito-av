@@ -250,6 +250,8 @@ brpc_buffer_t *brpc_buffer_new(const char *fmt, ...)
 
 	va_start(args, fmt);
 	for(p = fmt, arg_count = 0; *p; p++, arg_count++) {
+		if (arg_count >= ATABLE_MAX_ENTRIES)
+			goto ret_error;
 		switch(*p) {
 		case 'i':
 			arg_p = brpc_buffer_add_arg(b, arg_count, ARG_INT32, ARG_INT32_SIZE, ARG_INT32_ALIGN);
@@ -605,8 +607,9 @@ static int brpc_connection_process_request(struct brpc_connection *conn, brpc_bu
 	id = brpc_buffer_get_id(params);
 	if (id != 0) {
 		brpc_buffer_set_type(result, RESPONSE);
+		brpc_buffer_set_method(result, 0);
 		brpc_buffer_set_id(result, id);
-		/* brpc_connection_send(conn, make_result_obj(result, id)); */
+		brpc_connection_send(conn, result);
 	}
 
 	return BRPC_OK;
