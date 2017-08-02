@@ -18,10 +18,6 @@ int32_t brpc_buffer_get_int32(const brpc_buffer_t *b, uint8_t index, int *error)
 int64_t brpc_buffer_get_int64(const brpc_buffer_t *b, uint8_t index, int *error);
 char *brpc_buffer_get_str(const brpc_buffer_t *b, uint8_t index, int *error);
 
-int brpc_buffer_add_int32(const brpc_buffer_t *b, int32_t i);
-int brpc_buffer_add_int64(const brpc_buffer_t *b, int64_t l);
-int brpc_buffer_add_str(const brpc_buffer_t *b, const char *s);
-
 /*
  * RPC mapper
  * handles mapping method id (a char) to method definition
