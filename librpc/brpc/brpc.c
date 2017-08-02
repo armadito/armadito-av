@@ -129,12 +129,10 @@
 #define ATENTRY_GET_OFFSET(B, I)     GETBITS(*ATENTRY_ADDR(B, I), ATENTRY_OFFSET_SHIFT, ATENTRY_OFFSET_BITS)
 #define ATENTRY_MAX_OFFSET           (1 << ATENTRY_OFFSET_BITS)
 
-enum brpc_buffer_type {
-	REQUEST = 1,
-	NOTIFY,
-	RESPONSE,
-	ERROR,
-};
+#define BUFFER_TYPE_REQUEST   ((uint8_t)1)
+#define BUFFER_TYPE_NOTIFY    ((uint8_t)2)
+#define BUFFER_TYPE_RESPONSE  ((uint8_t)3)
+#define BUFFER_TYPE_ERROR     ((uint8_t)4)
 
 static uint16_t brpc_buffer_get_size(const brpc_buffer_t *b)
 {
@@ -332,6 +330,48 @@ char *brpc_buffer_get_str(const brpc_buffer_t *b, uint8_t index, int *error)
 
 	return (char *)(b + ATENTRY_GET_OFFSET(b, index));
 }
+
+#ifdef DEBUG
+static const char *brpc_buffer_type_str(uint8_t type)
+{
+	switch(type) {
+#define M(T) case T: return #T
+		M(BUFFER_TYPE_REQUEST);
+		M(BUFFER_TYPE_NOTIFY);
+		M(BUFFER_TYPE_RESPONSE);
+		M(BUFFER_TYPE_ERROR);
+	}
+
+	return "unknown";
+}
+
+void brpc_buffer_print(brpc_buffer_t *b)
+{
+	int argc = 0;
+
+	fprintf(stderr, "Buffer: type %s size %d method %d id %d\n",
+		brpc_buffer_type_str(brpc_buffer_get_type(b)),
+		brpc_buffer_get_size(b),
+		brpc_buffer_get_method(b),
+		brpc_buffer_get_id(b));
+	while (argc < ATABLE_MAX_ENTRIES && ATENTRY_GET_TYPE(b, argc) != ARG_NONE) {
+		switch(ATENTRY_GET_TYPE(b, argc)) {
+		case ARG_INT32:
+			fprintf(stderr, "  [%d] %d\n", argc, brpc_buffer_get_int32(b, argc, NULL));
+			break;
+		case ARG_INT64:
+			fprintf(stderr, "  [%d] 0x%lx\n", argc, brpc_buffer_get_int64(b, argc, NULL));
+			break;
+		case ARG_STR:
+			fprintf(stderr, "  [%d] \"%s\"\n", argc, brpc_buffer_get_str(b, argc, NULL));
+			break;
+		}
+
+		argc++;
+	}
+}
+#endif
+
 
 #define MAPPER_MAX_METHODS 64
 
@@ -606,7 +646,7 @@ static int brpc_connection_process_request(struct brpc_connection *conn, brpc_bu
 
 	id = brpc_buffer_get_id(params);
 	if (id != 0) {
-		brpc_buffer_set_type(result, RESPONSE);
+		brpc_buffer_set_type(result, BUFFER_TYPE_RESPONSE);
 		brpc_buffer_set_method(result, 0);
 		brpc_buffer_set_id(result, id);
 		brpc_connection_send(conn, result);
@@ -643,14 +683,18 @@ int brpc_connection_process(struct brpc_connection *conn)
 	if ((ret = brpc_connection_receive(conn, &b)))
 		return ret;
 
+#ifdef DEBUG
+	brpc_buffer_print(b);
+#endif
+
 	switch(brpc_buffer_get_type(b)) {
-	case REQUEST:
+	case BUFFER_TYPE_REQUEST:
 		ret = brpc_connection_process_request(conn, b);
 		break;
-	case RESPONSE:
+	case BUFFER_TYPE_RESPONSE:
 		ret = brpc_connection_process_result(conn, b);
 		break;
-	case ERROR:
+	case BUFFER_TYPE_ERROR:
 		ret = brpc_connection_process_error(conn, b);
 		break;
 	default:
@@ -675,35 +719,18 @@ int brpc_call(struct brpc_connection *conn, uint8_t method, brpc_buffer_t *param
 	if (cb != NULL)
 		id = brpc_connection_register_callback(conn, cb, user_data);
 
-	brpc_buffer_set_type(params, REQUEST);
+	brpc_buffer_set_type(params, BUFFER_TYPE_REQUEST);
 	brpc_buffer_set_method(params, method);
 	brpc_buffer_set_id(params, id);
+
+#ifdef DEBUG
+	brpc_buffer_print(params);
+#endif
 
 	return brpc_connection_send(conn, params);
 }
 
 #ifdef DO_TEST_DEBUG_MAIN
-
-void brpc_buffer_print(brpc_buffer_t *b)
-{
-	int argc = 0;
-
-	while (argc < ATABLE_MAX_ENTRIES && ATENTRY_GET_TYPE(b, argc) != ARG_NONE) {
-		switch(ATENTRY_GET_TYPE(b, argc)) {
-		case ARG_INT32:
-			printf("[%d] %d\n", argc, brpc_buffer_get_int32(b, argc, NULL));
-			break;
-		case ARG_INT64:
-			printf("[%d] 0x%lx\n", argc, brpc_buffer_get_int64(b, argc, NULL));
-			break;
-		case ARG_STR:
-			printf("[%d] \"%s\"\n", argc, brpc_buffer_get_str(b, argc, NULL));
-			break;
-		}
-
-		argc++;
-	}
-}
 
 #include <assert.h>
 

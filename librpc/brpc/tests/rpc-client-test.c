@@ -1,6 +1,6 @@
 /*
   compile with:
-  gcc -Wall -Wno-unused -g -I../include/ -o rpc-client-test ../buffer.c ../hash.c ../brpc.c unix.c rpc-client-test.c
+  gcc -Wall -Wno-unused -g -I../include/ -DDEBUG -o rpc-client-test ../buffer.c ../hash.c ../brpc.c unix.c rpc-client-test.c
 */
 
 #include <brpc.h>
