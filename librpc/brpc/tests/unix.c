@@ -45,7 +45,7 @@ int unix_server_listen(const char *socket_path)
 	path_len = strlen(socket_path);
 	assert(path_len < UNIX_PATH_MAX);
 
-	if ((fd = socket(AF_UNIX, SOCK_SEQPACKET, 0)) < 0) {
+	if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
 		perror("socket() failed");
 		return -1;
 	}
@@ -92,7 +92,7 @@ int unix_client_connect(const char *socket_path, int max_retry)
 	path_len = strlen(socket_path);
 	assert(path_len < UNIX_PATH_MAX);
 
-	fd = socket( AF_UNIX, SOCK_SEQPACKET, 0);
+	fd = socket( AF_UNIX, SOCK_STREAM, 0);
 	if (fd < 0) {
 		perror("socket() failed");
 		return -1;
@@ -123,9 +123,28 @@ int unix_client_connect(const char *socket_path, int max_retry)
 	return fd;
 }
 
+#define N_PER_LINE 16
+
+static void buffer_dump(FILE *out, const char *name, const char *buffer, size_t size)
+{
+	size_t i;
+
+	for (i = 0; i < size; i++) {
+		if (i % N_PER_LINE == 0)
+			fprintf(out, "%s[%2d] ", name, (int)i);
+		fprintf(out, "%2d ", buffer[i]);
+		if (i % N_PER_LINE == N_PER_LINE - 1)
+			fprintf(out, "\n");
+	}
+	if (i % N_PER_LINE != 0)
+		fprintf(out, "\n");
+}
+
 ssize_t unix_fd_write_cb(const void *buffer, size_t size, void *data)
 {
 	int fd = *(int *)data;
+
+	buffer_dump(stderr, "write", buffer, size);
 
 	return send(fd, buffer, size, MSG_EOR);
 }
@@ -133,6 +152,12 @@ ssize_t unix_fd_write_cb(const void *buffer, size_t size, void *data)
 ssize_t unix_fd_read_cb(void *buffer, size_t size, void *data)
 {
 	int fd = *(int *)data;
+	int ret;
 
-	return recv(fd, buffer, size, 0);
+	ret = recv(fd, buffer, size, 0);
+
+	if (ret > 0)
+		buffer_dump(stderr, "read", buffer, size);
+
+	return ret;
 }
