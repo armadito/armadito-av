@@ -41,9 +41,10 @@ void buffer_free(struct buffer *b, int free_data)
 
 void buffer_make_room(struct buffer *b, size_t needed)
 {
-	size_t old_size, new_size;
+	size_t available, old_size, new_size;
 
-	if (b->end + needed < b->alloced_end)
+	available = b->alloced_end - b->end;
+	if (needed <= available)
 		return;
 
 	old_size = b->alloced_end - b->base;
