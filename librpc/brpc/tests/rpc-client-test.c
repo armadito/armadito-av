@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 
 	/* brpc_connection_set_error_handler(conn, client_error_handler); */
 
-	test_call(conn, METHOD_ADD, 0, 0);
+	test_call(conn, METHOD_ADD, 33, 66);
 	test_call(conn, METHOD_ADD, 58, 11);
 	test_call(conn, METHOD_DIV, 9, 3);
 	test_call(conn, METHOD_DIV, 9, 0);
