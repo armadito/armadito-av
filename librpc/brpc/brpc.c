@@ -599,7 +599,7 @@ static int brpc_connection_send(struct brpc_connection *conn, const brpc_buffer_
 
 static int brpc_connection_receive(struct brpc_connection *conn, brpc_buffer_t **p_b)
 {
-	ssize_t n_read;
+	ssize_t n_read, size_to_read;
 	uint16_t b_size;
 	brpc_buffer_t *b;
 
@@ -612,10 +612,11 @@ static int brpc_connection_receive(struct brpc_connection *conn, brpc_buffer_t *
 		return BRPC_ERR_INTERNAL_ERROR;
 
 	b = malloc((size_t)b_size);
-	n_read = (*conn->read_cb)(b + BSIZE_SIZE, (size_t)(b_size - BSIZE_SIZE), conn->read_cb_data);
+	size_to_read = b_size - BSIZE_SIZE;
+	n_read = (*conn->read_cb)(b + BSIZE_SIZE, size_to_read, conn->read_cb_data);
 	if (n_read == 0)
 		return BRPC_EOF;
-	else if (n_read < b_size - BSIZE_SIZE)
+	else if (n_read < size_to_read)
 		return BRPC_ERR_INTERNAL_ERROR;
 
 	brpc_buffer_set_size(b, b_size);
@@ -624,34 +625,46 @@ static int brpc_connection_receive(struct brpc_connection *conn, brpc_buffer_t *
 	return BRPC_OK;
 }
 
+static brpc_buffer_t *brpc_buffer_new_error(int32_t id, int error_code, const char *error_message)
+{
+	brpc_buffer_t *b;
+
+	b = brpc_buffer_new("is", error_code, error_message);
+	brpc_buffer_set_type(b, BUFFER_TYPE_ERROR);
+	brpc_buffer_set_method(b, 0);
+	brpc_buffer_set_id(b, id);
+
+	return b;
+}
+
 static int brpc_connection_process_request(struct brpc_connection *conn, brpc_buffer_t *params)
 {
-	struct brpc_mapper *mapper;
 	brpc_method_t method_cb = NULL;
-	brpc_buffer_t *result;
-	uint32_t id;
+	brpc_buffer_t *result = NULL;
+	struct brpc_mapper *mapper = brpc_connection_get_mapper(conn);
+	uint32_t id = brpc_buffer_get_id(params);
 	int ret, mth_ret;
 
-	mapper = brpc_connection_get_mapper(conn);
 	if (mapper != NULL)
 		method_cb = brpc_mapper_get(mapper, brpc_buffer_get_method(params));
-	if (method_cb == NULL) {
-		ret = BRPC_ERR_METHOD_NOT_FOUND;
-		/* connection_send(conn, make_error_obj(ret, "method was not found", NULL, id)); */
-		return BRPC_OK;
-	}
+
+	if (method_cb == NULL)
+		return brpc_connection_send(conn, brpc_buffer_new_error(id, BRPC_ERR_METHOD_NOT_FOUND, "method was not found"));
 
 	mth_ret = (*method_cb)(conn, params, &result);
 
-	if (mth_ret) {
-	}
+	if (mth_ret)
+		return brpc_connection_send(conn, brpc_buffer_new_error(id, mth_ret, "method returned an error"));
 
-	id = brpc_buffer_get_id(params);
 	if (id != 0) {
+		if (result == NULL)
+			result = brpc_buffer_new("");
+
 		brpc_buffer_set_type(result, BUFFER_TYPE_RESPONSE);
 		brpc_buffer_set_method(result, 0);
 		brpc_buffer_set_id(result, id);
-		brpc_connection_send(conn, result);
+
+		return brpc_connection_send(conn, result);
 	}
 
 	return BRPC_OK;
