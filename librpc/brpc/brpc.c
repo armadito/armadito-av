@@ -213,9 +213,11 @@ static size_t brpc_buffer_approximate_size(const char *fmt)
 static char *brpc_buffer_add_arg(struct buffer *b, int arg_count, uint8_t arg_type, size_t arg_size, size_t arg_alignment)
 {
 	char *arg_p;
-	size_t arg_offset;
+	size_t gap, arg_offset;
 
-	buffer_fill(b, 0, align_gap(buffer_size(b), arg_alignment));
+	gap = align_gap(buffer_size(b), arg_alignment);
+	if (gap != 0)
+		buffer_fill(b, 0, gap);
 	buffer_make_room(b, arg_size);
 
 	arg_offset = buffer_size(b);
