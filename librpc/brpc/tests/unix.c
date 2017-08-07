@@ -123,11 +123,12 @@ int unix_client_connect(const char *socket_path, int max_retry)
 	return fd;
 }
 
-#define N_PER_LINE 16
-
+#ifdef DEBUG
 static void buffer_dump(FILE *out, const char *name, const char *buffer, size_t size)
 {
 	size_t i;
+
+#define N_PER_LINE 16
 
 	for (i = 0; i < size; i++) {
 		if (i % N_PER_LINE == 0)
@@ -139,12 +140,15 @@ static void buffer_dump(FILE *out, const char *name, const char *buffer, size_t 
 	if (i % N_PER_LINE != 0)
 		fprintf(out, "\n");
 }
+#endif
 
 ssize_t unix_fd_write_cb(const void *buffer, size_t size, void *data)
 {
 	int fd = *(int *)data;
 
+#ifdef DEBUG
 	buffer_dump(stderr, "write", buffer, size);
+#endif
 
 	return send(fd, buffer, size, MSG_EOR);
 }
@@ -156,8 +160,10 @@ ssize_t unix_fd_read_cb(void *buffer, size_t size, void *data)
 
 	ret = recv(fd, buffer, size, 0);
 
+#ifdef DEBUG
 	if (ret > 0)
 		buffer_dump(stderr, "read", buffer, size);
+#endif
 
 	return ret;
 }
