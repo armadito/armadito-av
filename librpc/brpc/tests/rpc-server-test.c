@@ -84,7 +84,7 @@ static void *notify_thread_fun(void *arg)
 	while(1) {
 		if (client_connection == NULL)
 			break;
-		brpc_notify(client_connection, METHOD_DO_NOTIFY, NULL);
+		brpc_notify(client_connection, METHOD_DO_NOTIFY, brpc_buffer_new("s", "hello"));
 		sleep(s);
 	}
 
@@ -168,8 +168,12 @@ int main(int argc, char **argv)
 		brpc_connection_set_read_cb(conn, unix_fd_read_cb, p_client_sock);
 		brpc_connection_set_write_cb(conn, unix_fd_write_cb, p_client_sock);
 
+		client_connection = conn;
+
 		while ((ret = brpc_connection_process(conn)) != BRPC_EOF)
 			;
+
+		client_connection = NULL;
 
 		brpc_connection_free(conn);
 
