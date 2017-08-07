@@ -15,26 +15,22 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void simple_cb(const brpc_buffer_t *result, void *user_data)
+static void simple_cb(const struct brpc_msg *result, void *user_data)
 {
-	fprintf(stderr, "The callback has been called, result is %d\n", brpc_buffer_get_int32(result, 0, NULL));
+	fprintf(stderr, "The callback has been called, result is %d\n", brpc_msg_get_int32(result, 0, NULL));
 }
 
 static int test_call(struct brpc_connection *conn, uint8_t method, int op1, int op2)
 {
-	brpc_buffer_t *params = brpc_buffer_new("ii", op1, op2);
-
-	return brpc_call(conn, method, params, simple_cb, NULL);
+	return brpc_call(conn, method, simple_cb, NULL, "ii", op1, op2);
 }
 
 static int test_notify(struct brpc_connection *conn, const char *whot)
 {
-	brpc_buffer_t *params = brpc_buffer_new("s", whot);
-
-	return brpc_notify(conn, METHOD_NOTIFY_START_STOP, params);
+	return brpc_notify(conn, METHOD_NOTIFY_START_STOP, "s", whot);
 }
 
-static int do_notify_method(struct brpc_connection *conn, const brpc_buffer_t *params, brpc_buffer_t **result)
+static int do_notify_method(struct brpc_connection *conn, const struct brpc_msg *params, struct brpc_msg *result)
 {
 	fprintf(stderr, "I have been notified\n");
 
