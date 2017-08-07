@@ -27,19 +27,11 @@ static int test_call(struct brpc_connection *conn, uint8_t method, int op1, int 
 	return brpc_call(conn, method, params, simple_cb, NULL);
 }
 
-#if 0
 static int test_notify(struct brpc_connection *conn, const char *whot)
 {
-	struct notify_action action;
-	json_t *j_action;
-	int ret;
+	brpc_buffer_t *params = brpc_buffer_new("s", whot);
 
-	action.whot = whot;
-
-	if ((ret = BRPC_STRUCT2JSON(notify_action, &action, &j_action)))
-		return ret;
-
-	return brpc_notify(conn, "notify", j_action);
+	return brpc_notify(conn, METHOD_NOTIFY_START_STOP, params);
 }
 
 static int do_notify_method(struct brpc_connection *conn, const brpc_buffer_t *params, brpc_buffer_t **result)
@@ -48,7 +40,6 @@ static int do_notify_method(struct brpc_connection *conn, const brpc_buffer_t *p
 
 	return BRPC_OK;
 }
-#endif
 
 static void client_error_handler(struct brpc_connection *conn, uint32_t id, int code, const char *message)
 {
@@ -73,7 +64,7 @@ int main(int argc, char **argv)
 	}
 
 	client_mapper = brpc_mapper_new();
-	/* brpc_mapper_add(client_mapper, "do_notify", do_notify_method); */
+	brpc_mapper_add(client_mapper, METHOD_DO_NOTIFY, do_notify_method);
 
 	conn = brpc_connection_new(client_mapper, NULL);
 
@@ -90,10 +81,8 @@ int main(int argc, char **argv)
 	test_call(conn, METHOD_DIV, 9, 0);
 	test_call(conn, METHOD_SQRT, 4761, 0);
 	test_call(conn, METHOD_SQRT, -9, 0);
-#if 0
 	test_notify(conn, "start");
 	test_notify(conn, "foo");
-#endif
 
 	while (brpc_connection_process(conn) != BRPC_EOF)
 		;

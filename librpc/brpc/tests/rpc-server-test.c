@@ -1,9 +1,9 @@
 /*
   compile with:
   - with debug:
-  gcc -Wall -Wno-unused -g -I../include/ -DDEBUG -o rpc-server-test ../buffer.c ../hash.c ../brpc.c unix.c rpc-server-test.c -lm
+  gcc -Wall -Wno-unused -g -I../include/ -DDEBUG -DHAVE_PTHREAD -o rpc-server-test ../buffer.c ../hash.c ../brpc.c unix.c rpc-server-test.c -lm -lpthread
   - without debug:
-  gcc -Wall -Wno-unused -g -I../include/ -o rpc-server-test ../buffer.c ../hash.c ../brpc.c unix.c rpc-server-test.c -lm
+  gcc -Wall -Wno-unused -g -I../include/ -DHAVE_PTHREAD -o rpc-server-test ../buffer.c ../hash.c ../brpc.c unix.c rpc-server-test.c -lm -lpthread
 */
 
 #include <brpc.h>
@@ -72,7 +72,6 @@ static int sqrt_method(struct brpc_connection *conn, const brpc_buffer_t *params
 	return BRPC_OK;
 }
 
-#if 0
 static struct brpc_connection *client_connection;
 
 static pthread_t notify_thread_1;
@@ -85,13 +84,12 @@ static void *notify_thread_fun(void *arg)
 	while(1) {
 		if (client_connection == NULL)
 			break;
-		brpc_notify(client_connection, "do_notify", NULL);
+		brpc_notify(client_connection, METHOD_DO_NOTIFY, NULL);
 		sleep(s);
 	}
 
 	return NULL;
 }
-
 
 static void notify_start(void)
 {
@@ -113,24 +111,19 @@ static void notify_stop(void)
 	fprintf(stderr, "notifications stopped\n");
 }
 
-static int notify_method(struct brpc_connection *conn, brpc_buffer_t *params, brpc_buffer_t **result)
+static int notify_method(struct brpc_connection *conn, const brpc_buffer_t *params, brpc_buffer_t **result)
 {
-	struct notify_action *action;
-	int ret;
+	const char *whot = brpc_buffer_get_str(params, 0, NULL);
 
-	if ((ret = BRPC_JSON2STRUCT(notify_action, params, &action)))
-		return ret;
-
-	if (!strcmp(action->whot, "start"))
+	if (!strcmp(whot, "start"))
 		notify_start();
-	else if (!strcmp(action->whot, "stop"))
+	else if (!strcmp(whot, "stop"))
 		notify_stop();
 	else
 		return ERR_INVALID_ACTION;
 
 	return BRPC_OK;
 }
-#endif
 
 int main(int argc, char **argv)
 {
@@ -148,7 +141,7 @@ int main(int argc, char **argv)
 	brpc_mapper_add(server_mapper, METHOD_ADD, add_method);
 	brpc_mapper_add(server_mapper, METHOD_DIV, div_method);
 	brpc_mapper_add(server_mapper, METHOD_SQRT, sqrt_method);
-	/* brpc_mapper_add(server_mapper, METHOD_NOTIFY, notify_method); */
+	brpc_mapper_add(server_mapper, METHOD_NOTIFY_START_STOP, notify_method);
 
 	/* brpc_mapper_add_error_message(server_mapper, ERR_DIVIDE_BY_ZERO, "divide by zero"); */
 	/* brpc_mapper_add_error_message(server_mapper, ERR_SQRT_OF_NEGATIVE, "square root of negative number"); */
