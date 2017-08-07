@@ -418,7 +418,7 @@ struct brpc_connection {
 	brpc_write_cb_t write_cb;
 	void *write_cb_data;
 	void *connection_data;
-	/* brpc_error_handler_t error_handler; */
+	brpc_error_handler_t error_handler;
 #ifdef HAVE_PTHREAD
 	pthread_mutex_t connection_mutex;
 #endif
@@ -484,7 +484,7 @@ struct brpc_connection *brpc_connection_new(struct brpc_mapper *mapper, void *co
 	conn->write_cb_data = NULL;
 
 	conn->connection_data = connection_data;
-	/* conn->error_handler = NULL; */
+	conn->error_handler = NULL;
 
 	brpc_connection_lock_init(conn);
 
@@ -520,17 +520,15 @@ void brpc_connection_set_write_cb(struct brpc_connection *conn, brpc_write_cb_t 
 	conn->write_cb_data = data;
 }
 
-#if 0
 void brpc_connection_set_error_handler(struct brpc_connection *conn, brpc_error_handler_t error_handler)
 {
 	conn->error_handler = error_handler;
 }
 
-brpc_error_handler_t brpc_connection_get_error_handler(struct brpc_connection *conn)
+static brpc_error_handler_t brpc_connection_get_error_handler(struct brpc_connection *conn)
 {
 	return conn->error_handler;
 }
-#endif
 
 static uint32_t brpc_connection_register_callback(struct brpc_connection *conn, brpc_cb_t cb, void *user_data)
 {
@@ -687,6 +685,23 @@ static int brpc_connection_process_result(struct brpc_connection *conn, brpc_buf
 
 static int brpc_connection_process_error(struct brpc_connection *conn, brpc_buffer_t *b)
 {
+	uint32_t id = brpc_buffer_get_id(b);
+	int error = BRPC_OK;
+	uint32_t code;
+	char *message;
+	brpc_error_handler_t error_handler = brpc_connection_get_error_handler(conn);
+
+	code = brpc_buffer_get_int32(b, 0, &error);
+	if (error)
+		return BRPC_ERR_INVALID_ERROR_BUFFER;
+
+	message = brpc_buffer_get_str(b, 1, &error);
+	if (error)
+		return BRPC_ERR_INVALID_ERROR_BUFFER;
+
+	if (error_handler != NULL)
+		(*error_handler)(conn, id, code, message);
+
 	return BRPC_OK;
 }
 

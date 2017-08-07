@@ -47,15 +47,13 @@ static int do_notify_method(struct brpc_connection *conn, const brpc_buffer_t *p
 }
 #endif
 
-#if 0
-static void client_error_handler(struct brpc_connection *conn, size_t id, int code, const char *message, json_t *data)
+static void client_error_handler(struct brpc_connection *conn, uint32_t id, int code, const char *message)
 {
-	if (BRPC_ERR_IS_METHOD_ERROR(code))
-		code = BRPC_ERR_CODE_TO_METHOD(code);
+	/* if (BRPC_ERR_IS_METHOD_ERROR(code)) */
+	/* 	code = BRPC_ERR_CODE_TO_METHOD(code); */
 
-	fprintf(stderr, "error handler: id %ld code %d message \"%s\"\n", id, code, message);
+	fprintf(stderr, "error handler: id %d code %d message \"%s\"\n", id, code, message);
 }
-#endif
 
 int main(int argc, char **argv)
 {
@@ -82,7 +80,7 @@ int main(int argc, char **argv)
 	brpc_connection_set_read_cb(conn, unix_fd_read_cb, p_client_sock);
 	brpc_connection_set_write_cb(conn, unix_fd_write_cb, p_client_sock);
 
-	/* brpc_connection_set_error_handler(conn, client_error_handler); */
+	brpc_connection_set_error_handler(conn, client_error_handler);
 
 	test_call(conn, METHOD_ADD, 33, 66);
 	test_call(conn, METHOD_ADD, 58, 11);
