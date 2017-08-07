@@ -25,49 +25,49 @@
 #define ERR_SQRT_OF_NEGATIVE  ((unsigned char)2)
 #define ERR_INVALID_ACTION  ((unsigned char)3)
 
-static int add_method(struct brpc_connection *conn, const brpc_buffer_t *params, brpc_buffer_t **result)
+static int add_method(struct brpc_connection *conn, const struct brpc_msg *params, struct brpc_msg *result)
 {
 	int32_t op1, op2, r;
 
-	op1 = brpc_buffer_get_int32(params, 0, NULL);
-	op2 = brpc_buffer_get_int32(params, 1, NULL);
+	op1 = brpc_msg_get_int32(params, 0, NULL);
+	op2 = brpc_msg_get_int32(params, 1, NULL);
 
 	r = op1 + op2;
 
-	*result = brpc_buffer_new("i", r);
+	brpc_msg_add_int32(result, r);
 
 	return BRPC_OK;
 }
 
-static int div_method(struct brpc_connection *conn, const brpc_buffer_t *params, brpc_buffer_t **result)
+static int div_method(struct brpc_connection *conn, const struct brpc_msg *params, struct brpc_msg *result)
 {
 	int32_t op1, op2, r;
 
-	op1 = brpc_buffer_get_int32(params, 0, NULL);
-	op2 = brpc_buffer_get_int32(params, 1, NULL);
+	op1 = brpc_msg_get_int32(params, 0, NULL);
+	op2 = brpc_msg_get_int32(params, 1, NULL);
 
 	if (op2 == 0)
 		return ERR_DIVIDE_BY_ZERO;
 
 	r = op1 / op2;
 
-	*result = brpc_buffer_new("i", r);
+	brpc_msg_add_int32(result, r);
 
 	return BRPC_OK;
 }
 
-static int sqrt_method(struct brpc_connection *conn, const brpc_buffer_t *params, brpc_buffer_t **result)
+static int sqrt_method(struct brpc_connection *conn, const struct brpc_msg *params, struct brpc_msg *result)
 {
 	int32_t op1, r;
 
-	op1 = brpc_buffer_get_int32(params, 0, NULL);
+	op1 = brpc_msg_get_int32(params, 0, NULL);
 
 	if (op1 < 0)
 		return ERR_SQRT_OF_NEGATIVE;
 
 	r = (int32_t)sqrt(op1);
 
-	*result = brpc_buffer_new("i", r);
+	brpc_msg_add_int32(result, r);
 
 	return BRPC_OK;
 }
@@ -84,7 +84,7 @@ static void *notify_thread_fun(void *arg)
 	while(1) {
 		if (client_connection == NULL)
 			break;
-		brpc_notify(client_connection, METHOD_DO_NOTIFY, brpc_buffer_new("s", "hello"));
+		brpc_notify(client_connection, METHOD_DO_NOTIFY, "s", "hello");
 		sleep(s);
 	}
 
@@ -111,9 +111,9 @@ static void notify_stop(void)
 	fprintf(stderr, "notifications stopped\n");
 }
 
-static int notify_method(struct brpc_connection *conn, const brpc_buffer_t *params, brpc_buffer_t **result)
+static int notify_method(struct brpc_connection *conn, const struct brpc_msg *params, struct brpc_msg *result)
 {
-	const char *whot = brpc_buffer_get_str(params, 0, NULL);
+	const char *whot = brpc_msg_get_str(params, 0, NULL);
 
 	if (!strcmp(whot, "start"))
 		notify_start();
