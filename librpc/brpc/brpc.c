@@ -652,7 +652,7 @@ static int brpc_connection_process_request(struct brpc_connection *conn, brpc_bu
 	mth_ret = (*method_cb)(conn, params, &result);
 
 	if (mth_ret)
-		return brpc_connection_send(conn, brpc_buffer_new_error(id, mth_ret, "method returned an error"));
+		return brpc_connection_send(conn, brpc_buffer_new_error(id, BRPC_ERR_METHOD_TO_CODE(mth_ret), "method returned an error"));
 
 	if (id != 0) {
 		if (result == NULL)
@@ -774,7 +774,7 @@ int main(int argc, char **argv)
 
 	b = brpc_buffer_new("zob", "foo", 66, "bar", "joe", 99);
 	assert(b != NULL);
-	brpc_buffer_print(b);
+p	brpc_buffer_print(b);
 
 	return 0;
 }

@@ -10,7 +10,7 @@ typedef SSIZE_T ssize_t;
 #include <sys/types.h>
 #endif
 
-/* error codes */
+/* status and error codes */
 #define BRPC_OK                               0
 #define BRPC_EOF                              1
 #define BRPC_ERR_INTERNAL_ERROR               2
@@ -20,6 +20,12 @@ typedef SSIZE_T ssize_t;
 #define BRPC_ERR_INVALID_BUFFER_TYPE          6
 #define BRPC_ERR_INVALID_RESPONSE_ID          7
 #define BRPC_ERR_INVALID_ERROR_BUFFER         8
+#define BRPC_ERR_METHOD_ERROR                 0x80
+
+#define BRPC_ERR_IS_METHOD_ERROR(C) ((C) & BRPC_ERR_METHOD_ERROR)
+
+#define BRPC_ERR_METHOD_TO_CODE(E) (BRPC_ERR_METHOD_ERROR | ((E) & 0x7f))
+#define BRPC_ERR_CODE_TO_METHOD(C) (~BRPC_ERR_METHOD_ERROR & (C))
 
 typedef char brpc_buffer_t;
 

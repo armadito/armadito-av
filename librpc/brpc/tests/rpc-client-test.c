@@ -43,8 +43,8 @@ static int do_notify_method(struct brpc_connection *conn, const brpc_buffer_t *p
 
 static void client_error_handler(struct brpc_connection *conn, uint32_t id, int code, const char *message)
 {
-	/* if (BRPC_ERR_IS_METHOD_ERROR(code)) */
-	/* 	code = BRPC_ERR_CODE_TO_METHOD(code); */
+	if (BRPC_ERR_IS_METHOD_ERROR(code))
+		code = BRPC_ERR_CODE_TO_METHOD(code);
 
 	fprintf(stderr, "error handler: id %d code %d message \"%s\"\n", id, code, message);
 }
