@@ -1,6 +1,9 @@
 /*
   compile with:
+  - with debug:
   gcc -Wall -Wno-unused -g -I../include/ -DDEBUG -o rpc-server-test ../buffer.c ../hash.c ../brpc.c unix.c rpc-server-test.c -lm
+  - without debug:
+  gcc -Wall -Wno-unused -g -I../include/ -o rpc-server-test ../buffer.c ../hash.c ../brpc.c unix.c rpc-server-test.c -lm
 */
 
 #include <brpc.h>
@@ -63,6 +66,8 @@ static int sqrt_method(struct brpc_connection *conn, const brpc_buffer_t *params
 		return ERR_SQRT_OF_NEGATIVE;
 
 	r = (int32_t)sqrt(op1);
+
+	*result = brpc_buffer_new("i", r);
 
 	return BRPC_OK;
 }

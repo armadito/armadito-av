@@ -1,6 +1,9 @@
 /*
   compile with:
+  - with debug:
   gcc -Wall -Wno-unused -g -I../include/ -DDEBUG -o rpc-client-test ../buffer.c ../hash.c ../brpc.c unix.c rpc-client-test.c
+  - without debug:
+  gcc -Wall -Wno-unused -g -I../include/ -o rpc-client-test ../buffer.c ../hash.c ../brpc.c unix.c rpc-client-test.c
 */
 
 #include <brpc.h>
@@ -82,9 +85,8 @@ int main(int argc, char **argv)
 
 	brpc_connection_set_error_handler(conn, client_error_handler);
 
-	test_call(conn, METHOD_ADD, 33, 66);
 	test_call(conn, METHOD_ADD, 58, 11);
-	test_call(conn, METHOD_DIV, 9, 3);
+	test_call(conn, METHOD_DIV, 207, 3);
 	test_call(conn, METHOD_DIV, 9, 0);
 	test_call(conn, METHOD_SQRT, 4761, 0);
 	test_call(conn, METHOD_SQRT, -9, 0);
