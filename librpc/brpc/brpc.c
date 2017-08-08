@@ -692,12 +692,12 @@ static int brpc_connection_send(struct brpc_connection *conn, const struct brpc_
 
 	assert(conn->write_cb != NULL);
 
-	brpc_connection_lock(conn);
+	/* brpc_connection_lock(conn); */
 
 	if ((*conn->write_cb)(brpc_msg_get_data(msg), brpc_msg_get_size(msg), conn->write_cb_data) < 0)
 		ret = BRPC_ERR_IO_ERROR;
 
-	brpc_connection_unlock(conn);
+	/* brpc_connection_unlock(conn); */
 
 	return ret;
 }
@@ -750,6 +750,8 @@ static int brpc_connection_process_request(struct brpc_connection *conn, struct 
 	struct brpc_mapper *mapper = brpc_connection_get_mapper(conn);
 	uint32_t id = brpc_msg_get_id(params);
 	int ret, mth_ret;
+
+	fprintf(stderr, "processing request %d\n", id);
 
 	if (mapper != NULL)
 		method_cb = brpc_mapper_get(mapper, brpc_msg_get_method(params));
