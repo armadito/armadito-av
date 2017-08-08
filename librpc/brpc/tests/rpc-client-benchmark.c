@@ -145,5 +145,8 @@ int main(int argc, char **argv)
 	if (pthread_join(cb_thread, NULL))
 		perror("pthread_join");
 
+	brpc_connection_free(conn);
+	free(p_client_sock);
+
 	return ret;
 }
