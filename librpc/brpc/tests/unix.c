@@ -133,7 +133,7 @@ static void buffer_dump(FILE *out, const char *name, const char *buffer, size_t 
 	for (i = 0; i < size; i++) {
 		if (i % N_PER_LINE == 0)
 			fprintf(out, "%s[%2d] ", name, (int)i);
-		fprintf(out, "%2d ", buffer[i]);
+		fprintf(out, "%3d ", buffer[i]);
 		if (i % N_PER_LINE == N_PER_LINE - 1)
 			fprintf(out, "\n");
 	}
