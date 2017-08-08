@@ -1,8 +1,3 @@
-/*
-  compile with:
-  gcc -g -Iinclude/ -DDEBUG -DDO_TEST_DEBUG_MAIN -o brpc buffer.c hash.c brpc.c
-*/
-
 #include <brpc.h>
 #include <assert.h>
 #include <stdarg.h>
@@ -907,24 +902,3 @@ int brpc_call(struct brpc_connection *conn, uint8_t method, brpc_cb_t cb, void *
 
 	return ret;
 }
-
-#ifdef DO_TEST_DEBUG_MAIN
-
-#include <assert.h>
-
-int main(int argc, char **argv)
-{
-	struct brpc_msg *b;
-
-	b = brpc_msg_new("sissil", "foo", 66, "bar", "joe", 99, 0xdeadbeefcacafaceL);
-	assert(b != NULL);
-	brpc_msg_print(b);
-
-	b = brpc_msg_new("zob", "foo", 66, "bar", "joe", 99);
-	assert(b != NULL);
-	brpc_msg_print(b);
-
-	return 0;
-}
-
-#endif
