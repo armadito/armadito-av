@@ -227,7 +227,7 @@ static void hash_table_rehash(struct hash_table *ht)
 	size_t j;
 	struct hash_table_entry *old_table;
 
-	fprintf(stderr, "rehashing: %ld keys vs. %ld size\n", ht->key_count, ht->size);
+	/* fprintf(stderr, "rehashing: %ld keys vs. %ld size\n", ht->key_count, ht->size); */
 
 	old_size = ht->size;
 	old_table = ht->table;
@@ -286,8 +286,8 @@ int hash_table_insert(struct hash_table *ht, void *key, void *value)
 	assert(i != ht->size);
 
 	/* TODO: update collision counter instead of printing */
-	if (i != 0)
-		fprintf(stderr, "collision for key %p\n", key);
+	/* if (i != 0) */
+	/* 	fprintf(stderr, "collision for key %p\n", key); */
 
 	if (ht->key_destroy_cb != NULL && ht->table[w].key != NULL)
 		(*ht->key_destroy_cb)(ht->table[w].key);
