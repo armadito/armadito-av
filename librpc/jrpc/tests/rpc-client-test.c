@@ -81,7 +81,11 @@ static int test_call(struct jrpc_connection *conn, const char *method, int op1, 
 
 	operands_free(s_op);
 
-	return jrpc_call(conn, method, j_op, simple_cb, NULL);
+	ret = jrpc_call(conn, method, j_op, simple_cb, NULL);
+
+	json_decref(j_op);
+
+	return ret;
 }
 
 static int test_add(struct jrpc_connection *conn, int count)
@@ -108,7 +112,11 @@ static int test_notify(struct jrpc_connection *conn, const char *whot)
 	if ((ret = JRPC_STRUCT2JSON(notify_action, &action, &j_action)))
 		return ret;
 
-	return jrpc_notify(conn, "notify", j_action);
+	ret = jrpc_notify(conn, "notify", j_action);
+
+	json_decref(j_action);
+
+	return ret;
 }
 
 static int do_notify_method(struct jrpc_connection *conn, json_t *params, json_t **result)
