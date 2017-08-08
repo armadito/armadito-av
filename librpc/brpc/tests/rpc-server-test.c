@@ -179,6 +179,9 @@ int main(int argc, char **argv)
 
 		brpc_connection_free(conn);
 
+		if (close(client_sock) < 0)
+			perror("close");
+
 		fprintf(stderr, "disconnected %s\n", addr.sun_path);
 	}
 
