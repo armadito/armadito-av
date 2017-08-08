@@ -239,6 +239,7 @@ static char *add_arg(struct buffer *b, int arg_count, uint8_t arg_type, size_t a
 	arg_p = buffer_end(b);
 	buffer_increment(b, arg_size);
 
+	*MSIZE_ADDR(buffer_data(b)) = buffer_size(b);
 	*ATENTRY_ADDR(buffer_data(b), arg_count) = ATENTRY(arg_type, arg_offset);
 
 	return arg_p;
@@ -290,7 +291,6 @@ static struct brpc_msg *brpc_msg_vnew(const char *fmt, va_list args)
 		}
 	}
 
-	brpc_msg_set_size(msg, buffer_size(&msg->buffer));
 	return msg;
 
 ret_error:
@@ -387,6 +387,57 @@ char *brpc_msg_get_str(const struct brpc_msg *msg, int index, int *error)
 		return "";
 
 	return (char *)(b + ATENTRY_GET_OFFSET(b, index));
+}
+
+static int count_args(brpc_data_t *b)
+{
+	int i;
+
+	for (i = 0; i < ATABLE_MAX_ENTRIES; i++)
+		if (ATENTRY_GET_TYPE(b, i) == ARG_NONE)
+			break;
+
+	return i;
+}
+
+int brpc_msg_add_int32(struct brpc_msg *msg, int32_t i)
+{
+	int arg_count = count_args(brpc_msg_get_data(msg));
+	char *arg_p = add_arg(&msg->buffer, arg_count, ARG_INT32, ARG_INT32_SIZE, ARG_INT32_ALIGN);
+
+	if (arg_p == NULL)
+		return BRPC_ERR_TOO_MANY_ARGUMENTS;
+
+	*(int32_t *)arg_p = i;
+
+	return BRPC_OK;
+}
+
+int brpc_msg_add_int64(struct brpc_msg *msg, int64_t l)
+{
+	int arg_count = count_args(brpc_msg_get_data(msg));
+	char *arg_p = add_arg(&msg->buffer, arg_count, ARG_INT64, ARG_INT64_SIZE, ARG_INT64_ALIGN);
+
+	if (arg_p == NULL)
+		return BRPC_ERR_TOO_MANY_ARGUMENTS;
+
+	*(int64_t *)arg_p = l;
+
+	return BRPC_OK;
+}
+
+int brpc_msg_add_str(struct brpc_msg *msg, const char *s)
+{
+	int arg_count = count_args(brpc_msg_get_data(msg));
+	size_t l = strlen(s) + 1;
+	char *arg_p = add_arg(&msg->buffer, arg_count, ARG_STR, l, ARG_STR_ALIGN);
+
+	if (arg_p == NULL)
+		return BRPC_ERR_TOO_MANY_ARGUMENTS;
+
+	strncpy(arg_p, s, l);
+
+	return BRPC_OK;
 }
 
 #ifdef DEBUG
