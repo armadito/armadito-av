@@ -1,4 +1,5 @@
 brpc
+*.o
 tests/rpc-client-test
 tests/rpc-server-test
 tests/rpc-client-benchmark
