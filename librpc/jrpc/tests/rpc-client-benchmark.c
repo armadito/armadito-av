@@ -29,6 +29,8 @@ static void simple_cb(json_t *result, void *user_data)
 		fprintf(stderr, "got the answer: %d\n", r);
 		done = 1;
 	}
+
+	operands_free(op);
 }
 
 static int test_call(struct jrpc_connection *conn, const char *method, int op1, int op2)
@@ -43,10 +45,14 @@ static int test_call(struct jrpc_connection *conn, const char *method, int op1, 
 	if ((ret = JRPC_STRUCT2JSON(operands, s_op, &j_op)))
 		return ret;
 
+	operands_free(s_op);
+
 	ret = jrpc_call(conn, method, j_op, simple_cb, NULL);
 
 	if (ret)
 		fprintf(stderr, "call failed: %d\n", ret);
+
+	json_decref(j_op);
 
 	return ret;
 }
