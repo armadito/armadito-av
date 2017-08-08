@@ -516,6 +516,12 @@ static brpc_method_t brpc_mapper_get(struct brpc_mapper *mapper, uint8_t method)
 	return mapper->method_table[method];
 }
 
+enum lock_id {
+	ID_TABLE_LOCK = 0,
+	WRITE_LOCK    = 1,
+	LOCKS,
+};
+
 struct brpc_connection {
 	struct brpc_mapper *mapper;
 	uint32_t current_id;
@@ -527,7 +533,7 @@ struct brpc_connection {
 	void *connection_data;
 	brpc_error_handler_t error_handler;
 #ifdef HAVE_PTHREAD
-	pthread_mutex_t connection_mutex;
+	pthread_mutex_t mutex[LOCKS];
 #endif
 };
 
@@ -537,26 +543,32 @@ struct rpc_callback_entry {
 };
 
 #ifdef HAVE_PTHREAD
-static void brpc_connection_lock(struct brpc_connection *conn)
+static void brpc_connection_lock(struct brpc_connection *conn, enum lock_id id)
 {
-	if (pthread_mutex_lock(&conn->connection_mutex))
+	if (pthread_mutex_lock(&conn->mutex[id]))
 		perror("pthread_mutex_lock");
 }
 
-static void brpc_connection_unlock(struct brpc_connection *conn)
+static void brpc_connection_unlock(struct brpc_connection *conn, enum lock_id id)
 {
-	if (pthread_mutex_unlock(&conn->connection_mutex))
+	if (pthread_mutex_unlock(&conn->mutex[id]))
 		perror("pthread_mutex_unlock");
 }
 
 static void brpc_connection_lock_init(struct brpc_connection *conn)
 {
-	pthread_mutex_init(&conn->connection_mutex, NULL);
+	int i;
+
+	for (i = 0; i < LOCKS; i++)
+		pthread_mutex_init(&conn->mutex[i], NULL);
 }
 
 static void brpc_connection_lock_destroy(struct brpc_connection *conn)
 {
-	pthread_mutex_destroy(&conn->connection_mutex);
+	int i;
+
+	for (i = 0; i < LOCKS; i++)
+		pthread_mutex_destroy(&conn->mutex[i]);
 }
 #else
 static void brpc_connection_lock(struct brpc_connection *conn)
@@ -646,7 +658,7 @@ static uint32_t brpc_connection_register_callback(struct brpc_connection *conn, 
 	entry->cb = cb;
 	entry->user_data = user_data;
 
-	brpc_connection_lock(conn);
+	brpc_connection_lock(conn, ID_TABLE_LOCK);
 
 	id = conn->current_id;
 
@@ -656,7 +668,7 @@ static uint32_t brpc_connection_register_callback(struct brpc_connection *conn, 
 	if (!hash_table_insert(conn->response_table, H_INT_TO_POINTER(id), entry))
 		free(entry);
 
-	brpc_connection_unlock(conn);
+	brpc_connection_unlock(conn, ID_TABLE_LOCK);
 
 	return id;
 }
@@ -671,7 +683,7 @@ static brpc_cb_t brpc_connection_find_callback(struct brpc_connection *conn, uin
 	   walk through a hash table that is being modified at the same time by hash_table_insert;
 	   hash_table_insert may realloc the hash table, hence corrupting the memory accessed by hash_table_search
 	*/
-	brpc_connection_lock(conn);
+	brpc_connection_lock(conn, ID_TABLE_LOCK);
 
 	entry = hash_table_search(conn->response_table, H_INT_TO_POINTER(id));
 
@@ -681,7 +693,7 @@ static brpc_cb_t brpc_connection_find_callback(struct brpc_connection *conn, uin
 		hash_table_remove(conn->response_table, H_INT_TO_POINTER(id));
 	}
 
-	brpc_connection_unlock(conn);
+	brpc_connection_unlock(conn, ID_TABLE_LOCK);
 
 	return cb;
 }
@@ -692,12 +704,12 @@ static int brpc_connection_send(struct brpc_connection *conn, const struct brpc_
 
 	assert(conn->write_cb != NULL);
 
-	/* brpc_connection_lock(conn); */
+	brpc_connection_lock(conn, WRITE_LOCK);
 
 	if ((*conn->write_cb)(brpc_msg_get_data(msg), brpc_msg_get_size(msg), conn->write_cb_data) < 0)
 		ret = BRPC_ERR_IO_ERROR;
 
-	/* brpc_connection_unlock(conn); */
+	brpc_connection_unlock(conn, WRITE_LOCK);
 
 	return ret;
 }
@@ -750,8 +762,6 @@ static int brpc_connection_process_request(struct brpc_connection *conn, struct 
 	struct brpc_mapper *mapper = brpc_connection_get_mapper(conn);
 	uint32_t id = brpc_msg_get_id(params);
 	int ret, mth_ret;
-
-	fprintf(stderr, "processing request %d\n", id);
 
 	if (mapper != NULL)
 		method_cb = brpc_mapper_get(mapper, brpc_msg_get_method(params));
