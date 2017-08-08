@@ -17,23 +17,34 @@
 #include <pthread.h>
 
 static int done = 0;
+static int32_t r;
 
 static void simple_cb(const struct brpc_msg *result, void *user_data)
 {
-	int32_t r = brpc_msg_get_int32(result, 0, NULL);
+	r = brpc_msg_get_int32(result, 0, NULL);
 
-	if (r == 42)
+	if (r == 42) {
+		fprintf(stderr, "got the answer: %d\n", r);
 		done = 1;
+	}
 }
 
 static int test_call(struct brpc_connection *conn, uint8_t method, int op1, int op2)
 {
 	int ret = brpc_call(conn, method, simple_cb, NULL, "ii", op1, op2);
 
-	if (ret) {
+	if (ret)
 		fprintf(stderr, "call failed: %d\n", ret);
-		return ret;
-	}
+
+	return BRPC_OK;
+}
+
+static int test_notify(struct brpc_connection *conn, uint8_t method, int op1, int op2)
+{
+	int ret = brpc_notify(conn, method, "ii", op1, op2);
+
+	if (ret)
+		fprintf(stderr, "notify failed: %d\n", ret);
 
 	return BRPC_OK;
 }
@@ -42,8 +53,18 @@ static void *cb_thread_fun(void *arg)
 {
 	struct brpc_connection *conn = (struct brpc_connection *)arg;
 
-	while (brpc_connection_process(conn) != BRPC_EOF && !done)
-		;
+	while (!done) {
+		int ret = brpc_connection_process(conn);
+
+		if (ret == BRPC_EOF)
+			break;
+		if (ret != BRPC_OK) {
+			fprintf(stderr, "brpc_connection_process returned %d\n", ret);
+			return NULL;
+		}
+	}
+
+	fprintf(stderr, "thread exiting: done %d\n", done);
 
 	return NULL;
 }
@@ -82,6 +103,7 @@ int main(int argc, char **argv)
 	int *p_client_sock;
 	pthread_t cb_thread;
 	size_t count;
+	int ret;
 
 	count = get_from_arg(argc, argv);
 
@@ -106,14 +128,22 @@ int main(int argc, char **argv)
 		perror("pthread_create");
 
 	while (count--) {
-		if (test_call(conn, METHOD_ADD, 58, 11))
+		fprintf(stderr, "call %ld\n", count);
+		ret = test_call(conn, METHOD_ADD, 58, 11);
+		if (ret)
 			break;
 	}
 
-	test_call(conn, METHOD_ADD, 21, 21);
+	if (!ret)
+		ret = test_call(conn, METHOD_ADD, 21, 21);
+
+	fprintf(stderr, "trying to join thread 0x%lx\n", cb_thread);
+
+	/* if (pthread_cancel(cb_thread)) */
+	/* 	perror("pthread_cancel"); */
 
 	if (pthread_join(cb_thread, NULL))
 		perror("pthread_join");
 
-	return 0;
+	return ret;
 }
