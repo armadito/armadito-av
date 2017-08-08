@@ -128,7 +128,7 @@ int main(int argc, char **argv)
 		perror("pthread_create");
 
 	while (count--) {
-		fprintf(stderr, "call %ld\n", count);
+		/* fprintf(stderr, "call %ld\n", count); */
 		ret = test_call(conn, METHOD_ADD, 58, 11);
 		if (ret)
 			break;
