@@ -150,7 +150,8 @@ ssize_t unix_fd_write_cb(const void *buffer, size_t size, void *data)
 	buffer_dump(stderr, "write", buffer, size);
 #endif
 
-	return send(fd, buffer, size, MSG_EOR);
+	/* return send(fd, buffer, size, MSG_EOR); */
+	return send(fd, buffer, size, MSG_NOSIGNAL);
 }
 
 ssize_t unix_fd_read_cb(void *buffer, size_t size, void *data)
