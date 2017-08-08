@@ -155,8 +155,10 @@ int main(int argc, char **argv)
 		socklen_t addr_len = sizeof(addr);
 
 		memset(&addr, 0, addr_len);
-		if ((client_sock = accept(listen_sock, (struct sockaddr *)&addr, &addr_len)) < 0)
+		if ((client_sock = accept(listen_sock, (struct sockaddr *)&addr, &addr_len)) < 0) {
+			perror("accept");
 			exit(EXIT_FAILURE);
+		}
 
 		fprintf(stderr, "got connection from %s\n", addr.sun_path);
 
