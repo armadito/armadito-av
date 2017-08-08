@@ -242,7 +242,7 @@ static char *add_arg(struct buffer *b, int arg_count, uint8_t arg_type, size_t a
 	return arg_p;
 }
 
-static struct brpc_msg *brpc_msg_vnew(const char *fmt, va_list args)
+static struct brpc_msg *brpc_msg_vnew(uint8_t msg_type, const char *fmt, va_list args)
 {
 	struct brpc_msg *msg;
 	const char *p, *s;
@@ -256,6 +256,8 @@ static struct brpc_msg *brpc_msg_vnew(const char *fmt, va_list args)
 	msg = malloc(sizeof(struct brpc_msg));
 	buffer_init(&msg->buffer, asize);
 	buffer_fill(&msg->buffer, 0, ARG_OFF);
+
+	brpc_msg_set_type(msg, msg_type);
 
 	if (fmt != NULL) {
 		for(p = fmt, arg_count = 0; *p; p++, arg_count++) {
@@ -291,18 +293,18 @@ static struct brpc_msg *brpc_msg_vnew(const char *fmt, va_list args)
 	return msg;
 
 ret_error:
-	buffer_free(&msg->buffer, 1);
+	buffer_destroy(&msg->buffer, 1);
 	free(msg);
 	return NULL;
 }
 
-static struct brpc_msg *brpc_msg_new(const char *fmt, ...)
+static struct brpc_msg *brpc_msg_new(uint8_t msg_type, const char *fmt, ...)
 {
 	va_list args;
 	struct brpc_msg *ret;
 
 	va_start(args, fmt);
-	ret = brpc_msg_vnew(fmt, args);
+	ret = brpc_msg_vnew(msg_type, fmt, args);
 	va_end(args);
 
 	return ret;
@@ -316,6 +318,12 @@ static struct brpc_msg *brpc_msg_new_with_size(size_t initial_size)
 	buffer_init(&msg->buffer, initial_size);
 
 	return msg;
+}
+
+static void brpc_msg_free(struct brpc_msg *msg)
+{
+	buffer_destroy(&msg->buffer, 1);
+	free(msg);
 }
 
 static int check_arg(brpc_data_t *b, int index, uint8_t arg_type, int *error)
@@ -478,7 +486,6 @@ void brpc_msg_print(struct brpc_msg *msg)
 }
 #endif
 
-
 #define MAPPER_MAX_METHODS 64
 
 struct brpc_mapper {
@@ -552,7 +559,7 @@ static void lock_acquire(brpc_lock_t *lock)
 	DWORD dwWaitResult;
 
 	dwWaitResult = WaitForSingleObject(
-		*lock,    // handle to mutex
+		*lock,      // handle to mutex
 		INFINITE);  // no time-out interval
 }
 
@@ -705,7 +712,7 @@ static brpc_cb_t brpc_connection_find_callback(struct brpc_connection *conn, uin
 	return cb;
 }
 
-static int brpc_connection_send(struct brpc_connection *conn, const struct brpc_msg *msg)
+static int brpc_connection_send_and_free(struct brpc_connection *conn, struct brpc_msg *msg)
 {
 	int ret = BRPC_OK;
 
@@ -717,6 +724,8 @@ static int brpc_connection_send(struct brpc_connection *conn, const struct brpc_
 		ret = BRPC_ERR_IO_ERROR;
 
 	lock_release(&conn->write_lock);
+
+	brpc_msg_free(msg);
 
 	return ret;
 }
@@ -750,44 +759,38 @@ static int brpc_connection_receive(struct brpc_connection *conn, struct brpc_msg
 	return BRPC_OK;
 }
 
-static struct brpc_msg *brpc_msg_new_error(int32_t id, int error_code, const char *error_message)
-{
-	struct brpc_msg *b;
-
-	b = brpc_msg_new("is", error_code, error_message);
-	brpc_msg_set_type(b, MESSAGE_TYPE_ERROR);
-	brpc_msg_set_method(b, 0);
-	brpc_msg_set_id(b, id);
-
-	return b;
-}
-
 static int brpc_connection_process_request(struct brpc_connection *conn, struct brpc_msg *params)
 {
 	brpc_method_t method_cb = NULL;
 	struct brpc_msg *result;
 	struct brpc_mapper *mapper = brpc_connection_get_mapper(conn);
 	uint32_t id = brpc_msg_get_id(params);
-	int ret, mth_ret;
+	int mth_ret;
 
 	if (mapper != NULL)
 		method_cb = brpc_mapper_get(mapper, brpc_msg_get_method(params));
 
-	if (method_cb == NULL)
-		return brpc_connection_send(conn, brpc_msg_new_error(id, BRPC_ERR_METHOD_NOT_FOUND, "method was not found"));
+	if (method_cb == NULL) {
+		result = brpc_msg_new(MESSAGE_TYPE_ERROR, "is", BRPC_ERR_METHOD_NOT_FOUND, "method was not found");
 
-	result = brpc_msg_new(NULL);
+		return brpc_connection_send_and_free(conn, result);
+	}
+
+	result = brpc_msg_new(MESSAGE_TYPE_RESPONSE, NULL);
 	mth_ret = (*method_cb)(conn, params, result);
 
-	if (mth_ret)
-		return brpc_connection_send(conn, brpc_msg_new_error(id, BRPC_ERR_METHOD_TO_CODE(mth_ret), "method returned an error"));
+	if (mth_ret) {
+		brpc_msg_free(result);
 
-	if (id != 0) {
-		brpc_msg_set_type(result, MESSAGE_TYPE_RESPONSE);
-		brpc_msg_set_method(result, 0);
+		result = brpc_msg_new(MESSAGE_TYPE_ERROR, "is", BRPC_ERR_METHOD_TO_CODE(mth_ret), "method returned an error");
 		brpc_msg_set_id(result, id);
 
-		return brpc_connection_send(conn, result);
+		return brpc_connection_send_and_free(conn, result);
+	}
+	else if (id != 0) {
+		brpc_msg_set_id(result, id);
+
+		return brpc_connection_send_and_free(conn, result);
 	}
 
 	return BRPC_OK;
@@ -857,7 +860,7 @@ int brpc_connection_process(struct brpc_connection *conn)
 		break;
 	}
 
-	free(b);
+	brpc_msg_free(b);
 
 	return ret;
 }
@@ -865,13 +868,12 @@ int brpc_connection_process(struct brpc_connection *conn)
 static int brpc_vcall(struct brpc_connection *conn, uint8_t method, brpc_cb_t cb, void *user_data, const char *fmt, va_list args)
 {
 	uint32_t id = 0;
-	struct brpc_msg *params = brpc_msg_vnew(fmt, args);
+	struct brpc_msg *params = brpc_msg_vnew(MESSAGE_TYPE_REQUEST, fmt, args);
 	int ret;
 
 	if (cb != NULL)
 		id = brpc_connection_register_callback(conn, cb, user_data);
 
-	brpc_msg_set_type(params, MESSAGE_TYPE_REQUEST);
 	brpc_msg_set_method(params, method);
 	brpc_msg_set_id(params, id);
 
@@ -879,9 +881,7 @@ static int brpc_vcall(struct brpc_connection *conn, uint8_t method, brpc_cb_t cb
 	brpc_msg_print(params);
 #endif
 
-	ret = brpc_connection_send(conn, params);
-
-	return ret;
+	return brpc_connection_send_and_free(conn, params);
 }
 
 int brpc_notify(struct brpc_connection *conn, uint8_t method, const char *fmt, ...)
