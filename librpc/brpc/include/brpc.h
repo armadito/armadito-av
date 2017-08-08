@@ -17,9 +17,10 @@ typedef SSIZE_T ssize_t;
 #define BRPC_ERR_METHOD_NOT_FOUND             3      /* the invoked method (either call or notify) does not exist */
 #define BRPC_ERR_ARGC_OUT_OF_BOUND            4      /* when retrieving argument by index, index is greater than effective # of arguments */
 #define BRPC_ERR_ARGUMENT_TYPE_MISMATCH       5      /* when retrieving argument by index, wanted argument type does not match type in the message */
-#define BRPC_ERR_INVALID_MESSAGE_TYPE         6      /* the message type is neither request, response or error */
-#define BRPC_ERR_INVALID_RESPONSE_ID          7      /* the id of the response is not registered */
-#define BRPC_ERR_INVALID_ERROR_MESSAGE        8      /* the error message does not contain an int32 (code) and a str (message) */
+#define BRPC_ERR_TOO_MANY_ARGUMENTS           6      /* when retrieving argument by index, index is greater than effective # of arguments */
+#define BRPC_ERR_INVALID_MESSAGE_TYPE         7      /* the message type is neither request, response or error */
+#define BRPC_ERR_INVALID_RESPONSE_ID          8      /* the id of the response is not registered */
+#define BRPC_ERR_INVALID_ERROR_MESSAGE        9      /* the error message does not contain an int32 (code) and a str (message) */
 #define BRPC_ERR_METHOD_ERROR                 0x80   /* mask for method specific error code */
 
 #define BRPC_ERR_IS_METHOD_ERROR(C) ((C) & BRPC_ERR_METHOD_ERROR)
