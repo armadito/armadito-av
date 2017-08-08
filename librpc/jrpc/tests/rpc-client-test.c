@@ -63,6 +63,8 @@ static void simple_cb(json_t *result, void *user_data)
 		return;
 
 	fprintf(stderr, "The callback has been called, result is %d\n", op->i_result);
+
+	operands_free(op);
 }
 
 static int test_call(struct jrpc_connection *conn, const char *method, int op1, int op2)
@@ -76,6 +78,8 @@ static int test_call(struct jrpc_connection *conn, const char *method, int op1, 
 
 	if ((ret = JRPC_STRUCT2JSON(operands, s_op, &j_op)))
 		return ret;
+
+	operands_free(s_op);
 
 	return jrpc_call(conn, method, j_op, simple_cb, NULL);
 }

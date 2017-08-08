@@ -4,6 +4,7 @@ AUTOMAKE_OPTIONS=subdir-objects
 
 check_PROGRAMS= \
 rpc-client-test \
+rpc-client-benchmark \
 rpc-server-test
 
 LDFLAGS=$(PTHREAD_CFLAGS) $(COVERAGE_LDFLAGS)
@@ -17,9 +18,12 @@ test-marshall.h \
 unix.c \
 unix.h
 
-
 rpc_client_test_SOURCES= \
 rpc-client-test.c \
+$(COMMON_SOURCES)
+
+rpc_client_benchmark_SOURCES= \
+rpc-client-benchmark.c \
 $(COMMON_SOURCES)
 
 rpc_server_test_SOURCES= \

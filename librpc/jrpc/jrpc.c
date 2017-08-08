@@ -200,10 +200,12 @@ static int connection_process_request(struct jrpc_connection *conn, struct rpc_o
 	if (method_cb == NULL) {
 		ret = JRPC_ERR_METHOD_NOT_FOUND;
 		connection_send(conn, make_error_obj(ret, "method was not found", NULL, id));
+		free((void *)method);
 		return ret;
 	}
 
 	mth_ret = (*method_cb)(conn, params, &result);
+	free((void *)method);
 
 	if (mth_ret) {
 		const char *error_message;
