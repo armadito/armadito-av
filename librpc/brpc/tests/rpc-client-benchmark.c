@@ -16,27 +16,23 @@
 #include <string.h>
 #include <pthread.h>
 
-static size_t call_countdown;
-static int32_t r;
+static int done = 0;
 
 static void simple_cb(const struct brpc_msg *result, void *user_data)
 {
-	r = brpc_msg_get_int32(result, 0, NULL);
+	int32_t r = brpc_msg_get_int32(result, 0, NULL);
 
-	call_countdown--;
+	if (r == 42)
+		done = 1;
 }
 
-static int test_call(struct brpc_connection *conn, uint8_t method, int op1, int op2, size_t count)
+static int test_call(struct brpc_connection *conn, uint8_t method, int op1, int op2)
 {
-	size_t i;
+	int ret = brpc_call(conn, method, simple_cb, NULL, "ii", op1, op2);
 
-	for (i = 0; i < count; i++) {
-		int ret = brpc_call(conn, method, simple_cb, NULL, "ii", op1, op2);
-
-		if (ret) {
-			fprintf(stderr, "call failed: %d\n", ret);
-			return ret;
-		}
+	if (ret) {
+		fprintf(stderr, "call failed: %d\n", ret);
+		return ret;
 	}
 
 	return BRPC_OK;
@@ -46,7 +42,7 @@ static void *cb_thread_fun(void *arg)
 {
 	struct brpc_connection *conn = (struct brpc_connection *)arg;
 
-	while (brpc_connection_process(conn) != BRPC_EOF && call_countdown > 0)
+	while (brpc_connection_process(conn) != BRPC_EOF && !done)
 		;
 
 	return NULL;
@@ -106,17 +102,18 @@ int main(int argc, char **argv)
 
 	brpc_connection_set_error_handler(conn, client_error_handler);
 
-	call_countdown = count;
-
 	if (pthread_create(&cb_thread, NULL, cb_thread_fun, conn))
 		perror("pthread_create");
 
-	test_call(conn, METHOD_ADD, 58, 11, count);
+	while (count--) {
+		if (test_call(conn, METHOD_ADD, 58, 11))
+			break;
+	}
+
+	test_call(conn, METHOD_ADD, 21, 21);
 
 	if (pthread_join(cb_thread, NULL))
 		perror("pthread_join");
-
-	printf("the result is: %d\n", r);
 
 	return 0;
 }
