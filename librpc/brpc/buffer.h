@@ -39,7 +39,7 @@ static inline size_t buffer_size(const struct buffer *b)
 	return b->end - b->base;
 }
 
-static inline char *buffer_data(const struct buffer *b)
+static inline void *buffer_data(const struct buffer *b)
 {
 	return b->base;
 }

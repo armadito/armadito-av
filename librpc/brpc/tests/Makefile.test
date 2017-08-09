@@ -1,10 +1,10 @@
-BINS=rpc-server-test rpc-client-test rpc-client-benchmark
-CFLAGS=-Wall -Wno-unused -I../include/ -DHAVE_PTHREAD
+BINS=rpc-server-test rpc-client-test rpc-client-benchmark ptrarray-test
+CFLAGS=-Wall -Wno-unused -I../include/ -I.. -DHAVE_PTHREAD
 ifdef debug
 CFLAGS+=-g -DDEBUG
 endif
 LDLIBS=-lm -lpthread 
-OBJS=../buffer.o ../hash.o ../brpc.o unix.o
+OBJS=../buffer.o ../hash.o ../brpc.o ../ptrarray.o unix.o
 
 all: $(BINS)
 
