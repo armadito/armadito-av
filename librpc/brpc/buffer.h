@@ -49,7 +49,7 @@ static inline void buffer_clear(struct buffer *b)
 	b->end = b->base;
 }
 
-void buffer_append(struct buffer *b, const char *data, size_t size);
+void buffer_append(struct buffer *b, const void *data, size_t size);
 
 void buffer_fill(struct buffer *b, int c, size_t size);
 

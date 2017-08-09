@@ -57,7 +57,7 @@ void buffer_make_room(struct buffer *b, size_t needed)
 	b->alloced_end = b->base + new_size;
 }
 
-void buffer_append(struct buffer *b, const char *data, size_t size)
+void buffer_append(struct buffer *b, const void *data, size_t size)
 {
 	buffer_make_room(b, size);
 
