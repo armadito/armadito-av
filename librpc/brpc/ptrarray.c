@@ -43,7 +43,7 @@ size_t ptr_array_size(struct ptr_array *array)
 
 void *ptr_array_index(struct ptr_array *array, int index)
 {
-	return (void **)buffer_data(&array->b) + index;
+	return *((void **)buffer_data(&array->b) + index);
 }
 
 void ptr_array_clear(struct ptr_array *array)
