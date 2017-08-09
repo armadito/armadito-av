@@ -29,7 +29,7 @@ static inline void buffer_increment(struct buffer *b, size_t size)
 	b->end += size;
 }
 
-static inline char *buffer_end(const struct buffer *b)
+static inline void *buffer_end(const struct buffer *b)
 {
 	return b->end;
 }
