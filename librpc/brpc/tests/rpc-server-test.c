@@ -25,7 +25,7 @@
 #define ERR_SQRT_OF_NEGATIVE  ((unsigned char)2)
 #define ERR_INVALID_ACTION  ((unsigned char)3)
 
-static int add_method(struct brpc_connection *conn, const struct brpc_msg *params, struct brpc_msg *result)
+static int add_method(struct brpc_connection *conn, const struct brpc_msg *params, struct brpc_msg **result)
 {
 	int32_t op1, op2, r;
 
@@ -34,12 +34,12 @@ static int add_method(struct brpc_connection *conn, const struct brpc_msg *param
 
 	r = op1 + op2;
 
-	brpc_msg_add_int32(result, r);
+	*result = brpc_msg_new_response("i", r);
 
 	return BRPC_OK;
 }
 
-static int div_method(struct brpc_connection *conn, const struct brpc_msg *params, struct brpc_msg *result)
+static int div_method(struct brpc_connection *conn, const struct brpc_msg *params, struct brpc_msg **result)
 {
 	int32_t op1, op2, r;
 
@@ -51,12 +51,12 @@ static int div_method(struct brpc_connection *conn, const struct brpc_msg *param
 
 	r = op1 / op2;
 
-	brpc_msg_add_int32(result, r);
+	*result = brpc_msg_new_response("i", r);
 
 	return BRPC_OK;
 }
 
-static int sqrt_method(struct brpc_connection *conn, const struct brpc_msg *params, struct brpc_msg *result)
+static int sqrt_method(struct brpc_connection *conn, const struct brpc_msg *params, struct brpc_msg **result)
 {
 	int32_t op1, r;
 
@@ -67,7 +67,7 @@ static int sqrt_method(struct brpc_connection *conn, const struct brpc_msg *para
 
 	r = (int32_t)sqrt(op1);
 
-	brpc_msg_add_int32(result, r);
+	*result = brpc_msg_new_response("i", r);
 
 	return BRPC_OK;
 }
@@ -111,7 +111,7 @@ static void notify_stop(void)
 	fprintf(stderr, "notifications stopped\n");
 }
 
-static int notify_method(struct brpc_connection *conn, const struct brpc_msg *params, struct brpc_msg *result)
+static int notify_start_stop_method(struct brpc_connection *conn, const struct brpc_msg *params, struct brpc_msg **result)
 {
 	const char *whot = brpc_msg_get_str(params, 0, NULL);
 
@@ -141,7 +141,7 @@ int main(int argc, char **argv)
 	brpc_mapper_add(server_mapper, METHOD_ADD, add_method);
 	brpc_mapper_add(server_mapper, METHOD_DIV, div_method);
 	brpc_mapper_add(server_mapper, METHOD_SQRT, sqrt_method);
-	brpc_mapper_add(server_mapper, METHOD_NOTIFY_START_STOP, notify_method);
+	brpc_mapper_add(server_mapper, METHOD_NOTIFY_START_STOP, notify_start_stop_method);
 
 	/* brpc_mapper_add_error_message(server_mapper, ERR_DIVIDE_BY_ZERO, "divide by zero"); */
 	/* brpc_mapper_add_error_message(server_mapper, ERR_SQRT_OF_NEGATIVE, "square root of negative number"); */

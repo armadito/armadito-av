@@ -30,6 +30,8 @@ typedef SSIZE_T ssize_t;
 
 struct brpc_msg;
 
+struct brpc_msg *brpc_msg_new_response(const char *fmt, ...);
+
 int brpc_msg_is_int32(const struct brpc_msg *msg, int index);
 int brpc_msg_is_int64(const struct brpc_msg *msg, int index);
 int brpc_msg_is_str(const struct brpc_msg *msg, int index);
@@ -38,9 +40,11 @@ int32_t brpc_msg_get_int32(const struct brpc_msg *msg, int index, int *error);
 int64_t brpc_msg_get_int64(const struct brpc_msg *msg, int index, int *error);
 char *brpc_msg_get_str(const struct brpc_msg *msg, int index, int *error);
 
+#if 0
 int brpc_msg_add_int32(struct brpc_msg *msg, int32_t i);
 int brpc_msg_add_int64(struct brpc_msg *msg, int64_t l);
 int brpc_msg_add_str(struct brpc_msg *msg, const char *s);
+#endif
 
 /*
  * RPC mapper
@@ -49,7 +53,7 @@ int brpc_msg_add_str(struct brpc_msg *msg, const char *s);
 
 struct brpc_connection;
 
-typedef int (*brpc_method_t)(struct brpc_connection *conn, const struct brpc_msg *params, struct brpc_msg *result);
+typedef int (*brpc_method_t)(struct brpc_connection *conn, const struct brpc_msg *params, struct brpc_msg **result);
 
 struct brpc_mapper;
 

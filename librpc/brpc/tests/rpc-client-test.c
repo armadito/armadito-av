@@ -30,7 +30,7 @@ static int test_notify(struct brpc_connection *conn, const char *whot)
 	return brpc_notify(conn, METHOD_NOTIFY_START_STOP, "s", whot);
 }
 
-static int do_notify_method(struct brpc_connection *conn, const struct brpc_msg *params, struct brpc_msg *result)
+static int do_notify_method(struct brpc_connection *conn, const struct brpc_msg *params, struct brpc_msg **result)
 {
 	fprintf(stderr, "I have been notified\n");
 

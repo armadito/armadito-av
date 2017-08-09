@@ -305,6 +305,18 @@ static struct brpc_msg *brpc_msg_new(uint8_t msg_type, const char *fmt, ...)
 	return ret;
 }
 
+struct brpc_msg *brpc_msg_new_response(const char *fmt, ...)
+{
+	va_list args;
+	struct brpc_msg *ret;
+
+	va_start(args, fmt);
+	ret = brpc_msg_vnew(MESSAGE_TYPE_RESPONSE, fmt, args);
+	va_end(args);
+
+	return ret;
+}
+
 static struct brpc_msg *brpc_msg_new_with_size(size_t initial_size)
 {
 	struct brpc_msg *msg;
@@ -757,7 +769,7 @@ static int brpc_connection_receive(struct brpc_connection *conn, struct brpc_msg
 static int brpc_connection_process_request(struct brpc_connection *conn, struct brpc_msg *params)
 {
 	brpc_method_t method_cb = NULL;
-	struct brpc_msg *result;
+	struct brpc_msg *result = NULL;
 	struct brpc_mapper *mapper = brpc_connection_get_mapper(conn);
 	uint32_t id = brpc_msg_get_id(params);
 	int mth_ret;
@@ -771,18 +783,18 @@ static int brpc_connection_process_request(struct brpc_connection *conn, struct 
 		return brpc_connection_send_and_free(conn, result);
 	}
 
-	result = brpc_msg_new(MESSAGE_TYPE_RESPONSE, NULL);
-	mth_ret = (*method_cb)(conn, params, result);
+	mth_ret = (*method_cb)(conn, params, &result);
 
 	if (mth_ret) {
-		brpc_msg_free(result);
+		if (result != NULL)
+			brpc_msg_free(result);
 
 		result = brpc_msg_new(MESSAGE_TYPE_ERROR, "is", BRPC_ERR_METHOD_TO_CODE(mth_ret), "method returned an error");
 		brpc_msg_set_id(result, id);
 
 		return brpc_connection_send_and_free(conn, result);
 	}
-	else if (id != 0) {
+	else if (id != 0 && result != NULL) {
 		brpc_msg_set_id(result, id);
 
 		return brpc_connection_send_and_free(conn, result);
