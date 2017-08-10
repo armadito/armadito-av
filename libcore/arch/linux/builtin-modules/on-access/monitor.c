@@ -41,7 +41,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+/* #ifndef RM_GLIB */
 #include <glib.h>
+/* #endif */
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
