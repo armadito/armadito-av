@@ -40,17 +40,17 @@ enum hash_table_type {
 typedef void (*free_cb_t)(void *p);
 
 /* must add key and value destroy callbacks */
-struct hash_table *hash_table_new(enum hash_table_type t, free_cb_t key_free_cb, free_cb_t value_free_cb);
+struct hash_table *jhash_table_new(enum hash_table_type t, free_cb_t key_free_cb, free_cb_t value_free_cb);
 
-void hash_table_free(struct hash_table *ht);
+void jhash_table_free(struct hash_table *ht);
 
 /* returns 1 if key has been inserted, 0 if not */
-int hash_table_insert(struct hash_table *ht, void *key, void *value);
+int jhash_table_insert(struct hash_table *ht, void *key, void *value);
 
 /* returns the value mapped to key, NULL if not found */
-void *hash_table_search(struct hash_table *ht, void *key);
+void *jhash_table_search(struct hash_table *ht, void *key);
 
 /* returns 1 if key was removed, 0 if not */
-int hash_table_remove(struct hash_table *ht, void *key);
+int jhash_table_remove(struct hash_table *ht, void *key);
 
 #endif

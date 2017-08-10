@@ -77,7 +77,7 @@ static int equal_pointer(void *k1, void *k2)
 	return k1 == k2;
 }
 
-struct hash_table *hash_table_new(enum hash_table_type t, free_cb_t key_free_cb, free_cb_t value_free_cb)
+struct hash_table *jhash_table_new(enum hash_table_type t, free_cb_t key_free_cb, free_cb_t value_free_cb)
 {
 	struct hash_table *ht;
 
@@ -108,7 +108,7 @@ struct hash_table *hash_table_new(enum hash_table_type t, free_cb_t key_free_cb,
 	return ht;
 }
 
-void hash_table_free(struct hash_table *ht)
+void jhash_table_free(struct hash_table *ht)
 {
 	size_t i;
 	struct hash_table_entry *p;
@@ -127,7 +127,7 @@ void hash_table_free(struct hash_table *ht)
 	free(ht);
 }
 
-void hash_table_print(struct hash_table *ht)
+void jhash_table_print(struct hash_table *ht)
 {
 	size_t i;
 	const char *fmt = (ht->type == HASH_KEY_STR) ? " key %s value %p\n" : " key %p value %p\n";
@@ -263,7 +263,7 @@ static void hash_table_check_overflow(struct hash_table *ht)
 		hash_table_rehash(ht);
 }
 
-int hash_table_insert(struct hash_table *ht, void *key, void *value)
+int jhash_table_insert(struct hash_table *ht, void *key, void *value)
 {
 	size_t h;
 	size_t i;
@@ -328,7 +328,7 @@ static struct hash_table_entry *lookup_entry(struct hash_table *ht, void *key)
 	return NULL;
 }
 
-void *hash_table_search(struct hash_table *ht, void *key)
+void *jhash_table_search(struct hash_table *ht, void *key)
 {
 	struct hash_table_entry *p = lookup_entry(ht, key);
 
@@ -338,7 +338,7 @@ void *hash_table_search(struct hash_table *ht, void *key)
 	return NULL;
 }
 
-int hash_table_remove(struct hash_table *ht, void *key)
+int jhash_table_remove(struct hash_table *ht, void *key)
 {
 	struct hash_table_entry *p = lookup_entry(ht, key);
 

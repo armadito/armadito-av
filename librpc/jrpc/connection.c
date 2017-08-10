@@ -123,7 +123,7 @@ struct jrpc_connection *jrpc_connection_new(struct jrpc_mapper *mapper, void *co
 	conn->mapper = mapper;
 
 	conn->current_id = 1L;
-	conn->response_table = hash_table_new(HASH_KEY_INT, NULL, (free_cb_t)free);
+	conn->response_table = jhash_table_new(HASH_KEY_INT, NULL, (free_cb_t)free);
 	lock_init(&conn->id_lock);
 
 	conn->read_cb = NULL;
@@ -173,7 +173,7 @@ jrpc_error_handler_t jrpc_connection_get_error_handler(struct jrpc_connection *c
 
 void jrpc_connection_free(struct jrpc_connection *conn)
 {
-	hash_table_free(conn->response_table);
+	jhash_table_free(conn->response_table);
 	lock_destroy(&conn->id_lock);
 	lock_destroy(&conn->write_lock);
 	free(conn);
@@ -195,7 +195,7 @@ size_t connection_register_callback(struct jrpc_connection *conn, jrpc_cb_t cb, 
 	conn->current_id++;
 
 	/* insertion should always work??? */
-	if (!hash_table_insert(conn->response_table, H_INT_TO_POINTER(id), entry))
+	if (!jhash_table_insert(conn->response_table, H_INT_TO_POINTER(id), entry))
 		free(entry);
 
 	lock_release(&conn->id_lock);
@@ -210,12 +210,12 @@ jrpc_cb_t connection_find_callback(struct jrpc_connection *conn, size_t id, void
 
 	lock_acquire(&conn->id_lock);
 
-	entry = hash_table_search(conn->response_table, H_INT_TO_POINTER(id));
+	entry = jhash_table_search(conn->response_table, H_INT_TO_POINTER(id));
 
 	if (entry != NULL) {
 		cb = entry->cb;
 		*p_user_data = entry->user_data;
-		hash_table_remove(conn->response_table, H_INT_TO_POINTER(id));
+		jhash_table_remove(conn->response_table, H_INT_TO_POINTER(id));
 	}
 
 	lock_release(&conn->id_lock);
