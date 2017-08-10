@@ -27,7 +27,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "onaccessmod.h"
 #include "modname.h"
 
-#include <glib.h>
 #include <stdlib.h>
 #include <string.h>
 
