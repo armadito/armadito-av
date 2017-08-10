@@ -19,6 +19,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
+#include "armadito-config.h"
 #include <libjrpc/jrpc.h>
 
 #include "buffer.h"
@@ -31,23 +32,81 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #ifdef HAVE_PTHREAD
 #include <pthread.h>
+
+typedef pthread_mutex_t jrpc_lock_t;
+
+static void lock_acquire(jrpc_lock_t *lock)
+{
+	if (pthread_mutex_lock((pthread_mutex_t *)lock))
+		perror("pthread_mutex_lock");
+}
+
+static void lock_release(jrpc_lock_t *lock)
+{
+	if (pthread_mutex_unlock((pthread_mutex_t *)lock))
+		perror("pthread_mutex_lock");
+}
+
+static void lock_init(jrpc_lock_t *lock)
+{
+	if (pthread_mutex_init((pthread_mutex_t *)lock, NULL))
+		perror("pthread_mutex_init");
+}
+
+static void lock_destroy(jrpc_lock_t *lock)
+{
+
+	if (pthread_mutex_destroy((pthread_mutex_t *)lock))
+		perror("pthread_mutex_destroy");
+}
+#else
+#include <windows.h>
+
+typedef HANDLE jrpc_lock_t;
+
+static void lock_acquire(jrpc_lock_t *lock)
+{
+	DWORD dwWaitResult;
+
+	dwWaitResult = WaitForSingleObject(
+		*lock,      // handle to mutex
+		INFINITE);  // no time-out interval
+}
+
+static void lock_release(jrpc_lock_t *lock)
+{
+	ReleaseMutex(*lock);
+}
+
+static void lock_init(jrpc_lock_t *lock)
+{
+	*lock = CreateMutex(
+		NULL,              // default security attributes
+		FALSE,             // initially not owned
+		NULL);             // unnamed mutex
+}
+
+static void lock_destroy(jrpc_lock_t *lock)
+{
+	CloseHandle(*lock);
+}
 #endif
 
 struct jrpc_connection {
 	struct jrpc_mapper *mapper;
 	size_t current_id;
 	struct hash_table *response_table;
+	jrpc_lock_t id_lock;
 	jrpc_read_cb_t read_cb;
 	void *read_cb_data;
 	jrpc_write_cb_t write_cb;
 	void *write_cb_data;
+	jrpc_lock_t write_lock;
 	void *connection_data;
 	jrpc_error_handler_t error_handler;
-#ifdef HAVE_PTHREAD
-	pthread_mutex_t connection_mutex;
-#endif
 };
 
 struct rpc_callback_entry {
@@ -57,46 +116,6 @@ struct rpc_callback_entry {
 
 #define DEFAULT_INPUT_BUFFER_SIZE 4096
 
-#ifdef HAVE_PTHREAD
-static void connection_lock(struct jrpc_connection *conn)
-{
-	if (pthread_mutex_lock(&conn->connection_mutex))
-		perror("pthread_mutex_lock");
-}
-
-static void connection_unlock(struct jrpc_connection *conn)
-{
-	if (pthread_mutex_unlock(&conn->connection_mutex))
-		perror("pthread_mutex_unlock");
-}
-
-static void connection_lock_init(struct jrpc_connection *conn)
-{
-	pthread_mutex_init(&conn->connection_mutex, NULL);
-}
-
-static void connection_lock_destroy(struct jrpc_connection *conn)
-{
-	pthread_mutex_destroy(&conn->connection_mutex);
-}
-#else
-static void connection_lock(struct jrpc_connection *conn)
-{
-}
-
-static void connection_unlock(struct jrpc_connection *conn)
-{
-}
-
-static void connection_lock_init(struct jrpc_connection *conn)
-{
-}
-
-static void connection_lock_destroy(struct jrpc_connection *conn)
-{
-}
-#endif
-
 struct jrpc_connection *jrpc_connection_new(struct jrpc_mapper *mapper, void *connection_data)
 {
 	struct jrpc_connection *conn = malloc(sizeof(struct jrpc_connection));
@@ -105,16 +124,17 @@ struct jrpc_connection *jrpc_connection_new(struct jrpc_mapper *mapper, void *co
 
 	conn->current_id = 1L;
 	conn->response_table = hash_table_new(HASH_KEY_INT, NULL, (free_cb_t)free);
+	lock_init(&conn->id_lock);
 
 	conn->read_cb = NULL;
 	conn->read_cb_data = NULL;
 	conn->write_cb = NULL;
 	conn->write_cb_data = NULL;
+	lock_init(&conn->write_lock);
 
 	conn->connection_data = connection_data;
 	conn->error_handler = NULL;
 
-	connection_lock_init(conn);
 
 	return conn;
 }
@@ -154,7 +174,8 @@ jrpc_error_handler_t jrpc_connection_get_error_handler(struct jrpc_connection *c
 void jrpc_connection_free(struct jrpc_connection *conn)
 {
 	hash_table_free(conn->response_table);
-	connection_lock_destroy(conn);
+	lock_destroy(&conn->id_lock);
+	lock_destroy(&conn->write_lock);
 	free(conn);
 }
 
@@ -167,7 +188,7 @@ size_t connection_register_callback(struct jrpc_connection *conn, jrpc_cb_t cb, 
 	entry->cb = cb;
 	entry->user_data = user_data;
 
-	connection_lock(conn);
+	lock_acquire(&conn->id_lock);
 
 	id = conn->current_id;
 
@@ -177,7 +198,7 @@ size_t connection_register_callback(struct jrpc_connection *conn, jrpc_cb_t cb, 
 	if (!hash_table_insert(conn->response_table, H_INT_TO_POINTER(id), entry))
 		free(entry);
 
-	connection_unlock(conn);
+	lock_release(&conn->id_lock);
 
 	return id;
 }
@@ -187,6 +208,8 @@ jrpc_cb_t connection_find_callback(struct jrpc_connection *conn, size_t id, void
 	struct rpc_callback_entry *entry;
 	jrpc_cb_t cb = NULL;
 
+	lock_acquire(&conn->id_lock);
+
 	entry = hash_table_search(conn->response_table, H_INT_TO_POINTER(id));
 
 	if (entry != NULL) {
@@ -194,6 +217,8 @@ jrpc_cb_t connection_find_callback(struct jrpc_connection *conn, size_t id, void
 		*p_user_data = entry->user_data;
 		hash_table_remove(conn->response_table, H_INT_TO_POINTER(id));
 	}
+
+	lock_release(&conn->id_lock);
 
 	return cb;
 }
@@ -227,11 +252,11 @@ int connection_send(struct jrpc_connection *conn, json_t *obj)
 #ifdef JRPC_DEBUG
 	fprintf(stderr, "sending buffer: %s\n", buffer_data(&b));
 #endif
-	connection_lock(conn);
+	lock_acquire(&conn->write_lock);
 	/* - 1 so that we don't write the trailing '\0' */
 	if ((*conn->write_cb)(buffer_data(&b), buffer_size(&b) - 1, conn->write_cb_data) < 0)
 		ret = JRPC_ERR_INTERNAL_ERROR;
-	connection_unlock(conn);
+	lock_release(&conn->write_lock);
 
 end:
 	buffer_destroy(&b);

@@ -42,117 +42,72 @@ struct hash_table_entry {
 #define IS_REMOVED(T, I) (T[(I)].state == REMOVED)
 #define IS_OCCUPIED(T, I) (T[(I)].state == OCCUPIED)
 
-typedef size_t (*hash_fun_t)(void *p);
-typedef int (*equal_fun_t)(void *k1, void *k2);
-
 struct hash_table {
-	enum hash_table_type type;
 	size_t size;
 	struct hash_table_entry *table;
 	size_t key_count;
-	free_cb_t key_free_cb;
-	free_cb_t value_free_cb;
 	hash_fun_t hash_fun;
 	equal_fun_t equal_fun;
+	destroy_cb_t key_destroy_cb;
+	destroy_cb_t value_destroy_cb;
 };
 
 #define HASH_DEFAULT_SIZE 64
 
 #define HASH(HT, K) (*HT->hash_fun)(K)
-#define EQUAL(HT, K1, K2) (*HT->equal_fun)(K1, K2)
+#define EQUAL(HT, P, Q) (*HT->equal_fun)(P, Q)
 
-static uint32_t pjw32(const char *s);
-static uint32_t himult32(void *p);
-static uint64_t himult64(void *p);
-static uint32_t fmix32(void *p);
-static uint64_t fmix64(void *p);
-
-static int equal_str(void *k1, void *k2)
+size_t hash_int(void *k)
 {
-	return strcmp((const char *)k1, (const char *)k2) == 0;
+	uintptr_t p = H_POINTER_TO_INT(k);
+
+	/* for 64 bits, use 11400712997709160919 which is a prime close to 2^64 x phi */
+	return p * UINT64_C(11400712997709160919);
 }
 
-static int equal_pointer(void *k1, void *k2)
+int equal_int(void *p, void *q)
 {
-	return k1 == k2;
+	return p == q;
 }
 
-struct hash_table *hash_table_new(enum hash_table_type t, free_cb_t key_free_cb, free_cb_t value_free_cb)
+size_t hash_pointer(void *k)
 {
-	struct hash_table *ht;
+	uint64_t p = H_POINTER_TO_INT(k);
 
-	ht = malloc(sizeof(struct hash_table));
-	ht->type = t;
-	ht->size = HASH_DEFAULT_SIZE;
-	ht->table = calloc(ht->size, sizeof(struct hash_table_entry));
-	ht->key_count = 0;
+	p ^= p >> 33;
+	p *= UINT64_C(0xff51afd7ed558ccd);
+	p ^= p >> 33;
+	p *= UINT64_C(0xc4ceb9fe1a85ec53);
+	p ^= p >> 33;
 
-	ht->key_free_cb = key_free_cb;
-	ht->value_free_cb = value_free_cb;
-
-	switch(ht->type) {
-	case HASH_KEY_STR:
-		ht->hash_fun = (hash_fun_t)&pjw32;
-		ht->equal_fun = &equal_str;
-		break;
-	case HASH_KEY_INT:
-		ht->hash_fun = (hash_fun_t)&himult64;
-		ht->equal_fun = &equal_pointer;
-		break;
-	case HASH_KEY_PTR:
-		ht->hash_fun = (hash_fun_t)&fmix64;
-		ht->equal_fun = &equal_pointer;
-		break;
-	}
-
-	return ht;
+	return p;
 }
 
-void hash_table_free(struct hash_table *ht)
+int equal_pointer(void *p, void *q)
 {
-	size_t i;
-	struct hash_table_entry *p;
-
-	for (i = 0, p = ht->table; i < ht->size; i++, p++) {
-		if (p->state == EMPTY || p->state == REMOVED)
-			continue;
-
-		if (ht->key_free_cb != NULL && p->key != NULL)
-			(*ht->key_free_cb)(p->key);
-		if (ht->value_free_cb != NULL && p->value != NULL)
-			(*ht->value_free_cb)(p->value);
-	}
-
-	free(ht->table);
-	free(ht);
-}
-
-void hash_table_print(struct hash_table *ht)
-{
-	size_t i;
-	const char *fmt = (ht->type == HASH_KEY_STR) ? " key %s value %p\n" : " key %p value %p\n";
-
-	printf("hash table size %ld key count %ld\n", ht->size, ht->key_count);
-
-	for(i = 0; i < ht->size; i++)
-		printf(fmt, ht->table[i].key, ht->table[i].value);
+	return p == q;
 }
 
 /* PJW non-cryptographic string hash function */
-static uint32_t pjw32(const char *s)
+size_t hash_str(void *k)
 {
 	uint32_t h = 0;
 	uint32_t high;
-	const char *p = s;
+	const char *p = k;
 
 	while (*p) {
 		h = (h << 4) + *p++;
-		if (high = h & 0xF0000000)
+		if ((high = h & 0xF0000000))
 			h ^= high >> 24;
 		h &= ~high;
 	}
 
 	return h;
+}
+
+int equal_str(void *p, void *q)
+{
+	return strcmp((const char *)p, (const char *)q) == 0;
 }
 
 /*
@@ -218,11 +173,61 @@ static uint64_t fmix64(void *p)
   mult_hash_i64        0   72     28
 */
 
+
+struct hash_table *hash_table_new(hash_fun_t hash_fun, equal_fun_t equal_fun, destroy_cb_t key_destroy_cb, destroy_cb_t value_destroy_cb)
+{
+	struct hash_table *ht;
+
+	ht = malloc(sizeof(struct hash_table));
+	ht->size = HASH_DEFAULT_SIZE;
+	ht->table = calloc(ht->size, sizeof(struct hash_table_entry));
+	ht->key_count = 0;
+
+	ht->hash_fun = hash_fun;
+	ht->equal_fun = equal_fun;
+	ht->key_destroy_cb = key_destroy_cb;
+	ht->value_destroy_cb = value_destroy_cb;
+
+	return ht;
+}
+
+void hash_table_free(struct hash_table *ht)
+{
+	size_t i;
+	struct hash_table_entry *p;
+
+	for (i = 0, p = ht->table; i < ht->size; i++, p++) {
+		if (p->state == EMPTY || p->state == REMOVED)
+			continue;
+
+		if (ht->key_destroy_cb != NULL && p->key != NULL)
+			(*ht->key_destroy_cb)(p->key);
+		if (ht->value_destroy_cb != NULL && p->value != NULL)
+			(*ht->value_destroy_cb)(p->value);
+	}
+
+	free(ht->table);
+	free(ht);
+}
+
+void hash_table_print(struct hash_table *ht)
+{
+	size_t i;
+	const char *fmt = (ht->hash_fun == hash_str) ? " key %s value %p\n" : " key %p value %p\n";
+
+	printf("hash table size %ld key count %ld\n", ht->size, ht->key_count);
+
+	for(i = 0; i < ht->size; i++)
+		printf(fmt, ht->table[i].key, ht->table[i].value);
+}
+
 static void hash_table_rehash(struct hash_table *ht)
 {
 	size_t old_size;
 	size_t j;
 	struct hash_table_entry *old_table;
+
+	/* fprintf(stderr, "rehashing: %ld keys vs. %ld size\n", ht->key_count, ht->size); */
 
 	old_size = ht->size;
 	old_table = ht->table;
@@ -251,16 +256,10 @@ static void hash_table_rehash(struct hash_table *ht)
 	free(old_table);
 }
 
-static int hash_table_must_rehash(struct hash_table *ht)
+static int hash_table_check_overflow(struct hash_table *ht)
 {
 	/* 16 / 23 == 0.6956 e.g. ~ 0.7 */
 	return 23 * ht->key_count > 16 * ht->size;
-}
-
-static void hash_table_check_overflow(struct hash_table *ht)
-{
-	if (hash_table_must_rehash(ht))
-		hash_table_rehash(ht);
 }
 
 int hash_table_insert(struct hash_table *ht, void *key, void *value)
@@ -269,7 +268,8 @@ int hash_table_insert(struct hash_table *ht, void *key, void *value)
 	size_t i;
 	size_t w;
 
-	hash_table_check_overflow(ht);
+	if (hash_table_check_overflow(ht))
+		hash_table_rehash(ht);
 
 	h = HASH(ht, key) % ht->size;
 
@@ -289,12 +289,12 @@ int hash_table_insert(struct hash_table *ht, void *key, void *value)
 	/* if (i != 0) */
 	/* 	fprintf(stderr, "collision for key %p\n", key); */
 
-	if (ht->key_free_cb != NULL && ht->table[w].key != NULL)
-		(*ht->key_free_cb)(ht->table[w].key);
+	if (ht->key_destroy_cb != NULL && ht->table[w].key != NULL)
+		(*ht->key_destroy_cb)(ht->table[w].key);
 	ht->table[w].key = key;
 
-	if (ht->value_free_cb != NULL && ht->table[w].value != NULL)
-		(*ht->value_free_cb)(ht->table[w].value);
+	if (ht->value_destroy_cb != NULL && ht->table[w].value != NULL)
+		(*ht->value_destroy_cb)(ht->table[w].value);
 	ht->table[w].value = value;
 
 	ht->table[w].state = OCCUPIED;
@@ -345,12 +345,12 @@ int hash_table_remove(struct hash_table *ht, void *key)
 	if (p == NULL)
 		return 0;
 
-	if (ht->key_free_cb != NULL && p->key != NULL)
-		(*ht->key_free_cb)(p->key);
+	if (ht->key_destroy_cb != NULL && p->key != NULL)
+		(*ht->key_destroy_cb)(p->key);
 	p->key = NULL;
 
-	if (ht->value_free_cb != NULL && p->value != NULL)
-		(*ht->value_free_cb)(p->value);
+	if (ht->value_destroy_cb != NULL && p->value != NULL)
+		(*ht->value_destroy_cb)(p->value);
 	p->value = NULL;
 	p->state = REMOVED;
 

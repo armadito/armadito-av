@@ -52,5 +52,6 @@ struct notify_action {
 #include "test-marshall.h"
 
 struct operands *operands_new(int allow_null);
+void operands_free(struct operands *op);
 
 #endif

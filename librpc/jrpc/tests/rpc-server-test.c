@@ -55,11 +55,13 @@ static int op_sqrt(int *p_res, int op1, int op2)
 static int operator_method(json_t *params, json_t **result, int (*operator)(int *, int, int))
 {
 	struct operands *s_op;
-	struct operands *s_res = operands_new(1);
+	struct operands *s_res;
 	int ret;
 
 	if ((ret = JRPC_JSON2STRUCT(operands, params, &s_op)))
 		return ret;
+
+	s_res = operands_new(1);
 
 	switch(s_op->opt) {
 	case OP_INT:
@@ -68,11 +70,20 @@ static int operator_method(json_t *params, json_t **result, int (*operator)(int 
 		break;
 	}
 
-	if (ret)
+	if (ret) {
+		operands_free(s_op);
+		operands_free(s_res);
 		return ret;
+	}
 
-	if ((ret = JRPC_STRUCT2JSON(operands, s_res, result)))
+	if ((ret = JRPC_STRUCT2JSON(operands, s_res, result))) {
+		operands_free(s_op);
+		operands_free(s_res);
 		return ret;
+	}
+
+	operands_free(s_op);
+	operands_free(s_res);
 
 	return JRPC_OK;
 }

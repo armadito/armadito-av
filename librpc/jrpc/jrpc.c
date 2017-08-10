@@ -35,8 +35,13 @@ static json_t *make_call_obj(const char *method, json_t *params, size_t id)
 	if (params != NULL)
 		json_object_set(obj, "params", params);
 
-	if (id)
-		json_object_set(obj, "id", json_integer(id));
+	if (id) {
+		json_t *j_id = json_integer(id);
+
+		json_object_set(obj, "id", j_id);
+
+		json_decref(j_id);
+	}
 
 	return obj;
 }
@@ -200,10 +205,12 @@ static int connection_process_request(struct jrpc_connection *conn, struct rpc_o
 	if (method_cb == NULL) {
 		ret = JRPC_ERR_METHOD_NOT_FOUND;
 		connection_send(conn, make_error_obj(ret, "method was not found", NULL, id));
+		free((void *)method);
 		return ret;
 	}
 
 	mth_ret = (*method_cb)(conn, params, &result);
+	free((void *)method);
 
 	if (mth_ret) {
 		const char *error_message;
@@ -265,6 +272,8 @@ static int connection_process_error(struct jrpc_connection *conn, struct rpc_obj
 	if (error_handler != NULL)
 		(*error_handler)(conn, id, code, message, data);
 
+	free((void *)message);
+
 	return JRPC_OK;
 }
 
@@ -285,12 +294,17 @@ int jrpc_process(struct jrpc_connection *conn)
 
 	switch(r_obj.type) {
 	case REQUEST:
-		return connection_process_request(conn, &r_obj);
+		ret = connection_process_request(conn, &r_obj);
+		break;
 	case RESULT_RESPONSE:
-		return connection_process_result(conn, &r_obj);
+		ret = connection_process_result(conn, &r_obj);
+		break;
 	case ERROR_RESPONSE:
-		return connection_process_error(conn, &r_obj);
+		ret = connection_process_error(conn, &r_obj);
+		break;
 	}
 
-	return JRPC_OK;
+	json_decref(j_obj);
+
+	return ret;
 }
