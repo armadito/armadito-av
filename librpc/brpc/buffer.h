@@ -51,6 +51,8 @@ static inline void buffer_clear(struct buffer *b)
 
 void buffer_append(struct buffer *b, const void *data, size_t size);
 
+void buffer_str_append(struct buffer *b, const char *s);
+
 void buffer_fill(struct buffer *b, int c, size_t size);
 
 #endif

@@ -66,6 +66,17 @@ void buffer_append(struct buffer *b, const void *data, size_t size)
 	buffer_increment(b, size);
 }
 
+void buffer_str_append(struct buffer *b, const char *s)
+{
+	const char *p = s;
+
+	do {
+		buffer_make_room(b, 1);
+		*((char *)buffer_end(b)) = *p;
+		buffer_increment(b);
+	} while (*p++);
+}
+
 void buffer_fill(struct buffer *b, int c, size_t size)
 {
 	buffer_make_room(b, size);
