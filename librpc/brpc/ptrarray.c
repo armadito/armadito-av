@@ -49,8 +49,10 @@ void ptr_array_clear(struct ptr_array *array)
 {
 	void **p;
 
-	for(p = buffer_data(&array->elements); p < (void **)buffer_end(&array->elements); p++)
-		(*(array->element_destroy_cb))(*p);
+	if (array->element_destroy_cb != NULL) {
+		for(p = buffer_data(&array->elements); p < (void **)buffer_end(&array->elements); p++)
+			(*(array->element_destroy_cb))(*p);
+	}
 
 	buffer_clear(&array->elements);
 }
