@@ -57,7 +57,7 @@ struct hash_table {
 #define HASH(HT, K) (*HT->hash_fun)(K)
 #define EQUAL(HT, P, Q) (*HT->equal_fun)(P, Q)
 
-size_t hash_int(void *k)
+size_t hash_int(const void *k)
 {
 	uintptr_t p = H_POINTER_TO_INT(k);
 
@@ -65,12 +65,12 @@ size_t hash_int(void *k)
 	return p * UINT64_C(11400712997709160919);
 }
 
-int equal_int(void *p, void *q)
+int equal_int(const void *p, const void *q)
 {
 	return p == q;
 }
 
-size_t hash_pointer(void *k)
+size_t hash_pointer(const void *k)
 {
 	uint64_t p = H_POINTER_TO_INT(k);
 
@@ -83,13 +83,13 @@ size_t hash_pointer(void *k)
 	return p;
 }
 
-int equal_pointer(void *p, void *q)
+int equal_pointer(const void *p, const void *q)
 {
 	return p == q;
 }
 
 /* PJW non-cryptographic string hash function */
-size_t hash_str(void *k)
+size_t hash_str(const void *k)
 {
 	uint32_t h = 0;
 	uint32_t high;
@@ -105,7 +105,7 @@ size_t hash_str(void *k)
 	return h;
 }
 
-int equal_str(void *p, void *q)
+int equal_str(const void *p, const void *q)
 {
 	return strcmp((const char *)p, (const char *)q) == 0;
 }
@@ -304,7 +304,7 @@ int hash_table_insert(struct hash_table *ht, void *key, void *value)
 	return 1;
 }
 
-static struct hash_table_entry *lookup_entry(struct hash_table *ht, void *key)
+static struct hash_table_entry *lookup_entry(struct hash_table *ht, const void *key)
 {
 	size_t h;
 	size_t i;
@@ -328,7 +328,7 @@ static struct hash_table_entry *lookup_entry(struct hash_table *ht, void *key)
 	return NULL;
 }
 
-void *hash_table_search(struct hash_table *ht, void *key)
+void *hash_table_lookup(struct hash_table *ht, const void *key)
 {
 	struct hash_table_entry *p = lookup_entry(ht, key);
 
@@ -338,7 +338,7 @@ void *hash_table_search(struct hash_table *ht, void *key)
 	return NULL;
 }
 
-int hash_table_remove(struct hash_table *ht, void *key)
+int hash_table_remove(struct hash_table *ht, const void *key)
 {
 	struct hash_table_entry *p = lookup_entry(ht, key);
 

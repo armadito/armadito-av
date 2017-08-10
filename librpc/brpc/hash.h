@@ -24,17 +24,17 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 
-typedef size_t (*hash_fun_t)(void *k);
-typedef int (*equal_fun_t)(void *p, void *q);
+typedef size_t (*hash_fun_t)(const void *k);
+typedef int (*equal_fun_t)(const void *p, const void *q);
 
-size_t hash_int(void *k);
-int equal_int(void *p, void *q);
+size_t hash_int(const void *k);
+int equal_int(const void *p, const void *q);
 
-size_t hash_pointer(void *k);
-int equal_pointer(void *p, void *q);
+size_t hash_pointer(const void *k);
+int equal_pointer(const void *p, const void *q);
 
-size_t hash_str(void *k);
-int equal_str(void *p, void *q);
+size_t hash_str(const void *k);
+int equal_str(const void *p, const void *q);
 
 /* copied from glib */
 #define H_POINTER_TO_INT(p)	((uintptr_t) (p))
@@ -52,9 +52,9 @@ void hash_table_free(struct hash_table *ht);
 int hash_table_insert(struct hash_table *ht, void *key, void *value);
 
 /* returns the value mapped to key, NULL if not found */
-void *hash_table_search(struct hash_table *ht, void *key);
+void *hash_table_lookup(struct hash_table *ht, const void *key);
 
 /* returns 1 if key was removed, 0 if not */
-int hash_table_remove(struct hash_table *ht, void *key);
+int hash_table_remove(struct hash_table *ht, const void *key);
 
 #endif

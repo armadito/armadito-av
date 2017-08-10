@@ -45,10 +45,12 @@ arch/linux/builtin-modules/on-access/queue.c \
 arch/linux/builtin-modules/on-access/queue.h \
 arch/linux/builtin-modules/on-access/stamp.h \
 arch/linux/builtin-modules/on-access/watchdog.c \
-arch/linux/builtin-modules/on-access/watchdog.h
+arch/linux/builtin-modules/on-access/watchdog.h \
+../librpc/brpc/hash.c \
+../librpc/brpc/hash.h
 endif
 
-libcore_a_CFLAGS=-I$(top_srcdir) -I$(top_srcdir)/libmodule/include -I$(top_srcdir)/libcore/include -I$(top_srcdir)/libcore/arch/linux
+libcore_a_CFLAGS=-I$(top_srcdir) -I$(top_srcdir)/libmodule/include -I$(top_srcdir)/libcore/include -I$(top_srcdir)/libcore/arch/linux -I$(top_srcdir)/librpc/brpc
 #libcore_a_LIBADD= 
 
 libcore_a_CFLAGS+= @GLIB2_CFLAGS@
