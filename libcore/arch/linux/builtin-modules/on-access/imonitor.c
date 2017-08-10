@@ -19,6 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
+#define _GNU_SOURCE
+
 #include <libarmadito/armadito.h>
 #include <armadito-config.h>
 
@@ -30,13 +32,14 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <assert.h>
 #include <errno.h>
-#if 1
+#ifndef RM_GLIB
 #include <glib.h>
 #endif
 #include <stdlib.h>
 #include <string.h>
 #include <sys/inotify.h>
 #include <unistd.h>
+#include <stdio.h>
 
 struct inotify_monitor {
 	struct access_monitor *monitor;
@@ -135,6 +138,7 @@ int inotify_monitor_unmark_directory(struct inotify_monitor *im, const char *pat
 	return 0;
 }
 
+#ifndef RM_GLIB
 #ifdef DEBUG
 static void inotify_event_log(const struct inotify_event *e, const char *full_path)
 {
@@ -176,6 +180,7 @@ static void inotify_event_log(const struct inotify_event *e, const char *full_pa
 	g_string_free(s, TRUE);
 }
 #endif
+#endif
 
 static char *inotify_event_full_path(struct inotify_monitor *im, struct inotify_event *event)
 {
@@ -189,13 +194,7 @@ static char *inotify_event_full_path(struct inotify_monitor *im, struct inotify_
 		return NULL;
 
 	if (event->len) {
-		GString *tmp = g_string_new("");
-
-		g_string_printf(tmp, "%s/%s", dir, event->name);
-
-		full_path = tmp->str;
-
-		g_string_free(tmp, FALSE);
+		asprintf(&full_path, "%s/%s", dir, event->name);
 	} else {
 		full_path = strdup(dir);
 	}
@@ -230,6 +229,7 @@ static void inotify_event_process(struct inotify_monitor *im, struct inotify_eve
 /* Size of buffer to use when reading inotify events */
 #define INOTIFY_BUFFER_SIZE 8192
 
+#ifndef RM_GLIB
 static gboolean inotify_cb(GIOChannel *source, GIOCondition condition, gpointer data)
 {
 	struct inotify_monitor *im = (struct inotify_monitor *)data;
@@ -255,3 +255,4 @@ static gboolean inotify_cb(GIOChannel *source, GIOCondition condition, gpointer 
 
 	return TRUE;
 }
+#endif
