@@ -27,14 +27,14 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "response.h"
 #include "modname.h"
 
-#include <glib.h>
 #include <linux/fanotify.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 #undef ENABLE_WATCHDOG
 
 struct watchdog {
-	GThread *thread;
+	pthread_t thread;
 	struct queue *queue;
 	int fanotify_fd;
 };
@@ -43,9 +43,9 @@ struct watchdog {
 #define TIMEOUT  100000  /* micro seconds */
 #define SLEEP    TIMEOUT  /* micro seconds */
 
-static gpointer watchdog_thread_fun(gpointer data)
+static void *watchdog_thread_fun(void *arg)
 {
-	struct watchdog *w = (struct watchdog *)data;
+	struct watchdog *w = (struct watchdog *)arg;
 	struct timespec timeout = { 0, TIMEOUT * ONE_MICROSECOND};
 	struct timespec sleep_duration = { 0, SLEEP * ONE_MICROSECOND};
 	struct timespec before;
@@ -78,7 +78,8 @@ struct watchdog *watchdog_new(int fanotify_fd)
 
 #ifdef ENABLE_WATCHDOG
 	w->queue = queue_new();
-	w->thread = g_thread_new("timeout thread", watchdog_thread_fun, w);
+	if (pthread_create(&w->thread NULL, watchdog_thread_fun, w))
+		a6o_log(A6O_LOG_MODULE, A60_LOG_LEVEL_WARNING, "cannot create watchdog thread");
 	w->fanotify_fd = fanotify_fd;
 #endif
 
