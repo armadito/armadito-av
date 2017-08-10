@@ -119,4 +119,3 @@ int watchdog_remove(struct watchdog *w, int fd, struct timespec *after)
 
 	return r;
 }
-
