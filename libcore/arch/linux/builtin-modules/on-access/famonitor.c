@@ -77,6 +77,22 @@ struct fanotify_monitor *fanotify_monitor_new(struct access_monitor *m, struct a
 	return f;
 }
 
+static void display_init_error(void)
+{
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": fanotify_init failed (%s)", strerror(errno));
+
+	switch(errno) {
+	case EPERM:
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": you must be root or have CAP_SYS_ADMIN capability to enable on-access protection");
+		break;
+	case ENOSYS:
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": this kernel does not implement fanotify_init()");
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": fanotify is available only if the kernel was configured with CONFIG_FANOTIFY");
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": check your running kernel config, for instance with 'grep FANOTIFY /boot/config-$(uname -r)'");
+		break;
+	}
+}
+
 int fanotify_monitor_start(struct fanotify_monitor *f)
 {
 	GIOChannel *fanotify_channel;
@@ -85,12 +101,7 @@ int fanotify_monitor_start(struct fanotify_monitor *f)
 	f->fanotify_fd = fanotify_init(FAN_CLASS_CONTENT | FAN_UNLIMITED_QUEUE | FAN_UNLIMITED_MARKS, O_LARGEFILE | O_RDONLY);
 
 	if (f->fanotify_fd < 0) {
-		if (errno == EPERM)
-			a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": you must be root or have CAP_SYS_ADMIN capability to enable on-access protection");
-		else if (errno == ENOSYS)
-			a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": this kernel does not implement fanotify_init(). The fanotify API is available only if the kernel was configured with CONFIG_FANOTIFY");
-		else
-			a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": fanotify_init failed (%s)", strerror(errno));
+		display_init_error();
 
 		return -1;
 	}
@@ -189,9 +200,10 @@ static int stat_check(int fd)
 	/* the 2 following tests could be removed: */
 	/* if file descriptor does not refer to a file, read() will fail inside os_mime_type_guess_fd() */
 	/* in this case, mime_type will be null, context_status will be error and response will be ALLOW */
-	/* BUT: this gives a lot of warning in os_mime_type_guess() */
+	/* BUT: this would give a lot of warning in os_mime_type_guess() */
 	/* and the read() in os_mime_type_guess() could be successfull for a device for instance */
 	/* so for now I keep the fstat() */
+
 	if (fstat(fd, &buf) < 0)
 		return 1;
 
