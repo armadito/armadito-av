@@ -28,7 +28,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <sys/stat.h>
 #include <unistd.h>
 #include <errno.h>
-#include <glib.h>
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>

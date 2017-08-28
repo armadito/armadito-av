@@ -26,7 +26,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "core/dir.h"
 
-#include <glib.h>
 #include <dirent.h>
 #include <sys/types.h>
 #include <stdio.h>
