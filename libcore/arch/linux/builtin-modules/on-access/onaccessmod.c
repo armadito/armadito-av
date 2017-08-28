@@ -19,6 +19,12 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
+/*
+   REMINDER:
+   to set capabilities, do as root:
+   setcap cap_sys_admin+pe ./armadito-scand
+*/
+
 #include <libarmadito/armadito.h>
 
 #include "core/scanconf.h"

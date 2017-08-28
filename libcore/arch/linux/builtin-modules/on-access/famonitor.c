@@ -182,7 +182,7 @@ static void scan_file_thread_fun(gpointer data, gpointer user_data)
 	free(thread_data);
 }
 
-static int stat_check(struct fanotify_monitor *f, int fd, const char *path)
+static int stat_check(int fd)
 {
 	struct stat buf;
 
@@ -192,17 +192,11 @@ static int stat_check(struct fanotify_monitor *f, int fd, const char *path)
 	/* BUT: this gives a lot of warning in os_mime_type_guess() */
 	/* and the read() in os_mime_type_guess() could be successfull for a device for instance */
 	/* so for now I keep the fstat() */
-	if (fstat(fd, &buf) < 0) {
-		if (watchdog_remove(f->watchdog, fd, NULL))
-			response_write(f->fanotify_fd, fd, FAN_ALLOW, path, "stat failed");
+	if (fstat(fd, &buf) < 0)
 		return 1;
-	}
 
-	if (!S_ISREG(buf.st_mode)) {
-		if (watchdog_remove(f->watchdog, fd, NULL))
-			response_write(f->fanotify_fd, fd, FAN_ALLOW, path, "not a file");
+	if (!S_ISREG(buf.st_mode))
 		return 1;
-	}
 
 	return 0;
 }
@@ -213,8 +207,11 @@ static void fanotify_perm_event_process(struct fanotify_monitor *f, struct fanot
 	struct a6o_scan_context *file_context;
 	struct a6o_report *report;
 
-	if (stat_check(f, event->fd, path))
+	if (stat_check(event->fd)) {
+		if (watchdog_remove(f->watchdog, event->fd, NULL))
+			response_write(f->fanotify_fd, event->fd, FAN_ALLOW, path, "stat failed or not a regular file");
 		return;
+	}
 
 	file_context = malloc(sizeof(struct a6o_scan_context));
 	report = malloc(sizeof(struct a6o_report));
@@ -342,10 +339,13 @@ int fanotify_monitor_unmark_directory(struct fanotify_monitor *f, const char *pa
 
 int fanotify_monitor_mark_mount(struct fanotify_monitor *f, const char *path, int enable_permission)
 {
-	uint64_t fan_mask = enable_permission ? FAN_OPEN_PERM : FAN_CLOSE_WRITE;
+	uint64_t fan_mask;
 	int r;
 
+	fan_mask = enable_permission ? FAN_OPEN_PERM : FAN_CLOSE_WRITE;
+
 	r = fanotify_mark(f->fanotify_fd, FAN_MARK_ADD | FAN_MARK_MOUNT, fan_mask, AT_FDCWD, path);
+
 	if (r < 0)
 		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": adding fanotify mark on mount point %s failed (%s)", path, strerror(errno));
 
@@ -354,8 +354,10 @@ int fanotify_monitor_mark_mount(struct fanotify_monitor *f, const char *path, in
 
 int fanotify_monitor_unmark_mount(struct fanotify_monitor *f, const char *path, int enable_permission)
 {
-	uint64_t fan_mask = enable_permission ? FAN_OPEN_PERM : FAN_CLOSE_WRITE;
+	uint64_t fan_mask;
 	int r;
+
+	fan_mask = enable_permission ? FAN_OPEN_PERM : FAN_CLOSE_WRITE;
 
 	r = fanotify_mark(f->fanotify_fd, FAN_MARK_REMOVE | FAN_MARK_MOUNT, fan_mask, AT_FDCWD, path);
 
