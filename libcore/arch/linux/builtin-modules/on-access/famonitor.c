@@ -307,6 +307,17 @@ static gboolean fanotify_cb(GIOChannel *source, GIOCondition condition, gpointer
 	return TRUE;
 }
 
+static void display_mark_error(const char *path, int enable_permission, const char *adding_or_removing, const char *dir_or_mount)
+{
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": %s fanotify mark for %s %s failed (%s)", adding_or_removing, dir_or_mount, path, strerror(errno));
+
+	if (enable_permission && errno == EINVAL) {
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": may be this kernel does not support fanotify access permissions?");
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": the fanotify access permissions are available only if the kernel was configured with CONFIG_FANOTIFY_ACCESS_PERMISSIONS");
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": check your running kernel config, for instance with 'grep FANOTIFY /boot/config-$(uname -r)'");
+	}
+}
+
 int fanotify_monitor_mark_directory(struct fanotify_monitor *f, const char *path, int enable_permission)
 {
 	uint64_t fan_mask;
@@ -317,7 +328,7 @@ int fanotify_monitor_mark_directory(struct fanotify_monitor *f, const char *path
 	r = fanotify_mark(f->fanotify_fd, FAN_MARK_ADD, fan_mask, AT_FDCWD, path);
 
 	if (r < 0)
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": adding fanotify mark for %s failed (%s)", path, strerror(errno));
+		display_mark_error(path, enable_permission, "adding", "directory");
 
 	return r;
 }
@@ -332,7 +343,7 @@ int fanotify_monitor_unmark_directory(struct fanotify_monitor *f, const char *pa
 	r = fanotify_mark(f->fanotify_fd, FAN_MARK_REMOVE, fan_mask, AT_FDCWD, path);
 
 	if (r < 0)
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": removing fanotify mark for %s failed (%s)", path, strerror(errno));
+		display_mark_error(path, enable_permission, "removing", "directory");
 
 	return r;
 }
@@ -347,7 +358,7 @@ int fanotify_monitor_mark_mount(struct fanotify_monitor *f, const char *path, in
 	r = fanotify_mark(f->fanotify_fd, FAN_MARK_ADD | FAN_MARK_MOUNT, fan_mask, AT_FDCWD, path);
 
 	if (r < 0)
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": adding fanotify mark on mount point %s failed (%s)", path, strerror(errno));
+		display_mark_error(path, enable_permission, "adding", "mount point");
 
 	return r;
 }
@@ -362,7 +373,7 @@ int fanotify_monitor_unmark_mount(struct fanotify_monitor *f, const char *path, 
 	r = fanotify_mark(f->fanotify_fd, FAN_MARK_REMOVE | FAN_MARK_MOUNT, fan_mask, AT_FDCWD, path);
 
 	if (r < 0)
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": removing fanotify mark for mount point %s failed (%s)", path, strerror(errno));
+		display_mark_error(path, enable_permission, "removing", "mount point");
 
 	return r;
 }
