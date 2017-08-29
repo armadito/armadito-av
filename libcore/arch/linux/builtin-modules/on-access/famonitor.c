@@ -193,6 +193,14 @@ static void scan_file_thread_fun(gpointer data, gpointer user_data)
 			response_write(f->fanotify_fd, file_context->fd, fan_response, file_context->path, "scanned");
 
 		file_context->fd = -1; /* this will prevent a6o_scan_context_destroy from closing the file descriptor twice :( */
+	} else {
+		enum a6o_log_level log_level = (status == A6O_FILE_MALWARE) ? A6O_LOG_LEVEL_WARNING : A6O_LOG_LEVEL_INFO;
+		const char *msg =  (status == A6O_FILE_MALWARE) ? "MALWARE" : "CLEAN";
+
+		a6o_log(A6O_LOG_MODULE, log_level, MODULE_LOG_NAME ": fd %3d path %s: %s (scanned)",
+			file_context->fd,
+			(file_context->path != NULL) ? file_context->path : "null",
+			msg);
 	}
 
 	a6o_scan_context_destroy(file_context);
