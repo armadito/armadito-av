@@ -65,7 +65,7 @@ directory="/var/tmp"; "/tmp"
 white-list-dir="/bin"; "/boot"; "/dev"; "/etc"; "/lib"; "/lib32"; "/lib64"; "/libx32"; "/opt"; "/proc"; "/run"; "/sbin"; "/sys"; "/usr"
 
 # scanned mime types: scan executables, PDF documents 
-mime-types="application/x-executable"; "application/pdf"
+mime-types="application/x-executable"; "application/x-sharedlib"; "application/pdf"
 
 # scan modules: scan with clamav only
 modules= "clamav"
