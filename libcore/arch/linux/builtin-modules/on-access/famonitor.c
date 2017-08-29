@@ -47,6 +47,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <unistd.h>
 
 struct fanotify_monitor {
+	int enable_permission;
+
 	struct access_monitor *monitor;
 	struct armadito *armadito;
 
@@ -68,6 +70,7 @@ struct fanotify_monitor *fanotify_monitor_new(struct access_monitor *m, struct a
 {
 	struct fanotify_monitor *f = malloc(sizeof(struct fanotify_monitor));
 
+	f->enable_permission = 0;
 	f->monitor = m;
 	f->armadito = u;
 
@@ -75,6 +78,18 @@ struct fanotify_monitor *fanotify_monitor_new(struct access_monitor *m, struct a
 	f->my_pid = getpid();
 
 	return f;
+}
+
+int fanotify_monitor_enable_permission(struct fanotify_monitor *f, int enable_permission)
+{
+	f->enable_permission = enable_permission;
+
+	return f->enable_permission;
+}
+
+int fanotify_monitor_is_enable_permission(struct fanotify_monitor *f)
+{
+	return f->enable_permission;
 }
 
 static void display_init_error(void)
@@ -324,62 +339,62 @@ static void display_mark_error(const char *path, int enable_permission, const ch
 	}
 }
 
-int fanotify_monitor_mark_directory(struct fanotify_monitor *f, const char *path, int enable_permission)
+int fanotify_monitor_mark_directory(struct fanotify_monitor *f, const char *path)
 {
 	uint64_t fan_mask;
 	int r;
 
-	fan_mask = (enable_permission ? FAN_OPEN_PERM : FAN_CLOSE_WRITE) | FAN_EVENT_ON_CHILD;
+	fan_mask = ((f->enable_permission) ? FAN_OPEN_PERM : FAN_CLOSE_WRITE) | FAN_EVENT_ON_CHILD;
 
 	r = fanotify_mark(f->fanotify_fd, FAN_MARK_ADD, fan_mask, AT_FDCWD, path);
 
 	if (r < 0)
-		display_mark_error(path, enable_permission, "adding", "directory");
+		display_mark_error(path, f->enable_permission, "adding", "directory");
 
 	return r;
 }
 
-int fanotify_monitor_unmark_directory(struct fanotify_monitor *f, const char *path, int enable_permission)
+int fanotify_monitor_unmark_directory(struct fanotify_monitor *f, const char *path)
 {
 	uint64_t fan_mask;
 	int r;
 
-	fan_mask = (enable_permission ? FAN_OPEN_PERM : FAN_CLOSE_WRITE) | FAN_EVENT_ON_CHILD;
+	fan_mask = ((f->enable_permission) ? FAN_OPEN_PERM : FAN_CLOSE_WRITE) | FAN_EVENT_ON_CHILD;
 
 	r = fanotify_mark(f->fanotify_fd, FAN_MARK_REMOVE, fan_mask, AT_FDCWD, path);
 
 	if (r < 0)
-		display_mark_error(path, enable_permission, "removing", "directory");
+		display_mark_error(path, f->enable_permission, "removing", "directory");
 
 	return r;
 }
 
-int fanotify_monitor_mark_mount(struct fanotify_monitor *f, const char *path, int enable_permission)
+int fanotify_monitor_mark_mount(struct fanotify_monitor *f, const char *path)
 {
 	uint64_t fan_mask;
 	int r;
 
-	fan_mask = enable_permission ? FAN_OPEN_PERM : FAN_CLOSE_WRITE;
+	fan_mask = (f->enable_permission) ? FAN_OPEN_PERM : FAN_CLOSE_WRITE;
 
 	r = fanotify_mark(f->fanotify_fd, FAN_MARK_ADD | FAN_MARK_MOUNT, fan_mask, AT_FDCWD, path);
 
 	if (r < 0)
-		display_mark_error(path, enable_permission, "adding", "mount point");
+		display_mark_error(path, f->enable_permission, "adding", "mount point");
 
 	return r;
 }
 
-int fanotify_monitor_unmark_mount(struct fanotify_monitor *f, const char *path, int enable_permission)
+int fanotify_monitor_unmark_mount(struct fanotify_monitor *f, const char *path)
 {
 	uint64_t fan_mask;
 	int r;
 
-	fan_mask = enable_permission ? FAN_OPEN_PERM : FAN_CLOSE_WRITE;
+	fan_mask = (f->enable_permission) ? FAN_OPEN_PERM : FAN_CLOSE_WRITE;
 
 	r = fanotify_mark(f->fanotify_fd, FAN_MARK_REMOVE | FAN_MARK_MOUNT, fan_mask, AT_FDCWD, path);
 
 	if (r < 0)
-		display_mark_error(path, enable_permission, "removing", "mount point");
+		display_mark_error(path, f->enable_permission, "removing", "mount point");
 
 	return r;
 }
