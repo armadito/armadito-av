@@ -142,7 +142,6 @@ static char *get_file_path_from_fd(int fd, char *buffer, size_t buffer_size)
 
 struct scan_thread_data {
 	struct a6o_scan_context *file_context;
-	struct a6o_report *report;
 };
 
 static void fire_detection_event(struct fanotify_monitor *f, struct a6o_report *report)
@@ -169,12 +168,14 @@ static void scan_file_thread_fun(gpointer data, gpointer user_data)
 	struct fanotify_monitor *f = (struct fanotify_monitor *)user_data;
 	struct scan_thread_data *thread_data = (struct scan_thread_data *)data;
 	struct a6o_scan_context *file_context = thread_data->file_context;
-	struct a6o_report *report = thread_data->report;
+	struct a6o_report report;
 	enum a6o_file_status status;
 	__u32 fan_r;
 
-	status = a6o_scan_context_scan(file_context, report);
-	fan_r = status == A6O_FILE_MALWARE ? FAN_DENY : FAN_ALLOW;
+	a6o_report_init(&report, file_context->path);
+
+	status = a6o_scan_context_scan(file_context, &report);
+	fan_r = (status == A6O_FILE_MALWARE) ? FAN_DENY : FAN_ALLOW;
 
 	if (watchdog_remove(f->watchdog, file_context->fd, NULL))
 		response_write(f->fanotify_fd, file_context->fd, fan_r, file_context->path, "scanned");
@@ -184,11 +185,10 @@ static void scan_file_thread_fun(gpointer data, gpointer user_data)
 	free(file_context);
 
 	if ((status == A6O_FILE_MALWARE || status == A6O_FILE_SUSPICIOUS)
-		&& report->path != NULL)
-		fire_detection_event(f, report);
+		&& report.path != NULL)
+		fire_detection_event(f, &report);
 
-	a6o_report_destroy(report);
-	free(report);
+	a6o_report_destroy(&report);
 
 	free(thread_data);
 }
@@ -217,7 +217,6 @@ static void fanotify_perm_event_process(struct fanotify_monitor *f, struct fanot
 {
 	struct scan_thread_data *thread_data;
 	struct a6o_scan_context *file_context;
-	struct a6o_report *report;
 
 	if (stat_check(event->fd)) {
 		if (watchdog_remove(f->watchdog, event->fd, NULL))
@@ -226,9 +225,8 @@ static void fanotify_perm_event_process(struct fanotify_monitor *f, struct fanot
 	}
 
 	file_context = malloc(sizeof(struct a6o_scan_context));
-	report = malloc(sizeof(struct a6o_report));
 
-	if (a6o_scan_context_get(file_context, event->fd, path, f->scan_conf, report)) {   /* means file must not be scanned */
+	if (a6o_scan_context_get(file_context, event->fd, path, f->scan_conf, NULL)) {   /* means file must not be scanned */
 		if (watchdog_remove(f->watchdog, event->fd, NULL))
 			response_write(f->fanotify_fd, event->fd, FAN_ALLOW, path, "not scanned");
 
@@ -239,16 +237,12 @@ static void fanotify_perm_event_process(struct fanotify_monitor *f, struct fanot
 		a6o_scan_context_destroy(file_context);
 		free(file_context);
 
-		a6o_report_destroy(report);
-		free(report);
-
 		return;
 	}
 
 	/* scan in thread pool */
 	thread_data = malloc(sizeof(struct scan_thread_data));
 	thread_data->file_context = file_context;
-	thread_data->report = report;
 
 	g_thread_pool_push(f->thread_pool, thread_data, NULL);
 }
