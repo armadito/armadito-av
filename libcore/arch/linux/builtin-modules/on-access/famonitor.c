@@ -110,10 +110,12 @@ static void display_init_error(void)
 
 int fanotify_monitor_start(struct fanotify_monitor *f)
 {
+	unsigned int flags;
 	GIOChannel *fanotify_channel;
 	GSource *source;
 
-	f->fanotify_fd = fanotify_init(FAN_CLASS_CONTENT | FAN_UNLIMITED_QUEUE | FAN_UNLIMITED_MARKS, O_LARGEFILE | O_RDONLY);
+	flags = ((f->enable_permission) ? FAN_CLASS_CONTENT : FAN_CLASS_NOTIF) | FAN_UNLIMITED_QUEUE | FAN_UNLIMITED_MARKS;
+	f->fanotify_fd = fanotify_init(flags, O_LARGEFILE | O_RDONLY);
 
 	if (f->fanotify_fd < 0) {
 		display_init_error();
@@ -344,7 +346,7 @@ int fanotify_monitor_mark_directory(struct fanotify_monitor *f, const char *path
 	uint64_t fan_mask;
 	int r;
 
-	fan_mask = ((f->enable_permission) ? FAN_OPEN_PERM : FAN_CLOSE_WRITE) | FAN_EVENT_ON_CHILD;
+	fan_mask = ((f->enable_permission) ? FAN_OPEN_PERM : FAN_OPEN) | FAN_EVENT_ON_CHILD;
 
 	r = fanotify_mark(f->fanotify_fd, FAN_MARK_ADD, fan_mask, AT_FDCWD, path);
 
@@ -359,7 +361,7 @@ int fanotify_monitor_unmark_directory(struct fanotify_monitor *f, const char *pa
 	uint64_t fan_mask;
 	int r;
 
-	fan_mask = ((f->enable_permission) ? FAN_OPEN_PERM : FAN_CLOSE_WRITE) | FAN_EVENT_ON_CHILD;
+	fan_mask = ((f->enable_permission) ? FAN_OPEN_PERM : FAN_OPEN) | FAN_EVENT_ON_CHILD;
 
 	r = fanotify_mark(f->fanotify_fd, FAN_MARK_REMOVE, fan_mask, AT_FDCWD, path);
 
@@ -374,7 +376,7 @@ int fanotify_monitor_mark_mount(struct fanotify_monitor *f, const char *path)
 	uint64_t fan_mask;
 	int r;
 
-	fan_mask = (f->enable_permission) ? FAN_OPEN_PERM : FAN_CLOSE_WRITE;
+	fan_mask = (f->enable_permission) ? FAN_OPEN_PERM : FAN_OPEN;
 
 	r = fanotify_mark(f->fanotify_fd, FAN_MARK_ADD | FAN_MARK_MOUNT, fan_mask, AT_FDCWD, path);
 
@@ -389,7 +391,7 @@ int fanotify_monitor_unmark_mount(struct fanotify_monitor *f, const char *path)
 	uint64_t fan_mask;
 	int r;
 
-	fan_mask = (f->enable_permission) ? FAN_OPEN_PERM : FAN_CLOSE_WRITE;
+	fan_mask = (f->enable_permission) ? FAN_OPEN_PERM : FAN_OPEN;
 
 	r = fanotify_mark(f->fanotify_fd, FAN_MARK_REMOVE | FAN_MARK_MOUNT, fan_mask, AT_FDCWD, path);
 
