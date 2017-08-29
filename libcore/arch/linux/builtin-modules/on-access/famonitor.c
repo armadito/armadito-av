@@ -157,10 +157,6 @@ static char *get_file_path_from_fd(int fd, char *buffer, size_t buffer_size)
 	return buffer;
 }
 
-struct scan_thread_data {
-	struct a6o_scan_context *file_context;
-};
-
 static void fire_detection_event(struct fanotify_monitor *f, struct a6o_report *report)
 {
 	struct a6o_detection_event detection_ev;
@@ -183,21 +179,22 @@ static void fire_detection_event(struct fanotify_monitor *f, struct a6o_report *
 static void scan_file_thread_fun(gpointer data, gpointer user_data)
 {
 	struct fanotify_monitor *f = (struct fanotify_monitor *)user_data;
-	struct scan_thread_data *thread_data = (struct scan_thread_data *)data;
-	struct a6o_scan_context *file_context = thread_data->file_context;
+	struct a6o_scan_context *file_context = (struct a6o_scan_context *)data;
 	struct a6o_report report;
 	enum a6o_file_status status;
-	__u32 fan_r;
 
 	a6o_report_init(&report, file_context->path);
 
 	status = a6o_scan_context_scan(file_context, &report);
-	fan_r = (status == A6O_FILE_MALWARE) ? FAN_DENY : FAN_ALLOW;
 
-	if (watchdog_remove(f->watchdog, file_context->fd, NULL))
-		response_write(f->fanotify_fd, file_context->fd, fan_r, file_context->path, "scanned");
+	if (fanotify_monitor_is_enable_permission(f)) {
+		__u32 fan_response = (status == A6O_FILE_MALWARE) ? FAN_DENY : FAN_ALLOW;
+		if (watchdog_remove(f->watchdog, file_context->fd, NULL))
+			response_write(f->fanotify_fd, file_context->fd, fan_response, file_context->path, "scanned");
 
-	file_context->fd = -1; /* this will prevent a6o_scan_context_destroy from closing the file descriptor twice :( */
+		file_context->fd = -1; /* this will prevent a6o_scan_context_destroy from closing the file descriptor twice :( */
+	}
+
 	a6o_scan_context_destroy(file_context);
 	free(file_context);
 
@@ -206,8 +203,6 @@ static void scan_file_thread_fun(gpointer data, gpointer user_data)
 		fire_detection_event(f, &report);
 
 	a6o_report_destroy(&report);
-
-	free(thread_data);
 }
 
 static int stat_check(int fd)
@@ -232,7 +227,6 @@ static int stat_check(int fd)
 
 static void fanotify_perm_event_process(struct fanotify_monitor *f, struct fanotify_event_metadata *event, const char *path)
 {
-	struct scan_thread_data *thread_data;
 	struct a6o_scan_context *file_context;
 
 	if (stat_check(event->fd)) {
@@ -258,15 +252,32 @@ static void fanotify_perm_event_process(struct fanotify_monitor *f, struct fanot
 	}
 
 	/* scan in thread pool */
-	thread_data = malloc(sizeof(struct scan_thread_data));
-	thread_data->file_context = file_context;
-
-	g_thread_pool_push(f->thread_pool, thread_data, NULL);
+	g_thread_pool_push(f->thread_pool, file_context, NULL);
 }
 
-static void fanotify_notify_event_process(struct fanotify_monitor *m, struct fanotify_event_metadata *event)
+static void fanotify_notify_event_process(struct fanotify_monitor *f, struct fanotify_event_metadata *event, const char *path)
 {
-	/* FIXME: TODO */
+	struct a6o_scan_context *file_context;
+
+	if (stat_check(event->fd)) {
+		/* log? */
+		return;
+	}
+
+	file_context = malloc(sizeof(struct a6o_scan_context));
+
+	if (a6o_scan_context_get(file_context, event->fd, path, f->scan_conf, NULL)) {   /* means file must not be scanned */
+		/* log? */
+		/* response_write(f->fanotify_fd, event->fd, FAN_ALLOW, path, "not scanned"); */
+
+		a6o_scan_context_destroy(file_context);
+		free(file_context);
+
+		return;
+	}
+
+	/* scan in thread pool */
+	g_thread_pool_push(f->thread_pool, file_context, NULL);
 }
 
 static void fanotify_pass_1(struct fanotify_monitor *f, struct fanotify_event_metadata *buf, ssize_t len)
@@ -288,20 +299,20 @@ static void fanotify_pass_2(struct fanotify_monitor *f, struct fanotify_event_me
 {
 	struct fanotify_event_metadata *event;
 
-	/* second pass: process all PERM events that were not from myself and all other events */
+	/* second pass: process all OPEN_PERM or OPEN events that were not from myself and all other events */
 	for(event = buf; FAN_EVENT_OK(event, len); event = FAN_EVENT_NEXT(event, len)) {
-		if ((event->mask & FAN_OPEN_PERM)) {
-			char file_path[PATH_MAX + 1];
-			char *p;
+		char file_path[PATH_MAX + 1];
+		char *p;
 
-			if (event->pid == f->my_pid)
-				continue;
+		if (event->pid == f->my_pid)
+			continue;
 
-			p = get_file_path_from_fd(event->fd, file_path, PATH_MAX);
+		p = get_file_path_from_fd(event->fd, file_path, PATH_MAX);
 
+		if ((event->mask & FAN_OPEN_PERM))
 			fanotify_perm_event_process(f, event, p);
-		} else
-			fanotify_notify_event_process(f, event);
+		else if ((event->mask & FAN_OPEN))
+			fanotify_notify_event_process(f, event, p);
 	}
 }
 
