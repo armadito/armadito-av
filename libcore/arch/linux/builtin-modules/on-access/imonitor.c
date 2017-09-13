@@ -28,12 +28,12 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "monitor.h"
 #include "modname.h"
 
-#include "hash.h"
-
 #include <assert.h>
 #include <errno.h>
 #ifndef RM_GLIB
 #include <glib.h>
+#else
+#include "hash.h"
 #endif
 #include <stdlib.h>
 #include <string.h>

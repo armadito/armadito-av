@@ -346,6 +346,7 @@ int fanotify_monitor_mark_mount(struct fanotify_monitor *f, const char *path, in
 	int r;
 
 	r = fanotify_mark(f->fanotify_fd, FAN_MARK_ADD | FAN_MARK_MOUNT, fan_mask, AT_FDCWD, path);
+
 	if (r < 0)
 		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": adding fanotify mark on mount point %s failed (%s)", path, strerror(errno));
 
