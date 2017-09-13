@@ -19,11 +19,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-/*
-  TODO:
-  - implement fanotify non-perm event
-*/
-
 #define _GNU_SOURCE
 
 #include <libarmadito/armadito.h>
