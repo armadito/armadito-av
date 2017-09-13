@@ -21,6 +21,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #define _GNU_SOURCE
 
+#define RM_GLIB
+
 #include <libarmadito/armadito.h>
 #include <armadito-config.h>
 
