@@ -21,6 +21,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #define _GNU_SOURCE
 
+/* glib is "half-removed" because of GMainLoop & co */
+#define RM_GLIB
+
 #include <libarmadito/armadito.h>
 #include "armadito-config.h"
 
@@ -36,9 +39,11 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
-/* #ifndef RM_GLIB */
+/* must still be included for GMainLoop & co */
 #include <glib.h>
-/* #endif */
+#ifdef RM_GLIB
+#include "ptrarray.h"
+#endif
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -62,7 +67,11 @@ struct access_monitor {
 	int enable_removable_media;
 	int autoscan_removable_media;
 
+#ifdef RM_GLIB
+	struct ptr_array *entries;
+#else
 	GPtrArray *entries;
+#endif
 
 	int start_pipe[2];
 	int command_pipe[2];
@@ -84,13 +93,23 @@ static void mount_cb(enum mount_event_type ev_type, const char *path, void *user
 
 static gpointer monitor_thread_fun(gpointer data);
 
-static void entry_destroy_notify(gpointer data)
+#ifdef RM_GLIB
+static void entry_destroy_cb(void *data)
 {
 	struct monitor_entry *e = (struct monitor_entry *)data;
 
 	free((void *)e->path);
 	free(e);
 }
+#else
+static void entry_destroy_cb(gpointer data)
+{
+	struct monitor_entry *e = (struct monitor_entry *)data;
+
+	free((void *)e->path);
+	free(e);
+}
+#endif
 
 struct access_monitor *access_monitor_new(struct armadito *armadito)
 {
@@ -103,7 +122,11 @@ struct access_monitor *access_monitor_new(struct armadito *armadito)
 
 	m->ar = armadito;
 
-	m->entries = g_ptr_array_new_full(10, entry_destroy_notify);
+#ifdef RM_GLIB
+	m->entries = ptr_array_new(entry_destroy_cb);
+#else
+	m->entries = g_ptr_array_new_full(10, entry_destroy_cb);
+#endif
 
 	/* this pipe will be used to trigger creation of the monitor thread when entering main thread loop, */
 	/* so that the monitor thread does not start before all modules are initialized  */
@@ -195,7 +218,11 @@ static void add_entry(struct access_monitor *m, const char *path, enum entry_fla
 	e->path = strdup(path);
 	e->flag = flag;
 
+#ifdef RM_GLIB
+	ptr_array_add(m->entries, e);
+#else
 	g_ptr_array_add(m->entries, e);
+#endif
 }
 
 static dev_t get_dev_id(const char *path)
@@ -357,8 +384,13 @@ static void mark_entries(struct access_monitor *m)
 {
 	int i;
 
+#ifdef RM_GLIB
+	for(i = 0; i < ptr_array_size(m->entries); i++) {
+		struct monitor_entry *e = (struct monitor_entry *)ptr_array_index(m->entries, i);
+#else
 	for(i = 0; i < m->entries->len; i++) {
 		struct monitor_entry *e = (struct monitor_entry *)g_ptr_array_index(m->entries, i);
+#endif
 
 		switch (e->flag) {
 		case ENTRY_DIR:
