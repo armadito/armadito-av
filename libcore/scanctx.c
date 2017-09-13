@@ -55,12 +55,10 @@ enum a6o_scan_context_status a6o_scan_context_get(struct a6o_scan_context *ctx, 
 	const char *mime_type;
 	int err = 0;
 
-	/* initializes the structure */
-	a6o_report_init(report, path);
-
 	if (fd < 0 && path == NULL) {
 		ctx->status = A6O_SC_FILE_OPEN_ERROR;
-		a6o_report_change(report, A6O_FILE_IERROR, NULL, NULL);
+		if (report != NULL)
+			a6o_report_change(report, A6O_FILE_IERROR, NULL, NULL);
 		return ctx->status;
 	}
 
@@ -70,14 +68,13 @@ enum a6o_scan_context_status a6o_scan_context_get(struct a6o_scan_context *ctx, 
 	ctx->mime_type = NULL;
 	ctx->applicable_modules = NULL;
 
-	/* 1) check file name vs. directories white list */
+	/* check file name vs. directories white list */
 	if (path != NULL && a6o_scan_conf_is_white_listed(conf, path)) {
 		ctx->status = A6O_SC_WHITE_LISTED_DIRECTORY;
-		a6o_report_change(report, A6O_FILE_WHITE_LISTED, NULL, NULL);
+		if (report != NULL)
+			a6o_report_change(report, A6O_FILE_WHITE_LISTED, NULL, NULL);
 		return ctx->status;
 	}
-
-	/* 2) cache => NOT YET */
 
 	/* open file if no fd given */
 	if (ctx->fd < 0) {
@@ -91,19 +88,21 @@ enum a6o_scan_context_status a6o_scan_context_get(struct a6o_scan_context *ctx, 
 
 		if (ctx->fd < 0) {
 			ctx->status = A6O_SC_FILE_OPEN_ERROR;
-			a6o_report_change(report, A6O_FILE_IERROR, NULL, NULL);
+			if (report != NULL)
+				a6o_report_change(report, A6O_FILE_IERROR, NULL, NULL);
 			a6o_log(A6O_LOG_LIB,A6O_LOG_LEVEL_WARNING, " Error :: a6o_scan_context_get :: Opening file [%s] for scan failed :: err = %d\n",path,err);
 			return ctx->status;
 		}
 	}
 
-	/* 3) fstat file descriptor and get file size */
+	/* fstat file descriptor and get file size */
 	/* not yet */
 
-	/* 4) file type using mime_type_guess and applicable modules from configuration */
+	/* file type using mime_type_guess and applicable modules from configuration */
 	mime_type = os_mime_type_guess_fd(ctx->fd);
 	if (mime_type == NULL) {
-		a6o_report_change(report, A6O_FILE_UNKNOWN_TYPE, NULL, NULL);
+		if (report != NULL)
+			a6o_report_change(report, A6O_FILE_UNKNOWN_TYPE, NULL, NULL);
 		ctx->status = A6O_SC_FILE_TYPE_NOT_SCANNED;
 		return ctx->status;
 	}
@@ -112,7 +111,8 @@ enum a6o_scan_context_status a6o_scan_context_get(struct a6o_scan_context *ctx, 
 
 	if (applicable_modules == NULL) {
 		free((void *)mime_type);
-		a6o_report_change(report, A6O_FILE_UNKNOWN_TYPE, NULL, NULL);
+		if (report != NULL)
+			a6o_report_change(report, A6O_FILE_UNKNOWN_TYPE, NULL, NULL);
 		ctx->status = A6O_SC_FILE_TYPE_NOT_SCANNED;
 
 		return ctx->status;

@@ -164,6 +164,7 @@ arch/linux/net/Makefile
 arch/linux/nsjail/Makefile
 arch/linux/service/Makefile
 conf/Makefile
+conf/linux/Makefile
 libcore/Makefile
 libmodule/Makefile
 librpc/Makefile

@@ -64,7 +64,6 @@ struct monitor_entry {
 
 struct access_monitor {
 	int enable;
-	int enable_permission;
 	int enable_removable_media;
 	int autoscan_removable_media;
 
@@ -104,7 +103,6 @@ struct access_monitor *access_monitor_new(struct armadito *armadito)
 	GIOChannel *start_channel;
 
 	m->enable = 0;
-	m->enable_permission = 0;
 	m->enable_removable_media = 0;
 	m->autoscan_removable_media = 0;
 
@@ -117,14 +115,14 @@ struct access_monitor *access_monitor_new(struct armadito *armadito)
 	/* and the daemon main loop is entered */
 	if (pipe(m->start_pipe) < 0) {
 		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": pipe failed (%s)", strerror(errno));
-		g_free(m);
+		free(m);
 		return NULL;
 	}
 
 	/* this pipe will be used to send commands to the monitor thread */
 	if (pipe(m->command_pipe) < 0) {
 		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": pipe failed (%s)", strerror(errno));
-		g_free(m);
+		free(m);
 		return NULL;
 	}
 
@@ -158,14 +156,12 @@ int access_monitor_is_enable(struct access_monitor *m)
 
 int access_monitor_enable_permission(struct access_monitor *m, int enable_permission)
 {
-	m->enable_permission = enable_permission;
-
-	return m->enable_permission;
+	return fanotify_monitor_enable_permission(m->fanotify_monitor, enable_permission);
 }
 
 int access_monitor_is_enable_permission(struct access_monitor *m)
 {
-	return m->enable_permission;
+	return fanotify_monitor_is_enable_permission(m->fanotify_monitor);
 }
 
 int access_monitor_enable_removable_media(struct access_monitor *m, int enable_removable_media)
@@ -289,7 +285,7 @@ static gboolean delayed_start_cb(GIOChannel *source, GIOCondition condition, gpo
 
 static void mark_directory(struct access_monitor *m, const char *path)
 {
-	if (fanotify_monitor_mark_directory(m->fanotify_monitor, path, m->enable_permission) < 0)
+	if (fanotify_monitor_mark_directory(m->fanotify_monitor, path) < 0)
 		return;
 
 	if (inotify_monitor_mark_directory(m->inotify_monitor, path) < 0)
@@ -300,7 +296,7 @@ static void mark_directory(struct access_monitor *m, const char *path)
 
 int access_monitor_unmark_directory(struct access_monitor *m, const char *path)
 {
-	if (fanotify_monitor_unmark_directory(m->fanotify_monitor, path, m->enable_permission) < 0)
+	if (fanotify_monitor_unmark_directory(m->fanotify_monitor, path) < 0)
 		return -1;
 
 	if (inotify_monitor_unmark_directory(m->inotify_monitor, path) < 0)
@@ -345,7 +341,7 @@ int access_monitor_recursive_mark_directory(struct access_monitor *m, const char
 
 static void mark_mount_point(struct access_monitor *m, const char *path)
 {
-	if (fanotify_monitor_mark_mount(m->fanotify_monitor, path, m->enable_permission) < 0)
+	if (fanotify_monitor_mark_mount(m->fanotify_monitor, path) < 0)
 		return;
 
 	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": added mark for mount point %s", path);
@@ -356,7 +352,7 @@ static void unmark_mount_point(struct access_monitor *m, const char *path)
 	if (path == NULL)
 		return;
 
-	if (fanotify_monitor_unmark_mount(m->fanotify_monitor, path, m->enable_permission) < 0)
+	if (fanotify_monitor_unmark_mount(m->fanotify_monitor, path) < 0)
 		return;
 
 	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": removed mark for mount point %s", path);

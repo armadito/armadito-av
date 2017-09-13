@@ -319,6 +319,8 @@ static void scan_file(struct a6o_on_demand *on_demand, const char *path)
 	enum a6o_scan_context_status context_status;
 	struct a6o_report report;
 
+	a6o_report_init(&report, path);
+
 	context_status = a6o_scan_context_get(&file_context, -1, path, on_demand->scan_conf, &report);
 
 	if (context_status == A6O_SC_MUST_SCAN)

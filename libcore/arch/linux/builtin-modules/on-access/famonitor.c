@@ -47,6 +47,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <unistd.h>
 
 struct fanotify_monitor {
+	int enable_permission;
+
 	struct access_monitor *monitor;
 	struct armadito *armadito;
 
@@ -68,6 +70,7 @@ struct fanotify_monitor *fanotify_monitor_new(struct access_monitor *m, struct a
 {
 	struct fanotify_monitor *f = malloc(sizeof(struct fanotify_monitor));
 
+	f->enable_permission = 0;
 	f->monitor = m;
 	f->armadito = u;
 
@@ -77,20 +80,45 @@ struct fanotify_monitor *fanotify_monitor_new(struct access_monitor *m, struct a
 	return f;
 }
 
+int fanotify_monitor_enable_permission(struct fanotify_monitor *f, int enable_permission)
+{
+	f->enable_permission = enable_permission;
+
+	return f->enable_permission;
+}
+
+int fanotify_monitor_is_enable_permission(struct fanotify_monitor *f)
+{
+	return f->enable_permission;
+}
+
+static void display_init_error(void)
+{
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": fanotify_init failed (%s)", strerror(errno));
+
+	switch(errno) {
+	case EPERM:
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": you must be root or have CAP_SYS_ADMIN capability to enable on-access protection");
+		break;
+	case ENOSYS:
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": this kernel does not implement fanotify_init()");
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": fanotify is available only if the kernel was configured with CONFIG_FANOTIFY");
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": check your running kernel config, for instance with 'grep FANOTIFY /boot/config-$(uname -r)'");
+		break;
+	}
+}
+
 int fanotify_monitor_start(struct fanotify_monitor *f)
 {
+	unsigned int flags;
 	GIOChannel *fanotify_channel;
 	GSource *source;
 
-	f->fanotify_fd = fanotify_init(FAN_CLASS_CONTENT | FAN_UNLIMITED_QUEUE | FAN_UNLIMITED_MARKS, O_LARGEFILE | O_RDONLY);
+	flags = ((f->enable_permission) ? FAN_CLASS_CONTENT : FAN_CLASS_NOTIF) | FAN_UNLIMITED_QUEUE | FAN_UNLIMITED_MARKS;
+	f->fanotify_fd = fanotify_init(flags, O_LARGEFILE | O_RDONLY);
 
 	if (f->fanotify_fd < 0) {
-		if (errno == EPERM)
-			a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": you must be root or have CAP_SYS_ADMIN capability to enable on-access protection");
-		else if (errno == ENOSYS)
-			a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": this kernel does not implement fanotify_init(). The fanotify API is available only if the kernel was configured with CONFIG_FANOTIFY");
-		else
-			a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": fanotify_init failed (%s)", strerror(errno));
+		display_init_error();
 
 		return -1;
 	}
@@ -129,11 +157,6 @@ static char *get_file_path_from_fd(int fd, char *buffer, size_t buffer_size)
 	return buffer;
 }
 
-struct scan_thread_data {
-	struct a6o_scan_context *file_context;
-	struct a6o_report *report;
-};
-
 static void fire_detection_event(struct fanotify_monitor *f, struct a6o_report *report)
 {
 	struct a6o_detection_event detection_ev;
@@ -156,70 +179,73 @@ static void fire_detection_event(struct fanotify_monitor *f, struct a6o_report *
 static void scan_file_thread_fun(gpointer data, gpointer user_data)
 {
 	struct fanotify_monitor *f = (struct fanotify_monitor *)user_data;
-	struct scan_thread_data *thread_data = (struct scan_thread_data *)data;
-	struct a6o_scan_context *file_context = thread_data->file_context;
-	struct a6o_report *report = thread_data->report;
+	struct a6o_scan_context *file_context = (struct a6o_scan_context *)data;
+	struct a6o_report report;
 	enum a6o_file_status status;
-	__u32 fan_r;
 
-	status = a6o_scan_context_scan(file_context, report);
-	fan_r = status == A6O_FILE_MALWARE ? FAN_DENY : FAN_ALLOW;
+	a6o_report_init(&report, file_context->path);
 
-	if (watchdog_remove(f->watchdog, file_context->fd, NULL))
-		response_write(f->fanotify_fd, file_context->fd, fan_r, file_context->path, "scanned");
+	status = a6o_scan_context_scan(file_context, &report);
 
-	file_context->fd = -1; /* this will prevent a6o_scan_context_destroy from closing the file descriptor twice :( */
+	if (fanotify_monitor_is_enable_permission(f)) {
+		__u32 fan_response = (status == A6O_FILE_MALWARE) ? FAN_DENY : FAN_ALLOW;
+		if (watchdog_remove(f->watchdog, file_context->fd, NULL))
+			response_write(f->fanotify_fd, file_context->fd, fan_response, file_context->path, "scanned");
+
+		file_context->fd = -1; /* this will prevent a6o_scan_context_destroy from closing the file descriptor twice :( */
+	} else {
+		enum a6o_log_level log_level = (status == A6O_FILE_MALWARE) ? A6O_LOG_LEVEL_WARNING : A6O_LOG_LEVEL_INFO;
+		const char *msg =  (status == A6O_FILE_MALWARE) ? "MALWARE" : "CLEAN";
+
+		a6o_log(A6O_LOG_MODULE, log_level, MODULE_LOG_NAME ": fd %3d path %s: %s (scanned)",
+			file_context->fd,
+			(file_context->path != NULL) ? file_context->path : "null",
+			msg);
+	}
+
 	a6o_scan_context_destroy(file_context);
 	free(file_context);
 
 	if ((status == A6O_FILE_MALWARE || status == A6O_FILE_SUSPICIOUS)
-		&& report->path != NULL)
-		fire_detection_event(f, report);
+		&& report.path != NULL)
+		fire_detection_event(f, &report);
 
-	a6o_report_destroy(report);
-	free(report);
-
-	free(thread_data);
+	a6o_report_destroy(&report);
 }
 
-static int stat_check(struct fanotify_monitor *f, int fd, const char *path)
+static int stat_check(int fd)
 {
 	struct stat buf;
 
 	/* the 2 following tests could be removed: */
 	/* if file descriptor does not refer to a file, read() will fail inside os_mime_type_guess_fd() */
 	/* in this case, mime_type will be null, context_status will be error and response will be ALLOW */
-	/* BUT: this gives a lot of warning in os_mime_type_guess() */
+	/* BUT: this would give a lot of warning in os_mime_type_guess() */
 	/* and the read() in os_mime_type_guess() could be successfull for a device for instance */
 	/* so for now I keep the fstat() */
-	if (fstat(fd, &buf) < 0) {
-		if (watchdog_remove(f->watchdog, fd, NULL))
-			response_write(f->fanotify_fd, fd, FAN_ALLOW, path, "stat failed");
-		return 1;
-	}
 
-	if (!S_ISREG(buf.st_mode)) {
-		if (watchdog_remove(f->watchdog, fd, NULL))
-			response_write(f->fanotify_fd, fd, FAN_ALLOW, path, "not a file");
+	if (fstat(fd, &buf) < 0)
 		return 1;
-	}
+
+	if (!S_ISREG(buf.st_mode))
+		return 1;
 
 	return 0;
 }
 
 static void fanotify_perm_event_process(struct fanotify_monitor *f, struct fanotify_event_metadata *event, const char *path)
 {
-	struct scan_thread_data *thread_data;
 	struct a6o_scan_context *file_context;
-	struct a6o_report *report;
 
-	if (stat_check(f, event->fd, path))
+	if (stat_check(event->fd)) {
+		if (watchdog_remove(f->watchdog, event->fd, NULL))
+			response_write(f->fanotify_fd, event->fd, FAN_ALLOW, path, "stat failed or not a regular file");
 		return;
+	}
 
 	file_context = malloc(sizeof(struct a6o_scan_context));
-	report = malloc(sizeof(struct a6o_report));
 
-	if (a6o_scan_context_get(file_context, event->fd, path, f->scan_conf, report)) {   /* means file must not be scanned */
+	if (a6o_scan_context_get(file_context, event->fd, path, f->scan_conf, NULL)) {   /* means file must not be scanned */
 		if (watchdog_remove(f->watchdog, event->fd, NULL))
 			response_write(f->fanotify_fd, event->fd, FAN_ALLOW, path, "not scanned");
 
@@ -230,23 +256,36 @@ static void fanotify_perm_event_process(struct fanotify_monitor *f, struct fanot
 		a6o_scan_context_destroy(file_context);
 		free(file_context);
 
-		a6o_report_destroy(report);
-		free(report);
+		return;
+	}
+
+	/* scan in thread pool */
+	g_thread_pool_push(f->thread_pool, file_context, NULL);
+}
+
+static void fanotify_notify_event_process(struct fanotify_monitor *f, struct fanotify_event_metadata *event, const char *path)
+{
+	struct a6o_scan_context *file_context;
+
+	if (stat_check(event->fd)) {
+		/* log? */
+		return;
+	}
+
+	file_context = malloc(sizeof(struct a6o_scan_context));
+
+	if (a6o_scan_context_get(file_context, event->fd, path, f->scan_conf, NULL)) {   /* means file must not be scanned */
+		/* log? */
+		/* response_write(f->fanotify_fd, event->fd, FAN_ALLOW, path, "not scanned"); */
+
+		a6o_scan_context_destroy(file_context);
+		free(file_context);
 
 		return;
 	}
 
 	/* scan in thread pool */
-	thread_data = malloc(sizeof(struct scan_thread_data));
-	thread_data->file_context = file_context;
-	thread_data->report = report;
-
-	g_thread_pool_push(f->thread_pool, thread_data, NULL);
-}
-
-static void fanotify_notify_event_process(struct fanotify_monitor *m, struct fanotify_event_metadata *event)
-{
-	/* FIXME: TODO */
+	g_thread_pool_push(f->thread_pool, file_context, NULL);
 }
 
 static void fanotify_pass_1(struct fanotify_monitor *f, struct fanotify_event_metadata *buf, ssize_t len)
@@ -268,20 +307,20 @@ static void fanotify_pass_2(struct fanotify_monitor *f, struct fanotify_event_me
 {
 	struct fanotify_event_metadata *event;
 
-	/* second pass: process all PERM events that were not from myself and all other events */
+	/* second pass: process all OPEN_PERM or OPEN events that were not from myself and all other events */
 	for(event = buf; FAN_EVENT_OK(event, len); event = FAN_EVENT_NEXT(event, len)) {
-		if ((event->mask & FAN_OPEN_PERM)) {
-			char file_path[PATH_MAX + 1];
-			char *p;
+		char file_path[PATH_MAX + 1];
+		char *p;
 
-			if (event->pid == f->my_pid)
-				continue;
+		if (event->pid == f->my_pid)
+			continue;
 
-			p = get_file_path_from_fd(event->fd, file_path, PATH_MAX);
+		p = get_file_path_from_fd(event->fd, file_path, PATH_MAX);
 
+		if ((event->mask & FAN_OPEN_PERM))
 			fanotify_perm_event_process(f, event, p);
-		} else
-			fanotify_notify_event_process(f, event);
+		else if ((event->mask & FAN_OPEN))
+			fanotify_notify_event_process(f, event, p);
 	}
 }
 
@@ -310,58 +349,73 @@ static gboolean fanotify_cb(GIOChannel *source, GIOCondition condition, gpointer
 	return TRUE;
 }
 
-int fanotify_monitor_mark_directory(struct fanotify_monitor *f, const char *path, int enable_permission)
+static void display_mark_error(const char *path, int enable_permission, const char *adding_or_removing, const char *dir_or_mount)
+{
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": %s fanotify mark for %s %s failed (%s)", adding_or_removing, dir_or_mount, path, strerror(errno));
+
+	if (enable_permission && errno == EINVAL) {
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": may be this kernel does not support fanotify access permissions?");
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": the fanotify access permissions are available only if the kernel was configured with CONFIG_FANOTIFY_ACCESS_PERMISSIONS");
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": check your running kernel config, for instance with 'grep FANOTIFY /boot/config-$(uname -r)'");
+	}
+}
+
+int fanotify_monitor_mark_directory(struct fanotify_monitor *f, const char *path)
 {
 	uint64_t fan_mask;
 	int r;
 
-	fan_mask = (enable_permission ? FAN_OPEN_PERM : FAN_CLOSE_WRITE) | FAN_EVENT_ON_CHILD;
+	fan_mask = ((f->enable_permission) ? FAN_OPEN_PERM : FAN_OPEN) | FAN_EVENT_ON_CHILD;
 
 	r = fanotify_mark(f->fanotify_fd, FAN_MARK_ADD, fan_mask, AT_FDCWD, path);
 
 	if (r < 0)
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": adding fanotify mark for %s failed (%s)", path, strerror(errno));
+		display_mark_error(path, f->enable_permission, "adding", "directory");
 
 	return r;
 }
 
-int fanotify_monitor_unmark_directory(struct fanotify_monitor *f, const char *path, int enable_permission)
+int fanotify_monitor_unmark_directory(struct fanotify_monitor *f, const char *path)
 {
 	uint64_t fan_mask;
 	int r;
 
-	fan_mask = (enable_permission ? FAN_OPEN_PERM : FAN_CLOSE_WRITE) | FAN_EVENT_ON_CHILD;
+	fan_mask = ((f->enable_permission) ? FAN_OPEN_PERM : FAN_OPEN) | FAN_EVENT_ON_CHILD;
 
 	r = fanotify_mark(f->fanotify_fd, FAN_MARK_REMOVE, fan_mask, AT_FDCWD, path);
 
 	if (r < 0)
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": removing fanotify mark for %s failed (%s)", path, strerror(errno));
+		display_mark_error(path, f->enable_permission, "removing", "directory");
 
 	return r;
 }
 
-int fanotify_monitor_mark_mount(struct fanotify_monitor *f, const char *path, int enable_permission)
+int fanotify_monitor_mark_mount(struct fanotify_monitor *f, const char *path)
 {
-	uint64_t fan_mask = enable_permission ? FAN_OPEN_PERM : FAN_CLOSE_WRITE;
+	uint64_t fan_mask;
 	int r;
+
+	fan_mask = (f->enable_permission) ? FAN_OPEN_PERM : FAN_OPEN;
 
 	r = fanotify_mark(f->fanotify_fd, FAN_MARK_ADD | FAN_MARK_MOUNT, fan_mask, AT_FDCWD, path);
 
 	if (r < 0)
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": adding fanotify mark on mount point %s failed (%s)", path, strerror(errno));
+		display_mark_error(path, f->enable_permission, "adding", "mount point");
 
 	return r;
 }
 
-int fanotify_monitor_unmark_mount(struct fanotify_monitor *f, const char *path, int enable_permission)
+int fanotify_monitor_unmark_mount(struct fanotify_monitor *f, const char *path)
 {
-	uint64_t fan_mask = enable_permission ? FAN_OPEN_PERM : FAN_CLOSE_WRITE;
+	uint64_t fan_mask;
 	int r;
+
+	fan_mask = (f->enable_permission) ? FAN_OPEN_PERM : FAN_OPEN;
 
 	r = fanotify_mark(f->fanotify_fd, FAN_MARK_REMOVE | FAN_MARK_MOUNT, fan_mask, AT_FDCWD, path);
 
 	if (r < 0)
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": removing fanotify mark for mount point %s failed (%s)", path, strerror(errno));
+		display_mark_error(path, f->enable_permission, "removing", "mount point");
 
 	return r;
 }
