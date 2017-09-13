@@ -73,7 +73,7 @@ void buffer_str_append(struct buffer *b, const char *s)
 	do {
 		buffer_make_room(b, 1);
 		*((char *)buffer_end(b)) = *p;
-		buffer_increment(b);
+		buffer_increment(b, 1);
 	} while (*p++);
 }
 
