@@ -46,8 +46,12 @@ arch/linux/builtin-modules/on-access/queue.h \
 arch/linux/builtin-modules/on-access/stamp.h \
 arch/linux/builtin-modules/on-access/watchdog.c \
 arch/linux/builtin-modules/on-access/watchdog.h \
+../librpc/brpc/buffer.c \
+../librpc/brpc/buffer.h \
 ../librpc/brpc/hash.c \
-../librpc/brpc/hash.h
+../librpc/brpc/hash.h \
+../librpc/brpc/ptrarray.c \
+../librpc/brpc/ptrarray.h
 endif
 
 libcore_a_CFLAGS=-I$(top_srcdir) -I$(top_srcdir)/libmodule/include -I$(top_srcdir)/libcore/include -I$(top_srcdir)/libcore/arch/linux -I$(top_srcdir)/librpc/brpc
