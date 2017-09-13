@@ -339,7 +339,7 @@ int access_monitor_recursive_mark_directory(struct access_monitor *m, const char
 	return 0;
 }
 
-static void mark_mount_point(struct access_monitor *m, const char *path)
+void access_monitor_mark_mount_point(struct access_monitor *m, const char *path)
 {
 	if (fanotify_monitor_mark_mount(m->fanotify_monitor, path) < 0)
 		return;
@@ -347,7 +347,7 @@ static void mark_mount_point(struct access_monitor *m, const char *path)
 	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": added mark for mount point %s", path);
 }
 
-static void unmark_mount_point(struct access_monitor *m, const char *path)
+static void access_monitor_unmark_mount_point(struct access_monitor *m, const char *path)
 {
 	if (path == NULL)
 		return;
@@ -365,10 +365,14 @@ static void mark_entries(struct access_monitor *m)
 	for(i = 0; i < m->entries->len; i++) {
 		struct monitor_entry *e = (struct monitor_entry *)g_ptr_array_index(m->entries, i);
 
-		if (e->flag == ENTRY_DIR)
+		switch (e->flag) {
+		case ENTRY_DIR:
 			access_monitor_recursive_mark_directory(m, e->path);
-		else
-			mark_mount_point(m, e->path);
+			break;
+		case ENTRY_MOUNT:
+			access_monitor_mark_mount_point(m, e->path);
+			break;
+		}
 	}
 }
 
@@ -441,7 +445,7 @@ static gboolean mount_idle_cb(gpointer user_data)
 		if (access_monitor_is_autoscan_removable_media(data->monitor))
 			scan_media(data);
 		if (access_monitor_is_enable_removable_media(data->monitor))
-			mark_mount_point(data->monitor, data->path);
+			access_monitor_mark_mount_point(data->monitor, data->path);
 	}
 
 	/* if ev_type is EVENT_UMOUNT, nothing to be done, the kernel has already removed the fanotify mark */

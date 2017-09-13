@@ -54,6 +54,8 @@ int access_monitor_recursive_mark_directory(struct access_monitor *m, const char
 
 int access_monitor_unmark_directory(struct access_monitor *m, const char *path);
 
+void access_monitor_mark_mount_point(struct access_monitor *m, const char *path);
+
 int access_monitor_delayed_start(struct access_monitor *m);
 
 #define ACCESS_MONITOR_START    ((char)0x1)
