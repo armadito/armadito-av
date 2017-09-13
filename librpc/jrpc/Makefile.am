@@ -7,8 +7,6 @@ SUBDIRS=. tests
 noinst_LIBRARIES=libjrpc.a
 
 libjrpc_a_SOURCES= \
-buffer.c \
-buffer.h \
 connection.c \
 connection.h \
 hash.c \
@@ -16,6 +14,9 @@ hash.h \
 jrpc.c \
 mapper.c \
 marshall.c 
+
+#buffer.c 
+#buffer.h 
 
 # for debug, add:
 #JRPC_DEBUG=-DJRPC_DEBUG 

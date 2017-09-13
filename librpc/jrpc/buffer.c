@@ -27,7 +27,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #define DEFAULT_INITIAL_SIZE 128
 
-void buffer_init(struct buffer *b, size_t initial_size)
+static void buffer_init(struct buffer *b, size_t initial_size)
 {
 	b->filled_size = 0;
 	if (initial_size == 0)
@@ -37,12 +37,12 @@ void buffer_init(struct buffer *b, size_t initial_size)
 	b->p = malloc(b->alloced_size);
 }
 
-void buffer_destroy(struct buffer *b)
+static void buffer_destroy(struct buffer *b)
 {
 	free(b->p);
 }
 
-void buffer_grow(struct buffer *b, size_t needed)
+static void buffer_grow(struct buffer *b, size_t needed)
 {
 	if (b->filled_size + needed >= b->alloced_size) {
 		while (b->filled_size + needed >= b->alloced_size)
@@ -51,17 +51,17 @@ void buffer_grow(struct buffer *b, size_t needed)
 	}
 }
 
-void buffer_increment(struct buffer *b, size_t size)
+static void buffer_increment(struct buffer *b, size_t size)
 {
 	b->filled_size += size;
 }
 
-char *buffer_end(struct buffer *b)
+static char *buffer_end(struct buffer *b)
 {
 	return b->p + b->filled_size;
 }
 
-void buffer_append(struct buffer *b, const char *data, size_t size)
+static void buffer_append(struct buffer *b, const char *data, size_t size)
 {
 	buffer_grow(b, size);
 
@@ -70,17 +70,17 @@ void buffer_append(struct buffer *b, const char *data, size_t size)
 	buffer_increment(b, size);
 }
 
-size_t buffer_size(struct buffer *b)
+static size_t buffer_size(struct buffer *b)
 {
 	return b->filled_size;
 }
 
-char *buffer_data(struct buffer *b)
+static char *buffer_data(struct buffer *b)
 {
 	return b->p;
 }
 
-void buffer_clear(struct buffer *b)
+static void buffer_clear(struct buffer *b)
 {
 	b->filled_size = 0;
 }

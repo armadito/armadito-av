@@ -30,22 +30,22 @@ struct buffer {
 	size_t alloced_size;
 };
 
-void buffer_init(struct buffer *b, size_t initial_size);
+static void buffer_init(struct buffer *b, size_t initial_size);
 
-void buffer_destroy(struct buffer *b);
+static void buffer_destroy(struct buffer *b);
 
-void buffer_grow(struct buffer *b, size_t needed);
+static void buffer_grow(struct buffer *b, size_t needed);
 
-void buffer_increment(struct buffer *b, size_t size);
+static void buffer_increment(struct buffer *b, size_t size);
 
-char *buffer_end(struct buffer *b);
+static char *buffer_end(struct buffer *b);
 
-void buffer_append(struct buffer *b, const char *data, size_t size);
+static void buffer_append(struct buffer *b, const char *data, size_t size);
 
-size_t buffer_size(struct buffer *b);
+static size_t buffer_size(struct buffer *b);
 
-char *buffer_data(struct buffer *b);
+static char *buffer_data(struct buffer *b);
 
-void buffer_clear(struct buffer *b);
+static void buffer_clear(struct buffer *b);
 
 #endif
