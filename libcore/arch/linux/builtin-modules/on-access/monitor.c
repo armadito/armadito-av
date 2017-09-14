@@ -460,7 +460,9 @@ static gboolean mount_idle_cb(gpointer user_data)
 {
 	struct mount_data *data = user_data;
 
+#if 0
 	assert(g_main_context_is_owner(access_monitor_get_main_context(data->monitor)));
+#endif
 
 	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": received mount notification for %s (%s)", data->path, data->ev_type == EVENT_MOUNT ? "mount" : "umount");
 
@@ -538,7 +540,7 @@ static void access_monitor_stop_command(struct access_monitor *m)
 
 static void access_monitor_status_command(struct access_monitor *m)
 {
-	/* ??? */
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": on-access protection status (Not Yet Implemented)");
 }
 
 static gboolean command_cb(GIOChannel *source, GIOCondition condition, gpointer data)
@@ -546,7 +548,9 @@ static gboolean command_cb(GIOChannel *source, GIOCondition condition, gpointer 
 	struct access_monitor *m = (struct access_monitor *)data;
 	char cmd;
 
+#if 0
 	assert(g_main_context_is_owner(m->monitor_thread_context));
+#endif
 
 	if (read(m->command_pipe[0], &cmd, 1) < 0) {
 		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": read() in command callback failed (%s)", strerror(errno));

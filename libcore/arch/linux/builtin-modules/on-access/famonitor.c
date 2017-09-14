@@ -334,7 +334,9 @@ static gboolean fanotify_cb(GIOChannel *source, GIOCondition condition, gpointer
 	char buf[FANOTIFY_BUFFER_SIZE];
 	ssize_t len;
 
+#if 0
 	assert(g_main_context_is_owner(access_monitor_get_main_context(f->monitor)));
+#endif
 
 	if ((len = read(f->fanotify_fd, buf, FANOTIFY_BUFFER_SIZE)) < 0) {
 		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": error reading fanotify event descriptor (%s)", strerror(errno));

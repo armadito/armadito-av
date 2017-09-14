@@ -261,7 +261,9 @@ static gboolean inotify_cb(GIOChannel *source, GIOCondition condition, gpointer 
 	char event_buffer[INOTIFY_BUFFER_SIZE];
 	ssize_t len;
 
+#if 0
 	assert(g_main_context_is_owner(access_monitor_get_main_context(im->monitor)));
+#endif
 
 	len = read (im->inotify_fd, event_buffer, INOTIFY_BUFFER_SIZE);
 
