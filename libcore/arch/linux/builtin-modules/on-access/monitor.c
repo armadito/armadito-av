@@ -35,7 +35,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "mount.h"
 #include "modname.h"
 
+#if 0
 #include <assert.h>
+#endif
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>

@@ -30,7 +30,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "monitor.h"
 #include "modname.h"
 
+#if 0
 #include <assert.h>
+#endif
 #include <errno.h>
 #ifdef RM_GLIB
 #include "hash.h"

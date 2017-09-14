@@ -34,7 +34,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "watchdog.h"
 #include "modname.h"
 
+#if 0
 #include <assert.h>
+#endif
 #include <errno.h>
 #include <fcntl.h>
 #include <glib.h>
