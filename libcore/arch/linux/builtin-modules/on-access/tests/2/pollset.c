@@ -70,9 +70,10 @@ int poll_set_add_fd(struct poll_set *s, int fd, poll_cb_t cb, void *user_data)
 	return 0;
 }
 
+#define MAX_EVENTS 1024
+
 int poll_set_loop(struct poll_set *s)
 {
-#define MAX_EVENTS 1024
 	while (1) {
 		int n_events, n;
 		struct epoll_event events[MAX_EVENTS];
@@ -86,9 +87,8 @@ int poll_set_loop(struct poll_set *s)
 
 		for (n = 0; n < n_events; n++) {
 			struct poll_entry *e = (struct poll_entry *)events[n].data.ptr;
-			poll_cb_t cb = e->cb;
 
-			(cb)(e->user_data);
+			(*e->cb)(e->user_data);
 		}
 	}
 
