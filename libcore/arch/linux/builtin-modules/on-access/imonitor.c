@@ -30,9 +30,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "monitor.h"
 #include "modname.h"
 
-#if 0
-#include <assert.h>
-#endif
 #include <errno.h>
 #ifdef RM_GLIB
 #include "hash.h"
@@ -59,11 +56,7 @@ struct inotify_monitor {
 #endif
 };
 
-#if 0
-static gboolean inotify_cb(GIOChannel *source, GIOCondition condition, gpointer data);
-#else
 static int inotify_cb(void *data);
-#endif
 
 static void path_destroy_notify(gpointer data)
 {
@@ -95,17 +88,7 @@ int inotify_monitor_start(struct inotify_monitor *im)
 		return -1;
 	}
 
-#if 0
-	{
-		GIOChannel *inotify_channel = g_io_channel_unix_new(im->inotify_fd);
-		GSource *source = g_io_create_watch(inotify_channel, G_IO_IN);
-		g_source_set_callback(source, (GSourceFunc)inotify_cb, im, NULL);
-		g_source_attach(source, access_monitor_get_main_context(im->monitor));
-		g_source_unref(source);
-	}
-#else
 	access_monitor_add_fd(im->monitor, im->inotify_fd, inotify_cb, im);
-#endif
 
 	return 0;
 }
@@ -262,19 +245,11 @@ static void inotify_event_process(struct inotify_monitor *im, struct inotify_eve
 /* Size of buffer to use when reading inotify events */
 #define INOTIFY_BUFFER_SIZE 8192
 
-#if 0
-static gboolean inotify_cb(GIOChannel *source, GIOCondition condition, gpointer data)
-#else
 static int inotify_cb(void *data)
-#endif
 {
 	struct inotify_monitor *im = (struct inotify_monitor *)data;
 	char event_buffer[INOTIFY_BUFFER_SIZE];
 	ssize_t len;
-
-#if 0
-	assert(g_main_context_is_owner(access_monitor_get_main_context(im->monitor)));
-#endif
 
 	len = read (im->inotify_fd, event_buffer, INOTIFY_BUFFER_SIZE);
 

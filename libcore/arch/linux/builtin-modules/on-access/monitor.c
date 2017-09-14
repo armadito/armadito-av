@@ -35,9 +35,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "mount.h"
 #include "modname.h"
 
-#if 0
-#include <assert.h>
-#endif
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -90,11 +87,7 @@ struct access_monitor {
 
 static gboolean delayed_start_cb(GIOChannel *source, GIOCondition condition, gpointer data);
 
-#if 0
-static gboolean command_cb(GIOChannel *source, GIOCondition condition, gpointer data);
-#else
 static int command_cb(void *data);
-#endif
 
 static void mount_cb(enum mount_event_type ev_type, const char *path, void *user_data);
 
@@ -467,10 +460,6 @@ static gboolean mount_idle_cb(gpointer user_data)
 {
 	struct mount_data *data = user_data;
 
-#if 0
-	assert(g_main_context_is_owner(access_monitor_get_main_context(data->monitor)));
-#endif
-
 	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": received mount notification for %s (%s)", data->path, data->ev_type == EVENT_MOUNT ? "mount" : "umount");
 
 	if (data->ev_type == EVENT_MOUNT) {
@@ -527,15 +516,7 @@ static gpointer monitor_thread_fun(gpointer data)
 
 	loop = g_main_loop_new(m->monitor_thread_context, FALSE);
 
-#if 0
-	command_channel = g_io_channel_unix_new(m->command_pipe[0]);
-	source = g_io_create_watch(command_channel, G_IO_IN);
-	g_source_set_callback(source, (GSourceFunc)command_cb, m, NULL);
-	g_source_attach(source, m->monitor_thread_context);
-	g_source_unref(source);
-#else
 	access_monitor_add_fd(m, m->command_pipe[0], command_cb, m);
-#endif
 
 	g_main_loop_run(loop);
 }
@@ -567,18 +548,10 @@ static void access_monitor_status_command(struct access_monitor *m)
 	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": on-access protection status (Not Yet Implemented)");
 }
 
-#if 0
-static gboolean command_cb(GIOChannel *source, GIOCondition condition, gpointer data)
-#else
 static int command_cb(void *data)
-#endif
 {
 	struct access_monitor *m = (struct access_monitor *)data;
 	char cmd;
-
-#if 0
-	assert(g_main_context_is_owner(m->monitor_thread_context));
-#endif
 
 	if (read(m->command_pipe[0], &cmd, 1) < 0) {
 		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": read() in command callback failed (%s)", strerror(errno));

@@ -34,9 +34,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "watchdog.h"
 #include "modname.h"
 
-#if 0
-#include <assert.h>
-#endif
 #include <errno.h>
 #include <fcntl.h>
 #include <glib.h>
@@ -65,11 +62,7 @@ struct fanotify_monitor {
 	struct watchdog *watchdog;
 };
 
-#if 0
-static gboolean fanotify_cb(GIOChannel *source, GIOCondition condition, gpointer data);
-#else
 static int fanotify_cb(void *data);
-#endif
 
 static void scan_file_thread_fun(gpointer data, gpointer user_data);
 
@@ -135,15 +128,7 @@ int fanotify_monitor_start(struct fanotify_monitor *f)
 	f->thread_pool = g_thread_pool_new(scan_file_thread_fun, f, -1, FALSE, NULL);
 
 	/* add the fanotify file desc to the thread loop */
-#if 0
-	fanotify_channel = g_io_channel_unix_new(f->fanotify_fd);
-	source = g_io_create_watch(fanotify_channel, G_IO_IN);
-	g_source_set_callback(source, (GSourceFunc)fanotify_cb, f, NULL);
-	g_source_attach(source, access_monitor_get_main_context(f->monitor));
-	g_source_unref(source);
-#else
 	access_monitor_add_fd(f->monitor, f->fanotify_fd, fanotify_cb, f);
-#endif
 
 	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": started Linux on-access protection with fanotify");
 
@@ -337,19 +322,11 @@ static void fanotify_pass_2(struct fanotify_monitor *f, struct fanotify_event_me
 /* 8192 is recommended by fanotify man page */
 #define FANOTIFY_BUFFER_SIZE 8192
 
-#if 0
-static gboolean fanotify_cb(GIOChannel *source, GIOCondition condition, gpointer data)
-#else
 static int fanotify_cb(void *data)
-#endif
 {
 	struct fanotify_monitor *f = (struct fanotify_monitor *)data;
 	char buf[FANOTIFY_BUFFER_SIZE];
 	ssize_t len;
-
-#if 0
-	assert(g_main_context_is_owner(access_monitor_get_main_context(f->monitor)));
-#endif
 
 	if ((len = read(f->fanotify_fd, buf, FANOTIFY_BUFFER_SIZE)) < 0) {
 		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": error reading fanotify event descriptor (%s)", strerror(errno));
