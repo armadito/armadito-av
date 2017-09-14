@@ -32,10 +32,10 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <assert.h>
 #include <errno.h>
-#ifndef RM_GLIB
-#include <glib.h>
-#else
+#ifdef RM_GLIB
 #include "hash.h"
+#else
+#include <glib.h>
 #endif
 #include <stdlib.h>
 #include <string.h>
@@ -47,10 +47,14 @@ struct inotify_monitor {
 	struct access_monitor *monitor;
 
 	int inotify_fd;
-	/* GHashTable *wd2path_table; */
-	/* GHashTable *path2wd_table; */
+
+#ifdef RM_GLIB
 	struct hash_table *wd2path_table;
 	struct hash_table *path2wd_table;
+#else
+	GHashTable *wd2path_table;
+	GHashTable *path2wd_table;
+#endif
 };
 
 static gboolean inotify_cb(GIOChannel *source, GIOCondition condition, gpointer data);
@@ -66,10 +70,13 @@ struct inotify_monitor *inotify_monitor_new(struct access_monitor *m)
 
 	im->monitor = m;
 
-	/* im->wd2path_table = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, path_destroy_notify); */
-	/* im->path2wd_table = g_hash_table_new_full(g_str_hash, g_str_equal, path_destroy_notify, NULL); */
+#ifdef RM_GLIB
 	im->wd2path_table = hash_table_new(hash_int, equal_int, NULL, (destroy_cb_t)free);
 	im->path2wd_table = hash_table_new(hash_str, equal_str, (destroy_cb_t)free, NULL);
+#else
+	im->wd2path_table = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, path_destroy_notify);
+	im->path2wd_table = g_hash_table_new_full(g_str_hash, g_str_equal, path_destroy_notify, NULL);
+#endif
 
 	return im;
 }
@@ -82,7 +89,7 @@ int inotify_monitor_start(struct inotify_monitor *im)
 		return -1;
 	}
 
-#if 0
+#ifndef RM_GLIB
 	{
 		GIOChannel *inotify_channel = g_io_channel_unix_new(im->inotify_fd);
 		GSource *source = g_io_create_watch(inotify_channel, G_IO_IN);
@@ -105,10 +112,13 @@ int inotify_monitor_mark_directory(struct inotify_monitor *im, const char *path)
 		return -1;
 	}
 
-	/* g_hash_table_insert(im->wd2path_table, GINT_TO_POINTER(wd), (gpointer)strdup(path)); */
-	/* g_hash_table_insert(im->path2wd_table, (gpointer)strdup(path), GINT_TO_POINTER(wd)); */
+#ifdef RM_GLIB
 	hash_table_insert(im->wd2path_table, H_INT_TO_POINTER(wd), strdup(path));
 	hash_table_insert(im->path2wd_table, strdup(path), H_INT_TO_POINTER(wd));
+#else
+	g_hash_table_insert(im->wd2path_table, GINT_TO_POINTER(wd), (gpointer)strdup(path));
+	g_hash_table_insert(im->path2wd_table, (gpointer)strdup(path), GINT_TO_POINTER(wd));
+#endif
 
 	return 0;
 }
@@ -118,8 +128,12 @@ int inotify_monitor_unmark_directory(struct inotify_monitor *im, const char *pat
 	void *p;
 
 	/* retrieve the watch descriptor associated to path */
-	/* p = g_hash_table_lookup(im->path2wd_table, path); */
+#ifdef RM_GLIB
 	p = hash_table_lookup(im->path2wd_table, path);
+#else
+	p = g_hash_table_lookup(im->path2wd_table, path);
+#endif
+
 	if (p == NULL) {
 		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": retrieving inotify watch id for %s failed", path);
 	} else {
@@ -130,12 +144,18 @@ int inotify_monitor_unmark_directory(struct inotify_monitor *im, const char *pat
 			a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": removing inotify watch %d for %s failed (%s)", wd, path, strerror(errno));
 		}
 
-		/* g_hash_table_remove(im->wd2path_table, GINT_TO_POINTER(wd)); */
+#ifdef RM_GLIB
 		hash_table_remove(im->wd2path_table, H_INT_TO_POINTER(wd));
+#else
+		g_hash_table_remove(im->wd2path_table, GINT_TO_POINTER(wd));
+#endif
 	}
 
-	/* g_hash_table_remove(im->path2wd_table, path); */
+#ifdef RM_GLIB
 	hash_table_remove(im->path2wd_table, path);
+#else
+	g_hash_table_remove(im->path2wd_table, path);
+#endif
 
 	return 0;
 }
@@ -189,8 +209,11 @@ static char *inotify_event_full_path(struct inotify_monitor *im, struct inotify_
 	char *dir;
 	char *full_path;
 
-	/* dir = (char *)g_hash_table_lookup(im->wd2path_table, GINT_TO_POINTER(event->wd)); */
+#ifdef RM_GLIB
 	dir = (char *)hash_table_lookup(im->wd2path_table, H_INT_TO_POINTER(event->wd));
+#else
+	dir = (char *)g_hash_table_lookup(im->wd2path_table, GINT_TO_POINTER(event->wd));
+#endif
 
 	if (dir == NULL)
 		return NULL;
