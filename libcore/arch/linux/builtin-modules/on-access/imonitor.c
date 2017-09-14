@@ -59,7 +59,11 @@ struct inotify_monitor {
 #endif
 };
 
+#if 0
 static gboolean inotify_cb(GIOChannel *source, GIOCondition condition, gpointer data);
+#else
+static int inotify_cb(void *data);
+#endif
 
 static void path_destroy_notify(gpointer data)
 {
@@ -91,7 +95,7 @@ int inotify_monitor_start(struct inotify_monitor *im)
 		return -1;
 	}
 
-#ifndef RM_GLIB
+#if 0
 	{
 		GIOChannel *inotify_channel = g_io_channel_unix_new(im->inotify_fd);
 		GSource *source = g_io_create_watch(inotify_channel, G_IO_IN);
@@ -99,6 +103,8 @@ int inotify_monitor_start(struct inotify_monitor *im)
 		g_source_attach(source, access_monitor_get_main_context(im->monitor));
 		g_source_unref(source);
 	}
+#else
+	access_monitor_add_fd(im->monitor, im->inotify_fd, inotify_cb, im);
 #endif
 
 	return 0;
@@ -256,8 +262,11 @@ static void inotify_event_process(struct inotify_monitor *im, struct inotify_eve
 /* Size of buffer to use when reading inotify events */
 #define INOTIFY_BUFFER_SIZE 8192
 
-#ifndef RM_GLIB
+#if 0
 static gboolean inotify_cb(GIOChannel *source, GIOCondition condition, gpointer data)
+#else
+static int inotify_cb(void *data)
+#endif
 {
 	struct inotify_monitor *im = (struct inotify_monitor *)data;
 	char event_buffer[INOTIFY_BUFFER_SIZE];
@@ -284,4 +293,3 @@ static gboolean inotify_cb(GIOChannel *source, GIOCondition condition, gpointer 
 
 	return TRUE;
 }
-#endif

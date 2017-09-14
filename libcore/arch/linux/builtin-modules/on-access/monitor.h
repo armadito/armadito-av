@@ -50,6 +50,8 @@ void access_monitor_add_mount(struct access_monitor *m, const char *mount_point)
 
 void access_monitor_add_directory(struct access_monitor *m, const char *path);
 
+void access_monitor_add_fd(struct access_monitor *m, int fd, int (*cb)(void *data), void *data);
+
 int access_monitor_recursive_mark_directory(struct access_monitor *m, const char *path);
 
 int access_monitor_unmark_directory(struct access_monitor *m, const char *path);

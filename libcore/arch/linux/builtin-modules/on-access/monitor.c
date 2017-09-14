@@ -89,7 +89,12 @@ struct access_monitor {
 };
 
 static gboolean delayed_start_cb(GIOChannel *source, GIOCondition condition, gpointer data);
+
+#if 0
 static gboolean command_cb(GIOChannel *source, GIOCondition condition, gpointer data);
+#else
+static int command_cb(void *data);
+#endif
 
 static void mount_cb(enum mount_event_type ev_type, const char *path, void *user_data);
 
@@ -497,6 +502,20 @@ static void mount_cb(enum mount_event_type ev_type, const char *path, void *user
 				(GDestroyNotify)mount_data_free);
 }
 
+void access_monitor_add_fd(struct access_monitor *m, int fd, int (*cb)(void *data), void *data)
+{
+	GIOChannel *channel;
+	GSource *source;
+
+	channel = g_io_channel_unix_new(fd);
+
+	source = g_io_create_watch(channel, G_IO_IN);
+	g_source_set_callback(source, (GSourceFunc)cb, data, NULL);
+	g_source_attach(source, m->monitor_thread_context);
+	g_source_unref(source);
+}
+
+
 static gpointer monitor_thread_fun(gpointer data)
 {
 	struct access_monitor *m = (struct access_monitor *)data;
@@ -508,12 +527,15 @@ static gpointer monitor_thread_fun(gpointer data)
 
 	loop = g_main_loop_new(m->monitor_thread_context, FALSE);
 
+#if 0
 	command_channel = g_io_channel_unix_new(m->command_pipe[0]);
-
 	source = g_io_create_watch(command_channel, G_IO_IN);
 	g_source_set_callback(source, (GSourceFunc)command_cb, m, NULL);
 	g_source_attach(source, m->monitor_thread_context);
 	g_source_unref(source);
+#else
+	access_monitor_add_fd(m, m->command_pipe[0], command_cb, m);
+#endif
 
 	g_main_loop_run(loop);
 }
@@ -545,7 +567,11 @@ static void access_monitor_status_command(struct access_monitor *m)
 	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": on-access protection status (Not Yet Implemented)");
 }
 
+#if 0
 static gboolean command_cb(GIOChannel *source, GIOCondition condition, gpointer data)
+#else
+static int command_cb(void *data)
+#endif
 {
 	struct access_monitor *m = (struct access_monitor *)data;
 	char cmd;
