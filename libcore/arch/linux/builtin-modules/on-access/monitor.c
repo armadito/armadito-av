@@ -305,17 +305,6 @@ static gboolean delayed_start_cb(GIOChannel *source, GIOCondition condition, gpo
 	return TRUE;
 }
 
-static void mark_directory(struct access_monitor *m, const char *path)
-{
-	if (fanotify_monitor_mark_directory(m->fanotify_monitor, path) < 0)
-		return;
-
-	if (inotify_monitor_mark_directory(m->inotify_monitor, path) < 0)
-		return;
-
-	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": added mark for directory %s", path);
-}
-
 int access_monitor_unmark_directory(struct access_monitor *m, const char *path)
 {
 	if (fanotify_monitor_unmark_directory(m->fanotify_monitor, path) < 0)
@@ -335,7 +324,13 @@ int access_monitor_recursive_mark_directory(struct access_monitor *m, const char
 	struct dirent *entry;
 	GString *entry_path;
 
-	mark_directory(m, path);
+	if (fanotify_monitor_mark_directory(m->fanotify_monitor, path) < 0)
+		return -1;
+
+	if (inotify_monitor_mark_directory(m->inotify_monitor, path) < 0)
+		return -1;
+
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": added mark for directory %s", path);
 
 	if ((dir = opendir(path)) == NULL) {
 		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": error opening directory %s (%s)", path, strerror(errno));
@@ -350,6 +345,7 @@ int access_monitor_recursive_mark_directory(struct access_monitor *m, const char
 
 		g_string_printf(entry_path, "%s/%s", path, entry->d_name);
 
+		/* FIXME: should return if failed? */
 		access_monitor_recursive_mark_directory(m, entry_path->str);
 	}
 
