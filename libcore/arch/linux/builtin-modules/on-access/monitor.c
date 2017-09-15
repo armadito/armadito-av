@@ -438,6 +438,11 @@ void access_monitor_add_fd(struct access_monitor *m, int fd, int (*cb)(void *dat
 #ifdef RM_GLIB
 static void *monitor_pthread_fun(void *arg)
 {
+	struct access_monitor *m = (struct access_monitor *)arg;
+
+	access_monitor_add_fd(m, m->command_pipe[0], command_cb, m);
+
+	poll_set_loop(m->poll_fds);
 }
 #else
 static gpointer monitor_gthread_fun(gpointer data)
