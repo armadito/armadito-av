@@ -42,6 +42,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <glib.h>
 #ifdef RM_GLIB
 #include "ptrarray.h"
+#include "pollset.h"
+#include <pthread.h>
 #endif
 #include <limits.h>
 #include <stdio.h>
@@ -75,8 +77,13 @@ struct access_monitor {
 	int start_pipe[2];
 	int command_pipe[2];
 
+#ifdef RM_GLIB
+	pthread_t monitor_thread;
+	struct poll_set *poll_fds;
+#else
 	GThread *monitor_thread;
 	GMainContext *monitor_thread_context;
+#endif
 
 	struct fanotify_monitor *fanotify_monitor;
 	struct inotify_monitor *inotify_monitor;
@@ -89,9 +96,11 @@ static gboolean delayed_start_cb(GIOChannel *source, GIOCondition condition, gpo
 
 static int command_cb(void *data);
 
-static void mount_cb(enum mount_event_type ev_type, const char *path, void *user_data);
-
-static gpointer monitor_thread_fun(gpointer data);
+#ifdef RM_GLIB
+static void *monitor_pthread_fun(void *arg);
+#else
+static gpointer monitor_gthread_fun(gpointer data);
+#endif
 
 #ifdef RM_GLIB
 static void entry_destroy_cb(void *data)
@@ -149,11 +158,18 @@ struct access_monitor *access_monitor_new(struct armadito *armadito)
 
 	m->fanotify_monitor = fanotify_monitor_new(m, armadito);
 	m->inotify_monitor = inotify_monitor_new(m);
+#if 0
 	m->mount_monitor = mount_monitor_new(mount_cb, m);
+#endif
 
+#ifdef RM_GLIB
+	m->poll_fds = poll_set_new();
+	if (pthread_create(&m->monitor_thread, NULL, monitor_pthread_fun, m))
+		;
+#else
 	m->monitor_thread_context = g_main_context_new();
-
-	m->monitor_thread = g_thread_new("access monitor thread", monitor_thread_fun, m);
+	m->monitor_thread = g_thread_new("access monitor thread", monitor_gthread_fun, m);
+#endif
 
 	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_DEBUG, MODULE_LOG_NAME ": created monitor thread %p", m->monitor_thread);
 
@@ -206,11 +222,6 @@ int access_monitor_is_autoscan_removable_media(struct access_monitor *m)
 	return m->autoscan_removable_media;
 }
 
-GMainContext *access_monitor_get_main_context(struct access_monitor *m)
-{
-	return m->monitor_thread_context;
-}
-
 static void add_entry(struct access_monitor *m, const char *path, enum entry_flag flag)
 {
 	struct monitor_entry *e = malloc(sizeof(struct monitor_entry));
@@ -235,28 +246,33 @@ static dev_t get_dev_id(const char *path)
 	return buf.st_dev;
 }
 
+static int check_mount_point_is_not_slash(const char *mount_point)
+{
+	dev_t slash_dev_id = get_dev_id("/");
+	dev_t mount_dev_id = get_dev_id(mount_point);
+
+	if (slash_dev_id < 0 || mount_dev_id < 0)
+		return -1;
+
+	if (mount_dev_id == slash_dev_id)
+		return 0;
+
+	return 1;
+}
+
 void access_monitor_add_mount(struct access_monitor *m, const char *mount_point)
 {
-	dev_t mount_dev_id;
-	dev_t slash_dev_id;
+	int ret = check_mount_point_is_not_slash(mount_point);
 
-	/* check that mount_point is not in the same partition as / */
-	slash_dev_id = get_dev_id("/");
-	if (slash_dev_id < 0) {
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": cannot get device id for / (%s)", strerror(errno));
-		return;
-	}
-
-	mount_dev_id = get_dev_id(mount_point);
-	if (mount_dev_id < 0) {
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": cannot get device id for %s (%s)", mount_point, strerror(errno));
-		return;
-	}
-
-	if (mount_dev_id == slash_dev_id) {
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": \"%s\" is in same partition as \"/\"; adding \"/\" as monitored mount point is not supported", mount_point);
-		return;
-	}
+	if (ret < 0)
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR,
+			MODULE_LOG_NAME ": cannot get device id for / or for %s (%s)",
+			mount_point,
+			strerror(errno));
+	else if (ret == 0)
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING,
+			MODULE_LOG_NAME ": \"%s\" same partition as \"/\"; adding \"/\" as monitored mount point not supported",
+			mount_point);
 
 	add_entry(m, mount_point, ENTRY_MOUNT);
 }
@@ -399,6 +415,114 @@ static void mark_entries(struct access_monitor *m)
 	}
 }
 
+#ifdef RM_GLIB
+void access_monitor_add_fd(struct access_monitor *m, int fd, int (*cb)(void *data), void *data)
+{
+	poll_set_add_fd(m->poll_fds, fd, (poll_cb_t)cb, m);
+}
+#else
+void access_monitor_add_fd(struct access_monitor *m, int fd, int (*cb)(void *data), void *data)
+{
+	GIOChannel *channel;
+	GSource *source;
+
+	channel = g_io_channel_unix_new(fd);
+
+	source = g_io_create_watch(channel, G_IO_IN);
+	g_source_set_callback(source, (GSourceFunc)cb, data, NULL);
+	g_source_attach(source, m->monitor_thread_context);
+	g_source_unref(source);
+}
+#endif
+
+#ifdef RM_GLIB
+static void *monitor_pthread_fun(void *arg)
+{
+}
+#else
+static gpointer monitor_gthread_fun(gpointer data)
+{
+	struct access_monitor *m = (struct access_monitor *)data;
+	GMainLoop *loop;
+	GIOChannel *command_channel;
+	GSource *source;
+
+	g_main_context_push_thread_default(m->monitor_thread_context);
+
+	loop = g_main_loop_new(m->monitor_thread_context, FALSE);
+
+	access_monitor_add_fd(m, m->command_pipe[0], command_cb, m);
+
+	g_main_loop_run(loop);
+}
+#endif
+
+static void access_monitor_start_command(struct access_monitor *m)
+{
+	if (fanotify_monitor_start(m->fanotify_monitor))
+		return;
+
+	if (inotify_monitor_start(m->inotify_monitor))
+		return;
+
+	if (mount_monitor_start(m->mount_monitor) < 0)
+		return;
+
+	/* init all fanotify and inotify marks */
+	mark_entries(m);
+
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": on-access protection started");
+}
+
+static void access_monitor_stop_command(struct access_monitor *m)
+{
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": on-access protection stopped (Not Yet Implemented)");
+}
+
+static void access_monitor_status_command(struct access_monitor *m)
+{
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": on-access protection status (Not Yet Implemented)");
+}
+
+static int command_cb(void *data)
+{
+	struct access_monitor *m = (struct access_monitor *)data;
+	char cmd;
+
+	if (read(m->command_pipe[0], &cmd, 1) < 0) {
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": read() in command callback failed (%s)", strerror(errno));
+
+		return FALSE;
+	}
+
+	switch(cmd) {
+	case ACCESS_MONITOR_START:
+		access_monitor_start_command(m);
+		break;
+	case ACCESS_MONITOR_STOP:
+		access_monitor_stop_command(m);
+		break;
+	case ACCESS_MONITOR_STATUS:
+		access_monitor_status_command(m);
+		break;
+	}
+
+	return TRUE;
+}
+
+int access_monitor_send_command(struct access_monitor *m, char command)
+{
+	if (write(m->command_pipe[1], &command, 1) < 0) {
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": error sending command to access monitor thread (%s)", strerror(errno));
+		return -1;
+	}
+
+	return 0;
+}
+
+#if 0
+static void mount_cb(enum mount_event_type ev_type, const char *path, void *user_data);
+
 struct mount_data {
 	enum mount_event_type ev_type;
 	const char *path;
@@ -490,97 +614,5 @@ static void mount_cb(enum mount_event_type ev_type, const char *path, void *user
 				data,
 				(GDestroyNotify)mount_data_free);
 }
-
-void access_monitor_add_fd(struct access_monitor *m, int fd, int (*cb)(void *data), void *data)
-{
-	GIOChannel *channel;
-	GSource *source;
-
-	channel = g_io_channel_unix_new(fd);
-
-	source = g_io_create_watch(channel, G_IO_IN);
-	g_source_set_callback(source, (GSourceFunc)cb, data, NULL);
-	g_source_attach(source, m->monitor_thread_context);
-	g_source_unref(source);
-}
-
-
-static gpointer monitor_thread_fun(gpointer data)
-{
-	struct access_monitor *m = (struct access_monitor *)data;
-	GMainLoop *loop;
-	GIOChannel *command_channel;
-	GSource *source;
-
-	g_main_context_push_thread_default(m->monitor_thread_context);
-
-	loop = g_main_loop_new(m->monitor_thread_context, FALSE);
-
-	access_monitor_add_fd(m, m->command_pipe[0], command_cb, m);
-
-	g_main_loop_run(loop);
-}
-
-static void access_monitor_start_command(struct access_monitor *m)
-{
-	if (fanotify_monitor_start(m->fanotify_monitor))
-		return;
-
-	if (inotify_monitor_start(m->inotify_monitor))
-		return;
-
-	if (mount_monitor_start(m->mount_monitor) < 0)
-		return;
-
-	/* init all fanotify and inotify marks */
-	mark_entries(m);
-
-	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": on-access protection started");
-}
-
-static void access_monitor_stop_command(struct access_monitor *m)
-{
-	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": on-access protection stopped (Not Yet Implemented)");
-}
-
-static void access_monitor_status_command(struct access_monitor *m)
-{
-	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": on-access protection status (Not Yet Implemented)");
-}
-
-static int command_cb(void *data)
-{
-	struct access_monitor *m = (struct access_monitor *)data;
-	char cmd;
-
-	if (read(m->command_pipe[0], &cmd, 1) < 0) {
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": read() in command callback failed (%s)", strerror(errno));
-
-		return FALSE;
-	}
-
-	switch(cmd) {
-	case ACCESS_MONITOR_START:
-		access_monitor_start_command(m);
-		break;
-	case ACCESS_MONITOR_STOP:
-		access_monitor_stop_command(m);
-		break;
-	case ACCESS_MONITOR_STATUS:
-		access_monitor_status_command(m);
-		break;
-	}
-
-	return TRUE;
-}
-
-int access_monitor_send_command(struct access_monitor *m, char command)
-{
-	if (write(m->command_pipe[1], &command, 1) < 0) {
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": error sending command to access monitor thread (%s)", strerror(errno));
-		return -1;
-	}
-
-	return 0;
-}
+#endif
 
