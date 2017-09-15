@@ -539,6 +539,7 @@ int access_monitor_send_command(struct access_monitor *m, char command)
 }
 
 #ifdef MOUNT_MONITOR
+
 struct mount_data {
 	enum mount_event_type ev_type;
 	const char *path;
@@ -630,5 +631,5 @@ static void mount_cb(enum mount_event_type ev_type, const char *path, void *user
 				data,
 				(GDestroyNotify)mount_data_free);
 }
-#endif
 
+#endif
