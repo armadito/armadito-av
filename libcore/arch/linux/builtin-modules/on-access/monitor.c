@@ -21,6 +21,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #define _GNU_SOURCE
 
+/* no mount monitor for now */
+#undef MOUNT_MONITOR
+
 /* glib is "half-removed" because of GMainLoop & co */
 #define RM_GLIB
 
@@ -32,7 +35,9 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include "monitor.h"
 #include "famonitor.h"
 #include "imonitor.h"
+#ifdef MOUNT_MONITOR
 #include "mount.h"
+#endif
 #include "modname.h"
 
 #include <dirent.h>
@@ -87,7 +92,9 @@ struct access_monitor {
 
 	struct fanotify_monitor *fanotify_monitor;
 	struct inotify_monitor *inotify_monitor;
+#ifdef MOUNT_MONITOR
 	struct mount_monitor *mount_monitor;
+#endif
 
 	struct armadito *ar;
 };
@@ -100,6 +107,10 @@ static int command_cb(void *data);
 static void *monitor_pthread_fun(void *arg);
 #else
 static gpointer monitor_gthread_fun(gpointer data);
+#endif
+
+#ifdef MOUNT_MONITOR
+static void mount_cb(enum mount_event_type ev_type, const char *path, void *user_data);
 #endif
 
 #ifdef RM_GLIB
@@ -158,7 +169,7 @@ struct access_monitor *access_monitor_new(struct armadito *armadito)
 
 	m->fanotify_monitor = fanotify_monitor_new(m, armadito);
 	m->inotify_monitor = inotify_monitor_new(m);
-#if 0
+#ifdef MOUNT_MONITOR
 	m->mount_monitor = mount_monitor_new(mount_cb, m);
 #endif
 
@@ -470,8 +481,10 @@ static void access_monitor_start_command(struct access_monitor *m)
 	if (inotify_monitor_start(m->inotify_monitor))
 		return;
 
+#ifdef MOUNT_MONITOR
 	if (mount_monitor_start(m->mount_monitor) < 0)
 		return;
+#endif
 
 	/* init all fanotify and inotify marks */
 	mark_entries(m);
@@ -525,9 +538,7 @@ int access_monitor_send_command(struct access_monitor *m, char command)
 	return 0;
 }
 
-#if 0
-static void mount_cb(enum mount_event_type ev_type, const char *path, void *user_data);
-
+#ifdef MOUNT_MONITOR
 struct mount_data {
 	enum mount_event_type ev_type;
 	const char *path;
