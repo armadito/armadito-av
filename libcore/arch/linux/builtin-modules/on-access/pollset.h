@@ -19,8 +19,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#ifndef _POLLSET_H_
-#define _POLLSET_H_
+#ifndef POLLSET_H_
+#define POLLSET_H_
 
 struct poll_set;
 
