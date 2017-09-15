@@ -111,8 +111,6 @@ static void display_init_error(void)
 int fanotify_monitor_start(struct fanotify_monitor *f)
 {
 	unsigned int flags;
-	GIOChannel *fanotify_channel;
-	GSource *source;
 
 	flags = ((f->enable_permission) ? FAN_CLASS_CONTENT : FAN_CLASS_NOTIF) | FAN_UNLIMITED_QUEUE | FAN_UNLIMITED_MARKS;
 	f->fanotify_fd = fanotify_init(flags, O_LARGEFILE | O_RDONLY);
