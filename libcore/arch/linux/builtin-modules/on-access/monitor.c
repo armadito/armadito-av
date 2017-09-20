@@ -24,7 +24,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 /* no mount monitor for now */
 #undef MOUNT_MONITOR
 
-/* glib is "half-removed" because of GMainLoop & co */
+/* glib is completely removed in this file; beware of GMainLoop & co w.r.t. delayed start */
 #define RM_GLIB
 
 #include <libarmadito/armadito.h>
@@ -43,12 +43,13 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
-/* must still be included for GMainLoop & co */
-#include <glib.h>
 #ifdef RM_GLIB
 #include "ptrarray.h"
 #include "pollset.h"
 #include <pthread.h>
+#else
+/* GMainLoop mess w.r.t. delayed start; to be checked */
+#include <glib.h>
 #endif
 #include <limits.h>
 #include <stdio.h>
@@ -79,7 +80,7 @@ struct access_monitor {
 	GPtrArray *entries;
 #endif
 
-#if 0
+#ifndef RM_GLIB
 	int start_pipe[2];
 #endif
 
@@ -102,7 +103,7 @@ struct access_monitor {
 	struct armadito *ar;
 };
 
-#if 0
+#ifndef RM_GLIB
 static gboolean delayed_start_cb(GIOChannel *source, GIOCondition condition, gpointer data);
 #endif
 
@@ -153,7 +154,7 @@ struct access_monitor *access_monitor_new(struct armadito *armadito)
 	m->entries = g_ptr_array_new_full(10, entry_destroy_cb);
 #endif
 
-#if 0
+#ifndef RM_GLIB
 	/* this pipe will be used to trigger creation of the monitor thread when entering main thread loop, */
 	/* so that the monitor thread does not start before all modules are initialized  */
 	/* and the daemon main loop is entered */
@@ -171,7 +172,7 @@ struct access_monitor *access_monitor_new(struct armadito *armadito)
 		return NULL;
 	}
 
-#if 0
+#ifndef RM_GLIB
 	start_channel = g_io_channel_unix_new(m->start_pipe[0]);
 	g_io_add_watch(start_channel, G_IO_IN, delayed_start_cb, m);
 #endif
@@ -302,7 +303,7 @@ void access_monitor_add_directory(struct access_monitor *m, const char *path)
 	add_entry(m, path, ENTRY_DIR);
 }
 
-#if 0
+#ifndef RM_GLIB
 int access_monitor_delayed_start(struct access_monitor *m)
 {
 	char c = 'A';
