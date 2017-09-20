@@ -429,7 +429,7 @@ static void mark_entries(struct access_monitor *m)
 #ifdef RM_GLIB
 void access_monitor_add_fd(struct access_monitor *m, int fd, int (*cb)(void *data), void *data)
 {
-	poll_set_add_fd(m->poll_fds, fd, (poll_cb_t)cb, m);
+	poll_set_add_fd(m->poll_fds, fd, (poll_cb_t)cb, data);
 }
 #else
 void access_monitor_add_fd(struct access_monitor *m, int fd, int (*cb)(void *data), void *data)
