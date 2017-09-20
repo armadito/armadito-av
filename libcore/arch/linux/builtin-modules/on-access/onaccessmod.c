@@ -194,7 +194,11 @@ static enum a6o_mod_status mod_oal_post_init(struct a6o_module *module)
 	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": -> removable media monitoring: %s", YES_NO(access_monitor_is_enable_removable_media(data->monitor)));
 	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": -> removable media autoscan: %s", YES_NO(access_monitor_is_autoscan_removable_media(data->monitor)));
 
+#if 0
 	access_monitor_delayed_start(data->monitor);
+#else
+	access_monitor_send_command(data->monitor, ACCESS_MONITOR_START);
+#endif
 
 	return A6O_MOD_OK;
 }

@@ -56,7 +56,9 @@ int access_monitor_unmark_directory(struct access_monitor *m, const char *path);
 
 void access_monitor_mark_mount_point(struct access_monitor *m, const char *path);
 
+#if 0
 int access_monitor_delayed_start(struct access_monitor *m);
+#endif
 
 #define ACCESS_MONITOR_START    ((char)0x1)
 #define ACCESS_MONITOR_STOP     ((char)0x2)

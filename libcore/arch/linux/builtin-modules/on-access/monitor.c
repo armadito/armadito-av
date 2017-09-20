@@ -79,7 +79,10 @@ struct access_monitor {
 	GPtrArray *entries;
 #endif
 
+#if 0
 	int start_pipe[2];
+#endif
+
 	int command_pipe[2];
 
 #ifdef RM_GLIB
@@ -99,7 +102,9 @@ struct access_monitor {
 	struct armadito *ar;
 };
 
+#if 0
 static gboolean delayed_start_cb(GIOChannel *source, GIOCondition condition, gpointer data);
+#endif
 
 static int command_cb(void *data);
 
@@ -148,6 +153,7 @@ struct access_monitor *access_monitor_new(struct armadito *armadito)
 	m->entries = g_ptr_array_new_full(10, entry_destroy_cb);
 #endif
 
+#if 0
 	/* this pipe will be used to trigger creation of the monitor thread when entering main thread loop, */
 	/* so that the monitor thread does not start before all modules are initialized  */
 	/* and the daemon main loop is entered */
@@ -156,6 +162,7 @@ struct access_monitor *access_monitor_new(struct armadito *armadito)
 		free(m);
 		return NULL;
 	}
+#endif
 
 	/* this pipe will be used to send commands to the monitor thread */
 	if (pipe(m->command_pipe) < 0) {
@@ -164,8 +171,10 @@ struct access_monitor *access_monitor_new(struct armadito *armadito)
 		return NULL;
 	}
 
+#if 0
 	start_channel = g_io_channel_unix_new(m->start_pipe[0]);
 	g_io_add_watch(start_channel, G_IO_IN, delayed_start_cb, m);
+#endif
 
 	m->fanotify_monitor = fanotify_monitor_new(m, armadito);
 	m->inotify_monitor = inotify_monitor_new(m);
@@ -293,6 +302,7 @@ void access_monitor_add_directory(struct access_monitor *m, const char *path)
 	add_entry(m, path, ENTRY_DIR);
 }
 
+#if 0
 int access_monitor_delayed_start(struct access_monitor *m)
 {
 	char c = 'A';
@@ -331,6 +341,7 @@ static gboolean delayed_start_cb(GIOChannel *source, GIOCondition condition, gpo
 
 	return TRUE;
 }
+#endif
 
 int access_monitor_unmark_directory(struct access_monitor *m, const char *path)
 {
@@ -473,6 +484,9 @@ static gpointer monitor_gthread_fun(gpointer data)
 
 static void access_monitor_start_command(struct access_monitor *m)
 {
+	if (!access_monitor_is_enable(m))
+	  return;
+
 	if (fanotify_monitor_start(m->fanotify_monitor))
 		return;
 
