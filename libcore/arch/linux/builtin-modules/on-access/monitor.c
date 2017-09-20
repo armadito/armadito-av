@@ -349,7 +349,7 @@ int access_monitor_recursive_mark_directory(struct access_monitor *m, const char
 {
 	DIR *dir;
 	struct dirent *entry;
-	GString *entry_path;
+	char *entry_path;
 
 	if (fanotify_monitor_mark_directory(m->fanotify_monitor, path) < 0)
 		return -1;
@@ -364,19 +364,17 @@ int access_monitor_recursive_mark_directory(struct access_monitor *m, const char
 		return -1;
 	}
 
-	entry_path = g_string_new("");
-
 	while((entry = readdir(dir)) != NULL) {
 		if (entry->d_type != DT_DIR || !strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
 			continue;
 
-		g_string_printf(entry_path, "%s/%s", path, entry->d_name);
+		asprintf(&entry_path, "%s/%s", path, entry->d_name);
 
 		/* FIXME: should return if failed? */
-		access_monitor_recursive_mark_directory(m, entry_path->str);
-	}
+		access_monitor_recursive_mark_directory(m, entry_path);
 
-	g_string_free(entry_path, TRUE);
+		free(entry_path);
+	}
 
 	if (closedir(dir) < 0)
 		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": error closing directory %s (%s)", path, strerror(errno));
