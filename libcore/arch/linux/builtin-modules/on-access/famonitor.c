@@ -94,7 +94,7 @@ int fanotify_monitor_is_enable_permission(struct fanotify_monitor *f)
 
 static void display_init_error(void)
 {
-	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": fanotify_init failed (%s)", strerror(errno));
+	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": fanotify_init failed (%s)", strerror(errno));
 
 	switch(errno) {
 	case EPERM:
