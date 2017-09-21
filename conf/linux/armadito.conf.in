@@ -54,6 +54,7 @@ enable-removable-media=1
 # this option can in theory be used at the same time as enable-removable-media
 autoscan-removable-media=0
 
+
 # monitored mount points
 # file access inside these mount points will be monitored
 mount="/home"
@@ -71,4 +72,7 @@ mime-types="application/x-executable"; "application/x-sharedlib"; "application/p
 modules= "clamav"
 
 # 1M, must support units ;-)
-#max-size=1048576
+#max-size = 1048576
+
+# maximum number of threads used for files scan
+#max-scan_threads = 4

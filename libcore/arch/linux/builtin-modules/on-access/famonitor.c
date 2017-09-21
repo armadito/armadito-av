@@ -82,9 +82,12 @@ struct fanotify_monitor *fanotify_monitor_new(struct access_monitor *m, struct a
 
 int fanotify_monitor_enable_permission(struct fanotify_monitor *f, int enable_permission)
 {
+	if (enable_permission != 0 && enable_permission != 1)
+		return 1;
+
 	f->enable_permission = enable_permission;
 
-	return f->enable_permission;
+	return 0;
 }
 
 int fanotify_monitor_is_enable_permission(struct fanotify_monitor *f)

@@ -27,6 +27,11 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 /* glib is completely removed in this file; beware of GMainLoop & co w.r.t. delayed start */
 #define RM_GLIB
 
+/* maximum number of threads for file scan */
+#define MAX_SCAN_THREADS_LIMIT 32
+/* default number of threads for file scan */
+#define DEFAULT_SCAN_THREADS 4
+
 #include <libarmadito/armadito.h>
 #include "armadito-config.h"
 
@@ -73,6 +78,7 @@ struct access_monitor {
 	int enable;
 	int enable_removable_media;
 	int autoscan_removable_media;
+	int max_scan_threads;
 
 #ifdef RM_GLIB
 	struct ptr_array *entries;
@@ -147,6 +153,7 @@ struct access_monitor *access_monitor_new(struct armadito *armadito)
 	m->enable = 0;
 	m->enable_removable_media = 0;
 	m->autoscan_removable_media = 0;
+	m->max_scan_threads = DEFAULT_SCAN_THREADS;
 
 	m->ar = armadito;
 
@@ -201,9 +208,12 @@ struct access_monitor *access_monitor_new(struct armadito *armadito)
 
 int access_monitor_enable(struct access_monitor *m, int enable)
 {
+	if (enable != 0 && enable != 1)
+		return 1;
+
 	m->enable = enable;
 
-	return m->enable;
+	return 0;
 }
 
 int access_monitor_is_enable(struct access_monitor *m)
@@ -223,9 +233,12 @@ int access_monitor_is_enable_permission(struct access_monitor *m)
 
 int access_monitor_enable_removable_media(struct access_monitor *m, int enable_removable_media)
 {
+	if (enable_removable_media != 0 && enable_removable_media != 1)
+		return 1;
+
 	m->enable_removable_media = enable_removable_media;
 
-	return m->enable_removable_media;
+	return 0;
 }
 
 int access_monitor_is_enable_removable_media(struct access_monitor *m)
@@ -235,14 +248,27 @@ int access_monitor_is_enable_removable_media(struct access_monitor *m)
 
 int access_monitor_autoscan_removable_media(struct access_monitor *m, int autoscan_removable_media)
 {
+	if (autoscan_removable_media != 0 && autoscan_removable_media != 1)
+		return 1;
+
 	m->autoscan_removable_media = autoscan_removable_media;
 
-	return m->autoscan_removable_media;
+	return 0;
 }
 
 int access_monitor_is_autoscan_removable_media(struct access_monitor *m)
 {
 	return m->autoscan_removable_media;
+}
+
+int access_monitor_set_max_scan_threads(struct access_monitor *m, int max_scan_threads)
+{
+	if (max_scan_threads <= 0 || max_scan_threads > MAX_SCAN_THREADS_LIMIT)
+		return 1;
+
+	m->max_scan_threads = max_scan_threads;
+
+	return 0;
 }
 
 static void add_entry(struct access_monitor *m, const char *path, enum entry_flag flag)

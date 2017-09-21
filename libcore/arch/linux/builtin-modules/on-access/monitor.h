@@ -42,6 +42,8 @@ int access_monitor_autoscan_removable_media(struct access_monitor *m, int autosc
 
 int access_monitor_is_autoscan_removable_media(struct access_monitor *m);
 
+int access_monitor_set_max_scan_threads(struct access_monitor *m, int max_scan_threads);
+
 void access_monitor_add_mount(struct access_monitor *m, const char *mount_point);
 
 void access_monitor_add_directory(struct access_monitor *m, const char *path);

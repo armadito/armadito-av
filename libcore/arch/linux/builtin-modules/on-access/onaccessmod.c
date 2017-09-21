@@ -61,7 +61,8 @@ static enum a6o_mod_status mod_oal_conf_enable(struct a6o_module *module, const 
 {
 	struct mod_oal_data *data = (struct mod_oal_data *)module->data;
 
-	access_monitor_enable(data->monitor, a6o_conf_value_get_int(value));
+	if (access_monitor_enable(data->monitor, a6o_conf_value_get_int(value)))
+		return A6O_MOD_CONF_ERROR;
 
 	return A6O_MOD_OK;
 }
@@ -70,7 +71,8 @@ static enum a6o_mod_status mod_oal_conf_enable_permission(struct a6o_module *mod
 {
 	struct mod_oal_data *data = (struct mod_oal_data *)module->data;
 
-	access_monitor_enable_permission(data->monitor, a6o_conf_value_get_int(value));
+	if (access_monitor_enable_permission(data->monitor, a6o_conf_value_get_int(value)))
+		return A6O_MOD_CONF_ERROR;
 
 	return A6O_MOD_OK;
 }
@@ -79,7 +81,8 @@ static enum a6o_mod_status mod_oal_conf_enable_removable_media(struct a6o_module
 {
 	struct mod_oal_data *data = (struct mod_oal_data *)module->data;
 
-	access_monitor_enable_removable_media(data->monitor, a6o_conf_value_get_int(value));
+	if (access_monitor_enable_removable_media(data->monitor, a6o_conf_value_get_int(value)))
+		return A6O_MOD_CONF_ERROR;
 
 	return A6O_MOD_OK;
 }
@@ -88,7 +91,8 @@ static enum a6o_mod_status mod_oal_conf_autoscan_removable_media(struct a6o_modu
 {
 	struct mod_oal_data *data = (struct mod_oal_data *)module->data;
 
-	access_monitor_autoscan_removable_media(data->monitor, a6o_conf_value_get_int(value));
+	if (access_monitor_autoscan_removable_media(data->monitor, a6o_conf_value_get_int(value)))
+		return A6O_MOD_CONF_ERROR;
 
 	return A6O_MOD_OK;
 }
@@ -182,6 +186,16 @@ static enum a6o_mod_status mod_oal_conf_max_size(struct a6o_module *module, cons
 	return A6O_MOD_OK;
 }
 
+static enum a6o_mod_status mod_oal_conf_max_scan_threads(struct a6o_module *module, const char *key, struct a6o_conf_value *value)
+{
+	struct mod_oal_data *data = (struct mod_oal_data *)module->data;
+
+	if (access_monitor_set_max_scan_threads(data->monitor, a6o_conf_value_get_int(value)))
+		return A6O_MOD_CONF_ERROR;
+
+	return A6O_MOD_OK;
+}
+
 static enum a6o_mod_status mod_oal_post_init(struct a6o_module *module)
 {
 	struct mod_oal_data *data = (struct mod_oal_data *)module->data;
@@ -221,6 +235,7 @@ struct a6o_conf_entry mod_oal_conf_table[] = {
 	{ "mime-types", CONF_TYPE_STRING | CONF_TYPE_LIST, &mod_oal_conf_mime_types},
 	{ "modules", CONF_TYPE_STRING | CONF_TYPE_LIST, &mod_oal_conf_modules},
 	{ "max-size", CONF_TYPE_INT, &mod_oal_conf_max_size},
+	{ "max-scan_threads", CONF_TYPE_INT, &mod_oal_conf_max_scan_threads},
 	{ NULL, 0, NULL},
 };
 
