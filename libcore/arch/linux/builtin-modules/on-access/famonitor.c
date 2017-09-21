@@ -331,10 +331,8 @@ static int fanotify_cb(void *data)
 		return TRUE;
 	}
 
-	if (len) {
-		fanotify_pass_1(f, (struct fanotify_event_metadata *)buf, len);
-		fanotify_pass_2(f, (struct fanotify_event_metadata *)buf, len);
-	}
+	fanotify_pass_1(f, (struct fanotify_event_metadata *)buf, len);
+	fanotify_pass_2(f, (struct fanotify_event_metadata *)buf, len);
 
 	return TRUE;
 }
