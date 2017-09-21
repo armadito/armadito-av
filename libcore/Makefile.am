@@ -46,6 +46,8 @@ arch/linux/builtin-modules/on-access/queue.h \
 arch/linux/builtin-modules/on-access/response.c \
 arch/linux/builtin-modules/on-access/response.h \
 arch/linux/builtin-modules/on-access/stamp.h \
+arch/linux/builtin-modules/on-access/threadpool.c \
+arch/linux/builtin-modules/on-access/threadpool.h \
 arch/linux/builtin-modules/on-access/watchdog.c \
 arch/linux/builtin-modules/on-access/watchdog.h \
 ../librpc/brpc/buffer.c \
