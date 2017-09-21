@@ -58,10 +58,12 @@ struct inotify_monitor {
 
 static int inotify_cb(void *data);
 
+#ifndef RM_GLIB
 static void path_destroy_notify(gpointer data)
 {
 	free(data);
 }
+#endif
 
 struct inotify_monitor *inotify_monitor_new(struct access_monitor *m)
 {
@@ -117,6 +119,7 @@ int inotify_monitor_mark_directory(struct inotify_monitor *im, const char *path)
 int inotify_monitor_unmark_directory(struct inotify_monitor *im, const char *path)
 {
 	void *p;
+	int wd;
 
 	/* retrieve the watch descriptor associated to path */
 #ifdef RM_GLIB
@@ -127,24 +130,25 @@ int inotify_monitor_unmark_directory(struct inotify_monitor *im, const char *pat
 
 	if (p == NULL) {
 		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": retrieving inotify watch id for %s failed", path);
-	} else {
-		int wd = GPOINTER_TO_INT(p);
-
-		/* errors are ignored: if the watch descriptor is invalid, it means it is no longer being watched because of deletion */
-		if (inotify_rm_watch(im->inotify_fd, wd) == -1) {
-			a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": removing inotify watch %d for %s failed (%s)", wd, path, strerror(errno));
-		}
-
-#ifdef RM_GLIB
-		hash_table_remove(im->wd2path_table, H_INT_TO_POINTER(wd));
-#else
-		g_hash_table_remove(im->wd2path_table, GINT_TO_POINTER(wd));
-#endif
+		return 1;
 	}
 
 #ifdef RM_GLIB
+	wd = H_POINTER_TO_INT(p);
+#else
+	wd = GPOINTER_TO_INT(p);
+#endif
+
+	/* errors are ignored: if the watch descriptor is invalid, it means it is no longer being watched because of deletion */
+	if (inotify_rm_watch(im->inotify_fd, wd) == -1) {
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": removing inotify watch %d for %s failed (%s)", wd, path, strerror(errno));
+	}
+
+#ifdef RM_GLIB
+	hash_table_remove(im->wd2path_table, p);
 	hash_table_remove(im->path2wd_table, path);
 #else
+	g_hash_table_remove(im->wd2path_table, p);
 	g_hash_table_remove(im->path2wd_table, path);
 #endif
 
@@ -266,5 +270,5 @@ static int inotify_cb(void *data)
 		}
 	}
 
-	return TRUE;
+	return 1;
 }

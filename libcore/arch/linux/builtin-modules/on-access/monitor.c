@@ -140,7 +140,9 @@ static void entry_destroy_cb(gpointer data)
 struct access_monitor *access_monitor_new(struct armadito *armadito)
 {
 	struct access_monitor *m = malloc(sizeof(struct access_monitor));
+#ifndef RM_GLIB
 	GIOChannel *start_channel;
+#endif
 
 	m->enable = 0;
 	m->enable_removable_media = 0;
@@ -523,7 +525,7 @@ static int command_cb(void *data)
 	if (read(m->command_pipe[0], &cmd, 1) < 0) {
 		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": read() in command callback failed (%s)", strerror(errno));
 
-		return FALSE;
+		return 0;
 	}
 
 	switch(cmd) {
@@ -538,7 +540,7 @@ static int command_cb(void *data)
 		break;
 	}
 
-	return TRUE;
+	return 0;
 }
 
 int access_monitor_send_command(struct access_monitor *m, char command)

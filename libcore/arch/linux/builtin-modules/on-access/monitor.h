@@ -22,8 +22,6 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _MONITOR_H_
 #define _MONITOR_H_
 
-#include <glib.h>
-
 struct access_monitor;
 
 struct access_monitor *access_monitor_new(struct armadito *armadito);
