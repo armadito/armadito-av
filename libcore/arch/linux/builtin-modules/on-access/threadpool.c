@@ -1,6 +1,7 @@
 
 #include <pthread.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "threadpool.h"
 
@@ -19,16 +20,21 @@ static void *thread_fun(void *arg)
 	struct thread_pool *pool = (struct thread_pool *)arg;
 
 	while (1) {
+		fprintf(stderr, "thread 0x%lx is going to lock mutex\n", pthread_self());
 		pthread_mutex_lock(&pool->mutex);
+		fprintf(stderr, "thread 0x%lx owns mutex\n", pthread_self());
 		data = (*pool->blocking_fun)(pool->pool_data);
+		fprintf(stderr, "thread 0x%lx unlocks mutex\n", pthread_self());
 		pthread_mutex_unlock(&pool->mutex);
 
 		if (data == NULL)
-			return NULL;
+			break;
 
-		if (!(*pool->process_fun)(pool->pool_data, data))
-			return NULL;
+		if ((*pool->process_fun)(pool->pool_data, data))
+			break;
 	}
+
+	fprintf(stderr, "thread 0x%lx is exiting\n", pthread_self());
 
 	return NULL;
 }
