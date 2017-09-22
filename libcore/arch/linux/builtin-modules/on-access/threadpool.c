@@ -23,7 +23,9 @@ static void *thread_fun(void *arg)
 		fprintf(stderr, "thread 0x%lx is going to lock mutex\n", pthread_self());
 		pthread_mutex_lock(&pool->mutex);
 		fprintf(stderr, "thread 0x%lx owns mutex\n", pthread_self());
+
 		data = (*pool->blocking_fun)(pool->pool_data);
+
 		fprintf(stderr, "thread 0x%lx unlocks mutex\n", pthread_self());
 		pthread_mutex_unlock(&pool->mutex);
 
@@ -47,15 +49,16 @@ struct thread_pool *thread_pool_new(int n_threads, blocking_fun_t bf, process_fu
 	tp->blocking_fun = bf;
 	tp->process_fun = pf;
 	tp->pool_data = pool_data;
+	tp->n_threads = n_threads;
 	tp->threads = calloc(n_threads, sizeof(pthread_t));
-
-	pthread_mutex_init(&tp->mutex, NULL);
 
 	/* create the threads */
 	for (n = 0; n < n_threads; n++) {
 		if (pthread_create(&tp->threads[n], NULL, thread_fun, tp))
 			goto ret_err;
 	}
+
+	pthread_mutex_init(&tp->mutex, NULL);
 
 	return tp;
 
@@ -68,3 +71,29 @@ ret_err:
 	return NULL;
 }
 
+int thread_pool_free(struct thread_pool *tp, int do_join)
+{
+	int n, ret = 0;
+
+	for (n = 0; n < tp->n_threads; n++) {
+		int r;
+
+		r = pthread_cancel(tp->threads[n]);
+		if (r)
+			ret = r;
+	}
+
+	if (!do_join)
+		return ret;
+
+	for (n = 0; n < tp->n_threads; n++) {
+		int r;
+		void *retval;
+
+		r = pthread_join(tp->threads[n], &retval);
+		if (r)
+			ret = r;
+	}
+
+	return ret;
+}
