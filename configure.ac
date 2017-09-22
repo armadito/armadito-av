@@ -166,6 +166,7 @@ arch/linux/service/Makefile
 conf/Makefile
 conf/linux/Makefile
 libcore/Makefile
+libcore/arch/linux/builtin-modules/on-access/tests/Makefile
 libmodule/Makefile
 librpc/Makefile
 librpc/jrpc/Makefile

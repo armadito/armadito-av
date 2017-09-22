@@ -19,12 +19,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 ***/
 
-#include <libarmadito/armadito.h>
-
-#include "armadito-config.h"
-
 #include "mount.h"
-#include "modname.h"
 
 #include <gio/gio.h>
 #include <stdio.h>
@@ -172,7 +167,7 @@ int mount_monitor_start(struct mount_monitor *m)
 	m->conn = g_bus_get_sync(MON_DBUS_TYPE, NULL, &error);
 
 	if (m->conn == NULL) {
-		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_WARNING, MODULE_LOG_NAME ": error getting connection to D-Bus (%s)", error->message);
+		fprintf(stderr, "error getting connection to D-Bus (%s)", error->message);
 		return -1;
 	}
 
