@@ -9,9 +9,7 @@ static void *block_1(void *pool_data)
 	unsigned int seconds = random() % 2 + 1;
 
 	printf("thread 0x%lx is going to sleep for %d seconds\n", pthread_self(), seconds);
-
 	sleep(seconds);
-
 	printf("thread 0x%lx has finished sleeping\n", pthread_self());
 
 	return malloc(1);
@@ -69,6 +67,7 @@ static int test_2(void)
 	int command_pipe[2];
 	struct thread_pool *tp;
 	int *pool_data;
+	int i, ret;
 
 	if (pipe(command_pipe) < 0) {
 		perror("pipe failed");
@@ -80,24 +79,29 @@ static int test_2(void)
 
 	tp = thread_pool_new(4, block_2, process_2, pool_data);
 
-	while(1) {
+	for (i = 0; i < 32; i++) {
 		char c = 'A' + (random() % 26);
 
 		if (write(command_pipe[1], &c, 1) < 0) {
 			perror("write failed");
 			return 1;
 		}
+		printf("[%d] %c\n", i, c);
 
 		sleep(1);
-	}
+ 	}
 
-	return 0;
+	if ((ret = thread_pool_free(tp, 1)))
+		fprintf(stderr, "thread_pool_free returned %d\n", ret);
+
+	return ret;
 }
 
 static void usage(const char *progname)
 {
 	fprintf(stderr, "Usage: %s TEST_NUMBER\n", progname);
 	fprintf(stderr, "  TEST_NUMBER: 1,2\n");
+
 	exit(EXIT_FAILURE);
 }
 
