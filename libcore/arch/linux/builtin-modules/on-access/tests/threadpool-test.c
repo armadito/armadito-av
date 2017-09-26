@@ -57,7 +57,7 @@ static int process_2(void *pool_data, void *data)
 
 	free(p);
 
-	sleep(1);
+	usleep(5000);
 
 	return 0;
 }
@@ -88,7 +88,7 @@ static int test_2(int n_loops, int n_threads)
 		}
 		printf("writen %c\n", c);
 
-		sleep(1);
+		usleep(10000);
  	}
 
 	if ((ret = thread_pool_free(tp, 1)))
@@ -96,6 +96,7 @@ static int test_2(int n_loops, int n_threads)
 
 	return ret;
 }
+
 
 static void usage(const char *progname)
 {
@@ -118,7 +119,7 @@ int main(int argc, char **argv)
 	case 1:
 		return test_1();
 	case 2:
-		return test_2(64, 8);
+		return test_2(1000, 8);
 	default:
 		usage(argv[0]);
 	}
