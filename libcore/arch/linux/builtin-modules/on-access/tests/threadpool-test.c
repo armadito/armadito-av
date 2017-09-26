@@ -40,6 +40,8 @@ static void *block_2(void *pool_data)
 	int fd = *(int *)pool_data;
 	char *p = malloc(1);
 
+	printf("thread 0x%lx is going to read()\n", pthread_self());
+
 	if (read(fd, p, 1) <= 0) {
 		perror("read");
 		free(p);
@@ -118,7 +120,7 @@ int main(int argc, char **argv)
 	case 1:
 		return test_1();
 	case 2:
-		return test_2(4);
+		return test_2(3);
 	default:
 		usage(argv[0]);
 	}

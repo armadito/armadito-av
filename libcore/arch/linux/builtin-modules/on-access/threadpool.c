@@ -22,6 +22,13 @@ struct thread_pool {
 	pthread_cond_t notify;
 };
 
+static void thread_cleanup(void *arg)
+{
+	struct thread_pool *pool = (struct thread_pool *)arg;
+
+	pthread_mutex_unlock(&pool->mutex);
+}
+
 static void *thread_fun(void *arg)
 {
 	void *data;
@@ -33,11 +40,14 @@ static void *thread_fun(void *arg)
 	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, &oldtype);
 	fprintf(stderr, "cancel type %d\n", oldtype);
 
+	pthread_cleanup_push(thread_cleanup, pool);
+
 	while (1) {
 		pthread_mutex_lock(&pool->mutex);
 		while (!pool->canceled && pool->token == OWNED) {
 			fprintf(stderr, "thread 0x%lx is going to wait\n", pthread_self());
 			pthread_cond_wait(&pool->notify, &pool->mutex);
+			fprintf(stderr, "thread 0x%lx finished waiting cancel %d token %d\n", pthread_self(), pool->canceled, pool->token);
 		}
 		if (pool->canceled) {
 			fprintf(stderr, "thread 0x%lx was canceled while waiting\n", pthread_self());
@@ -67,6 +77,8 @@ static void *thread_fun(void *arg)
 
 	fprintf(stderr, "thread 0x%lx is exiting\n", pthread_self());
 
+	pthread_cleanup_pop(0);
+
 	return NULL;
 }
 
@@ -79,6 +91,7 @@ struct thread_pool *thread_pool_new(int n_threads, blocking_fun_t bf, process_fu
 	tp->process_fun = pf;
 	tp->pool_data = pool_data;
 	tp->canceled = 0;
+	tp->token = AVAILABLE;
 	tp->n_threads = n_threads;
 	tp->threads = calloc(n_threads, sizeof(pthread_t));
 
@@ -88,7 +101,6 @@ struct thread_pool *thread_pool_new(int n_threads, blocking_fun_t bf, process_fu
 			goto ret_err;
 	}
 
-	tp->token = AVAILABLE;
 	pthread_mutex_init(&tp->mutex, NULL);
 	pthread_cond_init(&tp->notify, NULL);
 
@@ -128,6 +140,7 @@ int thread_pool_free(struct thread_pool *tp, int do_join)
 
 		fprintf(stderr, "joining thread 0x%lx\n", tp->threads[n]);
 		r = pthread_join(tp->threads[n], &retval);
+		fprintf(stderr, "joined thread 0x%lx r %d\n", tp->threads[n], r);
 		if (r)
 			ret = r;
 	}
