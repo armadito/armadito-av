@@ -62,7 +62,7 @@ static int process_2(void *pool_data, void *data)
 	return 0;
 }
 
-static int test_2(void)
+static int test_2(int n)
 {
 	int command_pipe[2];
 	struct thread_pool *tp;
@@ -79,7 +79,7 @@ static int test_2(void)
 
 	tp = thread_pool_new(4, block_2, process_2, pool_data);
 
-	for (i = 0; i < 32; i++) {
+	for (i = 0; i < n; i++) {
 		char c = 'A' + (random() % 26);
 
 		if (write(command_pipe[1], &c, 1) < 0) {
@@ -118,7 +118,7 @@ int main(int argc, char **argv)
 	case 1:
 		return test_1();
 	case 2:
-		return test_2();
+		return test_2(4);
 	default:
 		usage(argv[0]);
 	}
