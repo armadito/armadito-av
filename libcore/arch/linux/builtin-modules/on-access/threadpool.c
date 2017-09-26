@@ -5,13 +5,20 @@
 
 #include "threadpool.h"
 
+enum token_state {
+	OWNED,
+	AVAILABLE,
+};
+
 struct thread_pool {
 	blocking_fun_t blocking_fun;
 	process_fun_t process_fun;
 	void *pool_data;
 	int n_threads;
 	pthread_t *threads;
+	enum token_state token;
 	pthread_mutex_t mutex;
+	pthread_cond_t notify;
 };
 
 static void *thread_fun(void *arg)
@@ -20,14 +27,20 @@ static void *thread_fun(void *arg)
 	struct thread_pool *pool = (struct thread_pool *)arg;
 
 	while (1) {
-		fprintf(stderr, "thread 0x%lx is going to lock mutex\n", pthread_self());
 		pthread_mutex_lock(&pool->mutex);
-		fprintf(stderr, "thread 0x%lx owns mutex\n", pthread_self());
+		while (pool->token == OWNED) {
+			pthread_cond_wait(&pool->notify, &pool->mutex);
+		}
+
+		pool->token = OWNED;
+		pthread_mutex_unlock(&pool->mutex);
 
 		data = (*pool->blocking_fun)(pool->pool_data);
 
-		fprintf(stderr, "thread 0x%lx unlocks mutex\n", pthread_self());
+		pthread_mutex_lock(&pool->mutex);
+		pool->token = AVAILABLE;
 		pthread_mutex_unlock(&pool->mutex);
+		pthread_cond_signal(&pool->notify);
 
 		if (data == NULL)
 			break;
@@ -58,7 +71,9 @@ struct thread_pool *thread_pool_new(int n_threads, blocking_fun_t bf, process_fu
 			goto ret_err;
 	}
 
+	tp->token = AVAILABLE;
 	pthread_mutex_init(&tp->mutex, NULL);
+	pthread_cond_init(&tp->notify, NULL);
 
 	return tp;
 
