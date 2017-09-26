@@ -40,8 +40,6 @@ static void *block_2(void *pool_data)
 	int fd = *(int *)pool_data;
 	char *p = malloc(1);
 
-	printf("thread 0x%lx is going to read()\n", pthread_self());
-
 	if (read(fd, p, 1) <= 0) {
 		perror("read");
 		free(p);
@@ -64,7 +62,7 @@ static int process_2(void *pool_data, void *data)
 	return 0;
 }
 
-static int test_2(int n)
+static int test_2(int n_loops, int n_threads)
 {
 	int command_pipe[2];
 	struct thread_pool *tp;
@@ -79,16 +77,16 @@ static int test_2(int n)
 	pool_data = malloc(sizeof(int));
 	*pool_data = command_pipe[0];
 
-	tp = thread_pool_new(4, block_2, process_2, pool_data);
+	tp = thread_pool_new(n_threads, block_2, process_2, pool_data);
 
-	for (i = 0; i < n; i++) {
+	for (i = 0; i < n_loops; i++) {
 		char c = 'A' + (random() % 26);
 
 		if (write(command_pipe[1], &c, 1) < 0) {
 			perror("write failed");
 			return 1;
 		}
-		printf("[%d] %c\n", i, c);
+		printf("writen %c\n", c);
 
 		sleep(1);
  	}
@@ -120,7 +118,7 @@ int main(int argc, char **argv)
 	case 1:
 		return test_1();
 	case 2:
-		return test_2(3);
+		return test_2(64, 8);
 	default:
 		usage(argv[0]);
 	}

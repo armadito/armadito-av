@@ -36,32 +36,24 @@ static void *thread_fun(void *arg)
 	int oldstate, oldtype;
 
 	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, &oldstate);
-	fprintf(stderr, "cancel state %d\n", oldstate);
 	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, &oldtype);
-	fprintf(stderr, "cancel type %d\n", oldtype);
 
 	pthread_cleanup_push(thread_cleanup, pool);
 
 	while (1) {
 		pthread_mutex_lock(&pool->mutex);
 		while (!pool->canceled && pool->token == OWNED) {
-			fprintf(stderr, "thread 0x%lx is going to wait\n", pthread_self());
 			pthread_cond_wait(&pool->notify, &pool->mutex);
-			fprintf(stderr, "thread 0x%lx finished waiting cancel %d token %d\n", pthread_self(), pool->canceled, pool->token);
 		}
-		if (pool->canceled) {
-			fprintf(stderr, "thread 0x%lx was canceled while waiting\n", pthread_self());
+		if (pool->canceled)
 			break;
-		}
 
 		pool->token = OWNED;
 		pthread_mutex_unlock(&pool->mutex);
 
 		data = (*pool->blocking_fun)(pool->pool_data);
-		if (pool->canceled) {
-			fprintf(stderr, "thread 0x%lx was canceled while blocking\n", pthread_self());
+		if (pool->canceled)
 			break;
-		}
 
 		pthread_mutex_lock(&pool->mutex);
 		pool->token = AVAILABLE;
@@ -74,8 +66,6 @@ static void *thread_fun(void *arg)
 		if ((*pool->process_fun)(pool->pool_data, data))
 			break;
 	}
-
-	fprintf(stderr, "thread 0x%lx is exiting\n", pthread_self());
 
 	pthread_cleanup_pop(0);
 
@@ -123,13 +113,10 @@ int thread_pool_free(struct thread_pool *tp, int do_join)
 	for (n = 0; n < tp->n_threads; n++) {
 		int r;
 
-		fprintf(stderr, "canceling thread 0x%lx\n", tp->threads[n]);
 		r = pthread_cancel(tp->threads[n]);
 		if (r)
 			ret = r;
 	}
-
-	fprintf(stderr, "after cancel: ret = %d\n", ret);
 
 	if (!do_join)
 		return ret;
@@ -138,9 +125,7 @@ int thread_pool_free(struct thread_pool *tp, int do_join)
 		int r;
 		void *retval;
 
-		fprintf(stderr, "joining thread 0x%lx\n", tp->threads[n]);
 		r = pthread_join(tp->threads[n], &retval);
-		fprintf(stderr, "joined thread 0x%lx r %d\n", tp->threads[n], r);
 		if (r)
 			ret = r;
 	}
