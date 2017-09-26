@@ -21,6 +21,8 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #define _GNU_SOURCE
 
+/* #define RM_GLIB */
+
 #include <libarmadito/armadito.h>
 #include <armadito-config.h>
 
@@ -36,7 +38,11 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <errno.h>
 #include <fcntl.h>
+#ifdef RM_GLIB
+#include "threadpool.h"
+#else
 #include <glib.h>
+#endif
 #include <limits.h>
 #include <sys/fanotify.h>
 #include <stdio.h>
@@ -57,14 +63,19 @@ struct fanotify_monitor {
 
 	int fanotify_fd;
 
+#ifdef RM_GLIB
+	struct thread_pool *thread_pool;
+#else
 	GThreadPool *thread_pool;
+#endif
 
 	struct watchdog *watchdog;
 };
 
+#ifndef RM_GLIB
 static int fanotify_cb(void *data);
-
 static void scan_file_thread_fun(gpointer data, gpointer user_data);
+#endif
 
 struct fanotify_monitor *fanotify_monitor_new(struct access_monitor *m, struct armadito *u)
 {
@@ -126,10 +137,10 @@ int fanotify_monitor_start(struct fanotify_monitor *f)
 
 	f->watchdog = watchdog_new(f->fanotify_fd);
 
+#ifndef RM_GLIB
 	f->thread_pool = g_thread_pool_new(scan_file_thread_fun, f, -1, FALSE, NULL);
-
-	/* add the fanotify file desc to the thread loop */
 	access_monitor_add_fd(f->monitor, f->fanotify_fd, fanotify_cb, f);
+#endif
 
 	a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_INFO, MODULE_LOG_NAME ": started Linux on-access protection with fanotify");
 
@@ -171,6 +182,7 @@ static void fire_detection_event(struct fanotify_monitor *f, struct a6o_report *
 	a6o_event_free(ev);
 }
 
+#ifndef RM_GLIB
 static void scan_file_thread_fun(gpointer data, gpointer user_data)
 {
 	struct fanotify_monitor *f = (struct fanotify_monitor *)user_data;
@@ -207,6 +219,7 @@ static void scan_file_thread_fun(gpointer data, gpointer user_data)
 
 	a6o_report_destroy(&report);
 }
+#endif
 
 static int stat_check(int fd)
 {
@@ -254,8 +267,10 @@ static void fanotify_perm_event_process(struct fanotify_monitor *f, struct fanot
 		return;
 	}
 
+#ifndef RM_GLIB
 	/* scan in thread pool */
 	g_thread_pool_push(f->thread_pool, file_context, NULL);
+#endif
 }
 
 static void fanotify_notify_event_process(struct fanotify_monitor *f, struct fanotify_event_metadata *event, const char *path)
@@ -279,8 +294,10 @@ static void fanotify_notify_event_process(struct fanotify_monitor *f, struct fan
 		return;
 	}
 
+#ifndef RM_GLIB
 	/* scan in thread pool */
 	g_thread_pool_push(f->thread_pool, file_context, NULL);
+#endif
 }
 
 static void fanotify_pass_1(struct fanotify_monitor *f, struct fanotify_event_metadata *buf, ssize_t len)
@@ -323,6 +340,7 @@ static void fanotify_pass_2(struct fanotify_monitor *f, struct fanotify_event_me
 /* 8192 is recommended by fanotify man page */
 #define FANOTIFY_BUFFER_SIZE 8192
 
+#ifndef RM_GLIB
 static int fanotify_cb(void *data)
 {
 	struct fanotify_monitor *f = (struct fanotify_monitor *)data;
@@ -339,6 +357,7 @@ static int fanotify_cb(void *data)
 
 	return TRUE;
 }
+#endif
 
 static void display_mark_error(const char *path, int enable_permission, const char *adding_or_removing, const char *dir_or_mount)
 {
