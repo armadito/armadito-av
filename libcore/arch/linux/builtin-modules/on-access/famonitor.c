@@ -21,7 +21,7 @@ along with Armadito core.  If not, see <http://www.gnu.org/licenses/>.
 
 #define _GNU_SOURCE
 
-/* #define RM_GLIB */
+#define RM_GLIB
 
 #include <libarmadito/armadito.h>
 #include <armadito-config.h>
@@ -72,7 +72,10 @@ struct fanotify_monitor {
 	struct watchdog *watchdog;
 };
 
-#ifndef RM_GLIB
+#ifdef RM_GLIB
+static void *event_buffer_read(void *pool_data);
+static int event_buffer_process(void *pool_data, void *data);
+#else
 static int fanotify_cb(void *data);
 static void scan_file_thread_fun(gpointer data, gpointer user_data);
 #endif
@@ -337,6 +340,42 @@ static void fanotify_pass_2(struct fanotify_monitor *f, struct fanotify_event_me
 			fanotify_notify_event_process(f, event, p);
 	}
 }
+
+#ifdef RM_GLIB
+/* Size of buffer to use when reading fanotify events */
+/* 8192 is recommended by fanotify man page */
+#define FANOTIFY_BUFFER_SIZE 8192
+
+struct event_buffer {
+	char buf[FANOTIFY_BUFFER_SIZE];
+	ssize_t len;
+};
+
+static void *event_buffer_read(void *pool_data)
+{
+	struct fanotify_monitor *f = (struct fanotify_monitor *)pool_data;
+	struct event_buffer *b = malloc(sizeof(struct event_buffer));
+
+	if ((b->len = read(f->fanotify_fd, b->buf, FANOTIFY_BUFFER_SIZE)) < 0) {
+		a6o_log(A6O_LOG_MODULE, A6O_LOG_LEVEL_ERROR, MODULE_LOG_NAME ": error reading fanotify event descriptor (%s)", strerror(errno));
+		return NULL;
+	}
+
+	return b;
+}
+
+static int event_buffer_process(void *pool_data, void *data)
+{
+	struct fanotify_monitor *f = (struct fanotify_monitor *)pool_data;
+	struct event_buffer *b = (struct event_buffer *)data;
+
+	fanotify_pass_1(f, (struct fanotify_event_metadata *)b->buf, b->len);
+	fanotify_pass_2(f, (struct fanotify_event_metadata *)b->buf, b->len);
+
+	return 0;
+}
+#endif
+
 
 /* Size of buffer to use when reading fanotify events */
 /* 8192 is recommended by fanotify man page */
