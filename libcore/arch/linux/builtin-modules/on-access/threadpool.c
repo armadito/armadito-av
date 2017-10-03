@@ -31,7 +31,6 @@ static void thread_cleanup(void *arg)
 
 static void *thread_fun(void *arg)
 {
-	void *data;
 	struct thread_pool *pool = (struct thread_pool *)arg;
 	int oldstate, oldtype;
 
@@ -41,12 +40,16 @@ static void *thread_fun(void *arg)
 	pthread_cleanup_push(thread_cleanup, pool);
 
 	while (1) {
+		void *data;
+
 		pthread_mutex_lock(&pool->mutex);
 		while (!pool->canceled && pool->token == OWNED) {
 			pthread_cond_wait(&pool->notify, &pool->mutex);
 		}
-		if (pool->canceled)
+		if (pool->canceled) {
+			pthread_mutex_unlock(&pool->mutex);
 			break;
+		}
 
 		pool->token = OWNED;
 		pthread_mutex_unlock(&pool->mutex);
